@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "vitest": "2.1.8",
-    "glob": "11.0.0",
+    "glob": "11.0.1",
     "graphql-tag": "2.12.6"
   },
   "license": "ISC",

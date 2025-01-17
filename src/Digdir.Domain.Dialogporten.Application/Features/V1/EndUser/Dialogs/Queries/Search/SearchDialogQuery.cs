@@ -97,7 +97,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public string? Search { get; init; }
 
     /// <summary>
-    /// Limit free text search to texts with this language code, e.g. 'no', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
+    /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
     /// </summary>
     public string? SearchLanguageCode
     {

@@ -4947,7 +4947,7 @@
             }
           },
           {
-            "description": "Limit free text search to texts with this language code, e.g. \u0027no\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
+            "description": "Limit free text search to texts with this language code, e.g. \u0027nb\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
             "in": "query",
             "name": "searchLanguageCode",
             "schema": {
@@ -5788,7 +5788,7 @@
             }
           },
           {
-            "description": "Limit free text search to texts with this language code, e.g. \u0027no\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
+            "description": "Limit free text search to texts with this language code, e.g. \u0027nb\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
             "in": "query",
             "name": "searchLanguageCode",
             "schema": {

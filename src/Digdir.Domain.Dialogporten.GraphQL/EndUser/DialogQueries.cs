@@ -1,4 +1,7 @@
+using AppAny.HotChocolate.FluentValidation;
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
@@ -27,15 +30,42 @@ public partial class Queries
     public async Task<SearchDialogsPayload> SearchDialogs(
         [Service] ISender mediator,
         [Service] IMapper mapper,
+        [UseFluentValidation, UseValidator<SearchDialogInputValidator>]
         SearchDialogInput input,
         CancellationToken cancellationToken)
     {
         var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
 
+        if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(
+                input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)
+        {
+            return new SearchDialogsPayload
+            {
+                Errors = [new SearchDialogContinuationTokenParsingError()]
+            };
+        }
+
+        searchDialogQuery.ContinuationToken = continuationTokenSet;
+
+        if (!input.OrderBy.TryToOrderSet(out var orderSet) && input.OrderBy != null)
+        {
+            return new SearchDialogsPayload
+            {
+                Errors = [new SearchDialogOrderByParsingError()]
+            };
+        }
+
+        searchDialogQuery.OrderBy = orderSet;
+
         var result = await mediator.Send(searchDialogQuery, cancellationToken);
 
         return result.Match(
-            mapper.Map<SearchDialogsPayload>,
+            paginatedList =>
+            {
+                var mappedResult = mapper.Map<SearchDialogsPayload>(paginatedList);
+                mappedResult.OrderBy = paginatedList.OrderBy.AsSpan().ToSearchDialogSortTypeList();
+                return mappedResult;
+            },
             validationError => new SearchDialogsPayload
             {
                 Errors = [.. validationError.Errors.Select(x => new SearchDialogValidationError { Message = x.ErrorMessage })]

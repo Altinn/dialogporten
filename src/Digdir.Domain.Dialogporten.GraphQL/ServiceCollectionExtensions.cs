@@ -1,3 +1,4 @@
+using AppAny.HotChocolate.FluentValidation;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
@@ -15,6 +16,7 @@ public static class ServiceCollectionExtensions
             // This assumes that subscriptions have been set up by the infrastructure
             .AddSubscriptionType<Subscriptions>()
             .AddAuthorization()
+            .AddFluentValidation()
             .RegisterDbContext<DialogDbContext>()
             .AddDiagnosticEventListener<OpenTelemetryEventListener>()
             .AddQueryType<Queries>()
@@ -25,6 +27,8 @@ public static class ServiceCollectionExtensions
             .AddType<SearchDialogValidationError>()
             .AddType<SearchDialogForbidden>()
             .AddType<SetSystemLabelEntityNotFound>()
+            .AddType<SearchDialogOrderByParsingError>()
+            .AddType<SearchDialogContinuationTokenParsingError>()
             .AddMaxExecutionDepthRule(12)
             .AddInstrumentation()
             .InitializeOnStartup()

@@ -10,7 +10,7 @@ public class PaginationParameter<TOrderDefinition, TTarget>
 {
     private readonly int _limit = PaginationConstants.DefaultLimit;
 
-    public ContinuationTokenSet<TOrderDefinition, TTarget>? ContinuationToken { get; init; }
+    public ContinuationTokenSet<TOrderDefinition, TTarget>? ContinuationToken { get; set; }
 
     public int? Limit
     {
@@ -22,7 +22,7 @@ public class PaginationParameter<TOrderDefinition, TTarget>
 public class SortablePaginationParameter<TOrderDefinition, TTarget> : PaginationParameter<TOrderDefinition, TTarget>
     where TOrderDefinition : IOrderDefinition<TTarget>
 {
-    public OrderSet<TOrderDefinition, TTarget>? OrderBy { get; init; } = OrderSet<TOrderDefinition, TTarget>.Default;
+    public OrderSet<TOrderDefinition, TTarget>? OrderBy { get; set; } = OrderSet<TOrderDefinition, TTarget>.Default;
 }
 
 internal sealed class PaginationParameterValidator<TOrderDefinition, TTarget> : AbstractValidator<PaginationParameter<TOrderDefinition, TTarget>>

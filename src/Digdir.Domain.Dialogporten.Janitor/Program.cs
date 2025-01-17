@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Janitor;
+using Digdir.Domain.Dialogporten.Janitor.Common.Extensions;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,12 +15,10 @@ using Serilog;
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Warning()
-    .Enrich.FromLogContext()
     .Enrich.WithEnvironmentName()
+    .Enrich.FromLogContext()
     .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
-    .WriteTo.ApplicationInsights(
-        TelemetryConfiguration.CreateDefault(),
-        TelemetryConverter.Traces)
+    .TryWriteToOpenTelemetry()
     .CreateBootstrapLogger();
 
 try
@@ -53,12 +52,10 @@ static void BuildAndRun(string[] args)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
         .Enrich.WithEnvironmentName()
-        .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
-        .WriteTo.ApplicationInsights(
-            services.GetRequiredService<TelemetryConfiguration>(),
-            TelemetryConverter.Traces));
+        .WriteTo.OpenTelemetryOrConsole(context));
 
     builder.Services
+        .AddDialogportenTelemetry(builder.Configuration, builder.Environment)
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)
             .WithoutPubSubCapabilities()

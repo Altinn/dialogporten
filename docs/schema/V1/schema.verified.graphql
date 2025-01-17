@@ -211,8 +211,23 @@ type SearchDialog {
   seenSinceLastUpdate: [SeenLog!]!
 }
 
+type SearchDialogContinuationTokenParsingError implements SearchDialogError {
+  message: String!
+}
+
 type SearchDialogForbidden implements SearchDialogError {
   message: String!
+}
+
+type SearchDialogOrderByParsingError implements SearchDialogError {
+  message: String!
+}
+
+"Set only one property per object."
+type SearchDialogSortType {
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+  dueAt: OrderDirection
 }
 
 type SearchDialogValidationError implements SearchDialogError {
@@ -222,8 +237,9 @@ type SearchDialogValidationError implements SearchDialogError {
 type SearchDialogsPayload {
   items: [SearchDialog!]
   hasNextPage: Boolean!
+  "Use this token to fetch the next page of dialogs, must be used in combination with OrderBy from the previous response"
   continuationToken: String
-  orderBy: String
+  orderBy: [SearchDialogSortType!]!
   errors: [SearchDialogError!]!
 }
 
@@ -294,8 +310,21 @@ input SearchDialogInput {
   dueBefore: DateTime
   "Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate"
   search: String
-  "Limit free text search to texts with this language code, e.g. 'no', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes"
+  "Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes"
   searchLanguageCode: String
+  "Limit the number of results returned, defaults to 100, max 1000"
+  limit: Int
+  "Continuation token for pagination"
+  continuationToken: String
+  "Sort the results by one or more fields"
+  orderBy: [SearchDialogSortTypeInput!]
+}
+
+"Set only one property per object."
+input SearchDialogSortTypeInput {
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+  dueAt: OrderDirection
 }
 
 input SetSystemLabelInput {
@@ -384,6 +413,11 @@ enum HttpVerb {
   OPTIONS
   TRACE
   CONNECT
+}
+
+enum OrderDirection {
+  ASC
+  DESC
 }
 
 enum SystemLabel {

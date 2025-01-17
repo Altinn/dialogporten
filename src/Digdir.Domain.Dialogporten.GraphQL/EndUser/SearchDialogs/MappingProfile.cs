@@ -9,9 +9,12 @@ public sealed class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<SearchDialogInput, SearchDialogQuery>()
+            .ForMember(dest => dest.OrderBy, opt => opt.Ignore())
+            .ForMember(dest => dest.ContinuationToken, opt => opt.Ignore())
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
-        CreateMap<PaginatedList<DialogDto>, SearchDialogsPayload>();
+        CreateMap<PaginatedList<DialogDto>, SearchDialogsPayload>()
+            .ForMember(dest => dest.OrderBy, opt => opt.Ignore());
 
         CreateMap<ContentDto, SearchContent>();
 

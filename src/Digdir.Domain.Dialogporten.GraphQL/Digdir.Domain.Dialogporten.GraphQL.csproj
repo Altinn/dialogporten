@@ -4,10 +4,10 @@
         <PackageReference Include="Azure.Identity" Version="1.13.1" />
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
-        <PackageReference Include="HotChocolate.AspNetCore" Version="13.9.14" />
-        <PackageReference Include="HotChocolate.Diagnostics" Version="13.9.14" />
-        <PackageReference Include="HotChocolate.Data.EntityFramework" Version="13.9.14" />
-        <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="13.9.14" />
+        <PackageReference Include="HotChocolate.AspNetCore" Version="14.3.0" />
+        <PackageReference Include="HotChocolate.Diagnostics" Version="14.3.0" />
+        <PackageReference Include="HotChocolate.Data.EntityFramework" Version="14.3.0" />
+        <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="14.3.0" />
         <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.0.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
         <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.3.0" />

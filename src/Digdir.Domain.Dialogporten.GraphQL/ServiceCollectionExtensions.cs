@@ -15,7 +15,8 @@ public static class ServiceCollectionExtensions
             // This assumes that subscriptions have been set up by the infrastructure
             .AddSubscriptionType<Subscriptions>()
             .AddAuthorization()
-            .RegisterDbContext<DialogDbContext>()
+            .RegisterDbContextFactory<DialogDbContext>()
+            // .RegisterDbContext<DialogDbContext>()
             .AddDiagnosticEventListener<OpenTelemetryEventListener>()
             .AddQueryType<Queries>()
             .AddMutationType<Mutations>()

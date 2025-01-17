@@ -17,8 +17,8 @@ internal static class Activity
         var activityId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), DialogCreatedType);
         var activityId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), InformationType);
 
-        activityCsvData.AppendLine($"{activityId1},{dto.FormattedTimestamp},NULL,1,,{dto.DialogId}"); // Type DialogCreated
-        activityCsvData.AppendLine($"{activityId2},{dto.FormattedTimestamp},NULL,3,,{dto.DialogId}"); // Type Information
+        activityCsvData.AppendLine($"{activityId1},{dto.FormattedTimestamp},,1,,{dto.DialogId}"); // Type DialogCreated
+        activityCsvData.AppendLine($"{activityId2},{dto.FormattedTimestamp},,3,,{dto.DialogId}"); // Type Information
 
         return activityCsvData.ToString();
     }

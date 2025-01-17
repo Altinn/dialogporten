@@ -16,6 +16,6 @@ internal static class Dialog
         var party = Parties[partyIndex];
 
         return
-            $"{dto.DialogId},{dto.FormattedTimestamp},FALSE,,,,sql-generated,NULL,ttd,{party},NULL,NULL,11,{Guid.NewGuid()},{serviceResource},GenericAccessResource,1,,{dto.FormattedTimestamp}";
+            $"{dto.DialogId},{dto.FormattedTimestamp},FALSE,,,,sql-generated,,ttd,{party},,,11,{Guid.NewGuid()},{serviceResource},GenericAccessResource,1,,{dto.FormattedTimestamp}";
     }
 }

@@ -14,9 +14,9 @@ internal static class Actor
 
         // DialogActivity
         var activityId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), Activity.DialogCreatedType);
-        actorCsvData.AppendLine($"{activityId1},NULL,1,'ActorName','DialogActivityPerformedByActor',{activityId1},,,{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
+        actorCsvData.AppendLine($"{activityId1},,1,ActorName,DialogActivityPerformedByActor,{activityId1},,,{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
         var activityId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), Activity.InformationType);
-        actorCsvData.AppendLine($"{activityId2},NULL,1,'ActorName','DialogActivityPerformedByActor',{activityId2},,,{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
+        actorCsvData.AppendLine($"{activityId2},,1,ActorName,DialogActivityPerformedByActor,{activityId2},,,{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
 
         // DialogSeenLog
         // Should we add an actual Party to the ActorId here?
@@ -24,10 +24,10 @@ internal static class Actor
 
         // Transmission
         var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 1);
-        actorCsvData.AppendLine($"{transmissionId1},NULL,1,'ActorName','DialogTransmissionSenderActor',,,{transmissionId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
+        actorCsvData.AppendLine($"{transmissionId1},,1,ActorName,DialogTransmissionSenderActor,,,{transmissionId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
 
         var transmissionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 2);
-        actorCsvData.AppendLine($"{transmissionId2},NULL,1,'ActorName','DialogTransmissionSenderActor',,,{transmissionId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
+        actorCsvData.AppendLine($"{transmissionId2},,1,ActorName,DialogTransmissionSenderActor,,,{transmissionId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
 
         return actorCsvData.ToString();
     }

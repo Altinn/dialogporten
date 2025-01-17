@@ -15,8 +15,8 @@ internal static class DialogContent
 
         var dialogContentCsvData = new StringBuilder();
 
-        dialogContentCsvData.AppendLine($"{contentId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},'text/plain',{dto.DialogId},1");
-        dialogContentCsvData.AppendLine($"{contentId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},'text/plain',{dto.DialogId},3");
+        dialogContentCsvData.AppendLine($"{contentId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{dto.DialogId},1");
+        dialogContentCsvData.AppendLine($"{contentId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{dto.DialogId},3");
 
         return dialogContentCsvData.ToString();
     }

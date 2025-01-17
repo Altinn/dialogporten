@@ -14,8 +14,8 @@ internal static class Transmission
         var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 1);
         var transmissionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 2);
 
-        transmissionCsvData.AppendLine($"{transmissionId1},{dto.FormattedTimestamp},NULL,NULL,1,{dto.DialogId},");
-        transmissionCsvData.AppendLine($"{transmissionId2},{dto.FormattedTimestamp},NULL,NULL,2,{dto.DialogId},{transmissionId1}");
+        transmissionCsvData.AppendLine($"{transmissionId1},{dto.FormattedTimestamp},,,1,{dto.DialogId},");
+        transmissionCsvData.AppendLine($"{transmissionId2},{dto.FormattedTimestamp},,,2,{dto.DialogId},{transmissionId1}");
 
         return transmissionCsvData.ToString();
     }

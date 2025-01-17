@@ -15,9 +15,9 @@ internal static class GuiAction
         var guiActionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogGuiAction), 2);
         var guiActionId3 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogGuiAction), 3);
 
-        guiActionCsvData.AppendLine($"{guiActionId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},'submit','https://digdir.apps.tt02.altinn.no',NULL,FALSE,1,2,{dto.DialogId}");
-        guiActionCsvData.AppendLine($"{guiActionId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},'submit','https://digdir.apps.tt02.altinn.no',NULL,FALSE,2,2,{dto.DialogId}");
-        guiActionCsvData.AppendLine($"{guiActionId3},{dto.FormattedTimestamp},{dto.FormattedTimestamp},'submit','https://digdir.apps.tt02.altinn.no',NULL,FALSE,3,2,{dto.DialogId}");
+        guiActionCsvData.AppendLine($"{guiActionId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},submit,https://digdir.apps.tt02.altinn.no,,FALSE,1,2,{dto.DialogId}");
+        guiActionCsvData.AppendLine($"{guiActionId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},submit,https://digdir.apps.tt02.altinn.no,,FALSE,2,2,{dto.DialogId}");
+        guiActionCsvData.AppendLine($"{guiActionId3},{dto.FormattedTimestamp},{dto.FormattedTimestamp},submit,https://digdir.apps.tt02.altinn.no,,FALSE,3,2,{dto.DialogId}");
 
         return guiActionCsvData.ToString();
     }

@@ -14,6 +14,9 @@
       <None Update="service_resources">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="parties">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>

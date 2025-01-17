@@ -38,6 +38,89 @@ try
     const int taskRetryDelayInMs = 10000;
     const int taskRetryLimit = 1000;
 
+    foreach (var arg in args)
+    {
+        Console.WriteLine(arg);
+        if (arg == "RestoreIndexes")
+        {
+            var primaryKeys = """
+                                DO
+                                $$
+                                DECLARE
+                                x RECORD;
+                                BEGIN
+                                    FOR x IN 
+                                SELECT create_script
+                                FROM constraint_index_backup
+                                WHERE priority IN(1,2)
+                                ORDER BY priority
+                                    LOOP
+                                EXECUTE x.create_script;
+                                END LOOP;
+                                END;
+                                $$;
+                    
+                                COMMIT;
+                        """;
+
+            await using var primaryKeysCommand = dataSource.CreateCommand(primaryKeys);
+            await primaryKeysCommand.ExecuteNonQueryAsync();
+            await primaryKeysCommand.DisposeAsync();
+
+            var foreignKeys = "SELECT create_script FROM constraint_index_backup WHERE priority = 3";
+
+            await using var foreignKeyCommand = dataSource.CreateCommand(foreignKeys);
+            await using var foreignKeyReader = await foreignKeyCommand.ExecuteReaderAsync();
+
+            var foreignKeyTasks = new List<Task>();
+
+            while (await foreignKeyReader.ReadAsync())
+            {
+                var createConstraintCommand = foreignKeyReader.GetString(0);
+                foreignKeyTasks.Add(Task.Run(async () =>
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine($"Restoring constraint: {createConstraintCommand}");
+
+                        await using var createCommand = dataSource.CreateCommand(createConstraintCommand);
+                        await createCommand.ExecuteNonQueryAsync();
+                        Console.WriteLine($"Restored constraint: {createConstraintCommand}");
+                        Console.WriteLine();
+                    }
+                ));
+            }
+
+            await Task.WhenAll(foreignKeyTasks);
+
+            var indexes = "SELECT create_script FROM constraint_index_backup WHERE priority = 4";
+
+            await using var indexCommand = dataSource.CreateCommand(indexes);
+            await using var indexReader = await indexCommand.ExecuteReaderAsync();
+
+            var indexTasks = new List<Task>();
+
+            while (await indexReader.ReadAsync())
+            {
+                var createIndexCommand = indexReader.GetString(0);
+                indexTasks.Add(Task.Run(async () =>
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine($"Restoring index: {createIndexCommand}");
+
+                        await using var createCommand = dataSource.CreateCommand(createIndexCommand);
+                        await createCommand.ExecuteNonQueryAsync();
+                        Console.WriteLine($"Restored index: {createIndexCommand}");
+                        Console.WriteLine();
+                    }
+                ));
+            }
+
+            await Task.WhenAll(indexTasks);
+
+            Environment.Exit(0);
+        }
+    }
+
     void CreateCopyTask(Func<DialogTimestamp, string> generator, string entityName,
         string copyCommand, bool singleLinePerTimestamp = false, int numberOfTasks = 1)
     {

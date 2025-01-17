@@ -19,7 +19,8 @@ internal static class Actor
         actorCsvData.AppendLine($"{activityId2},NULL,1,'ActorName','DialogActivityPerformedByActor',{activityId2},,,{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
 
         // DialogSeenLog
-        actorCsvData.AppendLine($"{dto.DialogId},NULL,1,'ActorName','DialogSeenLogSeenByActor',,{dto.DialogId},,{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
+        // Should we add an actual Party to the ActorId here?
+        actorCsvData.AppendLine($"{dto.DialogId},,1,ActorName,DialogSeenLogSeenByActor,,{dto.DialogId},,{dto.FormattedTimestamp},{dto.FormattedTimestamp},");
 
         // Transmission
         var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 1);

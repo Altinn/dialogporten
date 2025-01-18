@@ -9,7 +9,8 @@ DB_PASSWORD="" # DO NOT COMMIT
 
 # SQL command
 SQL_COMMAND=$(cat <<EOF
-DO $$
+DO
+\$\$
 DECLARE
     x RECORD;
     loop_counter INTEGER := 0; -- Initialize loop counter
@@ -57,7 +58,7 @@ BEGIN
     RAISE NOTICE 'Completed all % loops.', total_loops;
     RAISE NOTICE '============================================================';
 END;
-$$;
+\$\$;
 EOF
 )
 

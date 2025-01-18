@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.45.1](https://github.com/Altinn/dialogporten/compare/v1.45.0...v1.45.1) (2025-01-18)
+
+
+### Bug Fixes
+
+* **graphql:** Add missing search parameters for paging and sorting ([#1671](https://github.com/Altinn/dialogporten/issues/1671)) ([02f2335](https://github.com/Altinn/dialogporten/commit/02f2335d7eb2dde1e0a6e95e5ccc9918b1b15b34))
+* Removed .AsSingleQuery from EndUser Search query ([#1707](https://github.com/Altinn/dialogporten/issues/1707)) ([2a3153b](https://github.com/Altinn/dialogporten/commit/2a3153b216f6a9e02ebef4d343d52f7b83cd248d))
+* **webapi:** Use correct language code for norwegian in OpenApi description ([#1705](https://github.com/Altinn/dialogporten/issues/1705)) ([ce0a07d](https://github.com/Altinn/dialogporten/commit/ce0a07d4622839a5f1c3f467ab83950d7750d49e))
+
 ## [1.45.0](https://github.com/Altinn/dialogporten/compare/v1.44.2...v1.45.0) (2025-01-15)
 
 

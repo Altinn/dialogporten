@@ -9,25 +9,55 @@ DB_PASSWORD="" # DO NOT COMMIT
 
 # SQL command
 SQL_COMMAND=$(cat <<EOF
-BEGIN;
+DO $$
+DECLARE
+    x RECORD;
+    loop_counter INTEGER := 0; -- Initialize loop counter
+    total_loops INTEGER;       -- Variable to store total number of loops
+    priority_values INTEGER[] := ARRAY[1, 2, 3, 4]; -- Array of priorities
+BEGIN
+    -- Calculate the total number of loops (rows in the SELECT statement)
+    SELECT COUNT(*) INTO total_loops
+    FROM constraint_index_backup
+    WHERE priority = ANY(priority_values);
 
--- Restore constraints and indexes
-DO
-\$\$
-    DECLARE
-        x RECORD;
-    BEGIN
-        FOR x IN
-            SELECT create_script
-            FROM constraint_index_backup
-            ORDER BY priority
-            LOOP
-                EXECUTE x.create_script;
-            END LOOP;
-    END;
-\$\$;
+    -- Log the total number of loops before starting
+    RAISE NOTICE '============================================================';
+    RAISE NOTICE 'Starting loop execution. Total number of loops: %', total_loops;
+    RAISE NOTICE 'Priority values being processed: %', priority_values;
+    RAISE NOTICE '============================================================';
 
-COMMIT;
+    -- Iterate over the rows
+    FOR x IN
+        SELECT create_script
+        FROM constraint_index_backup
+        WHERE priority = ANY(priority_values)
+        ORDER BY priority
+    LOOP
+        -- Increment the loop counter
+        loop_counter := loop_counter + 1;
+
+        -- Log a splitter before each iteration
+        RAISE NOTICE '------------------------------------------------------------';
+
+        -- Log each iteration with the updated timestamp, loop count, and total count
+        RAISE NOTICE 'Loop % of %', loop_counter, total_loops;
+        RAISE NOTICE 'Timestamp: %', clock_timestamp();
+        RAISE NOTICE 'Executing script: %', x.create_script;
+
+        -- Execute the script
+        EXECUTE x.create_script;
+
+        -- Log a splitter after each iteration
+        RAISE NOTICE '------------------------------------------------------------';
+    END LOOP;
+
+    -- Final log message
+    RAISE NOTICE '============================================================';
+    RAISE NOTICE 'Completed all % loops.', total_loops;
+    RAISE NOTICE '============================================================';
+END;
+$$;
 EOF
 )
 

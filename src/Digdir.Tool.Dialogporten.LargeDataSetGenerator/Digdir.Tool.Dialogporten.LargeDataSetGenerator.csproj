@@ -14,6 +14,12 @@
       <None Update="service_resources">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="wordlist_en">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="wordlist_no">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="parties">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

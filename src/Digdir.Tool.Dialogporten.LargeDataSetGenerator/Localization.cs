@@ -36,10 +36,22 @@ internal static class Localization
 
         foreach (var localizationSetId in localizationSetIds)
         {
+            var rng = new Random(localizationSetId.GetHashCode());
+
+            var english = Words.English.Length != 0
+                ? Words.English[rng.Next(0, Words.English.Length)] + " " +
+                  Words.English[rng.Next(0, Words.English.Length)]
+                : $"English {Guid.NewGuid().ToString()[..8]}";
+
+            var norwegian = Words.Norwegian.Length != 0
+                ? Words.Norwegian[rng.Next(0, Words.Norwegian.Length)] + " " +
+                  Words.Norwegian[rng.Next(0, Words.Norwegian.Length)]
+                : $"Norsk {Guid.NewGuid().ToString()[..8]}";
+
             csvData.AppendLine(
-                $"nb,{localizationSetId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},Norsk {Guid.NewGuid().ToString()[..8]}");
+                $"nb,{localizationSetId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{norwegian}");
             csvData.AppendLine(
-                $"en,{localizationSetId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},English {Guid.NewGuid().ToString()[..8]}");
+                $"en,{localizationSetId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{english}");
         }
 
         return csvData.ToString();

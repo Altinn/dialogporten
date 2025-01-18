@@ -6,8 +6,6 @@ internal static class DialogContent
 {
     public const string CopyCommand = """COPY "DialogContent" ("Id", "CreatedAt", "UpdatedAt", "MediaType", "DialogId", "TypeId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
 
-    public const int EntitiesPerParent = 2;
-
     public static string Generate(DialogTimestamp dto)
     {
         var contentId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 1);

@@ -5,6 +5,8 @@ using Activity = Digdir.Tool.Dialogporten.LargeDataSetGenerator.Activity;
 
 try
 {
+    var logicalProcessorCount = Environment.ProcessorCount;
+    Console.WriteLine($"Logical Processor Count: {logicalProcessorCount}");
     Console.WriteLine("Starting large data set generator...");
 
     if (!File.Exists("./parties"))
@@ -12,6 +14,8 @@ try
         Console.Error.WriteLine("No file 'parties' found, exiting...");
         Environment.Exit(1);
     }
+
+    Console.WriteLine($"Using {Parties.List.Length} parties from ./parties");
 
     if (!File.Exists("./service_resources"))
     {
@@ -43,31 +47,32 @@ try
         Console.WriteLine(arg);
         if (arg == "RestoreIndexes")
         {
-            var primaryKeys = """
-                                DO
-                                $$
-                                DECLARE
-                                x RECORD;
-                                BEGIN
-                                    FOR x IN 
-                                SELECT create_script
-                                FROM constraint_index_backup
-                                WHERE priority IN(1,2)
-                                ORDER BY priority
-                                    LOOP
-                                EXECUTE x.create_script;
-                                END LOOP;
-                                END;
-                                $$;
-                    
-                                COMMIT;
-                        """;
+            const string primaryKeys =
+                """
+                DO
+                $$
+                DECLARE
+                x RECORD;
+                BEGIN
+                    FOR x IN 
+                SELECT create_script
+                FROM constraint_index_backup
+                WHERE priority IN(1,2)
+                ORDER BY priority
+                    LOOP
+                EXECUTE x.create_script;
+                END LOOP;
+                END;
+                $$;
+
+                COMMIT;
+                """;
 
             await using var primaryKeysCommand = dataSource.CreateCommand(primaryKeys);
             await primaryKeysCommand.ExecuteNonQueryAsync();
             await primaryKeysCommand.DisposeAsync();
 
-            var foreignKeys = "SELECT create_script FROM constraint_index_backup WHERE priority = 3";
+            const string foreignKeys = "SELECT create_script FROM constraint_index_backup WHERE priority = 3";
 
             await using var foreignKeyCommand = dataSource.CreateCommand(foreignKeys);
             await using var foreignKeyReader = await foreignKeyCommand.ExecuteReaderAsync();
@@ -84,6 +89,7 @@ try
 
                         await using var createCommand = dataSource.CreateCommand(createConstraintCommand);
                         await createCommand.ExecuteNonQueryAsync();
+
                         Console.WriteLine($"Restored constraint: {createConstraintCommand}");
                         Console.WriteLine();
                     }
@@ -92,7 +98,7 @@ try
 
             await Task.WhenAll(foreignKeyTasks);
 
-            var indexes = "SELECT create_script FROM constraint_index_backup WHERE priority = 4";
+            const string indexes = "SELECT create_script FROM constraint_index_backup WHERE priority = 4";
 
             await using var indexCommand = dataSource.CreateCommand(indexes);
             await using var indexReader = await indexCommand.ExecuteReaderAsync();
@@ -109,6 +115,7 @@ try
 
                         await using var createCommand = dataSource.CreateCommand(createIndexCommand);
                         await createCommand.ExecuteNonQueryAsync();
+
                         Console.WriteLine($"Restored index: {createIndexCommand}");
                         Console.WriteLine();
                     }
@@ -207,19 +214,20 @@ try
     }
 
     // Split Localizations, 28 lines per dialog
-    CreateCopyTask(Localization.Generate, "localizations", Localization.CopyCommand, numberOfTasks: 3);
+    CreateCopyTask(Localization.Generate, "localizations", Localization.CopyCommand, numberOfTasks: 12);
 
     // Split LocalizationSets, 14 lines per dialog
-    CreateCopyTask(LocalizationSet.Generate, "localization sets", LocalizationSet.CopyCommand, numberOfTasks: 3);
+    CreateCopyTask(LocalizationSet.Generate, "localization sets", LocalizationSet.CopyCommand, numberOfTasks: 8);
 
     // Split AttachmentUrls, 6 lines per dialog
-    CreateCopyTask(AttachmentUrl.Generate, "attachment URLs", AttachmentUrl.CopyCommand, numberOfTasks: 2);
+    CreateCopyTask(AttachmentUrl.Generate, "attachment URLs", AttachmentUrl.CopyCommand, numberOfTasks: 6);
 
     // Split Actors, 5 lines per dialog
-    CreateCopyTask(Actor.Generate, "actors", Actor.CopyCommand, numberOfTasks: 2);
+    CreateCopyTask(Actor.Generate, "actors", Actor.CopyCommand, numberOfTasks: 4);
 
     // Split TransmissionContent, 4 lines per dialog
-    CreateCopyTask(TransmissionContent.Generate, "transmission content", TransmissionContent.CopyCommand, numberOfTasks: 2);
+    CreateCopyTask(TransmissionContent.Generate, "transmission content", TransmissionContent.CopyCommand,
+        numberOfTasks: 3);
 
     // No split, 2-3 lines per dialog
     CreateCopyTask(DialogContent.Generate, "dialog content", DialogContent.CopyCommand);
@@ -235,6 +243,7 @@ try
         singleLinePerTimestamp: true);
     CreateCopyTask(Dialog.Generate, "dialogs", Dialog.CopyCommand, singleLinePerTimestamp: true);
 
+
     await Task.WhenAll(tasks);
 
     Console.WriteLine(string.Empty);
@@ -247,4 +256,18 @@ catch (Exception ex)
 {
     Console.Error.WriteLine(ex.Message);
     Console.Error.WriteLine(ex.StackTrace);
+}
+
+internal static class Parties
+{
+    internal static readonly string[] List = File.ReadAllLines("./parties");
+}
+
+internal static class Words
+{
+    internal static readonly string[]
+        English = File.Exists("./wordlist_en") ? File.ReadAllLines("./wordlist_en") : [];
+
+    internal static readonly string[]
+        Norwegian = File.Exists("./wordlist_no") ? File.ReadAllLines("./wordlist_no") : [];
 }

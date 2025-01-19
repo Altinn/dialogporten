@@ -17,12 +17,20 @@ internal static class SearchTags
 
         var rng = new Random(dto.DialogId.ToString().GetHashCode());
 
+        var tagText1Index = rng.Next(0, Words.Norwegian.Length);
         var tagText1 = Words.Norwegian.Length != 0
-            ? Words.Norwegian[rng.Next(0, Words.Norwegian.Length)]
+            ? Words.Norwegian[tagText1Index]
             : $"Norsk {Guid.NewGuid().ToString()[..8]}";
 
+        int tagText2Index;
+        do
+        {
+            tagText2Index = rng.Next(0, Words.Norwegian.Length);
+        }
+        while (tagText2Index == tagText1Index);
+
         var tagText2 = Words.Norwegian.Length != 0
-            ? Words.Norwegian[rng.Next(0, Words.Norwegian.Length)]
+            ? Words.Norwegian[tagText2Index]
             : $"Norsk {Guid.NewGuid().ToString()[..8]}";
 
         var tagText3 = Words.English.Length != 0

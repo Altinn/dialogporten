@@ -23,6 +23,18 @@ try
         Environment.Exit(1);
     }
 
+    if (Words.Norwegian.Length < 2)
+    {
+        Console.Error.WriteLine("Too few words in wordlist_no, need to be more than 2 (pref. much more), exiting...");
+        Environment.Exit(1);
+    }
+
+    if (Words.English.Length < 2)
+    {
+        Console.Error.WriteLine("Too few words in wordlist_en, need to be more than 2 (pref. much more), exiting...");
+        Environment.Exit(1);
+    }
+
     var connString = Environment.GetEnvironmentVariable("CONN_STRING");
     var startingDate = DateTimeOffset.Parse(Environment.GetEnvironmentVariable("FROM_DATE")!);
     var endDate = DateTimeOffset.Parse(Environment.GetEnvironmentVariable("TO_DATE")!);

@@ -4,10 +4,10 @@
 START_TIME=$(date +%s)
 
 # Initial dates
-START_DATE="1980-01-02"
-END_DATE="1980-03-28"
+START_DATE="1970-01-02"
+END_DATE="1970-01-28"
 
-export DIALOG_AMOUNT="10000"
+export DIALOG_AMOUNT="2000000"
 export CONN_STRING="" # DO NOT COMMIT
 
 # Detect platform (macOS or Linux)
@@ -18,7 +18,7 @@ else
   IS_MACOS=true
 fi
 
-for (( i=1; i<=100; i++ ))
+for (( i=1; i<=50; i++ ))
 do
   # Set environment variables
   export FROM_DATE="$START_DATE"
@@ -27,17 +27,17 @@ do
   echo "Loop $i: FROM_DATE=$FROM_DATE, TO_DATE=$TO_DATE"
 
   # Run the dotnet command (commented out for testing the date ranges)
-  dotnet run -c Release
+  #  dotnet run -c Release
 
   # Update dates for the next loop
   if $IS_MACOS; then
     # macOS (BSD `date`)
     START_DATE=$(date -j -f "%Y-%m-%d" "$END_DATE" "+%Y-%m-02" | xargs -I{} date -j -v+1m -f "%Y-%m-%d" {} "+%Y-%m-%d")
-    END_DATE=$(date -j -f "%Y-%m-%d" "$START_DATE" "+%Y-%m-%d" | xargs -I{} date -j -v+2m -v+26d -f "%Y-%m-%d" {} "+%Y-%m-%d")
+    END_DATE=$(date -j -f "%Y-%m-%d" "$START_DATE" "+%Y-%m-%d" | xargs -I{} date -j -v+26d -f "%Y-%m-%d" {} "+%Y-%m-%d")
   else
     # Linux (GNU `date`)
     START_DATE=$(date -d "$END_DATE +1 month" +"%Y-%m-02")
-    END_DATE=$(date -d "$START_DATE +2 months +26 days" +"%Y-%m-%d")
+    END_DATE=$(date -d "$START_DATE +26 days" +"%Y-%m-%d")
   fi
 done
 

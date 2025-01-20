@@ -282,4 +282,16 @@ internal static class Words
 
     internal static readonly string[]
         Norwegian = File.Exists("./wordlist_no") ? File.ReadAllLines("./wordlist_no") : [];
+
+    static Words()
+    {
+        if (English.Length > Norwegian.Length)
+        {
+            English = English.Except(Norwegian).ToArray();
+        }
+        else
+        {
+            Norwegian = Norwegian.Except(English).ToArray();
+        }
+    }
 }

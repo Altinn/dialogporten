@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -11,10 +13,11 @@ using OneOf;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
-public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>
+public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>, IAltinnEventDisabler
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
+    public bool DisableAltinnEvents { get; set; }
 }
 
 [GenerateOneOf]

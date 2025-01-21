@@ -2,6 +2,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -16,11 +17,15 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using OneOf;
-using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
-public sealed class CreateDialogCommand : CreateDialogDto, IRequest<CreateDialogResult>;
+public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, IAltinnEventDisabler
+{
+    public bool DisableAltinnEvents { get; init; }
+    public CreateDialogDto Dto { get; set; } = null!;
+}
+
 public sealed record CreateDialogSuccess(Guid DialogId, Guid Revision);
 
 [GenerateOneOf]
@@ -56,7 +61,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
     public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
     {
-        var dialog = _mapper.Map<DialogEntity>(request);
+        var dialog = _mapper.Map<DialogEntity>(request.Dto);
 
         await _serviceResourceAuthorizer.SetResourceType(dialog, cancellationToken);
         var serviceResourceAuthorizationResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
@@ -88,7 +93,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,
-            propertyName: nameof(CreateDialogCommand.Transmissions),
+            propertyName: nameof(CreateDialogDto.Transmissions),
             maxDepth: 100,
             maxWidth: 1));
 
@@ -103,7 +108,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private void CreateDialogEndUserContext(CreateDialogCommand request, DialogEntity dialog)
     {
         dialog.DialogEndUserContext = new();
-        if (!request.SystemLabel.HasValue)
+        if (!request.Dto.SystemLabel.HasValue)
         {
             return;
         }
@@ -115,7 +120,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         dialog.DialogEndUserContext.UpdateLabel(
-            request.SystemLabel.Value,
+            request.Dto.SystemLabel.Value,
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);
     }

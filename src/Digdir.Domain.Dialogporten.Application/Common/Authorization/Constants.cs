@@ -12,6 +12,9 @@ public static class Constants
     public const string ServiceOwnerAdminScope = "digdir:dialogporten.serviceprovider.admin";
     public const string LegacyHtmlScope = "digdir:dialogporten.serviceprovider.legacyhtml";
 
+    public const string DisableAltinnEventsRequiresAdminScope =
+        "Disabling Altinn events requires service owner admin scope.";
+
     public static readonly ImmutableArray<string> SupportedResourceTypes =
     [
         "GenericAccessResource",

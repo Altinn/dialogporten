@@ -2268,7 +2268,7 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogsCommandsCreate_DialogCommand": {
+      "V1ServiceOwnerDialogsCommandsCreate_Dialog": {
         "additionalProperties": false,
         "properties": {
           "activities": {
@@ -3249,6 +3249,15 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCreate_DialogRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_Dialog"
           }
         },
         "type": "object"
@@ -5864,14 +5873,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_DialogCommand"
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_Dialog"
               }
             }
           },
-          "description": "",
           "required": true,
-          "x-name": "CreateDialogCommand",
-          "x-position": 1
+          "x-name": "dto"
         },
         "responses": {
           "201": {

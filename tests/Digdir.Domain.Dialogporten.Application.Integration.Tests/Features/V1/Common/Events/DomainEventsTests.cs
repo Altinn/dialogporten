@@ -60,26 +60,27 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .Single(x => x.Type == DialogActivityType.Values.TransmissionOpened);
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1).First();
         transmissionOpenedActivity.TransmissionId = transmission.Id;
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(
             activities: activities,
             attachments: DialogGenerator.GenerateFakeDialogAttachments(3));
-        createDialogCommand.Transmissions.Add(transmission);
+        var dto = createDialogCommand.Dto;
+        dto.Transmissions.Add(transmission);
 
         // Act
         await Application.Send(createDialogCommand);
         await harness.Consumed
-            .SelectAsync<DialogCreatedDomainEvent>(x => x.Context.Message.DialogId == createDialogCommand.Id)
+            .SelectAsync<DialogCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
             .FirstOrDefault();
         await harness.Consumed
-            .SelectAsync<DialogActivityCreatedDomainEvent>(x => x.Context.Message.DialogId == createDialogCommand.Id)
+            .SelectAsync<DialogActivityCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
             .Take(activities.Count)
             .ToListAsync();
         var cloudEvents = Application.PopPublishedCloudEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == createDialogCommand.Id.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Party);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dto.Id.ToString());
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == dto.ServiceResource);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == dto.Party);
 
         cloudEvents.Should().ContainSingle(cloudEvent =>
             cloudEvent.Type == CloudEventTypes.Get(nameof(DialogCreatedDomainEvent)));
@@ -91,7 +92,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         cloudEvents.Count
             .Should()
             // +1 for the dialog created event
-            .Be(createDialogCommand.Activities.Count + 1);
+            .Be(dto.Activities.Count + 1);
     }
 
     [Fact]
@@ -99,14 +100,15 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     {
         // Arrange
         var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(
             activities: [],
             progress: 0,
             attachments: []);
 
         await Application.Send(createDialogCommand);
+        var dto = createDialogCommand.Dto;
 
-        var getDialogResult = await Application.Send(new GetDialogQuery { DialogId = createDialogCommand.Id!.Value });
+        var getDialogResult = await Application.Send(new GetDialogQuery { DialogId = dto.Id!.Value });
         getDialogResult.TryPickT0(out var getDialogDto, out _);
 
         var updateDialogDto = Mapper.Map<UpdateDialogDto>(getDialogDto);
@@ -116,20 +118,20 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         var updateDialogCommand = new UpdateDialogCommand
         {
-            Id = createDialogCommand.Id!.Value,
+            Id = dto.Id!.Value,
             Dto = updateDialogDto
         };
 
         await Application.Send(updateDialogCommand);
         await harness.Consumed
-            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == createDialogCommand.Id)
+            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
             .FirstOrDefault();
         var cloudEvents = Application.PopPublishedCloudEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == createDialogCommand.Id!.Value.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Party);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dto.Id!.Value.ToString());
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == dto.ServiceResource);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == dto.Party);
 
         cloudEvents.Should().ContainSingle(cloudEvent =>
             cloudEvent.Type == CloudEventTypes.Get(nameof(DialogUpdatedDomainEvent)));
@@ -141,7 +143,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         // Arrange
         var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(
             id: dialogId,
             attachments: []);
 
@@ -177,8 +179,8 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         // Assert
         cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dialogId.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Party);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.Dto.ServiceResource);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Dto.Party);
 
         cloudEvents.Should().ContainSingle(cloudEvent =>
             cloudEvent.Type == CloudEventTypes.Get(nameof(DialogUpdatedDomainEvent)));
@@ -189,7 +191,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         // Arrange
         var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(id: dialogId, attachments: [], activities: []);
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(id: dialogId, attachments: [], activities: []);
 
         await Application.Send(createDialogCommand);
 
@@ -206,8 +208,8 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         // Assert
         cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dialogId.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Party);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.Dto.ServiceResource);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Dto.Party);
 
         cloudEvents.Should().ContainSingle(cloudEvent =>
             cloudEvent.Type == CloudEventTypes.Get(nameof(DialogDeletedDomainEvent)));
@@ -219,7 +221,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         // Arrange
         var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(id: dialogId, attachments: [], activities: []);
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(id: dialogId, attachments: [], activities: []);
 
         await Application.Send(createDialogCommand);
 
@@ -237,10 +239,85 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         // Assert
         cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dialogId.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Party);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.Dto.ServiceResource);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Dto.Party);
 
         cloudEvents.Should().ContainSingle(cloudEvent =>
             cloudEvent.Type == CloudEventTypes.Get(nameof(DialogDeletedDomainEvent)));
+    }
+
+    [Fact]
+    public async Task AltinnEvents_Should_Be_Disabled_When_DisableAltinnEvents_Is_Set()
+    {
+        // Arrange - Create
+        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
+
+        var activity = DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information);
+        var initialProgress = 1;
+
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(
+            disableAltinnEvents: true,
+            activities: [activity],
+            attachments: [],
+            progress: initialProgress);
+        var dto = createDialogCommand.Dto;
+
+        // Act - Create
+        await Application.Send(createDialogCommand);
+        await harness.Consumed
+            .SelectAsync<DialogCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
+            .FirstOrDefault();
+        await harness.Consumed
+            .SelectAsync<DialogActivityCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
+            .FirstOrDefault();
+
+        // Arrange - Update
+        var getDialogResult = await Application.Send(new GetDialogQuery { DialogId = dto.Id!.Value });
+        getDialogResult.TryPickT0(out var getDialogDto, out _);
+
+        var updateDialogDto = Mapper.Map<UpdateDialogDto>(getDialogDto);
+        updateDialogDto.Progress = ++initialProgress;
+        var updateDialogCommand = new UpdateDialogCommand
+        {
+            Id = dto.Id!.Value,
+            Dto = updateDialogDto,
+            DisableAltinnEvents = true
+        };
+
+        // Act - Update
+        await Application.Send(updateDialogCommand);
+        await harness.Consumed
+            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
+            .FirstOrDefault();
+
+        // Arrange - Delete
+        var deleteDialogCommand = new DeleteDialogCommand
+        {
+            Id = dto.Id!.Value,
+            DisableAltinnEvents = true
+        };
+
+        // Act - Delete
+        await Application.Send(deleteDialogCommand);
+        await harness.Consumed
+            .SelectAsync<DialogDeletedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
+            .FirstOrDefault();
+
+        // Arrange - Purge
+        var purgeCommand = new PurgeDialogCommand
+        {
+            DialogId = dto.Id!.Value,
+            DisableAltinnEvents = true
+        };
+
+        // Act - Purge
+        await Application.Send(purgeCommand);
+        await harness.Consumed
+            .SelectAsync<DialogDeletedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
+            .FirstOrDefault();
+
+        // Assert
+        var cloudEvents = Application.PopPublishedCloudEvents();
+        cloudEvents.Should().BeEmpty();
     }
 }

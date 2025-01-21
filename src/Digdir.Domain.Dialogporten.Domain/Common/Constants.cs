@@ -7,4 +7,6 @@ public static class Constants
     public const int DefaultMaxUriLength = 1023;
 
     public const string ServiceResourcePrefix = "urn:altinn:resource:";
+
+    public const string DisableAltinnEvents = "DisableAltinnEvents";
 }

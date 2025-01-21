@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -19,14 +20,16 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, IAltinnEventDisabler
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
+    public bool DisableAltinnEvents { get; set; }
 }
 
 [GenerateOneOf]
@@ -163,6 +166,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
 
         UpdateLabel(dialog);
+
         var saveResult = await _unitOfWork
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)
             .SaveChangesAsync(cancellationToken);

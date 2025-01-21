@@ -1,4 +1,4 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Common;
+﻿using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 

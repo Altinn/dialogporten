@@ -75,7 +75,7 @@ internal sealed class ServiceResourceAuthorizer : IServiceResourceAuthorizer
         if (serviceResourceInformation is null)
         {
             var supportedResourceTypes = string.Join(", ", Constants.SupportedResourceTypes);
-            _domainContext.AddError(nameof(CreateDialogCommand.ServiceResource),
+            _domainContext.AddError(nameof(CreateDialogDto.ServiceResource),
                 $"Service resource '{dialog.ServiceResource}' does not exist in the resource " +
                 $"registry, or is not of the following supported resource types: " +
                 $"[{supportedResourceTypes}].");

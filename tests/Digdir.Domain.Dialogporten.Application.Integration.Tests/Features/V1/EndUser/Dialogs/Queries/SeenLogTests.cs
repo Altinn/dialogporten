@@ -16,7 +16,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     public async Task Get_Dialog_SeenLog_Should_Not_Return_User_Ids_Unhashed()
     {
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var createCommandResponse = await Application.Send(createDialogCommand);
 
         // Act
@@ -38,7 +38,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     public async Task Search_Dialog_SeenLog_Should_Not_Return_User_Ids_Unhashed()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var createCommandResponse = await Application.Send(createDialogCommand);
 
         // Trigger SeenLog
@@ -47,7 +47,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         // Act
         var response = await Application.Send(new SearchDialogQuery
         {
-            ServiceResource = [createDialogCommand.ServiceResource]
+            ServiceResource = [createDialogCommand.Dto.ServiceResource]
         });
 
         // Assert
@@ -67,7 +67,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     public async Task Get_SeenLog_Should_Not_Return_User_Ids_Unhashed()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var createCommandResponse = await Application.Send(createDialogCommand);
 
         var triggerSeenLogResponse = await Application.Send(new GetDialogQuery
@@ -97,7 +97,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     public async Task Search_SeenLog_Should_Not_Return_User_Ids_Unhashed()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var createCommandResponse = await Application.Send(createDialogCommand);
 
         // Trigger SeenLog

@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.GraphQl;
@@ -16,6 +17,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
     private readonly Lazy<ITopicEventSender> _topicEventSender;
     private readonly ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> _logger;
     private readonly Lazy<IPublishEndpoint> _publishEndpoint;
+    private readonly IDomainEventContext _domainEventContext;
 
     private List<IDomainEvent> _domainEvents = [];
 
@@ -23,12 +25,14 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         ITransactionTime transactionTime,
         Lazy<ITopicEventSender> topicEventSender,
         ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> logger,
-        Lazy<IPublishEndpoint> publishEndpoint)
+        Lazy<IPublishEndpoint> publishEndpoint,
+        IDomainEventContext domainEventContext)
     {
         _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
         _topicEventSender = topicEventSender ?? throw new ArgumentNullException(nameof(topicEventSender));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+        _domainEventContext = domainEventContext;
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -60,6 +64,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         EnsureLazyLoadedServices();
         foreach (var domainEvent in _domainEvents)
         {
+            domainEvent.Metadata = _domainEventContext.Metadata;
             domainEvent.OccuredAt = _transactionTime.Value;
         }
 

@@ -17,7 +17,17 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 internal sealed class CreateDialogCommandValidator : AbstractValidator<CreateDialogCommand>
 {
-    public CreateDialogCommandValidator(
+    public CreateDialogCommandValidator(IValidator<CreateDialogDto> createDialogDtoValidator)
+    {
+        RuleFor(x => x.Dto)
+            .NotEmpty()
+            .SetValidator(createDialogDtoValidator);
+    }
+}
+
+internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogDto>
+{
+    public CreateDialogDtoValidator(
         IValidator<TransmissionDto> transmissionValidator,
         IValidator<AttachmentDto> attachmentValidator,
         IValidator<GuiActionDto> guiActionValidator,
@@ -35,13 +45,13 @@ internal sealed class CreateDialogCommandValidator : AbstractValidator<CreateDia
 
         RuleFor(x => x.CreatedAt)
             .NotEmpty()
-                .WithMessage($"{{PropertyName}} must not be empty when '{nameof(CreateDialogCommand.UpdatedAt)} is set.")
+                .WithMessage($"{{PropertyName}} must not be empty when '{nameof(CreateDialogDto.UpdatedAt)} is set.")
                 .When(x => x.UpdatedAt != default);
 
         RuleFor(x => x.UpdatedAt)
             .IsInPast()
             .GreaterThanOrEqualTo(x => x.CreatedAt)
-                .WithMessage($"'{{PropertyName}}' must be greater than or equal to '{nameof(CreateDialogCommand.CreatedAt)}'.")
+                .WithMessage($"'{{PropertyName}}' must be greater than or equal to '{nameof(CreateDialogDto.CreatedAt)}'.")
                 .When(x => x.CreatedAt != default && x.UpdatedAt != default);
 
         RuleFor(x => x.ServiceResource)
@@ -136,7 +146,7 @@ internal sealed class CreateDialogCommandValidator : AbstractValidator<CreateDia
 
         RuleFor(x => x.Process)
             .NotEmpty()
-            .WithMessage($"{{PropertyName}} must not be empty when {nameof(CreateDialogCommand.PrecedingProcess)} is set.")
+            .WithMessage($"{{PropertyName}} must not be empty when {nameof(CreateDialogDto.PrecedingProcess)} is set.")
             .When(x => x.PrecedingProcess is not null);
 
         RuleFor(x => x.PrecedingProcess)

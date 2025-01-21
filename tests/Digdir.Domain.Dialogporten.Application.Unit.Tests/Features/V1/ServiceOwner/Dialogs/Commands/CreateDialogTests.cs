@@ -30,15 +30,15 @@ public class CreateDialogTests
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
 
-        var createCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         serviceAuthorizationSub
             .AuthorizeServiceResources(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
             .Returns(new Forbidden());
 
         resourceRegistrySub
-            .GetResourceInformation(createCommand.ServiceResource, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResourceInformation(createCommand.ServiceResource, "foo", "912345678", "ttd"));
+            .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
+            .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
         var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
@@ -67,15 +67,15 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
-        var createCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         serviceAuthorizationSub
             .AuthorizeServiceResources(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
             .Returns(new Forbidden());
 
         resourceRegistrySub
-            .GetResourceInformation(createCommand.ServiceResource, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResourceInformation(createCommand.ServiceResource, "foo", "912345678", "ttd"));
+            .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
+            .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
         var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,

@@ -1,7 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Externals;
 using Microsoft.Extensions.Options;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.AltinnForwarders;
 
 internal class DomainEventToAltinnForwarderBase
 {

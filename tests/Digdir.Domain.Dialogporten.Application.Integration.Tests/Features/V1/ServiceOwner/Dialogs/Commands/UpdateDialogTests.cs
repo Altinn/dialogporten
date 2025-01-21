@@ -20,7 +20,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public async Task UpdateDialogCommand_Should_Return_New_Revision()
     {
         // Arrange
-        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeDialog());
+        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
 
         var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
         var getDialogDto = await Application.Send(getDialogQuery);
@@ -85,9 +85,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public async Task Cannot_Include_Old_Transmissions_In_UpdateCommand()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var existingTransmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
-        createDialogCommand.Transmissions.Add(existingTransmission);
+        createDialogCommand.Dto.Transmissions.Add(existingTransmission);
         var createCommandResponse = await Application.Send(createDialogCommand);
 
         var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
@@ -124,11 +124,11 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
     private async Task<(CreateDialogCommand, CreateDialogResult)> GenerateDialogWithActivity()
     {
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var activity = DialogGenerator.GenerateFakeDialogActivity(type: DialogActivityType.Values.Information);
         activity.PerformedBy.ActorId = DialogGenerator.GenerateRandomParty(forcePerson: true);
         activity.PerformedBy.ActorName = null;
-        createDialogCommand.Activities.Add(activity);
+        createDialogCommand.Dto.Activities.Add(activity);
         var createCommandResponse = await Application.Send(createDialogCommand);
         return (createDialogCommand, createCommandResponse);
     }

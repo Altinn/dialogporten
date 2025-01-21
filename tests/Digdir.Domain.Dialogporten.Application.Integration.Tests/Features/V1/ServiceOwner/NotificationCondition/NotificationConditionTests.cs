@@ -28,7 +28,7 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         bool expectedSendNotificationValue)
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         switch (conditionType)
         {
             case NotificationConditionType.Exists when expectedSendNotificationValue:
@@ -44,7 +44,7 @@ public class NotificationConditionTests(DialogApplication application) : Applica
 
         if (activityType is DialogActivityType.Values.TransmissionOpened)
         {
-            var transmissionId = createDialogCommand.Transmissions.FirstOrDefault()?.Id ?? Guid.NewGuid();
+            var transmissionId = createDialogCommand.Dto.Transmissions.FirstOrDefault()?.Id ?? Guid.NewGuid();
             notificationConditionQuery.TransmissionId = transmissionId;
         }
 
@@ -62,13 +62,13 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         DialogActivityType.Values activityType)
     {
         var activity = DialogGenerator.GenerateFakeDialogActivity(type: activityType);
-        createDialogCommand.Activities.Add(activity);
+        createDialogCommand.Dto.Activities.Add(activity);
 
         if (activityType is not DialogActivityType.Values.TransmissionOpened) return;
 
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(type: DialogTransmissionType.Values.Information)[0];
-        createDialogCommand.Transmissions.Add(transmission);
-        createDialogCommand.Activities[0].TransmissionId = createDialogCommand.Transmissions[0].Id;
+        createDialogCommand.Dto.Transmissions.Add(transmission);
+        createDialogCommand.Dto.Activities[0].TransmissionId = createDialogCommand.Dto.Transmissions[0].Id;
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class NotificationConditionTests(DialogApplication application) : Applica
     public async Task Gone_Should_Be_Returned_When_Dialog_Is_Deleted()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         var response = await Application.Send(createDialogCommand);
         response.TryPickT0(out var success, out _);

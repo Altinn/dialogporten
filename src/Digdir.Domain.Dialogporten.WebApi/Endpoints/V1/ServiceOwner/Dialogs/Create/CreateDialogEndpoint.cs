@@ -10,7 +10,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Create;
 
-public sealed class CreateDialogEndpoint : Endpoint<CreateDialogCommand>
+public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
 {
     private readonly ISender _sender;
 
@@ -31,9 +31,10 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogCommand>
             StatusCodes.Status422UnprocessableEntity));
     }
 
-    public override async Task HandleAsync(CreateDialogCommand req, CancellationToken ct)
+    public override async Task HandleAsync(CreateDialogRequest req, CancellationToken ct)
     {
-        var result = await _sender.Send(req, ct);
+        var command = new CreateDialogCommand { Dto = req.Dto, DisableAltinnEvents = req.DisableAltinnEvents ?? false };
+        var result = await _sender.Send(command, ct);
         await result.Match(
             success =>
             {
@@ -45,4 +46,13 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogCommand>
             validationError => this.BadRequestAsync(validationError, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct));
     }
+}
+
+public sealed class CreateDialogRequest
+{
+    [HideFromDocs]
+    public bool? DisableAltinnEvents { get; init; }
+
+    [FromBody]
+    public CreateDialogDto Dto { get; set; } = null!;
 }

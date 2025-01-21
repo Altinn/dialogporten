@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.46.0](https://github.com/Altinn/dialogporten/compare/v1.45.1...v1.46.0) (2025-01-21)
+
+
+### Features
+
+* **webapi:** Add option to disable Altinn event generation ([#1633](https://github.com/Altinn/dialogporten/issues/1633)) ([dda7c1f](https://github.com/Altinn/dialogporten/commit/dda7c1f8ece73c092a62fbe1bae42bb553b1e1d5))
+
 ## [1.45.1](https://github.com/Altinn/dialogporten/compare/v1.45.0...v1.45.1) (2025-01-18)
 
 

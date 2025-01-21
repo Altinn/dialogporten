@@ -24,7 +24,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Arrange
         var invalidDialogId = Guid.NewGuid();
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog(id: invalidDialogId);
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: invalidDialogId);
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -41,7 +41,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Guid created with Medo, Uuid7.NewUuid7().ToGuid(bigEndian: true)
         var invalidDialogId = Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655");
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog(id: invalidDialogId);
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: invalidDialogId);
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -58,7 +58,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var timestamp = DateTimeOffset.UtcNow.AddSeconds(1);
         var invalidDialogId = IdentifiableExtensions.CreateVersion7(timestamp);
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog(id: invalidDialogId);
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: invalidDialogId);
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -75,7 +75,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var timestamp = DateTimeOffset.UtcNow.AddSeconds(-1);
         var validDialogId = IdentifiableExtensions.CreateVersion7(timestamp);
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog(id: validDialogId);
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: validDialogId);
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -91,7 +91,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var createCommand = DialogGenerator.GenerateSimpleFakeDialog(id: expectedDialogId);
+        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
 
         // Act
         var response = await Application.Send(createCommand);
@@ -106,7 +106,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(id: expectedDialogId);
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(id: expectedDialogId);
 
         // Act
         var result = await Application.Send(createDialogCommand);
@@ -123,7 +123,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var dialogId = IdentifiableExtensions.CreateVersion7();
         var createdAt = DateTimeOffset.UtcNow.AddYears(-20);
         var updatedAt = DateTimeOffset.UtcNow.AddYears(-15);
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(id: dialogId, updatedAt: updatedAt, createdAt: createdAt);
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(id: dialogId, updatedAt: updatedAt, createdAt: createdAt);
 
         // Act
         var createDialogResult = await Application.Send(createDialogCommand);
@@ -150,7 +150,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var updatedAt = DateTimeOffset.UtcNow.AddYears(-15);
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(updatedAt: updatedAt);
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(updatedAt: updatedAt);
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -158,7 +158,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Assert
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
-        validationError.Errors.Should().Contain(e => e.ErrorMessage.Contains(nameof(createDialogCommand.UpdatedAt)));
+        validationError.Errors.Should().Contain(e => e.ErrorMessage.Contains(nameof(createDialogCommand.Dto.UpdatedAt)));
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Arrange
         var createdAt = DateTimeOffset.UtcNow.AddYears(-10);
         var updatedAt = DateTimeOffset.UtcNow.AddYears(-15);
-        var createDialogCommand = DialogGenerator.GenerateFakeDialog(updatedAt: updatedAt, createdAt: createdAt);
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(updatedAt: updatedAt, createdAt: createdAt);
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -175,7 +175,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Assert
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
-        validationError.Errors.Should().Contain(e => e.ErrorMessage.Contains(nameof(createDialogCommand.CreatedAt)));
+        validationError.Errors.Should().Contain(e => e.ErrorMessage.Contains(nameof(createDialogCommand.Dto.CreatedAt)));
     }
 
     [Fact]
@@ -184,7 +184,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Arrange
         var aYearFromNow = DateTimeOffset.UtcNow.AddYears(1);
         var createDialogCommand = DialogGenerator
-            .GenerateFakeDialog(updatedAt: aYearFromNow, createdAt: aYearFromNow);
+            .GenerateFakeCreateDialogCommand(updatedAt: aYearFromNow, createdAt: aYearFromNow);
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -201,7 +201,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Arrange
         var aYearAgo = DateTimeOffset.UtcNow.AddYears(-1);
         var createDialogCommand = DialogGenerator
-            .GenerateFakeDialog(updatedAt: aYearAgo, createdAt: aYearAgo);
+            .GenerateFakeCreateDialogCommand(updatedAt: aYearAgo, createdAt: aYearAgo);
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -218,8 +218,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
         transmission.Content = null!;
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
-        createDialogCommand.Transmissions = [transmission];
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.Transmissions = [transmission];
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -240,8 +240,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
         transmission.Content.Summary.Value = [];
         transmission.Content.Title.Value = [];
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
-        createDialogCommand.Transmissions = [transmission];
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.Transmissions = [transmission];
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -250,7 +250,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
         validationError.Errors
-            .Count(e => e.PropertyName.Contains(nameof(createDialogCommand.Content)))
+            .Count(e => e.PropertyName.Contains(nameof(createDialogCommand.Dto.Content)))
             .Should()
             .Be(2);
     }
@@ -263,8 +263,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
         transmission.Content.Summary.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
         transmission.Content.Title.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
-        createDialogCommand.Transmissions = [transmission];
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.Transmissions = [transmission];
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -273,7 +273,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
         validationError.Errors
-            .Count(e => e.PropertyName.Contains(nameof(createDialogCommand.Content)))
+            .Count(e => e.PropertyName.Contains(nameof(createDialogCommand.Dto.Content)))
             .Should()
             .Be(2);
     }
@@ -290,8 +290,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public async Task Cannot_Create_AdditionalInfo_Content_With_Html_MediaType_Without_Correct_Scope()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
-        createDialogCommand.Content.AdditionalInfo = CreateHtmlContentValueDto();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.Content.AdditionalInfo = CreateHtmlContentValueDto();
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -309,8 +309,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public async Task Can_Create_AdditionalInfo_Content_With_Html_MediaType_With_Correct_Scope()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
-        createDialogCommand.Content.AdditionalInfo = CreateHtmlContentValueDto();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.Content.AdditionalInfo = CreateHtmlContentValueDto();
 
         var userWithLegacyScope = new IntegrationTestUser([new("scope", Constants.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
@@ -331,8 +331,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public async Task Cannot_Create_Title_Content_With_Html_MediaType_With_Correct_Scope()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
-        createDialogCommand.Content.Title = CreateHtmlContentValueDto();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.Content.Title = CreateHtmlContentValueDto();
 
         var userWithLegacyScope = new IntegrationTestUser([new("scope", Constants.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
@@ -357,8 +357,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public async Task Cannot_Create_Title_Content_With_Embeddable_Html_MediaType_With_Correct_Scope()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
-        createDialogCommand.Content.Title = new ContentValueDto
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.Content.Title = new ContentValueDto
         {
             MediaType = MediaTypes.LegacyEmbeddableHtml,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
@@ -388,8 +388,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog(id: expectedDialogId);
-        createDialogCommand.Content.MainContentReference = new ContentValueDto
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
+        createDialogCommand.Dto.Content.MainContentReference = new ContentValueDto
         {
             MediaType = MediaTypes.LegacyEmbeddableHtml,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
@@ -415,7 +415,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public async Task CreateDialogCommand_Should_Return_Revision()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         // Act
         var response = await Application.Send(createDialogCommand);

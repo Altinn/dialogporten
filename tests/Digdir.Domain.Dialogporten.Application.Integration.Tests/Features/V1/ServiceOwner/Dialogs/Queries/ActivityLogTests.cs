@@ -43,7 +43,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
         // Act
         var response = await Application.Send(new SearchDialogQuery
         {
-            ServiceResource = [createDialogCommand.ServiceResource]
+            ServiceResource = [createDialogCommand.Dto.ServiceResource]
         });
 
         // Assert
@@ -89,11 +89,11 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
 
     private async Task<(CreateDialogCommand, CreateDialogResult)> GenerateDialogWithActivity()
     {
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeDialog();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var activity = DialogGenerator.GenerateFakeDialogActivity(type: DialogActivityType.Values.Information);
         activity.PerformedBy.ActorId = DialogGenerator.GenerateRandomParty(forcePerson: true);
         activity.PerformedBy.ActorName = null;
-        createDialogCommand.Activities.Add(activity);
+        createDialogCommand.Dto.Activities.Add(activity);
         var createCommandResponse = await Application.Send(createDialogCommand);
         return (createDialogCommand, createCommandResponse);
     }

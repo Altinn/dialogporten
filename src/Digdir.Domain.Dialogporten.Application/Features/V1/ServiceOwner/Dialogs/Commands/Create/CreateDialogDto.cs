@@ -11,7 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.Http;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
-public class CreateDialogDto
+public sealed class CreateDialogDto
 {
     /// <summary>
     /// A self-defined UUIDv7 may be provided to support idempotent creation of dialogs. If not provided, a new UUIDv7 will be generated.

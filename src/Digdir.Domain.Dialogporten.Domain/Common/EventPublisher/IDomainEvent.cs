@@ -16,4 +16,9 @@ public interface IDomainEvent : INotification
     /// The time in which the event, as well as all the actual changes occured.
     /// </summary>
     DateTimeOffset OccuredAt { get; set; }
+
+    /// <summary>
+    /// Dictionary of metadata.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; set; }
 }

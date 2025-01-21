@@ -11,7 +11,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using Medo;
 
 namespace Digdir.Tool.Dialogporten.GenerateFakeData;
 
@@ -19,7 +18,63 @@ public static class DialogGenerator
 {
     private static readonly DateTime RefTime = new(2026, 1, 1);
 
-    public static CreateDialogCommand GenerateFakeDialog(
+    public static CreateDialogCommand GenerateSimpleFakeCreateDialogCommand(Guid? id = null) => new()
+    {
+        Dto = GenerateSimpleFakeDialog(id)
+    };
+
+    public static CreateDialogCommand GenerateFakeCreateDialogCommand(
+        int? seed = null,
+        Guid? id = null,
+        string? serviceResource = null,
+        string? party = null,
+        int? progress = null,
+        string? extendedStatus = null,
+        string? externalReference = null,
+        DateTimeOffset? createdAt = null,
+        DateTimeOffset? updatedAt = null,
+        DateTimeOffset? dueAt = null,
+        DateTimeOffset? expiresAt = null,
+        string? process = null,
+        DialogStatus.Values? status = null,
+        ContentDto? content = null,
+        List<SearchTagDto>? searchTags = null,
+        List<AttachmentDto>? attachments = null,
+        List<GuiActionDto>? guiActions = null,
+        List<ApiActionDto>? apiActions = null,
+        List<ActivityDto>? activities = null,
+        List<TransmissionDto>? transmissions = null,
+        bool disableAltinnEvents = false) => new()
+        {
+            DisableAltinnEvents = disableAltinnEvents,
+            Dto = GenerateFakeDialogs(
+                seed,
+                1,
+                id,
+                serviceResource,
+                party,
+                null,
+                null,
+                progress,
+                extendedStatus,
+                externalReference,
+                createdAt,
+                updatedAt,
+                dueAt,
+                expiresAt,
+                process,
+                status,
+                content,
+                searchTags,
+                attachments,
+                guiActions,
+                apiActions,
+                activities,
+                transmissions
+            )[0]
+        };
+
+    public static CreateDialogDto GenerateFakeDialog(
         int? seed = null,
         Guid? id = null,
         string? serviceResource = null,
@@ -68,7 +123,7 @@ public static class DialogGenerator
         )[0];
     }
 
-    public static List<CreateDialogCommand> GenerateFakeDialogs(int? seed = null,
+    public static List<CreateDialogDto> GenerateFakeDialogs(int? seed = null,
         int count = 1,
         Guid? id = null,
         string? serviceResource = null,
@@ -93,7 +148,7 @@ public static class DialogGenerator
         List<TransmissionDto>? transmissions = null)
     {
         Randomizer.Seed = seed.HasValue ? new Random(seed.Value) : new Random();
-        return new Faker<CreateDialogCommand>()
+        return new Faker<CreateDialogDto>()
             .RuleFor(o => o.Id, _ => id ?? IdentifiableExtensions.CreateVersion7())
             .RuleFor(o => o.ServiceResource, _ => serviceResource ?? GenerateFakeResource(serviceResourceGenerator))
             .RuleFor(o => o.Party, _ => party ?? GenerateRandomParty(partyGenerator))
@@ -118,7 +173,7 @@ public static class DialogGenerator
 
     private const string ResourcePrefix = "urn:altinn:resource:";
 
-    public static CreateDialogCommand GenerateSimpleFakeDialog(Guid? id = null)
+    public static CreateDialogDto GenerateSimpleFakeDialog(Guid? id = null)
     {
         return GenerateFakeDialog(
             id: id,
@@ -153,7 +208,9 @@ public static class DialogGenerator
         if (generatedValue != null) return generatedValue;
 
         var r = new Randomizer();
-        return r.Bool() && !forcePerson ? $"urn:altinn:organization:identifier-no:{GenerateFakeOrgNo()}" : $"urn:altinn:person:identifier-no:{GenerateFakePid()}";
+        return r.Bool() && !forcePerson
+            ? $"urn:altinn:organization:identifier-no:{GenerateFakeOrgNo()}"
+            : $"urn:altinn:person:identifier-no:{GenerateFakePid()}";
     }
 
     private static readonly int[] SocialSecurityNumberWeights1 = [3, 7, 6, 1, 8, 9, 4, 5, 2];
@@ -162,7 +219,6 @@ public static class DialogGenerator
 
     public static string GenerateFakePid()
     {
-
         int c1, c2;
         string pidWithoutControlDigits;
         do
@@ -174,7 +230,6 @@ public static class DialogGenerator
 
             c1 = CalculateControlDigit(pidWithoutControlDigits, SocialSecurityNumberWeights1);
             c2 = CalculateControlDigit(pidWithoutControlDigits + c1, SocialSecurityNumberWeights2);
-
         } while (c1 == -1 || c2 == -1);
 
         return pidWithoutControlDigits + c1 + c2;
@@ -215,6 +270,7 @@ public static class DialogGenerator
     private static readonly DateTime BirthDateRangeBegin = new(1965, 1, 1);
     private static readonly DateTime BirthDateRangeEnd = new(1970, 1, 1);
     private static readonly TimeSpan Range = BirthDateRangeEnd - BirthDateRangeBegin;
+
     private static DateTime GenerateRandomDateOfBirth()
     {
         var r = new Randomizer();
@@ -254,7 +310,8 @@ public static class DialogGenerator
             .Generate(count ?? new Randomizer().Number(1, 4));
     }
 
-    public static List<ActivityDto> GenerateFakeDialogActivities(int? count = null, DialogActivityType.Values? type = null)
+    public static List<ActivityDto> GenerateFakeDialogActivities(int? count = null,
+        DialogActivityType.Values? type = null)
     {
         // Temporarily removing the ActivityType TransmissionOpened from the list of possible types for random picking.
         // Going to have a look at re-writing the generator https://github.com/altinn/dialogporten/issues/1123
@@ -266,8 +323,12 @@ public static class DialogGenerator
             .RuleFor(o => o.CreatedAt, f => f.Date.Past())
             .RuleFor(o => o.ExtendedType, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
             .RuleFor(o => o.Type, f => type ?? f.PickRandom(activityTypes))
-            .RuleFor(o => o.PerformedBy, f => new ActorDto { ActorType = ActorType.Values.PartyRepresentative, ActorName = f.Name.FullName() })
-            .RuleFor(o => o.Description, (f, o) => o.Type == DialogActivityType.Values.Information ? GenerateFakeLocalizations(f.Random.Number(4, 8)) : null)
+            .RuleFor(o => o.PerformedBy,
+                f => new ActorDto { ActorType = ActorType.Values.PartyRepresentative, ActorName = f.Name.FullName() })
+            .RuleFor(o => o.Description,
+                (f, o) => o.Type == DialogActivityType.Values.Information
+                    ? GenerateFakeLocalizations(f.Random.Number(4, 8))
+                    : null)
             .Generate(count ?? new Randomizer().Number(1, 4));
     }
 

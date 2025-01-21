@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Domain;
 using MediatR.NotificationPublishers;
 
 namespace Digdir.Domain.Dialogporten.Application;
@@ -32,6 +33,9 @@ public static class ApplicationExtensions
         ValidatorOptions.Global.DisplayNameResolver = (_, member, _) => member?.Name;
 
         services
+            // Domain
+            .AddDomain()
+
             // Framework
             .AddAutoMapper(thisAssembly)
             .AddMediatR(x =>
@@ -59,7 +63,8 @@ public static class ApplicationExtensions
             .AddTransient<IUserParties, UserParties>()
             .AddTransient<IClock, Clock>()
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>));
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainAltinnEventOptOutBehaviour<,>));
 
         if (!environment.IsDevelopment())
         {

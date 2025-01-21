@@ -8,7 +8,7 @@ export default function () {
         expectStatusFor(r).to.equal(400);
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'reponse').to.have.property('errors');
-        expect(r.json().errors, 'error').to.have.property('guiActions');
+        expect(r.json().errors, 'error').to.have.property('dto.guiActions');
     };
 
     let createDialogWithGuiActions = function(numActions, actionType) {

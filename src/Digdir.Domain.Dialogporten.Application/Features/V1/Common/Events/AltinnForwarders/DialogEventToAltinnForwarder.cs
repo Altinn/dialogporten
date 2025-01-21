@@ -1,10 +1,11 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
 using Microsoft.Extensions.Options;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.AltinnForwarders;
 
 internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarderBase,
     INotificationHandler<DialogCreatedDomainEvent>,
@@ -18,6 +19,11 @@ internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarde
     [EndpointName("DialogEventToAltinnForwarder_DialogCreatedDomainEvent")]
     public async Task Handle(DialogCreatedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
+        if (domainEvent.ShouldNotBeSentToAltinnEvents())
+        {
+            return;
+        }
+
         var cloudEvent = new CloudEvent
         {
             Id = domainEvent.EventId,
@@ -29,12 +35,18 @@ internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarde
             Source = $"{SourceBaseUrl()}{domainEvent.DialogId}",
             Data = GetCloudEventData(domainEvent)
         };
+
         await CloudEventBus.Publish(cloudEvent, cancellationToken);
     }
 
     [EndpointName("DialogEventToAltinnForwarder_DialogUpdatedDomainEvent")]
     public async Task Handle(DialogUpdatedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
+        if (domainEvent.ShouldNotBeSentToAltinnEvents())
+        {
+            return;
+        }
+
         var cloudEvent = new CloudEvent
         {
             Id = domainEvent.EventId,
@@ -53,6 +65,11 @@ internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarde
     [EndpointName("DialogEventToAltinnForwarder_DialogSeenDomainEvent")]
     public async Task Handle(DialogSeenDomainEvent domainEvent, CancellationToken cancellationToken)
     {
+        if (domainEvent.ShouldNotBeSentToAltinnEvents())
+        {
+            return;
+        }
+
         var cloudEvent = new CloudEvent
         {
             Id = domainEvent.EventId,
@@ -71,6 +88,11 @@ internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarde
     [EndpointName("DialogEventToAltinnForwarder_DialogDeletedDomainEvent")]
     public async Task Handle(DialogDeletedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
+        if (domainEvent.ShouldNotBeSentToAltinnEvents())
+        {
+            return;
+        }
+
         var cloudEvent = new CloudEvent
         {
             Id = domainEvent.EventId,
@@ -89,6 +111,7 @@ internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarde
     private static Dictionary<string, object>? GetCloudEventData(IProcessEvent domainEvent)
     {
         var data = new Dictionary<string, object>();
+
         if (domainEvent.Process is not null)
         {
             data["process"] = domainEvent.Process;
@@ -97,6 +120,7 @@ internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarde
         {
             data["precedingProcess"] = domainEvent.PrecedingProcess;
         }
+
         return data.Count == 0 ? null : data;
     }
 }

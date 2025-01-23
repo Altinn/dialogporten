@@ -360,7 +360,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         createDialogCommand.Dto.Content.Title = new ContentValueDto
         {
-            MediaType = MediaTypes.LegacyEmbeddableHtml,
+            MediaType = MediaTypes.LegacyEmbeddableHtmlDeprecated,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
         };
 
@@ -378,7 +378,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
         validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(MediaTypes.LegacyEmbeddableHtml))
+            .Count(e => e.AttemptedValue.Equals(MediaTypes.LegacyEmbeddableHtmlDeprecated))
             .Should()
             .Be(1);
     }
@@ -391,7 +391,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
         createDialogCommand.Dto.Content.MainContentReference = new ContentValueDto
         {
-            MediaType = MediaTypes.LegacyEmbeddableHtml,
+            MediaType = MediaTypes.LegacyEmbeddableHtmlDeprecated,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
         };
 

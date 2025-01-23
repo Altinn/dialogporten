@@ -38,7 +38,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     }
 
     [Fact]
-    public async Task Can_Create_Transmission_With_Embeddable_Content()
+    public async Task Can_Create_Transmission_With_Deprecated_Embeddable_Content()
     {
         // Arrange
         var dialogId = IdentifiableExtensions.CreateVersion7();
@@ -51,7 +51,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         transmission.Id = transmissionId;
         transmission.Content.ContentReference = new ContentValueDto
         {
-            MediaType = MediaTypes.EmbeddableMarkdown,
+            MediaType = MediaTypes.EmbeddableMarkdownDeprecated,
             Value = [new LocalizationDto { LanguageCode = "nb", Value = contentUrl }]
         };
 
@@ -72,7 +72,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         transmissionEntity.Id.Should().Be(transmissionId);
 
         var contentEntities = await Application.GetDbEntities<DialogTransmissionContent>();
-        contentEntities.First(x => x.MediaType == MediaTypes.EmbeddableMarkdown).TransmissionId.Should().Be(transmissionId);
+        contentEntities.First(x => x.MediaType == MediaTypes.EmbeddableMarkdownDeprecated).TransmissionId.Should().Be(transmissionId);
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
         transmission.Content.ContentReference = new ContentValueDto
         {
-            MediaType = MediaTypes.EmbeddableMarkdown,
+            MediaType = MediaTypes.EmbeddableMarkdownDeprecated,
             Value = [new LocalizationDto { LanguageCode = "nb", Value = "http://example.com/transmission" }]
         };
 

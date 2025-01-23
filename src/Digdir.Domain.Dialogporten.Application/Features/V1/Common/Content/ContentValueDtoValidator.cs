@@ -73,7 +73,7 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
             DialogContentType.Values.AdditionalInfo when UserHasLegacyHtmlScope(user)
                 => contentType.AllowedMediaTypes.Append(MediaTypes.LegacyHtml).ToArray(),
             DialogContentType.Values.MainContentReference when UserHasLegacyHtmlScope(user)
-                => contentType.AllowedMediaTypes.Append(MediaTypes.LegacyEmbeddableHtml).ToArray(),
+                => contentType.AllowedMediaTypes.Append(MediaTypes.LegacyEmbeddableHtmlDeprecated).ToArray(),
             _ => contentType.AllowedMediaTypes
         };
     private static bool UserHasLegacyHtmlScope(IUser? user)

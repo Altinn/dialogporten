@@ -36,7 +36,7 @@ public sealed class DialogTransmissionContentType : AbstractLookupEntity<DialogT
         {
             Required = false,
             MaxLength = 1023,
-            AllowedMediaTypes = [MediaTypes.EmbeddableMarkdown]
+            AllowedMediaTypes = [MediaTypes.EmbeddableMarkdownDeprecated]
         },
         _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
     };

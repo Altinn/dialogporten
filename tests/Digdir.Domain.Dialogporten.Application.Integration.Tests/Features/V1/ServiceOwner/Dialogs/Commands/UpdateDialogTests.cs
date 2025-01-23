@@ -29,8 +29,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var mapper = Application.GetMapper();
         var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
 
-        // Update something
-        updateDialogDto.Progress++;
+        // Update progress
+        updateDialogDto.Progress = (updateDialogDto.Progress % 100) + 1;
 
         // Act
         var updateResponse = await Application.Send(new UpdateDialogCommand

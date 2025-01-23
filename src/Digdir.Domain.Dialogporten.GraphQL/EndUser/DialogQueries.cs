@@ -1,7 +1,6 @@
 using AppAny.HotChocolate.FluentValidation;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;

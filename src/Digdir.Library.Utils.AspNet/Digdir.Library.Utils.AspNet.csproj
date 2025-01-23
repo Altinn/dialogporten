@@ -6,12 +6,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Azure.Identity" Version="1.13.1" />
+        <PackageReference Include="Azure.Identity" Version="1.13.2" />
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
         <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
-        <PackageReference Include="System.Text.Json" Version="9.0.0" />
-        <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
         <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.0.0" />
     </ItemGroup>
 

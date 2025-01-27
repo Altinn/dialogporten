@@ -23,7 +23,6 @@ jobs:
         id: release
         with:
           token: ${{ secrets.RELEASE_PLEASE_PAT }}
-          release-type: simple
 
   generate-git-short-sha:
     name: Generate git short sha

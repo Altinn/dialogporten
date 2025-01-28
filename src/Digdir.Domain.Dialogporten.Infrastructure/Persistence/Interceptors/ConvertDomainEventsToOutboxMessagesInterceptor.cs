@@ -65,7 +65,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         foreach (var domainEvent in _domainEvents)
         {
             domainEvent.Metadata = _domainEventContext.Metadata;
-            domainEvent.OccuredAt = _transactionTime.Value;
+            domainEvent.OccurredAt = _transactionTime.Value;
         }
 
         await Task.WhenAll(_domainEvents
@@ -126,7 +126,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         }
         catch (Exception e)
         {
-            throw new InvalidOperationException("Failed to ensure lazy loaded services. Is the presentation layer registered with publish capabilities?", e);
+            throw new InvalidOperationException("Failed to ensure lazy-loaded services. Is the presentation layer registered with publish capabilities?", e);
         }
     }
 }

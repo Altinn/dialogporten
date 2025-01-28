@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.47.3](https://github.com/Altinn/dialogporten/compare/v1.47.2...v1.47.3) (2025-01-28)
+
+
+### Bug Fixes
+
+* **graphql:** Use correct type filter for LocalDevelopmentUser  ([#1745](https://github.com/Altinn/dialogporten/issues/1745)) ([14ff138](https://github.com/Altinn/dialogporten/commit/14ff1380bf3d49ddb275805f946de6f3e5da2eb9))
+* Use correct type filter for LocalDevelopmentUser ([#1744](https://github.com/Altinn/dialogporten/issues/1744)) ([fa30ebe](https://github.com/Altinn/dialogporten/commit/fa30ebecfa11551f19615251ffc4ddff5817e722))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency npgsql.entityframeworkcore.postgresql to 9.0.3 ([#1734](https://github.com/Altinn/dialogporten/issues/1734)) ([195443f](https://github.com/Altinn/dialogporten/commit/195443f5a2f2149c6ac9ed4c7abfb840e11ba173))
+* **deps:** update dependency verify.xunit to 28.9.0 ([#1735](https://github.com/Altinn/dialogporten/issues/1735)) ([73d1ddb](https://github.com/Altinn/dialogporten/commit/73d1ddb13bc2454243b719084b5cd7cfd57ee5cc))
+* **deps:** update dependency vitest to v3 ([#1732](https://github.com/Altinn/dialogporten/issues/1732)) ([9e67931](https://github.com/Altinn/dialogporten/commit/9e679314acedd611c83decc1c16e6db6dbb366c5))
+* **deps:** update dependency vitest to v3.0.2 ([#1733](https://github.com/Altinn/dialogporten/issues/1733)) ([f32a0e2](https://github.com/Altinn/dialogporten/commit/f32a0e20e6333d8cf424997686fc9365e13a0a0c))
+* **deps:** update opentelemetry-dotnet monorepo to 1.11.0 ([#1736](https://github.com/Altinn/dialogporten/issues/1736)) ([75c7a24](https://github.com/Altinn/dialogporten/commit/75c7a24f3897eb6a64dc63463d3db492f44ebd79))
+* Include chores in the changelog ([#1525](https://github.com/Altinn/dialogporten/issues/1525)) ([d9281fc](https://github.com/Altinn/dialogporten/commit/d9281fc697b6ad613c5546b1cd81a115e349bde4))
+* Set 20% otel sample rate for all apps in yt01 ([#1737](https://github.com/Altinn/dialogporten/issues/1737)) ([09c9ce9](https://github.com/Altinn/dialogporten/commit/09c9ce9fbbd850aaeeaad6c7da2292ada3a4b917))
+
 ## [1.47.2](https://github.com/Altinn/dialogporten/compare/v1.47.1...v1.47.2) (2025-01-23)
 
 

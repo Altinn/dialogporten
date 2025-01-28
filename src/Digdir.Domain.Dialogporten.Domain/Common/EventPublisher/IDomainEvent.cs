@@ -13,9 +13,22 @@ public interface IDomainEvent : INotification
     Guid EventId { get; }
 
     /// <summary>
-    /// The time in which the event, as well as all the actual changes occured.
+    /// The time at which the event, as well as all the actual changes, occurred.
     /// </summary>
+    [Obsolete($"Use {nameof(OccurredAt)} instead")]
     DateTimeOffset OccuredAt { get; set; }
+
+    /// <summary>
+    /// The time at which the event, as well as all the actual changes, occurred.
+    /// </summary>
+    DateTimeOffset OccurredAt
+    {
+        // Will be removed once all events in the database/on the bus have been consumed
+#pragma warning disable CS0618 // Type or member is obsolete
+        get => OccuredAt;
+        set => OccuredAt = value;
+#pragma warning restore CS0618 // Type or member is obsolete
+    }
 
     /// <summary>
     /// Dictionary of metadata.

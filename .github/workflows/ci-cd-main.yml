@@ -15,15 +15,6 @@ permissions:
   id-token: write
 
 jobs:
-  release-please:
-    name: Release please
-    runs-on: ubuntu-latest
-    steps:
-      - uses: googleapis/release-please-action@v4
-        id: release
-        with:
-          token: ${{ secrets.RELEASE_PLEASE_PAT }}
-
   generate-git-short-sha:
     name: Generate git short sha
     uses: ./.github/workflows/workflow-generate-git-short-sha.yml

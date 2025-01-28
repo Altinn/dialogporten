@@ -12,5 +12,12 @@ public abstract record DomainEvent : IDomainEvent
     public DateTimeOffset OccuredAt { get; set; }
 
     [JsonInclude]
+    public DateTimeOffset OccurredAt
+    {
+        get => OccuredAt;
+        set => OccuredAt = value;
+    }
+
+    [JsonInclude]
     public Dictionary<string, string> Metadata { get; set; } = [];
 }

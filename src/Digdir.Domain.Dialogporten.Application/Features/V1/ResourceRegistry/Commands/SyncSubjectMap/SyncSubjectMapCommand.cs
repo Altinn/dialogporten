@@ -69,7 +69,7 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
             }
             else
             {
-                _logger.LogInformation("Subject-resources are already up-to-date.");
+                _logger.LogInformation("Subject-resources are already up to date.");
             }
 
             return new Success();

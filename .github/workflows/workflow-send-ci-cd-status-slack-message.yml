@@ -34,6 +34,14 @@ on:
         type: string
         description: "Status of the build and test job"
         default: "skipped"
+      release_please_status:
+        type: string
+        description: "Status of the release-please job"
+        default: "skipped"
+      notify_release_created_status:
+        type: string
+        description: "Status of the notify-release-created job"
+        default: "skipped"
     secrets:
       SLACK_BOT_TOKEN:
         required: true
@@ -69,6 +77,8 @@ jobs:
             echo "PUBLISH_EMOJI=$(determine_emoji "${{ inputs.publish_status }}")"
             echo "BUILD_AND_TEST_EMOJI=$(determine_emoji "${{ inputs.build_and_test_status }}")"
             echo "PERFORMANCE_TESTS_EMOJI=$(determine_emoji "${{ inputs.performance_tests_status }}")"
+            echo "RELEASE_PLEASE_EMOJI=$(determine_emoji "${{ inputs.release_please_status }}")"
+            echo "NOTIFY_RELEASE_CREATED_EMOJI=$(determine_emoji "${{ inputs.notify_release_created_status }}")"
           } >> "$GITHUB_OUTPUT"
 
       - name: Send GitHub slack message
@@ -85,6 +95,8 @@ jobs:
           PUBLISH_STATUS: "${{ steps.status-emojis.outputs.PUBLISH_EMOJI }}"
           BUILD_AND_TEST_STATUS: "${{ steps.status-emojis.outputs.BUILD_AND_TEST_EMOJI }}"
           PERFORMANCE_TESTS_STATUS: "${{ steps.status-emojis.outputs.PERFORMANCE_TESTS_EMOJI }}"
+          RELEASE_PLEASE_STATUS: "${{ steps.status-emojis.outputs.RELEASE_PLEASE_EMOJI }}"
+          NOTIFY_RELEASE_CREATED_STATUS: "${{ steps.status-emojis.outputs.NOTIFY_RELEASE_CREATED_EMOJI }}"
         uses: slackapi/slack-github-action@v2.0.0
         with:
           errors: true

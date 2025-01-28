@@ -38,7 +38,7 @@ internal static class AuthorizationScope
     private static ReadOnlyCollection<string> GetAll() =>
         typeof(AuthorizationScope)
             .GetFields()
-            .Where(x => x.IsLiteral && !x.IsInitOnly && x.DeclaringType == typeof(string))
+            .Where(x => x.IsLiteral && !x.IsInitOnly && x.FieldType == typeof(string))
             .Select(x => (string)x.GetRawConstantValue()!)
             .ToList()
             .AsReadOnly();

@@ -50,7 +50,7 @@ internal sealed class DialogContentInputConverter<TDialogContent> :
             {
                 TypeId = dialogContentType.Id,
                 Value = sourceValue.Value,
-                MediaType = sourceValue.MediaType
+                MediaType = sourceValue.MediaType.ConvertIfDeprecatedMediaType()
             });
         }
 

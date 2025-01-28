@@ -65,7 +65,11 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
             Required = false,
             MaxLength = 1023,
             OutputInList = false,
+            // TODO: Create migration to change this after deploying new app version to all environments
+            // https://github.com/Altinn/dialogporten/issues/1749
+#pragma warning disable CS0618 // Type or member is obsolete
             AllowedMediaTypes = [MediaTypes.EmbeddableMarkdownDeprecated]
+#pragma warning restore CS0618 // Type or member is obsolete
         },
         _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
     };

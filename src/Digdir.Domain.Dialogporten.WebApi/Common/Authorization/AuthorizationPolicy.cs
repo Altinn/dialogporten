@@ -18,6 +18,7 @@ internal static class AuthorizationScope
     public const string ServiceProviderSearch = "digdir:dialogporten.serviceprovider.search";
     public const string Testing = "digdir:dialogporten.developer.test";
     public const string NotificationConditionCheck = "altinn:system/notifications.condition.check";
+    public const string LegacyHtmlScope = "digdir:dialogporten.serviceprovider.legacyhtml";
 
     internal static readonly Lazy<IReadOnlyCollection<string>> AllScopes = new(GetAll);
 

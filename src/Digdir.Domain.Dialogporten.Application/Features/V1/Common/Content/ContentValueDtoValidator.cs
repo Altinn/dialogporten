@@ -19,9 +19,10 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
 {
     public ContentValueDtoValidator(DialogTransmissionContentType contentType)
     {
+        var allowedMediaTypes = GetAllowedTransmissionContentMediaTypes(contentType);
         RuleFor(x => x.MediaType)
             .NotEmpty()
-            .Must(value => value is not null && contentType.AllowedMediaTypes.Contains(value))
+            .Must(value => value is not null && allowedMediaTypes.Contains(value))
             .WithMessage($"{{PropertyName}} '{{PropertyValue}}' is not allowed for content type {contentType.Name}. " +
                          $"Allowed media types are {string.Join(", ", contentType.AllowedMediaTypes.Select(x => $"'{x}'"))}");
 
@@ -43,7 +44,7 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
 
     public ContentValueDtoValidator(DialogContentType contentType, IUser? user = null)
     {
-        var allowedMediaTypes = GetAllowedMediaTypes(contentType, user);
+        var allowedMediaTypes = GetAllowedDialogContentMediaTypes(contentType, user);
         RuleFor(x => x.MediaType)
             .NotEmpty()
             .Must(value => value is not null && allowedMediaTypes.Contains(value))
@@ -67,15 +68,48 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
     }
 
     [SuppressMessage("Style", "IDE0072:Add missing cases")]
-    private static string[] GetAllowedMediaTypes(DialogContentType contentType, IUser? user)
+#pragma warning disable CS0618 // Type or member is obsolete
+    private static string[] GetAllowedDialogContentMediaTypes(DialogContentType contentType, IUser? user)
         => contentType.Id switch
         {
             DialogContentType.Values.AdditionalInfo when UserHasLegacyHtmlScope(user)
                 => contentType.AllowedMediaTypes.Append(MediaTypes.LegacyHtml).ToArray(),
             DialogContentType.Values.MainContentReference when UserHasLegacyHtmlScope(user)
-                => contentType.AllowedMediaTypes.Append(MediaTypes.LegacyEmbeddableHtmlDeprecated).ToArray(),
+                => contentType.AllowedMediaTypes // DB lookup type
+                    .Append(MediaTypes.LegacyEmbeddableHtmlDeprecated)
+                    .Append(MediaTypes.LegacyEmbeddableHtml)
+                    // Need to add this manually until migration is done,
+                    // see https://github.com/Altinn/dialogporten/issues/1749
+                    .Append(MediaTypes.EmbeddableMarkdown)
+                    .Append(MediaTypes.EmbeddableMarkdownDeprecated)
+                    .ToArray(),
+            DialogContentType.Values.MainContentReference
+                => contentType.AllowedMediaTypes
+                    // Need to add this manually until migration is done,
+                    // see https://github.com/Altinn/dialogporten/issues/1749
+                    .Append(MediaTypes.EmbeddableMarkdown)
+                    .Append(MediaTypes.EmbeddableMarkdownDeprecated)
+                    .ToArray(),
             _ => contentType.AllowedMediaTypes
         };
+#pragma warning restore CS0618 // Type or member is obsolete
+
+    [SuppressMessage("Style", "IDE0072:Add missing cases")]
+#pragma warning disable CS0618 // Type or member is obsolete
+    private static string[] GetAllowedTransmissionContentMediaTypes(DialogTransmissionContentType contentType)
+        => contentType.Id switch
+        {
+            DialogTransmissionContentType.Values.ContentReference
+                => contentType.AllowedMediaTypes
+                    // Need to add this manually until migration is done,
+                    // see https://github.com/Altinn/dialogporten/issues/1749
+                    .Append(MediaTypes.EmbeddableMarkdown)
+                    .Append(MediaTypes.EmbeddableMarkdownDeprecated)
+                    .ToArray(),
+            _ => contentType.AllowedMediaTypes
+        };
+#pragma warning restore CS0618 // Type or member is obsolete
+
     private static bool UserHasLegacyHtmlScope(IUser? user)
         => user is not null && user.GetPrincipal().HasScope(Constants.LegacyHtmlScope);
 }

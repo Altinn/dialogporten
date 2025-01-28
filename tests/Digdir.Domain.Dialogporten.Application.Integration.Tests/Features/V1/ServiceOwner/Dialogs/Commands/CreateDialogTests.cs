@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -278,11 +279,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .Be(2);
     }
 
-    private const string LegacyHtmlMediaType = MediaTypes.LegacyHtml;
 
     private static ContentValueDto CreateHtmlContentValueDto() => new()
     {
-        MediaType = LegacyHtmlMediaType,
+        MediaType = MediaTypes.LegacyHtml,
         Value = [new() { LanguageCode = "nb", Value = "<p>Some HTML content</p>" }]
     };
 
@@ -300,7 +300,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
         validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(LegacyHtmlMediaType))
+            .Count(e => e.AttemptedValue.Equals(MediaTypes.LegacyHtml))
             .Should()
             .Be(1);
     }
@@ -348,19 +348,23 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
         validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(LegacyHtmlMediaType))
+            .Count(e => e.AttemptedValue.Equals(MediaTypes.LegacyHtml))
             .Should()
             .Be(1);
     }
 
-    [Fact]
-    public async Task Cannot_Create_Title_Content_With_Embeddable_Html_MediaType_With_Correct_Scope()
+    [Theory]
+    [InlineData(MediaTypes.LegacyEmbeddableHtml)]
+#pragma warning disable CS0618 // Type or member is obsolete
+    [InlineData(MediaTypes.LegacyEmbeddableHtmlDeprecated)]
+#pragma warning restore CS0618 // Type or member is obsolete
+    public async Task Cannot_Create_Title_Content_With_Embeddable_Html_MediaType_With_Correct_Scope(string mediaType)
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         createDialogCommand.Dto.Content.Title = new ContentValueDto
         {
-            MediaType = MediaTypes.LegacyEmbeddableHtmlDeprecated,
+            MediaType = mediaType,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
         };
 
@@ -378,20 +382,24 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
         validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(MediaTypes.LegacyEmbeddableHtmlDeprecated))
+            .Count(e => e.AttemptedValue.Equals(mediaType))
             .Should()
             .Be(1);
     }
 
-    [Fact]
-    public async Task Can_Create_MainContentRef_Content_With_Embeddable_Html_MediaType_With_Correct_Scope()
+    [Theory]
+    [InlineData(MediaTypes.LegacyEmbeddableHtml)]
+#pragma warning disable CS0618 // Type or member is obsolete
+    [InlineData(MediaTypes.LegacyEmbeddableHtmlDeprecated)]
+#pragma warning restore CS0618 // Type or member is obsolete
+    public async Task Can_Create_MainContentRef_Content_With_Embeddable_Html_MediaType_With_Correct_Scope(string mediaType)
     {
         // Arrange
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
         createDialogCommand.Dto.Content.MainContentReference = new ContentValueDto
         {
-            MediaType = MediaTypes.LegacyEmbeddableHtmlDeprecated,
+            MediaType = mediaType,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
         };
 
@@ -409,6 +417,12 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT0(out var success, out _).Should().BeTrue();
         success.Should().NotBeNull();
         success.DialogId.Should().Be(expectedDialogId);
+
+        var dialogContentEntities = await Application.GetDbEntities<DialogContent>();
+
+        // Checking against LegacyEmbeddableHtml since the deprecated version should be converted
+        dialogContentEntities.Single(x => x.MediaType == MediaTypes.LegacyEmbeddableHtml)
+            .DialogId.Should().Be(expectedDialogId);
     }
 
     [Fact]

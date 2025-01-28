@@ -79,14 +79,14 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
                     .Append(MediaTypes.LegacyEmbeddableHtmlDeprecated)
                     .Append(MediaTypes.LegacyEmbeddableHtml)
                     // Need to add this manually until migration is done,
-                    // see https://github.com/Altinn/dialogporten/issues/1749
+                    // https://github.com/Altinn/dialogporten/issues/1749
                     .Append(MediaTypes.EmbeddableMarkdown)
                     .Append(MediaTypes.EmbeddableMarkdownDeprecated)
                     .ToArray(),
             DialogContentType.Values.MainContentReference
                 => contentType.AllowedMediaTypes
                     // Need to add this manually until migration is done,
-                    // see https://github.com/Altinn/dialogporten/issues/1749
+                    // https://github.com/Altinn/dialogporten/issues/1749
                     .Append(MediaTypes.EmbeddableMarkdown)
                     .Append(MediaTypes.EmbeddableMarkdownDeprecated)
                     .ToArray(),
@@ -102,7 +102,7 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
             DialogTransmissionContentType.Values.ContentReference
                 => contentType.AllowedMediaTypes
                     // Need to add this manually until migration is done,
-                    // see https://github.com/Altinn/dialogporten/issues/1749
+                    // https://github.com/Altinn/dialogporten/issues/1749
                     .Append(MediaTypes.EmbeddableMarkdown)
                     .Append(MediaTypes.EmbeddableMarkdownDeprecated)
                     .ToArray(),

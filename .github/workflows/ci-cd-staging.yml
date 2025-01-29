@@ -81,6 +81,16 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}
       runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
 
+  publish-sdk-to-nuget:
+    uses: ./.github/workflows/workflow-publish-nuget.yml
+    needs: [ get-current-version, check-for-changes ]
+    if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
+    with:
+      version: ${{ needs.get-current-version.outputs.version }}
+      path: $(find . -name '*Digdir.Library.Dialogporten.WebApiClient.csproj' -printf "%p"  -quit)
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_TEST_KEY }}
+  
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
     needs: [deploy-apps, get-current-version]

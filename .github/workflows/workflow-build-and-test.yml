@@ -3,10 +3,22 @@ name: Build and test .NET
 on:
   workflow_dispatch:
   workflow_call:
+    secrets:
+      DIALOGPORTEN_MASKINPORTEN_ENCODEDJWK:
+        required: true
+      DIALOGPORTEN_MASKINPORTEN_CLIENTID:
+        required: true
+      DIALOGPORTEN_MASKINPORTEN_SCOPE:
+        required: true
+      ED25519KEYS_PRIMARY_KID:
+        required: true
+      ED25519KEYS_PRIMARY_PUBLICCOMPONENT:
+        required: true
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    environment: test
     steps:
       - uses: actions/checkout@v4
 
@@ -22,4 +34,11 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Test
+        env:
+          DialogportenSettings:Environment: "test"
+          DialogportenSettings:Maskinporten:ClientId: ${{secrets.DIALOGPORTEN_MASKINPORTEN_CLIENTID}}
+          DialogportenSettings:Maskinporten:Scope: ${{secrets.DIALOGPORTEN_MASKINPORTEN_SCOPE}}
+          DialogportenSettings:Maskinporten:EncodedJwk: ${{secrets.DIALOGPORTEN_MASKINPORTEN_ENCODEDJWK}}
+          Ed25519Keys:Primary:Kid: "${{secrets.ED25519KEYS_PRIMARY_KID}}"
+          Ed25519Keys:Primary:PublicComponent: "${{secrets.ED25519KEYS_PRIMARY_PUBLICCOMPONENT}}"
         run: dotnet test --no-build --configuration Release

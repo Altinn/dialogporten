@@ -7060,7 +7060,7 @@
   },
   "servers": [
     {
-      "url": "https://altinn-dev-api.azure-api.net/dialogporten"
+      "url": "https://localhost:7214/"
     }
   ]
 }

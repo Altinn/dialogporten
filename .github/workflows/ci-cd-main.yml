@@ -32,6 +32,12 @@ jobs:
     uses: ./.github/workflows/workflow-build-and-test.yml
     needs: [check-for-changes]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
+    secrets:
+      DIALOGPORTEN_MASKINPORTEN_ENCODEDJWK: ${{ secrets.DIALOGPORTEN_MASKINPORTEN_ENCODEDJWK }}
+      DIALOGPORTEN_MASKINPORTEN_CLIENTID: ${{ secrets.DIALOGPORTEN_MASKINPORTEN_CLIENTID }}
+      DIALOGPORTEN_MASKINPORTEN_SCOPE: ${{ secrets.DIALOGPORTEN_MASKINPORTEN_SCOPE }}
+      ED25519KEYS_PRIMARY_KID: ${{ secrets.ED25519KEYS_PRIMARY_KID }}
+      ED25519KEYS_PRIMARY_PUBLICCOMPONENT: ${{ secrets.ED25519KEYS_PRIMARY_PUBLICCOMPONENT }}
 
   publish:
     name: Build and publish docker images
@@ -98,6 +104,16 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
 
+  publish-sdk-to-nuget:
+    uses: ./.github/workflows/workflow-publish-nuget.yml
+    needs: [ get-current-version, generate-git-short-sha, check-for-changes ]
+    if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasSchemaChanges == 'true' }}
+    with:
+      version: ${{ needs.get-current-version.outputs.version }}-rc.${{ needs.generate-git-short-sha.outputs.gitShortSha }}
+      path: $(find . -name '*Digdir.Library.Dialogporten.WebApiClient.csproj' -printf "%p"  -quit)
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_TEST_KEY }}
+      
   publish-schema-npm:
     name: Deploy schema npm package
     needs: [check-for-changes, get-current-version, generate-git-short-sha, deploy-apps]

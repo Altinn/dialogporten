@@ -104,6 +104,26 @@ static void BuildAndRun(string[] args)
             x.RemoveEmptyRequestSchema = true;
             x.DocumentSettings = s =>
             {
+                s.PostProcess = document =>
+                {
+                    var dialogportenBaseUri = builder.Configuration
+                        .GetSection(ApplicationSettings.ConfigurationSectionName)
+                        .Get<ApplicationSettings>()!
+                        .Dialogporten
+                        .BaseUri
+                        .ToString();
+
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer
+                    {
+                        Url = dialogportenBaseUri
+                    });
+                    document.Generator = null;
+                    document.ReplaceProblemDetailsDescriptions();
+                    document.MakeCollectionsNullable();
+                    document.FixJwtBearerCasing();
+                    document.RemoveSystemStringHeaderTitles();
+                };
                 s.Title = "Dialogporten";
                 s.DocumentName = "v1";
                 s.Version = "v1";
@@ -147,7 +167,6 @@ static void BuildAndRun(string[] args)
     }
 
     var app = builder.Build();
-
     app.MapAspNetHealthChecks()
         .MapControllers();
 
@@ -186,26 +205,7 @@ static void BuildAndRun(string[] args)
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
         })
         .UseAddSwaggerCorsHeader()
-        .UseSwaggerGen(config =>
-        {
-            config.PostProcess = (document, _) =>
-            {
-                var dialogportenBaseUri = builder.Configuration
-                    .GetSection(ApplicationSettings.ConfigurationSectionName)
-                    .Get<ApplicationSettings>()!
-                    .Dialogporten
-                    .BaseUri
-                    .ToString();
-
-                document.Servers.Clear();
-                document.Servers.Add(new OpenApiServer { Url = dialogportenBaseUri });
-                document.Generator = null;
-                document.ReplaceProblemDetailsDescriptions();
-                document.MakeCollectionsNullable();
-                document.FixJwtBearerCasing();
-                document.RemoveSystemStringHeaderTitles();
-            };
-        }, uiConfig =>
+        .UseSwaggerGen(uiConfig: uiConfig =>
         {
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;

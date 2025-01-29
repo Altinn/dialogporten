@@ -1,4 +1,4 @@
-namespace Digdir.Domain.Dialogporten.WebApi.Integration.Tests;
+namespace Digdir.Domain.Dialogporten.WebApi.Unit.Tests;
 
 public static class Utils
 {

@@ -28,7 +28,16 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
 
         options.AddPolicy(AuthorizationPolicy.EndUser, builder => builder
             .Combine(options.DefaultPolicy)
-            .RequireScope(AuthorizationScope.EndUser));
+            .RequireAssertion(context =>
+            {
+                var userScopes = context.User
+                    .FindAll(AuthorizationPolicyBuilderExtensions.ScopeClaim)
+                    .SelectMany(s => s.Value.Split(" "))
+                    .ToList();
+
+                return userScopes.Contains(AuthorizationScope.EndUser) ||
+                       userScopes.Contains(AuthorizationScope.EndUserNoConsent);
+            }));
 
         options.AddPolicy(AuthorizationPolicy.ServiceProvider, builder => builder
             .Combine(options.DefaultPolicy)

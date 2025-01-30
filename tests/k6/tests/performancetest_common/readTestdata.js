@@ -7,8 +7,8 @@
  */
 
 import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
-import { SharedArray } from "k6/data";
-
+import { SharedArray } from 'k6/data';
+import exec from 'k6/execution';
 /**
  * Function to read the CSV file specified by the filename parameter.
  * @param {} filename 
@@ -51,5 +51,51 @@ export const serviceOwners = new SharedArray('serviceOwners', function () {
 export const endUsers = new SharedArray('endUsers', function () {
   return readCsv(filenameEndusers); 
 });
+
+function endUsersPart(totalVus, vuId) {
+  const endUsersLength = endUsers.length;
+  if (totalVus == 1) {
+      return endUsers.slice(0, endUsersLength);
+  }
+  let usersPerVU = Math.floor(endUsersLength / totalVus);
+  let extras = endUsersLength % totalVus;
+  let ixStart = (vuId-1) * usersPerVU;
+  if (vuId <= extras) {
+      usersPerVU++;
+      ixStart += vuId - 1;
+  }
+  else {
+      ixStart += extras;
+  }
+  return endUsers.slice(ixStart, ixStart + usersPerVU);
+}
+
+export function setup() {
+  const totalVus = exec.test.options.scenarios.default.vus;
+  let parts = [];
+  for (let i = 1; i <= totalVus; i++) {
+      parts.push(endUsersPart(totalVus, i));
+  }
+  return parts;
+}
+
+export function validateTestData(data, serviceOwners=null) {
+    if (!Array.isArray(data) || !data[exec.vu.idInTest - 1]) {
+        throw new Error('Invalid data structure: expected array of end users');
+    }
+    const myEndUsers = data[exec.vu.idInTest - 1];
+    if (!Array.isArray(myEndUsers) || myEndUsers.length === 0) {
+        throw new Error('Invalid end users array: expected non-empty array');
+    }
+    if (serviceOwners !== null) {
+        if (!Array.isArray(serviceOwners) || serviceOwners.length === 0) {
+            throw new Error('Invalid service owners array: expected non-empty array');
+        }
+    }
+    return {
+        endUsers: myEndUsers,
+        index: exec.vu.iterationInInstance % myEndUsers.length
+    };
+}
 
 

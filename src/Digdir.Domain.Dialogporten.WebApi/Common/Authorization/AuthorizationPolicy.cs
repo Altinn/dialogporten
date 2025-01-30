@@ -14,6 +14,7 @@ internal static class AuthorizationPolicy
 internal static class AuthorizationScope
 {
     public const string EndUser = "digdir:dialogporten";
+    public const string EndUserNoConsent = "digdir:dialogporten.noconsent";
     public const string ServiceProvider = "digdir:dialogporten.serviceprovider";
     public const string ServiceProviderSearch = "digdir:dialogporten.serviceprovider.search";
     public const string Testing = "digdir:dialogporten.developer.test";
@@ -24,7 +25,7 @@ internal static class AuthorizationScope
     private static ReadOnlyCollection<string> GetAll() =>
         typeof(AuthorizationScope)
             .GetFields()
-            .Where(x => x.IsLiteral && !x.IsInitOnly && x.DeclaringType == typeof(string))
+            .Where(x => x.IsLiteral && !x.IsInitOnly && x.FieldType == typeof(string))
             .Select(x => (string)x.GetRawConstantValue()!)
             .ToList()
             .AsReadOnly();

@@ -13,9 +13,9 @@ public interface IDomainEvent : INotification
     Guid EventId { get; }
 
     /// <summary>
-    /// The time in which the event, as well as all the actual changes occured.
+    /// The time at which the event, as well as all the actual changes, occurred.
     /// </summary>
-    DateTimeOffset OccuredAt { get; set; }
+    DateTimeOffset OccurredAt { get; set; }
 
     /// <summary>
     /// Dictionary of metadata.

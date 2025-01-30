@@ -90,6 +90,12 @@ public enum ActivityType
 
     [GraphQLDescription("Indicates that a dialog has been sent to payment.")]
     SentToPayment = 13,
+
+    [GraphQLDescription("Indicates that a form associated with the dialog has been submitted.")]
+    FormSubmitted = 14,
+
+    [GraphQLDescription("Indicates that a form associated with the dialog has been saved.")]
+    FormSaved = 15,
 }
 
 public enum DialogStatus

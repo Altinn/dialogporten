@@ -5,7 +5,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 
 internal static class AuthorizationPolicyBuilderExtensions
 {
-    private const string ScopeClaim = "scope";
+    public const string ScopeClaim = "scope";
     private const char ScopeClaimSeparator = ' ';
 
     public static AuthorizationPolicyBuilder RequireScope(this AuthorizationPolicyBuilder builder, string scope) =>

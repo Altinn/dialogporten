@@ -2,6 +2,9 @@
 
 tokengenuser=${TOKEN_GENERATOR_USERNAME}
 tokengenpasswd=${TOKEN_GENERATOR_PASSWORD}
+failed=0
+
+kubectl config set-context --current --namespace=dialogporten
 
 # Validate required environment variables
 if [ -z "$TOKEN_GENERATOR_USERNAME" ] || [ -z "$TOKEN_GENERATOR_PASSWORD" ]; then
@@ -27,17 +30,23 @@ print_logs() {
     K8S_CONTEXT="${K8S_CONTEXT:-k6tests-cluster}"
     K8S_NAMESPACE="${K8S_NAMESPACE:-default}"
     LOG_TIMEOUT="${LOG_TIMEOUT:-60}"
+    
     # Verify kubectl access
-    if ! kubectl --context "$K8S_CONTEXT" -n "$K8S_NAMESPACE" get pods &>/dev/null; then
+    if ! kubectl get pods &>/dev/null; then
         echo "Error: Failed to access Kubernetes cluster"
         return 1
     fi
-    for pod in $(kubectl --context "$K8S_CONTEXT" -n "$K8S_NAMESPACE" get pods -l "$POD_LABEL" -o name); do 
+    for pod in $(kubectl get pods -l "$POD_LABEL" -o name); do 
         if [[ $pod != *"initializer"* ]]; then
             echo ---------------------------
             echo $pod
             echo ---------------------------
-            kubectl --context "$K8S_CONTEXT" -n "$K8S_NAMESPACE" logs --tail=-1 $pod
+            kubectl logs --tail=-1 $pod
+            status=`kubectl get $pod -o jsonpath='{.status.phase}'`
+            if [ "$status" != "Succeeded" ]; then
+                failed=1
+            fi
+            echo
         fi
     done
 }
@@ -114,8 +123,9 @@ apiVersion: k6.io/v1alpha1
 kind: TestRun
 metadata:
   name: $name
+  namespace: dialogporten
 spec:
-  arguments: --out experimental-prometheus-rw --vus=$vus --duration=$duration
+  arguments: --out experimental-prometheus-rw --vus=$vus --duration=$duration --tag testid=$testid --log-output=none
   parallelism: $parallelism
   script:
     configMap:
@@ -130,6 +140,9 @@ spec:
     metadata:
       labels:
         k6-test: $name
+    resources:
+      requests:
+        memory: "200Mi"
     
 EOF
 # Apply the config.yml configuration
@@ -137,15 +150,14 @@ kubectl apply -f config.yml
 
 # Wait for the job to finish
 wait_timeout="${duration}100s"
-kubectl --context k6tests-cluster wait --for=jsonpath='{.status.stage}'=finished testrun/$name --timeout=$wait_timeout
-
+kubectl wait --for=jsonpath='{.status.stage}'=finished testrun/$name --timeout=$wait_timeout
 # Print the logs of the pods
 print_logs
 
 cleanup() {
-    local exit_code=$?
-    echo "Cleaning up resources..."
-    
+    local exit_code=$failed
+    echo "Sleeping for 15s and then cleaning up resources..."
+    sleep 15
     if [ -f "config.yml" ]; then
         kubectl delete -f config.yml --ignore-not-found || true
         rm -f config.yml

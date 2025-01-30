@@ -89,7 +89,9 @@
           "SentToSigning",
           "SentToFormFill",
           "SentToSendIn",
-          "SentToPayment"
+          "SentToPayment",
+          "FormSubmitted",
+          "FormSaved"
         ],
         "type": "string",
         "x-enumNames": [
@@ -105,7 +107,9 @@
           "SentToSigning",
           "SentToFormFill",
           "SentToSendIn",
-          "SentToPayment"
+          "SentToPayment",
+          "FormSubmitted",
+          "FormSaved"
         ]
       },
       "DialogsEntitiesTransmissions_DialogTransmissionType": {
@@ -5912,7 +5916,7 @@
                 }
               }
             },
-            "description": "Validation error occured. See problem details for a list of errors."
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
@@ -5928,7 +5932,7 @@
                 }
               }
             },
-            "description": "Domain error occured. See problem details for a list of errors."
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [
@@ -5987,7 +5991,7 @@
                 }
               }
             },
-            "description": "Validation error occured. See problem details for a list of errors."
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
@@ -6152,7 +6156,7 @@
                 }
               }
             },
-            "description": "Validation error occured. See problem details for a list of errors."
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \\\u0022digdir:dialogporten.serviceprovider\\\u0022"
@@ -6188,7 +6192,7 @@
                 }
               }
             },
-            "description": "Domain error occured. See problem details for a list of errors."
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [
@@ -6256,7 +6260,7 @@
                 }
               }
             },
-            "description": "Validation error occured. See problem details for a list of errors."
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
@@ -6295,7 +6299,7 @@
                 }
               }
             },
-            "description": "Domain error occured. See problem details for a list of errors."
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [
@@ -6566,7 +6570,7 @@
                 }
               }
             },
-            "description": "Validation error occured. See problem details for a list of errors."
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
@@ -6605,7 +6609,7 @@
                 }
               }
             },
-            "description": "Domain error occured. See problem details for a list of errors."
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [
@@ -6938,7 +6942,7 @@
                 }
               }
             },
-            "description": "Validation error occured. See problem details for a list of errors."
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
@@ -6977,7 +6981,7 @@
                 }
               }
             },
-            "description": "Domain error occured. See problem details for a list of errors."
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [

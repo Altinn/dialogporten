@@ -13,7 +13,7 @@ using ProblemDetails = FastEndpoints.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Patch;
 
-/* Since minimal apis don't support json patch documents out of the box,
+/* Since minimal apis don't support JSON patch documents out of the box,
  * and we've not been able to find a good alternative library for it yet,
  * we've decided to use the old way of doing it using controllers and
  * NewtonsoftJson. System.Text.Json will still be used for everything
@@ -44,12 +44,12 @@ public sealed class PatchDialogsController : ControllerBase
     /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
     /// </remarks>
     /// <response code="204">Patch was successfully applied.</response>
-    /// <response code="400">Validation error occured. See problem details for a list of errors.</response>
+    /// <response code="400">Validation error occurred. See problem details for a list of errors.</response>
     /// <response code="401">Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\"</response>
     /// <response code="403">Unauthorized to update a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)</response>
     /// <response code="404">The given dialog ID was not found or is deleted</response>
     /// <response code="412">The supplied Revision does not match the current Revision of the dialog</response>
-    /// <response code="422">Domain error occured. See problem details for a list of errors.</response>
+    /// <response code="422">Domain error occurred. See problem details for a list of errors.</response>
     [HttpPatch("{dialogId}")]
 
     [OpenApiOperation("V1ServiceOwnerDialogsPatchDialog")]

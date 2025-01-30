@@ -1,0 +1,34 @@
+{
+  "packages": {
+    ".": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "simple",
+      "draft": false,
+      "prerelease": false
+    }
+  },
+  "release-type": "simple",
+  "changelog-sections": [
+    {
+      "type": "feat",
+      "hidden": false,
+      "section": "Features"
+    },
+    {
+      "type": "feature",
+      "hidden": false,
+      "section": "Features"
+    },
+    {
+      "type": "fix",
+      "hidden": false,
+      "section": "Bug Fixes"
+    },
+    {
+      "type": "chore",
+      "hidden": false,
+      "section": "Miscellaneous Chores"
+    }
+  ],
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}

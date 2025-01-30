@@ -1,10 +1,11 @@
 ﻿name: CI/CD YT01
 
+run-name: CI/CD YT01 ${{ github.event.client_payload.version && format('({0})', github.event.client_payload.version) || '' }}
+
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "v*.*.*"
+  repository_dispatch:
+    types: [release_created]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -29,17 +30,6 @@ jobs:
   get-current-version:
     name: Get current version
     uses: ./.github/workflows/workflow-get-current-version.yml
-
-  publish:
-    name: Build and publish docker images
-    uses: ./.github/workflows/workflow-publish.yml
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
-    needs: [get-current-version, check-for-changes]
-    secrets:
-      GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      dockerImageBaseName: ghcr.io/altinn/dialogporten-
-      version: ${{ needs.get-current-version.outputs.version }}
 
   deploy-infra:
     name: Deploy infra to yt01
@@ -74,7 +64,7 @@ jobs:
   deploy-apps:
     name: Deploy apps to yt01
     needs:
-      [get-current-version, check-for-changes, deploy-infra, publish]
+      [get-current-version, check-for-changes, deploy-infra]
     # we want deployment of apps to be dependent on deployment of infrastructure, but if infrastructure is skipped, we still want to deploy the apps
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
     uses: ./.github/workflows/workflow-deploy-apps.yml
@@ -98,7 +88,7 @@ jobs:
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
     needs: [deploy-apps, get-current-version]
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.deploy-apps.outputs.deployment_executed == 'true') }}
+    if: ${{ always() && !failure() && (github.event_name == 'workflow_dispatch' || needs.deploy-apps.outputs.deployment_executed == 'true') }}
     uses: ./.github/workflows/workflow-store-github-env-variable.yml
     with:
       variable_name: LATEST_DEPLOYED_APPS_VERSION
@@ -130,7 +120,7 @@ jobs:
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasInfraChanges == 'true') }}
     needs: [deploy-apps, deploy-infra, check-for-changes]
     #needs: [deploy-apps, check-for-changes]
-    uses: ./.github/workflows/workflow-run-k6-performance.yml
+    uses: ./.github/workflows/workflow-run-k6-ci-cd-yt01.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
       TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
@@ -154,7 +144,7 @@ jobs:
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [deploy-infra, deploy-apps, run-e2e-tests, publish, run-performance-tests]
+    needs: [deploy-infra, deploy-apps, run-e2e-tests, run-performance-tests]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:
@@ -163,7 +153,6 @@ jobs:
       apps_status: ${{ needs.deploy-apps.result }}
       e2e_tests_status: ${{ needs.run-e2e-tests.result }}
       performance_tests_status: ${{ needs.run-performance-tests.result }}
-      publish_status: ${{ needs.publish.result }}
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}

@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.47.5](https://github.com/Altinn/dialogporten/compare/v1.47.4...v1.47.5) (2025-01-30)
+
+
+### Bug Fixes
+
+* **auth:** Allow .noconsent scope in EndUser auth policy ([#1760](https://github.com/Altinn/dialogporten/issues/1760)) ([d770779](https://github.com/Altinn/dialogporten/commit/d7707797a91e30c4db4a2ae70b746bb661d9b835))
+* **auth:** Split values when checking EndUser scopes ([#1764](https://github.com/Altinn/dialogporten/issues/1764)) ([5957e7d](https://github.com/Altinn/dialogporten/commit/5957e7dbb84c316c35d212609b7480dae47ab42b))
+
+
+### Miscellaneous Chores
+
+* Add FormSubmitted and FormSaved to ActivityType ([#1742](https://github.com/Altinn/dialogporten/issues/1742)) ([4b9bad0](https://github.com/Altinn/dialogporten/commit/4b9bad002d90e06425bb6782a0a945c6a841f1f1))
+* **deps:** update dependency ziggycreatures.fusioncache to v2 ([#1752](https://github.com/Altinn/dialogporten/issues/1752)) ([dd24928](https://github.com/Altinn/dialogporten/commit/dd24928c2905ad3edd69539b2038082794dbfa1b))
+* **perfomance:** Fixing github action to run performance tests in k8s ([#1739](https://github.com/Altinn/dialogporten/issues/1739)) ([166d53d](https://github.com/Altinn/dialogporten/commit/166d53d58381ab16d706a1ff5ad635e115946d4a))
+* Remove old OccuredAt property on DomainEvent ([#1758](https://github.com/Altinn/dialogporten/issues/1758)) ([67ee75d](https://github.com/Altinn/dialogporten/commit/67ee75dcc0479eac4a561b8aa37b47c12a5075b1))
+
+## [1.47.4](https://github.com/Altinn/dialogporten/compare/v1.47.3...v1.47.4) (2025-01-29)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency coverlet.collector to 6.0.4 ([#1750](https://github.com/Altinn/dialogporten/issues/1750)) ([7d8bb26](https://github.com/Altinn/dialogporten/commit/7d8bb26d77c8f0a6b9ab62b84974c4595c63c02c))
+* **deps:** update dependency vitest to v3.0.3 ([#1748](https://github.com/Altinn/dialogporten/issues/1748)) ([6ee8d28](https://github.com/Altinn/dialogporten/commit/6ee8d280a60031096284624c0e7540acbc3a1704))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.118.0 ([#1751](https://github.com/Altinn/dialogporten/issues/1751)) ([2e3ae4d](https://github.com/Altinn/dialogporten/commit/2e3ae4dcd3f4497c687aa005d05057c28f30629e))
+* Misc. typos ([#1740](https://github.com/Altinn/dialogporten/issues/1740)) ([d83c7a0](https://github.com/Altinn/dialogporten/commit/d83c7a06d33c62ce3c2cafba401631e71c261161))
+
 ## [1.47.3](https://github.com/Altinn/dialogporten/compare/v1.47.2...v1.47.3) (2025-01-28)
 
 

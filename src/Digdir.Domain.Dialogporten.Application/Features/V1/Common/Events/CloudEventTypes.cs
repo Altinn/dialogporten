@@ -27,6 +27,8 @@ internal static class CloudEventTypes
         nameof(DialogActivityType.Values.SentToFormFill) => "dialogporten.dialog.activity.sent-to-form-fill.v1",
         nameof(DialogActivityType.Values.SentToSendIn) => "dialogporten.dialog.activity.sent-to-send-in.v1",
         nameof(DialogActivityType.Values.SentToPayment) => "dialogporten.dialog.activity.sent-to-payment.v1",
+        nameof(DialogActivityType.Values.FormSubmitted) => "dialogporten.dialog.activity.form-submitted.v1",
+        nameof(DialogActivityType.Values.FormSaved) => "dialogporten.dialog.activity.form-saved.v1",
 
         _ => throw new ArgumentOutOfRangeException(nameof(eventName), eventName, null)
     };

@@ -73,5 +73,15 @@ public sealed class DialogActivityType : AbstractLookupEntity<DialogActivityType
         /// Indicates that a dialog has been sent to payment.
         /// </summary>
         SentToPayment = 13,
+
+        /// <summary>
+        /// Indicates that a form associated with the dialog has been submitted.
+        /// </summary>
+        FormSubmitted = 14,
+
+        /// <summary>
+        /// Indicates that a form associated with the dialog has been saved.
+        /// </summary>
+        FormSaved = 15,
     }
 }

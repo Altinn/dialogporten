@@ -9,14 +9,7 @@ public abstract record DomainEvent : IDomainEvent
     public Guid EventId { get; private set; } = Guid.NewGuid();
 
     [JsonInclude]
-    public DateTimeOffset OccuredAt { get; set; }
-
-    [JsonInclude]
-    public DateTimeOffset OccurredAt
-    {
-        get => OccuredAt;
-        set => OccuredAt = value;
-    }
+    public DateTimeOffset OccurredAt { get; set; }
 
     [JsonInclude]
     public Dictionary<string, string> Metadata { get; set; } = [];

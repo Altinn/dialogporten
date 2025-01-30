@@ -89,7 +89,9 @@
           "SentToSigning",
           "SentToFormFill",
           "SentToSendIn",
-          "SentToPayment"
+          "SentToPayment",
+          "FormSubmitted",
+          "FormSaved"
         ],
         "type": "string",
         "x-enumNames": [
@@ -105,7 +107,9 @@
           "SentToSigning",
           "SentToFormFill",
           "SentToSendIn",
-          "SentToPayment"
+          "SentToPayment",
+          "FormSubmitted",
+          "FormSaved"
         ]
       },
       "DialogsEntitiesTransmissions_DialogTransmissionType": {

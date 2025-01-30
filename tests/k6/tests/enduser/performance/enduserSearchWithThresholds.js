@@ -1,3 +1,4 @@
+export { setup as setup } from '../../performancetest_common/readTestdata.js';
 import { default as run } from "./enduser-search.js";
 
 export let options = {

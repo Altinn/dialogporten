@@ -359,6 +359,10 @@ enum ActivityType {
   SENT_TO_SEND_IN
   "Indicates that a dialog has been sent to payment."
   SENT_TO_PAYMENT
+  "Indicates that a form associated with the dialog has been submitted."
+  FORM_SUBMITTED
+  "Indicates that a form associated with the dialog has been saved."
+  FORM_SAVED
 }
 
 enum ActorType {

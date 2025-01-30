@@ -68,6 +68,7 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_PLEASE_PAT }}
           event-type: release_created
+          client-payload: '{"version": "${{ needs.release-please.outputs.version }}"}'
 
   send-slack-message-on-failure:
     name: Send Slack message on failure

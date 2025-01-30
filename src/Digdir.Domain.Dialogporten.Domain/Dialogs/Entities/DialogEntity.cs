@@ -23,6 +23,7 @@ public sealed class DialogEntity :
 {
     public Guid Id { get; set; }
     public Guid Revision { get; set; }
+    public string? IdempotentKey { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public bool Deleted { get; set; }

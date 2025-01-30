@@ -20,6 +20,11 @@ public sealed class CreateDialogDto
     public Guid? Id { get; set; }
 
     /// <summary>
+    /// A self-defined Id may be provided to support idempotent creation of dialogs.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
+
+    /// <summary>
     /// The service identifier for the service that the dialog is related to in URN-format.
     /// This corresponds to a resource in the Altinn Resource Registry, which the authenticated organization
     /// must own, i.e., be listed as the "competent authority" in the Resource Registry entry.

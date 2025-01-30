@@ -65,6 +65,14 @@ internal static class ErrorResponseBuilderExtensions
                 Instance = ctx.Request.Path,
                 Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
             },
+            StatusCodes.Status409Conflict => new ValidationProblemDetails(errors)
+            {
+                Title = "Conflict.",
+                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8",
+                Status = statusCode,
+                Instance = ctx.Request.Path,
+                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
+            },
             StatusCodes.Status410Gone => new ValidationProblemDetails(errors)
             {
                 Title = "Resource no longer available.",

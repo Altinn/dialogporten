@@ -45,6 +45,7 @@ public interface IDialogDbContext
     DbSet<LabelAssignmentLog> LabelAssignmentLogs { get; }
     DbSet<ResourcePolicyInformation> ResourcePolicyInformation { get; }
 
+
     /// <summary>
     /// Validate a property on the <typeparamref name="TEntity"/> using a lambda
     /// expression to specify the predicate only when the property is modified.

@@ -110,6 +110,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
         // Explicitly configure the Actor entity so that it will register as TPH in the database
         modelBuilder.Entity<Actor>();
 
+
         modelBuilder
             .RemovePluralizingTableNameConvention()
             .AddAuditableEntities()

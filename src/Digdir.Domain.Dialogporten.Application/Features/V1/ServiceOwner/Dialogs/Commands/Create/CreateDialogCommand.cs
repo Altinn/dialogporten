@@ -16,6 +16,8 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -29,7 +31,7 @@ public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, IAltinnE
 public sealed record CreateDialogSuccess(Guid DialogId, Guid Revision);
 
 [GenerateOneOf]
-public sealed partial class CreateDialogResult : OneOfBase<CreateDialogSuccess, DomainError, ValidationError, Forbidden>;
+public sealed partial class CreateDialogResult : OneOfBase<CreateDialogSuccess, DomainError, ValidationError, Forbidden, Conflict>;
 
 internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogCommand, CreateDialogResult>
 {
@@ -81,6 +83,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             dialog.Org = serviceResourceInformation.OwnOrgShortName;
         }
 
+
         CreateDialogEndUserContext(request, dialog);
         await EnsureNoExistingUserDefinedIds(dialog, cancellationToken);
 
@@ -98,7 +101,27 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             maxWidth: 1));
 
         await _db.Dialogs.AddAsync(dialog, cancellationToken);
-        var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        SaveChangesResult saveResult;
+        try
+        {
+            saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException e)
+            when (e.InnerException is PostgresException
+            {
+                SqlState: "23505", // unique violation
+                ConstraintName: "IX_Dialog_Org_IdempotentKey"
+            })
+        {
+            var dialogId = await _db.Dialogs
+                .Where(x => x.IdempotentKey == request.IdempotentKey && x.Org == dialog.Org)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return new Conflict(new ConflictError(nameof(request.IdempotentKey), $"'{request.IdempotentKey}' already exists with DialogId '{dialogId}'"));
+        }
+
         return saveResult.Match<CreateDialogResult>(
             success => new CreateDialogSuccess(dialog.Id, dialog.Revision),
             domainError => domainError,

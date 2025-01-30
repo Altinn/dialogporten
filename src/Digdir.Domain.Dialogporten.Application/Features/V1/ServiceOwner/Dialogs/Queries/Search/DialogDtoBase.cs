@@ -15,6 +15,11 @@ public class DialogDtoBase
     public Guid Id { get; set; }
 
     /// <summary>
+    ///  A self-defined Id may be provided to support idempotent creation of dialogs.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
+
+    /// <summary>
     /// The service owner code representing the organization (service owner) related to this dialog.
     /// </summary>
     /// <example>ske</example>
@@ -158,7 +163,6 @@ public sealed class DialogSeenLogDto
     public bool IsCurrentEndUser { get; set; }
 }
 
-
 public sealed class DialogActivityDto
 {
     /// <summary>
@@ -198,4 +202,3 @@ public sealed class DialogActivityDto
     /// </summary>
     public List<LocalizationDto> Description { get; set; } = [];
 }
-

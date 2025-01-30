@@ -4,6 +4,7 @@ import { default as authorization } from './authorization.js';
 import { default as concurrency } from './concurrency.js';
 import { default as dialogCreateActivity } from './dialogCreateActivity.js';
 import { default as dialogCreateExternalResource } from './dialogCreateExternalResource.js';
+import { default as dialogCreateIdempotentKey } from './dialogCreateIdempotentKey.js';
 import { default as dialogCreateInvalidActionCount } from './dialogCreateInvalidActionCount.js';
 import { default as dialogCreateInvalidProcess } from './dialogCreateInvalidProcess.js';
 import { default as dialogCreatePatchDelete } from './dialogCreatePatchDelete.js';
@@ -18,6 +19,7 @@ export default function() {
   concurrency();
   dialogCreateActivity();
   dialogCreateExternalResource();
+  dialogCreateIdempotentKey();
   dialogCreateInvalidActionCount();
   dialogCreateInvalidProcess();
   dialogCreatePatchDelete();

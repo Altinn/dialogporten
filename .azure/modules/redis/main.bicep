@@ -40,7 +40,7 @@ var redisNameMaxLength = 63
 var redisName = uniqueResourceName('${namePrefix}-redis', redisNameMaxLength)
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.cache/redis?pivots=deployment-language-bicep
-resource redis 'Microsoft.Cache/Redis@2023-08-01' = {
+resource redis 'Microsoft.Cache/Redis@2024-11-01' = {
   name: redisName
   location: location
   identity: {

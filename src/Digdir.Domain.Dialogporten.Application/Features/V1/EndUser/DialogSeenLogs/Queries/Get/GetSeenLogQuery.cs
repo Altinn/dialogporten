@@ -46,7 +46,7 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
         var dialog = await _dbContext.Dialogs
             .AsNoTracking()
             .Include(x => x.SeenLog.Where(x => x.Id == request.SeenLogId))
-                .ThenInclude(x => x.SeenBy)
+                .ThenInclude(x => x.SeenBy).ThenInclude(x => x.ActorNameEntity)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                 cancellationToken: cancellationToken);

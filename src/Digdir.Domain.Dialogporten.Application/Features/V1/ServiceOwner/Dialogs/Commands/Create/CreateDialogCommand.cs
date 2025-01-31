@@ -80,7 +80,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         {
             dialog.Org = serviceResourceInformation.OwnOrgShortName;
         }
-
         CreateDialogEndUserContext(request, dialog);
         await EnsureNoExistingUserDefinedIds(dialog, cancellationToken);
 

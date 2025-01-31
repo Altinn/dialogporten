@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -14,14 +15,17 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
+    private readonly ITransactionTime _transactionTime;
     private bool _hasBeenExecuted;
 
     public PopulateActorNameInterceptor(
+        ITransactionTime transactionTime,
         IDomainContext domainContext,
         IPartyNameRegistry partyNameRegistry)
     {
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
+        _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -57,8 +61,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         var actorNameById = new Dictionary<string, string?>();
         foreach (var actorId in actors
-                     .Select(x => x.ActorId!)
-                     .Distinct())
+            .Select(x => x.ActorId!)
+            .Distinct())
         {
             actorNameById[actorId] = await _partyNameRegistry.GetName(actorId, cancellationToken);
         }
@@ -86,7 +90,28 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 continue;
             }
 
-            actor.ActorName = actorName;
+            var actorNameEntity = await dbContext.Set<ActorName>()
+                .FirstOrDefaultAsync(x => x.ActorId == actor.ActorId && x.Name == actorName, cancellationToken);
+            if (actorNameEntity is null)
+            {
+                actor.ActorNameEntity = new ActorName
+                {
+                    Id = IdentifiableExtensions.CreateVersion7(),
+                    CreatedAt = _transactionTime.Value,
+                    Name = actorName,
+                    ActorId = actor.ActorId!
+                };
+                dbContext.Add(actor.ActorNameEntity);
+            }
+            else
+            {
+                actor.ActorNameEntity = actorNameEntity;
+            }
+
+            // ActorName is not set/overwritten by the Interceptor.
+            // In cases where ActorName and ActorId is given, ActorName might not equal ActorNameEntity.ActorName
+            // ActorName should not be used when ActorNameEntity is used therefore its set to null 
+            actor.ActorName = null;
         }
 
         _hasBeenExecuted = true;

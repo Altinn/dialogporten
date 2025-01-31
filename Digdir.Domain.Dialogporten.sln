@@ -63,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Domain.Dialogporten.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Library.Utils.AspNet", "src\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj", "{6A485C65-3613-4A49-A16F-2789119F6F38}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Tool.Dialogporten.LargeDataSetGenerator", "src\Digdir.Tool.Dialogporten.LargeDataSetGenerator\Digdir.Tool.Dialogporten.LargeDataSetGenerator.csproj", "{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,10 @@ Global
 		{6A485C65-3613-4A49-A16F-2789119F6F38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A485C65-3613-4A49-A16F-2789119F6F38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A485C65-3613-4A49-A16F-2789119F6F38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -182,6 +188,7 @@ Global
 		{0900E3CF-F9D8-4B29-957F-484B3B028D6D} = {320B47A0-5EB8-4B6E-8C84-90633A1849CA}
 		{E389C7C8-9610-40AC-86DC-769B1B7DC78E} = {CADB8189-4AA1-4732-844A-C41DBF3EC8B7}
 		{6A485C65-3613-4A49-A16F-2789119F6F38} = {096E9B69-6783-4446-A895-0B6D7729A0D9}
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671} = {3C2C775D-F2D1-42A2-B53F-CC6D5FF59633}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2FE67FF-7622-4AFB-AD8E-961B6A39D888}

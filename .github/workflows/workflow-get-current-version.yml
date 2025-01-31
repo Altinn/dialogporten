@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set current version
         id: set-current-version
         run: echo "version=$(cat version.txt)" >> $GITHUB_OUTPUT

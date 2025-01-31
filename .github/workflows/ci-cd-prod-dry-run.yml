@@ -1,8 +1,12 @@
 ﻿name: CI/CD Production
 
+run-name: CI/CD Production Dry Run ${{ github.event.client_payload.version && format('({0})', github.event.client_payload.version) || '' }}
+
 on:
   workflow_dispatch:
-  
+  repository_dispatch:
+    types: [release_created]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
@@ -27,8 +31,8 @@ jobs:
     name: Get current version
     uses: ./.github/workflows/workflow-get-current-version.yml
 
-  deploy-infra:
-    name: Deploy infra to prod
+  dry-run-deploy-infra:
+    name: Dry run deploy infra to prod
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
     needs: [get-current-version, check-for-changes]
     uses: ./.github/workflows/workflow-deploy-infra.yml
@@ -44,25 +48,14 @@ jobs:
       environment: prod
       region: norwayeast
       version: ${{ needs.get-current-version.outputs.version }}
-      ref: ${{ needs.get-current-version.outputs.version_sha }}
+      dryRun: true
 
-  store-infra-version:
-    name: Store Latest Deployed Infra Version as GitHub Variable
-    needs: [deploy-infra, get-current-version]
-    if: ${{ needs.deploy-infra.result == 'success' }}
-    uses: ./.github/workflows/workflow-store-github-env-variable.yml
-    with:
-      variable_name: LATEST_DEPLOYED_INFRA_VERSION
-      variable_value: ${{ needs.get-current-version.outputs.version }}
-      environment: prod
-    secrets:
-      GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
-
-  deploy-apps:
-    name: Deploy apps to prod
+  dry-run-deploy-apps:
+    name: Dry run deploy apps to prod
     needs:
-      [get-current-version, check-for-changes]
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+      [get-current-version, check-for-changes, dry-run-deploy-infra]
+    # we want deployment of apps to be dependent on deployment of infrastructure, but if infrastructure is skipped, we still want to dry-run deploy the apps
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -79,29 +72,18 @@ jobs:
       environment: prod
       region: norwayeast
       version: ${{ needs.get-current-version.outputs.version }}
+      dryRun: true
       runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
-      ref: ${{ needs.get-current-version.outputs.version_sha }}
-  store-apps-version:
-    name: Store Latest Deployed Apps Version as GitHub Variable
-    needs: [deploy-apps, get-current-version]
-    if: ${{ always() && !failure() && (github.event_name == 'workflow_dispatch' || needs.deploy-apps.outputs.deployment_executed == 'true') }}
-    uses: ./.github/workflows/workflow-store-github-env-variable.yml
-    with:
-      variable_name: LATEST_DEPLOYED_APPS_VERSION
-      variable_value: ${{ needs.get-current-version.outputs.version }}
-      environment: prod
-    secrets:
-      GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [deploy-infra, deploy-apps]
+    needs: [dry-run-deploy-infra, dry-run-deploy-apps]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:
       environment: prod
-      infra_status: ${{ needs.deploy-infra.result }}
-      apps_status: ${{ needs.deploy-apps.result }}
+      infra_status: ${{ needs.dry-run-deploy-infra.result }}
+      apps_status: ${{ needs.dry-run-deploy-apps.result }}
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}

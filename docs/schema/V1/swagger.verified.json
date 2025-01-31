@@ -6379,6 +6379,72 @@
         ]
       }
     },
+    "/api/v1/serviceowner/dialogs/{dialogId}/actions/restore": {
+      "post": {
+        "description": "Restore a dialog. For more information see the documentation (link TBD). ",
+        "operationId": "V1ServiceOwnerDialogsRestore_RestoreDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The dialog aggregate was restored successfully."
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found or is already deleted."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "summary": "Restore a dialog",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification": {
       "get": {
         "description": "Used by Altinn Notification only. Takes a dialogId and returns a boolean value based on conditions used to determine if a notification is to be sent.",

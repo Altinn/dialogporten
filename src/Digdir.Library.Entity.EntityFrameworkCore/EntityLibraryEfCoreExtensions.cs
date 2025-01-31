@@ -26,13 +26,18 @@ namespace Digdir.Library.Entity.EntityFrameworkCore;
 public static class EntityLibraryEfCoreExtensions
 {
     /// <summary>
-    /// Updates the properties and sets the correct <see cref="EntityState"/> on the <see cref="ChangeTracker"/> for the entities implementing the following abstractions in context of aggregates.
+    /// Updates the properties and sets the correct <see cref="EntityState"/> on the <see cref="ChangeTracker"/> for the entities implementing the following abstractions.
     /// <list type="bullet">
     ///     <item><see cref="IAggregateCreatedHandler"/></item>
     ///     <item><see cref="IAggregateUpdatedHandler"/></item>
     ///     <item><see cref="IAggregateDeletedHandler"/></item>
     ///     <item><see cref="IAggregateRestoredHandler"/></item>
+    ///     <item><see cref="IIdentifiableEntity"/></item>
+    ///     <item><see cref="ICreatableEntity"/></item>
     ///     <item><see cref="IUpdateableEntity"/></item>
+    ///     <item><see cref="ISoftDeletableEntity"/></item>
+    ///     <item><see cref="IImmutableEntity"/></item>
+    ///     <item><see cref="ILookupEntity"/></item>
     ///     <item><see cref="IVersionableEntity"/></item>
     /// </list>
     /// </summary>
@@ -41,38 +46,26 @@ public static class EntityLibraryEfCoreExtensions
     /// </remarks>
     /// <param name="changeTracker">The change tracker.</param>
     /// <param name="utcNow">The time in UTC in which the changes took place.</param>
+    /// <param name="options">Optional settings to configure entity handling behavior.</param>
     /// <param name="cancellationToken">A token for requesting cancellation of the operation.</param>
     /// <returns>The same <see cref="ChangeTracker"/> instance so that multiple calls can be chained.</returns>
-    public static Task<ChangeTracker> HandleAggregateEntities(
+    public static Task<ChangeTracker> HandleAuditableEntities(
         this ChangeTracker changeTracker,
         DateTimeOffset utcNow,
+        IEntityOptions options,
         CancellationToken cancellationToken = default)
-        => AggregateExtensions.HandleAggregateEntities(changeTracker, utcNow, cancellationToken);
+    {
+        changeTracker.DoIf(options.EnableLookupFilter, x => x.HandleLookupEntities())
+            .DoIf(options.EnableIdentifiableFilter, x => x.HandleIdentifiableEntities())
+            .DoIf(options.EnableImmutableFilter, x => x.HandleImmutableEntities())
+            .DoIf(options.EnableCreatableFilter, x => x.HandleCreatableEntities(utcNow))
+            .DoIf(options.EnableUpdatableFilter, x => x.HandleUpdatableEntities(utcNow))
+            .DoIf(options.EnableSoftDeletableFilter, x => x.HandleSoftDeletableEntities(utcNow));
+        return changeTracker.HandleAggregateEntities(utcNow, options, cancellationToken);
+    }
 
-    /// <summary>
-    /// Updates the properties and sets the correct <see cref="EntityState"/> on the <see cref="ChangeTracker"/> for the entities implementing the following abstractions.
-    /// <list type="bullet">
-    ///     <item><see cref="IIdentifiableEntity"/></item>
-    ///     <item><see cref="ICreatableEntity"/></item>
-    ///     <item><see cref="IUpdateableEntity"/></item>
-    ///     <item><see cref="ISoftDeletableEntity"/></item>
-    ///     <item><see cref="IImmutableEntity"/></item>
-    ///     <item><see cref="ILookupEntity"/></item>
-    /// </list>
-    /// </summary>
-    /// <remarks>
-    /// Should be called right before saving the entities.
-    /// </remarks>
-    /// <param name="changeTracker">The change tracker.</param>
-    /// <param name="utcNow">The time in UTC in which the changes took place.</param>
-    /// <returns>The same <see cref="ChangeTracker"/> instance so that multiple calls can be chained.</returns>
-    public static ChangeTracker HandleAuditableEntities(this ChangeTracker changeTracker, DateTimeOffset utcNow)
-        => changeTracker.HandleLookupEntities()
-            .HandleIdentifiableEntities()
-            .HandleImmutableEntities()
-            .HandleCreatableEntities(utcNow)
-            .HandleUpdatableEntities(utcNow)
-            .HandleSoftDeletableEntities(utcNow);
+    private static ChangeTracker DoIf(this ChangeTracker changeTracker, bool predicate, Func<ChangeTracker, ChangeTracker> action)
+        => predicate ? action(changeTracker) : changeTracker;
 
     /// <summary>
     /// Configures the shape of, and how the entities implementing the following abstractions are mapped to the database.

@@ -37,8 +37,12 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         transmissionEntities.First().Id.Should().Be(transmission.Id!.Value);
     }
 
-    [Fact]
-    public async Task Can_Create_Transmission_With_Embeddable_Content()
+    [Theory]
+    [InlineData(MediaTypes.EmbeddableMarkdown)]
+#pragma warning disable CS0618 // Type or member is obsolete
+    [InlineData(MediaTypes.EmbeddableMarkdownDeprecated)]
+#pragma warning restore CS0618 // Type or member is obsolete
+    public async Task Can_Create_Transmission_With_Embeddable_Content(string mediaType)
     {
         // Arrange
         var dialogId = IdentifiableExtensions.CreateVersion7();
@@ -51,7 +55,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         transmission.Id = transmissionId;
         transmission.Content.ContentReference = new ContentValueDto
         {
-            MediaType = MediaTypes.EmbeddableMarkdown,
+            MediaType = mediaType,
             Value = [new LocalizationDto { LanguageCode = "nb", Value = contentUrl }]
         };
 
@@ -72,11 +76,18 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         transmissionEntity.Id.Should().Be(transmissionId);
 
         var contentEntities = await Application.GetDbEntities<DialogTransmissionContent>();
-        contentEntities.First(x => x.MediaType == MediaTypes.EmbeddableMarkdown).TransmissionId.Should().Be(transmissionId);
+
+        // Checking against EmbeddableMarkdown since the deprecated version should be converted
+        contentEntities.Single(x => x.MediaType == MediaTypes.EmbeddableMarkdown)
+            .TransmissionId.Should().Be(transmissionId);
     }
 
-    [Fact]
-    public async Task Cannot_Create_Transmission_Embeddable_Content_With_Http_Url()
+    [Theory]
+    [InlineData(MediaTypes.EmbeddableMarkdown)]
+#pragma warning disable CS0618 // Type or member is obsolete
+    [InlineData(MediaTypes.EmbeddableMarkdownDeprecated)]
+#pragma warning restore CS0618 // Type or member is obsolete
+    public async Task Cannot_Create_Transmission_Embeddable_Content_With_Http_Url(string mediaType)
     {
         // Arrange
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
@@ -85,7 +96,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
         transmission.Content.ContentReference = new ContentValueDto
         {
-            MediaType = MediaTypes.EmbeddableMarkdown,
+            MediaType = mediaType,
             Value = [new LocalizationDto { LanguageCode = "nb", Value = "http://example.com/transmission" }]
         };
 
@@ -98,7 +109,6 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
         validationError.Errors.Should().HaveCount(1);
         validationError.Errors.First().ErrorMessage.Should().Contain("HTTPS");
-
     }
 
     [Fact]

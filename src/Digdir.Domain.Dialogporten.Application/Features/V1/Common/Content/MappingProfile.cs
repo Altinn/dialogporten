@@ -11,7 +11,9 @@ public sealed class MappingProfile : Profile
         // See IntermediateDialogContent
         CreateMap<IntermediateTransmissionContent, DialogTransmissionContent>();
         CreateMap<IntermediateDialogContent, DialogContent>();
-        CreateMap<DialogTransmissionContent, ContentValueDto>();
-        CreateMap<DialogContent, ContentValueDto>();
+        CreateMap<DialogTransmissionContent, ContentValueDto>()
+            .ForMember(x => x.MediaType, opt => opt.MapFrom(x => x.MediaType.ConvertIfDeprecatedMediaType()));
+        CreateMap<DialogContent, ContentValueDto>()
+            .ForMember(x => x.MediaType, opt => opt.MapFrom(x => x.MediaType.ConvertIfDeprecatedMediaType()));
     }
 }

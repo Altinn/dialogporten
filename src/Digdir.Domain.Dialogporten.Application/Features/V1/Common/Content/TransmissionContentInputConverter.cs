@@ -53,7 +53,7 @@ internal sealed class TransmissionContentInputConverter<TTransmissionContent> :
             {
                 TypeId = transmissionContentType.Id,
                 Value = sourceValue.Value,
-                MediaType = sourceValue.MediaType
+                MediaType = sourceValue.MediaType.ConvertIfDeprecatedMediaType()
             });
         }
 

@@ -4,7 +4,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner;
 
 public sealed class ServiceOwnerGroup : Group
 {
-    public const string RoutePrefix = "Serviceowner";
+    public const string RoutePrefix = "serviceowner";
     public ServiceOwnerGroup()
     {
         Configure(RoutePrefix.ToLowerInvariant(), ep =>

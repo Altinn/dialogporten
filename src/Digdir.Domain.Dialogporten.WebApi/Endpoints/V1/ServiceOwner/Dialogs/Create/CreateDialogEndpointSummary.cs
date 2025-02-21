@@ -12,7 +12,7 @@ public sealed class CreateDialogEndpointSummary : Summary<CreateDialogEndpoint>
     {
         Summary = "Creates a new dialog";
         Description = """
-                      The dialog is created with the given configuration. For more information see the documentation (link TBD).
+                      The dialog is created with the given configuration.
 
                       For detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)
                       """;

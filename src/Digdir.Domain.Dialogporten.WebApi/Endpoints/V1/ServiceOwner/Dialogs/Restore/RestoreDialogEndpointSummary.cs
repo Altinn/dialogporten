@@ -10,7 +10,7 @@ public sealed class RestoreDialogEndpointSummary : Summary<RestoreDialogEndpoint
     {
         Summary = "Restore a dialog";
         Description = """
-                      Restore a dialog. For more information see the documentation (link TBD). 
+                      Restore a dialog. 
                       """;
 
         Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Restored.FormatInvariant("aggregate");

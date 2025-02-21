@@ -136,6 +136,7 @@ static void BuildAndRun(string[] args)
                     document.RemoveSystemStringHeaderTitles();
                 };
                 s.Title = "Dialogporten";
+                s.Description = Constants.SwaggerSummary.GlobalDescription;
                 s.DocumentName = "v1";
                 s.Version = "v1";
 
@@ -150,6 +151,9 @@ static void BuildAndRun(string[] args)
 
                 // Adding ResponseHeaders for PATCH MVC controller
                 s.OperationProcessors.Add(new ProducesResponseHeaderOperationProcessor());
+
+                // Adding required scopes to security definitions
+                s.OperationProcessors.Add(new SecurityRequirementsOperationProcessor());
             };
         })
         .AddControllers(options => options.InputFormatters.Insert(0, JsonPatchInputFormatter.Get()))

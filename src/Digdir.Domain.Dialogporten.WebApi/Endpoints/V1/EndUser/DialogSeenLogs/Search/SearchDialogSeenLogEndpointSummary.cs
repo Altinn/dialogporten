@@ -11,7 +11,7 @@ public sealed class SearchDialogSeenLogEndpointSummary : Summary<SearchDialogSee
         const string summary = "Gets all seen log records for a dialog";
         Summary = summary;
         Description = $"""
-                      {summary}. For more information see the documentation (link TBD).
+                      {summary}.
                       """;
 
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("seen log records");

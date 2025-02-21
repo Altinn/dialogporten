@@ -6401,7 +6401,7 @@
         ],
         "summary": "Patch a single dialog",
         "tags": [
-          "serviceowner"
+          "Serviceowner"
         ]
       },
       "put": {

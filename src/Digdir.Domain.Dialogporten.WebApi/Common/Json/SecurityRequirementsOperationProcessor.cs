@@ -21,12 +21,16 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
         }
 
         securityRequirement[JwtBearerAuth] =
-            (context.OperationDescription.Operation.Tags.FirstOrDefault()?.ToLowerInvariant()) switch
+            context.OperationDescription.Operation.Tags.FirstOrDefault() switch
             {
-                ServiceOwnerGroup.RoutePrefix => IsServiceOwnerSearchEndpoint(context)
-                    ? [AuthorizationScope.ServiceProvider, AuthorizationScope.ServiceProviderSearch]
-                    : [AuthorizationScope.ServiceProvider],
-                EndUserGroup.RoutePrefix => [AuthorizationScope.EndUser],
+                var tag when string.Equals(tag, ServiceOwnerGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase)
+                    => IsServiceOwnerSearchEndpoint(context)
+                        ? new[] { AuthorizationScope.ServiceProvider, AuthorizationScope.ServiceProviderSearch }
+                        : new[] { AuthorizationScope.ServiceProvider },
+
+                var tag when string.Equals(tag, EndUserGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase)
+                    => new[] { AuthorizationScope.EndUser },
+
                 _ => value
             };
 

@@ -173,6 +173,57 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public async Task Creates_Update_Event_And_Activity_Created_Event_When_Activity_Is_Added()
+    {
+        // Arrange
+        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+
+        await Application.Send(createDialogCommand);
+        var dto = createDialogCommand.Dto;
+
+        var getDialogResult = await Application.Send(new GetDialogQuery { DialogId = dto.Id!.Value });
+        getDialogResult.TryPickT0(out var getDialogDto, out _);
+
+        var updateDialogDto = Mapper.Map<UpdateDialogDto>(getDialogDto);
+
+        // Act
+        updateDialogDto.Activities = [new ActivityDto
+        {
+            Type = DialogActivityType.Values.DialogClosed,
+            PerformedBy = new() {ActorType = ActorType.Values.ServiceOwner}
+        }];
+
+        var updateDialogCommand = new UpdateDialogCommand
+        {
+            Id = dto.Id!.Value,
+            Dto = updateDialogDto
+        };
+
+        await Application.Send(updateDialogCommand);
+
+        await harness.Consumed
+            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
+            .FirstOrDefault();
+
+        await harness.Consumed
+            .SelectAsync<DialogActivityCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
+            .FirstOrDefault();
+        var cloudEvents = Application.PopPublishedCloudEvents();
+
+        // Assert
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dto.Id!.Value.ToString());
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == dto.ServiceResource);
+        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == dto.Party);
+
+        cloudEvents.Should().ContainSingle(cloudEvent =>
+            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogUpdatedDomainEvent)));
+
+        cloudEvents.Should().ContainSingle(cloudEvent =>
+            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogActivityType.Values.DialogClosed)));
+    }
+
+    [Fact]
     public async Task Creates_Update_Event_And_Transmission_Created_Event_When_Transmission_Is_Added()
     {
         // Arrange

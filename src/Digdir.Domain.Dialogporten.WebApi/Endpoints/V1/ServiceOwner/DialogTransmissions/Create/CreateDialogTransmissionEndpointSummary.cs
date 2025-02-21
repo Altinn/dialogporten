@@ -12,7 +12,7 @@ public sealed class CreateDialogTransmissionEndpointSummary : Summary<CreateDial
     {
         Summary = "Adds a transmission to a dialog";
         Description = $"""
-                       The transmission is created with the given configuration. For more information see the documentation (link TBD).
+                       The transmission is created with the given configuration.
 
                        {Constants.SwaggerSummary.OptimisticConcurrencyNote}
                        """;

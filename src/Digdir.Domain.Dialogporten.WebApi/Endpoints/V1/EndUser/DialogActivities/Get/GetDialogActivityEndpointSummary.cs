@@ -10,7 +10,7 @@ public sealed class GetDialogActivityEndpointSummary : Summary<GetDialogActivity
     {
         Summary = "Gets a single dialog activity";
         Description = """
-                      Gets a single activity belonging to a dialog. For more information see the documentation (link TBD).
+                      Gets a single activity belonging to a dialog.
                       """;
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("activity");
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;

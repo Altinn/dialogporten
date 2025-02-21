@@ -12,7 +12,7 @@ public sealed class DeleteDialogEndpointSummary : Summary<DeleteDialogEndpoint>
     {
         Summary = "Deletes a dialog";
         Description = """
-                      Deletes a given dialog (soft delete). For more information see the documentation (link TBD).
+                      Deletes a given dialog (soft delete).
 
                       Note that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.
                       If end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.

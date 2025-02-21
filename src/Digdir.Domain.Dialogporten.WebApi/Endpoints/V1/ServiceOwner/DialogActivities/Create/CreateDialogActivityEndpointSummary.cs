@@ -12,7 +12,7 @@ public sealed class CreateDialogActivityEndpointSummary : Summary<CreateDialogAc
     {
         Summary = "Adds a activity to a dialogs activity history";
         Description = $"""
-                       The activity is created with the given configuration. For more information see the documentation (link TBD).
+                       The activity is created with the given configuration.
 
                        {Constants.SwaggerSummary.OptimisticConcurrencyNote}
                        """;

@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Buffers.Text;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.Common;
@@ -42,6 +43,21 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
             validationResult.AddError(tokenPropertyName, "Token has expired");
         }
 
+        var body = decodedTokenParts.Body;
+        var claims = new List<Claim>
+        {
+            new(DialogTokenClaimTypes.C, body.GetProperty(DialogTokenClaimTypes.C).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.Level, body.GetProperty(DialogTokenClaimTypes.Level).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.Party, body.GetProperty(DialogTokenClaimTypes.Party).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.Scope, body.GetProperty(DialogTokenClaimTypes.Scope).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.DialogId, body.GetProperty(DialogTokenClaimTypes.DialogId).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.A, body.GetProperty(DialogTokenClaimTypes.A).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.Issuer, body.GetProperty(DialogTokenClaimTypes.Issuer).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.Expire, body.GetProperty(DialogTokenClaimTypes.Expire).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.IssuedAt, body.GetProperty(DialogTokenClaimTypes.IssuedAt).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.NotVisibleBefore, body.GetProperty(DialogTokenClaimTypes.NotVisibleBefore).GetString() ?? string.Empty)
+        };
+        validationResult.Claims = new ClaimsPrincipal(new ClaimsIdentity(claims, "DialogToken"));
         return validationResult;
     }
 
@@ -154,6 +170,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         {
             return false;
         }
+
 
         var signedPart = signedPartBuffer[..signedPartLength];
 
@@ -279,19 +296,19 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     }
 }
 
-// internal sealed class DialogTokenClaimTypes
-// {
-//     public const string C = "c";
-//     public const string Level = "l";
-//     public const string Party = "p";
-//     public const string Scope = "s";
-//     public const string DialogId = "i";
-//     public const string A = "a";
-//     public const string Issuer = "iss";
-//     public const string IssuedAt = "iat";
-//     public const string NotVisibleBefore = "nbf";
-//     public const string Expire = "exp";
-// }
+internal sealed class DialogTokenClaimTypes
+{
+    public const string C = "c";
+    public const string Level = "l";
+    public const string Party = "p";
+    public const string Scope = "s";
+    public const string DialogId = "i";
+    public const string A = "a";
+    public const string Issuer = "iss";
+    public const string IssuedAt = "iat";
+    public const string NotVisibleBefore = "nbf";
+    public const string Expire = "exp";
+}
 
 public sealed record DialogTokenClaims(
     string C,

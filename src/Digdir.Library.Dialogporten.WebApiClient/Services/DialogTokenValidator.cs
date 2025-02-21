@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Buffers.Text;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -42,20 +43,24 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         {
             validationResult.AddError(tokenPropertyName, "Token has expired");
         }
+        if (!validationResult.IsValid)
+        {
+            return validationResult;
+        }
 
         var body = decodedTokenParts.Body;
         var claims = new List<Claim>
         {
             new(DialogTokenClaimTypes.C, body.GetProperty(DialogTokenClaimTypes.C).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.Level, body.GetProperty(DialogTokenClaimTypes.Level).GetString() ?? string.Empty),
+            new(DialogTokenClaimTypes.Level, body.GetProperty(DialogTokenClaimTypes.Level).GetInt64().ToString(CultureInfo.InvariantCulture)),
             new(DialogTokenClaimTypes.Party, body.GetProperty(DialogTokenClaimTypes.Party).GetString() ?? string.Empty),
             new(DialogTokenClaimTypes.Scope, body.GetProperty(DialogTokenClaimTypes.Scope).GetString() ?? string.Empty),
             new(DialogTokenClaimTypes.DialogId, body.GetProperty(DialogTokenClaimTypes.DialogId).GetString() ?? string.Empty),
             new(DialogTokenClaimTypes.A, body.GetProperty(DialogTokenClaimTypes.A).GetString() ?? string.Empty),
             new(DialogTokenClaimTypes.Issuer, body.GetProperty(DialogTokenClaimTypes.Issuer).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.Expire, body.GetProperty(DialogTokenClaimTypes.Expire).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.IssuedAt, body.GetProperty(DialogTokenClaimTypes.IssuedAt).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.NotVisibleBefore, body.GetProperty(DialogTokenClaimTypes.NotVisibleBefore).GetString() ?? string.Empty)
+            new(DialogTokenClaimTypes.Expire, body.GetProperty(DialogTokenClaimTypes.Expire).GetInt64().ToString(CultureInfo.InvariantCulture)),
+            new(DialogTokenClaimTypes.IssuedAt, body.GetProperty(DialogTokenClaimTypes.IssuedAt).GetInt64().ToString(CultureInfo.InvariantCulture)),
+            new(DialogTokenClaimTypes.NotVisibleBefore, body.GetProperty(DialogTokenClaimTypes.NotVisibleBefore).GetInt64().ToString(CultureInfo.InvariantCulture))
         };
         validationResult.Claims = new ClaimsPrincipal(new ClaimsIdentity(claims, "DialogToken"));
         return validationResult;
@@ -77,8 +82,8 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         // Validate that the header and body are valid JSON
 
-        if (!IsValidJson(decodedToken.Header, out var headerJson) ||
-            !IsValidJson(decodedToken.Body, out var bodyJson))
+        if (!TryParseJson(decodedToken.Header, out var headerJson) ||
+            !TryParseJson(decodedToken.Body, out var bodyJson))
         {
             return false;
         }
@@ -86,7 +91,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         return true;
     }
 
-    private static bool IsValidJson(ReadOnlySpan<byte> span, out JsonElement jsonElement)
+    private static bool TryParseJson(ReadOnlySpan<byte> span, out JsonElement jsonElement)
     {
         jsonElement = default;
         var reader = new Utf8JsonReader(span);
@@ -222,12 +227,6 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
             return false;
         }
 
-        // Span<char> kidCharBuffer = stackalloc char[Encoding.UTF8.GetMaxCharCount(tokenKid.GetBytesFromBase64().Length)];
-        // if (!Encoding.UTF8.TryGetChars(tokenKid.GetBytesFromBase64(), kidCharBuffer, out var charsWritten))
-        // {
-        //     return false;
-        // }
-
         foreach (var (kid, key) in keyPairs)
         {
             if (!kid.AsSpan().SequenceEqual(tokenKid.GetString())) continue;
@@ -237,27 +236,6 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         return false;
     }
-
-
-    // private static bool TryGetJsonElement(ref Utf8JsonReader reader, out JsonElement jsonElement)
-    // {
-    //     jsonElement = default;
-    //     reader.Read();
-    //     if (reader.TokenType != JsonTokenType.PropertyName)
-    //     {
-    //         return false;
-    //     }
-    //     var name = reader.ValueSpan;
-    //     reader.Read();
-    //     if (reader.TokenType == JsonTokenType.PropertyName)
-    //     {
-    //         return false;
-    //     }
-    //
-    //     var value = reader.ValueSpan;
-    //     jsonElement = new JsonElement();
-    //     return true;
-    // }
 
     private readonly ref struct JwksTokenParts<T>
         where T : unmanaged
@@ -279,7 +257,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         }
     }
 
-    public readonly ref struct JsonTokenParts
+    private readonly ref struct JsonTokenParts
     {
         public JsonElement Header { get; }
 
@@ -296,7 +274,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     }
 }
 
-internal sealed class DialogTokenClaimTypes
+internal static class DialogTokenClaimTypes
 {
     public const string C = "c";
     public const string Level = "l";
@@ -308,29 +286,4 @@ internal sealed class DialogTokenClaimTypes
     public const string IssuedAt = "iat";
     public const string NotVisibleBefore = "nbf";
     public const string Expire = "exp";
-}
-
-public sealed record DialogTokenClaims(
-    string C,
-    string Level,
-    string Party,
-    string Scope,
-    string DialogId,
-    string A,
-    string Issuer,
-    long IssuedAt,
-    long NotVisibleBefore,
-    long Expire
-)
-{
-    public string C { get; private set; } = C;
-    public string Level { get; private set; } = Level;
-    public string Party { get; private set; } = Party;
-    public string Scope { get; private set; } = Scope;
-    public string DialogId { get; private set; } = DialogId;
-    public string A { get; private set; } = A;
-    public string Issuer { get; private set; } = Issuer;
-    public long IssuedAt { get; private set; } = IssuedAt;
-    public long NotVisibleBefore { get; private set; } = NotVisibleBefore;
-    public long Expire { get; private set; } = Expire;
 }

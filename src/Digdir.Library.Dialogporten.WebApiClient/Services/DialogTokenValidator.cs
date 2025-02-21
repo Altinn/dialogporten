@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Buffers.Text;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.Common;
@@ -26,12 +27,13 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         var validationResult = new DefaultValidationResult();
         Span<byte> tokenDecodeBuffer = stackalloc byte[Base64Url.GetMaxDecodedLength(token.Length)];
 
-        if (!TryDecodeToken(token, tokenDecodeBuffer, out var tokenParts, out var decodedTokenParts))
+        if (!TryDecodeToken(token, tokenDecodeBuffer, out var tokenParts, out var decodedTokenParts, out var claimsPrincipal))
         {
             validationResult.AddError(tokenPropertyName, "Invalid token format");
             return validationResult;
         }
 
+        validationResult.ClaimsPrincipal = claimsPrincipal;
         if (!VerifySignature(tokenParts, decodedTokenParts))
         {
             validationResult.AddError(tokenPropertyName, "Invalid signature");
@@ -49,9 +51,11 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         ReadOnlySpan<char> token,
         Span<byte> tokenDecodeBuffer,
         out JwksTokenParts<char> tokenParts,
-        out JwksTokenParts<byte> decodedTokenParts)
+        out JwksTokenParts<byte> decodedTokenParts,
+        [NotNullWhen(true)] out ClaimsPrincipal? claimsPrincipal)
     {
         decodedTokenParts = default;
+        claimsPrincipal = null;
         if (!TryGetTokenParts(token, out tokenParts) ||
             !TryDecodeParts(tokenDecodeBuffer, tokenParts, out decodedTokenParts))
         {
@@ -59,21 +63,8 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         }
 
         // Validate that the header and body are valid JSON
-        return IsValidJson(decodedTokenParts.Header) &&
-               IsValidJson(decodedTokenParts.Body);
-    }
-
-    private static bool IsValidJson(ReadOnlySpan<byte> span)
-    {
-        var reader = new Utf8JsonReader(span);
-        try
-        {
-            while (reader.Read()) { }
-
-            return true;
-        }
-        catch (JsonException) { }
-        return false;
+        return decodedTokenParts.Header.IsValidJson() &&
+               decodedTokenParts.Body.TryGetClaimsPrincipal(out claimsPrincipal);
     }
 
     private static bool TryGetTokenParts(ReadOnlySpan<char> token, out JwksTokenParts<char> tokenParts)

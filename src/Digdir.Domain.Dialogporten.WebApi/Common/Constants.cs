@@ -10,6 +10,7 @@ internal static class Constants
 
     internal static class SwaggerSummary
     {
+        internal const string GlobalDescription = "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.<br><br>All operations* described within this document require authentication and authorization. Read more at <a href=\"https://docs.altinn.studio/dialogporten/user-guides/authenticating/\">https://docs.altinn.studio/dialogporten/user-guides/authenticating/</a><br><br><strong>All GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).</strong><br><br>For more information about this product, see <a href=\"https://docs.altinn.studio/dialogporten\">https://docs.altinn.studio/dialogporten</a><br><br><em>* Except the metadata APIs";
         internal const string ReturnedResult = "Successfully returned the dialog {0}.";
         internal const string Created = "The UUID of the created dialog {0}. A relative URL to the newly created activity is set in the \"Location\" header.";
         internal const string Deleted = "The dialog {0} was deleted successfully.";
@@ -21,8 +22,8 @@ internal static class Constants
         internal const string EndUserAuthenticationFailure = "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".";
         internal const string DialogNotFound = "The given dialog ID was not found.";
         internal const string DialogDeleted = $"Entity with the given key(s) is removed.";
-        internal const string DialogActivityNotFound = "The given dialog ID was not found or was deleted, or the given activity ID was not found.";
-        internal const string DialogTransmissionNotFound = "The given dialog ID was not found or was deleted, or the given transmission ID was not found.";
+        internal const string DialogActivityNotFound = "The specified dialog ID or activity ID was not found.";
+        internal const string DialogTransmissionNotFound = "The specified dialog ID or transmission ID was not found.";
         internal const string RevisionMismatch = "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.";
         internal const string AccessDeniedToDialog = "Unauthorized to {0} the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).";
         internal const string AccessDeniedToDialogForChildEntity = "Unauthorized to {0} child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy).";

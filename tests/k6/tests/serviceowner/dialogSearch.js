@@ -22,6 +22,7 @@ import {
 import { default as dialogToInsert } from './testdata/01-create-dialog.js';
 
 import { getDefaultEnduserOrgNo, getDefaultEnduserSsn } from "../../common/token.js";
+import { notValidEnduserId } from '../../common/config.js';
 
 export default function () {
 
@@ -203,7 +204,7 @@ export default function () {
     })
 
     describe('List with invalid enduserid', () => {
-        let invalidEndUserId = "urn:altinn:person:identifier-no:08895699684";
+        let invalidEndUserId = "urn:altinn:person:identifier-no:" + notValidEnduserId;
         let r = getSO('dialogs/' + defaultFilter + '&EndUserId=' + invalidEndUserId + '&ServiceResource=' + auxResource);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();

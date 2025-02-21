@@ -104,7 +104,7 @@ jobs:
     if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-rc.${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-      path: 'src/Digdir.Library.Dialogporten.WebApiClient.csproj'
+      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

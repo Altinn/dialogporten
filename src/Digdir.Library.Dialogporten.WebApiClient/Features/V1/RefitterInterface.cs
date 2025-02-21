@@ -208,7 +208,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Adds a transmission to a dialog</summary>
         /// <remarks>
-        /// The transmission is created with the given configuration. For more information see the documentation (link TBD).
+        /// The transmission is created with the given configuration.
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
@@ -262,7 +262,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         Task<IApiResponse<string>> V1ServiceOwnerDialogTransmissionsCreateDialogTransmission(System.Guid dialogId, [Body, AliasAs("CreateTransmissionRequest")] V1ServiceOwnerDialogTransmissionsCreate_TransmissionRequest createTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog transmission</summary>
-        /// <remarks>Gets a single transmission belonging to a dialog. For more information see the documentation (link TBD).</remarks>
+        /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -284,7 +284,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>The given dialog ID was not found or was deleted, or the given transmission ID was not found.</description>
+        /// <description>The specified dialog ID or transmission ID was not found.</description>
         /// </item>
         /// <item>
         /// <term>410</term>
@@ -297,7 +297,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
-        /// <remarks>Gets all seen log records for a dialog. For more information see the documentation (link TBD).</remarks>
+        /// <remarks>Gets all seen log records for a dialog.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -332,7 +332,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog>>> V1ServiceOwnerDialogSeenLogsSearchSearchDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog seen log record</summary>
-        /// <remarks>Gets a single dialog seen log record. For more information see the documentation (link TBD).</remarks>
+        /// <remarks>Gets a single dialog seen log record.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -368,7 +368,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Replaces a dialog</summary>
         /// <remarks>
-        /// Replaces a given dialog with the supplied model. For more information see the documentation (link TBD).
+        /// Replaces a given dialog with the supplied model.
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
@@ -419,7 +419,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a single dialog</summary>
         /// <remarks>
-        /// Gets a single dialog aggregate. For more information see the documentation (link TBD).
+        /// Gets a single dialog aggregate.
         /// 
         /// Note that this operation may return deleted dialogs (see the field `DeletedAt`).
         /// </remarks>
@@ -455,7 +455,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Deletes a dialog</summary>
         /// <remarks>
-        /// Deletes a given dialog (soft delete). For more information see the documentation (link TBD).
+        /// Deletes a given dialog (soft delete).
         /// 
         /// Note that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.
         /// If end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.
@@ -557,7 +557,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
-        /// Performs a search for dialogs, returning a paginated list of dialogs. For more information see the documentation (link TBD).
+        /// Performs a search for dialogs, returning a paginated list of dialogs.
         /// 
         /// * All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00+01:00
         /// * See "continuationToken" in the response for how to get the next page of results.
@@ -587,7 +587,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Creates a new dialog</summary>
         /// <remarks>
-        /// The dialog is created with the given configuration. For more information see the documentation (link TBD).
+        /// The dialog is created with the given configuration.
         /// 
         /// For detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)
         /// </remarks>
@@ -633,7 +633,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
 
         /// <summary>Restore a dialog</summary>
-        /// <remarks>Restore a dialog. For more information see the documentation (link TBD).</remarks>
+        /// <remarks>Restore a dialog.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -669,7 +669,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Permanently deletes a dialog</summary>
         /// <remarks>
-        /// Deletes a given dialog (hard delete). For more information see the documentation (link TBD).
+        /// Deletes a given dialog (hard delete).
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
@@ -727,15 +727,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>403</term>
         /// <description>Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
         /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json")]
+        [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogActivitiesQueriesSearch_Activity>>> V1ServiceOwnerDialogActivitiesSearchSearchDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Adds a activity to a dialogs activity history</summary>
         /// <remarks>
-        /// The activity is created with the given configuration. For more information see the documentation (link TBD).
+        /// The activity is created with the given configuration.
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
@@ -817,7 +821,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         Task<IApiResponse<V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationCondition>> V1ServiceOwnerDialogActivitiesNotificationConditionNotificationCondition(System.Guid dialogId, [Query] V1ServiceOwnerDialogActivitiesNotificationConditionNotificationConditionQueryParams queryParams, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog activity</summary>
-        /// <remarks>Gets a single activity belonging to a dialog. For more information see the documentation (link TBD).</remarks>
+        /// <remarks>Gets a single activity belonging to a dialog.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -839,7 +843,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>The given dialog ID was not found or was deleted, or the given activity ID was not found.</description>
+        /// <description>The specified dialog ID or activity ID was not found.</description>
         /// </item>
         /// <item>
         /// <term>410</term>

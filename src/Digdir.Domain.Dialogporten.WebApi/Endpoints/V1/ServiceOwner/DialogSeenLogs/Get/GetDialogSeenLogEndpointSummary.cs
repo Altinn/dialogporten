@@ -10,7 +10,7 @@ public sealed class GetDialogSeenLogEndpointSummary : Summary<GetDialogSeenLogEn
     {
         Summary = "Gets a single dialog seen log record";
         Description = """
-                      Gets a single dialog seen log record. For more information see the documentation (link TBD).
+                      Gets a single dialog seen log record.
                       """;
 
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("seen log record");

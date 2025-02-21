@@ -24,6 +24,7 @@ public sealed class GetDialogTransmissionEndpoint : Endpoint<GetTransmissionQuer
 
         Description(b => b.ProducesOneOf<TransmissionDto>(
             StatusCodes.Status200OK,
+            StatusCodes.Status410Gone,
             StatusCodes.Status404NotFound));
     }
 

@@ -12,7 +12,7 @@ public sealed class UpdateDialogEndpointSummary : Summary<UpdateDialogEndpoint>
     {
         Summary = "Replaces a dialog";
         Description = $"""
-                       Replaces a given dialog with the supplied model. For more information see the documentation (link TBD).
+                       Replaces a given dialog with the supplied model.
 
                        {Constants.SwaggerSummary.OptimisticConcurrencyNote}
                        """;

@@ -4846,6 +4846,7 @@
     }
   },
   "info": {
+    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/dialogporten\u0022\u003Ehttps://docs.altinn.studio/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs",
     "title": "Dialogporten",
     "version": "v1"
   },
@@ -4897,7 +4898,7 @@
     },
     "/api/v1/enduser/dialogs": {
       "get": {
-        "description": "Performs a search for dialogs, returning a paginated list of dialogs. For more information see the documentation (link TBD).\n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
+        "description": "Performs a search for dialogs, returning a paginated list of dialogs. \n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
         "operationId": "V1EndUserDialogsSearch_SearchDialog",
         "parameters": [
           {
@@ -5133,7 +5134,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a list of dialogs",
@@ -5144,7 +5147,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}": {
       "get": {
-        "description": "Gets a single dialog aggregate. For more information see the documentation (link TBD).",
+        "description": "Gets a single dialog aggregate. ",
         "operationId": "V1EndUserDialogsGet_GetDialog",
         "parameters": [
           {
@@ -5187,7 +5190,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a single dialog",
@@ -5230,11 +5235,23 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a list of dialog activities",
@@ -5245,7 +5262,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}": {
       "get": {
-        "description": "Gets a single activity belonging to a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets a single activity belonging to a dialog.",
         "operationId": "V1EndUserDialogActivitiesGet_GetDialogActivity",
         "parameters": [
           {
@@ -5292,12 +5309,14 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given activity ID was not found."
+            "description": "The specified dialog ID or activity ID was not found."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a single dialog activity",
@@ -5356,7 +5375,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "tags": [
@@ -5366,7 +5387,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/seenlog": {
       "get": {
-        "description": "Gets all seen log records for a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets all seen log records for a dialog.",
         "operationId": "V1EndUserDialogSeenLogsSearch_SearchDialogSeenLog",
         "parameters": [
           {
@@ -5412,7 +5433,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets all seen log records for a dialog",
@@ -5423,7 +5446,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}": {
       "get": {
-        "description": "Gets a single dialog seen log record. For more information see the documentation (link TBD).",
+        "description": "Gets a single dialog seen log record.",
         "operationId": "V1EndUserDialogSeenLogsGet_GetDialogSeenLog",
         "parameters": [
           {
@@ -5475,7 +5498,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a single dialog seen log record",
@@ -5567,7 +5592,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "tags": [
@@ -5609,11 +5636,26 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a list of dialog transmissions",
@@ -5624,7 +5666,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
-        "description": "Gets a single transmission belonging to a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets a single transmission belonging to a dialog.",
         "operationId": "V1EndUserDialogTransmissionsGet_GetDialogTransmission",
         "parameters": [
           {
@@ -5671,12 +5713,17 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given transmission ID was not found."
+            "description": "The specified dialog ID or transmission ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a single dialog transmission",
@@ -5687,7 +5734,7 @@
     },
     "/api/v1/enduser/parties": {
       "get": {
-        "description": "Gets the list of authorized parties for the end user. For more information see the documentation (link TBD).",
+        "description": "Gets the list of authorized parties for the end user.",
         "operationId": "V1EndUserPartiesGet_GetParties",
         "responses": {
           "200": {
@@ -5712,7 +5759,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets the list of authorized parties for the end user",
@@ -5723,7 +5772,7 @@
     },
     "/api/v1/serviceowner/dialogs": {
       "get": {
-        "description": "Performs a search for dialogs, returning a paginated list of dialogs. For more information see the documentation (link TBD).\n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
+        "description": "Performs a search for dialogs, returning a paginated list of dialogs.\n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
         "operationId": "V1ServiceOwnerDialogsSearch_SearchDialog",
         "parameters": [
           {
@@ -5987,7 +6036,10 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider",
+              "digdir:dialogporten.serviceprovider.search"
+            ]
           }
         ],
         "summary": "Gets a list of dialogs",
@@ -5996,7 +6048,7 @@
         ]
       },
       "post": {
-        "description": "The dialog is created with the given configuration. For more information see the documentation (link TBD).\n\nFor detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)",
+        "description": "The dialog is created with the given configuration.\n\nFor detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)",
         "operationId": "V1ServiceOwnerDialogsCreate_Dialog",
         "requestBody": {
           "content": {
@@ -6065,7 +6117,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Creates a new dialog",
@@ -6076,7 +6130,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}": {
       "delete": {
-        "description": "Deletes a given dialog (soft delete). For more information see the documentation (link TBD).\n\nNote that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.\nIf end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
+        "description": "Deletes a given dialog (soft delete).\n\nNote that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.\nIf end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsDelete_Dialog",
         "parameters": [
           {
@@ -6153,7 +6207,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Deletes a dialog",
@@ -6162,7 +6218,7 @@
         ]
       },
       "get": {
-        "description": "Gets a single dialog aggregate. For more information see the documentation (link TBD).\n\nNote that this operation may return deleted dialogs (see the field \u0060DeletedAt\u0060).",
+        "description": "Gets a single dialog aggregate.\n\nNote that this operation may return deleted dialogs (see the field \u0060DeletedAt\u0060).",
         "operationId": "V1ServiceOwnerDialogsGet_GetDialog",
         "parameters": [
           {
@@ -6214,7 +6270,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a single dialog",
@@ -6335,7 +6393,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Patch a single dialog",
@@ -6344,7 +6404,7 @@
         ]
       },
       "put": {
-        "description": "Replaces a given dialog with the supplied model. For more information see the documentation (link TBD).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "Replaces a given dialog with the supplied model.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsUpdate_Dialog",
         "parameters": [
           {
@@ -6442,7 +6502,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Replaces a dialog",
@@ -6453,7 +6515,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/purge": {
       "post": {
-        "description": "Deletes a given dialog (hard delete). For more information see the documentation (link TBD).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
+        "description": "Deletes a given dialog (hard delete).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsPurge_PurgeDialog",
         "parameters": [
           {
@@ -6508,7 +6570,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Permanently deletes a dialog",
@@ -6519,7 +6583,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/restore": {
       "post": {
-        "description": "Restore a dialog. For more information see the documentation (link TBD). ",
+        "description": "Restore a dialog. ",
         "operationId": "V1ServiceOwnerDialogsRestore_RestoreDialog",
         "parameters": [
           {
@@ -6574,7 +6638,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Restore a dialog",
@@ -6651,7 +6717,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Returns a boolean value based on conditions used to determine if a notification is to be sent",
@@ -6694,11 +6762,23 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a list of dialog activities",
@@ -6707,7 +6787,7 @@
         ]
       },
       "post": {
-        "description": "The activity is created with the given configuration. For more information see the documentation (link TBD).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "The activity is created with the given configuration.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogActivitiesCreate_DialogActivity",
         "parameters": [
           {
@@ -6818,7 +6898,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Adds a activity to a dialogs activity history",
@@ -6829,7 +6911,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}": {
       "get": {
-        "description": "Gets a single activity belonging to a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets a single activity belonging to a dialog.",
         "operationId": "V1ServiceOwnerDialogActivitiesGet_GetDialogActivity",
         "parameters": [
           {
@@ -6876,7 +6958,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given activity ID was not found."
+            "description": "The specified dialog ID or activity ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6884,7 +6966,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a single dialog activity",
@@ -6895,7 +6979,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog": {
       "get": {
-        "description": "Gets all seen log records for a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets all seen log records for a dialog.",
         "operationId": "V1ServiceOwnerDialogSeenLogsSearch_SearchDialogSeenLog",
         "parameters": [
           {
@@ -6944,7 +7028,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets all seen log records for a dialog",
@@ -6955,7 +7041,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}": {
       "get": {
-        "description": "Gets a single dialog seen log record. For more information see the documentation (link TBD).",
+        "description": "Gets a single dialog seen log record.",
         "operationId": "V1ServiceOwnerDialogSeenLogsGet_GetDialogSeenLog",
         "parameters": [
           {
@@ -7010,7 +7096,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a single dialog seen log record",
@@ -7070,7 +7158,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a list of dialog transmissions",
@@ -7079,7 +7169,7 @@
         ]
       },
       "post": {
-        "description": "The transmission is created with the given configuration. For more information see the documentation (link TBD).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "The transmission is created with the given configuration.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogTransmissionsCreate_DialogTransmission",
         "parameters": [
           {
@@ -7190,7 +7280,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Adds a transmission to a dialog",
@@ -7201,7 +7293,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
-        "description": "Gets a single transmission belonging to a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets a single transmission belonging to a dialog.",
         "operationId": "V1ServiceOwnerDialogTransmissionsGet_GetDialogTransmission",
         "parameters": [
           {
@@ -7248,7 +7340,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given transmission ID was not found."
+            "description": "The specified dialog ID or transmission ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -7256,7 +7348,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a single dialog transmission",

@@ -11,7 +11,7 @@ public sealed class GetDialogTransmissionEndpointSummary : Summary<GetDialogTran
     {
         Summary = "Gets a single dialog transmission";
         Description = """
-                      Gets a single transmission belonging to a dialog. For more information see the documentation (link TBD).
+                      Gets a single transmission belonging to a dialog.
                       """;
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("transmission");
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope.ServiceProvider);

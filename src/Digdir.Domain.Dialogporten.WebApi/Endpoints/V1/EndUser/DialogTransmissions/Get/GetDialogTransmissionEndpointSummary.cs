@@ -11,11 +11,12 @@ public sealed class GetDialogTransmissionEndpointSummary : Summary<GetDialogTran
     {
         Summary = "Gets a single dialog transmission";
         Description = """
-                      Gets a single transmission belonging to a dialog. For more information see the documentation (link TBD).
+                      Gets a single transmission belonging to a dialog.
                       """;
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("transmission");
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure.FormatInvariant(AuthorizationScope.EndUser);
         Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialogForChildEntity.FormatInvariant("get");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogTransmissionNotFound;
+        Responses[StatusCodes.Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

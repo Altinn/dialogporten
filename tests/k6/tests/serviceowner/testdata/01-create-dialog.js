@@ -1,6 +1,6 @@
 import { uuidv4 } from '../../../common/testimports.js'
 import { getDefaultEnduserSsn } from "../../../common/token.js";
-import { sentinelValue } from "../../../common/config.js";
+import { sentinelValue, defaultServiceOwnerOrgNo } from "../../../common/config.js";
 
 export default function (endUser = getDefaultEnduserSsn()) {
     return {
@@ -302,7 +302,7 @@ export default function (endUser = getDefaultEnduserSsn()) {
                 "type": "Information",
                 "performedBy": {
                     "actorType": "partyRepresentative",
-                    "actorId": "urn:altinn:organization:identifier-no:991825827"
+                    "actorId": "urn:altinn:organization:identifier-no:" + defaultServiceOwnerOrgNo
                 },
                 "description": [
                     {

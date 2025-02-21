@@ -224,6 +224,33 @@ public class DialogTokenValidatorTests
         Assert.Contains("Invalid token format", result.Errors["token"]);
     }
 
+    [Fact]
+    public void ShouldContainClaims_GivenValidTokenWithClaims()
+    {
+        // Arrange
+        var sut = GetSut(
+            DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
+            ValidPublicKeyPairs);
+
+        // Act
+        var result = sut.Validate(DialogToken);
+
+        // Assert
+        Assert.True(result.IsValid);
+        Assert.NotNull(result.ClaimsPrincipal);
+        Assert.Equal("38cfdcb9-388b-47b8-a1bf-9f15b2819894", result.ClaimsPrincipal.FindFirst("jti")!.Value);
+        Assert.Equal("urn:altinn:person:identifier-no:14886498226", result.ClaimsPrincipal.FindFirst("c")!.Value);
+        Assert.Equal("3", result.ClaimsPrincipal.FindFirst("l")!.Value);
+        Assert.Equal("urn:altinn:person:identifier-no:14886498226", result.ClaimsPrincipal.FindFirst("p")!.Value);
+        Assert.Equal("urn:altinn:resource:dagl-correspondence", result.ClaimsPrincipal.FindFirst("s")!.Value);
+        Assert.Equal("0194fe82-9280-77a5-a7cd-5ff0e6a6fa07", result.ClaimsPrincipal.FindFirst("i")!.Value);
+        Assert.Equal("read", result.ClaimsPrincipal.FindFirst("a")!.Value);
+        Assert.Equal("https://platform.tt02.altinn.no/dialogporten/api/v1", result.ClaimsPrincipal.FindFirst("iss")!.Value);
+        Assert.Equal("1739523367", result.ClaimsPrincipal.FindFirst("iat")!.Value);
+        Assert.Equal("1739523367", result.ClaimsPrincipal.FindFirst("nbf")!.Value);
+        Assert.Equal("1739523967", result.ClaimsPrincipal.FindFirst("exp")!.Value);
+    }
+
     private static DialogTokenValidator GetSut(DateTimeOffset simulatedNow, params PublicKeyPair[] publicKeyPairs)
     {
         var keyCache = Substitute.For<IEdDsaSecurityKeysCache>();

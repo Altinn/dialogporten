@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using Altinn.ApiClients.Dialogporten.Services;
+
 namespace Altinn.ApiClients.Dialogporten;
 
 public interface IDialogTokenValidator
@@ -7,6 +10,7 @@ public interface IDialogTokenValidator
 
 public interface IValidationResult
 {
-    bool IsValid { get; }
+    [MemberNotNullWhen(true, "Claims")] bool IsValid { get; }
+    DialogTokenClaims? Claims { get; set; }
     Dictionary<string, List<string>> Errors { get; }
 }

@@ -26,11 +26,12 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         var validationResult = new DefaultValidationResult();
         Span<byte> tokenDecodeBuffer = stackalloc byte[Base64Url.GetMaxDecodedLength(token.Length)];
 
-        if (!TryDecodeToken(token, tokenDecodeBuffer, out var tokenParts, out var decodedTokenParts))
+        if (!TryDecodeToken(token, tokenDecodeBuffer, out var tokenParts, out var decodedTokenParts, out var claims))
         {
             validationResult.AddError(tokenPropertyName, "Invalid token format");
             return validationResult;
         }
+        validationResult.Claims = claims;
 
         if (!VerifySignature(tokenParts, decodedTokenParts))
         {
@@ -49,8 +50,10 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         ReadOnlySpan<char> token,
         Span<byte> tokenDecodeBuffer,
         out JwksTokenParts<char> tokenParts,
-        out JwksTokenParts<byte> decodedTokenParts)
+        out JwksTokenParts<byte> decodedTokenParts,
+        [NotNullWhen(true)] out DialogTokenClaims? claims)
     {
+        claims = null;
         decodedTokenParts = default;
         if (!TryGetTokenParts(token, out tokenParts) ||
             !TryDecodeParts(tokenDecodeBuffer, tokenParts, out decodedTokenParts))
@@ -66,9 +69,16 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     private static bool IsValidJson(ReadOnlySpan<byte> span)
     {
         var reader = new Utf8JsonReader(span);
+        var temp = new Dictionary<byte[], byte[]>();
         try
         {
-            while (reader.Read()) { }
+            while (reader.Read())
+            {
+                var prop = reader.ValueSpan;
+                reader.Read();
+                var value = reader.ValueSpan;
+                temp.Add(prop.ToArray(), value.ToArray());
+            }
 
             return true;
         }
@@ -258,3 +268,30 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         }
     }
 }
+
+internal sealed class DialogTokenClaimTypes
+{
+    public const string C = "c";
+    public const string Level = "l";
+    public const string Party = "p";
+    public const string Scope = "s";
+    public const string DialogId = "i";
+    public const string A = "a";
+    public const string Issuer = "iss";
+    public const string IssuedAt = "iat";
+    public const string NotVisibleBefore = "nbf";
+    public const string Expire = "exp";
+}
+
+public sealed record DialogTokenClaims(
+    string C,
+    string Level,
+    string Party,
+    string Scope,
+    string DialogId,
+    string A,
+    string Issuer,
+    long IssuedAt,
+    long NotVisibleBefore,
+    long Expire
+);

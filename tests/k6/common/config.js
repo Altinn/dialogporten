@@ -39,7 +39,7 @@ export const baseUrls = {
 };
 
 export const defaultEndUserOrgNo = "310923044"; // ÆRLIG UROKKELIG TIGER AS
-export const defaultEndUserSsn = "14886498226"; // UROMANTISK LITTERATUR, has "DAGL" for 310923044
+export const defaultEndUserSsn = "08844397713"; // UROMANTISK LITTERATUR, has "DAGL" for 310923044
 export const defaultServiceOwnerOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "713431400" : "991825827";
 export const otherOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "974761076" : "889640782";
 export const otherOrgName = __ENV.API_ENVIRONMENT == "yt01" ? "skd" : "nav";

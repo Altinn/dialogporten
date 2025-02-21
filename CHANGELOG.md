@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.55.1](https://github.com/Altinn/dialogporten/compare/v1.55.0...v1.55.1) (2025-02-21)
+
+
+### Miscellaneous Chores
+
+* **e2etests:** Fixing orgNos and resources to run tests in yt01 ([#1927](https://github.com/Altinn/dialogporten/issues/1927)) ([ffb5a67](https://github.com/Altinn/dialogporten/commit/ffb5a675df704835d33d7001efec4c21e373887b))
+
 ## [1.55.0](https://github.com/Altinn/dialogporten/compare/v1.54.0...v1.55.0) (2025-02-20)
 
 

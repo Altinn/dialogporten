@@ -251,6 +251,30 @@ public class DialogTokenValidatorTests
         Assert.Equal("1739523967", result.ClaimsPrincipal.FindFirst("exp")!.Value);
     }
 
+    [Fact]
+    public void ClaimsShouldBeNull_GivenInvalidTokenFormat()
+    {
+        var invalidBody = """
+                          {
+                            "jti": "38cfdcb9-388b-47b8-a1bf-9f15b2819894",
+                            "c": "urn:altinn:person:identifier-no:14886498226",
+                          """u8;
+        // Arrange
+        var sut = GetSut(
+            DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
+            ValidPublicKeyPairs);
+        var tokenParts = DialogToken.Split('.');
+        tokenParts[1] = Base64Url.EncodeToString(invalidBody);
+        var token = string.Join(".", tokenParts);
+
+        // Act
+        var result = sut.Validate(token);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Null(result.ClaimsPrincipal);
+    }
+
     private static DialogTokenValidator GetSut(DateTimeOffset simulatedNow, params PublicKeyPair[] publicKeyPairs)
     {
         var keyCache = Substitute.For<IEdDsaSecurityKeysCache>();

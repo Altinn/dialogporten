@@ -34,6 +34,7 @@ public class DialogTokenValidatorTests
 
         // Assert
         Assert.True(result.IsValid);
+        Assert.True(result.Claims != null);
     }
 
     [Fact]

@@ -17,5 +17,6 @@ public sealed class GetDialogTransmissionEndpointSummary : Summary<GetDialogTran
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure.FormatInvariant(AuthorizationScope.EndUser);
         Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialogForChildEntity.FormatInvariant("get");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogTransmissionNotFound;
+        Responses[StatusCodes.Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

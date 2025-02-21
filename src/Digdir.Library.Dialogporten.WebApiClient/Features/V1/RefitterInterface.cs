@@ -284,7 +284,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>The given dialog ID was not found or was deleted, or the given transmission ID was not found.</description>
+        /// <description>The specified dialog ID or transmission ID was not found.</description>
         /// </item>
         /// <item>
         /// <term>410</term>
@@ -538,6 +538,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found or is deleted</description>
         /// </item>
         /// <item>
+        /// <term>410</term>
+        /// <description>The dialog with the given key is removed</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied Revision does not match the current Revision of the dialog</description>
         /// </item>
@@ -723,9 +727,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>403</term>
         /// <description>Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
         /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json")]
+        [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogActivitiesQueriesSearch_Activity>>> V1ServiceOwnerDialogActivitiesSearchSearchDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
 
@@ -835,7 +843,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>The given dialog ID was not found or was deleted, or the given activity ID was not found.</description>
+        /// <description>The specified dialog ID or activity ID was not found.</description>
         /// </item>
         /// <item>
         /// <term>410</term>
@@ -1723,11 +1731,27 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1CommonContent_ContentValue Title { get; set; }
 
         /// <summary>
+        /// An optional non-sensitive title of the dialog.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveTitle")]
+        public V1CommonContent_ContentValue NonSensitiveTitle { get; set; }
+
+        /// <summary>
         /// A short summary of the dialog and its current state. Must be text/plain.
         /// </summary>
 
         [JsonPropertyName("summary")]
         public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// An optional non-sensitive summary of the dialog and its current state.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveSummary")]
+        public V1CommonContent_ContentValue NonSensitiveSummary { get; set; }
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.
@@ -2578,11 +2602,27 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1CommonContent_ContentValue Title { get; set; }
 
         /// <summary>
+        /// An optional non-sensitive title of the dialog.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveTitle")]
+        public V1CommonContent_ContentValue NonSensitiveTitle { get; set; }
+
+        /// <summary>
         /// A short summary of the dialog and its current state.
         /// </summary>
 
         [JsonPropertyName("summary")]
         public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// An optional non-sensitive summary of the dialog and its current state.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveSummary")]
+        public V1CommonContent_ContentValue NonSensitiveSummary { get; set; }
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name.
@@ -2872,11 +2912,27 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1CommonContent_ContentValue Title { get; set; }
 
         /// <summary>
+        /// An optional non-sensitive title of the dialog.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveTitle")]
+        public V1CommonContent_ContentValue NonSensitiveTitle { get; set; }
+
+        /// <summary>
         /// A short summary of the dialog and its current state.
         /// </summary>
 
         [JsonPropertyName("summary")]
         public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// An optional non-sensitive summary of the dialog and its current state.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveSummary")]
+        public V1CommonContent_ContentValue NonSensitiveSummary { get; set; }
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name.
@@ -3634,12 +3690,28 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1CommonContent_ContentValue Title { get; set; }
 
         /// <summary>
+        /// An optional non-sensitive title of the dialog.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveTitle")]
+        public V1CommonContent_ContentValue NonSensitiveTitle { get; set; }
+
+        /// <summary>
         /// A short summary of the dialog and its current state.
         /// <br/>Supported media types: text/plain
         /// </summary>
 
         [JsonPropertyName("summary")]
         public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// An optional non-sensitive summary of the dialog and its current state.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveSummary")]
+        public V1CommonContent_ContentValue NonSensitiveSummary { get; set; }
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.

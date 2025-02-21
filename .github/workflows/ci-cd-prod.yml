@@ -100,11 +100,11 @@ jobs:
 
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
-    needs: [ check-for-changes ]
-    if: ${{ needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
+    needs: [ deploy-apps, check-for-changes ]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
     with:
       version: ${{ inputs.version }}
-      path: 'src/Digdir.Library.Dialogporten.WebApiClient.csproj'
+      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

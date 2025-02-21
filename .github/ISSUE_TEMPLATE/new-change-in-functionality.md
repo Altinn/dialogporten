@@ -18,17 +18,13 @@ If this is functionality that does not have a clear solution, tag the issue with
 ### Implementation
 If there are guidelines on architecture or other implementation choices, they are added here. Different approaches can also be discussed here.
 
-```[tasklist]
 ### Tasks
 - [ ] Implementation tasks are added here
 - [ ] Prepare documentation (if relevant - either update working document, or add a new file in `docs`)
 - [ ] Add e2e-test (if relevant)
-```
 
-```[tasklist]
 ### Threat Modelling
 - [ ] I have considered potential security risks (if risks were found, please list them below)
-```
 
 ### Acceptance criteria
 _GIVEN_ ...

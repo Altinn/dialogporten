@@ -26,12 +26,11 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         var validationResult = new DefaultValidationResult();
         Span<byte> tokenDecodeBuffer = stackalloc byte[Base64Url.GetMaxDecodedLength(token.Length)];
 
-        if (!TryDecodeToken(token, tokenDecodeBuffer, out var tokenParts, out var decodedTokenParts, out var claims))
+        if (!TryDecodeToken(token, tokenDecodeBuffer, out var tokenParts, out var decodedTokenParts))
         {
             validationResult.AddError(tokenPropertyName, "Invalid token format");
             return validationResult;
         }
-        validationResult.Claims = claims;
 
         if (!VerifySignature(tokenParts, decodedTokenParts))
         {
@@ -50,36 +49,34 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         ReadOnlySpan<char> token,
         Span<byte> tokenDecodeBuffer,
         out JwksTokenParts<char> tokenParts,
-        out JwksTokenParts<byte> decodedTokenParts,
-        [NotNullWhen(true)] out DialogTokenClaims? claims)
+        out JsonTokenParts decodedTokenParts
+    )
     {
-        claims = null;
         decodedTokenParts = default;
         if (!TryGetTokenParts(token, out tokenParts) ||
-            !TryDecodeParts(tokenDecodeBuffer, tokenParts, out decodedTokenParts))
+            !TryDecodeParts(tokenDecodeBuffer, tokenParts, out var decodedToken))
         {
             return false;
         }
 
         // Validate that the header and body are valid JSON
-        return IsValidJson(decodedTokenParts.Header) &&
-               IsValidJson(decodedTokenParts.Body);
+
+        if (!IsValidJson(decodedToken.Header, out var headerJson) ||
+            !IsValidJson(decodedToken.Body, out var bodyJson))
+        {
+            return false;
+        }
+        decodedTokenParts = new JsonTokenParts(headerJson, bodyJson, decodedToken.Signature);
+        return true;
     }
 
-    private static bool IsValidJson(ReadOnlySpan<byte> span)
+    private static bool IsValidJson(ReadOnlySpan<byte> span, out JsonElement jsonElement)
     {
+        jsonElement = default;
         var reader = new Utf8JsonReader(span);
-        var temp = new Dictionary<byte[], byte[]>();
         try
         {
-            while (reader.Read())
-            {
-                var prop = reader.ValueSpan;
-                reader.Read();
-                var value = reader.ValueSpan;
-                temp.Add(prop.ToArray(), value.ToArray());
-            }
-
+            jsonElement = JsonElement.ParseValue(ref reader);
             return true;
         }
         catch (JsonException) { }
@@ -138,7 +135,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
     private bool VerifySignature(
         JwksTokenParts<char> tokenParts,
-        JwksTokenParts<byte> decodedTokenParts)
+        JsonTokenParts decodedTokenParts)
     {
         var publicKeys = _publicKeysCache.PublicKeys;
         if (publicKeys.Count == 0)
@@ -164,20 +161,15 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
                && SignatureAlgorithm.Ed25519.Verify(publicKey, signedPart, decodedTokenParts.Signature);
     }
 
-    private bool VerifyExpiration(JwksTokenParts<byte> decodedTokenParts)
+    private bool VerifyExpiration(JsonTokenParts decodedTokenParts)
     {
         const string expiresPropertyName = "exp";
-        if (!TryGetPropertyValue(decodedTokenParts.Body, expiresPropertyName, out var expiresSpan))
+        if (!decodedTokenParts.Body.TryGetProperty(expiresPropertyName, out var expiresElement))
         {
             return false;
         }
 
-        if (!Utf8Parser.TryParse(expiresSpan, out long expiresUnixTimeSeconds, out var bytesConsumed))
-        {
-            return false;
-        }
-
-        if (bytesConsumed != expiresSpan.Length)
+        if (!expiresElement.TryGetInt64(out var expiresUnixTimeSeconds))
         {
             return false;
         }
@@ -204,24 +196,24 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         return result is OperationStatus.Done;
     }
 
-    private static bool TryGetPublicKey(ReadOnlyCollection<PublicKeyPair> keyPairs, ReadOnlySpan<byte> header, [NotNullWhen(true)] out PublicKey? publicKey)
+    private static bool TryGetPublicKey(ReadOnlyCollection<PublicKeyPair> keyPairs, JsonElement header, [NotNullWhen(true)] out PublicKey? publicKey)
     {
         const string kidPropertyName = "kid";
         publicKey = null;
-        if (!TryGetPropertyValue(header, kidPropertyName, out var tokenKid))
+        if (!header.TryGetProperty(kidPropertyName, out var tokenKid))
         {
             return false;
         }
 
-        Span<char> kidCharBuffer = stackalloc char[Encoding.UTF8.GetMaxCharCount(tokenKid.Length)];
-        if (!Encoding.UTF8.TryGetChars(tokenKid, kidCharBuffer, out var charsWritten))
-        {
-            return false;
-        }
+        // Span<char> kidCharBuffer = stackalloc char[Encoding.UTF8.GetMaxCharCount(tokenKid.GetBytesFromBase64().Length)];
+        // if (!Encoding.UTF8.TryGetChars(tokenKid.GetBytesFromBase64(), kidCharBuffer, out var charsWritten))
+        // {
+        //     return false;
+        // }
 
         foreach (var (kid, key) in keyPairs)
         {
-            if (!kid.AsSpan().SequenceEqual(kidCharBuffer[..charsWritten])) continue;
+            if (!kid.AsSpan().SequenceEqual(tokenKid.GetString())) continue;
             publicKey = key;
             return true;
         }
@@ -229,24 +221,26 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         return false;
     }
 
-    private static bool TryGetPropertyValue(ReadOnlySpan<byte> json, ReadOnlySpan<char> name, out ReadOnlySpan<byte> value)
-    {
-        value = default;
-        var reader = new Utf8JsonReader(json);
-        while (reader.Read())
-        {
-            if (!IsPropertyName(reader, name)) continue;
-            reader.Read();
-            value = reader.ValueSpan;
-            return true;
-        }
-        return false;
-    }
 
-    private static bool IsPropertyName(Utf8JsonReader reader, ReadOnlySpan<char> name)
-    {
-        return reader.TokenType == JsonTokenType.PropertyName && reader.ValueTextEquals(name);
-    }
+    // private static bool TryGetJsonElement(ref Utf8JsonReader reader, out JsonElement jsonElement)
+    // {
+    //     jsonElement = default;
+    //     reader.Read();
+    //     if (reader.TokenType != JsonTokenType.PropertyName)
+    //     {
+    //         return false;
+    //     }
+    //     var name = reader.ValueSpan;
+    //     reader.Read();
+    //     if (reader.TokenType == JsonTokenType.PropertyName)
+    //     {
+    //         return false;
+    //     }
+    //
+    //     var value = reader.ValueSpan;
+    //     jsonElement = new JsonElement();
+    //     return true;
+    // }
 
     private readonly ref struct JwksTokenParts<T>
         where T : unmanaged
@@ -267,21 +261,37 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
             Signature = signature;
         }
     }
+
+    public readonly ref struct JsonTokenParts
+    {
+        public JsonElement Header { get; }
+
+        public JsonElement Body { get; }
+
+        public ReadOnlySpan<byte> Signature { get; }
+
+        public JsonTokenParts(JsonElement header, JsonElement body, ReadOnlySpan<byte> signature)
+        {
+            Header = header;
+            Body = body;
+            Signature = signature;
+        }
+    }
 }
 
-internal sealed class DialogTokenClaimTypes
-{
-    public const string C = "c";
-    public const string Level = "l";
-    public const string Party = "p";
-    public const string Scope = "s";
-    public const string DialogId = "i";
-    public const string A = "a";
-    public const string Issuer = "iss";
-    public const string IssuedAt = "iat";
-    public const string NotVisibleBefore = "nbf";
-    public const string Expire = "exp";
-}
+// internal sealed class DialogTokenClaimTypes
+// {
+//     public const string C = "c";
+//     public const string Level = "l";
+//     public const string Party = "p";
+//     public const string Scope = "s";
+//     public const string DialogId = "i";
+//     public const string A = "a";
+//     public const string Issuer = "iss";
+//     public const string IssuedAt = "iat";
+//     public const string NotVisibleBefore = "nbf";
+//     public const string Expire = "exp";
+// }
 
 public sealed record DialogTokenClaims(
     string C,
@@ -294,4 +304,16 @@ public sealed record DialogTokenClaims(
     long IssuedAt,
     long NotVisibleBefore,
     long Expire
-);
+)
+{
+    public string C { get; private set; } = C;
+    public string Level { get; private set; } = Level;
+    public string Party { get; private set; } = Party;
+    public string Scope { get; private set; } = Scope;
+    public string DialogId { get; private set; } = DialogId;
+    public string A { get; private set; } = A;
+    public string Issuer { get; private set; } = Issuer;
+    public long IssuedAt { get; private set; } = IssuedAt;
+    public long NotVisibleBefore { get; private set; } = NotVisibleBefore;
+    public long Expire { get; private set; } = Expire;
+}

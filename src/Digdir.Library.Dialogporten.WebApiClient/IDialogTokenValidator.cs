@@ -10,7 +10,7 @@ public interface IDialogTokenValidator
 
 public interface IValidationResult
 {
-    [MemberNotNullWhen(true, "Claims")] bool IsValid { get; }
+    [MemberNotNullWhen(true, nameof(Claims))] bool IsValid { get; }
     DialogTokenClaims? Claims { get; set; }
     Dictionary<string, List<string>> Errors { get; }
 }

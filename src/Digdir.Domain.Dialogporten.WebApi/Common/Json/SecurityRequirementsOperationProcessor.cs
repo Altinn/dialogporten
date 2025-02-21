@@ -7,7 +7,7 @@ using NSwag.Generation.Processors.Contexts;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Json;
 
-public class SecurityRequirementsOperationProcessor : IOperationProcessor
+public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
 {
     private const string JwtBearerAuth = "JWTBearerAuth";
     private const string ServiceOwnerSearchPath = "/api/v1/serviceowner/dialogs";

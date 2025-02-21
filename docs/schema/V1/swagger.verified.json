@@ -6118,8 +6118,7 @@
         "security": [
           {
             "JWTBearerAuth": [
-              "digdir:dialogporten.serviceprovider",
-              "digdir:dialogporten.serviceprovider.search"
+              "digdir:dialogporten.serviceprovider"
             ]
           }
         ],

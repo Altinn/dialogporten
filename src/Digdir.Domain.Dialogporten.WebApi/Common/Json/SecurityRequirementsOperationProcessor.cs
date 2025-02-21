@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner;
-
+using NSwag;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
@@ -24,7 +24,7 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
             context.OperationDescription.Operation.Tags.FirstOrDefault() switch
             {
                 var tag when string.Equals(tag, ServiceOwnerGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase)
-                    => IsServiceOwnerSearchEndpoint(context)
+                    => IsServiceOwnerSearchEndpoint(context.OperationDescription)
                         ? new[] { AuthorizationScope.ServiceProvider, AuthorizationScope.ServiceProviderSearch }
                         : new[] { AuthorizationScope.ServiceProvider },
 
@@ -37,6 +37,6 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
         return true;
     }
 
-    private static bool IsServiceOwnerSearchEndpoint(OperationProcessorContext context)
-        => context.OperationDescription.Path == ServiceOwnerSearchPath;
+    private static bool IsServiceOwnerSearchEndpoint(OpenApiOperationDescription description)
+        => description is { Path: ServiceOwnerSearchPath, Method: OpenApiOperationMethod.Get };
 }

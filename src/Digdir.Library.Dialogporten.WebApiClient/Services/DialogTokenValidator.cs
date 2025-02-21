@@ -49,20 +49,21 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         }
 
         var body = decodedTokenParts.Body;
-        var claims = new List<Claim>
-        {
-            new(DialogTokenClaimTypes.C, body.GetProperty(DialogTokenClaimTypes.C).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.Level, body.GetProperty(DialogTokenClaimTypes.Level).GetInt64().ToString(CultureInfo.InvariantCulture)),
-            new(DialogTokenClaimTypes.Party, body.GetProperty(DialogTokenClaimTypes.Party).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.Scope, body.GetProperty(DialogTokenClaimTypes.Scope).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.DialogId, body.GetProperty(DialogTokenClaimTypes.DialogId).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.A, body.GetProperty(DialogTokenClaimTypes.A).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.Issuer, body.GetProperty(DialogTokenClaimTypes.Issuer).GetString() ?? string.Empty),
-            new(DialogTokenClaimTypes.Expire, body.GetProperty(DialogTokenClaimTypes.Expire).GetInt64().ToString(CultureInfo.InvariantCulture)),
-            new(DialogTokenClaimTypes.IssuedAt, body.GetProperty(DialogTokenClaimTypes.IssuedAt).GetInt64().ToString(CultureInfo.InvariantCulture)),
-            new(DialogTokenClaimTypes.NotVisibleBefore, body.GetProperty(DialogTokenClaimTypes.NotVisibleBefore).GetInt64().ToString(CultureInfo.InvariantCulture))
-        };
-        validationResult.Claims = new ClaimsPrincipal(new ClaimsIdentity(claims, "DialogToken"));
+        validationResult.Claims = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new List<Claim>
+                {
+                    new(DialogTokenClaimTypes.C, body.GetProperty(DialogTokenClaimTypes.C).GetString() ?? string.Empty),
+                    new(DialogTokenClaimTypes.Level, body.GetProperty(DialogTokenClaimTypes.Level).GetInt64().ToString(CultureInfo.InvariantCulture)),
+                    new(DialogTokenClaimTypes.Party, body.GetProperty(DialogTokenClaimTypes.Party).GetString() ?? string.Empty),
+                    new(DialogTokenClaimTypes.Scope, body.GetProperty(DialogTokenClaimTypes.Scope).GetString() ?? string.Empty),
+                    new(DialogTokenClaimTypes.DialogId, body.GetProperty(DialogTokenClaimTypes.DialogId).GetString() ?? string.Empty),
+                    new(DialogTokenClaimTypes.A, body.GetProperty(DialogTokenClaimTypes.A).GetString() ?? string.Empty),
+                    new(DialogTokenClaimTypes.Issuer, body.GetProperty(DialogTokenClaimTypes.Issuer).GetString() ?? string.Empty),
+                    new(DialogTokenClaimTypes.Expire, body.GetProperty(DialogTokenClaimTypes.Expire).GetInt64().ToString(CultureInfo.InvariantCulture)),
+                    new(DialogTokenClaimTypes.IssuedAt, body.GetProperty(DialogTokenClaimTypes.IssuedAt).GetInt64().ToString(CultureInfo.InvariantCulture)),
+                    new(DialogTokenClaimTypes.NotVisibleBefore, body.GetProperty(DialogTokenClaimTypes.NotVisibleBefore).GetInt64().ToString(CultureInfo.InvariantCulture))
+                }, "DialogToken"));
         return validationResult;
     }
 

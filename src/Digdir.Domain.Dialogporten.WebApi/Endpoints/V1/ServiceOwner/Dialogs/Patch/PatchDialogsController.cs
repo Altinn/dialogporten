@@ -67,6 +67,8 @@ public sealed class PatchDialogsController : ControllerBase
         [FromRoute] Guid dialogId,
         [FromHeader(Name = Constants.IfMatch)] Guid? etag,
         [FromBody] JsonPatchDocument<UpdateDialogDto> patchDocument,
+        [OpenApiIgnore][FromQuery] bool? disableAltinnEvents,
+        [OpenApiIgnore][FromQuery] bool? disableSystemLabelReset,
         CancellationToken ct)
     {
         var dialogQueryResult = await _sender.Send(new GetDialogQuery { DialogId = dialogId }, ct);
@@ -87,7 +89,15 @@ public sealed class PatchDialogsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var command = new UpdateDialogCommand { Id = dialogId, IfMatchDialogRevision = etag, Dto = updateDialogDto };
+        var command = new UpdateDialogCommand
+        {
+            Id = dialogId,
+            IfMatchDialogRevision = etag,
+            Dto = updateDialogDto,
+            DisableAltinnEvents = disableAltinnEvents ?? false,
+            DisableSystemLabelReset = disableSystemLabelReset ?? false
+        };
+
         var result = await _sender.Send(command, ct);
         return result.Match(
             success =>

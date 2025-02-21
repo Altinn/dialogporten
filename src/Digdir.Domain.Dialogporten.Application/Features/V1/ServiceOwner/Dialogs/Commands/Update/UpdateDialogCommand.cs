@@ -20,6 +20,7 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
@@ -29,6 +30,7 @@ public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, IAltinnE
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
     public bool DisableAltinnEvents { get; set; }
+    public bool DisableSystemLabelReset { get; set; }
 }
 
 [GenerateOneOf]
@@ -66,6 +68,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
+        if (request.DisableSystemLabelReset && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            return new Forbidden(Constants.DisableSystemLabelResetRequiresAdminScope);
+        }
+
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
         var dialog = await _db.Dialogs
@@ -164,7 +171,10 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return forbiddenResult;
         }
 
-        UpdateLabel(dialog);
+        if (!request.DisableSystemLabelReset)
+        {
+            UpdateLabel(dialog);
+        }
 
         var saveResult = await _unitOfWork
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)

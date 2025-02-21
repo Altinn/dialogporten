@@ -5230,6 +5230,16 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
@@ -5292,7 +5302,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given activity ID was not found."
+            "description": "The specified dialog ID or activity ID was not found."
           }
         },
         "security": [
@@ -5609,6 +5619,19 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
           }
         },
         "security": [
@@ -5671,7 +5694,10 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given transmission ID was not found."
+            "description": "The specified dialog ID or transmission ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
           }
         },
         "security": [
@@ -5801,7 +5827,7 @@
             "style": "form"
           },
           {
-            "description": "If set to \u0027include\u0027, the result will include both deleted and non-deleted dialogs\nIf set to \u0027exclude\u0027, the result will only include non-deleted dialogs\nIf set to \u0027only\u0027, the result will only include deleted dialogs",
+            "description": "If set to \u0027include\u0027, the result will include both deleted and non-deleted dialogs. If set to \u0027exclude\u0027, the result will only include non-deleted dialogs. If set to \u0027only\u0027, the result will only include deleted dialogs",
             "in": "query",
             "name": "deleted",
             "schema": {
@@ -6694,6 +6720,16 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
@@ -6876,7 +6912,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given activity ID was not found."
+            "description": "The specified dialog ID or activity ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -7248,7 +7284,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given transmission ID was not found."
+            "description": "The specified dialog ID or transmission ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."

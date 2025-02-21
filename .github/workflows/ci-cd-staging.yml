@@ -79,16 +79,16 @@ jobs:
       runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       ref: "refs/tags/v${{ github.event.client_payload.version }}"
 
-#  publish-sdk-to-nuget:
-#    uses: ./.github/workflows/workflow-publish-nuget.yml
-#    needs: [ get-current-version, check-for-changes ]
-#    if: ${{ needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
-#    with:
-#      version: ${{ needs.get-current-version.outputs.version }}
-#      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
-#      source: 'https://api.nuget.org/v3/index.json'
-#    secrets:
-#      NUGET_API_KEY: ${{ secrets.NUGET_API_TEST_KEY }}
+  publish-sdk-to-nuget:
+    uses: ./.github/workflows/workflow-publish-nuget.yml
+    needs: [ deploy-apps, check-for-changes ]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
+    with:
+      version: ${{ github.event.client_payload.version }}-rc
+      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
+      source: 'https://api.nuget.org/v3/index.json'
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
@@ -105,7 +105,7 @@ jobs:
   publish-schema-npm:
     name: Publish schema npm package
     needs: [check-for-changes, deploy-apps]
-    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasGqlSchemaChanges == 'true' }}
+    if: ${{ always() && !failure() && !cancelled() && (needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasGqlSchemaChanges == 'true') }}
     uses: ./.github/workflows/workflow-publish-schema.yml
     with:
       version: ${{ github.event.client_payload.version }}

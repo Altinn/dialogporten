@@ -17,6 +17,9 @@ public static class Constants
     public const string DisableAltinnEventsRequiresAdminScope =
         "Disabling Altinn events requires service owner admin scope.";
 
+    public const string DisableSystemLabelResetRequiresAdminScope =
+        "Disabling SystemLabel reset requires service owner admin scope.";
+
     public static readonly ImmutableArray<string> SupportedResourceTypes =
     [
         "GenericAccessResource",

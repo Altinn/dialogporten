@@ -98,16 +98,16 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
 
-#  publish-sdk-to-nuget:
-#    uses: ./.github/workflows/workflow-publish-nuget.yml
-#    needs: [ get-current-version, generate-git-short-sha, check-for-changes ]
-#    if: ${{ needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
-#    with:
-#      version: ${{ needs.get-current-version.outputs.version }}-rc.${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-#      path: 'src/Digdir.Library.Dialogporten.WebApiClient.csproj'
-#      source: 'https://api.nuget.org/v3/index.json'
-#    secrets:
-#      NUGET_API_KEY: ${{ secrets.NUGET_API_TEST_KEY }}
+  publish-sdk-to-nuget:
+    uses: ./.github/workflows/workflow-publish-nuget.yml
+    needs: [ deploy-apps, get-current-version, generate-git-short-sha, check-for-changes ]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
+    with:
+      version: ${{ needs.get-current-version.outputs.version }}-rc.${{ needs.generate-git-short-sha.outputs.gitShortSha }}
+      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
+      source: 'https://api.nuget.org/v3/index.json'
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
   publish-schema-npm:
     name: Deploy schema npm package

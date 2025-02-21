@@ -98,6 +98,17 @@ jobs:
       runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       ref: "refs/tags/v${{ inputs.version }}"
 
+  publish-sdk-to-nuget:
+    uses: ./.github/workflows/workflow-publish-nuget.yml
+    needs: [ deploy-apps, check-for-changes ]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
+    with:
+      version: ${{ inputs.version }}
+      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
+      source: 'https://api.nuget.org/v3/index.json'
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
     needs: [deploy-apps]

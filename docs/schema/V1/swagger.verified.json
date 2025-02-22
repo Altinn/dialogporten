@@ -1810,33 +1810,46 @@
         "additionalProperties": false,
         "properties": {
           "hasKeyRole": {
+            "description": "Whether the authenticated user has a key role in the party.\n            \nRead more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#n\u00F8kkelroller",
             "type": "boolean"
           },
           "hasOnlyAccessToSubParties": {
+            "description": "If the authenticated user has only access to sub parties of this party, and not this party itself.",
             "type": "boolean"
           },
           "isAccessManager": {
+            "description": "Whether the authenticated user is an access manager of the party.\n            \nRead more about access managers (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#tilgangsstrying",
             "type": "boolean"
           },
           "isCurrentEndUser": {
+            "description": "Whether this party represents the authenticated user.",
             "type": "boolean"
           },
           "isDeleted": {
+            "description": "Whether the party is deleted or not",
             "type": "boolean"
           },
           "isMainAdministrator": {
+            "description": "Whether the authenticated user is the main administrator of the party\n            \nRead more about main administrator (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#hovedadministrator",
             "type": "boolean"
           },
           "name": {
+            "description": "The name of the party (verbatim from CCR, usually in all caps)",
+            "example": "CONTOSO REAL ESTATE AS",
             "type": "string"
           },
           "party": {
+            "description": "The party identifier in URN format",
+            "example": "urn:altinn:organization:identifier-no:912345678",
             "type": "string"
           },
           "partyType": {
+            "description": "The type of the party, either \u0022Organization\u0022 or \u0022Person\u0022.",
+            "example": "Organization",
             "type": "string"
           },
           "subParties": {
+            "description": "The sub parties of this party, if any. The sub party uses the same data model.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserPartiesQueriesGet_AuthorizedParty"
             },

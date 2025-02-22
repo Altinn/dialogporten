@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.55.2](https://github.com/Altinn/dialogporten/compare/v1.55.1...v1.55.2) (2025-02-22)
+
+
+### Miscellaneous Chores
+
+* Add docblocks to parties DTO ([#1934](https://github.com/Altinn/dialogporten/issues/1934)) ([c9e10db](https://github.com/Altinn/dialogporten/commit/c9e10db78257927a3f4a37e1165badf51871370c))
+* Return claimsprinciple on dialogtoken validate ([#1933](https://github.com/Altinn/dialogporten/issues/1933)) ([2814365](https://github.com/Altinn/dialogporten/commit/28143655f18b1f9f319cfe7f62bc2e12beafb854))
+* Update swagger summaries, add scopes, global description ([#1929](https://github.com/Altinn/dialogporten/issues/1929)) ([d91eacb](https://github.com/Altinn/dialogporten/commit/d91eacb57a3bce48a84c1b9f8c05aa993d3029b0))
+
 ## [1.55.1](https://github.com/Altinn/dialogporten/compare/v1.55.0...v1.55.1) (2025-02-21)
 
 

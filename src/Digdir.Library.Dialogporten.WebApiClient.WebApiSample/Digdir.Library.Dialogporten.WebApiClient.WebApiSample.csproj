@@ -1,19 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <UserSecretsId>750256a4-f332-4783-8802-8a7d9566f9cb</UserSecretsId>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
+        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj"/>
     </ItemGroup>
 
 </Project>

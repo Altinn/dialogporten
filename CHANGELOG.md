@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.55.3](https://github.com/Altinn/dialogporten/compare/v1.55.2...v1.55.3) (2025-02-23)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency coverlet.collector to 6.0.4 ([#1935](https://github.com/Altinn/dialogporten/issues/1935)) ([9500c06](https://github.com/Altinn/dialogporten/commit/9500c06c795622049c0b25df3ace5555c2d28aa7))
+* **deps:** update dependency uuidnext to 4.1.1 ([#1936](https://github.com/Altinn/dialogporten/issues/1936)) ([707ef06](https://github.com/Altinn/dialogporten/commit/707ef0601319b56e3df3a2afd85b04d5efbbe540))
+* **deps:** update grafana/loki docker tag to v3.4.1 ([#1938](https://github.com/Altinn/dialogporten/issues/1938)) ([b4f7173](https://github.com/Altinn/dialogporten/commit/b4f7173fd5621efbad8e1725f86301969c35a614))
+* **deps:** update microsoft dependencies ([#1937](https://github.com/Altinn/dialogporten/issues/1937)) ([4735140](https://github.com/Altinn/dialogporten/commit/473514014fcb6e36d593ad81bebe84c1583cf364))
+
 ## [1.55.2](https://github.com/Altinn/dialogporten/compare/v1.55.1...v1.55.2) (2025-02-22)
 
 

@@ -255,7 +255,9 @@ We are able to toggle some external resources in local development. This is done
     "UseLocalDevelopmentCompactJwsGenerator": true,
     "DisableCache": true,
     "DisableAuth": true,
-    "UseInMemoryServiceBusTransport": true
+    "UseInMemoryServiceBusTransport": true,
+    "DisableSubjectResourceSyncOnStartup": false,
+    "DisablePolicyInformationSyncOnStartup": true
 }
 ```
 Toggling these flags will enable/disable the external resources. The `DisableAuth` flag, for example, will disable authentication in the WebAPI project. This is useful when debugging the WebAPI project in an IDE. These settings will only be respected in the `Development` environment.
@@ -310,7 +312,7 @@ For pull requests, the title must follow [Conventional Commits](https://www.conv
 The title of the PR will be used as the commit message when squashing/merging the pull request, and the body of the PR will be used as the description.
 
 This title will be used to generate the changelog (using [Release Please](https://github.com/google-github-actions/release-please-action))
-Using `fix` will add to "Bug Fixes", `feat` will add to "Features". All the others,`chore`, `ci`, etc., will be ignored. ([Example release](https://github.com/altinn/dialogporten/releases/tag/v1.12.0))
+Using `fix` will add to "Bug Fixes", `feat` will add to "Features", `chore` will add to "Miscellaneous Chores". All the others, `test`, `ci`, `trivial` etc., will be ignored. ([Example release](https://github.com/altinn/dialogporten/releases/tag/v1.12.0))
 
 ## Deployment
 
@@ -340,14 +342,14 @@ Deployments are done using `GitHub Actions` with the following steps:
   - Bumps the version number.
   - Generates the release and changelog.
   - Deployment is tagged with the new `<version>` without `<git-sha>`
-  - The new version is built and deployed to the staging environment.
+  - The new version is built and deployed to the staging environment (tt02) and the performance environment (yt01).
 
 #### 5. Prepare deployment to Production
 - **Action**: Perform a dry run towards the production environment to ensure the deployment can proceed without issues.
 
 #### 6. Deploy to Production
-- **Trigger**: Approval of the dry run.
-- **Action**: The new version is built and deployed to the production environment.
+- **Trigger**: Manual trigger of workflow, specify the version to deploy.
+- **Action**: The specified version is deployed to the production environment.
 
 #### Visual Workflow
 
@@ -384,7 +386,7 @@ The `dispatch-infrastructure.yml` workflow is used for deploying infrastructure 
 3. Click on "Run workflow".
 4. Provide the necessary inputs:
    - **environment**: Select the environment you wish to deploy to (`test`, `staging`, or `prod`).
-   - **version**: Enter the version to deploy, which should correspond to a git tag.
+   - **version**: Enter the version to deploy, which should correspond to a git tag. (e.g., `1.23.4`).
 
 This workflow facilitates the deployment of infrastructure to the specified environment, using the version details provided.
 

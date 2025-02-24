@@ -84,7 +84,7 @@ jobs:
             tests:
               - 'tests/**/*'
             web_api_client:
-              - 'src/Digdir.Library.Dialogporten.WebApiClient/**/*
+              - 'src/Digdir.Library.Dialogporten.WebApiClient/**/*'
             swagger_schema:
               - 'docs/schema/V1/swagger.verified.json'
             gql_schema:

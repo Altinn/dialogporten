@@ -20,6 +20,9 @@ on:
       hasBackendChanges:
         description: "Backend related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasBackendChanges }}
+      hasWebApiClientChanges:
+        description: "WebApiClient related files changed"
+        value: ${{ jobs.check-for-changes.outputs.hasWebApiClientChanges }}
       hasTestChanges:
         description: "Test related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasTestChanges }}
@@ -48,6 +51,7 @@ jobs:
       hasSwaggerSchemaChanges: ${{ steps.filter-backend.outputs.swagger_schema_any_modified == 'true'}}
       hasGqlSchemaChanges: ${{ steps.filter-backend.outputs.gql_schema_any_modified == 'true'}}
       hasMigrationChanges: ${{ steps.filter-backend.outputs.migration_any_modified == 'true'}}
+      hasWebApiClientChanges: ${{ steps.filter-backend.outputs.web_api_client_modified == 'true'}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -79,6 +83,8 @@ jobs:
               - '.azure/modules/containerApp/**/*'
             tests:
               - 'tests/**/*'
+            web_api_client:
+              - 'src/Digdir.Library.Dialogporten.WebApiClient/**/*
             swagger_schema:
               - 'docs/schema/V1/swagger.verified.json'
             gql_schema:

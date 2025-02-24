@@ -1,32 +1,32 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using FluentAssertions;
-using Refit;
 using Xunit.Abstractions;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
 namespace Digdir.Domain.Dialogporten.WebApiClient.E2E.Tests;
 
-public class NotFoundTests : TestBed<E2EFixture>
+public class NotFoundTests : TestBed<AuthorizedE2EFixture>
 {
     private readonly IServiceownerApi _serviceownerApi;
-    private readonly Guid _sentinelId = Guid.NewGuid();
+    // private readonly Guid _sentinelId = Guid.NewGuid();
 
-    public NotFoundTests(ITestOutputHelper testOutputHelper, E2EFixture fixture) : base(testOutputHelper, fixture)
+    public NotFoundTests(ITestOutputHelper testOutputHelper, AuthorizedE2EFixture fixture) : base(testOutputHelper, fixture)
     {
         _serviceownerApi = fixture.GetService<IServiceownerApi>(_testOutputHelper)!;
     }
 
-    protected override async ValueTask DisposeAsyncCore()
-    {
-        Console.WriteLine("[CLEANUP] Disposing E2EFixture 🧹");
-
-        Console.WriteLine(_sentinelId.ToString());
-        // 🔥 Do any teardown work here
-        await Task.Delay(500); // Simulate async cleanup
-
-        await base.DisposeAsyncCore(); // Ensure base cleanup runs
-    }
+    //
+    // public new async ValueTask DisposeAsync()
+    // {
+    //     Console.WriteLine("[CLEANUP] Disposing E2EFixture 🧹");
+    //
+    //     Console.WriteLine(_sentinelId.ToString());
+    //     // 🔥 Do any teardown work here
+    //     await Task.Delay(500); // Simulate async cleanup
+    //
+    //     await base.DisposeAsync(); // Ensure base cleanup runs
+    // }
 
     [ConditionalSkipFact]
     public async Task Get_Dialog_With_Invalid_DialogId_Should_Return_NotFound()
@@ -47,7 +47,8 @@ public class NotFoundTests : TestBed<E2EFixture>
         var transmissionId = Guid.NewGuid();
 
         var getTransmissionResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogTransmissionsGetGetDialogTransmission(dialogId, transmissionId, CancellationToken.None);
+            .V1ServiceOwnerDialogTransmissionsGetGetDialogTransmission(dialogId, transmissionId,
+                CancellationToken.None);
 
         getTransmissionResponse.IsSuccessful.Should().BeFalse();
         getTransmissionResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -65,4 +66,112 @@ public class NotFoundTests : TestBed<E2EFixture>
         searchTransmissionResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    [ConditionalSkipFact]
+    public async Task Get_Activity_With_Invalid_ActivityId_Should_Return_NotFound()
+    {
+        var dialogId = Guid.NewGuid();
+        var activityId = Guid.NewGuid();
+
+        var getActivityResponse = await _serviceownerApi
+            .V1ServiceOwnerDialogActivitiesGetGetDialogActivity(dialogId, activityId, CancellationToken.None);
+
+        getActivityResponse.IsSuccessful.Should().BeFalse();
+        getActivityResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [ConditionalSkipFact]
+    public async Task Search_Activity_With_Invalid_ActivityId_Should_Return_NotFound()
+    {
+        var dialogId = Guid.NewGuid();
+
+        var searchActivityResponse = await _serviceownerApi
+            .V1ServiceOwnerDialogActivitiesSearchSearchDialogActivity(dialogId, CancellationToken.None);
+
+        searchActivityResponse.IsSuccessful.Should().BeFalse();
+        searchActivityResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [ConditionalSkipFact]
+    public async Task Get_SeenLog_With_Invalid_SeenLogId_Should_Return_NotFound()
+    {
+        var dialogId = Guid.NewGuid();
+        var seenLogId = Guid.NewGuid();
+
+        var getSeenLogResponse = await _serviceownerApi
+            .V1ServiceOwnerDialogSeenLogsGetGetDialogSeenLog(dialogId, seenLogId, CancellationToken.None);
+
+        getSeenLogResponse.IsSuccessful.Should().BeFalse();
+        getSeenLogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [ConditionalSkipFact]
+    public async Task Patch_Dialog_With_Invalid_DialogId_Should_Return_NotFound()
+    {
+        var dialogId = Guid.NewGuid();
+        var patchDocument = new List<JsonPatchOperations_Operation>
+        {
+            new()
+            {
+                Op = "replace",
+                Path = "/title",
+                Value = "New Title"
+            }
+        };
+
+        var patchDialogResponse = await _serviceownerApi
+            .V1ServiceOwnerDialogsPatchDialog(dialogId, patchDocument, null, CancellationToken.None);
+
+        patchDialogResponse.IsSuccessful.Should().BeFalse();
+        patchDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [ConditionalSkipFact]
+    public async Task Update_Dialog_With_Invalid_DialogId_Should_Return_NotFound()
+    {
+        var dialogId = Guid.NewGuid();
+        var updateDialogRequest = new V1ServiceOwnerDialogsCommandsUpdate_Dialog
+        {
+            SearchTags = [],
+            Attachments = [],
+            ApiActions = [],
+            GuiActions = [],
+            Transmissions = [],
+            Activities = [],
+            Content = new()
+            {
+                Title = new() { MediaType = "text/plain", Value = [new() { LanguageCode = "nb", Value = "New Title" }] },
+                Summary = new() { MediaType = "text/plain", Value = [new() { LanguageCode = "nb", Value = "New Summary" }] },
+            }
+        };
+
+        var updateDialogResponse = await _serviceownerApi
+            .V1ServiceOwnerDialogsUpdateDialog(dialogId, updateDialogRequest, null, CancellationToken.None);
+
+        updateDialogResponse.IsSuccessful.Should().BeFalse();
+        updateDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [ConditionalSkipFact]
+    public async Task Purge_Dialog_With_Invalid_DialogId_Should_Return_NotFound()
+    {
+        var dialogId = Guid.NewGuid();
+
+        var purgeDialogResponse = await _serviceownerApi
+            .V1ServiceOwnerDialogsPurgePurgeDialog(dialogId, null, CancellationToken.None);
+
+        purgeDialogResponse.IsSuccessful.Should().BeFalse();
+        purgeDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [ConditionalSkipFact]
+    public async Task Delete_Dialog_With_Invalid_DialogId_Should_Return_NotFound()
+    {
+        var dialogId = Guid.NewGuid();
+
+        var deleteDialogResponse = await _serviceownerApi
+            .V1ServiceOwnerDialogsDeleteDialog(dialogId, null, CancellationToken.None);
+
+        deleteDialogResponse.IsSuccessful.Should().BeFalse();
+        deleteDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

@@ -106,7 +106,7 @@ jobs:
     steps:
       - name: Get timestamp
         id: get-timestamp
-        run: echo "timestamp=$(date +'%m%d%H%M%S')" >> $GITHUB_OUTPUT
+        run: echo "timestamp=$(date +%s)" >> $GITHUB_OUTPUT
 
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml

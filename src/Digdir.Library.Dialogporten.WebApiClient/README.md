@@ -10,7 +10,7 @@ Uses refit IApiResponse on returns.
 
 Install nuget
 
-`dotnet add package Altinn.ApiClients.Dialogporten --version 1.55.2`
+`dotnet add package Altinn.ApiClients.Dialogporten --version 1.55.2`.
 
 ## Usage
 

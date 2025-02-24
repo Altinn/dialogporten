@@ -11,7 +11,8 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
     private readonly IServiceownerApi _serviceownerApi;
     // private readonly Guid _sentinelId = Guid.NewGuid();
 
-    public NotFoundTests(ITestOutputHelper testOutputHelper, AuthorizedE2EFixture fixture) : base(testOutputHelper, fixture)
+    public NotFoundTests(ITestOutputHelper testOutputHelper, AuthorizedE2EFixture fixture) : base(testOutputHelper,
+        fixture)
     {
         _serviceownerApi = fixture.GetService<IServiceownerApi>(_testOutputHelper)!;
     }
@@ -44,6 +45,41 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
     public async Task Get_Transmission_With_Invalid_DialogId_Should_Return_NotFound()
     {
         var dialogId = Guid.NewGuid();
+        var transmissionId = Guid.NewGuid();
+
+        var getTransmissionResponse = await _serviceownerApi
+            .V1ServiceOwnerDialogTransmissionsGetGetDialogTransmission(dialogId, transmissionId,
+                CancellationToken.None);
+
+        getTransmissionResponse.IsSuccessful.Should().BeFalse();
+        getTransmissionResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [ConditionalSkipFact]
+    public async Task Get_Transmission_With_Valid_DialogId_And_InvalidTransmissionId_Should_Return_NotFound()
+    {
+        var createDialogResult = await _serviceownerApi.V1ServiceOwnerDialogsCreateDialog(
+            new V1ServiceOwnerDialogsCommandsCreate_Dialog
+            {
+                ServiceResource = "urn:altinn:resource:super-simple-service",
+                Party = "urn:altinn:person:identifier-no:08895699684",
+                SearchTags = [],
+                Attachments = [],
+                ApiActions = [],
+                GuiActions = [],
+                Transmissions = [],
+                Activities = [],
+                Content = new()
+                {
+                    Title = new() { MediaType = "text/plain", Value = [new() { LanguageCode = "nb", Value = "New Title" }] },
+                    Summary = new() { MediaType = "text/plain", Value = [new() { LanguageCode = "nb", Value = "New Summary" }] },
+                }
+            },
+            CancellationToken.None);
+
+        createDialogResult.IsSuccessful.Should().BeTrue();
+
+        var dialogId = Guid.Parse(createDialogResult.Content?.Replace("\"", "")!);
         var transmissionId = Guid.NewGuid();
 
         var getTransmissionResponse = await _serviceownerApi

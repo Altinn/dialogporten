@@ -1,6 +1,7 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using FluentAssertions;
+using Refit;
 using Xunit.Abstractions;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
@@ -16,17 +17,16 @@ public class NotFoundTests : TestBed<E2EFixture>
         _serviceownerApi = fixture.GetService<IServiceownerApi>(_testOutputHelper)!;
     }
 
-    // public override async ValueTask DisposeAsync()
-    // {
-        // var searchResult = await _serviceownerApi
-            // .V1ServiceOwnerDialogsSearchSearchDialog(new V1ServiceOwnerDialogsSearchSearchDialogQueryParams()
-            // {
-                // Limit = 1000,
-                // Search = _sentinelId.ToString()
-            // });
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        Console.WriteLine("[CLEANUP] Disposing E2EFixture 🧹");
 
-        // Console.WriteLine(searchResult);
-    // }
+        Console.WriteLine(_sentinelId.ToString());
+        // 🔥 Do any teardown work here
+        await Task.Delay(500); // Simulate async cleanup
+
+        await base.DisposeAsyncCore(); // Ensure base cleanup runs
+    }
 
     [ConditionalSkipFact]
     public async Task Get_Dialog_With_Invalid_DialogId_Should_Return_NotFound()
@@ -36,6 +36,7 @@ public class NotFoundTests : TestBed<E2EFixture>
         var getDialogResponse = await _serviceownerApi
             .V1ServiceOwnerDialogsGetGetDialog(dialogId, null!, CancellationToken.None);
 
+        getDialogResponse.IsSuccessful.Should().BeFalse();
         getDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -48,6 +49,7 @@ public class NotFoundTests : TestBed<E2EFixture>
         var getTransmissionResponse = await _serviceownerApi
             .V1ServiceOwnerDialogTransmissionsGetGetDialogTransmission(dialogId, transmissionId, CancellationToken.None);
 
+        getTransmissionResponse.IsSuccessful.Should().BeFalse();
         getTransmissionResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -56,9 +58,11 @@ public class NotFoundTests : TestBed<E2EFixture>
     {
         var dialogId = Guid.NewGuid();
 
-        var getTransmissionResponse = await _serviceownerApi
+        var searchTransmissionResponse = await _serviceownerApi
             .V1ServiceOwnerDialogTransmissionsSearchSearchDialogTransmission(dialogId, CancellationToken.None);
 
-        getTransmissionResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        searchTransmissionResponse.IsSuccessful.Should().BeFalse();
+        searchTransmissionResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
 }

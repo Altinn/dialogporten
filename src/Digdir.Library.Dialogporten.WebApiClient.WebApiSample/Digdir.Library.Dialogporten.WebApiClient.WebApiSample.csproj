@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+    <PropertyGroup>
+        <UserSecretsId>750256a4-f332-4783-8802-8a7d9566f9cb</UserSecretsId>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2"/>
     </ItemGroup>

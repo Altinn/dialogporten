@@ -10,6 +10,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
 jobs:
+  generate-git-short-sha:
+    name: Generate git short sha
+    uses: ./.github/workflows/workflow-generate-git-short-sha.yml
+
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
@@ -81,7 +85,7 @@ jobs:
 
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
-    needs: [ deploy-apps, check-for-changes ]
+    needs: [ deploy-apps, check-for-changes, generate-git-short-sha ]
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges == 'true' )}}
     with:
       version: ${{ github.event.client_payload.version }}-rc+${{ needs.generate-git-short-sha.outputs.gitShortSha }}

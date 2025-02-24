@@ -1,4 +1,4 @@
-# SO SDK
+# .NET SDK for Dialogporten ServiceOwner API
 
 Simple overview
 Refit-based client SDK Based on https://github.com/altinn/altinn-apiclient-maskinporten
@@ -9,6 +9,8 @@ Uses refit IApiResponse on returns.
 ## Installation
 
 Install nuget
+
+`dotnet add package Altinn.ApiClients.Dialogporten --version 1.55.2`
 
 ## Usage
 

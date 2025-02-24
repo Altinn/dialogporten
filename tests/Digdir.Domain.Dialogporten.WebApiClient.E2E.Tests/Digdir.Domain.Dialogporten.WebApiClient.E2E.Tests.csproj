@@ -11,10 +11,12 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.2" />
         <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.2" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
+        <PackageReference Include="FluentAssertions" Version="[7.0.0, 8.0.0)"/>
         <PackageReference Include="xunit" Version="2.9.3"/>
         <PackageReference Include="Xunit.Microsoft.DependencyInjection" Version="9.0.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2"/>

@@ -2,7 +2,7 @@ import { group } from 'k6';
 
 export function describe(name, fn) {
     let success = true;
-  
+
     group(name, () => {
       try {
         const result = fn();
@@ -20,7 +20,7 @@ export function describe(name, fn) {
         handleError(name, error);
       }
     });
-  
+
     return success;
   }
 

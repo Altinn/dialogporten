@@ -1,4 +1,4 @@
-/** 
+/**
  * Performance test for creating and removing a dialog
  * Run: k6 run tests/k6/tests/serviceowner/performance/create-remove-dialog.js --vus 1 --iterations 1
  */

@@ -11,7 +11,7 @@ const abort_on_fail = (__ENV.abort_on_fail ?? 'true') === 'true';
 export let options = {
     summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(95)', 'p(99)', 'p(99.5)', 'p(99.9)', 'count'],
     thresholds: {
-        "http_req_duration": [{ threshold: "max<10000", abortOnFail: abort_on_fail }], 
+        "http_req_duration": [{ threshold: "max<10000", abortOnFail: abort_on_fail }],
     },
     executor: 'ramping-arrival-rate', //Assure load increase if the system slows
     stages: [
@@ -20,5 +20,5 @@ export let options = {
 }
 
 export default function() {
-    createDialog(randomItem(serviceOwners), randomItem(endUsers), traceCalls); 
+    createDialog(randomItem(serviceOwners), randomItem(endUsers), traceCalls);
 }

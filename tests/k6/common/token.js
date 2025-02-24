@@ -32,7 +32,7 @@ function getCacheKey(tokenType, tokenOptions) {
 }
 
 export function fetchToken(url, tokenOptions, type) {
-  const currentTime = Math.floor(Date.now() / 1000);  
+  const currentTime = Math.floor(Date.now() / 1000);
   const cacheKey = getCacheKey(type, tokenOptions);
 
   if (!cachedTokens[cacheKey] || (currentTime - cachedTokensIssuedAt[cacheKey] >= tokenTtl - tokenMargin)) {
@@ -42,7 +42,7 @@ export function fetchToken(url, tokenOptions, type) {
     else {
       console.info(`Fetching ${type} token from token generator during VU stage for VU #${__VU}`);
     }
-    
+
     let response = http.get(url, tokenRequestOptions);
 
     if (response.status != 200) {
@@ -75,7 +75,7 @@ export function getEndUserTokens(count, tokenOptions = null) {
   if (response.status != 200) {
     throw new Error(`Failed getting tokens: ${response.status_text}`);
   }
-  return response.json();                                       
+  return response.json();
 }
 
 export function getDefaultEnduserOrgNo() {

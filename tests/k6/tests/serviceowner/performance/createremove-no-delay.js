@@ -14,16 +14,15 @@ export function setup() {
 export default function(paramsWithToken) {
     let dialogId = null;
     describe('create dialog', () => {
-        let r = postSO('dialogs', dialogToInsert(), paramsWithToken);   
+        let r = postSO('dialogs', dialogToInsert(), paramsWithToken);
         expect(r.status, 'response status').to.equal(201);
         dialogId = r.json();
     });
 
     describe('remove dialog', () => {
         if (dialogId) {
-            let r = purgeSO('dialogs/' + dialogId, paramsWithToken);   
+            let r = purgeSO('dialogs/' + dialogId, paramsWithToken);
             expect(r.status, 'response status').to.equal(204);
         }
     });
 }
-

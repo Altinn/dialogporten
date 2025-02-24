@@ -3,9 +3,9 @@ import { fetchToken } from "../../common/token.js";
 const tokenGeneratorEnv = __ENV.API_ENVIRONMENT || 'yt01';
 const tokenTtl = __ENV.TTL || 3600;
 
-export function getEnterpriseToken(serviceOwner) {  
+export function getEnterpriseToken(serviceOwner) {
     const tokenOptions = {
-        scopes: serviceOwner.scopes, 
+        scopes: serviceOwner.scopes,
         orgName: serviceOwner.org,
         orgNo: serviceOwner.orgno
     }
@@ -15,7 +15,7 @@ export function getEnterpriseToken(serviceOwner) {
 
 export function getPersonalToken(endUser) {
     const tokenOptions = {
-        scopes: endUser.scopes, 
+        scopes: endUser.scopes,
         ssn: endUser.ssn
     }
     const url = `https://altinn-testtools-token-generator.azurewebsites.net/api/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(tokenOptions.scopes)}&pid=${tokenOptions.ssn}&ttl=${tokenTtl}`;

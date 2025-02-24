@@ -21,9 +21,8 @@ const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
 const numberOfTransmissions = (__ENV.numberOfTransmissions ?? '10');
 const maxTransmissionsInThread = (__ENV.maxTransmissionsInThread ?? '100');
 const testid = (__ENV.TESTID ?? 'createTransmissions');
-  
+
 export default function(data) {
     const { endUsers, index } = validateTestData(data, serviceOwners);
     createTransmissions(serviceOwners[0], endUsers[index], traceCalls, numberOfTransmissions, maxTransmissionsInThread, testid);
 }
-

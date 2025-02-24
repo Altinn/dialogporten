@@ -6,7 +6,8 @@ using Xunit.Microsoft.DependencyInjection.Abstracts;
 
 namespace Digdir.Domain.Dialogporten.WebApiClient.E2E.Tests;
 
-public sealed class E2EFixture : TestBedFixture
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class AuthorizedE2EFixture : TestBedFixture
 {
     private static string _clientId = "";
     private static string _encodedJwk = "";
@@ -32,7 +33,7 @@ public sealed class E2EFixture : TestBedFixture
 
     protected override void AddUserSecrets(IConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.AddUserSecrets<E2EFixture>(optional: true);
+        configurationBuilder.AddUserSecrets<AuthorizedE2EFixture>(optional: true);
 
         var config = configurationBuilder.Build();
         _clientId = config["DialogportenSettings:Maskinporten:ClientId"]!;

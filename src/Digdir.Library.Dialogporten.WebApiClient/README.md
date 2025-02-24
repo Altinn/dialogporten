@@ -14,7 +14,7 @@ Install nuget
 
 ## Usage
 
-This library provides extensions methods providing means to create dialogporten clients.
+This library provides extensions methods providing means to create dialogporten clients 
 
 Setup
 

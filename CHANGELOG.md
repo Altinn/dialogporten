@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.55.4](https://github.com/Altinn/dialogporten/compare/v1.55.3...v1.55.4) (2025-02-24)
+
+
+### Miscellaneous Chores
+
+* **performance:** remove warm-up step before performance tests ([#1942](https://github.com/Altinn/dialogporten/issues/1942)) ([757f454](https://github.com/Altinn/dialogporten/commit/757f454fb64a75e8eebd1d8e95a33242113ddbe6))
+* **sdk:** Update title for SDK README.md ([#1949](https://github.com/Altinn/dialogporten/issues/1949)) ([b4139b1](https://github.com/Altinn/dialogporten/commit/b4139b1b34b74913cd601a4726685226d3f79dbb))
+* updated push sdk to NuGet workflow on WebApiClient changes ([#1944](https://github.com/Altinn/dialogporten/issues/1944)) ([b7186ba](https://github.com/Altinn/dialogporten/commit/b7186ba3b99e2cd99f632ac0e34ff63c9121fb3e))
+
 ## [1.55.3](https://github.com/Altinn/dialogporten/compare/v1.55.2...v1.55.3) (2025-02-23)
 
 

@@ -101,7 +101,7 @@ jobs:
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
     needs: [ deploy-apps, get-current-version, generate-git-short-sha, check-for-changes ]
-    if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges ) }}
+    if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges == 'true' ) }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-rc.${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'

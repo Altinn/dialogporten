@@ -51,7 +51,7 @@ jobs:
       hasSwaggerSchemaChanges: ${{ steps.filter-backend.outputs.swagger_schema_any_modified == 'true'}}
       hasGqlSchemaChanges: ${{ steps.filter-backend.outputs.gql_schema_any_modified == 'true'}}
       hasMigrationChanges: ${{ steps.filter-backend.outputs.migration_any_modified == 'true'}}
-      hasWebApiClientChanges: ${{ steps.filter-backend.outputs.web_api_client_modified == 'true'}}
+      hasWebApiClientChanges: ${{ steps.filter-backend.outputs.web_api_client_any_modified == 'true'}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -8,10 +8,10 @@ internal sealed class ConditionalSkipFactAttribute : FactAttribute
 
     public ConditionalSkipFactAttribute()
     {
-        var disableSkippingE2E = Environment.GetEnvironmentVariable(RunE2E);
-        if (disableSkippingE2E != "true")
-        {
-            Skip = $"To run E2E tests, set the environment variable {RunE2E} to 'true'";
-        }
+        // var disableSkippingE2E = Environment.GetEnvironmentVariable(RunE2E);
+        // if (disableSkippingE2E != "true")
+        // {
+        //     Skip = $"To run E2E tests, set the environment variable {RunE2E} to 'true'";
+        // }
     }
 }

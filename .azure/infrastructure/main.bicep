@@ -62,6 +62,7 @@ param postgresConfiguration {
   storage: PostgresStorageConfig
   enableIndexTuning: bool
   enableQueryPerformanceInsight: bool
+  enableHighAvailability: bool
 }
 
 import { Sku as ServiceBusSku } from '../modules/serviceBus/main.bicep'
@@ -214,6 +215,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     enableQueryPerformanceInsight: postgresConfiguration.enableQueryPerformanceInsight
     subnetId: vnet.outputs.postgresqlSubnetId
     vnetId: vnet.outputs.virtualNetworkId
+    enableHighAvailability: postgresConfiguration.enableHighAvailability
     tags: tags
   }
 }

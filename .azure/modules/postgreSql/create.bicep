@@ -52,6 +52,9 @@ param enableIndexTuning bool
 @description('The name of the Application Insights workspace')
 param appInsightWorkspaceName string
 
+@description('Enable high availability')
+param enableHighAvailability bool
+
 @description('The Key Vault to store the PostgreSQL administrator login password')
 @secure()
 param srcKeyVault object
@@ -86,6 +89,11 @@ module privateDnsZone '../privateDnsZone/main.bicep' = {
   }
 }
 
+var highAvailabilityConfig = enableHighAvailability ? {
+  mode: 'ZoneRedundant'
+  standbyAvailabilityZone: '2'
+} : null
+
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: postgresServerName
   location: location
@@ -106,6 +114,7 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       delegatedSubnetResourceId: subnetId
       privateDnsZoneArmResourceId: privateDnsZone.outputs.id
     }
+    highAvailability: highAvailabilityConfig
   }
   sku: sku
   resource database 'databases' = {

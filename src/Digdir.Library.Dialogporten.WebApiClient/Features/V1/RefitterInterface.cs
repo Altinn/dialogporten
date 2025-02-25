@@ -1069,7 +1069,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Media type of the content, this can also indicate that the content is embeddable.
-        /// <br/>For a list of supported media types, see (link TBD).
         /// </summary>
 
         [JsonPropertyName("mediaType")]
@@ -1081,7 +1080,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public partial class V1CommonLocalizations_Localization
     {
         /// <summary>
-        /// The localized text or URI reference.
+        /// The localized text (or URL if a front-channel embed).
         /// </summary>
 
         [JsonPropertyName("value")]

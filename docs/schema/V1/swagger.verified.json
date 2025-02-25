@@ -345,7 +345,7 @@
         "additionalProperties": false,
         "properties": {
           "mediaType": {
-            "description": "Media type of the content, this can also indicate that the content is embeddable.\nFor a list of supported media types, see (link TBD).",
+            "description": "Media type of the content, this can also indicate that the content is embeddable.",
             "type": "string"
           },
           "value": {
@@ -368,7 +368,7 @@
             "type": "string"
           },
           "value": {
-            "description": "The localized text or URI reference.",
+            "description": "The localized text (or URL if a front-channel embed).",
             "type": "string"
           }
         },

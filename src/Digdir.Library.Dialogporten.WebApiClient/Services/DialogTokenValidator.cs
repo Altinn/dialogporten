@@ -14,16 +14,45 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 {
     private readonly IEdDsaSecurityKeysCache _publicKeysCache;
     private readonly IClock _clock;
+    private readonly string _expectedIssuer;
 
-    public DialogTokenValidator(IEdDsaSecurityKeysCache publicKeysCache, IClock clock)
+    public DialogTokenValidator(IEdDsaSecurityKeysCache publicKeysCache, IClock clock, DialogportenSettings settings)
     {
         _publicKeysCache = publicKeysCache;
         _clock = clock;
+        _expectedIssuer = CombineUriSegments(settings.BaseUri, "api/v1");
     }
 
-    public IValidationResult Validate(ReadOnlySpan<char> token)
+    private static string CombineUriSegments(ReadOnlySpan<char> segmentA, ReadOnlySpan<char> segmentB)
+    {
+        const string separator = "/";
+        return $"{segmentA.TrimEnd(separator)}{separator}{segmentB.TrimStart(separator)}";
+    }
+
+    public IValidationResult Validate(ReadOnlySpan<char> token,
+        DialogTokenValidationParameters? options = null,
+        Guid? dialogId = null,
+        params string[] requiredActions)
+    {
+        var validationResult = Validate(token, options);
+        if (dialogId.HasValue)
+        {
+            // TODO: Validate dialogId
+        }
+
+        if (requiredActions.Length > 0)
+        {
+            // TODO: Validate actions
+        }
+
+        return validationResult;
+    }
+
+    public IValidationResult Validate(ReadOnlySpan<char> token,
+        DialogTokenValidationParameters? options = null)
     {
         const string tokenPropertyName = "token";
+        options ??= DialogTokenValidationParameters.Default;
         var validationResult = new DefaultValidationResult();
         Span<byte> tokenDecodeBuffer = stackalloc byte[Base64Url.GetMaxDecodedLength(token.Length)];
 
@@ -39,12 +68,49 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
             validationResult.AddError(tokenPropertyName, "Invalid signature");
         }
 
-        if (!VerifyExpiration(decodedTokenParts))
+        if (options.ValidateLifetime && !VerifyNotValidBefore(claimsPrincipal, options.ClockSkew))
         {
-            validationResult.AddError(tokenPropertyName, "Token has expired");
+            validationResult.AddError(tokenPropertyName, "Invalid nbf");
+        }
+
+        if (options.ValidateLifetime && !VerifyExpirationTime(claimsPrincipal, options.ClockSkew))
+        {
+            validationResult.AddError(tokenPropertyName, "Invalid exp");
+        }
+
+        if (options.ValidateIssuer && !VerifyIssuer(claimsPrincipal))
+        {
+            validationResult.AddError(tokenPropertyName, "Invalid issuer");
         }
 
         return validationResult;
+    }
+
+    private bool VerifyIssuer(ClaimsPrincipal claimsPrincipal)
+    {
+        const string issuer = "iss";
+        return claimsPrincipal.TryGetClaimValue(issuer, out var iss)
+            && iss == _expectedIssuer;
+    }
+
+    private bool VerifyExpirationTime(ClaimsPrincipal claimsPrincipal, TimeSpan clockSkew)
+    {
+        const string expirationTime = "exp";
+        var exp = claimsPrincipal.TryGetClaimValue(expirationTime, out var exps)
+            && long.TryParse(exps, out var expl)
+                ? DateTimeOffset.FromUnixTimeSeconds(expl).Add(clockSkew)
+                : DateTimeOffset.MinValue;
+        return _clock.UtcNow <= exp;
+    }
+
+    private bool VerifyNotValidBefore(ClaimsPrincipal claimsPrincipal, TimeSpan clockSkew)
+    {
+        const string notValidBefore = "nbf";
+        var nbf = claimsPrincipal.TryGetClaimValue(notValidBefore, out var nbfs)
+            && long.TryParse(nbfs, out var nbfl)
+                ? DateTimeOffset.FromUnixTimeSeconds(nbfl).Add(-clockSkew)
+                : DateTimeOffset.MaxValue;
+        return nbf <= _clock.UtcNow;
     }
 
     private static bool TryDecodeToken(
@@ -143,28 +209,6 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         return TryGetPublicKey(publicKeys, decodedTokenParts.Header, out var publicKey)
                && SignatureAlgorithm.Ed25519.Verify(publicKey, signedPart, decodedTokenParts.Signature);
-    }
-
-    private bool VerifyExpiration(JwksTokenParts<byte> decodedTokenParts)
-    {
-        const string expiresPropertyName = "exp";
-        if (!TryGetPropertyValue(decodedTokenParts.Body, expiresPropertyName, out var expiresSpan))
-        {
-            return false;
-        }
-
-        if (!Utf8Parser.TryParse(expiresSpan, out long expiresUnixTimeSeconds, out var bytesConsumed))
-        {
-            return false;
-        }
-
-        if (bytesConsumed != expiresSpan.Length)
-        {
-            return false;
-        }
-
-        var expires = DateTimeOffset.FromUnixTimeSeconds(expiresUnixTimeSeconds);
-        return expires >= _clock.UtcNow;
     }
 
     private static bool TryDecodePart(ReadOnlySpan<char> tokenPart, Span<byte> buffer, out ReadOnlySpan<byte> span, out int length)

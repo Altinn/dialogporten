@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using Altinn.ApiClients.Dialogporten;
 using Altinn.ApiClients.Dialogporten.Common;
 using Altinn.ApiClients.Dialogporten.Services;
 using NSec.Cryptography;
@@ -27,7 +28,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         // Act
         var result = sut.Validate(DialogToken);
@@ -54,7 +55,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         // Act
         var result = sut.Validate("This.TokenIsMalformed....");
@@ -71,7 +72,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         // Act
         var result = sut.Validate("This.TokenIs.Invalid");
@@ -87,7 +88,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         var token = UpdateTokenHeader(DialogToken, "kid", "dp-testing-fake-kid");
         // Act
@@ -105,7 +106,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse("2025-02-17T09:00:00Z", CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         // Act
         var result = sut.Validate(DialogToken);
@@ -113,7 +114,24 @@ public class DialogTokenValidatorTests
         // Assert
         Assert.False(result.IsValid);
         Assert.True(result.Errors.ContainsKey("token"));
-        Assert.Contains("Token has expired", result.Errors["token"]);
+        Assert.Contains("Invalid exp", result.Errors["token"]);
+    }
+
+    [Fact]
+    public void ShouldReturnError_WhenUsedBeforeNbf()
+    {
+        // Arrange
+        var sut = GetSut(
+            DateTimeOffset.Parse("2025-02-14T08:50:00Z", CultureInfo.InvariantCulture),
+            publicKeyPairs: ValidPublicKeyPairs);
+
+        // Act
+        var result = sut.Validate(DialogToken);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.ContainsKey("token"));
+        Assert.Contains("Invalid nbf", result.Errors["token"]);
     }
 
     [Fact]
@@ -122,7 +140,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         // Act
         var result = sut.Validate("");
@@ -139,7 +157,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         var token = UpdateTokenPayload(DialogToken, "l", "4");
 
@@ -158,7 +176,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         var token = UpdateTokenHeader(DialogToken, "alg", "RS512");
 
@@ -183,7 +201,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         var tokenParts = DialogToken.Split('.');
         tokenParts[0] = Base64Url.EncodeToString(invalidHeader);
@@ -209,7 +227,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         var tokenParts = DialogToken.Split('.');
         tokenParts[1] = Base64Url.EncodeToString(invalidBody);
@@ -230,7 +248,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
 
         // Act
         var result = sut.Validate(DialogToken);
@@ -262,7 +280,7 @@ public class DialogTokenValidatorTests
         // Arrange
         var sut = GetSut(
             DateTimeOffset.Parse(ValidTimeStampString, CultureInfo.InvariantCulture),
-            ValidPublicKeyPairs);
+            publicKeyPairs: ValidPublicKeyPairs);
         var tokenParts = DialogToken.Split('.');
         tokenParts[1] = Base64Url.EncodeToString(invalidBody);
         var token = string.Join(".", tokenParts);
@@ -275,13 +293,18 @@ public class DialogTokenValidatorTests
         Assert.Null(result.ClaimsPrincipal);
     }
 
-    private static DialogTokenValidator GetSut(DateTimeOffset simulatedNow, params PublicKeyPair[] publicKeyPairs)
+    private static DialogTokenValidator GetSut(
+        DateTimeOffset simulatedNow,
+        string baseUri = "https://platform.tt02.altinn.no/dialogporten",
+        params PublicKeyPair[] publicKeyPairs)
     {
+        DialogTokenValidationParameters.Default.ClockSkew = TimeSpan.Zero;
         var keyCache = Substitute.For<IEdDsaSecurityKeysCache>();
         var clock = Substitute.For<IClock>();
+        var settings = new DialogportenSettings { BaseUri = baseUri };
         keyCache.PublicKeys.Returns(new ReadOnlyCollection<PublicKeyPair>(publicKeyPairs));
         clock.UtcNow.Returns(simulatedNow);
-        return new DialogTokenValidator(keyCache, clock);
+        return new DialogTokenValidator(keyCache, clock, settings);
     }
 
     private static PublicKey ToPublicKey(string key)

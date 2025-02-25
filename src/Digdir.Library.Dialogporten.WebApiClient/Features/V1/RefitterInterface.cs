@@ -1308,7 +1308,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
-        /// <br/>Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
         /// </summary>
 
         [JsonPropertyName("contentReference")]
@@ -1472,7 +1471,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-        /// <br/>Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
         /// </summary>
 
         [JsonPropertyName("contentReference")]
@@ -2956,7 +2954,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-        /// <br/>Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
         /// </summary>
 
         [JsonPropertyName("mainContentReference")]
@@ -3136,7 +3133,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-        /// <br/>Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
         /// </summary>
 
         [JsonPropertyName("contentReference")]
@@ -3738,7 +3734,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-        /// <br/>Supported media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
         /// </summary>
 
         [JsonPropertyName("mainContentReference")]
@@ -3905,7 +3900,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-        /// <br/>Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
         /// </summary>
 
         [JsonPropertyName("contentReference")]

@@ -1188,7 +1188,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
             "nullable": true,
             "oneOf": [
               {
@@ -1540,7 +1540,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
             "nullable": true,
             "oneOf": [
               {
@@ -1704,7 +1704,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
             "nullable": true,
             "oneOf": [
               {
@@ -2263,7 +2263,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nSupported media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
             "nullable": true,
             "oneOf": [
               {
@@ -2679,7 +2679,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
             "nullable": true,
             "oneOf": [
               {
@@ -3308,7 +3308,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
             "nullable": true,
             "oneOf": [
               {
@@ -3408,7 +3408,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
             "nullable": true,
             "oneOf": [
               {
@@ -4080,7 +4080,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
             "nullable": true,
             "oneOf": [
               {
@@ -4541,7 +4541,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
             "nullable": true,
             "oneOf": [
               {

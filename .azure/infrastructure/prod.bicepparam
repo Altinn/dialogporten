@@ -36,7 +36,7 @@ param postgresConfiguration = {
   }
   enableIndexTuning: false
   enableQueryPerformanceInsight: false
-  highAvailability: true
+  enableHighAvailability: true
 }
 
 param redisSku = {

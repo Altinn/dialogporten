@@ -368,7 +368,7 @@
             "type": "string"
           },
           "value": {
-            "description": "The localized text or URI reference.",
+            "description": "The localized text.",
             "type": "string"
           }
         },

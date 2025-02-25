@@ -1081,7 +1081,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public partial class V1CommonLocalizations_Localization
     {
         /// <summary>
-        /// The localized text or URI reference.
+        /// The localized text.
         /// </summary>
 
         [JsonPropertyName("value")]

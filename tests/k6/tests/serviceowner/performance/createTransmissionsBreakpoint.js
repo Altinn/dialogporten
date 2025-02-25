@@ -32,9 +32,8 @@ export function setup() {
     }
     return parts;
 }
-  
+
 export default function(data) {
     const { endUsers, index } = validateTestData(data);
     createTransmissions(randomItem(serviceOwners), endUsers[index], traceCalls, numberOfTransmissions, maxTransmissionsInThread, testid);
 }
-

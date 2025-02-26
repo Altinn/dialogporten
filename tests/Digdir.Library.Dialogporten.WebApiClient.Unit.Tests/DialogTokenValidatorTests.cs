@@ -38,7 +38,6 @@ public class DialogTokenValidatorTests
     [Fact]
     public void ShouldThrowException_GivenNoPublicKeys()
     {
-
         // Arrange
         var sut = GetSut(ValidTimeStamp);
 
@@ -75,6 +74,7 @@ public class DialogTokenValidatorTests
         Assert.True(result.Errors.ContainsKey("token"));
         Assert.Contains("Invalid token format", result.Errors["token"]);
     }
+
     [Fact]
     public void ShouldReturnError_GivenNoPublicKeyWithCorrectKeyId()
     {

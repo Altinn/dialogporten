@@ -28,7 +28,7 @@ export default function () {
     describe('Attempt to create dialog with same idempotentKey different Org', () => {
         let dialog = dialogToInsert();
         dialog.idempotentKey = uuidv7();
-        dialog.serviceResource = "urn:altinn:resource:" +otherServiceResource; 
+        dialog.serviceResource = "urn:altinn:resource:" +otherServiceResource;
         dialog.activities[2].performedBy.actorId = "urn:altinn:organization:identifier-no:" + otherOrgNo;
 
         let responseNav = postSO('dialogs', dialog, null, navOrg);

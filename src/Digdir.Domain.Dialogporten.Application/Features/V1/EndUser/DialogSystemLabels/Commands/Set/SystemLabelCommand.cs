@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
-using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
 

@@ -47,10 +47,10 @@ public sealed class DialogEntity :
 
     // === Dependent relationships ===
     public DialogStatus.Values StatusId { get; set; }
+
     public DialogStatus Status { get; set; } = null!;
 
     // === Principal relationships ===
-
     [AggregateChild]
     public List<DialogTransmission> Transmissions { get; set; } = [];
 

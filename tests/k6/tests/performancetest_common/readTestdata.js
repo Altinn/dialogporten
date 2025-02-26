@@ -2,7 +2,7 @@
  * This file contains the implementation of reading test data from CSV files.
  * The test data includes service owners, end users, and end users with tokens.
  * The data is read using the PapaParse library and stored in SharedArray variables.
- * 
+ *
  * @module readTestdata
  */
 
@@ -11,8 +11,8 @@ import { SharedArray } from 'k6/data';
 import exec from 'k6/execution';
 /**
  * Function to read the CSV file specified by the filename parameter.
- * @param {} filename 
- * @returns 
+ * @param {} filename
+ * @returns
  */
 function readCsv(filename) {
   try {
@@ -20,7 +20,7 @@ function readCsv(filename) {
   } catch (error) {
     console.log(`Error reading CSV file: ${error}`);
     return [];
-  } 
+  }
 }
 
 if (!__ENV.API_ENVIRONMENT) {
@@ -32,7 +32,7 @@ const filenameServiceowners = `../performancetest_data/serviceowners-${__ENV.API
 /**
  * SharedArray variable that stores the service owners data.
  * The data is parsed from the CSV file specified by the filenameServiceowners variable.
- * 
+ *
  * @name serviceOwners
  * @type {SharedArray}
  */
@@ -44,12 +44,12 @@ export const serviceOwners = new SharedArray('serviceOwners', function () {
  * SharedArray variable that stores the end users data.
  * The data is parsed from the CSV file specified by the filenameEndusers variable.
  * The filenameEndusers variable is dynamically generated based on the value of the API_ENVIRONMENT environment variable.
- * 
+ *
  * @name endUsers
  * @type {SharedArray}
  */
 export const endUsers = new SharedArray('endUsers', function () {
-  return readCsv(filenameEndusers); 
+  return readCsv(filenameEndusers);
 });
 
 export function endUsersPart(totalVus, vuId) {
@@ -97,5 +97,3 @@ export function validateTestData(data, serviceOwners=null) {
         index: exec.vu.iterationInInstance % myEndUsers.length
     };
 }
-
-

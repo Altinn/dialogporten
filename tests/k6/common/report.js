@@ -14,7 +14,7 @@ export function generateJUnitXML(k6Json) {
     }
 
     function processGroup(group) {
-        if (group.name && group.checks.length) { 
+        if (group.name && group.checks.length) {
             const groupName = xmlEncode(group.name);
             xmlDoc.push(`<testsuite name="${groupName}" tests="${group.checks.length}">`);
 

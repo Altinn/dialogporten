@@ -38,7 +38,5 @@ export function setup() {
 export default function(data) {
     const endUser = randomItem(Object.keys(data));
     const token = data[endUser];
-    graphqlSearch(endUser, token, traceCalls);  
+    graphqlSearch(endUser, token, traceCalls);
 }
-
-

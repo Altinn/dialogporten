@@ -7,12 +7,12 @@ export let options = {
     duration: "30s",
     thresholds: {
         "http_req_duration{name:create dialog}": ["p(95)<300"],
-        "http_reqs{name:create dialog}": []   
+        "http_reqs{name:create dialog}": []
     }
 }
 
 const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
 
-export default function () { 
+export default function () {
     createDialog(serviceOwners[0], randomItem(endUsers), traceCalls);
 }

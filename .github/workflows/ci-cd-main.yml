@@ -3,7 +3,7 @@
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [ main ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -30,7 +30,7 @@ jobs:
   build-and-test:
     name: Build and test backend
     uses: ./.github/workflows/workflow-build-and-test.yml
-    needs: [check-for-changes]
+    needs: [ check-for-changes ]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
 
   publish:
@@ -52,7 +52,7 @@ jobs:
 
   deploy-infra:
     name: Deploy infra to test
-    needs: [get-current-version, check-for-changes, generate-git-short-sha]
+    needs: [ get-current-version, check-for-changes, generate-git-short-sha ]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
     uses: ./.github/workflows/workflow-deploy-infra.yml
     secrets:
@@ -98,12 +98,22 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
 
+  generate-timestamp:
+    name: Generate timestamp
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.get-timestamp.outputs.timestamp }}
+    steps:
+      - name: Get timestamp
+        id: get-timestamp
+        run: echo "timestamp=$(date +%s)" >> $GITHUB_OUTPUT
+
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
-    needs: [ deploy-apps, get-current-version, generate-git-short-sha, check-for-changes ]
+    needs: [ deploy-apps, get-current-version, generate-git-short-sha, check-for-changes, generate-timestamp ]
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges == 'true' ) }}
     with:
-      version: ${{ needs.get-current-version.outputs.version }}-rc.${{ needs.generate-git-short-sha.outputs.gitShortSha }}
+      version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
@@ -111,7 +121,7 @@ jobs:
 
   publish-schema-npm:
     name: Deploy schema npm package
-    needs: [check-for-changes, get-current-version, generate-git-short-sha, deploy-apps]
+    needs: [ check-for-changes, get-current-version, generate-git-short-sha, deploy-apps ]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasGqlSchemaChanges == 'true') }}
     uses: ./.github/workflows/workflow-publish-schema.yml
     with:
@@ -123,7 +133,7 @@ jobs:
     name: "Run K6 functional end-to-end tests"
     # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
-    needs: [deploy-apps, check-for-changes]
+    needs: [ deploy-apps, check-for-changes ]
     uses: ./.github/workflows/workflow-run-k6-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}

@@ -1,6 +1,5 @@
 using System.Buffers.Text;
 using System.Collections.ObjectModel;
-using Altinn.ApiClients.Dialogporten.Common;
 using Altinn.ApiClients.Dialogporten.Common.Exceptions;
 using Altinn.ApiClients.Dialogporten.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;

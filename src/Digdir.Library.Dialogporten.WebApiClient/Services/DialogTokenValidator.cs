@@ -15,19 +15,11 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     private const string TokenPropertyName = "token";
     private readonly IEdDsaSecurityKeysCache _publicKeysCache;
     private readonly IClock _clock;
-    private readonly string _expectedIssuer;
 
-    public DialogTokenValidator(IEdDsaSecurityKeysCache publicKeysCache, IClock clock, DialogportenSettings settings)
+    public DialogTokenValidator(IEdDsaSecurityKeysCache publicKeysCache, IClock clock)
     {
         _publicKeysCache = publicKeysCache;
         _clock = clock;
-        _expectedIssuer = CombineUriSegments(settings.BaseUri, "api/v1");
-    }
-
-    private static string CombineUriSegments(ReadOnlySpan<char> segmentA, ReadOnlySpan<char> segmentB)
-    {
-        const string separator = "/";
-        return $"{segmentA.TrimEnd(separator)}{separator}{segmentB.TrimStart(separator)}";
     }
 
     public IValidationResult Validate(ReadOnlySpan<char> token,
@@ -60,11 +52,6 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         if (options.ValidateLifetime && !claimsPrincipal.VerifyExpirationTime(_clock, options.ClockSkew))
         {
             validationResult.AddError(tokenPropertyName, "Invalid exp");
-        }
-
-        if (options.ValidateIssuer && !claimsPrincipal.VerifyIssuer(_expectedIssuer))
-        {
-            validationResult.AddError(tokenPropertyName, "Invalid issuer");
         }
 
         if (dialogId.HasValue && !validationResult.ClaimsPrincipal.VerifyDialogId(dialogId.Value))

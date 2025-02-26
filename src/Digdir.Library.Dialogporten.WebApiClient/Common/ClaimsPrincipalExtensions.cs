@@ -37,19 +37,6 @@ internal static class ClaimsPrincipalExtensions
         return intersectionLength == requiredActionsLength;
     }
 
-    public static bool VerifyIssuer(this ClaimsPrincipal claimsPrincipal, string expectedIssuer)
-    {
-        const string issuerClaimName = "iss";
-        if (!claimsPrincipal.TryGetClaimValue(issuerClaimName, out var iss))
-        {
-            return false;
-        }
-
-        var cleanedExpectedIssuer = expectedIssuer.AsSpan().TrimEnd('/');
-        var cleanedIssuerClaim = iss.AsSpan().TrimEnd('/');
-        return cleanedExpectedIssuer.SequenceEqual(cleanedIssuerClaim, CaseInsensitiveCharComparer.Instance);
-    }
-
     public static bool VerifyExpirationTime(this ClaimsPrincipal claimsPrincipal, IClock clock, TimeSpan clockSkew)
     {
         const string expirationTimeClaimName = "exp";

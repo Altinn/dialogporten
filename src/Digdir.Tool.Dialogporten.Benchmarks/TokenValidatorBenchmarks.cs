@@ -23,8 +23,7 @@ public class TokenValidatorBenchmarks
     ];
     private static readonly DialogTokenValidator _sut = new(
         new DefaultEdDsaSecurityKeysCache(ValidPublicKeyPairs),
-        new BenchmarkClock(ValidTimeStampString),
-        new DialogportenSettings { BaseUri = "https://platform.tt02.altinn.no/dialogporten" });
+        new BenchmarkClock(ValidTimeStampString));
 
 
     [Benchmark]

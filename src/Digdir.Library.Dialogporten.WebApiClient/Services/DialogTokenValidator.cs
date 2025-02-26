@@ -12,7 +12,6 @@ namespace Altinn.ApiClients.Dialogporten.Services;
 
 internal sealed class DialogTokenValidator : IDialogTokenValidator
 {
-    private const string TokenPropertyName = "token";
     private readonly IEdDsaSecurityKeysCache _publicKeysCache;
     private readonly IClock _clock;
 
@@ -56,12 +55,12 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         if (dialogId.HasValue && !validationResult.ClaimsPrincipal.VerifyDialogId(dialogId.Value))
         {
-            validationResult.AddError(TokenPropertyName, "Invalid dialog ID");
+            validationResult.AddError(tokenPropertyName, "Invalid dialog ID");
         }
 
         if (requiredActions is not null && !validationResult.ClaimsPrincipal.VerifyActions(requiredActions))
         {
-            validationResult.AddError(TokenPropertyName, "Invalid actions");
+            validationResult.AddError(tokenPropertyName, "Invalid actions");
         }
 
         return validationResult;

@@ -55,6 +55,9 @@ param appInsightWorkspaceName string
 @description('Enable high availability')
 param enableHighAvailability bool
 
+@description('The availability zone for the PostgreSQL primary server')
+param availabilityZone string
+
 @description('The number of days to retain backups. If not specified, the default value of 7 days will be used.')
 @minValue(7)
 @maxValue(35)
@@ -123,6 +126,7 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       delegatedSubnetResourceId: subnetId
       privateDnsZoneArmResourceId: privateDnsZone.outputs.id
     }
+    availabilityZone: availabilityZone
     highAvailability: highAvailabilityConfig
   }
   sku: sku

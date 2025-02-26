@@ -64,6 +64,7 @@ param postgresConfiguration {
   enableQueryPerformanceInsight: bool
   enableHighAvailability: bool
   backupRetentionDays: int
+  availabilityZone: string
 }
 
 import { Sku as ServiceBusSku } from '../modules/serviceBus/main.bicep'
@@ -218,6 +219,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     vnetId: vnet.outputs.virtualNetworkId
     enableHighAvailability: postgresConfiguration.enableHighAvailability
     backupRetentionDays: postgresConfiguration.backupRetentionDays
+    availabilityZone: postgresConfiguration.availabilityZone
     tags: tags
   }
 }

@@ -12,6 +12,7 @@ namespace Altinn.ApiClients.Dialogporten.Services;
 
 internal sealed class DialogTokenValidator : IDialogTokenValidator
 {
+    private const string TokenPropertyName = "token";
     private readonly IEdDsaSecurityKeysCache _publicKeysCache;
     private readonly IClock _clock;
     private readonly string _expectedIssuer;
@@ -30,25 +31,8 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     }
 
     public IValidationResult Validate(ReadOnlySpan<char> token,
-        DialogTokenValidationParameters? options = null,
         Guid? dialogId = null,
-        params string[] requiredActions)
-    {
-        var validationResult = Validate(token, options);
-        if (dialogId.HasValue)
-        {
-            // TODO: Validate dialogId
-        }
-
-        if (requiredActions.Length > 0)
-        {
-            // TODO: Validate actions
-        }
-
-        return validationResult;
-    }
-
-    public IValidationResult Validate(ReadOnlySpan<char> token,
+        string[]? requiredActions = null,
         DialogTokenValidationParameters? options = null)
     {
         const string tokenPropertyName = "token";
@@ -68,49 +52,32 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
             validationResult.AddError(tokenPropertyName, "Invalid signature");
         }
 
-        if (options.ValidateLifetime && !VerifyNotValidBefore(claimsPrincipal, options.ClockSkew))
+        if (options.ValidateLifetime && !claimsPrincipal.VerifyNotValidBefore(_clock, options.ClockSkew))
         {
             validationResult.AddError(tokenPropertyName, "Invalid nbf");
         }
 
-        if (options.ValidateLifetime && !VerifyExpirationTime(claimsPrincipal, options.ClockSkew))
+        if (options.ValidateLifetime && !claimsPrincipal.VerifyExpirationTime(_clock, options.ClockSkew))
         {
             validationResult.AddError(tokenPropertyName, "Invalid exp");
         }
 
-        if (options.ValidateIssuer && !VerifyIssuer(claimsPrincipal))
+        if (options.ValidateIssuer && !claimsPrincipal.VerifyIssuer(_expectedIssuer))
         {
             validationResult.AddError(tokenPropertyName, "Invalid issuer");
         }
 
+        if (dialogId.HasValue && !validationResult.ClaimsPrincipal.VerifyDialogId(dialogId.Value))
+        {
+            validationResult.AddError(TokenPropertyName, "Invalid dialog ID");
+        }
+
+        if (requiredActions is not null && !validationResult.ClaimsPrincipal.VerifyActions(requiredActions))
+        {
+            validationResult.AddError(TokenPropertyName, "Invalid actions");
+        }
+
         return validationResult;
-    }
-
-    private bool VerifyIssuer(ClaimsPrincipal claimsPrincipal)
-    {
-        const string issuer = "iss";
-        return claimsPrincipal.TryGetClaimValue(issuer, out var iss)
-            && iss == _expectedIssuer;
-    }
-
-    private bool VerifyExpirationTime(ClaimsPrincipal claimsPrincipal, TimeSpan clockSkew)
-    {
-        const string expirationTime = "exp";
-        var exp = claimsPrincipal.TryGetClaimValue(expirationTime, out var exps)
-            && long.TryParse(exps, out var expl)
-                ? DateTimeOffset.FromUnixTimeSeconds(expl).Add(clockSkew)
-                : DateTimeOffset.MinValue;
-        return _clock.UtcNow <= exp;
-    }
-
-    private bool VerifyNotValidBefore(ClaimsPrincipal claimsPrincipal, TimeSpan clockSkew)
-    {
-        const string notValidBefore = "nbf";
-        var nbf = claimsPrincipal.TryGetClaimValue(notValidBefore, out var nbfs)
-            && long.TryParse(nbfs, out var nbfl)
-                ? DateTimeOffset.FromUnixTimeSeconds(nbfl).Add(-clockSkew)
-                : DateTimeOffset.MaxValue;
-        return nbf <= _clock.UtcNow;
     }
 
     private static bool TryDecodeToken(

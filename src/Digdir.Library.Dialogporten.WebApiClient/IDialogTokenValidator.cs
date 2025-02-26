@@ -6,11 +6,8 @@ namespace Altinn.ApiClients.Dialogporten;
 public interface IDialogTokenValidator
 {
     IValidationResult Validate(ReadOnlySpan<char> token,
-        DialogTokenValidationParameters? options = null,
         Guid? dialogId = null,
-        params string[] requiredActions);
-
-    IValidationResult Validate(ReadOnlySpan<char> token,
+        string[]? requiredActions = null,
         DialogTokenValidationParameters? options = null);
 }
 

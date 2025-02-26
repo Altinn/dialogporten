@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace Altinn.ApiClients.Dialogporten.Common;
 
-internal static class ClaimsPrincipleExtensions
+internal static class ClaimsPrincipalExtensions
 {
     public static bool VerifyDialogId(this ClaimsPrincipal claimsPrincipal, Guid dialogId)
     {

@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj"/>
+        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
     </ItemGroup>
 
 </Project>

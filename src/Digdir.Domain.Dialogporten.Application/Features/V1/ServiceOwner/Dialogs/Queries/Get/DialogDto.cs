@@ -316,7 +316,6 @@ public sealed class ContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-    /// Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
     /// </summary>
     public ContentValueDto? MainContentReference { get; set; }
 }
@@ -335,7 +334,6 @@ public sealed class DialogTransmissionContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-    /// Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
     /// </summary>
     public ContentValueDto? ContentReference { get; set; }
 }

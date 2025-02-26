@@ -12,7 +12,6 @@ public sealed class ContentValueDto
 
     /// <summary>
     /// Media type of the content, this can also indicate that the content is embeddable.
-    /// For a list of supported media types, see (link TBD).
     /// </summary>
     public string MediaType { get; set; } = MediaTypes.PlainText;
 }

@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.55.5](https://github.com/Altinn/dialogporten/compare/v1.55.4...v1.55.5) (2025-02-26)
+
+
+### Bug Fixes
+
+* **webapi:** Clarify use of FCEs in content values ([#1959](https://github.com/Altinn/dialogporten/issues/1959)) ([584a76c](https://github.com/Altinn/dialogporten/commit/584a76c83666c4a103e582d6d1a836f65c39b35c))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dotnet monorepo ([#1961](https://github.com/Altinn/dialogporten/issues/1961)) ([e3f12d5](https://github.com/Altinn/dialogporten/commit/e3f12d5b7f69e0710012ab8ba2d72188e871cbfe))
+* **deps:** update grafana/grafana docker tag to v10.4.16 ([#1962](https://github.com/Altinn/dialogporten/issues/1962)) ([4f93f67](https://github.com/Altinn/dialogporten/commit/4f93f672a6eab14ff77e13e540268f6e52c63437))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.119.0 ([#1963](https://github.com/Altinn/dialogporten/issues/1963)) ([0fca9a5](https://github.com/Altinn/dialogporten/commit/0fca9a556fbf11f95040068d53aa3349ffdcaf4c))
+* enrich validator api ([#1958](https://github.com/Altinn/dialogporten/issues/1958)) ([739380a](https://github.com/Altinn/dialogporten/commit/739380a58b758dc7192aec5dd3a7ef50b7e1c6da))
+* **performance:** Fix serviceowner orgno ([#1965](https://github.com/Altinn/dialogporten/issues/1965)) ([c2de39d](https://github.com/Altinn/dialogporten/commit/c2de39d9064c7b5153bd14f994336ae46e445b53))
+
 ## [1.55.4](https://github.com/Altinn/dialogporten/compare/v1.55.3...v1.55.4) (2025-02-24)
 
 

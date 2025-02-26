@@ -20,6 +20,12 @@ internal sealed class DefaultEdDsaSecurityKeysCache : IEdDsaSecurityKeysCache
     private List<PublicKeyPair> _publicKeys = [];
     public ReadOnlyCollection<PublicKeyPair> PublicKeys => _publicKeys.AsReadOnly();
     internal void SetPublicKeys(List<PublicKeyPair> publicKeys) => _publicKeys = publicKeys;
+
+    public DefaultEdDsaSecurityKeysCache() { }
+    internal DefaultEdDsaSecurityKeysCache(IEnumerable<PublicKeyPair> publicKeys)
+    {
+        _publicKeys = publicKeys.ToList();
+    }
 }
 
 internal sealed class EdDsaSecurityKeysCacheService : BackgroundService

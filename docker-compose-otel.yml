@@ -1,7 +1,7 @@
 services:
   # OpenTelemetry Collector
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.118.0
+    image: otel/opentelemetry-collector-contrib:0.119.0
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./local-otel-configuration/otel-collector-config.yaml:/etc/otel-collector-config.yaml
@@ -54,7 +54,7 @@ services:
 
   # Grafana for metrics visualization
   grafana:
-    image: grafana/grafana:10.4.11
+    image: grafana/grafana:10.4.16
     ports:
       - "3000:3000"
     environment:

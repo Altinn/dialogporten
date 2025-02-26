@@ -55,6 +55,11 @@ param appInsightWorkspaceName string
 @description('Enable high availability')
 param enableHighAvailability bool
 
+@description('The number of days to retain backups. If not specified, the default value of 7 days will be used.')
+@minValue(7)
+@maxValue(35)
+param backupRetentionDays int
+
 @description('The Key Vault to store the PostgreSQL administrator login password')
 @secure()
 param srcKeyVault object
@@ -105,6 +110,10 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       storageSizeGB: storage.storageSizeGB
       autoGrow: storage.autoGrow
       type: storage.type
+    }
+    backup: {
+      backupRetentionDays: backupRetentionDays
+      geoRedundantBackup: 'Disabled'
     }
     dataEncryption: {
       type: 'SystemManaged'

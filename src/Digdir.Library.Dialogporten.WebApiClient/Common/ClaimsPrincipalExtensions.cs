@@ -63,19 +63,4 @@ internal static class ClaimsPrincipalExtensions
         value = claimsPrincipal.FindFirst(claimType)?.Value;
         return value is not null;
     }
-
-    private class CaseInsensitiveCharComparer : IEqualityComparer<char>
-    {
-        public static CaseInsensitiveCharComparer Instance { get; } = new();
-
-        public bool Equals(char x, char y)
-        {
-            return char.ToUpperInvariant(x) == char.ToUpperInvariant(y);
-        }
-
-        public int GetHashCode(char obj)
-        {
-            return char.ToUpperInvariant(obj).GetHashCode();
-        }
-    }
 }

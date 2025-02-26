@@ -8,7 +8,7 @@ function cleanUp(originalPayload) {
         throw new Error('Invalid payload');
     }
 
-    const payload = { 
+    const payload = {
         ...originalPayload,
         searchTags: [...(originalPayload.searchTags || []), { "value": sentinelPerformanceValue }]
     };
@@ -18,10 +18,10 @@ function cleanUp(originalPayload) {
         if (activity.type !== ACTIVITY_TYPE_INFORMATION) {
             return activity;
         }
-                
+
         const { performedBy, ...rest } = activity;
         const { actorId, ...performedByRest } = performedBy;
-                
+
         return {
             ...rest,
             performedBy: {
@@ -54,6 +54,6 @@ export default function (endUser, resource) {
     let payload = createDialogPayload();
     payload.serviceResource = "urn:altinn:resource:" +resource;
     payload.party = "urn:altinn:person:identifier-no:" + endUser;
-    
+
     return cleanUp(payload);
 }

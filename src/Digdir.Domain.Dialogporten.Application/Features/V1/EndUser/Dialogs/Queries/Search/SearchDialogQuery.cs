@@ -158,7 +158,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .PrefilterAuthorizedDialogs(authorizedResources)
             .AsNoTracking()
             .Include(x => x.Content)
-            .ThenInclude(x => x.Value.Localizations)
+                .ThenInclude(x => x.Value.Localizations)
             .WhereIf(!request.Org.IsNullOrEmpty(), x => request.Org!.Contains(x.Org))
             .WhereIf(!request.ServiceResource.IsNullOrEmpty(), x => request.ServiceResource!.Contains(x.ServiceResource))
             .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))

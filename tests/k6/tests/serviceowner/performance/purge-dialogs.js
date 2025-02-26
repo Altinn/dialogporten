@@ -1,10 +1,10 @@
 /**
  * This script purges dialogs that have not been cleaned up by the tests.
  * The script is intended to be run after the main tests have completed.
- * 
+ *
  * The script retrieves all dialogs that contain a sentinel value in the search query.
  * It then purges these dialogs.
- * 
+ *
  * Run: k6 run tests/k6/tests/serviceowner/performance/purge-dialogs.js -e env=yt01
  */
 import { uuidv4 } from '../../../common/k6-utils.js';
@@ -18,7 +18,7 @@ const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
 
 /**
  * Retrieves the dialog ids to purge.
- * 
+ *
  * @param {Object} serviceOwner - The service owner object.
  * @returns {Array} - The dialog ids to purge.
  */
@@ -55,7 +55,7 @@ function getDialogs(serviceOwner) {
                 continuationToken = "";
             }
         }
-        console.log("Found " + dialogIdsToPurge.length + " unpurged dialogs");  
+        console.log("Found " + dialogIdsToPurge.length + " unpurged dialogs");
         hasNextPage = response.hasNextPage;
     } while (hasNextPage);
     return dialogIdsToPurge;
@@ -79,7 +79,7 @@ export function setup() {
         let dialogIdsToPurge = getDialogs(serviceOwner);
         data.push({token: serviceOwner.token, dialogIdsToPurge: dialogIdsToPurge});
     }
-    
+
     return data;
 }
 
@@ -106,7 +106,7 @@ export default function(serviceOwners) {
 
 /**
  * Purges dialogs.
- * 
+ *
  * @param {Object} serviceOwner - The service owner object.
  */
 export function purgeDialogs(serviceOwner) {

@@ -14,6 +14,8 @@ namespace Altinn.ApiClients.Dialogporten;
 
 public static class ServiceCollectionExtensions
 {
+    private const string ClientDefinitionKey = "dialogporten-sp-sdk";
+
     public static IServiceCollection AddDialogportenClient(this IServiceCollection services, DialogportenSettings settings)
     {
         if (!DialogportenSettings.Validate())
@@ -22,7 +24,7 @@ public static class ServiceCollectionExtensions
         }
         services.TryAddSingleton<IOptions<DialogportenSettings>>(new OptionsWrapper<DialogportenSettings>(settings));
 
-        services.RegisterMaskinportenClientDefinition<SettingsJwkClientDefinition>("dialogporten-sp-sdk", settings.Maskinporten);
+        services.RegisterMaskinportenClientDefinition<SettingsJwkClientDefinition>(ClientDefinitionKey, settings.Maskinporten);
 
         var refitClients = AssemblyMarker.Assembly.GetTypes()
             .Where(x =>
@@ -35,7 +37,7 @@ public static class ServiceCollectionExtensions
             services
                 .AddRefitClient(refitClient)
                 .ConfigureHttpClient(c => c.BaseAddress = new Uri(settings.BaseUri))
-                .AddMaskinportenHttpMessageHandler<SettingsJwkClientDefinition>("dialogporten-sp-sdk");
+                .AddMaskinportenHttpMessageHandler<SettingsJwkClientDefinition>(ClientDefinitionKey);
         }
 
         services

@@ -7,7 +7,7 @@ public sealed class LocalizationDto
     private readonly string _languageCode = null!;
 
     /// <summary>
-    /// The localized text or URI reference.
+    /// The localized text (or URL if a front-channel embed).
     /// </summary>
     public required string Value { get; init; }
 

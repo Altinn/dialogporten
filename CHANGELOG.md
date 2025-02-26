@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.56.0](https://github.com/Altinn/dialogporten/compare/v1.55.5...v1.56.0) (2025-02-26)
+
+
+### Features
+
+* **infra:** enable HA and increase retention for postgresql ([#1955](https://github.com/Altinn/dialogporten/issues/1955)) ([84a3fc6](https://github.com/Altinn/dialogporten/commit/84a3fc6e6208ab0ed57de503a248ee303bca795a))
+
+
+### Miscellaneous Chores
+
+* **e2e:** put filter on createdAfter for search in cleanup-step e2e-tests ([#1970](https://github.com/Altinn/dialogporten/issues/1970)) ([f9d2099](https://github.com/Altinn/dialogporten/commit/f9d2099ba44bde76f67b772ed3fb3db80aefb55e))
+
 ## [1.55.5](https://github.com/Altinn/dialogporten/compare/v1.55.4...v1.55.5) (2025-02-26)
 
 

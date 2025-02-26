@@ -23,6 +23,9 @@ on:
       hasWebApiClientChanges:
         description: "WebApiClient related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasWebApiClientChanges }}
+      hasWebApiClientRefitterInterfaceChanges:
+        description: "Refitter interface changed"
+        value: ${{ jobs.check-for-changes.outputs.hasWebApiClientRefitterInterfaceChanges }}
       hasTestChanges:
         description: "Test related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasTestChanges }}
@@ -51,6 +54,7 @@ jobs:
       hasSwaggerSchemaChanges: ${{ steps.filter-backend.outputs.swagger_schema_any_modified == 'true'}}
       hasGqlSchemaChanges: ${{ steps.filter-backend.outputs.gql_schema_any_modified == 'true'}}
       hasMigrationChanges: ${{ steps.filter-backend.outputs.migration_any_modified == 'true'}}
+      hasWebApiClientRefitterInterfaceChanges: ${{ steps.filter-backend.outputs.web_api_client_refitter_interface_any_modified == 'true'}}
       hasWebApiClientChanges: ${{ steps.filter-backend.outputs.web_api_client_any_modified == 'true'}}
     steps:
       - name: Checkout
@@ -83,6 +87,8 @@ jobs:
               - '.azure/modules/containerApp/**/*'
             tests:
               - 'tests/**/*'
+            web_api_client_refitter_interface:
+              - 'src/Digdir.Library.Dialogporten.WebApiClient/Features/V1/RefitterInterface.cs'
             web_api_client:
               - 'src/Digdir.Library.Dialogporten.WebApiClient/**/*'
             swagger_schema:

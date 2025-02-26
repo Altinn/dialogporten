@@ -5,6 +5,27 @@ on:
   workflow_call:
 
 jobs:
+  check-for-changes:
+    name: Check for changes
+    uses: ./.github/workflows/workflow-check-for-changes.yml
+
+  check-refitter-swagger-sync:
+    needs: [ check-for-changes ]
+    if: ${{ needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' && needs.check-for-changes.outputs.hasWebApiClientRefitterInterfaceChanges != 'true' }}
+    runs-on: ubuntu-latest
+    name: Check refitter swagger sync
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🤖 The OpenAPI spec has changed, but the WebAPI Refitter interface has not.\n\nDid you forget to rebuild the WebAPI SDK?\nIf not, carry on! 🚀'
+            })
+
   build-and-test:
     runs-on: ubuntu-latest
     steps:

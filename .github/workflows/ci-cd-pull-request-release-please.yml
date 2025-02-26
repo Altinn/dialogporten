@@ -103,7 +103,7 @@ jobs:
                         "type": "button",
                         "text": {
                           "type": "plain_text",
-                          "text": "Approve Release"
+                          "text": "Open release PR"
                         },
                         "url": "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
                       }

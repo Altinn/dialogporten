@@ -52,10 +52,19 @@ param enableIndexTuning bool
 @description('The name of the Application Insights workspace')
 param appInsightWorkspaceName string
 
-@description('Enable high availability')
-param enableHighAvailability bool
+@export()
+type HighAvailabilityConfiguration = {
+  mode: 'ZoneRedundant' | 'SameZone' | 'Disabled'
+  standbyAvailabilityZone: string
+}
 
-@description('The number of days to retain backups. If not specified, the default value of 7 days will be used.')
+@description('High availability configuration for the PostgreSQL server')
+param highAvailability HighAvailabilityConfiguration?
+
+@description('The availability zone for the PostgreSQL primary server')
+param availabilityZone string
+
+@description('The number of days to retain backups.')
 @minValue(7)
 @maxValue(35)
 param backupRetentionDays int
@@ -94,11 +103,6 @@ module privateDnsZone '../privateDnsZone/main.bicep' = {
   }
 }
 
-var highAvailabilityConfig = enableHighAvailability ? {
-  mode: 'ZoneRedundant'
-  standbyAvailabilityZone: '2'
-} : null
-
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: postgresServerName
   location: location
@@ -123,7 +127,8 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       delegatedSubnetResourceId: subnetId
       privateDnsZoneArmResourceId: privateDnsZone.outputs.id
     }
-    highAvailability: highAvailabilityConfig
+    availabilityZone: availabilityZone
+    highAvailability: highAvailability
   }
   sku: sku
   resource database 'databases' = {

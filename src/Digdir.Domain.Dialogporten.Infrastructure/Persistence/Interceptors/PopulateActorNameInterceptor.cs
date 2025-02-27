@@ -99,7 +99,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                     Id = IdentifiableExtensions.CreateVersion7(),
                     CreatedAt = _transactionTime.Value,
                     Name = actorName,
-                    ActorId = actor.ActorId!
+                    ActorId = actor.ActorId
                 };
                 dbContext.Add(actor.ActorNameEntity);
             }

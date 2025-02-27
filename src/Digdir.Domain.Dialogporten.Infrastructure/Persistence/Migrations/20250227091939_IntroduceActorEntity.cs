@@ -22,7 +22,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    ActorId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    ActorId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp at time zone 'utc'")
                 },
@@ -48,7 +48,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 column: "ActorNameEntityId",
                 principalTable: "ActorName",
                 principalColumn: "Id");
-
+            
+            
             migrationBuilder.Sql("""
                                     INSERT INTO "ActorName" ("Id", "CreatedAt", "ActorId", "Name")
                                     SELECT a."Id", -- Just borrow the Id from Actor to get uuid7
@@ -56,8 +57,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                                            a."ActorId",
                                            a."ActorName"
                                     FROM "Actor" a
-                                    WHERE a."ActorId" IS NOT NULL
-                                      AND a."ActorName" IS NOT NULL
+                                    WHERE a."ActorName" IS NOT NULL
                                     ON CONFLICT DO NOTHING;
                                     
                                     UPDATE "Actor"
@@ -66,8 +66,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                                             FROM "ActorName" an
                                             WHERE "ActorId" = an."ActorId"
                                                 AND "ActorName" = an."Name")
-                                    WHERE "ActorId" IS NOT NULL
-                                      AND "ActorName" IS NOT NULL
+                                    WHERE "ActorName" IS NOT NULL
                                       AND "ActorNameEntityId" IS NULL;
                                  """);
         }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250128083117_IntroduceActorEntity")]
+    [Migration("20250227091939_IntroduceActorEntity")]
     partial class IntroduceActorEntity
     {
         /// <inheritdoc />
@@ -82,7 +82,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("ActorId")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
@@ -629,6 +628,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 13,
                             Name = "SentToPayment"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "FormSubmitted"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "FormSaved"
                         });
                 });
 

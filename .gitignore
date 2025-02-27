@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# pg_dump backups
+*.dump
+
 # Local User-specific application configuration
 appsettings.local.json
 

@@ -8,6 +8,9 @@ internal sealed class ActorNameConfiguration : IEntityTypeConfiguration<ActorNam
 {
     public void Configure(EntityTypeBuilder<ActorName> builder)
     {
-        builder.HasIndex(x => new { x.ActorId, x.Name }).IsUnique();
+        builder
+            .HasIndex(x => new { x.ActorId, x.Name })
+            .IsUnique()
+            .AreNullsDistinct(false);
     }
 }

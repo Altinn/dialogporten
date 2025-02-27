@@ -64,7 +64,7 @@ param highAvailability HighAvailabilityConfiguration?
 @description('The availability zone for the PostgreSQL primary server')
 param availabilityZone string
 
-@description('The number of days to retain backups. If not specified, the default value of 7 days will be used.')
+@description('The number of days to retain backups.')
 @minValue(7)
 @maxValue(35)
 param backupRetentionDays int

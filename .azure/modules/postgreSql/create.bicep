@@ -52,8 +52,14 @@ param enableIndexTuning bool
 @description('The name of the Application Insights workspace')
 param appInsightWorkspaceName string
 
-@description('Enable high availability')
-param enableHighAvailability bool
+@export()
+type HighAvailabilityConfiguration = {
+  mode: 'ZoneRedundant'
+  standbyAvailabilityZone: string
+}
+
+@description('High availability configuration for the PostgreSQL server')
+param highAvailability HighAvailabilityConfiguration?
 
 @description('The availability zone for the PostgreSQL primary server')
 param availabilityZone string
@@ -97,11 +103,6 @@ module privateDnsZone '../privateDnsZone/main.bicep' = {
   }
 }
 
-var highAvailabilityConfig = enableHighAvailability ? {
-  mode: 'ZoneRedundant'
-  standbyAvailabilityZone: '2'
-} : null
-
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: postgresServerName
   location: location
@@ -127,7 +128,7 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       privateDnsZoneArmResourceId: privateDnsZone.outputs.id
     }
     availabilityZone: availabilityZone
-    highAvailability: highAvailabilityConfig
+    highAvailability: highAvailability
   }
   sku: sku
   resource database 'databases' = {

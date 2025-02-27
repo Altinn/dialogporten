@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.56.1](https://github.com/Altinn/dialogporten/compare/v1.56.0...v1.56.1) (2025-02-27)
+
+
+### Bug Fixes
+
+* **infra:** ensure we set az for primary in postgresql ([#1973](https://github.com/Altinn/dialogporten/issues/1973)) ([b4fd665](https://github.com/Altinn/dialogporten/commit/b4fd665c2500af6c4beb27e563d6c9e2134349b6))
+
 ## [1.56.0](https://github.com/Altinn/dialogporten/compare/v1.55.5...v1.56.0) (2025-02-26)
 
 

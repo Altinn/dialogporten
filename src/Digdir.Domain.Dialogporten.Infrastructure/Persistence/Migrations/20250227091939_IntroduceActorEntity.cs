@@ -60,11 +60,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                                     WHERE a."ActorName" IS NOT NULL
                                     ON CONFLICT DO NOTHING;
                                     
-                                    UPDATE "Actor"
+                                    UPDATE "Actor" a
                                     SET "ActorNameEntityId" = (
                                         SELECT an."Id"
                                             FROM "ActorName" an
-                                            WHERE "ActorId" = an."ActorId"
+                                            WHERE a."ActorId" = an."ActorId"
                                                 AND "ActorName" = an."Name")
                                     WHERE "ActorName" IS NOT NULL
                                       AND "ActorNameEntityId" IS NULL;

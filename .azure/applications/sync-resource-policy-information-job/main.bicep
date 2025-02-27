@@ -42,7 +42,7 @@ var tags = {
 }
 var name = '${namePrefix}-sync-rp-info'
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName
 }
 

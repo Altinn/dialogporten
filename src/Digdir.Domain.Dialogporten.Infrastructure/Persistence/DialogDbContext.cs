@@ -63,8 +63,9 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
         }
 
         var prop = Entry(entity).Property(x => x.Revision);
+        var isModified = prop.IsModified;
         prop.OriginalValue = revision.Value;
-        prop.IsModified = false;
+        prop.IsModified = isModified;
         return true;
     }
 
@@ -110,6 +111,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     {
         // Explicitly configure the Actor entity so that it will register as TPH in the database
         modelBuilder.Entity<Actor>();
+
 
         modelBuilder
             .RemovePluralizingTableNameConvention()

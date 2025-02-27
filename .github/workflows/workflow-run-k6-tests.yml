@@ -12,6 +12,11 @@ on:
       testSuitePath:
         required: true
         type: string
+      ref:
+        description: "The branch or tag ref to run the tests on. Using default checkout ref if not provided."
+        required: false
+        default: ${{ github.ref }}
+        type: string
     secrets:
       TOKEN_GENERATOR_USERNAME:
         required: true
@@ -28,6 +33,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.ref }}
 
     # todo: change to use the new https://github.com/grafana/setup-k6-action and https://github.com/grafana/run-k6-action
     # grafana/k6-action is deprecated

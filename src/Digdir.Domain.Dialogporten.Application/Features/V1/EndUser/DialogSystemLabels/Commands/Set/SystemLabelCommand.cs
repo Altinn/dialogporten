@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
-using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
 
@@ -15,8 +14,10 @@ public sealed class SystemLabelCommand : SystemLabelDto, IRequest<SetSystemLabel
     public Guid? IfMatchDialogRevision { get; set; }
 }
 
+public sealed record SetSystemLabelSuccess(Guid Revision);
+
 [GenerateOneOf]
-public sealed partial class SetSystemLabelResult : OneOfBase<Success, EntityNotFound, EntityDeleted, DomainError, ValidationError, ConcurrencyError>;
+public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, EntityDeleted, DomainError, ValidationError, ConcurrencyError>;
 
 internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SystemLabelCommand, SetSystemLabelResult>
 {
@@ -64,8 +65,9 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SystemLabel
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.DialogEndUserContext, request.IfMatchDialogRevision)
                                .SaveChangesAsync(cancellationToken);
+
         return saveResult.Match<SetSystemLabelResult>(
-            success => success,
+            success => new SetSystemLabelSuccess(dialog.DialogEndUserContext.Revision),
             domainError => domainError,
             concurrencyError => concurrencyError);
     }

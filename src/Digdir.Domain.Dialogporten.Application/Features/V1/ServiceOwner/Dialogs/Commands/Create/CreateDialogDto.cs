@@ -20,6 +20,11 @@ public sealed class CreateDialogDto
     public Guid? Id { get; set; }
 
     /// <summary>
+    /// An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
+
+    /// <summary>
     /// The service identifier for the service that the dialog is related to in URN-format.
     /// This corresponds to a resource in the Altinn Resource Registry, which the authenticated organization
     /// must own, i.e., be listed as the "competent authority" in the Resource Registry entry.
@@ -70,6 +75,7 @@ public sealed class CreateDialogDto
     /// Optional process identifier used to indicate a business process this dialog belongs to.
     /// </summary>
     public string? Process { get; set; }
+
     /// <summary>
     /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
     /// </summary>
@@ -215,10 +221,22 @@ public sealed class ContentDto
     public ContentValueDto Title { get; set; } = null!;
 
     /// <summary>
+    /// An optional non-sensitive title of the dialog.
+    /// Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    public ContentValueDto? NonSensitiveTitle { get; set; }
+
+    /// <summary>
     /// A short summary of the dialog and its current state.
     /// Supported media types: text/plain
     /// </summary>
     public ContentValueDto Summary { get; set; } = null!;
+
+    /// <summary>
+    /// An optional non-sensitive summary of the dialog and its current state.
+    /// Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    public ContentValueDto? NonSensitiveSummary { get; set; }
 
     /// <summary>
     /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.
@@ -240,7 +258,6 @@ public sealed class ContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-    /// Supported media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
     /// </summary>
     public ContentValueDto? MainContentReference { get; set; }
 }
@@ -259,7 +276,6 @@ public sealed class TransmissionContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-    /// Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
     /// </summary>
     public ContentValueDto? ContentReference { get; set; }
 }

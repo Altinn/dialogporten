@@ -7,6 +7,9 @@ param location string
 @description('Tags to apply to resources')
 param tags object
 
+@description('Whether to purge data immediately after 30 days in Application Insights')
+param immediatePurgeDataOn30Days bool
+
 @export()
 type Sku = {
   name:
@@ -28,6 +31,9 @@ resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-
   name: '${namePrefix}-insightsWorkspace'
   location: location
   properties: {
+    features: {
+        immediatePurgeDataOn30Days: immediatePurgeDataOn30Days
+    }
     retentionInDays: 30
     sku: sku
     workspaceCapping: {

@@ -43,6 +43,16 @@ public sealed class UpdateDialogDto
     public DateTimeOffset? DueAt { get; set; }
 
     /// <summary>
+    /// Optional process identifier used to indicate a business process this dialog belongs to.
+    /// </summary>
+    public string? Process { get; set; }
+
+    /// <summary>
+    /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
+    /// </summary>
+    public string? PrecedingProcess { get; set; }
+
+    /// <summary>
     /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
     ///
     /// After this date is passed, the dialog will be considered expired and no longer available for the end user in any
@@ -172,7 +182,6 @@ public sealed class TransmissionContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-    /// Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
     /// </summary>
     public ContentValueDto? ContentReference { get; set; }
 }
@@ -185,9 +194,21 @@ public sealed class ContentDto
     public ContentValueDto Title { get; set; } = null!;
 
     /// <summary>
+    /// An optional non-sensitive title of the dialog.
+    /// Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    public ContentValueDto? NonSensitiveTitle { get; set; }
+
+    /// <summary>
     /// A short summary of the dialog and its current state. Must be text/plain.
     /// </summary>
     public ContentValueDto Summary { get; set; } = null!;
+
+    /// <summary>
+    /// An optional non-sensitive summary of the dialog and its current state.
+    /// Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    public ContentValueDto? NonSensitiveSummary { get; set; }
 
     /// <summary>
     /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.

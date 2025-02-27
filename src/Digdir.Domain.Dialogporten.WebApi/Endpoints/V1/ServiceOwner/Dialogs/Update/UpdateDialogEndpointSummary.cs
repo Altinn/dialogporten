@@ -1,8 +1,8 @@
-using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Update;
 
@@ -12,7 +12,7 @@ public sealed class UpdateDialogEndpointSummary : Summary<UpdateDialogEndpoint>
     {
         Summary = "Replaces a dialog";
         Description = $"""
-                       Replaces a given dialog with the supplied model. For more information see the documentation (link TBD).
+                       Replaces a given dialog with the supplied model.
 
                        {Constants.SwaggerSummary.OptimisticConcurrencyNote}
                        """;

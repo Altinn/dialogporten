@@ -6,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 
 public interface ITokenIssuerCache
 {
-    public Task<string?> GetIssuerForScheme(string schemeName);
+    Task<string?> GetIssuerForScheme(string schemeName);
 }
 
 // ReSharper disable once ClassNeverInstantiated.Global

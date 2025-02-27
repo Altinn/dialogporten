@@ -1,8 +1,8 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogTransmissions.Queries.Search;
-using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.DialogTransmissions.Search;
 
@@ -18,5 +18,6 @@ public sealed class SearchDialogTransmissionEndpointSummary : Summary<SearchDial
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure.FormatInvariant(AuthorizationScope.EndUser);
         Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[StatusCodes.Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

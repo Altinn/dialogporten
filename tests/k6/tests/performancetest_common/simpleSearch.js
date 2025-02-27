@@ -2,12 +2,31 @@
  * This file contains common functions for performing simple searches
  * and GraphQL searches.
  */
-import { randomItem, uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
+import { randomItem, uuidv4 } from '../../common/k6-utils.js';
 import { expect, expectStatusFor } from "../../common/testimports.js";
 import { describe } from '../../common/describe.js';
 import { getEU, postGQ, getSO } from '../../common/request.js';
 import { getGraphqlParty } from '../performancetest_data/graphql-search.js';
 import { getEnterpriseToken, getPersonalToken } from './getTokens.js';
+
+export const emptySearchThresholds = {
+    "http_req_duration{scenario:default}": [],
+    "http_req_duration{name:get dialog}": [],
+    "http_req_duration{name:get dialog activities}": [],
+    "http_req_duration{name:get dialog activity}": [],
+    "http_req_duration{name:get seenlogs}": [],
+    "http_req_duration{name:get seenlog}": [],
+    "http_req_duration{name:get transmissions}": [],
+    "http_req_duration{name:get transmission}": [],
+    "http_reqs{scenario:default}": [],
+    "http_reqs{name:get dialog activities}": [],
+    "http_reqs{name:get dialog activity}": [],
+    "http_reqs{name:get seenlogs}": [],
+    "http_reqs{name:get seenlog}": [],
+    "http_reqs{name:get transmissions}": [],
+    "http_reqs{name:get transmission}": [],
+    "http_reqs{name:get dialog}": [],
+}
 
 /**
  * Retrieves the content for a dialog.
@@ -33,28 +52,31 @@ function retrieveDialogContent(response, paramsWithToken, getFunction = getEU) {
 function log(items, traceCalls, enduser) {
     if (items?.length && traceCalls) {
         console.log("Found " + items.length + " dialogs" + " for enduser " + enduser.ssn);
-    } 
-}   
+    }
+}
 
 /**
  * Performs a enduser search.
  * @param {Object} enduser - The end user.
  * @returns {void}
  */
-export function enduserSearch(enduser, traceCalls) {
+export function enduserSearch(enduser, token, traceCalls) {
+    if (token == null) {
+        token = getPersonalToken({ ssn: enduser, scopes: "digdir:dialogporten" });
+    }
     var traceparent = uuidv4();
     let paramsWithToken = {
         headers: {
-            Authorization: "Bearer " + getPersonalToken(enduser),
+            Authorization: "Bearer " + token,
             traceparent: traceparent
         },
-        tags: { name: 'enduser search' } 
+        tags: { name: 'enduser search' }
     }
     if (traceCalls) {
         paramsWithToken.tags.traceparent = traceparent;
         paramsWithToken.tags.enduser = enduser.ssn;
     }
-    let defaultParty = "urn:altinn:person:identifier-no:" + enduser.ssn;
+    let defaultParty = "urn:altinn:person:identifier-no:" + enduser;
     let defaultFilter = "?Party=" + defaultParty;
     describe('Perform enduser dialog list', () => {
         let r = getEU('dialogs' + defaultFilter, paramsWithToken);
@@ -70,7 +92,7 @@ export function enduserSearch(enduser, traceCalls) {
  * @param {string} dialogId - The dialog id.
  * @param {Object} paramsWithToken - The parameters with token.
  * @param {string} tag - Tagging the request.
- * @param {string} path - The path to append to the URL. Can be empty or /labellog. 
+ * @param {string} path - The path to append to the URL. Can be empty or /labellog.
  * @param {function} getFunction - The get function to use.
  * @returns {void}
  */
@@ -88,7 +110,7 @@ export function getContent(dialogId, paramsWithToken, tag, path = '', getFunctio
  * @param {Object} paramsWithToken - The parameters with token.
  * @param {string} tag - Tagging the request.
  * @param {string} subtag - Tagging the sub request.
- * @param {string} endpoint - The endpoint to append to the URL.   
+ * @param {string} endpoint - The endpoint to append to the URL.
  * @param {function} getFunction - The get function to use.
  * @returns {void}
  */
@@ -116,7 +138,7 @@ export function getContentChain(dialogId, paramsWithToken, tag, subtag, endpoint
  * @returns {Object} The response object.
  */
 export function getUrl(url, paramsWithToken, getFunction = getEU) {
-    let r = getFunction(url, paramsWithToken); 
+    let r = getFunction(url, paramsWithToken);
     expectStatusFor(r).to.equal(200);
     expect(r, 'response').to.have.validJsonBody();
     return r;
@@ -124,15 +146,18 @@ export function getUrl(url, paramsWithToken, getFunction = getEU) {
 
 /**
  * Performs a GraphQL search using the provided enduser token.
- * 
+ *
  * @param {Object} enduser - The enduser object containing the token.
  * @returns {void}
  */
-export function graphqlSearch(enduser, traceCalls) {
+export function graphqlSearch(enduser, token,  traceCalls) {
+    if (token == null) {
+        token = getPersonalToken({ ssn: enduser, scopes: "digdir:dialogporten" });
+    }
     let traceparent = uuidv4();
     let paramsWithToken = {
         headers: {
-            Authorization: "Bearer " + getPersonalToken(enduser),
+            Authorization: "Bearer " + token,
             traceparent: traceparent,
             'User-Agent': 'dialogporten-k6-graphql-search'
         },
@@ -152,9 +177,9 @@ export function graphqlSearch(enduser, traceCalls) {
 
 /**
  * Performs a serviceowner search.
- * @param {P} serviceowner 
+ * @param {P} serviceowner
  * @param {*} enduser
- * @param {*} tag_name 
+ * @param {*} tag_name
  */
 export function serviceownerSearch(serviceowner, enduser, tag_name, traceCalls, doSubqueries = true) {
     let traceparent = uuidv4();
@@ -171,7 +196,7 @@ export function serviceownerSearch(serviceowner, enduser, tag_name, traceCalls, 
     }
 
     let enduserid = encodeURIComponent(`urn:altinn:person:identifier-no:${enduser.ssn}`);
-    let serviceResource = encodeURIComponent(`urn:altinn:resource:${serviceowner.resource}`);
+    let serviceResource = encodeURIComponent(`urn:altinn:resource:${enduser.resource}`);
     let defaultFilter = `?enduserid=${enduserid}&serviceResource=${serviceResource}`;
     describe('Perform serviceowner dialog list', () => {
         let r = getSO('dialogs' + defaultFilter, paramsWithToken);

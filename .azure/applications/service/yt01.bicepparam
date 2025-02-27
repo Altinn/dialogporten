@@ -9,7 +9,7 @@ param appConfigurationName = readEnvironmentVariable('AZURE_APP_CONFIGURATION_NA
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')
 param serviceBusNamespaceName = readEnvironmentVariable('AZURE_SERVICE_BUS_NAMESPACE_NAME')
 
-param otelTraceSamplerRatio = '0.5'
+param otelTraceSamplerRatio = '0.0'
 
 // secrets
 param appInsightConnectionString = readEnvironmentVariable('AZURE_APP_INSIGHTS_CONNECTION_STRING')

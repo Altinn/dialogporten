@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Extensions.HotChocolate;
 using Microsoft.AspNetCore.Authorization;

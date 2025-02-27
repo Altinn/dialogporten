@@ -1,17 +1,35 @@
-﻿name: CI/CD Production
+﻿# Deploys the specified version to production
+name: CI/CD Production
+run-name: CI/CD Production ${{ inputs.version && format('({0})', inputs.version) || '' }}
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "v*.*.*"
+    inputs:
+      version:
+        description: "Version to deploy (e.g., `1.23.4`)"
+        required: true
+        type: string
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
+  group: ${{ github.workflow }}
 
 jobs:
+  check-if-version-exists:
+    name: Check if version exists
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if tag exists
+        run: |
+          if ! gh api repos/${{ github.repository }}/git/refs/tags/v${{ inputs.version }} &>/dev/null; then
+            echo "::error::Version ${{ inputs.version }} does not exist as a tag"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub
+    needs: [check-if-version-exists]
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
     with:
       environment: prod
@@ -26,33 +44,10 @@ jobs:
       infra_base_sha: ${{ needs.get-versions-from-github.outputs.infra_version_sha }}
       apps_base_sha: ${{ needs.get-versions-from-github.outputs.apps_version_sha }}
 
-  get-current-version:
-    name: Get current version
-    uses: ./.github/workflows/workflow-get-current-version.yml
-
-  dry-run-deploy-infra:
-    name: Dry run deploy infra to prod
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
-    needs: [get-current-version, check-for-changes]
-    uses: ./.github/workflows/workflow-deploy-infra.yml
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      AZURE_SOURCE_KEY_VAULT_NAME: ${{ secrets.AZURE_SOURCE_KEY_VAULT_NAME }}
-      AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID }}
-      AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP: ${{ secrets.AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP }}
-      AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY }}
-    with:
-      environment: prod
-      region: norwayeast
-      version: ${{ needs.get-current-version.outputs.version }}
-      dryRun: true
-
   deploy-infra:
     name: Deploy infra to prod
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
-    needs: [get-current-version, check-for-changes, dry-run-deploy-infra]
+    needs: [check-for-changes]
     uses: ./.github/workflows/workflow-deploy-infra.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -65,49 +60,25 @@ jobs:
     with:
       environment: prod
       region: norwayeast
-      version: ${{ needs.get-current-version.outputs.version }}
+      version: ${{ inputs.version }}
+      ref: "refs/tags/v${{ inputs.version }}"
 
   store-infra-version:
     name: Store Latest Deployed Infra Version as GitHub Variable
-    needs: [deploy-infra, get-current-version]
+    needs: [deploy-infra]
     if: ${{ needs.deploy-infra.result == 'success' }}
     uses: ./.github/workflows/workflow-store-github-env-variable.yml
     with:
       variable_name: LATEST_DEPLOYED_INFRA_VERSION
-      variable_value: ${{ needs.get-current-version.outputs.version }}
+      variable_value: ${{ inputs.version }}
       environment: prod
     secrets:
       GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
 
-  dry-run-deploy-apps:
-    name: Dry run deploy apps to prod
-    needs:
-      [get-current-version, check-for-changes, deploy-infra]
-    # we want deployment of apps to be dependent on deployment of infrastructure, but if infrastructure is skipped, we still want to dry-run deploy the apps
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
-    uses: ./.github/workflows/workflow-deploy-apps.yml
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      # todo: consider resolving these in another way since they are created in the infra-step
-      AZURE_RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-      AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
-      AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
-      AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
-      AZURE_APP_CONFIGURATION_NAME: ${{ secrets.AZURE_APP_CONFIGURATION_NAME }}
-      AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
-    with:
-      environment: prod
-      region: norwayeast
-      version: ${{ needs.get-current-version.outputs.version }}
-      dryRun: true
-      runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
-
   deploy-apps:
     name: Deploy apps to prod
     needs:
-      [get-current-version, check-for-changes, dry-run-deploy-apps]
+      [check-for-changes]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:
@@ -124,37 +95,32 @@ jobs:
     with:
       environment: prod
       region: norwayeast
-      version: ${{ needs.get-current-version.outputs.version }}
+      version: ${{ inputs.version }}
       runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
+      ref: "refs/tags/v${{ inputs.version }}"
+
+  publish-sdk-to-nuget:
+    uses: ./.github/workflows/workflow-publish-nuget.yml
+    needs: [ deploy-apps, check-for-changes ]
+    if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges == 'true' ) }}
+    with:
+      version: ${{ inputs.version }}
+      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
+      source: 'https://api.nuget.org/v3/index.json'
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
-    needs: [deploy-apps, get-current-version]
+    needs: [deploy-apps]
     if: ${{ always() && !failure() && (github.event_name == 'workflow_dispatch' || needs.deploy-apps.outputs.deployment_executed == 'true') }}
     uses: ./.github/workflows/workflow-store-github-env-variable.yml
     with:
       variable_name: LATEST_DEPLOYED_APPS_VERSION
-      variable_value: ${{ needs.get-current-version.outputs.version }}
+      variable_value: ${{ inputs.version }}
       environment: prod
     secrets:
       GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
-
-  # run-e2e-tests:
-  #   name: "Run K6 functional end-to-end tests"
-  #   # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
-  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
-  #   needs: [deploy-apps, check-for-changes]
-  #   uses: ./.github/workflows/workflow-run-k6-tests.yml
-  #   secrets:
-  #     TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
-  #     TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
-  #   with:
-  #     environment: prod
-  #     apiVersion: v1
-  #     testSuitePath: tests/k6/suites/all-single-pass.js
-  #   permissions:
-  #     checks: write
-  #     pull-requests: write
 
   send-slack-message-on-failure:
     name: Send Slack message on failure

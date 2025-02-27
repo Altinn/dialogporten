@@ -5,13 +5,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
-        <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.0"/>
+        <PackageReference Include="BenchmarkDotNet" Version="0.14.0"/>
+        <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.1"/>
         <PackageReference Include="NSec.Cryptography" Version="24.4.0"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj"/>
+        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
     </ItemGroup>
 
 </Project>

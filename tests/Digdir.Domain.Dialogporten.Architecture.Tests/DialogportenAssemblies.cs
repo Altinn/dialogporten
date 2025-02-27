@@ -1,6 +1,5 @@
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application;
-using Digdir.Domain.Dialogporten.ChangeDataCapture;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.GraphQL;
 using Digdir.Domain.Dialogporten.Infrastructure;
@@ -17,7 +16,6 @@ public static class DialogportenAssemblies
     internal static readonly List<Assembly> All =
     [
         ApplicationAssemblyMarker.Assembly,
-        ChangeDataCaptureAssemblyMarker.Assembly,
         DomainAssemblyMarker.Assembly,
         GraphQLAssemblyMarker.Assembly,
         InfrastructureAssemblyMarker.Assembly,

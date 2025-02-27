@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogTransmissions.Queries.Search;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 
@@ -20,6 +21,11 @@ public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissi
         Get("dialogs/{dialogId}/transmissions");
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
+
+        Description(b => b.ProducesOneOf<List<TransmissionDto>>(
+            StatusCodes.Status200OK,
+            StatusCodes.Status410Gone,
+            StatusCodes.Status404NotFound));
     }
 
     public override async Task HandleAsync(SearchTransmissionQuery req, CancellationToken ct)
@@ -28,6 +34,7 @@ public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissi
         await result.Match(
             dto => SendOkAsync(dto, ct),
             notFound => this.NotFoundAsync(notFound, ct),
-            deleted => this.GoneAsync(deleted, ct));
+            deleted => this.GoneAsync(deleted, ct),
+            forbidden => this.ForbiddenAsync(forbidden, ct));
     }
 }

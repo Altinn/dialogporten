@@ -48,6 +48,7 @@ public sealed class PatchDialogsController : ControllerBase
     /// <response code="401">Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\"</response>
     /// <response code="403">Unauthorized to update a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)</response>
     /// <response code="404">The given dialog ID was not found or is deleted</response>
+    /// <response code="410">The dialog with the given key is removed</response>
     /// <response code="412">The supplied Revision does not match the current Revision of the dialog</response>
     /// <response code="422">Domain error occurred. See problem details for a list of errors.</response>
     [HttpPatch("{dialogId}")]
@@ -58,6 +59,7 @@ public sealed class PatchDialogsController : ControllerBase
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status410Gone)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status412PreconditionFailed)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseHeader(StatusCodes.Status204NoContent, Constants.ETag, "The new UUID ETag of the dialog", "123e4567-e89b-12d3-a456-426614174000")]
@@ -65,6 +67,8 @@ public sealed class PatchDialogsController : ControllerBase
         [FromRoute] Guid dialogId,
         [FromHeader(Name = Constants.IfMatch)] Guid? etag,
         [FromBody] JsonPatchDocument<UpdateDialogDto> patchDocument,
+        [OpenApiIgnore][FromQuery] bool? disableAltinnEvents,
+        [OpenApiIgnore][FromQuery] bool? disableSystemLabelReset,
         CancellationToken ct)
     {
         var dialogQueryResult = await _sender.Send(new GetDialogQuery { DialogId = dialogId }, ct);
@@ -85,7 +89,15 @@ public sealed class PatchDialogsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var command = new UpdateDialogCommand { Id = dialogId, IfMatchDialogRevision = etag, Dto = updateDialogDto };
+        var command = new UpdateDialogCommand
+        {
+            Id = dialogId,
+            IfMatchDialogRevision = etag,
+            Dto = updateDialogDto,
+            DisableAltinnEvents = disableAltinnEvents ?? false,
+            DisableSystemLabelReset = disableSystemLabelReset ?? false
+        };
+
         var result = await _sender.Send(command, ct);
         return result.Match(
             success =>
@@ -94,7 +106,7 @@ public sealed class PatchDialogsController : ControllerBase
                 return (IActionResult)NoContent();
             },
             notFound => NotFound(HttpContext.GetResponseOrDefault(StatusCodes.Status404NotFound, notFound.ToValidationResults())),
-            badRequest => BadRequest(HttpContext.GetResponseOrDefault(StatusCodes.Status400BadRequest, badRequest.ToValidationResults())),
+            entityDeleted => StatusCode(StatusCodes.Status410Gone, HttpContext.GetResponseOrDefault(StatusCodes.Status410Gone, entityDeleted.ToValidationResults())),
             validationFailed => BadRequest(HttpContext.GetResponseOrDefault(StatusCodes.Status400BadRequest, validationFailed.Errors.ToList())),
             forbidden => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status403Forbidden, forbidden.ToValidationResults())),
             domainError => UnprocessableEntity(HttpContext.GetResponseOrDefault(StatusCodes.Status422UnprocessableEntity, domainError.ToValidationResults())),

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -26,6 +27,7 @@ internal sealed class IntegrationTestUser : IUser
         return
         [
             new Claim(ClaimTypes.Name, "Integration Test User"),
+            new Claim("acr", Constants.IdportenLoaHigh),
             new Claim(ClaimTypes.NameIdentifier, "integration-test-user"),
             new Claim("pid", "22834498646"),
             new Claim("consumer",

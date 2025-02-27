@@ -1,9 +1,11 @@
-﻿using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+﻿using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using System.Security.Claims;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using UserIdType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
@@ -27,12 +29,6 @@ public static class ClaimsPrincipalExtensions
     private const string ScopeClaim = "scope";
     private const char ScopeClaimSeparator = ' ';
     private const string PidClaim = "pid";
-
-
-    // TODO: This scope is also defined in WebAPI/GQL. Can this be fetched from a common auth lib?
-    // https://github.com/altinn/dialogporten/issues/647
-    // This could be done for all claims/scopes/prefixes etc, there are duplicates
-    public const string ServiceProviderScope = "digdir:dialogporten.serviceprovider";
 
     public static bool TryGetClaimValue(this ClaimsPrincipal claimsPrincipal, string claimType,
         [NotNullWhen(true)] out string? value)
@@ -173,37 +169,33 @@ public static class ClaimsPrincipalExtensions
 
         orgNumber = id.Split(IdDelimiter) switch
         {
-        [IdPrefix, var on] => NorwegianOrganizationIdentifier.IsValid(on) ? on : null,
+            [IdPrefix, var on] => NorwegianOrganizationIdentifier.IsValid(on) ? on : null,
             _ => null
         };
 
         return orgNumber is not null;
     }
 
-    public static bool TryGetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out int? authenticationLevel)
+    public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
     {
         if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level))
         {
-            authenticationLevel = level;
-            return true;
+            return level;
         }
 
         if (claimsPrincipal.TryGetClaimValue(IdportenAuthLevelClaim, out claimValue))
         {
             // The acr claim value is either "idporten-loa-substantial" (previously "Level3") or "idporten-loa-high" (previously "Level4")
             // https://docs.digdir.no/docs/idporten/oidc/oidc_protocol_new_idporten#new-acr-values
-            authenticationLevel = claimValue switch
+            return claimValue switch
             {
-                "idporten-loa-substantial" => 3,
-                "idporten-loa-high" => 4,
-                _ => null
+                Constants.IdportenLoaSubstantial => 3,
+                Constants.IdportenLoaHigh => 4,
+                _ => throw new ArgumentException("Unknown acr value")
             };
-
-            return authenticationLevel.HasValue;
         }
 
-        authenticationLevel = null;
-        return false;
+        throw new UnreachableException("No authentication level claim found");
     }
 
     public static IEnumerable<Claim> GetIdentifyingClaims(this IEnumerable<Claim> claims)
@@ -233,7 +225,7 @@ public static class ClaimsPrincipalExtensions
     {
         if (claimsPrincipal.TryGetPid(out var externalId))
         {
-            return (claimsPrincipal.HasScope(ServiceProviderScope)
+            return (claimsPrincipal.HasScope(AuthorizationScope.ServiceProvider)
                 ? UserIdType.ServiceOwnerOnBehalfOfPerson
                 : UserIdType.Person, externalId);
         }
@@ -244,7 +236,7 @@ public static class ClaimsPrincipalExtensions
             return (UserIdType.SystemUser, externalId);
         }
 
-        if (claimsPrincipal.HasScope(ServiceProviderScope) &&
+        if (claimsPrincipal.HasScope(AuthorizationScope.ServiceProvider) &&
             claimsPrincipal.TryGetOrganizationNumber(out externalId))
         {
             return (UserIdType.ServiceOwner, externalId);
@@ -261,12 +253,12 @@ public static class ClaimsPrincipalExtensions
         var (userType, externalId) = claimsPrincipal.GetUserType();
         return userType switch
         {
-            UserIdType.ServiceOwnerOnBehalfOfPerson or UserIdType.Person => NorwegianPersonIdentifier.TryParse(externalId, out var personId)
-                                ? personId
-                                : null,
-            UserIdType.SystemUser => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
-                                ? systemUserId
-                                : null,
+            UserIdType.ServiceOwnerOnBehalfOfPerson or UserIdType.Person
+                => NorwegianPersonIdentifier.TryParse(externalId, out var personId)
+                    ? personId : null,
+            UserIdType.SystemUser
+                => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
+                    ? systemUserId : null,
             UserIdType.Unknown => null,
             UserIdType.ServiceOwner => null,
             _ => null

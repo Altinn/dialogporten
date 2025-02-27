@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Authentication;

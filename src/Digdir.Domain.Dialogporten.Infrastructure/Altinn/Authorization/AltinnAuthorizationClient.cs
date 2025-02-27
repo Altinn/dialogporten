@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.Authorization.ABAC.Xacml.JsonProfile;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -26,6 +27,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     private readonly IFusionCache _partiesCache;
     private readonly IFusionCache _subjectResourcesCache;
     private readonly IUser _user;
+    private readonly IDialogDbContext _db;
     private readonly ILogger _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
@@ -39,6 +41,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         HttpClient client,
         IFusionCacheProvider cacheProvider,
         IUser user,
+        IDialogDbContext db,
         ILogger<AltinnAuthorizationClient> logger,
         IServiceScopeFactory serviceScopeFactory)
     {
@@ -47,6 +50,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         _partiesCache = cacheProvider.GetCache(nameof(AuthorizedPartiesResult)) ?? throw new ArgumentNullException(nameof(cacheProvider));
         _subjectResourcesCache = cacheProvider.GetCache(nameof(SubjectResource)) ?? throw new ArgumentNullException(nameof(cacheProvider));
         _user = user ?? throw new ArgumentNullException(nameof(user));
+        _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
     }
@@ -104,6 +108,19 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
 
         return authorizedResourcesForSearch.ResourcesByParties.Count > 0
                || authorizedResourcesForSearch.DialogIds.Contains(dialog.Id);
+    }
+
+    public bool UserHasRequiredAuthLevel(int minimumAuthenticationLevel) =>
+        minimumAuthenticationLevel <= _user.GetPrincipal().GetAuthenticationLevel();
+
+    public async Task<bool> UserHasRequiredAuthLevel(string serviceResource, CancellationToken cancellationToken)
+    {
+        var minimumAuthenticationLevel = await _db.ResourcePolicyInformation
+            .Where(x => x.Resource == serviceResource)
+            .Select(x => x.MinimumAuthenticationLevel)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return UserHasRequiredAuthLevel(minimumAuthenticationLevel);
     }
 
     private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)

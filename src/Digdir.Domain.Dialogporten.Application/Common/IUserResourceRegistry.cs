@@ -44,12 +44,12 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
 
     public bool UserCanModifyResourceType(string serviceResourceType) => serviceResourceType switch
     {
-        ResourceRegistry.Constants.CorrespondenceService => _user.GetPrincipal().HasScope(Constants.CorrespondenceScope),
+        ResourceRegistry.Constants.CorrespondenceService => _user.GetPrincipal().HasScope(AuthorizationScope.CorrespondenceScope),
         null => false,
         _ => true
     };
 
-    public bool IsCurrentUserServiceOwnerAdmin() => _user.GetPrincipal().HasScope(Constants.ServiceOwnerAdminScope);
+    public bool IsCurrentUserServiceOwnerAdmin() => _user.GetPrincipal().HasScope(AuthorizationScope.ServiceOwnerAdminScope);
 }
 
 internal sealed class LocalDevelopmentUserResourceRegistryDecorator : IUserResourceRegistry

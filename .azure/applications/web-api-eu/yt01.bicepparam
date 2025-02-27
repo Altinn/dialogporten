@@ -6,7 +6,7 @@ param apimIp = '51.13.85.197'
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param revisionSuffix = readEnvironmentVariable('REVISION_SUFFIX')
 
-param otelTraceSamplerRatio = '0.5'
+param otelTraceSamplerRatio = '0.0'
 
 // secrets
 param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_VAULT_NAME')

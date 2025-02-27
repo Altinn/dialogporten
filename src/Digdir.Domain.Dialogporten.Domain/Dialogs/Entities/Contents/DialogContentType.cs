@@ -13,7 +13,9 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         Summary = 3,
         AdditionalInfo = 4,
         ExtendedStatus = 5,
-        MainContentReference = 6
+        MainContentReference = 6,
+        NonSensitiveTitle = 7,
+        NonSensitiveSummary = 8,
     }
 
     public bool Required { get; private init; }
@@ -66,6 +68,20 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
             MaxLength = 1023,
             OutputInList = false,
             AllowedMediaTypes = [MediaTypes.EmbeddableMarkdown]
+        },
+        Values.NonSensitiveTitle => new(id)
+        {
+            Required = false,
+            MaxLength = Constants.DefaultMaxStringLength,
+            OutputInList = true,
+            AllowedMediaTypes = [MediaTypes.PlainText]
+        },
+        Values.NonSensitiveSummary => new(id)
+        {
+            Required = false,
+            MaxLength = Constants.DefaultMaxStringLength,
+            OutputInList = true,
+            AllowedMediaTypes = [MediaTypes.PlainText]
         },
         _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
     };

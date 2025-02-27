@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.Extensions;
@@ -6,51 +7,48 @@ namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.E
 public class ClaimsPrincipalExtensionsTests
 {
     [Fact]
-    public void TryGetAuthenticationLevel_Should_Parse_Idporten_Acr_Claim_For_Level3()
+    public void GetAuthenticationLevel_Should_Parse_Idporten_Acr_Claim_For_Level3()
     {
         // Arrange
         var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim("acr", "idporten-loa-substantial")
+            new Claim("acr", Constants.IdportenLoaSubstantial)
         ]));
 
         // Act
-        var result = claimsPrincipal.TryGetAuthenticationLevel(out var authenticationLevel);
+        var authenticationLevel = claimsPrincipal.GetAuthenticationLevel();
 
         // Assert
-        Assert.True(result);
         Assert.Equal(3, authenticationLevel);
     }
 
     [Fact]
-    public void TryGetAuthenticationLevel_Should_Parse_Idporten_Acr_Claim_For_Level4()
+    public void GetAuthenticationLevel_Should_Parse_Idporten_Acr_Claim_For_Level4()
     {
         // Arrange
         var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim("acr", "idporten-loa-high")
+            new Claim("acr", Constants.IdportenLoaHigh)
         ]));
 
         // Act
-        var result = claimsPrincipal.TryGetAuthenticationLevel(out var authenticationLevel);
+        var authenticationLevel = claimsPrincipal.GetAuthenticationLevel();
 
         // Assert
-        Assert.True(result);
         Assert.Equal(4, authenticationLevel);
     }
 
     [Fact]
-    public void TryGetAuthenticationLevel_Should_Parse_Altinn_Authlevel_First()
+    public void GetAuthenticationLevel_Should_Parse_Altinn_Authlevel_First()
     {
         // Arrange
         var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim("acr", "idporten-loa-high"),
+            new Claim("acr", Constants.IdportenLoaHigh),
             new Claim("urn:altinn:authlevel", "5")
         ]));
 
         // Act
-        var result = claimsPrincipal.TryGetAuthenticationLevel(out var authenticationLevel);
+        var authenticationLevel = claimsPrincipal.GetAuthenticationLevel();
 
         // Assert
-        Assert.True(result);
         Assert.Equal(5, authenticationLevel);
     }
 

@@ -18,7 +18,7 @@ public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>
 }
 
 [GenerateOneOf]
-public sealed partial class GetTransmissionResult : OneOfBase<TransmissionDto, EntityNotFound, EntityDeleted>;
+public sealed partial class GetTransmissionResult : OneOfBase<TransmissionDto, EntityNotFound, EntityDeleted, Forbidden>;
 
 internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmissionQuery, GetTransmissionResult>
 {
@@ -73,6 +73,11 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
+        if (!await _altinnAuthorization.UserHasRequiredAuthLevel(dialog.ServiceResource, cancellationToken))
+        {
+            return new Forbidden(Constants.AltinnAuthLevelTooLow);
+        }
+
         var transmission = dialog.Transmissions.FirstOrDefault();
         if (transmission is null)
         {
@@ -84,7 +89,7 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
 
         if (dto.IsAuthorized) return dto;
 
-        var urls = transmission.Attachments.SelectMany(a => a.Urls).ToList();
+        var urls = dto.Attachments.SelectMany(a => a.Urls).ToList();
         foreach (var url in urls)
         {
             url.Url = Constants.UnauthorizedUri;

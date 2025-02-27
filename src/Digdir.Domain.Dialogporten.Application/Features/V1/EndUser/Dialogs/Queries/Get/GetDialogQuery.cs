@@ -51,8 +51,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
     public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
     {
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-
         // This query could be written without all the includes as ProjectTo will do the job for us.
         // However, we need to guarantee an order for sub resources of the dialog aggregate.
         // This is to ensure that the get is consistent, and that PATCH in the API presentation
@@ -128,15 +126,22 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
+        if (!await _altinnAuthorization.UserHasRequiredAuthLevel(dialog.ServiceResource, cancellationToken))
+        {
+            return new Forbidden(Constants.AltinnAuthLevelTooLow);
+        }
+
         // TODO: What if name lookup fails
         // https://github.com/altinn/dialogporten/issues/387
+        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
         dialog.UpdateSeenAt(
             currentUserInformation.UserId.ExternalIdWithPrefix,
             currentUserInformation.UserId.Type,
             currentUserInformation.Name);
 
         var saveResult = await _unitOfWork
-            .WithoutAggregateSideEffects()
+            .DisableUpdatableFilter()
+            .DisableVersionableFilter()
             .SaveChangesAsync(cancellationToken);
 
         saveResult.Switch(

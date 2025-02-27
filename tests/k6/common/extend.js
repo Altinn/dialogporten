@@ -1,4 +1,4 @@
-/* 
+/*
 https://github.com/justmoon/node-extend
 
 The MIT License (MIT)

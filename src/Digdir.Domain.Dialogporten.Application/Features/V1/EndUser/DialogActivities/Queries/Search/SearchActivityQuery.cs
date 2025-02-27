@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -15,7 +16,7 @@ public sealed class SearchActivityQuery : IRequest<SearchActivityResult>
 }
 
 [GenerateOneOf]
-public sealed partial class SearchActivityResult : OneOfBase<List<ActivityDto>, EntityNotFound, EntityDeleted>;
+public sealed partial class SearchActivityResult : OneOfBase<List<ActivityDto>, EntityNotFound, EntityDeleted, Forbidden>;
 
 internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivityQuery, SearchActivityResult>
 {
@@ -59,6 +60,11 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
         if (dialog.Deleted)
         {
             return new EntityDeleted<DialogEntity>(request.DialogId);
+        }
+
+        if (!await _altinnAuthorization.UserHasRequiredAuthLevel(dialog.ServiceResource, cancellationToken))
+        {
+            return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
         return _mapper.Map<List<ActivityDto>>(dialog.Activities);

@@ -312,7 +312,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         createDialogCommand.Dto.Content.AdditionalInfo = CreateHtmlContentValueDto();
 
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", Constants.LegacyHtmlScope)]);
+        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
         {
             services.RemoveAll<IUser>();
@@ -334,7 +334,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         createDialogCommand.Dto.Content.Title = CreateHtmlContentValueDto();
 
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", Constants.LegacyHtmlScope)]);
+        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
         {
             services.RemoveAll<IUser>();
@@ -364,7 +364,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
         };
 
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", Constants.LegacyHtmlScope)]);
+        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
         {
             services.RemoveAll<IUser>();
@@ -395,7 +395,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
         };
 
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", Constants.LegacyHtmlScope)]);
+        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
         {
             services.RemoveAll<IUser>();

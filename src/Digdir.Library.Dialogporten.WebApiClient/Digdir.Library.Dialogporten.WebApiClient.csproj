@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <Company>Digitaliseringsdirektoratet</Company>
+        <PackageTags>digdir;altinn;dialogporten</PackageTags>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/altinn/dialogporten</RepositoryUrl>
+        <PackageId>Altinn.ApiClients.Dialogporten</PackageId>
+        <AssemblyName>Altinn.ApiClients.Dialogporten</AssemblyName>
+        <RootNamespace>Altinn.ApiClients.Dialogporten</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="/"/>
+        <None Include="../../LICENSE" Pack="true" PackagePath="/"/>
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
+                          ReferenceOutputAssembly="false"
+                          Condition="$(Configuration)=='Release'"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.2"/>
+        <PackageReference Include="NSec.Cryptography" Version="24.4.0"/>
+        <PackageReference Include="Refit" Version="8.0.0"/>
+        <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0"/>
+        <PackageReference Include="Refitter.SourceGenerator" Version="1.5.2" Condition="$(Configuration)=='Release'">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Digdir.Library.Dialogporten.WebApiClient.Unit.Tests"/>
+        <InternalsVisibleTo Include="Digdir.Tool.Dialogporten.Benchmarks"/>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
+    </ItemGroup>
+
+</Project>

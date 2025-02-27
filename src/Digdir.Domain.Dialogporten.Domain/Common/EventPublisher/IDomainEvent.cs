@@ -20,5 +20,5 @@ public interface IDomainEvent : INotification
     /// <summary>
     /// Dictionary of metadata.
     /// </summary>
-    public Dictionary<string, string> Metadata { get; set; }
+    Dictionary<string, string> Metadata { get; set; }
 }

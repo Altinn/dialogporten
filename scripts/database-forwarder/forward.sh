@@ -145,17 +145,11 @@ get_redis_info() {
     
     local hostname="${name}.redis.cache.windows.net"
     local port=6379
-    
-    local password
-    password=$(az redis list-keys \
-        --resource-group "dp-be-${env}-rg" \
-        --name "$name" \
-        --query "primaryKey" -o tsv)
-    
+
     echo "name=$name"
     echo "hostname=$hostname"
     echo "port=$port"
-    echo "connection_string=redis://:${password}@${hostname}:${port}"
+    echo "connection_string=redis://:<retrieve-password-from-keyvault>@${hostname}:${port}"
 }
 
 setup_ssh_tunnel() {

@@ -6,8 +6,8 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 
 public interface IContinuationTokenSet
 {
-    public IReadOnlyCollection<ContinuationToken> Tokens { get; }
-    public string Raw { get; }
+    IReadOnlyCollection<ContinuationToken> Tokens { get; }
+    string Raw { get; }
 }
 
 public sealed class ContinuationTokenSet<TOrderDefinition, TTarget> : IContinuationTokenSet
@@ -37,9 +37,9 @@ public sealed class ContinuationTokenSet<TOrderDefinition, TTarget> : IContinuat
             .Split(PaginationConstants.ContinuationTokenSetDelimiter, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .Select(x => x.Split(PaginationConstants.ContinuationTokenDelimiter, StringSplitOptions.TrimEntries) switch
                 {
-                [var key, var ctAsString]
+                    [var key, var ctAsString]
                     when OrderOptions<TOrderDefinition, TTarget>.Value.TryGetSelector(key, out var option)
-                         && TryParseExtensions.TryParse(option.Body.Type, ctAsString, out var ct) => new ContinuationToken(key, ct, option.Body.Type),
+                    && TryParseExtensions.TryParse(option.Body.Type, ctAsString, out var ct) => new ContinuationToken(key, ct, option.Body.Type),
                     _ => null
                 });
 

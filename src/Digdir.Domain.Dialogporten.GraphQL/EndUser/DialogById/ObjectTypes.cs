@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
@@ -5,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 [InterfaceType("DialogByIdError")]
 public interface IDialogByIdError
 {
-    public string Message { get; set; }
+    string Message { get; set; }
 }
 
 public sealed class DialogByIdNotFound : IDialogByIdError
@@ -21,6 +22,11 @@ public sealed class DialogByIdDeleted : IDialogByIdError
 public sealed class DialogByIdForbidden : IDialogByIdError
 {
     public string Message { get; set; } = "Forbidden";
+}
+
+public sealed class DialogByIdForbiddenAuthLevelTooLow : IDialogByIdError
+{
+    public string Message { get; set; } = Constants.AltinnAuthLevelTooLow;
 }
 
 public sealed class DialogByIdPayload

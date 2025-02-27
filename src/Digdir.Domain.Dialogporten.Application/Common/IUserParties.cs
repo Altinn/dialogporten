@@ -7,7 +7,7 @@ namespace Digdir.Domain.Dialogporten.Application.Common;
 
 public interface IUserParties
 {
-    public Task<AuthorizedPartiesResult> GetUserParties(CancellationToken cancellationToken = default);
+    Task<AuthorizedPartiesResult> GetUserParties(CancellationToken cancellationToken = default);
 }
 
 public sealed class UserParties : IUserParties

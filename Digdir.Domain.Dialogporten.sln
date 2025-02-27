@@ -33,8 +33,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Digdir.Domain.Dialogporten.ChangeDataCapture", "src\Digdir.Domain.Dialogporten.ChangeDataCapture\Digdir.Domain.Dialogporten.ChangeDataCapture.csproj", "{9420D9DA-6C2F-4664-B361-FA5E2E1FB6EB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Digdir.Domain.Dialogporten.Service", "src\Digdir.Domain.Dialogporten.Service\Digdir.Domain.Dialogporten.Service.csproj", "{45A63837-99BC-469C-A2DE-FEE6975516C3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Digdir.Domain.Dialogporten.Application.Integration.Tests", "tests\Digdir.Domain.Dialogporten.Application.Integration.Tests\Digdir.Domain.Dialogporten.Application.Integration.Tests.csproj", "{A1CC5E4E-020C-4ABA-BD66-48819259BDB3}"
@@ -49,7 +47,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Domain.Dialogporten.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Tool.Dialogporten.Ed25519KeyPairGenerator", "src\Digdir.Tool.Dialogporten.Ed25519KeyPairGenerator\Digdir.Tool.Dialogporten.Ed25519KeyPairGenerator.csproj", "{030909AA-5B61-46B4-9B74-0D2D779478FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Domain.Dialogporten.WebApi.Integration.Tests", "tests\Digdir.Domain.Dialogporten.WebApi.Integration.Tests\Digdir.Domain.Dialogporten.WebApi.Integration.Tests.csproj", "{42004236-D45C-4A1F-9FF9-CF12B7388389}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Domain.Dialogporten.WebApi.Unit.Tests", "tests\Digdir.Domain.Dialogporten.WebApi.Unit.Tests\Digdir.Domain.Dialogporten.WebApi.Unit.Tests.csproj", "{42004236-D45C-4A1F-9FF9-CF12B7388389}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Domain.Dialogporten.GraphQL", "src\Digdir.Domain.Dialogporten.GraphQL\Digdir.Domain.Dialogporten.GraphQL.csproj", "{234FE24D-1047-4E29-A625-1EB406C37A2D}"
 EndProject
@@ -62,6 +60,20 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Domain.Dialogporten.Architecture.Tests", "tests\Digdir.Domain.Dialogporten.Architecture.Tests\Digdir.Domain.Dialogporten.Architecture.Tests.csproj", "{E389C7C8-9610-40AC-86DC-769B1B7DC78E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Library.Utils.AspNet", "src\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj", "{6A485C65-3613-4A49-A16F-2789119F6F38}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApiClient", "WebApiClient", "{9B809C3A-B169-4599-A2D3-A25E87C510FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Library.Dialogporten.WebApiClient", "src\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj", "{714FBB11-ADC0-44E8-A768-D1A59D641D31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Tool.Dialogporten.LargeDataSetGenerator", "src\Digdir.Tool.Dialogporten.LargeDataSetGenerator\Digdir.Tool.Dialogporten.LargeDataSetGenerator.csproj", "{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Library.Dialogporten.WebApiClient.WebApiSample", "src\Digdir.Library.Dialogporten.WebApiClient.WebApiSample\Digdir.Library.Dialogporten.WebApiClient.WebApiSample.csproj", "{FBF19369-21CD-437D-BB88-CCB81EC947CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{21A54524-CC15-42A7-804B-1E4DEBFAA1F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApiClient", "WebApiClient", "{020E53CD-4575-44BA-81AC-26CE948EE0E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Library.Dialogporten.WebApiClient.Unit.Tests", "tests\Digdir.Library.Dialogporten.WebApiClient.Unit.Tests\Digdir.Library.Dialogporten.WebApiClient.Unit.Tests.csproj", "{E6CBC569-6821-4DBB-A819-AC95AA8A0682}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,10 +109,6 @@ Global
 		{38A843CE-EE54-4476-ADA1-D8084C3901A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38A843CE-EE54-4476-ADA1-D8084C3901A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38A843CE-EE54-4476-ADA1-D8084C3901A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9420D9DA-6C2F-4664-B361-FA5E2E1FB6EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9420D9DA-6C2F-4664-B361-FA5E2E1FB6EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9420D9DA-6C2F-4664-B361-FA5E2E1FB6EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9420D9DA-6C2F-4664-B361-FA5E2E1FB6EB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{45A63837-99BC-469C-A2DE-FEE6975516C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{45A63837-99BC-469C-A2DE-FEE6975516C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45A63837-99BC-469C-A2DE-FEE6975516C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -153,6 +161,22 @@ Global
 		{6A485C65-3613-4A49-A16F-2789119F6F38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A485C65-3613-4A49-A16F-2789119F6F38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A485C65-3613-4A49-A16F-2789119F6F38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{714FBB11-ADC0-44E8-A768-D1A59D641D31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{714FBB11-ADC0-44E8-A768-D1A59D641D31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{714FBB11-ADC0-44E8-A768-D1A59D641D31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{714FBB11-ADC0-44E8-A768-D1A59D641D31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBF19369-21CD-437D-BB88-CCB81EC947CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBF19369-21CD-437D-BB88-CCB81EC947CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBF19369-21CD-437D-BB88-CCB81EC947CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBF19369-21CD-437D-BB88-CCB81EC947CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6CBC569-6821-4DBB-A819-AC95AA8A0682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6CBC569-6821-4DBB-A819-AC95AA8A0682}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6CBC569-6821-4DBB-A819-AC95AA8A0682}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6CBC569-6821-4DBB-A819-AC95AA8A0682}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -167,7 +191,6 @@ Global
 		{0EE4AC8C-BDB9-474A-821D-23FB95CB54A7} = {CC70CBB9-D57A-4095-8786-956012537B1C}
 		{E7288616-9358-47C2-8650-EA019AB9D16F} = {CC70CBB9-D57A-4095-8786-956012537B1C}
 		{38A843CE-EE54-4476-ADA1-D8084C3901A9} = {CADB8189-4AA1-4732-844A-C41DBF3EC8B7}
-		{9420D9DA-6C2F-4664-B361-FA5E2E1FB6EB} = {320B47A0-5EB8-4B6E-8C84-90633A1849CA}
 		{45A63837-99BC-469C-A2DE-FEE6975516C3} = {320B47A0-5EB8-4B6E-8C84-90633A1849CA}
 		{A1CC5E4E-020C-4ABA-BD66-48819259BDB3} = {CADB8189-4AA1-4732-844A-C41DBF3EC8B7}
 		{3C2C775D-F2D1-42A2-B53F-CC6D5FF59633} = {320B47A0-5EB8-4B6E-8C84-90633A1849CA}
@@ -182,6 +205,13 @@ Global
 		{0900E3CF-F9D8-4B29-957F-484B3B028D6D} = {320B47A0-5EB8-4B6E-8C84-90633A1849CA}
 		{E389C7C8-9610-40AC-86DC-769B1B7DC78E} = {CADB8189-4AA1-4732-844A-C41DBF3EC8B7}
 		{6A485C65-3613-4A49-A16F-2789119F6F38} = {096E9B69-6783-4446-A895-0B6D7729A0D9}
+		{9B809C3A-B169-4599-A2D3-A25E87C510FC} = {096E9B69-6783-4446-A895-0B6D7729A0D9}
+		{714FBB11-ADC0-44E8-A768-D1A59D641D31} = {9B809C3A-B169-4599-A2D3-A25E87C510FC}
+		{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671} = {3C2C775D-F2D1-42A2-B53F-CC6D5FF59633}
+		{FBF19369-21CD-437D-BB88-CCB81EC947CF} = {9B809C3A-B169-4599-A2D3-A25E87C510FC}
+		{21A54524-CC15-42A7-804B-1E4DEBFAA1F7} = {CADB8189-4AA1-4732-844A-C41DBF3EC8B7}
+		{020E53CD-4575-44BA-81AC-26CE948EE0E7} = {21A54524-CC15-42A7-804B-1E4DEBFAA1F7}
+		{E6CBC569-6821-4DBB-A819-AC95AA8A0682} = {020E53CD-4575-44BA-81AC-26CE948EE0E7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2FE67FF-7622-4AFB-AD8E-961B6A39D888}

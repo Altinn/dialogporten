@@ -52,6 +52,14 @@ param enableIndexTuning bool
 @description('The name of the Application Insights workspace')
 param appInsightWorkspaceName string
 
+@description('Enable high availability')
+param enableHighAvailability bool
+
+@description('The number of days to retain backups. If not specified, the default value of 7 days will be used.')
+@minValue(7)
+@maxValue(35)
+param backupRetentionDays int
+
 @description('The Key Vault to store the PostgreSQL administrator login password')
 @secure()
 param srcKeyVault object
@@ -64,19 +72,6 @@ var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
 var postgresServerName = uniqueResourceName('${namePrefix}-postgres', postgresServerNameMaxLength)
-
-// Uncomment the following lines to add logical replication.
-// see https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-logical#pre-requisites-for-logical-replication-and-logical-decoding
-//var postgresqlConfiguration = {
-//	//wal_level: 'logical'
-//	//max_worker_processes: '16'
-
-//	// The leading theory is that we are using pgoutput as the replication protocol
-//	// which comes out of the box in postgresql. Therefore we may not need the
-//	// following two lines.
-//	//'azure.extensions': 'pglogical'
-//	//shared_preload_libraries: 'pglogical'
-//}
 
 module saveAdmPassword '../keyvault/upsertSecret.bicep' = {
   name: 'Save_${srcKeyVaultAdministratorLoginPasswordKey}'
@@ -99,6 +94,11 @@ module privateDnsZone '../privateDnsZone/main.bicep' = {
   }
 }
 
+var highAvailabilityConfig = enableHighAvailability ? {
+  mode: 'ZoneRedundant'
+  standbyAvailabilityZone: '2'
+} : null
+
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: postgresServerName
   location: location
@@ -111,6 +111,10 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       autoGrow: storage.autoGrow
       type: storage.type
     }
+    backup: {
+      backupRetentionDays: backupRetentionDays
+      geoRedundantBackup: 'Disabled'
+    }
     dataEncryption: {
       type: 'SystemManaged'
     }
@@ -119,6 +123,7 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       delegatedSubnetResourceId: subnetId
       privateDnsZoneArmResourceId: privateDnsZone.outputs.id
     }
+    highAvailability: highAvailabilityConfig
   }
   sku: sku
   resource database 'databases' = {

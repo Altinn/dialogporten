@@ -4,6 +4,8 @@ param environment = 'yt01'
 param location = 'norwayeast'
 param keyVaultSourceKeys = json(readEnvironmentVariable('AZURE_KEY_VAULT_SOURCE_KEYS'))
 
+param appInsightsPurgeDataOn30Days = true
+
 param redisVersion = '6.0'
 
 // secrets
@@ -36,6 +38,8 @@ param postgresConfiguration = {
   }
   enableIndexTuning: true
   enableQueryPerformanceInsight: true
+  enableHighAvailability: false
+  backupRetentionDays: 7
 }
 
 param redisSku = {

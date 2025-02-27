@@ -21,9 +21,21 @@ public sealed class ContentDto
     public ContentValueDto Title { get; set; } = null!;
 
     /// <summary>
+    /// An optional non-sensitive title of the dialog.
+    /// Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    public ContentValueDto? NonSensitiveTitle { get; set; }
+
+    /// <summary>
     /// A short summary of the dialog and its current state.
     /// </summary>
     public ContentValueDto Summary { get; set; } = null!;
+
+    /// <summary>
+    /// An optional non-sensitive summary of the dialog and its current state.
+    /// Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    public ContentValueDto? NonSensitiveSummary { get; set; }
 
     /// <summary>
     /// Overridden sender name. If not supplied, assume "org" as the sender name.

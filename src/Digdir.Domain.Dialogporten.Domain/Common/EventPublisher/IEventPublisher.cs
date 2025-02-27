@@ -9,5 +9,5 @@ public interface IEventPublisher
     /// Get a collection of <see cref="IDomainEvent"/> queued up for dispatching at the end of the next unit of work.
     /// This also clears the collection on the EventPublisher.
     /// </summary>
-    public IEnumerable<IDomainEvent> PopDomainEvents();
+    IEnumerable<IDomainEvent> PopDomainEvents();
 }

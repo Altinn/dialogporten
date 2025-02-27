@@ -143,8 +143,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
-        var currentUserInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-
         var searchExpression = Expressions.LocalizedSearchExpression(request.Search, request.SearchLanguageCode);
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
             request.Party ?? [],
@@ -160,7 +158,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .PrefilterAuthorizedDialogs(authorizedResources)
             .AsNoTracking()
             .Include(x => x.Content)
-            .ThenInclude(x => x.Value.Localizations)
+                .ThenInclude(x => x.Value.Localizations)
             .WhereIf(!request.Org.IsNullOrEmpty(), x => request.Org!.Contains(x.Org))
             .WhereIf(!request.ServiceResource.IsNullOrEmpty(), x => request.ServiceResource!.Contains(x.ServiceResource))
             .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
@@ -187,9 +185,30 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
         foreach (var seenLog in paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
         {
-            seenLog.IsCurrentEndUser = IdentifierMasker.GetMaybeMaskedIdentifier(currentUserInfo.UserId.ExternalIdWithPrefix) == seenLog.SeenBy.ActorId;
+            seenLog.IsCurrentEndUser = IdentifierMasker.GetMaybeMaskedIdentifier(_userRegistry.GetCurrentUserId().ExternalIdWithPrefix) == seenLog.SeenBy.ActorId;
         }
 
+        var serviceResources = paginatedList.Items
+            .Select(x => x.ServiceResource)
+            .Distinct()
+            .ToList();
+
+        var resourcePolicyInformation = await _db.ResourcePolicyInformation
+            .Where(x => serviceResources.Contains(x.Resource))
+            .ToDictionaryAsync(x => x.Resource, x => x.MinimumAuthenticationLevel, cancellationToken);
+
+        foreach (var dialog in paginatedList.Items)
+        {
+            if (!resourcePolicyInformation.TryGetValue(dialog.ServiceResource, out var minimumAuthenticationLevel))
+            {
+                continue;
+            }
+
+            if (!_altinnAuthorization.UserHasRequiredAuthLevel(minimumAuthenticationLevel))
+            {
+                dialog.Content.SetNonSensitiveContent();
+            }
+        }
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }
 }

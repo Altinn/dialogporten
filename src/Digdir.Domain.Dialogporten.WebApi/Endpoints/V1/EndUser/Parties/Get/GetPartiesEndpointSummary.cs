@@ -8,7 +8,7 @@ public sealed class GetPartiesEndpointSummary : Summary<GetPartiesEndpoint>
     {
         Summary = "Gets the list of authorized parties for the end user";
         Description = """
-                      Gets the list of authorized parties for the end user. For more information see the documentation (link TBD).
+                      Gets the list of authorized parties for the end user.
                       """;
 
         Responses[StatusCodes.Status200OK] = "The list of authorized parties for the end user";

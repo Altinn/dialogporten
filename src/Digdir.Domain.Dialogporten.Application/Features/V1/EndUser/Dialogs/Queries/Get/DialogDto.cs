@@ -308,7 +308,6 @@ public sealed class DialogTransmissionContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
-    /// Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
     /// </summary>
     public ContentValueDto? ContentReference { get; set; }
 }

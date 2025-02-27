@@ -17,7 +17,7 @@ public sealed class SetSystemLabelInput
 [InterfaceType("SetSystemLabelError")]
 public interface ISetSystemLabelError
 {
-    public string Message { get; set; }
+    string Message { get; set; }
 }
 
 public sealed class SetSystemLabelEntityNotFound : ISetSystemLabelError

@@ -1,3 +1,4 @@
+# Checks the title of a PR to ensure it follows the correct format
 name: "PR Title Checker"
 on:
   pull_request_target:

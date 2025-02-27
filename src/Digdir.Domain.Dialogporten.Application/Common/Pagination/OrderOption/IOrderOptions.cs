@@ -41,16 +41,12 @@ internal sealed class OrderOptions<TTarget> : IOrderOptions<TTarget>
 
         result = value.Split(PaginationConstants.OrderDelimiter, StringSplitOptions.TrimEntries) switch
         {
-        // eks: createdAt
-        [var key]
+            // eks: createdAt
+            [var key] when _optionByKey.TryGetValue(key, out var expression) => new(key, expression),
+            // eks: createdAt_desc
+            [var key, var direction]
             when _optionByKey.TryGetValue(key, out var expression)
-        => new(key, expression),
-        // eks: createdAt_desc
-        [var key, var direction]
-            when _optionByKey.TryGetValue(key, out var expression)
-            && Enum.TryParse<OrderDirection>(direction, ignoreCase: true, out var dirEnum)
-        => new(key, expression, dirEnum),
-
+            && Enum.TryParse<OrderDirection>(direction, ignoreCase: true, out var dirEnum) => new(key, expression, dirEnum),
             _ => null
         };
 

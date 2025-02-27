@@ -15,7 +15,7 @@ internal static class AggregateExtensions
     private static readonly EntityEntryComparer _entityEntryComparer = new();
 
     internal static async Task<ChangeTracker> HandleAggregateEntities(this ChangeTracker changeTracker,
-        DateTimeOffset utcNow, CancellationToken cancellationToken)
+        DateTimeOffset utcNow, IEntityOptions options, CancellationToken cancellationToken)
     {
         var aggregateNodeByEntry = await changeTracker
             .Entries()
@@ -24,27 +24,27 @@ internal static class AggregateExtensions
 
         foreach (var (_, aggregateNode) in aggregateNodeByEntry)
         {
-            if (aggregateNode.Entity is IAggregateCreatedHandler created && aggregateNode.IsAdded())
+            if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateCreatedHandler created && aggregateNode.IsAdded())
             {
                 created.OnCreate(aggregateNode, utcNow);
             }
 
-            if (aggregateNode.Entity is IAggregateUpdatedHandler updated && aggregateNode.IsModified())
+            if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateUpdatedHandler updated && aggregateNode.IsModified())
             {
                 updated.OnUpdate(aggregateNode, utcNow);
             }
 
-            if (aggregateNode.Entity is IAggregateDeletedHandler deleted && aggregateNode.IsDeleted())
+            if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateDeletedHandler deleted && aggregateNode.IsDeleted())
             {
                 deleted.OnDelete(aggregateNode, utcNow);
             }
 
-            if (aggregateNode.Entity is IAggregateRestoredHandler restored && aggregateNode.IsRestored())
+            if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateRestoredHandler restored && aggregateNode.IsRestored())
             {
                 restored.OnRestore(aggregateNode, utcNow);
             }
 
-            if (aggregateNode.Entity is IUpdateableEntity updatable)
+            if (options.EnableUpdatableFilter && aggregateNode.Entity is IUpdateableEntity updatable)
             {
                 if (aggregateNode.IsModified() || aggregateNode.IsAddedWithDefaultUpdatedAt(updatable))
                 {
@@ -52,7 +52,7 @@ internal static class AggregateExtensions
                 }
             }
 
-            if (aggregateNode.Entity is IVersionableEntity versionable)
+            if (options.EnableVersionableFilter && aggregateNode.Entity is IVersionableEntity versionable)
             {
                 versionable.NewVersion();
             }

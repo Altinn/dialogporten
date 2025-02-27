@@ -20,6 +20,11 @@ public sealed class DialogDto
     public Guid Id { get; set; }
 
     /// <summary>
+    ///  An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
+
+    /// <summary>
     /// The unique identifier for the revision in UUIDv4 format.
     /// </summary>
     /// <example>a312cb9c-7632-43c2-aa38-69b06aed56ca</example>
@@ -270,7 +275,6 @@ public sealed class DialogSeenLogDto
     public bool IsCurrentEndUser { get; set; }
 }
 
-
 public sealed class ContentDto
 {
     /// <summary>
@@ -279,9 +283,21 @@ public sealed class ContentDto
     public ContentValueDto Title { get; set; } = null!;
 
     /// <summary>
+    /// An optional non-sensitive title of the dialog.
+    /// Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    public ContentValueDto? NonSensitiveTitle { get; set; }
+
+    /// <summary>
     /// A short summary of the dialog and its current state.
     /// </summary>
     public ContentValueDto Summary { get; set; } = null!;
+
+    /// <summary>
+    /// An optional non-sensitive summary of the dialog and its current state.
+    /// Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    public ContentValueDto? NonSensitiveSummary { get; set; }
 
     /// <summary>
     /// Overridden sender name. If not supplied, assume "org" as the sender name.
@@ -300,7 +316,6 @@ public sealed class ContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-    /// Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
     /// </summary>
     public ContentValueDto? MainContentReference { get; set; }
 }
@@ -319,7 +334,6 @@ public sealed class DialogTransmissionContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-    /// Allowed media types: application/vnd.dialogporten.frontchannelembed+json;type=markdown
     /// </summary>
     public ContentValueDto? ContentReference { get; set; }
 }
@@ -371,7 +385,6 @@ public sealed class DialogActivityDto
     /// </summary>
     public List<LocalizationDto> Description { get; set; } = [];
 }
-
 
 public sealed class DialogApiActionDto
 {

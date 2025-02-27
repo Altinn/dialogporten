@@ -104,6 +104,21 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .UniqueBy(x => x.Id);
         RuleForEach(x => x.Activities)
             .SetValidator(activityValidator);
+
+        RuleFor(x => x.Process)
+            .IsValidUri()
+            .MaximumLength(Constants.DefaultMaxUriLength)
+            .When(x => x.Process is not null);
+
+        RuleFor(x => x.Process)
+            .NotEmpty()
+            .WithMessage($"{{PropertyName}} must not be empty when {nameof(UpdateDialogDto.PrecedingProcess)} is set.")
+            .When(x => x.PrecedingProcess is not null);
+
+        RuleFor(x => x.PrecedingProcess)
+            .IsValidUri()
+            .MaximumLength(Constants.DefaultMaxUriLength)
+            .When(x => x.PrecedingProcess is not null);
     }
 }
 

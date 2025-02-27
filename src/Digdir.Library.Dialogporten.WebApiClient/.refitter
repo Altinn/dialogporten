@@ -1,0 +1,18 @@
+{
+    "openApiPath": "../Digdir.Domain.Dialogporten.WebApi/bin/Release/net9.0/swagger.json",
+    "namespace": "Altinn.ApiClients.Dialogporten.Features.V1",
+    "outputFolder": "Features/V1",
+    "operationNameGenerator": "SingleClientFromOperationId",
+    "trimUnusedSchema": true,
+    "multipleInterfaces": "ByTag",
+    "includeTags": [
+        "Serviceowner"
+    ],
+    "useCancellationTokens": true,
+    "returnIApiResponse": true,
+    "useDynamicQuerystringParameters": true,
+    "outputFilename": "RefitterInterface.cs",
+    "codeGeneratorSettings": {
+        "dateFormat": "yyyy-MM-ddTHH:mm:ssZ"
+    }
+}

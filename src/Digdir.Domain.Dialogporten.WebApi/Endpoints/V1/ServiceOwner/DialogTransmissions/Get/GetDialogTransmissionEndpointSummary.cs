@@ -1,7 +1,7 @@
-using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.DialogTransmissions.Get;
 
@@ -11,7 +11,7 @@ public sealed class GetDialogTransmissionEndpointSummary : Summary<GetDialogTran
     {
         Summary = "Gets a single dialog transmission";
         Description = """
-                      Gets a single transmission belonging to a dialog. For more information see the documentation (link TBD).
+                      Gets a single transmission belonging to a dialog.
                       """;
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("transmission");
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope.ServiceProvider);

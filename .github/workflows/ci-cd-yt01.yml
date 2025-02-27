@@ -1,9 +1,8 @@
-﻿name: CI/CD YT01
-
+﻿# Deploys the created release to yt01
+name: CI/CD YT01
 run-name: CI/CD YT01 ${{ github.event.client_payload.version && format('({0})', github.event.client_payload.version) || '' }}
 
 on:
-  workflow_dispatch:
   repository_dispatch:
     types: [release_created]
 
@@ -27,14 +26,10 @@ jobs:
       infra_base_sha: ${{ needs.get-versions-from-github.outputs.infra_version_sha }}
       apps_base_sha: ${{ needs.get-versions-from-github.outputs.apps_version_sha }}
 
-  get-current-version:
-    name: Get current version
-    uses: ./.github/workflows/workflow-get-current-version.yml
-
   deploy-infra:
     name: Deploy infra to yt01
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
-    needs: [get-current-version, check-for-changes]
+    if: ${{ needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
+    needs: [check-for-changes]
     uses: ./.github/workflows/workflow-deploy-infra.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -47,26 +42,25 @@ jobs:
     with:
       environment: yt01
       region: norwayeast
-      version: ${{ needs.get-current-version.outputs.version }}
+      version: ${{ github.event.client_payload.version }}
+      ref: "refs/tags/v${{ github.event.client_payload.version }}"
 
   store-infra-version:
     name: Store Latest Deployed Infra Version as GitHub Variable
-    needs: [deploy-infra, get-current-version]
+    needs: [deploy-infra]
     if: ${{ needs.deploy-infra.result == 'success' }}
     uses: ./.github/workflows/workflow-store-github-env-variable.yml
     with:
       variable_name: LATEST_DEPLOYED_INFRA_VERSION
-      variable_value: ${{ needs.get-current-version.outputs.version }}
+      variable_value: ${{ github.event.client_payload.version }}
       environment: yt01
     secrets:
       GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
 
   deploy-apps:
     name: Deploy apps to yt01
-    needs:
-      [get-current-version, check-for-changes, deploy-infra]
-    # we want deployment of apps to be dependent on deployment of infrastructure, but if infrastructure is skipped, we still want to deploy the apps
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
+    needs: [check-for-changes, deploy-infra]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -82,17 +76,17 @@ jobs:
     with:
       environment: yt01
       region: norwayeast
-      version: ${{ needs.get-current-version.outputs.version }}
-      runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
-
+      version: ${{ github.event.client_payload.version }}
+      runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
+      ref: "refs/tags/v${{ github.event.client_payload.version }}"
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
-    needs: [deploy-apps, get-current-version]
-    if: ${{ always() && !failure() && (github.event_name == 'workflow_dispatch' || needs.deploy-apps.outputs.deployment_executed == 'true') }}
+    needs: [deploy-apps]
+    if: ${{ always() && !failure() && needs.deploy-apps.outputs.deployment_executed == 'true' }}
     uses: ./.github/workflows/workflow-store-github-env-variable.yml
     with:
       variable_name: LATEST_DEPLOYED_APPS_VERSION
-      variable_value: ${{ needs.get-current-version.outputs.version }}
+      variable_value: ${{ github.event.client_payload.version }}
       environment: yt01
     secrets:
       GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
@@ -100,7 +94,7 @@ jobs:
   run-e2e-tests:
     name: "Run K6 functional end-to-end tests"
     # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     needs: [deploy-apps, check-for-changes]
     uses: ./.github/workflows/workflow-run-k6-tests.yml
     secrets:
@@ -110,37 +104,43 @@ jobs:
       environment: yt01
       apiVersion: v1
       testSuitePath: tests/k6/suites/all-single-pass.js
+      ref: "refs/tags/v${{ github.event.client_payload.version }}"
     permissions:
       checks: write
       pull-requests: write
 
   run-performance-tests:
     name: "Run K6 performance tests"
-    # we want the performance tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasInfraChanges == 'true') }}
-    needs: [deploy-apps, deploy-infra, check-for-changes]
-    #needs: [deploy-apps, check-for-changes]
-    uses: ./.github/workflows/workflow-run-k6-ci-cd-yt01.yml
+    needs: [run-e2e-tests]
+    uses: ./.github/workflows/workflow-run-k6-performance.yml
     secrets:
-      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
-      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     strategy:
-      max-parallel: 1
+      max-parallel: 4
       matrix:
         files:
           - tests/k6/tests/serviceowner/performance/serviceOwnerSearchWithThresholds.js
           - tests/k6/tests/serviceowner/performance/createDialogWithThresholds.js
+          - tests/k6/tests/serviceowner/performance/createTransmissionsWithThresholds.js
           - tests/k6/tests/enduser/performance/enduserSearchWithThresholds.js
       fail-fast: false
     with:
       environment: yt01
       apiVersion: v1
       vus: 1
-      duration: 30s
+      duration: 60s
       testSuitePath: ${{ matrix.files }}
+      parallelism: 1
+      breakpoint: false
+      abortOnFail: false
+      numberOfEndUsers: 200
+      ref: "refs/tags/v${{ github.event.client_payload.version }}"
     permissions:
       checks: write
       pull-requests: write
+      id-token: write
+      contents: read
 
   send-slack-message-on-failure:
     name: Send Slack message on failure

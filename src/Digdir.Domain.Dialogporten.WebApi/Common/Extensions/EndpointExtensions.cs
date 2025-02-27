@@ -43,4 +43,10 @@ public static class EndpointExtensions
             domainError.ToValidationResults(),
             StatusCodes.Status422UnprocessableEntity,
             cancellation: cancellationToken);
+
+    public static Task ConflictAsync(this IEndpoint ep, Conflict conflict, CancellationToken cancellationToken = default) =>
+        ep.HttpContext.Response.SendErrorsAsync(
+            conflict.ToValidationResults(),
+            StatusCodes.Status409Conflict,
+            cancellation: cancellationToken);
 }

@@ -1,0 +1,44 @@
+name: "Publish nuget package"
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version"
+        required: true
+        type: string
+      path:
+        description: "Path to project"
+        required: true
+        type: string
+      source:
+        description: "Nuget Source"
+        required: true
+        type: string
+    secrets:
+      NUGET_API_KEY:
+        required: true
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ./global.json
+
+      - name: Pack with debug symbols
+        run: dotnet pack --configuration Release -p:Version="${{ inputs.version }}" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg --output . "${{ inputs.path }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: '*.*nupkg'
+          
+      - name: Push to NuGet   
+        run: dotnet nuget push *.nupkg --source "${{ inputs.source }}" --api-key ${{secrets.NUGET_API_KEY}}

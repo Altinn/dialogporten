@@ -24,6 +24,7 @@ public sealed class GetDialogTransmissionEndpoint : Endpoint<GetTransmissionQuer
 
         Description(b => b.ProducesOneOf<TransmissionDto>(
             StatusCodes.Status200OK,
+            StatusCodes.Status410Gone,
             StatusCodes.Status404NotFound));
     }
 
@@ -33,6 +34,7 @@ public sealed class GetDialogTransmissionEndpoint : Endpoint<GetTransmissionQuer
         await result.Match(
             dto => SendOkAsync(dto, ct),
             notFound => this.NotFoundAsync(notFound, ct),
-            deleted => this.GoneAsync(deleted, ct));
+            deleted => this.GoneAsync(deleted, ct),
+            forbidden => this.ForbiddenAsync(forbidden, ct));
     }
 }

@@ -1,4 +1,4 @@
-export { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
+export { uuidv4 } from './k6-utils.js';
 
 export function uuidv7() {
 

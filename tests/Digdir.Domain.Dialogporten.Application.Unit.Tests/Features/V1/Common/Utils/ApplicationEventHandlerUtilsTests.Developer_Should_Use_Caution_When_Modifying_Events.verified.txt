@@ -2,6 +2,8 @@
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities.DialogActivityCreatedDomainEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogCreatedDomainEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogDeletedDomainEvent,
+  Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogRestoredDomainEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogSeenDomainEvent,
+  Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogTransmissionCreatedDomainEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogUpdatedDomainEvent
 ]

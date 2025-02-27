@@ -7,30 +7,27 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Azure.Identity" Version="1.13.2" />
-        <PackageReference Include="FastEndpoints.Swagger" Version="5.33.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.1" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
-        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.1.1" />
-        <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.0.0" />
-        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
-        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-        <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.2.0" />
-        <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.11.0" />
-        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.0" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.10.0-beta.1" />
-        <PackageReference Include="OpenTelemetry" Version="1.11.0" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.10.0" />
-        <PackageReference Include="Npgsql.OpenTelemetry" Version="9.0.2" />
-        <PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.0.0" />
+        <PackageReference Include="Azure.Identity" Version="1.13.2"/>
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.1.1"/>
+        <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.0.0"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0"/>
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
+        <PackageReference Include="FastEndpoints.Swagger" Version="5.34.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2"/>
+        <PackageReference Include="NSwag.MSBuild" Version="14.2.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj" />
-        <ProjectReference Include="..\Digdir.Domain.Dialogporten.Infrastructure\Digdir.Domain.Dialogporten.Infrastructure.csproj" />
-        <ProjectReference Include="..\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj" />
-        <ProjectReference Include="..\Digdir.Tool.Dialogporten.GenerateFakeData\Digdir.Tool.Dialogporten.GenerateFakeData.csproj" />
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj"/>
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.Infrastructure\Digdir.Domain.Dialogporten.Infrastructure.csproj"/>
+        <ProjectReference Include="..\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj"/>
+        <ProjectReference Include="..\Digdir.Tool.Dialogporten.GenerateFakeData\Digdir.Tool.Dialogporten.GenerateFakeData.csproj"/>
     </ItemGroup>
+
+    <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration)=='Release'">
+        <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_net90) aspnetcore2openapi /nobuild:true /project:$(MSBuildProjectFullPath) /configuration:$(Configuration) /output:$(TargetDir)/swagger.json"/>
+    </Target>
 
 </Project>

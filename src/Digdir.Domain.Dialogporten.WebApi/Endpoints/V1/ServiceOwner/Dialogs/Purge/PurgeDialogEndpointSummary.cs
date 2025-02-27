@@ -1,7 +1,7 @@
-using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Purge;
 
@@ -11,7 +11,7 @@ public sealed class PurgeDialogEndpointSummary : Summary<PurgeDialogEndpoint>
     {
         Summary = "Permanently deletes a dialog";
         Description = """
-                      Deletes a given dialog (hard delete). For more information see the documentation (link TBD).
+                      Deletes a given dialog (hard delete).
 
                       Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
                       """;

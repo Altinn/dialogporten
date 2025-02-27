@@ -30,7 +30,7 @@ var tags = {
 }
 var name = '${namePrefix}-db-migration-job'
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName
 }
 

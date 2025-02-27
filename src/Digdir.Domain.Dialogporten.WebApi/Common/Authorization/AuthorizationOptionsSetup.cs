@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Authorization;

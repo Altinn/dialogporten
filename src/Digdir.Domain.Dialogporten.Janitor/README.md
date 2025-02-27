@@ -1,6 +1,6 @@
 # Dialogporten Janitor
 
-A console application for container app jobs or performing various synchronization and janitorial tasks in Dialogporten.
+A console application for container app jobs or performing various synchronizations and janitorial tasks in Dialogporten.
 
 ## Commands
 

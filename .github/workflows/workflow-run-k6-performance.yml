@@ -21,11 +21,21 @@ on:
       parallelism:
         required: true
         type: number
+      breakpoint:
+        required: true
+        type: boolean
+      abortOnFail:
+        required: true
+        type: boolean
+      numberOfEndUsers:
+        required: true
+        type: number
+      ref:
+        description: "The branch or tag ref to run the tests on. Using default checkout ref if not provided."
+        required: false
+        default: ${{ github.ref }}
+        type: string
     secrets:
-      TOKEN_GENERATOR_USERNAME:
-        required: true
-      TOKEN_GENERATOR_PASSWORD:
-        required: true
       AZURE_CLIENT_ID:
         required: true
       AZURE_TENANT_ID:
@@ -40,6 +50,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.ref }}
     - name: OIDC Login to Azure Public Cloud
       uses: azure/login@v2
       with:
@@ -71,9 +83,8 @@ jobs:
         echo "Running k6 test suite ${{ inputs.testSuitePath }} with ${{ inputs.vus }} VUs for ${{ inputs.duration }} on ${{ inputs.parallelism }} parallelism"
         k6configName=$(basename "${{ inputs.testSuitePath }}" .js)
         k6configName="k6-${k6configName}"
-        ./tests/k6/tests/scripts/run-test-in-k8s.sh -f ${{ inputs.testSuitePath }} -c $k6configName -n $k6configName -v ${{ inputs.vus }} -d ${{ inputs.duration }} -p ${{ inputs.parallelism }}
+        ./tests/k6/tests/scripts/run-test-in-k8s.sh -f ${{ inputs.testSuitePath }} -c $k6configName -n $k6configName -v ${{ inputs.vus }} -d ${{ inputs.duration }} -p ${{ inputs.parallelism }} -a ${{ inputs.abortOnFail }} -b ${{ inputs.breakpoint }} 
       env:
         API_ENVIRONMENT: ${{ inputs.environment }}
         API_VERSION: ${{ inputs.apiVersion }}
-        TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
-        TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+        NUMBER_OF_ENDUSERS: ${{ inputs.numberOfEndUsers }}

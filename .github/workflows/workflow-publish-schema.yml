@@ -6,6 +6,11 @@ on:
       version:
         required: true
         type: string
+      ref:
+        description: "The branch or tag ref to publish. Using default checkout ref if not provided."
+        required: false
+        default: ${{ github.ref }}
+        type: string
     secrets:
       NPM_TOKEN:
         required: true
@@ -23,6 +28,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -55,6 +62,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

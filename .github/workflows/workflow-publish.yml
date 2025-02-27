@@ -31,8 +31,6 @@ jobs:
             imageName: graphql
           - dockerfile: ./src/Digdir.Domain.Dialogporten.Service/Dockerfile
             imageName: service
-          - dockerfile: ./src/Digdir.Domain.Dialogporten.ChangeDataCapture/Dockerfile
-            imageName: cdc
           - dockerfile: ./src/Digdir.Domain.Dialogporten.Infrastructure/MigrationBundle.dockerfile
             imageName: migration-bundle
           - dockerfile: ./src/Digdir.Domain.Dialogporten.Janitor/Dockerfile

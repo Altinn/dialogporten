@@ -8,5 +8,5 @@ public interface IIdentifiableEntity
     /// <summary>
     /// The entity identification.
     /// </summary>
-    public Guid Id { get; set; }
+    Guid Id { get; set; }
 }

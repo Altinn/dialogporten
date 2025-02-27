@@ -14,7 +14,7 @@ on:
           - staging
           - prod
       version:
-        description: "Version to deploy (exclude the v prefix)"
+        description: "Version to deploy (e.g., `1.23.4`)"
         required: true
         type: string
       runMigration:
@@ -60,3 +60,4 @@ jobs:
       region: norwayeast
       version: ${{ inputs.version }}
       runMigration: ${{ inputs.runMigration }}
+      ref: "refs/tags/v${{ inputs.version }}"

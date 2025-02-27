@@ -89,7 +89,7 @@ export function setParty(dialog, party) {
 
 export function setProcess(dialog, process) {
     if (!isValidURI(process)) {
-        throw new Error("Invalid process provided. " + process); 
+        throw new Error("Invalid process provided. " + process);
     }
     dialog.process = process;
 }
@@ -147,7 +147,7 @@ export function setVisibleFrom(dialog, visibleFrom) {
 export function setSystemLabel(dialog, systemLabel) {
     let validLabels = ['Default', 'Bin', 'Archive']
     if (!validLabels.includes(systemLabel)) {
-       throw new Error("Invalid systemLabel provided."); 
+       throw new Error("Invalid systemLabel provided.");
     }
     dialog.systemLabel = systemLabel;
 }
@@ -162,8 +162,8 @@ export function setActivities(dialog, activities) {
 export function addActivity(dialog, activity) {
    if (activity == null) return;
    if (dialog.activities == null) {
-        dialog.activities = []; 
-   } 
+        dialog.activities = [];
+   }
    dialog.activities.push(activity);
 }
 

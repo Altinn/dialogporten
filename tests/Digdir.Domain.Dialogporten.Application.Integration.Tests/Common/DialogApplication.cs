@@ -68,7 +68,7 @@ public class DialogApplication : IAsyncLifetime
     /// <summary>
     /// This method lets you configure the IoC container for an integration test.
     /// It will be reset to the default configuration after each test.
-    /// You may only call this, or equivalent methods once per test.
+    /// You may only call this or equivalent methods once per test.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the method is called more than once per test.</exception>
     public void ConfigureServices(Action<IServiceCollection> configure)
@@ -86,7 +86,7 @@ public class DialogApplication : IAsyncLifetime
     /// <summary>
     /// This method lets you configure the IoC container for an integration test.
     /// It will be reset to the default configuration after each test.
-    /// You may only call this, or equivalent methods once per test.
+    /// You may only call this or equivalent methods once per test.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the method is called more than once per test.</exception>
     public async Task<ITestHarness> ConfigureServicesWithMassTransitTestHarness(Action<IServiceCollection>? configure = null)

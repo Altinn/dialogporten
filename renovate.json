@@ -35,6 +35,12 @@
         "^Serilog"
       ],
       "groupName": "Serilog dependencies"
+    },
+    {
+      "packagePatterns": [
+        "^ZiggyCreatures"
+      ],
+      "groupName": "FusionCache dependencies"
     }
   ]
 }

@@ -1,9 +1,9 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
-using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Search;
 
@@ -13,7 +13,7 @@ public sealed class ListDialogEndpointSummary : Summary<SearchDialogEndpoint, Se
     {
         Summary = "Gets a list of dialogs";
         Description = """
-                      Performs a search for dialogs, returning a paginated list of dialogs. For more information see the documentation (link TBD).
+                      Performs a search for dialogs, returning a paginated list of dialogs.
 
                       * All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00+01:00
                       * See "continuationToken" in the response for how to get the next page of results.

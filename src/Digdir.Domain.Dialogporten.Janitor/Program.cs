@@ -5,11 +5,12 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Janitor;
-using Digdir.Domain.Dialogporten.Janitor.Common.Extensions;
+using Digdir.Library.Utils.AspNet;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenTelemetry.Trace;
 using Serilog;
 
 // Using two-stage initialization to catch startup errors.
@@ -55,7 +56,8 @@ static void BuildAndRun(string[] args)
         .WriteTo.OpenTelemetryOrConsole(context));
 
     builder.Services
-        .AddDialogportenTelemetry(builder.Configuration, builder.Environment)
+        .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
+            additionalTracing: x => x.AddFusionCacheInstrumentation())
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)
             .WithoutPubSubCapabilities()

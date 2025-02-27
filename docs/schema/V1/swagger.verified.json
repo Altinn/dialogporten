@@ -327,11 +327,25 @@
         },
         "type": "object"
       },
+      "V1Common_DeletedFilter": {
+        "description": "",
+        "enum": [
+          "Exclude",
+          "Include",
+          "Only"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Exclude",
+          "Include",
+          "Only"
+        ]
+      },
       "V1CommonContent_ContentValue": {
         "additionalProperties": false,
         "properties": {
           "mediaType": {
-            "description": "Media type of the content, this can also indicate that the content is embeddable.\nFor a list of supported media types, see (link TBD).",
+            "description": "Media type of the content, this can also indicate that the content is embeddable.",
             "type": "string"
           },
           "value": {
@@ -354,7 +368,7 @@
             "type": "string"
           },
           "value": {
-            "description": "The localized text or URI reference.",
+            "description": "The localized text (or URL if a front-channel embed).",
             "type": "string"
           }
         },
@@ -1174,7 +1188,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
             "nullable": true,
             "oneOf": [
               {
@@ -1526,7 +1540,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
             "nullable": true,
             "oneOf": [
               {
@@ -1690,7 +1704,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
             "nullable": true,
             "oneOf": [
               {
@@ -1796,33 +1810,46 @@
         "additionalProperties": false,
         "properties": {
           "hasKeyRole": {
+            "description": "Whether the authenticated user has a key role in the party.\n            \nRead more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#n\u00F8kkelroller",
             "type": "boolean"
           },
           "hasOnlyAccessToSubParties": {
+            "description": "If the authenticated user has only access to sub parties of this party, and not this party itself.",
             "type": "boolean"
           },
           "isAccessManager": {
+            "description": "Whether the authenticated user is an access manager of the party.\n            \nRead more about access managers (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#tilgangsstrying",
             "type": "boolean"
           },
           "isCurrentEndUser": {
+            "description": "Whether this party represents the authenticated user.",
             "type": "boolean"
           },
           "isDeleted": {
+            "description": "Whether the party is deleted or not",
             "type": "boolean"
           },
           "isMainAdministrator": {
+            "description": "Whether the authenticated user is the main administrator of the party\n            \nRead more about main administrator (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#hovedadministrator",
             "type": "boolean"
           },
           "name": {
+            "description": "The name of the party (verbatim from CCR, usually in all caps)",
+            "example": "CONTOSO REAL ESTATE AS",
             "type": "string"
           },
           "party": {
+            "description": "The party identifier in URN format",
+            "example": "urn:altinn:organization:identifier-no:912345678",
             "type": "string"
           },
           "partyType": {
+            "description": "The type of the party, either \u0022Organization\u0022 or \u0022Person\u0022.",
+            "example": "Organization",
             "type": "string"
           },
           "subParties": {
+            "description": "The sub parties of this party, if any. The sub party uses the same data model.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserPartiesQueriesGet_AuthorizedParty"
             },
@@ -2236,7 +2263,25 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nSupported media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "nonSensitiveSummary": {
+            "description": "An optional non-sensitive summary of the dialog and its current state.\nUsed for search and list views if the user authorization does not meet the required eIDAS level",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "nonSensitiveTitle": {
+            "description": "An optional non-sensitive title of the dialog.\nUsed for search and list views if the user authorization does not meet the required eIDAS level",
             "nullable": true,
             "oneOf": [
               {
@@ -2349,6 +2394,11 @@
             "description": "A self-defined UUIDv7 may be provided to support idempotent creation of dialogs. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.",
             "nullable": true,
             "type": "string"
           },
@@ -2629,7 +2679,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
             "nullable": true,
             "oneOf": [
               {
@@ -2893,6 +2943,24 @@
               }
             ]
           },
+          "nonSensitiveSummary": {
+            "description": "An optional non-sensitive summary of the dialog and its current state.\nUsed for search and list views if the user authorization does not meet the required eIDAS level",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "nonSensitiveTitle": {
+            "description": "An optional non-sensitive title of the dialog.\nUsed for search and list views if the user authorization does not meet the required eIDAS level",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
           "senderName": {
             "description": "Overridden sender name. If not supplied, assume \u0022org\u0022 as the sender name. Must be text/plain if supplied.",
             "nullable": true,
@@ -2987,6 +3055,16 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "precedingProcess": {
+            "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
+            "nullable": true,
+            "type": "string"
+          },
+          "process": {
+            "description": "Optional process identifier used to indicate a business process this dialog belongs to.",
+            "nullable": true,
+            "type": "string"
           },
           "progress": {
             "description": "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come\nto a natural completion (successful or not).",
@@ -3230,7 +3308,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
             "nullable": true,
             "oneOf": [
               {
@@ -3330,7 +3408,25 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "nonSensitiveSummary": {
+            "description": "An optional non-sensitive summary of the dialog and its current state.\nUsed for search and list views if the user authorization does not meet the required eIDAS level",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "nonSensitiveTitle": {
+            "description": "An optional non-sensitive title of the dialog.\nUsed for search and list views if the user authorization does not meet the required eIDAS level",
             "nullable": true,
             "oneOf": [
               {
@@ -3449,6 +3545,11 @@
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
+            "type": "string"
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.\n            ",
+            "nullable": true,
             "type": "string"
           },
           "org": {
@@ -3979,7 +4080,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
             "nullable": true,
             "oneOf": [
               {
@@ -4021,6 +4122,24 @@
         "properties": {
           "extendedStatus": {
             "description": "Used as the human-readable label used to describe the \u0022ExtendedStatus\u0022 field.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "nonSensitiveSummary": {
+            "description": "An optional non-sensitive summary of the dialog and its current state.\nUsed for search and list views if the user authorization does not meet the required eIDAS level",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "nonSensitiveTitle": {
+            "description": "An optional non-sensitive title of the dialog.\nUsed for search and list views if the user authorization does not meet the required eIDAS level",
             "nullable": true,
             "oneOf": [
               {
@@ -4071,6 +4190,12 @@
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
             "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "If deleted, the date and time when the deletion was performed.",
+            "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "dueAt": {
@@ -4416,7 +4541,7 @@
         "additionalProperties": false,
         "properties": {
           "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nAllowed media types: application/vnd.dialogporten.frontchannelembed\u002Bjson;type=markdown",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
             "nullable": true,
             "oneOf": [
               {
@@ -4734,6 +4859,7 @@
     }
   },
   "info": {
+    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/dialogporten\u0022\u003Ehttps://docs.altinn.studio/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs",
     "title": "Dialogporten",
     "version": "v1"
   },
@@ -4785,7 +4911,7 @@
     },
     "/api/v1/enduser/dialogs": {
       "get": {
-        "description": "Performs a search for dialogs, returning a paginated list of dialogs. For more information see the documentation (link TBD).\n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
+        "description": "Performs a search for dialogs, returning a paginated list of dialogs. \n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
         "operationId": "V1EndUserDialogsSearch_SearchDialog",
         "parameters": [
           {
@@ -5021,7 +5147,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a list of dialogs",
@@ -5032,7 +5160,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}": {
       "get": {
-        "description": "Gets a single dialog aggregate. For more information see the documentation (link TBD).",
+        "description": "Gets a single dialog aggregate. ",
         "operationId": "V1EndUserDialogsGet_GetDialog",
         "parameters": [
           {
@@ -5070,12 +5198,14 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a single dialog",
@@ -5118,11 +5248,23 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a list of dialog activities",
@@ -5133,7 +5275,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}": {
       "get": {
-        "description": "Gets a single activity belonging to a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets a single activity belonging to a dialog.",
         "operationId": "V1EndUserDialogActivitiesGet_GetDialogActivity",
         "parameters": [
           {
@@ -5180,12 +5322,14 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given activity ID was not found."
+            "description": "The specified dialog ID or activity ID was not found."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a single dialog activity",
@@ -5244,7 +5388,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "tags": [
@@ -5254,7 +5400,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/seenlog": {
       "get": {
-        "description": "Gets all seen log records for a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets all seen log records for a dialog.",
         "operationId": "V1EndUserDialogSeenLogsSearch_SearchDialogSeenLog",
         "parameters": [
           {
@@ -5300,7 +5446,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets all seen log records for a dialog",
@@ -5311,7 +5459,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}": {
       "get": {
-        "description": "Gets a single dialog seen log record. For more information see the documentation (link TBD).",
+        "description": "Gets a single dialog seen log record.",
         "operationId": "V1EndUserDialogSeenLogsGet_GetDialogSeenLog",
         "parameters": [
           {
@@ -5363,7 +5511,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a single dialog seen log record",
@@ -5455,7 +5605,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "tags": [
@@ -5497,11 +5649,26 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a list of dialog transmissions",
@@ -5512,7 +5679,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
-        "description": "Gets a single transmission belonging to a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets a single transmission belonging to a dialog.",
         "operationId": "V1EndUserDialogTransmissionsGet_GetDialogTransmission",
         "parameters": [
           {
@@ -5559,12 +5726,17 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given transmission ID was not found."
+            "description": "The specified dialog ID or transmission ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets a single dialog transmission",
@@ -5575,7 +5747,7 @@
     },
     "/api/v1/enduser/parties": {
       "get": {
-        "description": "Gets the list of authorized parties for the end user. For more information see the documentation (link TBD).",
+        "description": "Gets the list of authorized parties for the end user.",
         "operationId": "V1EndUserPartiesGet_GetParties",
         "responses": {
           "200": {
@@ -5600,7 +5772,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
           }
         ],
         "summary": "Gets the list of authorized parties for the end user",
@@ -5611,7 +5785,7 @@
     },
     "/api/v1/serviceowner/dialogs": {
       "get": {
-        "description": "Performs a search for dialogs, returning a paginated list of dialogs. For more information see the documentation (link TBD).\n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
+        "description": "Performs a search for dialogs, returning a paginated list of dialogs.\n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
         "operationId": "V1ServiceOwnerDialogsSearch_SearchDialog",
         "parameters": [
           {
@@ -5687,6 +5861,19 @@
               "type": "array"
             },
             "style": "form"
+          },
+          {
+            "description": "If set to \u0027include\u0027, the result will include both deleted and non-deleted dialogs. If set to \u0027exclude\u0027, the result will only include non-deleted dialogs. If set to \u0027only\u0027, the result will only include deleted dialogs",
+            "in": "query",
+            "name": "deleted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/V1Common_DeletedFilter"
+                }
+              ],
+              "nullable": true
+            }
           },
           {
             "description": "Only return dialogs created after this date",
@@ -5862,7 +6049,10 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider",
+              "digdir:dialogporten.serviceprovider.search"
+            ]
           }
         ],
         "summary": "Gets a list of dialogs",
@@ -5871,7 +6061,7 @@
         ]
       },
       "post": {
-        "description": "The dialog is created with the given configuration. For more information see the documentation (link TBD).\n\nFor detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)",
+        "description": "The dialog is created with the given configuration.\n\nFor detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)",
         "operationId": "V1ServiceOwnerDialogsCreate_Dialog",
         "requestBody": {
           "content": {
@@ -5924,6 +6114,9 @@
           "403": {
             "description": "Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
+          "409": {
+            "description": "Dialog with IdempotentKey 01941821-ffca-73a1-9335-435a882be014 has already been created."
+          },
           "422": {
             "content": {
               "application/problem\u002Bjson": {
@@ -5937,7 +6130,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Creates a new dialog",
@@ -5948,7 +6143,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}": {
       "delete": {
-        "description": "Deletes a given dialog (soft delete). For more information see the documentation (link TBD).\n\nNote that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.\nIf end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
+        "description": "Deletes a given dialog (soft delete).\n\nNote that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.\nIf end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsDelete_Dialog",
         "parameters": [
           {
@@ -6007,7 +6202,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6025,7 +6220,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Deletes a dialog",
@@ -6034,7 +6231,7 @@
         ]
       },
       "get": {
-        "description": "Gets a single dialog aggregate. For more information see the documentation (link TBD).\n\nNote that this operation may return deleted dialogs (see the field \u0060DeletedAt\u0060).",
+        "description": "Gets a single dialog aggregate.\n\nNote that this operation may return deleted dialogs (see the field \u0060DeletedAt\u0060).",
         "operationId": "V1ServiceOwnerDialogsGet_GetDialog",
         "parameters": [
           {
@@ -6081,12 +6278,14 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a single dialog",
@@ -6174,6 +6373,16 @@
             },
             "description": "The given dialog ID was not found or is deleted"
           },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The dialog with the given key is removed"
+          },
           "412": {
             "content": {
               "application/json": {
@@ -6197,7 +6406,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Patch a single dialog",
@@ -6206,7 +6417,7 @@
         ]
       },
       "put": {
-        "description": "Replaces a given dialog with the supplied model. For more information see the documentation (link TBD).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "Replaces a given dialog with the supplied model.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsUpdate_Dialog",
         "parameters": [
           {
@@ -6276,7 +6487,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6304,7 +6515,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Replaces a dialog",
@@ -6315,7 +6528,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/purge": {
       "post": {
-        "description": "Deletes a given dialog (hard delete). For more information see the documentation (link TBD).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
+        "description": "Deletes a given dialog (hard delete).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsPurge_PurgeDialog",
         "parameters": [
           {
@@ -6355,7 +6568,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           },
           "412": {
             "content": {
@@ -6370,10 +6583,80 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Permanently deletes a dialog",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/actions/restore": {
+      "post": {
+        "description": "Restore a dialog. ",
+        "operationId": "V1ServiceOwnerDialogsRestore_RestoreDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The dialog aggregate was restored successfully."
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Restore a dialog",
         "tags": [
           "Serviceowner"
         ]
@@ -6447,7 +6730,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Returns a boolean value based on conditions used to determine if a notification is to be sent",
@@ -6490,11 +6775,23 @@
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a list of dialog activities",
@@ -6503,7 +6800,7 @@
         ]
       },
       "post": {
-        "description": "The activity is created with the given configuration. For more information see the documentation (link TBD).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "The activity is created with the given configuration.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogActivitiesCreate_DialogActivity",
         "parameters": [
           {
@@ -6586,7 +6883,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6614,7 +6911,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Adds a activity to a dialogs activity history",
@@ -6625,7 +6924,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}": {
       "get": {
-        "description": "Gets a single activity belonging to a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets a single activity belonging to a dialog.",
         "operationId": "V1ServiceOwnerDialogActivitiesGet_GetDialogActivity",
         "parameters": [
           {
@@ -6672,7 +6971,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given activity ID was not found."
+            "description": "The specified dialog ID or activity ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6680,7 +6979,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a single dialog activity",
@@ -6691,7 +6992,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog": {
       "get": {
-        "description": "Gets all seen log records for a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets all seen log records for a dialog.",
         "operationId": "V1ServiceOwnerDialogSeenLogsSearch_SearchDialogSeenLog",
         "parameters": [
           {
@@ -6732,7 +7033,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6740,7 +7041,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets all seen log records for a dialog",
@@ -6751,7 +7054,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}": {
       "get": {
-        "description": "Gets a single dialog seen log record. For more information see the documentation (link TBD).",
+        "description": "Gets a single dialog seen log record.",
         "operationId": "V1ServiceOwnerDialogSeenLogsGet_GetDialogSeenLog",
         "parameters": [
           {
@@ -6798,7 +7101,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6806,7 +7109,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a single dialog seen log record",
@@ -6858,7 +7163,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6866,7 +7171,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a list of dialog transmissions",
@@ -6875,7 +7182,7 @@
         ]
       },
       "post": {
-        "description": "The transmission is created with the given configuration. For more information see the documentation (link TBD).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "The transmission is created with the given configuration.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogTransmissionsCreate_DialogTransmission",
         "parameters": [
           {
@@ -6958,7 +7265,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or is already deleted."
+            "description": "The given dialog ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -6986,7 +7293,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Adds a transmission to a dialog",
@@ -6997,7 +7306,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
-        "description": "Gets a single transmission belonging to a dialog. For more information see the documentation (link TBD).",
+        "description": "Gets a single transmission belonging to a dialog.",
         "operationId": "V1ServiceOwnerDialogTransmissionsGet_GetDialogTransmission",
         "parameters": [
           {
@@ -7044,7 +7353,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found or was deleted, or the given transmission ID was not found."
+            "description": "The specified dialog ID or transmission ID was not found."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
@@ -7052,7 +7361,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": []
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
           }
         ],
         "summary": "Gets a single dialog transmission",
@@ -7064,7 +7375,7 @@
   },
   "servers": [
     {
-      "url": "https://altinn-dev-api.azure-api.net/dialogporten"
+      "url": "https://localhost:7214/"
     }
   ]
 }

@@ -54,6 +54,9 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
                 .WithMessage($"'{{PropertyName}}' must be greater than or equal to '{nameof(CreateDialogDto.CreatedAt)}'.")
                 .When(x => x.CreatedAt != default && x.UpdatedAt != default);
 
+        RuleFor(x => x.IdempotentKey)
+            .MaximumLength(36);
+
         RuleFor(x => x.ServiceResource)
             .NotNull()
             .IsValidUri()

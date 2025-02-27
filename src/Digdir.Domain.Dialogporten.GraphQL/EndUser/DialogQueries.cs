@@ -1,5 +1,6 @@
 using AppAny.HotChocolate.FluentValidation;
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
@@ -23,7 +24,21 @@ public partial class Queries
             dialog => new DialogByIdPayload { Dialog = mapper.Map<Dialog>(dialog) },
             notFound => new DialogByIdPayload { Errors = [new DialogByIdNotFound { Message = notFound.Message }] },
             deleted => new DialogByIdPayload { Errors = [new DialogByIdDeleted { Message = deleted.Message }] },
-            forbidden => new DialogByIdPayload { Errors = [new DialogByIdForbidden { Message = "Forbidden" }] });
+            forbidden =>
+            {
+                var response = new DialogByIdPayload();
+
+                if (forbidden.Reasons.Any(x => x.Contains(Constants.AltinnAuthLevelTooLow)))
+                {
+                    response.Errors.Add(new DialogByIdForbiddenAuthLevelTooLow());
+                }
+                else
+                {
+                    response.Errors.Add(new DialogByIdForbidden());
+                }
+
+                return response;
+            });
     }
 
     public async Task<SearchDialogsPayload> SearchDialogs(

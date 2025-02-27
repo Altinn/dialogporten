@@ -126,7 +126,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         }
         catch (Exception e)
         {
-            throw new InvalidOperationException("Failed to ensure lazy-loaded services. Is the presentation layer registered with publish capabilities?", e);
+            throw new InvalidOperationException("Failed to ensure lazy-loaded services. Is the presentation layer registered with publishing capabilities?", e);
         }
     }
 }

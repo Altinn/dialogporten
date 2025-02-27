@@ -4,11 +4,11 @@
     "color": "EEEEEE"
   },
   "CHECKS": {
-    "regexp": "^(feat|fix|docs|test|ci|chore)!?(\\(.*\\))?!?:.*"
+    "regexp": "^(feat|fix|docs|test|ci|chore|trivial)!?(\\(.*\\))?!?:.*"
   },
   "MESSAGES": {
     "success": "PR title is valid",
     "failure": "PR title is invalid",
-    "notice": "PR Title needs to pass regex '^(feat|fix|docs|test|ci|chore)!?(\\(.*\\))?!?:.*"
+    "notice": "PR Title needs to pass regex '^(feat|fix|docs|test|ci|chore|trivial)!?(\\(.*\\))?!?:.*"
   }
 }

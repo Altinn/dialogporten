@@ -35,7 +35,12 @@ on:
         description: 'Number of parallel test runs'
         required: true
         default: 1
-        type: number  
+        type: number 
+      numberOfEndUsers:
+        description: 'Number of end users'
+        required: true
+        default: 2799
+        type: number 
       testSuitePath:
         description: 'Path to test suite to run'
         required: true
@@ -55,8 +60,6 @@ jobs:
     name: "Run K6 performance test"
     uses: ./.github/workflows/workflow-run-k6-performance.yml
     secrets:
-      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
-      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     with:
@@ -66,4 +69,8 @@ jobs:
       vus: ${{ fromJson(inputs.vus) }}
       duration: ${{ inputs.duration }}
       parallelism: ${{ fromJson(inputs.parallelism) }}
+      numberOfEndUsers: ${{ fromJson(inputs.numberOfEndUsers) }}
+      breakpoint: false
+      abortOnFail: false
+
 

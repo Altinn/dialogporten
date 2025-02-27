@@ -1,16 +1,10 @@
 #!/bin/bash
 
-tokengenuser=${TOKEN_GENERATOR_USERNAME}
-tokengenpasswd=${TOKEN_GENERATOR_PASSWORD}
+API_VERSION=${API_VERSION:-v1}
+API_ENVIRONMENT=${API_ENVIRONMENT:-yt01}
+NUMBER_OF_ENDUSERS=${NUMBER_OF_ENDUSERS:-2799}
 failed=0
-
 kubectl config set-context --current --namespace=dialogporten
-
-# Validate required environment variables
-if [ -z "$TOKEN_GENERATOR_USERNAME" ] || [ -z "$TOKEN_GENERATOR_PASSWORD" ]; then
-    echo "Error: TOKEN_GENERATOR_USERNAME and TOKEN_GENERATOR_PASSWORD must be set"
-    exit 1
-fi
 
 help() {
     echo "Usage: $0 [OPTIONS]"
@@ -21,6 +15,8 @@ help() {
     echo "  -v, --vus            Specify the number of virtual users"
     echo "  -d, --duration       Specify the duration of the test"
     echo "  -p, --parallelism    Specify the level of parallelism"
+    echo "  -b, --breakpoint     Flag to set breakpoint test or not"
+    echo "  -a, --abort          Flag to specify whether to abort on fail or not, only used in breakpoint tests"
     echo "  -h, --help           Show this help message"
     exit 0
 }
@@ -51,6 +47,9 @@ print_logs() {
     done
 }
 
+breakpoint=false
+abort_on_fail=false
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -h|--help)
@@ -80,6 +79,14 @@ while [[ $# -gt 0 ]]; do
             parallelism="$2"
             shift 2
             ;;
+        -b|--breakpoint)    
+            breakpoint="$2"
+            shift 2
+            ;;
+        -a|--abort)
+            abort_on_fail="$2"
+            shift 2
+            ;;
         *)
             echo "Invalid option: $1"
             help
@@ -102,14 +109,26 @@ if [ ${#missing_args[@]} -ne 0 ]; then
     help
     exit 1
 fi
+name=$(echo "$name" | tr '[:upper:]' '[:lower:]')
+configmapname=$(echo "$configmapname" | tr '[:upper:]' '[:lower:]')
 # Set testid to name + timestamp
 testid="${name}_$(date '+%Y%m%dT%H%M%S')"
 
+archive_args=""
+if $breakpoint; then
+    archive_args="-e stages_target=$vus -e stages_duration=$duration -e abort_on_fail=$abort_on_fail"
+fi
 # Create the k6 archive
-if ! k6 archive $filename -e API_VERSION=v1 -e API_ENVIRONMENT=yt01 -e TOKEN_GENERATOR_USERNAME=$tokengenuser -e TOKEN_GENERATOR_PASSWORD=$tokengenpasswd -e TESTID=$testid; then
+
+if ! k6 archive $filename \
+     -e API_VERSION="$API_VERSION" \
+     -e API_ENVIRONMENT="$API_ENVIRONMENT" \
+     -e NUMBER_OF_ENDUSERS="$NUMBER_OF_ENDUSERS" \
+     -e TESTID=$testid $archive_args; then
     echo "Error: Failed to create k6 archive"
     exit 1
 fi
+   
 # Create the configmap from the archive
 if ! kubectl create configmap $configmapname --from-file=archive.tar; then
     echo "Error: Failed to create configmap"
@@ -118,6 +137,10 @@ if ! kubectl create configmap $configmapname --from-file=archive.tar; then
 fi
 
 # Create the config.yml file from a string
+arguments="--out experimental-prometheus-rw --vus=$vus --duration=$duration --tag testid=$testid --log-output=none"
+if $breakpoint; then
+    arguments="--out experimental-prometheus-rw --tag testid=$testid --log-output=none"
+fi
 cat <<EOF > config.yml
 apiVersion: k6.io/v1alpha1
 kind: TestRun
@@ -125,7 +148,7 @@ metadata:
   name: $name
   namespace: dialogporten
 spec:
-  arguments: --out experimental-prometheus-rw --vus=$vus --duration=$duration --tag testid=$testid --log-output=none
+  arguments: $arguments 
   parallelism: $parallelism
   script:
     configMap:
@@ -137,6 +160,9 @@ spec:
         value: "http://kube-prometheus-stack-prometheus.monitoring:9090/api/v1/write"
       - name: K6_PROMETHEUS_RW_TREND_STATS
         value: "avg,min,med,max,p(95),p(99),p(99.5),p(99.9),count"
+    envFrom:
+    - secretRef:
+        name: "token-generator-creds"
     metadata:
       labels:
         k6-test: $name
@@ -149,7 +175,7 @@ EOF
 kubectl apply -f config.yml
 
 # Wait for the job to finish
-wait_timeout="${duration}100s"
+wait_timeout="${duration}200s"
 kubectl wait --for=jsonpath='{.status.stage}'=finished testrun/$name --timeout=$wait_timeout
 # Print the logs of the pods
 print_logs

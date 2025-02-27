@@ -6,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 [InterfaceType("SearchDialogError")]
 public interface ISearchDialogError
 {
-    public string Message { get; set; }
+    string Message { get; set; }
 }
 
 public sealed class SearchDialogContinuationTokenParsingError : ISearchDialogError

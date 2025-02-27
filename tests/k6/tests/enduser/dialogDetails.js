@@ -11,7 +11,7 @@ export default function () {
     let dialogId = null;
     let dialog = null;
 
-    const availableExternalResource = "urn:altinn:resource:app_digdir_be-om-api-nokkel"; // should have "read" on this
+    const availableExternalResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence"; // should have "read" on this
     const unavailableExternalResource = "urn:altinn:resource:ttd-altinn-events-automated-tests"; // should not have "read" on this
     const unavailableSubresource = "someunavailablesubresource"; // should not have "transmissionread" on this;
 

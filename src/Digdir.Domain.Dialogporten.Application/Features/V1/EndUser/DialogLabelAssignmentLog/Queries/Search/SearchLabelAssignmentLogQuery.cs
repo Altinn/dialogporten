@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -15,7 +16,7 @@ public sealed class SearchLabelAssignmentLogQuery : IRequest<SearchLabelAssignme
 }
 
 [GenerateOneOf]
-public sealed partial class SearchLabelAssignmentLogResult : OneOfBase<List<LabelAssignmentLogDto>, EntityNotFound, EntityDeleted>;
+public sealed partial class SearchLabelAssignmentLogResult : OneOfBase<List<LabelAssignmentLogDto>, EntityNotFound, EntityDeleted, Forbidden>;
 
 internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<SearchLabelAssignmentLogQuery, SearchLabelAssignmentLogResult>
 {
@@ -54,6 +55,11 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
         if (dialog.Deleted)
         {
             return new EntityDeleted<DialogEntity>(request.DialogId);
+        }
+
+        if (!await _altinnAuthorization.UserHasRequiredAuthLevel(dialog.ServiceResource, cancellationToken))
+        {
+            return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
         return _mapper.Map<List<LabelAssignmentLogDto>>(dialog.DialogEndUserContext.LabelAssignmentLogs);

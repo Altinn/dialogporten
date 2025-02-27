@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -30,7 +31,11 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<Syst
     {
         var result = await _sender.Send(req, ct);
         await result.Match(
-            _ => SendNoContentAsync(ct),
+            success =>
+            {
+                HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
+                return SendNoContentAsync(ct);
+            },
             notFound => this.NotFoundAsync(notFound, ct),
             deleted => this.GoneAsync(deleted, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),

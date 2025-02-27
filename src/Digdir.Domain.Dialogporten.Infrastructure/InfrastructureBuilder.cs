@@ -28,7 +28,6 @@ public interface IInfrastructureBuilder
 }
 
 internal sealed class InfrastructureBuilder :
-    IInfrastructureBuilder,
     IPubSubInfrastructureChoice,
     ISubscriptionInfrastructureOptions
 {

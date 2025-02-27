@@ -1,0 +1,72 @@
+name: Run k6 breakpoint test
+
+on:
+  workflow_dispatch:
+    inputs:
+      apiVersion:
+        description: 'API Version'
+        required: true
+        default: 'v1'
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'yt01'
+        type: choice
+        options:
+          - test
+          - staging
+          - yt01
+      tag:
+        description: 'tag the breakpoint test'
+        required: true
+        default: 'Breakpoint test'
+        type: string
+      targetVus:
+        description: 'Target number of VUS'
+        required: true
+        default: 100
+        type: number
+      duration:
+        description: 'Target duration of test, ie 30s, 1m, 10m'
+        required: true
+        default: 20m
+        type: string
+      parallelism:
+        description: 'Number of parallel test runs'
+        required: true
+        default: 1
+        type: number
+      abortOnFail:
+        description: 'Abort on fail'
+        required: true
+        default: true
+        type: boolean  
+      testSuitePath:
+        description: 'Path to test suite to run'
+        required: true
+        default: 'tests/k6/tests/serviceowner/performance/createDialogBreakpoint.js'
+        type: choice
+        options:
+          - 'tests/k6/tests/serviceowner/performance/createDialogBreakpoint.js'
+          - 'tests/k6/tests/serviceowner/performance/createTransmissionsBreakpoint.js'
+          - 'tests/k6/tests/serviceowner/performance/serviceownerSearchBreakpoint.js'
+          - 'tests/k6/tests/enduser/performance/enduserSearchBreakpoint.js'
+
+run-name: ${{ inputs.tag }} ${{ inputs.targetVus }}/${{ inputs.duration }}/${{ inputs.parallelism }}
+jobs:
+  k6-performance:
+    name: "Run K6 performance test"
+    uses: ./.github/workflows/workflow-run-k6-performance.yml
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    with:
+      environment: ${{ inputs.environment }}
+      apiVersion: ${{ inputs.apiVersion }}
+      testSuitePath: ${{ inputs.testSuitePath }}
+      vus: ${{ fromJson(inputs.targetVus) }}
+      duration: ${{ inputs.duration }}
+      parallelism: ${{ fromJson(inputs.parallelism) }}
+      abortOnFail: ${{ inputs.abortOnFail }}
+      breakpoint: true
+

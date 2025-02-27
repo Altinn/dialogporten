@@ -1,5 +1,5 @@
-﻿name: CI/CD Pull Request Release Please
-
+﻿# Run dry-runs of staging deployment on release PRs
+name: CI/CD Pull Request Release Please
 on:
   pull_request:
     branches: [main]
@@ -15,10 +15,12 @@ jobs:
 
   get-current-version:
     name: Get current version
+    needs: [verify-release-please-branch]
     uses: ./.github/workflows/workflow-get-current-version.yml
 
   check-for-changes:
     name: Check for changes
+    needs: [verify-release-please-branch]
     uses: ./.github/workflows/workflow-check-for-changes.yml
 
   generate-git-short-sha:
@@ -101,7 +103,7 @@ jobs:
                         "type": "button",
                         "text": {
                           "type": "plain_text",
-                          "text": "Approve Release"
+                          "text": "Open release PR"
                         },
                         "url": "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
                       }

@@ -7,6 +7,7 @@ using MediatR;
 using OneOf;
 using Microsoft.EntityFrameworkCore;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search;
 
@@ -68,6 +69,11 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         if (dialog.Deleted)
         {
             return new EntityDeleted<DialogEntity>(request.DialogId);
+        }
+
+        if (!await _altinnAuthorization.UserHasRequiredAuthLevel(dialog.ServiceResource, cancellationToken))
+        {
+            return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
         return dialog.SeenLog

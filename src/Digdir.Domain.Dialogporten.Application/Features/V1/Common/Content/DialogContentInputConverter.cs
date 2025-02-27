@@ -50,7 +50,9 @@ internal sealed class DialogContentInputConverter<TDialogContent> :
             {
                 TypeId = dialogContentType.Id,
                 Value = sourceValue.Value,
-                MediaType = sourceValue.MediaType
+                // Temporary converting of deprecated media types
+                // TODO: https://github.com/Altinn/dialogporten/issues/1782
+                MediaType = sourceValue.MediaType.MapDeprecatedMediaType()
             });
         }
 

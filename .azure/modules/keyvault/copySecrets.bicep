@@ -49,7 +49,7 @@ resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   scope: resourceGroup(srcKeyVaultSubId, srcKeyVaultRGNName)
 }
 
-resource appConfigurationResource 'Microsoft.AppConfiguration/configurationStores@2023-03-01' existing = {
+resource appConfigurationResource 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationName
 }
 

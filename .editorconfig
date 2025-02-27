@@ -44,6 +44,9 @@ dotnet_diagnostic.IDE0028.severity = none
 # Primary constructors
 dotnet_diagnostic.IDE0290.severity = none
 
+# Unused private members
+dotnet_diagnostic.IDE0051.severity = none
+
 # Disable collection expression until Rider supports it
 dotnet_style_prefer_collection_expression = false;
 

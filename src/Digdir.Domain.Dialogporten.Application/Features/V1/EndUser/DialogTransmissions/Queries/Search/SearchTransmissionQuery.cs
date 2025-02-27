@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -15,7 +16,7 @@ public sealed class SearchTransmissionQuery : IRequest<SearchTransmissionResult>
 }
 
 [GenerateOneOf]
-public sealed partial class SearchTransmissionResult : OneOfBase<List<TransmissionDto>, EntityNotFound, EntityDeleted>;
+public sealed partial class SearchTransmissionResult : OneOfBase<List<TransmissionDto>, EntityNotFound, EntityDeleted, Forbidden>;
 
 internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTransmissionQuery, SearchTransmissionResult>
 {
@@ -69,6 +70,26 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        return _mapper.Map<List<TransmissionDto>>(dialog.Transmissions);
+        if (!await _altinnAuthorization.UserHasRequiredAuthLevel(dialog.ServiceResource, cancellationToken))
+        {
+            return new Forbidden(Constants.AltinnAuthLevelTooLow);
+        }
+
+        var dto = _mapper.Map<List<TransmissionDto>>(dialog.Transmissions);
+
+        foreach (var transmission in dto)
+        {
+            transmission.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
+
+            if (transmission.IsAuthorized) continue;
+
+            var urls = transmission.Attachments.SelectMany(a => a.Urls).ToList();
+            foreach (var url in urls)
+            {
+                url.Url = Constants.UnauthorizedUri;
+            }
+        }
+
+        return dto;
     }
 }

@@ -132,7 +132,7 @@ public sealed class AggregateNode<T> : AggregateNode
     public new T Entity => (T)base.Entity;
 
     private AggregateNode(T entity, AggregateNodeState state, IEnumerable<AggregateNodeProperty> modifiedProperties)
-        : base(entity, state, modifiedProperties)
+    : base(entity, state, modifiedProperties)
     {
     }
 }

@@ -103,6 +103,11 @@ public class DialogDtoBase
     public DateTimeOffset? DueAt { get; set; }
 
     /// <summary>
+    /// If deleted, the date and time when the deletion was performed.
+    /// </summary>
+    public DateTimeOffset? DeletedAt { get; set; }
+
+    /// <summary>
     /// The timestamp when the dialog will be made visible for authorized end users.
     /// </summary>
     public DateTimeOffset? VisibleFrom { get; set; }
@@ -158,7 +163,6 @@ public sealed class DialogSeenLogDto
     public bool IsCurrentEndUser { get; set; }
 }
 
-
 public sealed class DialogActivityDto
 {
     /// <summary>
@@ -198,4 +202,3 @@ public sealed class DialogActivityDto
     /// </summary>
     public List<LocalizationDto> Description { get; set; } = [];
 }
-

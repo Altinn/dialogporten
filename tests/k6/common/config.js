@@ -40,7 +40,12 @@ export const baseUrls = {
 
 export const defaultEndUserOrgNo = "310923044"; // ÆRLIG UROKKELIG TIGER AS
 export const defaultEndUserSsn = "08844397713"; // UROMANTISK LITTERATUR, has "DAGL" for 310923044
-export const defaultServiceOwnerOrgNo = "991825827";
+export const defaultServiceOwnerOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "713431400" : "991825827";
+export const otherOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "974761076" : "889640782";
+export const otherOrgName = __ENV.API_ENVIRONMENT == "yt01" ? "skd" : "nav";
+export const otherServiceResource = __ENV.API_ENVIRONMENT == "yt01" ? "app_skd_formueinntekt-skattemelding-v2" : "app_nav_barnehagelister";
+export const notValidEnduserId = __ENV.API_ENVIRONMENT == "yt01" ? "08837297959" : "08895699684";
+
 
 if (__ENV.IS_DOCKER && __ENV.API_ENVIRONMENT == "localdev") {
     __ENV.API_ENVIRONMENT = "localdev_docker";

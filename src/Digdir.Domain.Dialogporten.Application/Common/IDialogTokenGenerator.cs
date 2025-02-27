@@ -50,10 +50,7 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         {
             { DialogTokenClaimTypes.JwtId, Guid.NewGuid() },
             { DialogTokenClaimTypes.AuthenticatedParty, GetAuthenticatedParty() },
-            { DialogTokenClaimTypes.AuthenticationLevel,
-                claimsPrincipal.TryGetAuthenticationLevel(out var authenticationLevel)
-                ? authenticationLevel.Value
-                : 0 },
+            { DialogTokenClaimTypes.AuthenticationLevel, claimsPrincipal.GetAuthenticationLevel() },
             { DialogTokenClaimTypes.DialogParty, dialog.Party },
             { DialogTokenClaimTypes.ServiceResource, dialog.ServiceResource },
             { DialogTokenClaimTypes.DialogId, dialog.Id },

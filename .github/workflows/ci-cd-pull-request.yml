@@ -2,10 +2,9 @@
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
     paths-ignore:
       - "tests/k6/**"
-      - "CHANGELOG.md"
 
 jobs:
   generate-git-short-sha:
@@ -19,15 +18,15 @@ jobs:
   check-for-changes:
     name: Check for changes
     uses: ./.github/workflows/workflow-check-for-changes.yml
-
+  
   build:
     uses: ./.github/workflows/workflow-build-and-test.yml
-    needs: [check-for-changes]
+    needs: [ check-for-changes ]
     if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
 
   build-infrastructure:
     uses: ./.github/workflows/workflow-build-infrastructure.yml
-    needs: [check-for-changes]
+    needs: [ check-for-changes ]
     if: ${{ always() && needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -35,7 +34,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     with:
       environment: "test"
-
+  
   dry-run-deploy-infra:
     name: Dry run deploy infrastructure
     uses: ./.github/workflows/workflow-deploy-infra.yml
@@ -93,7 +92,7 @@ jobs:
   delete-github-deployments:
     name: Delete GitHub deployments
     uses: ./.github/workflows/workflow-delete-deployments.yml
-    needs: [dry-run-deploy-apps, dry-run-deploy-infra]
+    needs: [ dry-run-deploy-apps, dry-run-deploy-infra ]
     if: ${{ always() && !failure() && !cancelled() }}
     with:
       gitSha: ${{ github.event.pull_request.head.sha }}

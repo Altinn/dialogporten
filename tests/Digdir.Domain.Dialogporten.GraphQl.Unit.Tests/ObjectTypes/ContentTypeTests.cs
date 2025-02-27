@@ -11,6 +11,8 @@ public class ContentTypeTests
     {
         // Arrange
         var dialogContentTypeNames = DialogContentType.GetValues()
+            .Where(x => x.Id is not DialogContentType.Values.NonSensitiveSummary
+                and not DialogContentType.Values.NonSensitiveTitle)
             .Select(x => x.Name)
             .ToList();
 
@@ -31,6 +33,8 @@ public class ContentTypeTests
     {
         // Arrange
         var dialogContentTypeNames = DialogContentType.GetValues()
+            .Where(x => x.Id is not DialogContentType.Values.NonSensitiveSummary
+                and not DialogContentType.Values.NonSensitiveTitle)
             .Where(x => x.OutputInList)
             .Select(x => x.Name)
             .ToList();

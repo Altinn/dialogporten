@@ -1,0 +1,84 @@
+﻿# Runs a dry-run deployment of production whenever a new release is created
+name: CI/CD Production Dry Run
+run-name: CI/CD Production Dry Run ${{ github.event.client_payload.version && format('({0})', github.event.client_payload.version) || '' }}
+
+on:
+  repository_dispatch:
+    types: [release_created]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+
+jobs:
+  get-versions-from-github:
+    name: Get Latest Deployed Version Info from GitHub
+    uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
+    with:
+      environment: prod
+    secrets:
+      GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+
+  check-for-changes:
+    name: Check for changes
+    needs: [get-versions-from-github]
+    uses: ./.github/workflows/workflow-check-for-changes.yml
+    with:
+      infra_base_sha: ${{ needs.get-versions-from-github.outputs.infra_version_sha }}
+      apps_base_sha: ${{ needs.get-versions-from-github.outputs.apps_version_sha }}
+
+  dry-run-deploy-infra:
+    name: Dry run deploy infra to prod
+    if: ${{ needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
+    needs: [check-for-changes]
+    uses: ./.github/workflows/workflow-deploy-infra.yml
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_SOURCE_KEY_VAULT_NAME: ${{ secrets.AZURE_SOURCE_KEY_VAULT_NAME }}
+      AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID }}
+      AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP: ${{ secrets.AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP }}
+      AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY }}
+    with:
+      environment: prod
+      region: norwayeast
+      version: ${{ github.event.client_payload.version }}
+      dryRun: true
+      ref: "refs/tags/v${{ github.event.client_payload.version }}"
+
+  dry-run-deploy-apps:
+    name: Dry run deploy apps to prod
+    needs: [check-for-changes, dry-run-deploy-infra]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    uses: ./.github/workflows/workflow-deploy-apps.yml
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # todo: consider resolving these in another way since they are created in the infra-step
+      AZURE_RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+      AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+      AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+      AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
+      AZURE_APP_CONFIGURATION_NAME: ${{ secrets.AZURE_APP_CONFIGURATION_NAME }}
+      AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
+    with:
+      environment: prod
+      region: norwayeast
+      version: ${{ github.event.client_payload.version }}
+      dryRun: true
+      runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
+      ref: "refs/tags/v${{ github.event.client_payload.version }}"
+      
+  send-slack-message-on-failure:
+    name: Send Slack message on failure
+    needs: [dry-run-deploy-infra, dry-run-deploy-apps]
+    if: ${{ always() && failure() && !cancelled() }}
+    uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
+    with:
+      environment: prod
+      infra_status: ${{ needs.dry-run-deploy-infra.result }}
+      apps_status: ${{ needs.dry-run-deploy-apps.result }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}

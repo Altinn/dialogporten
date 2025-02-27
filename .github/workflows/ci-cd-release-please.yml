@@ -6,7 +6,6 @@
 # 2.3. Triggers staging and yt01 deployment via repository dispatch
 
 name: CI/CD Release Please
-
 on:
   push:
     branches: [main]
@@ -15,7 +14,7 @@ permissions:
   contents: write
   pull-requests: write
   packages: write
-  
+
 jobs:
   release-please:
     name: Release please
@@ -49,7 +48,7 @@ jobs:
   publish:
     name: Build and publish docker images
     needs: [release-please, check-for-changes]
-    if: needs.release-please.outputs.release_created == 'true' && needs.check-for-changes.outputs.hasBackendChanges == 'true'
+    if: needs.release-please.outputs.release_created == 'true'
     uses: ./.github/workflows/workflow-publish.yml
     secrets:
       GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify release created
-        uses: peter-evans/repository-dispatch@v2
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.RELEASE_PLEASE_PAT }}
           event-type: release_created
@@ -83,4 +82,3 @@ jobs:
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
-        

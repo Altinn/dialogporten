@@ -23,6 +23,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using NSwag;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using Serilog;
 
 // Using two-stage initialization to catch startup errors.
@@ -75,10 +77,19 @@ static void BuildAndRun(string[] args)
         .ValidateFluently()
         .ValidateOnStart();
 
+    builder.Services.AddSingleton<IHostLifetime>(sp => new DelayedShutdownHostLifetime(
+            sp.GetRequiredService<IHostApplicationLifetime>(),
+            TimeSpan.FromSeconds(10)
+        ));
+
     var thisAssembly = Assembly.GetExecutingAssembly();
 
     builder.Services
-        .AddDialogportenTelemetry(builder.Configuration, builder.Environment)
+        .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
+            additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
+            additionalTracing: x => x
+                .AddFusionCacheInstrumentation()
+                .AddAspNetCoreInstrumentationExcludingHealthPaths())
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
 
@@ -104,7 +115,28 @@ static void BuildAndRun(string[] args)
             x.RemoveEmptyRequestSchema = true;
             x.DocumentSettings = s =>
             {
+                s.PostProcess = document =>
+                {
+                    var dialogportenBaseUri = builder.Configuration
+                        .GetSection(ApplicationSettings.ConfigurationSectionName)
+                        .Get<ApplicationSettings>()!
+                        .Dialogporten
+                        .BaseUri
+                        .ToString();
+
+                    document.Servers.Clear();
+                    document.Servers.Add(new OpenApiServer
+                    {
+                        Url = dialogportenBaseUri
+                    });
+                    document.Generator = null;
+                    document.ReplaceProblemDetailsDescriptions();
+                    document.MakeCollectionsNullable();
+                    document.FixJwtBearerCasing();
+                    document.RemoveSystemStringHeaderTitles();
+                };
                 s.Title = "Dialogporten";
+                s.Description = Constants.SwaggerSummary.GlobalDescription;
                 s.DocumentName = "v1";
                 s.Version = "v1";
 
@@ -119,6 +151,9 @@ static void BuildAndRun(string[] args)
 
                 // Adding ResponseHeaders for PATCH MVC controller
                 s.OperationProcessors.Add(new ProducesResponseHeaderOperationProcessor());
+
+                // Adding required scopes to security definitions
+                s.OperationProcessors.Add(new SecurityRequirementsOperationProcessor());
             };
         })
         .AddControllers(options => options.InputFormatters.Insert(0, JsonPatchInputFormatter.Get()))
@@ -147,7 +182,6 @@ static void BuildAndRun(string[] args)
     }
 
     var app = builder.Build();
-
     app.MapAspNetHealthChecks()
         .MapControllers();
 
@@ -186,26 +220,7 @@ static void BuildAndRun(string[] args)
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
         })
         .UseAddSwaggerCorsHeader()
-        .UseSwaggerGen(config =>
-        {
-            config.PostProcess = (document, _) =>
-            {
-                var dialogportenBaseUri = builder.Configuration
-                    .GetSection(ApplicationSettings.ConfigurationSectionName)
-                    .Get<ApplicationSettings>()!
-                    .Dialogporten
-                    .BaseUri
-                    .ToString();
-
-                document.Servers.Clear();
-                document.Servers.Add(new OpenApiServer { Url = dialogportenBaseUri });
-                document.Generator = null;
-                document.ReplaceProblemDetailsDescriptions();
-                document.MakeCollectionsNullable();
-                document.FixJwtBearerCasing();
-                document.RemoveSystemStringHeaderTitles();
-            };
-        }, uiConfig =>
+        .UseSwaggerGen(uiConfig: uiConfig =>
         {
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;

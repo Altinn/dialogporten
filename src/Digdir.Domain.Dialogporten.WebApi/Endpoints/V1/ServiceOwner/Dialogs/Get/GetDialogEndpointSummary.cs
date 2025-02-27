@@ -1,7 +1,7 @@
-using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Get;
 
@@ -11,7 +11,7 @@ public sealed class GetDialogEndpointSummary : Summary<GetDialogEndpoint>
     {
         Summary = "Gets a single dialog";
         Description = """
-                      Gets a single dialog aggregate. For more information see the documentation (link TBD).
+                      Gets a single dialog aggregate.
 
                       Note that this operation may return deleted dialogs (see the field `DeletedAt`).
                       """;

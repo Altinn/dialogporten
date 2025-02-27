@@ -8,39 +8,70 @@ Uses refit IApiResponse on returns.
 
 ## Installation
 
-Install nuget
+Install the [nuget package](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten) through Package Manager Console:
+```
+Install-Package Altinn.ApiClients.Dialogporten
+```
 
-`dotnet add package Altinn.ApiClients.Dialogporten --version 1.55.2` 
+Or via .NET Core CLI:
+```
+dotnet add package Altinn.ApiClients.Dialogporten
+```
 
 ## Usage
+This package needs some configuration to work. The configuration is done through the `DialogportenSettings` class. The settings are as follows:
+- `BaseUri` - The base URI of the Dialogporten API.
+- `ThrowOnPublicKeyFetchInit` - If true, the client will throw an exception if the public key fetch fails on startup. Default true. 
+- `Maskinporten` - The [Maskinporten settings](https://github.com/Altinn/altinn-apiclient-maskinporten).
+  - `ClientId` - The client ID (secret).
+  - `EncodedJwk` - The encoded JWK (secret).
+  - `Environment` - The environment (test/prod).
+  - `Scope` - Whitespace separated list of scopes to use against Dialogporten. 
 
-This library provides extensions methods providing means to create dialogporten clients.
+### Registering with `IServiceCollection`
+There are two ways to register
 
-Setup
-
-```json
+#### Register through [action parameter](https://learn.microsoft.com/en-us/dotnet/core/extensions/options-library-authors#actiontoptions-parameter):
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDialogportenClient(x => 
 {
-    "dialogportenSettings": {
-        "BaseUri": "",
-        "ThrowOnPublicKeyFetchInit": "",
+    x.BaseUri = "https://platform.tt02.altinn.no/dialogporten";
+    // x.ThrowOnPublicKeyFetchInit = false;
+    x.Maskinporten.ClientId = "YOUR_CLIENT_ID";
+    x.Maskinporten.EncodedJwk = "YOUR_ENCODED_JWK";
+    x.Maskinporten.Environment = "test";
+    x.Maskinporten.Scope = "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search";
+}
+```
+
+#### Register through [options instance parameter](https://learn.microsoft.com/en-us/dotnet/core/extensions/options-library-authors#options-instance-parameter):
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+var dialogportenSettings = builder.Configuration
+    .GetSection("DialogportenSettings")
+    .Get<DialogportenSettings>()!;
+builder.Services.AddDialogportenClient(dialogportenSettings);
+```
+In this case, the configuration should look like this:
+```json5
+{
+    "DialogportenSettings": {
+        "BaseUri": "https://platform.tt02.altinn.no/dialogporten",
+        // "ThrowOnPublicKeyFetchInit": false,
         "Maskinporten": {
-            "ClientId": "",
-            "Environment": "",
-            "Scope": "",
-            "EncodedJwk": ""
+            "ClientId": "YOUR_CLIENT_ID",
+            "EncodedJwk": "YOUR_ENCODED_JWK",
+            "Environment": "test",
+            "Scope": "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search"
         }
     }
 }
 ```
 
-```C#
-var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .Build();
+### Available services
+The following services are available after registration:
+- `IServiceownerApi` - Used to interact with the Dialogporten ServiceOwner API.
+- `IDialogTokenValidator` - Used to validate Dialogporten tokens.
 
-var services = new ServiceCollection();
-
-services.AddSingleton<IConfiguration>(configuration);
-
-services.AddDialogportenClient();
-```
+A background service (`IHostedService`) is also registered that periodically fetches the public key from the Dialogporten API. This is required to validate dialog token signatures.

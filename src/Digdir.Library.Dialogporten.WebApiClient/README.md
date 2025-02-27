@@ -71,7 +71,9 @@ In this case, the configuration should look like this:
 
 ### Available services
 The following services are available after registration:
-- `IServiceownerApi` - Used to interact with the Dialogporten ServiceOwner API.
-- `IDialogTokenValidator` - Used to validate Dialogporten tokens.
+- [`Altinn.ApiClients.Dialogporten.Features.V1.IServiceownerApi`](./Features/V1/RefitterInterface.cs) - Used to interact with the Dialogporten ServiceOwner API.
+- [`Altinn.ApiClients.Dialogporten.IDialogTokenValidator`](IDialogTokenValidator.cs) - Used to validate Dialogporten tokens.
 
 A background service (`IHostedService`) is also registered that periodically fetches the public key from the Dialogporten API. This is required to validate dialog token signatures.
+
+See [sample project](../Digdir.Library.Dialogporten.WebApiClient.WebApiSample/Program.cs) for examples on how to use the services.

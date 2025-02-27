@@ -40,7 +40,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 name: "IX_ActorName_ActorId_Name",
                 table: "ActorName",
                 columns: new[] { "ActorId", "Name" },
-                unique: true);
+                unique: true)
+                .Annotation("Npgsql:NullsDistinct", false);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Actor_ActorName_ActorNameEntityId",
@@ -48,8 +49,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 column: "ActorNameEntityId",
                 principalTable: "ActorName",
                 principalColumn: "Id");
-            
-            
+
             migrationBuilder.Sql("""
                                     INSERT INTO "ActorName" ("Id", "CreatedAt", "ActorId", "Name")
                                     SELECT a."Id", -- Just borrow the Id from Actor to get uuid7

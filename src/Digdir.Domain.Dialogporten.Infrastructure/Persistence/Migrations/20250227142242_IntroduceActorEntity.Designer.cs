@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250227091939_IntroduceActorEntity")]
+    [Migration("20250227142242_IntroduceActorEntity")]
     partial class IntroduceActorEntity
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -99,6 +99,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ActorId", "Name")
                         .IsUnique();
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("ActorId", "Name"), false);
 
                     b.ToTable("ActorName");
                 });
@@ -755,10 +757,28 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 6,
-                            AllowedMediaTypes = new[] { "application/vnd.dialogporten.frontchannelembed+json;type=markdown" },
+                            AllowedMediaTypes = new[] { "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown" },
                             MaxLength = 1023,
                             Name = "MainContentReference",
                             OutputInList = false,
+                            Required = false
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AllowedMediaTypes = new[] { "text/plain" },
+                            MaxLength = 255,
+                            Name = "NonSensitiveTitle",
+                            OutputInList = true,
+                            Required = false
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AllowedMediaTypes = new[] { "text/plain" },
+                            MaxLength = 255,
+                            Name = "NonSensitiveSummary",
+                            OutputInList = true,
                             Required = false
                         });
                 });
@@ -794,6 +814,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Property<string>("ExternalReference")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<string>("IdempotentKey")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)");
 
                     b.Property<string>("Org")
                         .IsRequired()
@@ -863,6 +887,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("StatusId");
 
                     b.HasIndex("UpdatedAt");
+
+                    b.HasIndex("Org", "IdempotentKey")
+                        .IsUnique()
+                        .HasFilter("\"IdempotentKey\" is not null");
 
                     b.ToTable("Dialog", (string)null);
                 });
@@ -1096,7 +1124,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 3,
-                            AllowedMediaTypes = new[] { "application/vnd.dialogporten.frontchannelembed+json;type=markdown" },
+                            AllowedMediaTypes = new[] { "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown" },
                             MaxLength = 1023,
                             Name = "ContentReference",
                             Required = false

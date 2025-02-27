@@ -54,7 +54,7 @@ param appInsightWorkspaceName string
 
 @export()
 type HighAvailabilityConfiguration = {
-  mode: 'ZoneRedundant'
+  mode: 'ZoneRedundant' | 'SameZone' | 'Disabled'
   standbyAvailabilityZone: string
 }
 

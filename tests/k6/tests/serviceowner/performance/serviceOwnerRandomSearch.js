@@ -54,12 +54,6 @@ for (var filter of filter_combos) {
     options.thresholds[[`http_reqs{name:${filter.label}}`]] = [];
 }
 
-
-export default function(data) {
-    var [queryParams, label] = get_query_params();
-    serviceownerSearch(serviceOwners[0], queryParams, label, traceCalls, false);
-}
-
 function get_query_params() {
     var search_params = {};
     var filter_combo = randomItem(filter_combos);
@@ -84,9 +78,11 @@ function get_filter_value(filter, label) {
     }
 }
 
-function serviceownerSearch(serviceowner, queryParams, label, traceCalls) {
-    let traceparent = uuidv4();
-    let paramsWithToken = {
+export default function() {
+    const [queryParams, label] = get_query_params();
+    const serviceowner = serviceOwners[0];
+    const traceparent = uuidv4();
+    const paramsWithToken = {
         headers: {
             Authorization: "Bearer " + getEnterpriseToken(serviceowner),
             traceparent: traceparent,
@@ -100,20 +96,17 @@ function serviceownerSearch(serviceowner, queryParams, label, traceCalls) {
         paramsWithToken.tags.traceparent = traceparent;
     }
 
+    const url = new URL(baseUrlServiceOwner + 'dialogs');
+    for (const key in queryParams) {
+        url.searchParams.append(key, queryParams[key]);    
+    }
+
     describe('Perform serviceowner dialog list', () => {
-        let r = getSOWithSearchParams('dialogs', queryParams, paramsWithToken);
+        let r = http.get(url.toString(), paramsWithToken); //getSOWithSearchParams('dialogs', queryParams, paramsWithToken);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
         return r
     });
-}
-
-export function getSOWithSearchParams(path, queryParams, params = null, tokenOptions = null) {
-    const url = new URL(baseUrlServiceOwner + path);
-    for (const key in queryParams) {
-        url.searchParams.append(key, queryParams[key]);    
-    }
-    return http.get(url.toString(), params)
 }
 
 

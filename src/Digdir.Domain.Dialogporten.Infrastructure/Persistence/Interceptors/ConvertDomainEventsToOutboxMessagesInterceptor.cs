@@ -7,7 +7,6 @@ using HotChocolate.Subscriptions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Constants = Digdir.Domain.Dialogporten.Infrastructure.GraphQl.GraphQlSubscriptionConstants;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
@@ -103,7 +102,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
                 .Where(x => x is not null)
                 .Cast<DialogEventPayload>()
                 .Select(x => _topicEventSender.Value.SendAsync(
-                        $"{Constants.DialogEventsTopic}{x.Id}",
+                        $"{GraphQlSubscriptionConstants.DialogEventsTopic}{x.Id}",
                         x,
                         cancellationToken)
                     .AsTask());

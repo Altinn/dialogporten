@@ -141,6 +141,15 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   tags: tags
 }
 
+resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {
+    parent: postgres
+    name: 'azure.extensions'
+    properties: {
+      value: 'PG_TRGM'
+      source: 'user-override'
+    }
+  }
+
 resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {
   parent: postgres
   name: 'track_io_timing'

@@ -1,7 +1,6 @@
+import http from 'k6/http';
 import { serviceOwners, endUsers } from '../../performancetest_common/readTestdata.js';
 import { randomItem, uuidv4, URL} from '../../../common/k6-utils.js';
-
-import http from 'k6/http';
 import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
 import { baseUrlServiceOwner } from '../../../common/config.js';
@@ -37,7 +36,7 @@ const filter_combos = [
     {label: "search-createdafter", filters: ["Search", "createdAfter"]},
     {label: "search-serviceresource-enduser-createdafter", filters: ["Search", "serviceResource", "endUser", "createdAfter"]},
     {label: "search-enduser-createdafter-nohit", filters: ["Search", "endUser", "createdAfter"]},
-    //{label: "search", filters: ["Search"]},
+    {label: "search", filters: ["Search"]},
 
 ];
 
@@ -102,7 +101,7 @@ export default function() {
     }
 
     describe('Perform serviceowner dialog list', () => {
-        let r = http.get(url.toString(), paramsWithToken); //getSOWithSearchParams('dialogs', queryParams, paramsWithToken);
+        let r = http.get(url.toString(), paramsWithToken);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
         return r

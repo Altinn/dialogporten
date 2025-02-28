@@ -29,6 +29,9 @@ param args string = ''
 @minLength(1)
 param userAssignedIdentityId string
 
+@description('The replica timeout for the job in seconds')
+param replicaTimeOutInSeconds int
+
 var isScheduled = !empty(cronExpression)
 
 var scheduledJobProperties = {
@@ -64,7 +67,7 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
       {
         secrets: secrets
         replicaRetryLimit: 1
-        replicaTimeout: 120
+        replicaTimeout: replicaTimeOutInSeconds
       },
       isScheduled ? scheduledJobProperties : manualJobProperties
     )

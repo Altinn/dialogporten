@@ -157,6 +157,7 @@ resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configuratio
     value: 'on'
     source: 'user-override'
   }
+  dependsOn: [enable_extensions]
 }
 
 resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {

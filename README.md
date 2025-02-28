@@ -336,7 +336,7 @@ Deployments are done using `GitHub Actions` with the following steps:
 - **Purpose**: This generates a changelog and bumps the version number.
 - **Merge**: Merge the release pull request into the `main` branch.
 
-#### 4. Deploy to Staging (Bump Version and Create Tag)
+#### 4. Deploy to Staging and YT01 (Bump Version and Create Tag)
 - **Trigger**: Merging the release pull request.
 - **Action**: 
   - Bumps the version number.
@@ -371,7 +371,7 @@ The `dispatch-apps.yml` workflow is responsible for deploying applications. To t
 2. Select the `Dispatch Apps` workflow.
 3. Click on "Run workflow".
 4. Fill in the required inputs:
-   - **environment**: Choose the target environment (`test`, `staging`, or `prod`).
+   - **environment**: Choose the target environment (`test`, `yt01`, `staging`, or `prod`).
    - **version**: Specify the version to deploy. Could be git tag or a docker-tag published in packages.
    - **runMigration** (optional): Indicate whether to run database migrations (`true` or `false`).
 
@@ -385,7 +385,7 @@ The `dispatch-infrastructure.yml` workflow is used for deploying infrastructure 
 2. Select the `Dispatch Infrastructure` workflow.
 3. Click on "Run workflow".
 4. Provide the necessary inputs:
-   - **environment**: Select the environment you wish to deploy to (`test`, `staging`, or `prod`).
+   - **environment**: Select the environment you wish to deploy to (`test`, `yt01`, `staging`, or `prod`).
    - **version**: Enter the version to deploy, which should correspond to a git tag. (e.g., `1.23.4`).
 
 This workflow facilitates the deployment of infrastructure to the specified environment, using the version details provided.

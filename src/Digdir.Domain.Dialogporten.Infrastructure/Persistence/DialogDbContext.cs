@@ -100,8 +100,8 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.Properties<string>(x => x.HaveMaxLength(Constants.DefaultMaxStringLength));
-        configurationBuilder.Properties<Uri>(x => x.HaveMaxLength(Constants.DefaultMaxUriLength));
+        configurationBuilder.Properties<string>(x => x.HaveMaxLength(Domain.Common.Constants.DefaultMaxStringLength));
+        configurationBuilder.Properties<Uri>(x => x.HaveMaxLength(Domain.Common.Constants.DefaultMaxUriLength));
         configurationBuilder.Properties<DateTimeOffset>().HaveConversion<DateTimeOffsetConverter>();
         configurationBuilder.Properties<TimeSpan>().HaveConversion<TimeSpanToStringConverter>();
     }
@@ -113,6 +113,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
 
 
         modelBuilder
+            .HasPostgresExtension(Constants.PostgreSqlTrigram)
             .RemovePluralizingTableNameConvention()
             .AddAuditableEntities()
             .ApplyConfigurationsFromAssembly(typeof(DialogDbContext).Assembly)

@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.57.0](https://github.com/Altinn/dialogporten/compare/v1.56.1...v1.57.0) (2025-02-28)
+
+
+### Features
+
+* Add reverse indexes on Localizations and SearchTags ([#1971](https://github.com/Altinn/dialogporten/issues/1971)) ([7a506b3](https://github.com/Altinn/dialogporten/commit/7a506b3102e1a350cd26d1e75e02585b26224a37))
+* **ci:** Enable PostreSQL extension pg_trgm ([#1984](https://github.com/Altinn/dialogporten/issues/1984)) ([4dce375](https://github.com/Altinn/dialogporten/commit/4dce3750dd639e71a911c0392820a88a72917028))
+
+
+### Miscellaneous Chores
+
+* **sdk:** Add doc ([#1975](https://github.com/Altinn/dialogporten/issues/1975)) ([37c9130](https://github.com/Altinn/dialogporten/commit/37c91300e40739a4fca205cfad19dc493a051c27))
+
 ## [1.56.1](https://github.com/Altinn/dialogporten/compare/v1.56.0...v1.56.1) (2025-02-27)
 
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.57.1](https://github.com/Altinn/dialogporten/compare/v1.57.0...v1.57.1) (2025-02-28)
+
+
+### Bug Fixes
+
+* Add missing timeout parameter for sync jobs ([#1987](https://github.com/Altinn/dialogporten/issues/1987)) ([265bad0](https://github.com/Altinn/dialogporten/commit/265bad0ddba16ee787d6cf8dd5d5f4495a186a44))
+* Increase migration job timeout ([#1985](https://github.com/Altinn/dialogporten/issues/1985)) ([393f151](https://github.com/Altinn/dialogporten/commit/393f151ddd600dee0321227604bd20da65cbb827))
+
 ## [1.57.0](https://github.com/Altinn/dialogporten/compare/v1.56.1...v1.57.0) (2025-02-28)
 
 

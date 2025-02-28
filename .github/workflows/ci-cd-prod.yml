@@ -46,7 +46,7 @@ jobs:
 
   deploy-infra:
     name: Deploy infra to prod
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
+    if: ${{ needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
     needs: [check-for-changes]
     uses: ./.github/workflows/workflow-deploy-infra.yml
     secrets:
@@ -79,7 +79,7 @@ jobs:
     name: Deploy apps to prod
     needs:
       [check-for-changes]
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -96,7 +96,7 @@ jobs:
       environment: prod
       region: norwayeast
       version: ${{ inputs.version }}
-      runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
+      runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       ref: "refs/tags/v${{ inputs.version }}"
 
   publish-sdk-to-nuget:
@@ -113,7 +113,7 @@ jobs:
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
     needs: [deploy-apps]
-    if: ${{ always() && !failure() && (github.event_name == 'workflow_dispatch' || needs.deploy-apps.outputs.deployment_executed == 'true') }}
+    if: ${{ always() && !failure() && (needs.deploy-apps.outputs.deployment_executed == 'true') }}
     uses: ./.github/workflows/workflow-store-github-env-variable.yml
     with:
       variable_name: LATEST_DEPLOYED_APPS_VERSION

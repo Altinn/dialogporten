@@ -52,6 +52,23 @@ param enableIndexTuning bool
 @description('The name of the Application Insights workspace')
 param appInsightWorkspaceName string
 
+@export()
+type HighAvailabilityConfiguration = {
+  mode: 'ZoneRedundant' | 'SameZone' | 'Disabled'
+  standbyAvailabilityZone: string
+}
+
+@description('High availability configuration for the PostgreSQL server')
+param highAvailability HighAvailabilityConfiguration?
+
+@description('The availability zone for the PostgreSQL primary server')
+param availabilityZone string
+
+@description('The number of days to retain backups.')
+@minValue(7)
+@maxValue(35)
+param backupRetentionDays int
+
 @description('The Key Vault to store the PostgreSQL administrator login password')
 @secure()
 param srcKeyVault object
@@ -98,6 +115,10 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       autoGrow: storage.autoGrow
       type: storage.type
     }
+    backup: {
+      backupRetentionDays: backupRetentionDays
+      geoRedundantBackup: 'Disabled'
+    }
     dataEncryption: {
       type: 'SystemManaged'
     }
@@ -106,6 +127,8 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       delegatedSubnetResourceId: subnetId
       privateDnsZoneArmResourceId: privateDnsZone.outputs.id
     }
+    availabilityZone: availabilityZone
+    highAvailability: highAvailability
   }
   sku: sku
   resource database 'databases' = {

@@ -45,12 +45,14 @@ const orgNos = ["713431400"]
 
 export let options = {
     summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(95)', 'p(99)', 'p(99.5)', 'p(99.9)', 'count'],
-    thresholds: {}
+    thresholds: {
+        checks: ['rate>=1.0']
+    }
 };
 
 for (var filter of filter_combos) {
     options.thresholds[[`http_req_duration{name:${filter.label}}`]] = [];
-    options.thresholds[[`http_reqs{name:${filter.label}}`]] = [];
+    options.thresholds[[`http_req_failed{name:${filter.label}}`]] = ['rate<=0.0'];
 }
 
 function get_query_params() {

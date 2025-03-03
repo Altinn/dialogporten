@@ -38,6 +38,7 @@ const filter_combos = [
     {label: "search-party-createdafter", filters: ["Search", "party", "createdAfter"]},
     {label: "search-party-createdafter-nohit", filters: ["Search", "party", "createdAfter"]},
     {label: "search-party", filters: ["Search", "party"]},
+    {label: "party", filters: ["party"]},
 
 ];
 

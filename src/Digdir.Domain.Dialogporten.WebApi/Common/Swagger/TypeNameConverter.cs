@@ -111,18 +111,22 @@ internal static class TypeNameConverter
     {
         foreach (var prefix in prefixes)
         {
-            if (!name.StartsWith(prefix)) continue;
-
-            if (name.Length == prefix.Length ||
-                (name.Length > prefix.Length && (name[prefix.Length] < 'a' || name[prefix.Length] > 'z')))
+            // Remove "Delete" from "DeleteMe",
+            // but not from "DeletedFilter"
+            if (!name.StartsWith(prefix) || name.MatchWord(prefix))
             {
-                name = name[prefix.Length..];
-                break;
+                continue;
             }
+
+            name = name[prefix.Length..];
+            break;
         }
 
         return name;
     }
+
+    private static bool MatchWord(this ReadOnlySpan<char> name, string prefix)
+        => name.Length != prefix.Length && name[prefix.Length] is >= 'a' and <= 'z';
 
     private static ReadOnlySpan<char> ExcludePostfix(this ReadOnlySpan<char> name, IEnumerable<string> postfixes)
     {

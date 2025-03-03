@@ -26,6 +26,6 @@ app.MapGet("/dialog/{dialogId:Guid}", (
         [FromServices] IServiceownerApi serviceOwnerApi,
         [FromRoute] Guid dialogId,
         CancellationToken cancellationToken)
-    => Results.Ok(serviceOwnerApi.V1ServiceOwnerDialogsGetGetDialog(dialogId, null!, cancellationToken)));
+    => Results.Ok(serviceOwnerApi.V1ServiceOwnerDialogsGetDialog(dialogId, null!, cancellationToken)));
 
 app.Run();

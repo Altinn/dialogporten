@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Altinn.ApiClients.Dialogporten.Features.V1
 {
-    public class V1ServiceOwnerDialogsSearchSearchDialogQueryParams
+    public class V1ServiceOwnerDialogsSearchDialogQueryParams
     {
         
         /// <summary>
@@ -204,7 +204,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogTransmissionsQueriesSearch_Transmission>>> V1ServiceOwnerDialogTransmissionsSearchSearchDialogTransmission(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogTransmissionsQueriesSearch_Transmission>>> V1ServiceOwnerDialogTransmissionsSearchDialogTransmission(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Adds a transmission to a dialog</summary>
         /// <remarks>
@@ -294,7 +294,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -329,7 +329,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog>>> V1ServiceOwnerDialogSeenLogsSearchSearchDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog>>> V1ServiceOwnerDialogSeenLogsSearchDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
@@ -364,7 +364,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog>> V1ServiceOwnerDialogSeenLogsGetGetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog>> V1ServiceOwnerDialogSeenLogsGetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
 
         /// <summary>Replaces a dialog</summary>
         /// <remarks>
@@ -451,7 +451,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> V1ServiceOwnerDialogsGetGetDialog(System.Guid dialogId, [Query] string endUserId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> V1ServiceOwnerDialogsGetDialog(System.Guid dialogId, [Query] string endUserId, CancellationToken cancellationToken = default);
 
         /// <summary>Deletes a dialog</summary>
         /// <remarks>
@@ -583,7 +583,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json")]
         [Get("/api/v1/serviceowner/dialogs")]
-        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsSearchSearchDialog([Query] V1ServiceOwnerDialogsSearchSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
+        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsSearchDialog([Query] V1ServiceOwnerDialogsSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
 
         /// <summary>Creates a new dialog</summary>
         /// <remarks>
@@ -665,7 +665,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/restore")]
-        Task<IApiResponse> V1ServiceOwnerDialogsRestoreRestoreDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerDialogsRestoreDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Permanently deletes a dialog</summary>
         /// <remarks>
@@ -704,7 +704,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/purge")]
-        Task<IApiResponse> V1ServiceOwnerDialogsPurgePurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerDialogsPurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -735,7 +735,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogActivitiesQueriesSearch_Activity>>> V1ServiceOwnerDialogActivitiesSearchSearchDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogActivitiesQueriesSearch_Activity>>> V1ServiceOwnerDialogActivitiesSearchDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Adds a activity to a dialogs activity history</summary>
         /// <remarks>
@@ -853,7 +853,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogActivitiesQueriesGet_Activity>> V1ServiceOwnerDialogActivitiesGetGetDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogActivitiesQueriesGet_Activity>> V1ServiceOwnerDialogActivitiesGetDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
     }
 
 }
@@ -1652,7 +1652,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("searchTags")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_SearchTag> SearchTags { get; set; }
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Tag> SearchTags { get; set; }
 
         /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
@@ -1781,7 +1781,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_SearchTag
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_Tag
     {
         /// <summary>
         /// A search tag value.
@@ -2807,7 +2807,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("searchTags")]
-        public ICollection<V1ServiceOwnerDialogsQueriesGet_SearchTag> SearchTags { get; set; }
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_Tag> SearchTags { get; set; }
 
         /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
@@ -2962,7 +2962,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGet_SearchTag
+    public partial class V1ServiceOwnerDialogsQueriesGet_Tag
     {
         /// <summary>
         /// A search tag value.
@@ -3634,7 +3634,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("searchTags")]
-        public ICollection<V1ServiceOwnerDialogsCommandsCreate_SearchTag> SearchTags { get; set; }
+        public ICollection<V1ServiceOwnerDialogsCommandsCreate_Tag> SearchTags { get; set; }
 
         /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
@@ -3742,7 +3742,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsCreate_SearchTag
+    public partial class V1ServiceOwnerDialogsCommandsCreate_Tag
     {
         /// <summary>
         /// A search tag value.

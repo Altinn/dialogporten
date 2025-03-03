@@ -2426,7 +2426,7 @@
           "searchTags": {
             "description": "A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.",
             "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_SearchTag"
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_Tag"
             },
             "nullable": true,
             "type": "array"
@@ -2543,7 +2543,7 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogsCommandsCreate_SearchTag": {
+      "V1ServiceOwnerDialogsCommandsCreate_Tag": {
         "additionalProperties": false,
         "properties": {
           "value": {
@@ -3075,7 +3075,7 @@
           "searchTags": {
             "description": "A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.",
             "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_SearchTag"
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_Tag"
             },
             "nullable": true,
             "type": "array"
@@ -3172,7 +3172,7 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogsCommandsUpdate_SearchTag": {
+      "V1ServiceOwnerDialogsCommandsUpdate_Tag": {
         "additionalProperties": false,
         "properties": {
           "value": {
@@ -3587,7 +3587,7 @@
           "searchTags": {
             "description": "The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.",
             "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_SearchTag"
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_Tag"
             },
             "nullable": true,
             "type": "array"
@@ -4107,7 +4107,7 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogsQueriesGet_SearchTag": {
+      "V1ServiceOwnerDialogsQueriesGet_Tag": {
         "additionalProperties": false,
         "properties": {
           "value": {
@@ -4799,19 +4799,6 @@
         },
         "type": "object"
       },
-      "V1WellKnownJwksQueriesGet_GetJwks": {
-        "additionalProperties": false,
-        "properties": {
-          "keys": {
-            "items": {
-              "$ref": "#/components/schemas/V1WellKnownJwksQueriesGet_Jwk"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
       "V1WellKnownJwksQueriesGet_Jwk": {
         "additionalProperties": false,
         "properties": {
@@ -4836,7 +4823,20 @@
         },
         "type": "object"
       },
-      "V1WellKnownOauthAuthorizationServerQueriesGet_GetOauthAuthorizationServer": {
+      "V1WellKnownJwksQueriesGet_Jwks": {
+        "additionalProperties": false,
+        "properties": {
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/V1WellKnownJwksQueriesGet_Jwk"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1WellKnownOauthAuthorizationServerQueriesGet_OauthAuthorizationServer": {
         "additionalProperties": false,
         "properties": {
           "issuer": {
@@ -4868,13 +4868,13 @@
     "/api/v1/.well-known/jwks.json": {
       "get": {
         "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issues by Dialogporten.",
-        "operationId": "V1WellKnownJwksGet_GetJwks",
+        "operationId": "V1WellKnownJwksGet_Jwks",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1WellKnownJwksQueriesGet_GetJwks"
+                  "$ref": "#/components/schemas/V1WellKnownJwksQueriesGet_Jwks"
                 }
               }
             },
@@ -4890,13 +4890,13 @@
     "/api/v1/.well-known/oauth-authorization-server": {
       "get": {
         "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issues by Dialogporten.",
-        "operationId": "V1WellKnownOauthAuthorizationServerGet_GetOauthAuthorizationServer",
+        "operationId": "V1WellKnownOauthAuthorizationServerGet_OauthAuthorizationServer",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1WellKnownOauthAuthorizationServerQueriesGet_GetOauthAuthorizationServer"
+                  "$ref": "#/components/schemas/V1WellKnownOauthAuthorizationServerQueriesGet_OauthAuthorizationServer"
                 }
               }
             },
@@ -4912,7 +4912,7 @@
     "/api/v1/enduser/dialogs": {
       "get": {
         "description": "Performs a search for dialogs, returning a paginated list of dialogs. \n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
-        "operationId": "V1EndUserDialogsSearch_SearchDialog",
+        "operationId": "V1EndUserDialogsSearch_Dialog",
         "parameters": [
           {
             "description": "Filter by one or more service owner codes",
@@ -5161,7 +5161,7 @@
     "/api/v1/enduser/dialogs/{dialogId}": {
       "get": {
         "description": "Gets a single dialog aggregate. ",
-        "operationId": "V1EndUserDialogsGet_GetDialog",
+        "operationId": "V1EndUserDialogsGet_Dialog",
         "parameters": [
           {
             "in": "path",
@@ -5217,7 +5217,7 @@
     "/api/v1/enduser/dialogs/{dialogId}/activities": {
       "get": {
         "description": "Gets the list of activities belonging to a dialog",
-        "operationId": "V1EndUserDialogActivitiesSearch_SearchDialogActivity",
+        "operationId": "V1EndUserDialogActivitiesSearch_DialogActivity",
         "parameters": [
           {
             "in": "path",
@@ -5276,7 +5276,7 @@
     "/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}": {
       "get": {
         "description": "Gets a single activity belonging to a dialog.",
-        "operationId": "V1EndUserDialogActivitiesGet_GetDialogActivity",
+        "operationId": "V1EndUserDialogActivitiesGet_DialogActivity",
         "parameters": [
           {
             "in": "path",
@@ -5340,7 +5340,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/labellog": {
       "get": {
-        "operationId": "V1EndUserDialogLabelAssignmentLogsSearch_SearchDialogLabelAssignmentLog",
+        "operationId": "V1EndUserDialogLabelAssignmentLogsSearch_DialogLabelAssignmentLog",
         "parameters": [
           {
             "in": "path",
@@ -5401,7 +5401,7 @@
     "/api/v1/enduser/dialogs/{dialogId}/seenlog": {
       "get": {
         "description": "Gets all seen log records for a dialog.",
-        "operationId": "V1EndUserDialogSeenLogsSearch_SearchDialogSeenLog",
+        "operationId": "V1EndUserDialogSeenLogsSearch_DialogSeenLog",
         "parameters": [
           {
             "in": "path",
@@ -5460,7 +5460,7 @@
     "/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}": {
       "get": {
         "description": "Gets a single dialog seen log record.",
-        "operationId": "V1EndUserDialogSeenLogsGet_GetDialogSeenLog",
+        "operationId": "V1EndUserDialogSeenLogsGet_DialogSeenLog",
         "parameters": [
           {
             "in": "path",
@@ -5618,7 +5618,7 @@
     "/api/v1/enduser/dialogs/{dialogId}/transmissions": {
       "get": {
         "description": "Gets the list of transmissions belonging to a dialog",
-        "operationId": "V1EndUserDialogTransmissionsSearch_SearchDialogTransmission",
+        "operationId": "V1EndUserDialogTransmissionsSearch_DialogTransmission",
         "parameters": [
           {
             "in": "path",
@@ -5680,7 +5680,7 @@
     "/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
         "description": "Gets a single transmission belonging to a dialog.",
-        "operationId": "V1EndUserDialogTransmissionsGet_GetDialogTransmission",
+        "operationId": "V1EndUserDialogTransmissionsGet_DialogTransmission",
         "parameters": [
           {
             "in": "path",
@@ -5748,7 +5748,7 @@
     "/api/v1/enduser/parties": {
       "get": {
         "description": "Gets the list of authorized parties for the end user.",
-        "operationId": "V1EndUserPartiesGet_GetParties",
+        "operationId": "V1EndUserPartiesGet_Parties",
         "responses": {
           "200": {
             "content": {
@@ -5786,7 +5786,7 @@
     "/api/v1/serviceowner/dialogs": {
       "get": {
         "description": "Performs a search for dialogs, returning a paginated list of dialogs.\n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
-        "operationId": "V1ServiceOwnerDialogsSearch_SearchDialog",
+        "operationId": "V1ServiceOwnerDialogsSearch_Dialog",
         "parameters": [
           {
             "description": "Filter by one or more service resources",
@@ -6232,7 +6232,7 @@
       },
       "get": {
         "description": "Gets a single dialog aggregate.\n\nNote that this operation may return deleted dialogs (see the field \u0060DeletedAt\u0060).",
-        "operationId": "V1ServiceOwnerDialogsGet_GetDialog",
+        "operationId": "V1ServiceOwnerDialogsGet_Dialog",
         "parameters": [
           {
             "in": "path",
@@ -6529,7 +6529,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/purge": {
       "post": {
         "description": "Deletes a given dialog (hard delete).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",
-        "operationId": "V1ServiceOwnerDialogsPurge_PurgeDialog",
+        "operationId": "V1ServiceOwnerDialogsPurge_Dialog",
         "parameters": [
           {
             "in": "path",
@@ -6597,7 +6597,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/restore": {
       "post": {
         "description": "Restore a dialog. ",
-        "operationId": "V1ServiceOwnerDialogsRestore_RestoreDialog",
+        "operationId": "V1ServiceOwnerDialogsRestore_Dialog",
         "parameters": [
           {
             "in": "path",
@@ -6744,7 +6744,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/activities": {
       "get": {
         "description": "Gets the list of activities belonging to a dialog",
-        "operationId": "V1ServiceOwnerDialogActivitiesSearch_SearchDialogActivity",
+        "operationId": "V1ServiceOwnerDialogActivitiesSearch_DialogActivity",
         "parameters": [
           {
             "in": "path",
@@ -6925,7 +6925,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}": {
       "get": {
         "description": "Gets a single activity belonging to a dialog.",
-        "operationId": "V1ServiceOwnerDialogActivitiesGet_GetDialogActivity",
+        "operationId": "V1ServiceOwnerDialogActivitiesGet_DialogActivity",
         "parameters": [
           {
             "in": "path",
@@ -6993,7 +6993,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog": {
       "get": {
         "description": "Gets all seen log records for a dialog.",
-        "operationId": "V1ServiceOwnerDialogSeenLogsSearch_SearchDialogSeenLog",
+        "operationId": "V1ServiceOwnerDialogSeenLogsSearch_DialogSeenLog",
         "parameters": [
           {
             "in": "path",
@@ -7055,7 +7055,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}": {
       "get": {
         "description": "Gets a single dialog seen log record.",
-        "operationId": "V1ServiceOwnerDialogSeenLogsGet_GetDialogSeenLog",
+        "operationId": "V1ServiceOwnerDialogSeenLogsGet_DialogSeenLog",
         "parameters": [
           {
             "in": "path",
@@ -7123,7 +7123,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/transmissions": {
       "get": {
         "description": "Gets the list of transmissions belonging to a dialog",
-        "operationId": "V1ServiceOwnerDialogTransmissionsSearch_SearchDialogTransmission",
+        "operationId": "V1ServiceOwnerDialogTransmissionsSearch_DialogTransmission",
         "parameters": [
           {
             "in": "path",
@@ -7307,7 +7307,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
         "description": "Gets a single transmission belonging to a dialog.",
-        "operationId": "V1ServiceOwnerDialogTransmissionsGet_GetDialogTransmission",
+        "operationId": "V1ServiceOwnerDialogTransmissionsGet_DialogTransmission",
         "parameters": [
           {
             "in": "path",

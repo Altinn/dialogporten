@@ -78,7 +78,7 @@ jobs:
   deploy-apps:
     name: Deploy apps to prod
     needs:
-      [check-for-changes]
+      [check-for-changes, deploy-infra]
     if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:

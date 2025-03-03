@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.57.2](https://github.com/Altinn/dialogporten/compare/v1.57.1...v1.57.2) (2025-03-03)
+
+
+### Bug Fixes
+
+* Add missing prefixes in Swagger TypeNameConverter exlude list ([#1992](https://github.com/Altinn/dialogporten/issues/1992)) ([88925c1](https://github.com/Altinn/dialogporten/commit/88925c1601de8efb0a4596256c52405710f8c438))
+* **ci:** Wait for infra deployment before deploying apps in prod pipeline ([#1989](https://github.com/Altinn/dialogporten/issues/1989)) ([224e837](https://github.com/Altinn/dialogporten/commit/224e83720e3c08462ad79e7fc5049e88190054c4))
+
+
+### Miscellaneous Chores
+
+* **performance:** Make improved tests for search ([#1983](https://github.com/Altinn/dialogporten/issues/1983)) ([9412a85](https://github.com/Altinn/dialogporten/commit/9412a851b859a6400eda88ab2ac1613032e7b66d))
+
 ## [1.57.1](https://github.com/Altinn/dialogporten/compare/v1.57.0...v1.57.1) (2025-02-28)
 
 

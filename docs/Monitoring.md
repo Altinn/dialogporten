@@ -14,6 +14,28 @@ Quick monitoring dashboard for Dialogporten services showing:
 - Default view: Last 24 hours
 - Start with system health, then drill down as needed
 
+## Telemetry Collection
+
+Dialogporten uses OpenTelemetry for collecting and routing telemetry data:
+
+### OpenTelemetry Integration
+- Utilizes Azure Container Apps' managed OpenTelemetry agent
+- Automatically collects traces and logs from container apps
+- Routes telemetry data to Azure Application Insights
+- Configured through Container Apps Environment settings
+
+### Data Flow
+1. Applications emit OpenTelemetry-compliant telemetry
+2. Container Apps OpenTelemetry agent collects the data
+3. Data is sent to Azure Application Insights
+4. Grafana visualizes the data through Azure Monitor data source
+
+### Implementation Details
+- Traces and logs are configured to use Application Insights as destination
+- Uses standard OpenTelemetry instrumentation for .NET
+- Automatic correlation of distributed traces across services
+- Custom metrics and traces can be added through the OpenTelemetry SDK
+
 ## Redis Dashboard
 
 Detailed monitoring of Redis cache performance and health:

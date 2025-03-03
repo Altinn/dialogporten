@@ -386,3 +386,6 @@ FodyWeavers.xsd
 **/.serviceowners-with-tokens.csv
 
 **/http-client.private.env.json
+
+# Cursor IDE related files
+.cursor

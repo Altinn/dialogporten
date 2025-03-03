@@ -9,7 +9,7 @@ internal static class TypeNameConverter
     private const string NamespaceClassSeparator = "_";
 
     private static readonly string[] ExcludedClassPostfixes = ["Endpoint", "+Values", "Dto"];
-    private static readonly string[] ExcludedClassPrefixes = ["Create", "Update", "Delete", "Patch"];
+    private static readonly string[] ExcludedClassPrefixes = ["Create", "Get", "Search", "Purge", "Restore", "Update", "Delete", "Patch"];
     private static readonly string[] ExcludedNamespacePostfixes = [];
     private static readonly string[] ExcludedNamespacePrefixes =
     [
@@ -66,7 +66,7 @@ internal static class TypeNameConverter
     private static void WriteNonGenericType(Type type, Span<char> finalName, ref int index)
     {
         // If the input type is a generic parameter, use its name as is. For example, in the
-        // generic type List<T>, T is a generic parameter. Concrete types are not generic 
+        // generic type List<T>, T is a generic parameter. Concrete types are not generic
         // parameters and will be processed as usual. For example in List<int>, int is a
         // concrete type, and not a generic parameter.
         if (type.IsGenericTypeParameter)
@@ -78,22 +78,23 @@ internal static class TypeNameConverter
         type.FullName
             .AsSpan()
             .SplitNamespaceAndClassName(out var namespaceName, out var className);
+
         className = className
             .ExcludePrefix(ExcludedClassPrefixes)
             .ExcludePostfix(ExcludedClassPostfixes);
+
         namespaceName = namespaceName
             .ExcludePrefix(ExcludedNamespacePrefixes)
             .ExcludePostfix(ExcludedNamespacePostfixes);
+
         var namespaceWritten = false;
 
         // Copy namespace without '.'
         foreach (var @char in namespaceName)
         {
-            if (@char != '.')
-            {
-                finalName[index++] = @char;
-                namespaceWritten = true;
-            }
+            if (@char == '.') continue;
+            finalName[index++] = @char;
+            namespaceWritten = true;
         }
 
         // Add separator between namespace and class name
@@ -110,9 +111,10 @@ internal static class TypeNameConverter
     {
         foreach (var prefix in prefixes)
         {
-            if (name.StartsWith(prefix) &&
-                (name.Length == prefix.Length ||
-                 (name.Length > prefix.Length && (name[prefix.Length] < 'a' || name[prefix.Length] > 'z'))))
+            if (!name.StartsWith(prefix)) continue;
+
+            if (name.Length == prefix.Length ||
+                (name.Length > prefix.Length && (name[prefix.Length] < 'a' || name[prefix.Length] > 'z')))
             {
                 name = name[prefix.Length..];
                 break;
@@ -126,11 +128,9 @@ internal static class TypeNameConverter
     {
         foreach (var postfix in postfixes)
         {
-            if (name.EndsWith(postfix))
-            {
-                name = name[..^postfix.Length];
-                break;
-            }
+            if (!name.EndsWith(postfix)) continue;
+            name = name[..^postfix.Length];
+            break;
         }
 
         return name;

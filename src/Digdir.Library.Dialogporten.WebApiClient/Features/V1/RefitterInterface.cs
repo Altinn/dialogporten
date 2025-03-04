@@ -994,7 +994,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public partial class V1ServiceOwnerCommonActors_Actor
     {
         /// <summary>
-        /// The type of actor that sent the transmission.
+        /// The type of actor; either the service owner, or someone representing the party.
         /// </summary>
 
         [JsonPropertyName("actorType")]
@@ -1002,16 +1002,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public Actors_ActorType ActorType { get; set; }
 
         /// <summary>
-        /// Specifies the name of the entity that sent the transmission. Mutually exclusive with ActorId. If ActorId
-        /// <br/>is supplied, the name will be automatically populated from the name registries.
+        /// The name of the actor.
         /// </summary>
 
         [JsonPropertyName("actorName")]
         public string ActorName { get; set; }
 
         /// <summary>
-        /// The identifier of the person or organization that sent the transmission. Mutually exclusive with ActorName.
-        /// <br/>Might be omitted if ActorType is "ServiceOwner".
+        /// The identifier (national identity number or organization number) of the actor.
         /// </summary>
 
         [JsonPropertyName("actorId")]

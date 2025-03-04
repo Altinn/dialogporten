@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.57.3](https://github.com/Altinn/dialogporten/compare/v1.57.2...v1.57.3) (2025-03-04)
+
+
+### Miscellaneous Chores
+
+* Fix actor DTO summaries ([#1997](https://github.com/Altinn/dialogporten/issues/1997)) ([de7b915](https://github.com/Altinn/dialogporten/commit/de7b915b261b92b0440c7bc496982a04c99c3de7))
+
 ## [1.57.2](https://github.com/Altinn/dialogporten/compare/v1.57.1...v1.57.2) (2025-03-03)
 
 

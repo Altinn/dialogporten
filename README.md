@@ -318,13 +318,9 @@ Using `fix` will add to "Bug Fixes", `feat` will add to "Features", `chore` will
 
 This repository contains code for both infrastructure and applications. Configurations for infrastructure are located in `.azure/infrastructure`. Application configuration is in `.azure/applications`. 
 
-### Deployment process
+### Deployment process / GitHub actions
 
-See `docs/CI-CD.md`
-
-### GitHub Actions
-
-See `docs/CI-CD.md`
+See [docs/CI-CD.md](docs/CI-CD.md)
 
 ### Infrastructure
 
@@ -334,7 +330,7 @@ For example, to add a new storage account, you would:
 - Create or update a Bicep file within the `.azure/infrastructure` folder to include the storage account resource definition.
 - Ensure that the Bicep file is referenced correctly in `.azure/infrastructure/infrastructure.bicep` to be included in the deployment process.
 
-Refer to `docs/Infrastructure.md` for more detailed information.
+Refer to [docs/Infrastructure.md](docs/Infrastructure.md) for more detailed information.
 
 ### Applications
 

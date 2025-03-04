@@ -156,7 +156,7 @@ Use the following steps:
 
 - Run the GitHub action `Dispatch applications` in order to deploy all applications to the new environment.
 
-- To expose the applications through APIM, see [Common APIM Guide](docs/CommonAPIM.md)
+- To expose the applications through APIM, see [Common APIM Guide](CommonAPIM.md)
 
 ## Connecting to resources in Azure
 

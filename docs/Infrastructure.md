@@ -128,7 +128,7 @@ The resources refer to a `source key vault` in order to fetch the necessary secr
 
 Use the following steps:
 
-- Ensure a `source key vault` exist for the new environment. Either create a new key vault or use an existing key vault. Currently, two key vaults exist for our environments. One in the test subscription used by Test and Staging, and one in our Production subscription, which Production uses. Ensure you add the necessary secrets that should be used by the new environment. Read here to learn about secret convention [Configuration Guide](docs/Configuration.md). Ensure also that the key vault has the following enabled: `Azure Resource Manager for template deployment`.
+- Ensure a `source key vault` exist for the new environment. Either create a new key vault or use an existing key vault. Currently, two key vaults exist for our environments. One in the test subscription used by Test and Staging, and one in our Production subscription, which Production uses. Ensure you add the necessary secrets that should be used by the new environment. Read here to learn about secret convention [Configuration Guide](Configuration.md). Ensure also that the key vault has the following enabled: `Azure Resource Manager for template deployment`.
 
 - Ensure that a role assignment `Key Vault Secrets User` and `Contributer`(should be inherited) is added for the service principal used by the GitHub Entra Application.
 

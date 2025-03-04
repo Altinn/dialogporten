@@ -31,6 +31,9 @@ param jobSchedule string
 @secure()
 param appInsightConnectionString string
 
+@description('The replica timeout for the job in seconds')
+param replicaTimeOutInSeconds int
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 var tags = {
@@ -105,6 +108,7 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     cronExpression: jobSchedule
     args: 'sync-subject-resource-mappings'
     userAssignedIdentityId: managedIdentity.id
+    replicaTimeOutInSeconds: replicaTimeOutInSeconds
   }
 }
 

@@ -1,8 +1,6 @@
 import {default as createDialogPayload} from "../serviceowner/testdata/01-create-dialog.js"
 import { sentinelPerformanceValue } from "../../common/config.js";
 
-const ACTIVITY_TYPE_INFORMATION = 'Information';
-
 function cleanUp(originalPayload) {
     if (!originalPayload || typeof originalPayload !== 'object') {
         throw new Error('Invalid payload');
@@ -12,29 +10,7 @@ function cleanUp(originalPayload) {
         ...originalPayload,
         searchTags: [...(originalPayload.searchTags || []), { "value": sentinelPerformanceValue }]
     };
-    const { visibleFrom, ...payloadWithoutVisibleFrom } = payload;
-
-    const activities = payload.activities?.map(activity => {
-        if (activity.type !== ACTIVITY_TYPE_INFORMATION) {
-            return activity;
-        }
-
-        const { performedBy, ...rest } = activity;
-        const { actorId, ...performedByRest } = performedBy;
-
-        return {
-            ...rest,
-            performedBy: {
-                ...performedByRest,
-                actorName: "some name"
-            }
-        };
-    }) ?? [];
-
-    return {
-        ...payloadWithoutVisibleFrom,
-        activities
-    };
+    return payload
 }
 
 /**

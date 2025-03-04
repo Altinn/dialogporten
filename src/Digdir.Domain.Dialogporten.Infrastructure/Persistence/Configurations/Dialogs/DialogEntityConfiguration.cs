@@ -1,7 +1,7 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Common;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using static Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs;
 
@@ -11,7 +11,7 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
     {
         builder.ToTable("Dialog");
         builder.Property(x => x.ServiceResource)
-            .HasMaxLength(Constants.DefaultMaxStringLength);
+            .HasMaxLength(DefaultMaxStringLength);
         builder.HasIndex(x => x.CreatedAt);
         builder.HasIndex(x => x.DueAt);
         builder.HasIndex(x => x.UpdatedAt);

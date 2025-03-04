@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.57.2](https://github.com/Altinn/dialogporten/compare/v1.57.1...v1.57.2) (2025-03-03)
+
+
+### Bug Fixes
+
+* Add missing prefixes in Swagger TypeNameConverter exlude list ([#1992](https://github.com/Altinn/dialogporten/issues/1992)) ([88925c1](https://github.com/Altinn/dialogporten/commit/88925c1601de8efb0a4596256c52405710f8c438))
+* **ci:** Wait for infra deployment before deploying apps in prod pipeline ([#1989](https://github.com/Altinn/dialogporten/issues/1989)) ([224e837](https://github.com/Altinn/dialogporten/commit/224e83720e3c08462ad79e7fc5049e88190054c4))
+
+
+### Miscellaneous Chores
+
+* **performance:** Make improved tests for search ([#1983](https://github.com/Altinn/dialogporten/issues/1983)) ([9412a85](https://github.com/Altinn/dialogporten/commit/9412a851b859a6400eda88ab2ac1613032e7b66d))
+
+## [1.57.1](https://github.com/Altinn/dialogporten/compare/v1.57.0...v1.57.1) (2025-02-28)
+
+
+### Bug Fixes
+
+* Add missing timeout parameter for sync jobs ([#1987](https://github.com/Altinn/dialogporten/issues/1987)) ([265bad0](https://github.com/Altinn/dialogporten/commit/265bad0ddba16ee787d6cf8dd5d5f4495a186a44))
+* Increase migration job timeout ([#1985](https://github.com/Altinn/dialogporten/issues/1985)) ([393f151](https://github.com/Altinn/dialogporten/commit/393f151ddd600dee0321227604bd20da65cbb827))
+
+## [1.57.0](https://github.com/Altinn/dialogporten/compare/v1.56.1...v1.57.0) (2025-02-28)
+
+
+### Features
+
+* Add reverse indexes on Localizations and SearchTags ([#1971](https://github.com/Altinn/dialogporten/issues/1971)) ([7a506b3](https://github.com/Altinn/dialogporten/commit/7a506b3102e1a350cd26d1e75e02585b26224a37))
+* **ci:** Enable PostreSQL extension pg_trgm ([#1984](https://github.com/Altinn/dialogporten/issues/1984)) ([4dce375](https://github.com/Altinn/dialogporten/commit/4dce3750dd639e71a911c0392820a88a72917028))
+
+
+### Miscellaneous Chores
+
+* **sdk:** Add doc ([#1975](https://github.com/Altinn/dialogporten/issues/1975)) ([37c9130](https://github.com/Altinn/dialogporten/commit/37c91300e40739a4fca205cfad19dc493a051c27))
+
 ## [1.56.1](https://github.com/Altinn/dialogporten/compare/v1.56.0...v1.56.1) (2025-02-27)
 
 

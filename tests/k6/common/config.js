@@ -70,4 +70,4 @@ export const tokenGeneratorEnv = __ENV.API_ENVIRONMENT == "yt01" ? "yt01" : "tt0
 export const baseUrlGraphql = baseUrls[__ENV.API_VERSION]["graphql"][__ENV.API_ENVIRONMENT];
 
 export const sentinelValue = "dialogporten-e2e-sentinel";
-export const sentinelPerformanceValue = "dialogporten-e2e-sentinel-performance";
+export const sentinelPerformanceValue = "dialogporten-performance-sentinel";

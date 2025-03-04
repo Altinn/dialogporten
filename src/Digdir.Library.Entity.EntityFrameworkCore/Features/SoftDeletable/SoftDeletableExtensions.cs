@@ -87,6 +87,7 @@ public static class SoftDeletableExtensions
     {
         return modelBuilder.EntitiesOfType<ISoftDeletableEntity>(builder =>
         {
+            builder.HasIndex(nameof(ISoftDeletableEntity.Deleted));
             var method = OpenGenericInternalMethodInfo.MakeGenericMethod(builder.Metadata.ClrType);
             method.Invoke(null, [modelBuilder]);
         });

@@ -41,6 +41,7 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
         var dialog = await _dbContext.Dialogs
             .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
                 .ThenInclude(x => x.PerformedBy)
+                .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
                 .ThenInclude(x => x.Description!.Localizations)
             .IgnoreQueryFilters()

@@ -14,4 +14,6 @@ public abstract class Actor : IEntity
 
     public ActorType.Values ActorTypeId { get; set; }
     public ActorType ActorType { get; set; } = null!;
+
+    public ActorName? ActorNameEntity { get; set; }
 }

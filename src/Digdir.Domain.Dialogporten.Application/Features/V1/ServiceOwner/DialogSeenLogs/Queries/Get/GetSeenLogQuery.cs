@@ -44,6 +44,7 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
             .AsNoTracking()
             .Include(x => x.SeenLog.Where(x => x.Id == request.SeenLogId))
                 .ThenInclude(x => x.SeenBy)
+                .ThenInclude(x => x.ActorNameEntity)
             .IgnoreQueryFilters()
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
                 x => resourceIds.Contains(x.ServiceResource))

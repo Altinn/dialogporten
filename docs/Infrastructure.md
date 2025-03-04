@@ -176,4 +176,4 @@ There is a `ssh-jumper` virtual machine deployed with the infrastructure. This c
 
 2. Using the forwarding utility script:
    
-   See [scripts/database-forwarder/README.md](scripts/database-forwarder/README.md) for a more user-friendly way to establish database connections through SSH.
+   See [scripts/database-forwarder/README.md](../scripts/database-forwarder/README.md) for a more user-friendly way to establish database connections through SSH.

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.57.4](https://github.com/Altinn/dialogporten/compare/v1.57.3...v1.57.4) (2025-03-05)
+
+
+### Miscellaneous Chores
+
+* **deps:** revert update opentelemetry dependencies ([#2013](https://github.com/Altinn/dialogporten/issues/2013)) ([0f24474](https://github.com/Altinn/dialogporten/commit/0f24474cbcefff9d76410a7236eaba5ba6901adb))
+* **deps:** update dependency opentelemetry.exporter.opentelemetryprotocol to 1.11.2 ([#2007](https://github.com/Altinn/dialogporten/issues/2007)) ([35a2faf](https://github.com/Altinn/dialogporten/commit/35a2faf4b21135d4a6969d9bed10fb17202f15a9))
+
 ## [1.57.3](https://github.com/Altinn/dialogporten/compare/v1.57.2...v1.57.3) (2025-03-05)
 
 

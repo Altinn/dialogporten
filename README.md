@@ -311,7 +311,7 @@ builder.Configuration
 For pull requests, the title must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 The title of the PR will be used as the commit message when squashing/merging the pull request, and the body of the PR will be used as the description.
 
-This title will be used to generate the changelog (using [Release Please](https://github.com/google-github-actions/release-please-action))
+This title will be used to generate the changelog (using [Release Please](https://github.com/googleapis/release-please-action))
 Using `fix` will add to "Bug Fixes", `feat` will add to "Features", `chore` will add to "Miscellaneous Chores". All the others, `test`, `ci`, `trivial` etc., will be ignored. ([Example release](https://github.com/altinn/dialogporten/releases/tag/v1.12.0))
 
 ## Deployment

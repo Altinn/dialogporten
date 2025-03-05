@@ -128,7 +128,7 @@ This workflow facilitates the deployment of infrastructure to the specified envi
 - Docker images tagged with release versions
 - SDK and schema packages versioned with releases
 
-[Release Please](https://github.com/google-github-actions/release-please-action) is used to create releases, generate changelog and bumping version numbers.
+[Release Please](https://github.com/googleapis/release-please-action) is used to create releases, generate changelog and bumping version numbers.
 
 `CHANGELOG.md` and `version.txt` are automatically updated and should not be changed manually.
 

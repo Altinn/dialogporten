@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.57.3](https://github.com/Altinn/dialogporten/compare/v1.57.2...v1.57.3) (2025-03-05)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency bogus to 35.6.2 ([#2004](https://github.com/Altinn/dialogporten/issues/2004)) ([1161c9f](https://github.com/Altinn/dialogporten/commit/1161c9f8d50f3b6f615e2928798ef1a2e7c6372a))
+* **deps:** update dependency htmlagilitypack to 1.11.73 ([#2005](https://github.com/Altinn/dialogporten/issues/2005)) ([78a89fb](https://github.com/Altinn/dialogporten/commit/78a89fb74a212d3e14398e79f43e2d587da64a6f))
+* **deps:** update npgsql dependencies to 9.0.3 ([#2006](https://github.com/Altinn/dialogporten/issues/2006)) ([d7938be](https://github.com/Altinn/dialogporten/commit/d7938be80239a1a20cde9e7a9217655d94b81d5b))
+* **deps:** Update vitest to 3.0.7 and esbuild to 0.25.0 ([#2009](https://github.com/Altinn/dialogporten/issues/2009)) ([96542a2](https://github.com/Altinn/dialogporten/commit/96542a29e2786ccfea30ddbc97ea86b8fc385506))
+* Fix actor DTO summaries ([#1997](https://github.com/Altinn/dialogporten/issues/1997)) ([de7b915](https://github.com/Altinn/dialogporten/commit/de7b915b261b92b0440c7bc496982a04c99c3de7))
+
 ## [1.57.2](https://github.com/Altinn/dialogporten/compare/v1.57.1...v1.57.2) (2025-03-03)
 
 

@@ -2,7 +2,7 @@
 
 ## Overview Dashboard
 
-Quick monitoring dashboard for Dialogporten services showing:
+Dialogporten's monitoring dashboards are hosted in Grafana and provide comprehensive insights into system performance, health metrics, and operational status. The dashboards are accessible at [Grafana Altinn Cloud](https://grafana.altinn.cloud/dashboards/f/ce99lm57b1gcgd/).
 
 ### Main Metrics
 - **System Health**: Availability, request stats, latency

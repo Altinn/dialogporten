@@ -16,11 +16,10 @@
     "test": "npm run build && vitest run --test-timeout=10000"
   },
   "devDependencies": {
+    "vitest": "3.0.7",
     "glob": "11.0.1",
-    "graphql-tag": "2.12.6",
-    "vitest": "^3.0.7"
+    "graphql-tag": "2.12.6"
   },
   "license": "ISC",
   "type": "module"
 }
-

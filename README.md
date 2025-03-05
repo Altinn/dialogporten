@@ -311,93 +311,16 @@ builder.Configuration
 For pull requests, the title must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 The title of the PR will be used as the commit message when squashing/merging the pull request, and the body of the PR will be used as the description.
 
-This title will be used to generate the changelog (using [Release Please](https://github.com/google-github-actions/release-please-action))
+This title will be used to generate the changelog (using [Release Please](https://github.com/googleapis/release-please-action))
 Using `fix` will add to "Bug Fixes", `feat` will add to "Features", `chore` will add to "Miscellaneous Chores". All the others, `test`, `ci`, `trivial` etc., will be ignored. ([Example release](https://github.com/altinn/dialogporten/releases/tag/v1.12.0))
 
 ## Deployment
 
 This repository contains code for both infrastructure and applications. Configurations for infrastructure are located in `.azure/infrastructure`. Application configuration is in `.azure/applications`. 
 
-### Deployment process
+### Deployment process / GitHub actions
 
-Deployments are done using `GitHub Actions` with the following steps:
-
-#### 1. Create and Merge Pull Request
-- **Action**: Create a pull request.
-- **Merge**: Once the pull request is reviewed and approved, merge it into the `main` branch.
-
-#### 2. Build and Deploy to Test
-- **Trigger**: Merging the pull request into `main`.
-- **Action**: The code is built and deployed to the test environment.
-- **Tag**: The deployment is tagged with `<version>-<git-sha>`.
-
-#### 3. Prepare Release for Staging
-- **Passive**: Release-please creates or updates a release pull request.
-- **Purpose**: This generates a changelog and bumps the version number.
-- **Merge**: Merge the release pull request into the `main` branch.
-
-#### 4. Deploy to Staging and YT01 (Bump Version and Create Tag)
-- **Trigger**: Merging the release pull request.
-- **Action**: 
-  - Bumps the version number.
-  - Generates the release and changelog.
-  - Deployment is tagged with the new `<version>` without `<git-sha>`
-  - The new version is built and deployed to the staging environment (tt02) and the performance environment (yt01).
-
-#### 5. Prepare deployment to Production
-- **Action**: Perform a dry run towards the production environment to ensure the deployment can proceed without issues.
-
-#### 6. Deploy to Production
-- **Trigger**: Manual trigger of workflow, specify the version to deploy.
-- **Action**: The specified version is deployed to the production environment.
-
-#### Visual Workflow
-
-![Deployment process](docs/deploy-process.png)
-
-[Release Please](https://github.com/google-github-actions/release-please-action) is used to create releases, generate changelog and bumping version numbers.
-
-`CHANGELOG.md` and `version.txt` are automatically updated and should not be changed manually.
-
-### Manual deployment (⚠️ handle with care)
-
-This project uses two GitHub dispatch workflows to manage manual deployments: `dispatch-apps.yml` and `dispatch-infrastructure.yml`. These workflows allow for manual triggers of deployments through GitHub Actions, providing flexibility for deploying specific versions to designated environments.
-
-#### Using `dispatch-apps.yml`
-
-The `dispatch-apps.yml` workflow is responsible for deploying applications. To trigger this workflow:
-
-1. Navigate to the Actions tab in the GitHub repository.
-2. Select the `Dispatch Apps` workflow.
-3. Click on "Run workflow".
-4. Fill in the required inputs:
-   - **environment**: Choose the target environment (`test`, `yt01`, `staging`, or `prod`).
-   - **version**: Specify the version to deploy. Could be git tag or a docker-tag published in packages.
-   - **runMigration** (optional): Indicate whether to run database migrations (`true` or `false`).
-
-This workflow will handle the deployment of applications based on the specified parameters, ensuring that the correct version is deployed to the chosen environment.
-
-#### Using `dispatch-infrastructure.yml`
-
-The `dispatch-infrastructure.yml` workflow is used for deploying infrastructure components. To use this workflow:
-
-1. Go to the Actions tab in the GitHub repository.
-2. Select the `Dispatch Infrastructure` workflow.
-3. Click on "Run workflow".
-4. Provide the necessary inputs:
-   - **environment**: Select the environment you wish to deploy to (`test`, `yt01`, `staging`, or `prod`).
-   - **version**: Enter the version to deploy, which should correspond to a git tag. (e.g., `1.23.4`).
-
-This workflow facilitates the deployment of infrastructure to the specified environment, using the version details provided.
-
-### GitHub Actions
-
-Naming conventions for GitHub Actions:
-- `workflow-*.yml`: Reusable workflows
-- `ci-cd-*.yml`: Workflows that are triggered by an event
-- `dispatch-*.yml`: Workflows that are dispatchable
-
-The `workflow-check-for-changes.yml` workflow uses the `tj-actions/changed-files` action to check which files have been altered since last commit or tag. We use this filter to ensure we only deploy backend code or infrastructure if the respective files have been altered. 
+See [docs/CI-CD.md](docs/CI-CD.md)
 
 ### Infrastructure
 
@@ -407,51 +330,7 @@ For example, to add a new storage account, you would:
 - Create or update a Bicep file within the `.azure/infrastructure` folder to include the storage account resource definition.
 - Ensure that the Bicep file is referenced correctly in `.azure/infrastructure/infrastructure.bicep` to be included in the deployment process.
 
-Refer to the existing infrastructure definitions as templates for creating new components.
-
-#### Deploying a new infrastructure environment
-
-A few resources need to be created before we can apply the Bicep to create the main resources. 
-
-The resources refer to a `source key vault` in order to fetch the necessary secrets and store them in the key vault for the environment. An `ssh`-key is also necessary for the `ssh-jumper` used to access the resources in Azure within the `vnet`. 
-
-Use the following steps:
-
-- Ensure a `source key vault` exist for the new environment. Either create a new key vault or use an existing key vault. Currently, two key vaults exist for our environments. One in the test subscription used by Test and Staging, and one in our Production subscription, which Production uses. Ensure you add the necessary secrets that should be used by the new environment. Read here to learn about secret convention [Configuration Guide](docs/Configuration.md). Ensure also that the key vault has the following enabled: `Azure Resource Manager for template deployment`.
-
-- Ensure that a role assignment `Key Vault Secrets User` and `Contributer`(should be inherited) is added for the service principal used by the GitHub Entra Application.
-
-- Create an SSH key in Azure and discard the private key. We will use the `az cli` to access the virtual machine so storing the `ssh key` is only a security risk. 
-
-- Create a new environment in GitHub and add the following secrets: `AZURE_CLIENT_ID`, `AZURE_SOURCE_KEY_VAULT_NAME`, `AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP`, `AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_TENANT_ID` and `AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY`
-
-- Add a new file for the environment `.azure/infrastructure/<env>.bicepparam`. `<env>` must match the environment created in GitHub.
-
-- Add the new environment in the `dispatch-infrastructure.yml` list of environments. 
-
-- Run the GitHub action `Dispatch infrastructure` with the `version` you want to deploy and `environment`. All the resources in `.azure/infrastructure/main.bicep` should now be created. 
-
-- (The GitHub action might need to restart because of a timeout when creating Redis).
-
-#### Connecting to resources in Azure
-
-There is a `ssh-jumper` virtual machine deployed with the infrastructure. This can be used to create a `ssh`-tunnel into the `vnet`. There are two ways to establish connections:
-
-1. Using `az ssh` commands directly:
-   ```bash
-   # Connect to the VNet using:
-   az ssh vm --resource-group dp-be-<env>-rg --vm-name dp-be-<env>-ssh-jumper
-   
-   # Or create an SSH tunnel for specific resources (e.g., PostgreSQL database):
-   az ssh vm -g dp-be-<env>-rg -n dp-be-<env>-ssh-jumper -- -L 5432:<database-host-name>:5432
-   ```
-   This example forwards the PostgreSQL default port (5432) to your localhost. Adjust the ports and hostnames as needed for other resources.
-
-   You may be prompted to install the ssh extension.
-
-2. Using the forwarding utility script:
-   
-   See [scripts/database-forwarder/README.md](scripts/database-forwarder/README.md) for a more user-friendly way to establish database connections through SSH.
+Refer to [docs/Infrastructure.md](docs/Infrastructure.md) for more detailed information.
 
 ### Applications
 
@@ -464,17 +343,3 @@ For example, to add a new application named `web-api-new`, you would:
 - Add parameter files for each environment (e.g., `test.bicepparam`, `staging.bicepparam`) to specify environment-specific values.
 
 Refer to the existing applications like `web-api-so` and `web-api-eu` as templates.
-
-#### Deploying applications in a new infrastructure environment
-
-Ensure you have followed the steps in [Deploying a new infrastructure environment](#deploying-a-new-infrastructure-environment) to have the resources required for the applications.
-
-Use the following steps:
-
-- From the infrastructure resources created, add the following GitHub secrets in the new environment (this will not be necessary in the future as secrets would be added directly from infrastructure deployment): `AZURE_APP_CONFIGURATION_NAME`, `AZURE_APP_INSIGHTS_CONNECTION_STRING`, `AZURE_CONTAINER_APP_ENVIRONMENT_NAME`, `AZURE_ENVIRONMENT_KEY_VAULT_NAME`, `AZURE_REDIS_NAME`, `AZURE_RESOURCE_GROUP_NAME`, `AZURE_SERVICE_BUS_NAMESPACE_NAME` and `AZURE_SLACK_NOTIFIER_FUNCTION_APP_NAME`
-
-- Add new parameter files for the environment in all applications `.azure/applications/*/<env>.bicepparam`
-
-- Run the GitHub action `Dispatch applications` in order to deploy all applications to the new environment.
-
-- To expose the applications through APIM, see [Common APIM Guide](docs/CommonAPIM.md)

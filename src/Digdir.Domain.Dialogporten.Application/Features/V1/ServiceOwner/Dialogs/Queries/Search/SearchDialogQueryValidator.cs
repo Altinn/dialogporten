@@ -58,5 +58,10 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .IsValidUri()
             .MaximumLength(Constants.DefaultMaxUriLength)
             .When(x => x.Process is not null);
+
+        RuleFor(x => x.CreatedAfter)
+            .LessThanOrEqualTo(x => x.CreatedBefore)
+            .When(x => x.CreatedAfter is not null && x.CreatedBefore is not null)
+            .WithMessage("'{PropertyName}' must be less than or equal to '{ComparisonProperty}'.");
     }
 }

@@ -1,33 +1,33 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class UpdatedAtFilterTests : ApplicationCollectionFixture
+public class CreatedAtFilterTests : ApplicationCollectionFixture
 {
-    public UpdatedAtFilterTests(DialogApplication application) : base(application) { }
+    public CreatedAtFilterTests(DialogApplication application) : base(application) { }
 
     [Theory]
     [InlineData(2022, null, 2, new[] { 2022, 2023 })]
     [InlineData(null, 2021, 2, new[] { 2020, 2021 })]
     [InlineData(2021, 2022, 2, new[] { 2021, 2022 })]
-    public async Task Should_Filter_On_Updated_Date(int? updatedAfterYear, int? updatedBeforeYear, int expectedCount, int[] expectedYears)
+    public async Task Should_Filter_On_Created_Date(int? createdAfterYear, int? createdBeforeYear, int expectedCount, int[] expectedYears)
     {
         // Arrange
-        var dialogIn2020 = await Application.CreateDialogWithDateInYear(2020, UpdatedAt);
-        var dialogIn2021 = await Application.CreateDialogWithDateInYear(2021, UpdatedAt);
-        var dialogIn2022 = await Application.CreateDialogWithDateInYear(2022, UpdatedAt);
-        var dialogIn2023 = await Application.CreateDialogWithDateInYear(2023, UpdatedAt);
+        var dialogIn2020 = await Application.CreateDialogWithDateInYear(2020, CreatedAt);
+        var dialogIn2021 = await Application.CreateDialogWithDateInYear(2021, CreatedAt);
+        var dialogIn2022 = await Application.CreateDialogWithDateInYear(2022, CreatedAt);
+        var dialogIn2023 = await Application.CreateDialogWithDateInYear(2023, CreatedAt);
 
         // Act
         var response = await Application.Send(new SearchDialogQuery
         {
-            UpdatedAfter = updatedAfterYear.HasValue ? CreateDateFromYear(updatedAfterYear.Value) : null,
-            UpdatedBefore = updatedBeforeYear.HasValue ? CreateDateFromYear(updatedBeforeYear.Value) : null
+            Party = [Party],
+            CreatedAfter = createdAfterYear.HasValue ? CreateDateFromYear(createdAfterYear.Value) : null,
+            CreatedBefore = createdBeforeYear.HasValue ? CreateDateFromYear(createdBeforeYear.Value) : null
         });
 
         // Assert
@@ -51,13 +51,14 @@ public class UpdatedAtFilterTests : ApplicationCollectionFixture
     }
 
     [Fact]
-    public async Task Cannot_Filter_On_UpdatedAfter_With_Value_Greater_Than_UpdatedBefore()
+    public async Task Cannot_Filter_On_Created_After_With_Value_Greater_Than_Created_Before()
     {
         // Act
         var response = await Application.Send(new SearchDialogQuery
         {
-            UpdatedAfter = CreateDateFromYear(2022),
-            UpdatedBefore = CreateDateFromYear(2021)
+            Party = [Party],
+            CreatedAfter = CreateDateFromYear(2022),
+            CreatedBefore = CreateDateFromYear(2021)
         });
 
         // Assert

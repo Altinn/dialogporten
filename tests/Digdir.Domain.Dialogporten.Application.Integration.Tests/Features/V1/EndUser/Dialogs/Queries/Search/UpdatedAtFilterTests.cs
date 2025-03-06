@@ -1,10 +1,9 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class UpdatedAtFilterTests : ApplicationCollectionFixture
@@ -26,6 +25,7 @@ public class UpdatedAtFilterTests : ApplicationCollectionFixture
         // Act
         var response = await Application.Send(new SearchDialogQuery
         {
+            Party = [Party],
             UpdatedAfter = updatedAfterYear.HasValue ? CreateDateFromYear(updatedAfterYear.Value) : null,
             UpdatedBefore = updatedBeforeYear.HasValue ? CreateDateFromYear(updatedBeforeYear.Value) : null
         });
@@ -56,6 +56,7 @@ public class UpdatedAtFilterTests : ApplicationCollectionFixture
         // Act
         var response = await Application.Send(new SearchDialogQuery
         {
+            Party = [Party],
             UpdatedAfter = CreateDateFromYear(2022),
             UpdatedBefore = CreateDateFromYear(2021)
         });

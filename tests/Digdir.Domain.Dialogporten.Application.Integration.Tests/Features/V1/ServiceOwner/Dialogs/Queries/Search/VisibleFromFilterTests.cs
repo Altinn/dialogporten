@@ -2,7 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
-using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search.Common;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
@@ -10,45 +10,6 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class VisibleFromFilterTests : ApplicationCollectionFixture
 {
     public VisibleFromFilterTests(DialogApplication application) : base(application) { }
-
-    [Theory]
-    [InlineData(2022, null, 2, new[] { 2022, 2023 })]
-    [InlineData(null, 2021, 2, new[] { 2020, 2021 })]
-    [InlineData(2021, 2022, 2, new[] { 2021, 2022 })]
-    public async Task Should_Filter_On_VisibleFrom_Date(int? visibleFromAfterYear, int? visibleFromBeforeYear, int expectedCount, int[] expectedYears)
-    {
-        // Arrange
-        var dialogIn2020 = await CreateDialogWithVisibleFromInYear(2020);
-        var dialogIn2021 = await CreateDialogWithVisibleFromInYear(2021);
-        var dialogIn2022 = await CreateDialogWithVisibleFromInYear(2022);
-        var dialogIn2023 = await CreateDialogWithVisibleFromInYear(2023);
-
-        // Act
-        var response = await Application.Send(new SearchDialogQuery
-        {
-            VisibleAfter = visibleFromAfterYear.HasValue ? CreateDateFromYear(visibleFromAfterYear.Value) : null,
-            VisibleBefore = visibleFromBeforeYear.HasValue ? CreateDateFromYear(visibleFromBeforeYear.Value) : null
-        });
-
-        // Assert
-        response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-
-        result.Items.Should().HaveCount(expectedCount);
-        foreach (var year in expectedYears)
-        {
-            var dialogId = year switch
-            {
-                2020 => dialogIn2020,
-                2021 => dialogIn2021,
-                2022 => dialogIn2022,
-                2023 => dialogIn2023,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            result.Items.Should().ContainSingle(x => x.Id == dialogId);
-        }
-    }
 
     [Fact]
     public async Task Cannot_Filter_On_VisibleFrom_After_With_Value_Greater_Than_VisibleFrom_Before()
@@ -65,11 +26,84 @@ public class VisibleFromFilterTests : ApplicationCollectionFixture
         result.Should().NotBeNull();
     }
 
-    private async Task<Guid> CreateDialogWithVisibleFromInYear(int year)
+    [Theory, MemberData(nameof(GetVisibleFromTestData))]
+    public async Task Should_Filter_On_VisibleFrom_Date(DateFilterTestData testData)
     {
-        var visibleFrom = CreateDateFromYear(year);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(visibleFrom: visibleFrom);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-        return createCommandResponse.AsT0.DialogId;
+        // Arrange
+        var currentYear = DateTimeOffset.UtcNow.Year;
+
+        var oneYearInTheFuture = currentYear + 1;
+        var twoYearsInTheFuture = currentYear + 2;
+        var threeYearsInTheFuture = currentYear + 3;
+        var fourYearsInTheFuture = currentYear + 4;
+
+        var dialogOneYearInTheFuture = await Application.CreateDialogWithDateInYear(oneYearInTheFuture, VisibleFrom);
+        var dialogTwoYearsInTheFuture = await Application.CreateDialogWithDateInYear(twoYearsInTheFuture, VisibleFrom);
+        var dialogThreeYearsInTheFuture = await Application.CreateDialogWithDateInYear(threeYearsInTheFuture, VisibleFrom);
+        var dialogFourYearsInTheFuture = await Application.CreateDialogWithDateInYear(fourYearsInTheFuture, VisibleFrom);
+
+        // Act
+        var response = await Application.Send(new SearchDialogQuery
+        {
+            VisibleAfter = testData.AfterYear.HasValue ? CreateDateFromYear(testData.AfterYear.Value) : null,
+            VisibleBefore = testData.BeforeYear.HasValue ? CreateDateFromYear(testData.BeforeYear.Value) : null
+        });
+
+        // Assert
+        response.TryPickT0(out var result, out _).Should().BeTrue();
+        result.Should().NotBeNull();
+
+        result.Items.Should().HaveCount(testData.ExpectedCount);
+        foreach (var year in testData.ExpectedYears)
+        {
+            var dialogId = year switch
+            {
+                _ when year == oneYearInTheFuture => dialogOneYearInTheFuture,
+                _ when year == twoYearsInTheFuture => dialogTwoYearsInTheFuture,
+                _ when year == threeYearsInTheFuture => dialogThreeYearsInTheFuture,
+                _ when year == fourYearsInTheFuture => dialogFourYearsInTheFuture,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            result.Items.Should().ContainSingle(x => x.Id == dialogId);
+        }
+    }
+
+    public static IEnumerable<object[]> GetVisibleFromTestData()
+    {
+        var currentYear = DateTimeOffset.UtcNow.Year;
+        return new List<object[]>
+        {
+            new object[]
+            {
+                new DateFilterTestData
+                {
+                    AfterYear = currentYear + 3,
+                    BeforeYear = null,
+                    ExpectedCount = 2,
+                    ExpectedYears = [currentYear + 3, currentYear + 4]
+                }
+            },
+            new object[]
+            {
+                new DateFilterTestData
+                {
+                    AfterYear = null,
+                    BeforeYear = currentYear + 2,
+                    ExpectedCount = 2,
+                    ExpectedYears = [currentYear + 1, currentYear + 2]
+                }
+            },
+            new object[]
+            {
+                new DateFilterTestData
+                {
+                    AfterYear = currentYear + 1,
+                    BeforeYear = currentYear + 2,
+                    ExpectedCount = 2,
+                    ExpectedYears = [currentYear + 1, currentYear + 2]
+                }
+            }
+        };
     }
 }

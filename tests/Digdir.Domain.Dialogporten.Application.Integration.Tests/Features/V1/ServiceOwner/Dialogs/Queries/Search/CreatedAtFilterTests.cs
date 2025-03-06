@@ -2,7 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
-using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search.Common;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
@@ -18,10 +18,10 @@ public class CreatedAtFilterTests : ApplicationCollectionFixture
     public async Task Should_Filter_On_Created_Date(int? createdAfterYear, int? createdBeforeYear, int expectedCount, int[] expectedYears)
     {
         // Arrange
-        var dialogIn2020 = await CreateDialogWithCreatedAtInYear(2020);
-        var dialogIn2021 = await CreateDialogWithCreatedAtInYear(2021);
-        var dialogIn2022 = await CreateDialogWithCreatedAtInYear(2022);
-        var dialogIn2023 = await CreateDialogWithCreatedAtInYear(2023);
+        var dialogIn2020 = await Application.CreateDialogWithDateInYear(2020, CreatedAt);
+        var dialogIn2021 = await Application.CreateDialogWithDateInYear(2021, CreatedAt);
+        var dialogIn2022 = await Application.CreateDialogWithDateInYear(2022, CreatedAt);
+        var dialogIn2023 = await Application.CreateDialogWithDateInYear(2023, CreatedAt);
 
         // Act
         var response = await Application.Send(new SearchDialogQuery
@@ -63,13 +63,5 @@ public class CreatedAtFilterTests : ApplicationCollectionFixture
         // Assert
         response.TryPickT1(out var result, out _).Should().BeTrue();
         result.Should().NotBeNull();
-    }
-
-    private async Task<Guid> CreateDialogWithCreatedAtInYear(int year)
-    {
-        var createdAt = CreateDateFromYear(year);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(createdAt: createdAt);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-        return createCommandResponse.AsT0.DialogId;
     }
 }

@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using FluentValidation;
+using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.ValidationErrorStrings;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
@@ -62,21 +63,21 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
         RuleFor(x => x.CreatedAfter)
             .LessThanOrEqualTo(x => x.CreatedBefore)
             .When(x => x.CreatedAfter is not null && x.CreatedBefore is not null)
-            .WithMessage("'{PropertyName}' must be less than or equal to '{ComparisonProperty}'.");
+            .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
 
         RuleFor(x => x.DueAfter)
             .LessThanOrEqualTo(x => x.DueBefore)
             .When(x => x.DueAfter is not null && x.DueBefore is not null)
-            .WithMessage("'{PropertyName}' must be less than or equal to '{ComparisonProperty}'.");
+            .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
 
         RuleFor(x => x.UpdatedAfter)
             .LessThanOrEqualTo(x => x.UpdatedBefore)
             .When(x => x.UpdatedAfter is not null && x.UpdatedBefore is not null)
-            .WithMessage("'{PropertyName}' must be less than or equal to '{ComparisonProperty}'.");
+            .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
 
         RuleFor(x => x.VisibleAfter)
             .LessThanOrEqualTo(x => x.VisibleBefore)
             .When(x => x.VisibleAfter is not null && x.VisibleBefore is not null)
-            .WithMessage("'{PropertyName}' must be less than or equal to '{ComparisonProperty}'.");
+            .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
     }
 }

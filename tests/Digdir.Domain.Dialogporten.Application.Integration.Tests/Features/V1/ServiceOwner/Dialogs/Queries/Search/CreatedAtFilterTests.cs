@@ -1,14 +1,15 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search.Common;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class SearchDialogTests : ApplicationCollectionFixture
+public class CreatedAtFilterTests : ApplicationCollectionFixture
 {
-    public SearchDialogTests(DialogApplication application) : base(application) { }
+    public CreatedAtFilterTests(DialogApplication application) : base(application) { }
 
     [Theory]
     [InlineData(2022, null, 2, new[] { 2022, 2023 })]
@@ -64,44 +65,10 @@ public class SearchDialogTests : ApplicationCollectionFixture
         result.Should().NotBeNull();
     }
 
-    private static DateTimeOffset CreateDateFromYear(int year) => new(year, 1, 1, 0, 0, 0, TimeSpan.Zero);
-
     private async Task<Guid> CreateDialogWithCreatedAtInYear(int year)
     {
         var createdAt = CreateDateFromYear(year);
         var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(createdAt: createdAt);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-        return createCommandResponse.AsT0.DialogId;
-    }
-
-    private async Task<Guid> CreateDialogWithUpdatedAtInYear(int year)
-    {
-        var updatedAt = CreateDateFromYear(year);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(updatedAt: updatedAt);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-        return createCommandResponse.AsT0.DialogId;
-    }
-
-    private async Task<Guid> CreateDialogWithDueAtInYear(int year)
-    {
-        var dueAt = CreateDateFromYear(year);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(dueAt: dueAt);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-        return createCommandResponse.AsT0.DialogId;
-    }
-
-    private async Task<Guid> CreateDialogWithExpiresAtInYear(int year)
-    {
-        var expiresAt = CreateDateFromYear(year);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(expiresAt: expiresAt);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-        return createCommandResponse.AsT0.DialogId;
-    }
-
-    private async Task<Guid> CreateDialogWithVisibleFromInYear(int year)
-    {
-        var visibleFrom = CreateDateFromYear(year);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(visibleFrom: visibleFrom);
         var createCommandResponse = await Application.Send(createDialogCommand);
         return createCommandResponse.AsT0.DialogId;
     }

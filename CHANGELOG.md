@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.57.5](https://github.com/Altinn/dialogporten/compare/v1.57.4...v1.57.5) (2025-03-06)
+
+
+### Bug Fixes
+
+* **janitor:** Update min auth level on janitor RR sync ([#2003](https://github.com/Altinn/dialogporten/issues/2003)) ([58a2170](https://github.com/Altinn/dialogporten/commit/58a217039b73a16704c6abc1039671e0bf2c2d41))
+
+
+### Miscellaneous Chores
+
+* **deps:** update npgsql dependencies to 9.0.4 ([#2010](https://github.com/Altinn/dialogporten/issues/2010)) ([f8d232b](https://github.com/Altinn/dialogporten/commit/f8d232b586566ce47288ffc1aa9c6e1b90913f11))
+
 ## [1.57.4](https://github.com/Altinn/dialogporten/compare/v1.57.3...v1.57.4) (2025-03-05)
 
 

@@ -72,6 +72,10 @@ public class VisibleFromFilterTests : ApplicationCollectionFixture
     public static IEnumerable<object[]> GetVisibleFromTestData()
     {
         var currentYear = DateTimeOffset.UtcNow.Year;
+
+        // The numbers added to "currentYear" here represent future years relative to the current year.
+        // This is done to create test data for dialogs that are visible "soon" (1 to 4 years ahead).
+        // This approach ensures that the tests remain valid and relevant regardless of the current date.
         return new List<object[]>
         {
             new object[]

@@ -30,6 +30,7 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
 
     public async Task<int> Merge(IReadOnlyCollection<ResourcePolicyInformation> resourceMetadata, CancellationToken cancellationToken)
     {
+        // language=sql
         const string sql =
             $"""
             with source as (
@@ -41,7 +42,9 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
             using source s
             on t."{nameof(ResourcePolicyInformation.Resource)}" = s.resource
             when matched then
-              	update set "{nameof(ResourcePolicyInformation.UpdatedAt)}" = s.updatedAt
+              	update set 
+              	    "{nameof(ResourcePolicyInformation.UpdatedAt)}" = s.updatedAt,
+                    "{nameof(ResourcePolicyInformation.MinimumAuthenticationLevel)}" = s.minimumSecurityLevel
             when not matched then
               	insert ("{nameof(ResourcePolicyInformation.Id)}", "{nameof(ResourcePolicyInformation.Resource)}", "{nameof(ResourcePolicyInformation.MinimumAuthenticationLevel)}", "{nameof(ResourcePolicyInformation.CreatedAt)}", "{nameof(ResourcePolicyInformation.UpdatedAt)}")
               	values (s.id, s.resource, s.minimumSecurityLevel, s.createdAt, s.updatedAt);

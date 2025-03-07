@@ -19,15 +19,30 @@ internal sealed class MappingProfile : Profile
             .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(actorType))
             .ToList();
 
-        CreateMap<Actor, ActorDto>()
-            .ForMember(dest => dest.ActorType, opt => opt.MapFrom(src => src.ActorTypeId))
-            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => IdentifierMasker.GetMaybeMaskedIdentifier(src.ActorId)))
-            .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.ActorNameEntity == null ? src.ActorName! : src.ActorNameEntity.Name));
+        CreateMap<Actor, ActorDto>().IncludeMembers(src => src.ActorNameEntity)
+            .ForMember(dest => dest.ActorType, opt => opt.MapFrom(src => src.ActorTypeId));
+
+        CreateMap<ActorName, ActorDto>()
+            .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => IdentifierMasker.GetMaybeMaskedIdentifier(src.ActorId)));
+        // CreateMap<ActorName, ActorDto>()
+        //     .ConvertUsing<ActorNameEntityConverter>();
 
         foreach (var outputActor in derivedActorTypes)
         {
             CreateMap(outputActor, actorDtoType)
                 .IncludeBase(actorType, actorDtoType);
         }
+    }
+}
+
+internal abstract class ActorNameEntityConverter : ITypeConverter<ActorName, ActorDto>
+{
+    public ActorDto Convert(ActorName source, ActorDto destination, ResolutionContext context)
+    {
+        destination.ActorName = source.Name;
+        destination.ActorId = IdentifierMasker.GetMaybeMaskedIdentifier(source.ActorId);
+
+        return destination;
     }
 }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250227142242_IntroduceActorEntity")]
+    [Migration("20250306133621_IntroduceActorEntity")]
     partial class IntroduceActorEntity
     {
         /// <inheritdoc />
@@ -91,7 +91,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasDefaultValueSql("current_timestamp at time zone 'utc'");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 

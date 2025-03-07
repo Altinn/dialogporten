@@ -42,7 +42,10 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
                 PerformedBy = new()
                 {
                     ActorTypeId = actorType,
-                    ActorId = userId
+                    ActorNameEntity = new ActorName
+                    {
+                        ActorId = userId
+                    }
                 }
             });
         }
@@ -56,7 +59,10 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
                 PerformedBy = new()
                 {
                     ActorTypeId = actorType,
-                    ActorId = userId
+                    ActorNameEntity = new ActorName
+                    {
+                        ActorId = userId
+                    }
                 }
             });
         }

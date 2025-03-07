@@ -23,7 +23,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     ActorId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp at time zone 'utc'")
                 },
                 constraints: table =>
@@ -49,26 +49,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 column: "ActorNameEntityId",
                 principalTable: "ActorName",
                 principalColumn: "Id");
-
-            migrationBuilder.Sql("""
-                                    INSERT INTO "ActorName" ("Id", "CreatedAt", "ActorId", "Name")
-                                    SELECT a."Id", -- Just borrow the Id from Actor to get uuid7
-                                           a."CreatedAt",
-                                           a."ActorId",
-                                           a."ActorName"
-                                    FROM "Actor" a
-                                    WHERE a."ActorName" IS NOT NULL
-                                    ON CONFLICT DO NOTHING;
-                                    
-                                    UPDATE "Actor" a
-                                    SET "ActorNameEntityId" = (
-                                        SELECT an."Id"
-                                            FROM "ActorName" an
-                                            WHERE a."ActorId" = an."ActorId"
-                                                AND "ActorName" = an."Name")
-                                    WHERE "ActorName" IS NOT NULL
-                                      AND "ActorNameEntityId" IS NULL;
-                                 """);
         }
 
         /// <inheritdoc />

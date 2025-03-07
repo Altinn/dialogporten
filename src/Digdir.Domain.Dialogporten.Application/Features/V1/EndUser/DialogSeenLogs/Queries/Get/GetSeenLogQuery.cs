@@ -85,7 +85,7 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
         }
 
         var dto = _mapper.Map<SeenLogDto>(seenLog);
-        dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == seenLog.SeenBy.ActorId;
+        dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == seenLog.SeenBy.ActorNameEntity?.ActorId;
 
         return dto;
     }

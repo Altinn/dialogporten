@@ -80,7 +80,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
             .Select(x =>
             {
                 var dto = _mapper.Map<SeenLogDto>(x);
-                dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == x.SeenBy.ActorId;
+                dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == x.SeenBy.ActorNameEntity?.ActorId;
                 return dto;
             })
             .ToList();

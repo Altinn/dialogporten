@@ -154,7 +154,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = dialog.SeenLog
             .Select(log =>
             {
-                var actorId = log.SeenBy.ActorNameEntity != null ? log.SeenBy.ActorNameEntity.ActorId : log.SeenBy.ActorId;
+                var actorId = log.SeenBy.ActorNameEntity != null ? log.SeenBy.ActorNameEntity.ActorId : log.SeenBy.ActorNameEntity?.ActorId;
                 var logDto = _mapper.Map<DialogSeenLogDto>(log);
                 logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == actorId;
                 return logDto;

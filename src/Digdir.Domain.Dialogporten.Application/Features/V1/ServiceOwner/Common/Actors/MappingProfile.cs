@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 
@@ -20,6 +21,11 @@ internal sealed class MappingProfile : Profile
         CreateMap<ActorDto, Actor>()
             .ForMember(dest => dest.ActorType, opt => opt.Ignore())
             .ForMember(dest => dest.ActorTypeId, opt => opt.MapFrom(src => src.ActorType))
+            .ForMember(dest => dest.ActorName, opt => opt.Ignore())
+            .ForMember(dest => dest.ActorId, opt => opt.Ignore());
+
+        CreateMap<ActorDto, ActorName>()
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.ActorName))
             .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => src.ActorId));
 
         foreach (var inputActor in derivedActorTypes)
@@ -28,13 +34,14 @@ internal sealed class MappingProfile : Profile
                 .IncludeBase(actorDtoType, actorType);
         }
 
-        CreateMap<Actor, ActorDto>()
-            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => src.ActorId))
+        CreateMap<Actor, ActorDto>().IncludeMembers(src => src.ActorNameEntity)
+            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => src.ActorNameEntity == null ? "aaa" : src.ActorNameEntity.ActorId))
             .ForMember(dest => dest.ActorType, opt => opt.MapFrom(src => src.ActorTypeId))
-            .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src =>
-                src.ActorNameEntity == null ?
-                    src.ActorName :
-                    src.ActorNameEntity.Name));
+            .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.ActorNameEntity == null ? "aaa" : src.ActorNameEntity.Name));
+
+        CreateMap<ActorName, ActorDto>()
+            .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => src.ActorId));
 
         foreach (var outputActor in derivedActorTypes)
         {

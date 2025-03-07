@@ -7,6 +7,6 @@ public sealed class ActorName : IImmutableEntity
 {
     public Guid Id { get; set; }
     public string? ActorId { get; set; }
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 }

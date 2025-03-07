@@ -53,15 +53,15 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             .Select(x =>
             {
                 var actor = (Actor)x.Entity;
-                actor.ActorId = actor.ActorId?.ToLowerInvariant();
+                actor.ActorNameEntity!.ActorId = actor.ActorNameEntity.ActorId?.ToLowerInvariant();
                 return actor;
             })
-            .Where(x => x.ActorId is not null)
+            .Where(x => x.ActorNameEntity?.ActorId != null)
             .ToList();
 
         var actorNameById = new Dictionary<string, string?>();
         foreach (var actorId in actors
-            .Select(x => x.ActorId!)
+            .Select(x => x.ActorNameEntity?.ActorId!)
             .Distinct())
         {
             actorNameById[actorId] = await _partyNameRegistry.GetName(actorId, cancellationToken);
@@ -69,11 +69,11 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         foreach (var actor in actors)
         {
-            if (!actorNameById.TryGetValue(actor.ActorId!, out var actorName))
+            if (!actorNameById.TryGetValue(actor.ActorNameEntity?.ActorId!, out var actorName))
             {
                 throw new UnreachableException(
                     $"Expected {nameof(actorNameById)} to contain a record for every " +
-                    $"actor id. Missing record for actor id: {actor.ActorId}. Is " +
+                    $"actor id. Missing record for actor id: {actor.ActorNameEntity?.ActorId}. Is " +
                     $"the lookup method implemented correctly?");
             }
 
@@ -86,12 +86,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                     continue;
                 }
 
-                _domainContext.AddError(nameof(Actor.ActorId), $"Unable to look up name for actor id: {actor.ActorId}");
+                _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actor.ActorNameEntity?.ActorId}");
                 continue;
             }
 
             var actorNameEntity = await dbContext.Set<ActorName>()
-                .FirstOrDefaultAsync(x => x.ActorId == actor.ActorId && x.Name == actorName, cancellationToken);
+                .FirstOrDefaultAsync(x => x.ActorId == actor.ActorNameEntity!.ActorId && x.Name == actorName, cancellationToken);
             if (actorNameEntity is null)
             {
                 actor.ActorNameEntity = new ActorName
@@ -99,7 +99,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                     Id = IdentifiableExtensions.CreateVersion7(),
                     CreatedAt = _transactionTime.Value,
                     Name = actorName,
-                    ActorId = actor.ActorId
+                    ActorId = actor.ActorNameEntity?.ActorId
                 };
                 dbContext.Add(actor.ActorNameEntity);
             }
@@ -108,10 +108,6 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 actor.ActorNameEntity = actorNameEntity;
             }
 
-            // ActorName is not set/overwritten by the Interceptor.
-            // In cases where ActorName and ActorId is given, ActorName might not equal ActorNameEntity.ActorName
-            // ActorName should not be used when ActorNameEntity is used therefore its set to null 
-            actor.ActorName = null;
         }
 
         _hasBeenExecuted = true;

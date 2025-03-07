@@ -10,11 +10,11 @@ public class AuthorizedPartyBase
     public bool IsCurrentEndUser { get; init; }
     public bool IsMainAdministrator { get; init; }
     public bool IsAccessManager { get; init; }
-    public bool HasOnlyAccessToSubParties { get; init; }
 }
 
 public sealed class AuthorizedParty : AuthorizedPartyBase
 {
+    public bool HasOnlyAccessToSubParties { get; init; }
     public List<AuthorizedSubParty>? SubParties { get; init; }
 }
 

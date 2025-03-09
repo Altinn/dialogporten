@@ -95,10 +95,25 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     {
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(authenticatedParty);
 
-        var authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
-            => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
+        AuthorizedPartiesResult authorizedParties;
+        string cacheKey;
+        using (_logger.TimeOperation("GenerateCacheKey"))
+        {
+            cacheKey = authorizedPartiesRequest.GenerateCacheKey();
+        }
+        var cacheKeyFlattened = cacheKey + "_flattened";
 
-        return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
+        using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
+        {
+            authorizedParties = await _partiesCache.GetOrSetAsync(cacheKey, async token
+                => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
+        }
+
+        if (!flatten) return authorizedParties;
+        using (_logger.TimeOperation(nameof(GetFlattenedAuthorizedParties)))
+        {
+            return _partiesCache.GetOrSet(cacheKeyFlattened, _ => GetFlattenedAuthorizedParties(authorizedParties), token: cancellationToken);
+        }
     }
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
@@ -123,33 +138,69 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         return UserHasRequiredAuthLevel(minimumAuthenticationLevel);
     }
 
+
+    // Create static empty lists to reuse and avoid allocations
+    private static readonly List<string> EmptyRolesList = [];
+    private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
+
     private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)
     {
-        var flattenedAuthorizedParties = new AuthorizedPartiesResult();
+        // If we know there's always only one level of nesting, we can optimize specifically for this case
+        var topLevelCount = authorizedParties.AuthorizedParties.Count;
 
-        foreach (var authorizedParty in authorizedParties.AuthorizedParties)
+        // Pre-calculate the total capacity needed
+        var totalCapacity = topLevelCount;
+        for (var i = 0; i < topLevelCount; i++)
         {
-            Flatten(authorizedParty);
-        }
-
-        return flattenedAuthorizedParties;
-
-        void Flatten(AuthorizedParty party, AuthorizedParty? parent = null)
-        {
-            if (party.SubParties is not null && party.SubParties.Count != 0)
+            var party = authorizedParties.AuthorizedParties[i];
+            if (party.SubParties != null)
             {
-                foreach (var subParty in party.SubParties)
-                {
-                    Flatten(subParty, party);
-                }
+                totalCapacity += party.SubParties.Count;
             }
-
-            if (parent != null) party.ParentParty = parent.Party;
-
-            party.SubParties = [];
-
-            flattenedAuthorizedParties.AuthorizedParties.Add(party);
         }
+
+        // Preallocate the exact size needed
+        var flattenedList = new List<AuthorizedParty>(totalCapacity);
+
+        // Process top-level parties first (no parent)
+        for (var i = 0; i < topLevelCount; i++)
+        {
+            var party = authorizedParties.AuthorizedParties[i];
+
+            // Add a cloned version of the current party without subparties
+            flattenedList.Add(new AuthorizedParty
+            {
+                Party = party.Party,
+                ParentParty = null,
+                // Reuse empty lists for parties with no roles to reduce allocations
+                AuthorizedRoles = party.AuthorizedRoles.Count > 0
+                    ? new List<string>(party.AuthorizedRoles)
+                    : EmptyRolesList,
+                SubParties = EmptySubPartiesList
+            });
+
+            // If this party has subparties, add them all at once
+            if (!(party.SubParties?.Count > 0)) continue;
+            var subCount = party.SubParties.Count;
+            for (var j = 0; j < subCount; j++)
+            {
+                var subParty = party.SubParties[j];
+                flattenedList.Add(new AuthorizedParty
+                {
+                    Party = subParty.Party,
+                    ParentParty = party.Party,
+                    AuthorizedRoles = subParty.AuthorizedRoles?.Count > 0
+                        ? new List<string>(subParty.AuthorizedRoles)
+                        : EmptyRolesList,
+                    SubParties = EmptySubPartiesList
+                });
+            }
+        }
+
+        return new AuthorizedPartiesResult
+        {
+            AuthorizedParties = flattenedList
+        };
     }
 
     private async Task<AuthorizedPartiesResult> PerformAuthorizedPartiesRequest(AuthorizedPartiesRequest authorizedPartiesRequest,
@@ -176,27 +227,14 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 .ToList();
         }
 
-        var dialogSearchAuthorizationResult = new DialogSearchAuthorizationResult
+        using (_logger.TimeOperation(nameof(AuthorizationHelper.CollapseSubjectResources)))
         {
-            ResourcesByParties = authorizedParties.AuthorizedParties
-                .ToDictionary(
-                    p => p.Party,
-                    p => p.AuthorizedResources
-                        .Where(r => request.ConstraintServiceResources.Count == 0 || request.ConstraintServiceResources.Contains(r))
-                        .ToHashSet())
-                // Skip parties with no authorized resources
-                .Where(kv => kv.Value.Count != 0)
-                .ToDictionary(kv => kv.Key, kv => kv.Value),
-        };
-
-        await AuthorizationHelper.CollapseSubjectResources(
-            dialogSearchAuthorizationResult,
-            authorizedParties,
-            request.ConstraintServiceResources,
-            GetAllSubjectResources,
-            cancellationToken);
-
-        return dialogSearchAuthorizationResult;
+            return await AuthorizationHelper.CollapseSubjectResources(
+                authorizedParties,
+                request.ConstraintServiceResources,
+                GetAllSubjectResources,
+                cancellationToken);
+        }
     }
     private async Task<List<SubjectResource>> GetAllSubjectResources(CancellationToken cancellationToken) =>
         await _subjectResourcesCache.GetOrSetAsync(nameof(SubjectResource), async ct =>

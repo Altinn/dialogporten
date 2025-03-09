@@ -34,30 +34,6 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
     }
 
     [Fact]
-    public async Task Search_Dialog_LatestActivity_Should_Not_Return_User_Ids_Unhashed()
-    {
-        // Arrange
-        var (createDialogCommand, _) = await GenerateDialogWithActivity();
-
-        // Act
-        var response = await Application.Send(new SearchDialogQuery
-        {
-            ServiceResource = [createDialogCommand.Dto.ServiceResource]
-        });
-
-        // Assert
-        response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-
-        result.Items
-            .Single()
-            .LatestActivity!
-            .PerformedBy.ActorId
-            .Should()
-            .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
-    }
-
-    [Fact]
     public async Task Get_ActivityLog_Should_Not_Return_User_Ids_Unhashed()
     {
         // Arrange

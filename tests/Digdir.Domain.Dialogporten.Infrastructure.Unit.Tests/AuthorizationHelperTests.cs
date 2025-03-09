@@ -55,8 +55,7 @@ public class AuthorizationHelperTests
         }
 
         // Act
-        await AuthorizationHelper.CollapseSubjectResources(
-            dialogSearchAuthorizationResult,
+        dialogSearchAuthorizationResult = await AuthorizationHelper.CollapseSubjectResources(
             authorizedParties,
             constraintResources,
             GetSubjectResources,

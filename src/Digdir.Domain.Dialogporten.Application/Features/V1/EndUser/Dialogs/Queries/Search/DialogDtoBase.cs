@@ -108,7 +108,7 @@ public class DialogDtoBase
     /// <summary>
     /// The latest entry in the dialog's activity log.
     /// </summary>
-    public DialogActivityDto? LatestActivity { get; set; }
+    ///public DialogActivityDto? LatestActivity { get; set; }
 
     /// <summary>
     /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.

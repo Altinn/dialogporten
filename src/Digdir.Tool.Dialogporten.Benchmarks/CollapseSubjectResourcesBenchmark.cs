@@ -9,16 +9,16 @@ namespace Digdir.Tool.Dialogporten.Benchmarks;
 public class CollapseSubjectResourcesBenchmark
 {
     // Parameters for controlling the size of inputs
-    [Params(1000)]
+    [Params(20, 1000)]
     public int PartyCount { get; set; }
 
-    [Params(5)]
+    [Params(5, 20)]
     public int RolesPerParty { get; set; }
 
     [Params(0)]
     public int ConstraintResourcesCount { get; set; }
 
-    [Params(1000)]
+    [Params(100, 1000)]
     public int SubjectResourcesCount { get; set; }
 
     // Test data
@@ -120,48 +120,12 @@ public class CollapseSubjectResourcesBenchmark
         return dialogSearchAuthorizationResult;
     }
 
-    // Alternative implementation 1: Not mutating input
+    // New implementation not mutating input
     [Benchmark]
     [BenchmarkCategory("Implementation")]
     public async Task<DialogSearchAuthorizationResult> NewNonMutating()
     {
         return await CollapseSubjectResources(
-            _authorizedParties,
-            _constraintResources,
-            _ => Task.FromResult(_allSubjectResources),
-            CancellationToken.None);
-    }
-
-    // Alternative implementation 2: Using LINQ more heavily
-    [Benchmark]
-    [BenchmarkCategory("Implementation")]
-    public async Task<DialogSearchAuthorizationResult> LinqImplementation()
-    {
-        return await CollapseSubjectResourcesLinq(
-            _authorizedParties,
-            _constraintResources,
-            _ => Task.FromResult(_allSubjectResources),
-            CancellationToken.None);
-    }
-
-    // Alternative implementation 3: Using parallel processing for large data sets
-    [Benchmark]
-    [BenchmarkCategory("Implementation")]
-    public async Task<DialogSearchAuthorizationResult> ParallelImplementation()
-    {
-        return await CollapseSubjectResourcesParallel(
-            _authorizedParties,
-            _constraintResources,
-            _ => Task.FromResult(_allSubjectResources),
-            CancellationToken.None);
-    }
-
-    // Alternative implementation 4: Pre-allocating all collections
-    [Benchmark]
-    [BenchmarkCategory("Implementation")]
-    public async Task<DialogSearchAuthorizationResult> PreallocatedImplementation()
-    {
-        return await CollapseSubjectResourcesPreallocated(
             _authorizedParties,
             _constraintResources,
             _ => Task.FromResult(_allSubjectResources),
@@ -216,7 +180,7 @@ public class CollapseSubjectResourcesBenchmark
 
 
     // New implementation
-    private static async Task<DialogSearchAuthorizationResult> CollapseSubjectResources(
+    public static async Task<DialogSearchAuthorizationResult> CollapseSubjectResources(
         AuthorizedPartiesResult authorizedParties,
         List<string> constraintResources,
         Func<CancellationToken, Task<List<SubjectResource>>> getAllSubjectResources,
@@ -304,306 +268,6 @@ public class CollapseSubjectResourcesBenchmark
         return result;
     }
 
-    // Alternative implementation 1: Using LINQ more heavily
-    private static async Task<DialogSearchAuthorizationResult> CollapseSubjectResourcesLinq(
-        AuthorizedPartiesResult authorizedParties,
-        List<string> constraintResources,
-        Func<CancellationToken, Task<List<SubjectResource>>> getAllSubjectResources,
-        CancellationToken cancellationToken)
-    {
-        var result = new DialogSearchAuthorizationResult
-        {
-            ResourcesByParties = new Dictionary<string, HashSet<string>>(100)
-        };
-
-        // Quick check for empty input
-        if (authorizedParties.AuthorizedParties.Count == 0)
-            return result;
-
-        // Filter parties with roles
-        var partiesWithRoles = authorizedParties.AuthorizedParties
-            .Where(p => p.AuthorizedRoles.Count > 0)
-            .Select(p => (p.Party, p.AuthorizedRoles))
-            .ToList();
-
-        if (partiesWithRoles.Count == 0)
-            return result;
-
-        // Get unique subjects
-        var uniqueSubjects = partiesWithRoles
-            .SelectMany(p => p.AuthorizedRoles)
-            .ToHashSet();
-
-        // Get subject resources
-        var subjectResources = await getAllSubjectResources(cancellationToken);
-
-        // Create constraint resources set if needed
-        var constraintResourcesSet = constraintResources.Count > 0
-            ? new HashSet<string>(constraintResources)
-            : null;
-
-        // Build subject-to-resources dictionary with filtering
-        var subjectToResources = subjectResources
-            .Where(sr => uniqueSubjects.Contains(sr.Subject) &&
-                         (constraintResourcesSet == null || constraintResourcesSet.Contains(sr.Resource)))
-            .GroupBy(sr => sr.Subject)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(sr => sr.Resource).ToHashSet()
-            );
-
-        // Populate result dictionary
-        foreach (var (party, roles) in partiesWithRoles)
-        {
-            var partyResources = new HashSet<string>();
-            var hasResources = false;
-
-            foreach (var role in roles)
-            {
-                if (subjectToResources.TryGetValue(role, out var resources))
-                {
-                    partyResources.UnionWith(resources);
-                    hasResources = true;
-                }
-            }
-
-            if (hasResources)
-            {
-                result.ResourcesByParties[party] = partyResources;
-            }
-        }
-
-        return result;
-    }
-
-    // Alternative implementation 2: Using parallel processing for large data sets
-    private static async Task<DialogSearchAuthorizationResult> CollapseSubjectResourcesParallel(
-        AuthorizedPartiesResult authorizedParties,
-        List<string> constraintResources,
-        Func<CancellationToken, Task<List<SubjectResource>>> getAllSubjectResources,
-        CancellationToken cancellationToken)
-    {
-        var result = new DialogSearchAuthorizationResult
-        {
-            ResourcesByParties = new Dictionary<string, HashSet<string>>(100)
-        };
-
-        // Quick check for empty input
-        if (authorizedParties.AuthorizedParties.Count == 0)
-            return result;
-
-        // Step 1: Pre-filter parties with roles and build the unique subjects set
-        var uniqueSubjects = new HashSet<string>(100);
-        var partiesWithRoles = new List<(string Party, List<string> Roles)>();
-
-        foreach (var party in authorizedParties.AuthorizedParties)
-        {
-            if (!(party.AuthorizedRoles.Count > 0)) continue;
-            partiesWithRoles.Add((party.Party, party.AuthorizedRoles));
-
-            foreach (var role in party.AuthorizedRoles)
-            {
-                uniqueSubjects.Add(role);
-            }
-        }
-
-        if (partiesWithRoles.Count == 0)
-            return result;
-
-        // Step 2: Get and preprocess subject resources
-        var subjectResources = await getAllSubjectResources(cancellationToken);
-
-        HashSet<string>? constraintResourcesSet = null;
-        if (constraintResources.Count > 0)
-        {
-            constraintResourcesSet = new HashSet<string>(constraintResources);
-        }
-
-        // Step 3: Build subject-to-resources dictionary with early filtering (parallel for large datasets)
-        var subjectToResources = new Dictionary<string, HashSet<string>>(uniqueSubjects.Count);
-        var lockObject = new object();
-
-        // Only use parallel processing if we have a large number of subject resources
-        if (subjectResources.Count > 1000)
-        {
-            var partitioner = System.Collections.Concurrent.Partitioner.Create(subjectResources);
-
-            Parallel.ForEach(partitioner, sr =>
-            {
-                // Skip if not in our subjects list
-                if (!uniqueSubjects.Contains(sr.Subject))
-                    return;
-
-                // Skip if constraint resources exist and this resource isn't in the constraints
-                if (constraintResourcesSet != null && !constraintResourcesSet.Contains(sr.Resource))
-                    return;
-
-                lock (lockObject)
-                {
-                    // Add to our lookup dictionary
-                    if (!subjectToResources.TryGetValue(sr.Subject, out var resources))
-                    {
-                        resources = new HashSet<string>();
-                        subjectToResources[sr.Subject] = resources;
-                    }
-
-                    resources.Add(sr.Resource);
-                }
-            });
-        }
-        else
-        {
-            // Use original sequential approach for smaller datasets
-            foreach (var sr in subjectResources)
-            {
-                // Skip if not in our subjects list
-                if (!uniqueSubjects.Contains(sr.Subject))
-                    continue;
-
-                // Skip if constraint resources exist and this resource isn't in the constraints
-                if (constraintResourcesSet != null && !constraintResourcesSet.Contains(sr.Resource))
-                    continue;
-
-                // Add to our lookup dictionary
-                if (!subjectToResources.TryGetValue(sr.Subject, out var resources))
-                {
-                    resources = new HashSet<string>();
-                    subjectToResources[sr.Subject] = resources;
-                }
-
-                resources.Add(sr.Resource);
-            }
-        }
-
-        // Step 4: Populate result dictionary
-        foreach (var (party, roles) in partiesWithRoles)
-        {
-            var partyResources = new HashSet<string>();
-            var hasResources = false;
-
-            foreach (var role in roles)
-            {
-                if (subjectToResources.TryGetValue(role, out var resources))
-                {
-                    partyResources.UnionWith(resources);
-                    hasResources = true;
-                }
-            }
-
-            if (hasResources)
-            {
-                result.ResourcesByParties[party] = partyResources;
-            }
-        }
-
-        return result;
-    }
-
-    // Alternative implementation 3: Pre-allocating all collections with proper sizing
-    private static async Task<DialogSearchAuthorizationResult> CollapseSubjectResourcesPreallocated(
-        AuthorizedPartiesResult authorizedParties,
-        List<string> constraintResources,
-        Func<CancellationToken, Task<List<SubjectResource>>> getAllSubjectResources,
-        CancellationToken cancellationToken)
-    {
-        // Estimate capacity for collections based on input sizes
-        var partyCount = authorizedParties.AuthorizedParties.Count;
-
-        var result = new DialogSearchAuthorizationResult
-        {
-            ResourcesByParties = new Dictionary<string, HashSet<string>>(partyCount)
-        };
-
-        // Quick check for empty input
-        if (partyCount == 0)
-            return result;
-
-        // Step 1: Pre-filter parties with roles and build the unique subjects set
-        // Estimate the total number of roles for pre-allocation
-        var estimatedTotalRoles = authorizedParties.AuthorizedParties.Sum(p => p.AuthorizedRoles.Count);
-        var uniqueSubjects = new HashSet<string>(estimatedTotalRoles);
-        var partiesWithRoles = new List<(string Party, List<string> Roles)>(partyCount);
-
-        foreach (var party in authorizedParties.AuthorizedParties)
-        {
-            if (!(party.AuthorizedRoles.Count > 0)) continue;
-            partiesWithRoles.Add((party.Party, party.AuthorizedRoles));
-
-            // Pre-allocate unique subjects to reduce resizing
-            foreach (var role in party.AuthorizedRoles)
-            {
-                uniqueSubjects.Add(role);
-            }
-        }
-
-        if (partiesWithRoles.Count == 0)
-            return result;
-
-        // Step 2: Get and preprocess subject resources
-        var subjectResources = await getAllSubjectResources(cancellationToken);
-
-        // Pre-allocate constraint resources set if needed
-        HashSet<string>? constraintResourcesSet = null;
-        if (constraintResources.Count > 0)
-        {
-            constraintResourcesSet = new HashSet<string>(constraintResources.Count, StringComparer.Ordinal);
-            foreach (var resource in constraintResources)
-            {
-                constraintResourcesSet.Add(resource);
-            }
-        }
-
-        // Step 3: Estimate the number of resources per subject for pre-allocation
-        var avgResourcesPerSubject = subjectResources.Count / Math.Max(1, uniqueSubjects.Count);
-        var subjectToResources = new Dictionary<string, HashSet<string>>(uniqueSubjects.Count);
-
-        // Pre-create all HashSets for subjects to avoid resizing
-        foreach (var subject in uniqueSubjects)
-        {
-            subjectToResources[subject] = new HashSet<string>(avgResourcesPerSubject);
-        }
-
-        // Populate the subject-to-resources mapping
-        foreach (var sr in subjectResources)
-        {
-            // Skip if not in our subjects list
-            if (!uniqueSubjects.Contains(sr.Subject))
-                continue;
-
-            // Skip if constraint resources exist and this resource isn't in the constraints
-            if (constraintResourcesSet != null && !constraintResourcesSet.Contains(sr.Resource))
-                continue;
-
-            // We know the HashSet exists because we pre-created it
-            subjectToResources[sr.Subject].Add(sr.Resource);
-        }
-
-        // Step 4: Populate result dictionary
-        // Estimate average number of resources per party
-        var avgResourcesPerParty = estimatedTotalRoles * avgResourcesPerSubject / partyCount;
-
-        foreach (var (party, roles) in partiesWithRoles)
-        {
-            var partyResources = new HashSet<string>(avgResourcesPerParty);
-            var hasResources = false;
-
-            foreach (var role in roles)
-            {
-                if (subjectToResources.TryGetValue(role, out var resources) && resources.Count > 0)
-                {
-                    partyResources.UnionWith(resources);
-                    hasResources = true;
-                }
-            }
-
-            if (hasResources)
-            {
-                result.ResourcesByParties[party] = partyResources;
-            }
-        }
-
-        return result;
-    }
 }
 
 // Mock classes for completeness

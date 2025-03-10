@@ -96,24 +96,13 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(authenticatedParty);
 
         AuthorizedPartiesResult authorizedParties;
-        string cacheKey;
-        using (_logger.TimeOperation("GenerateCacheKey"))
-        {
-            cacheKey = authorizedPartiesRequest.GenerateCacheKey();
-        }
-        var cacheKeyFlattened = cacheKey + "_flattened";
-
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
-            authorizedParties = await _partiesCache.GetOrSetAsync(cacheKey, async token
+            authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
                 => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
         }
 
-        if (!flatten) return authorizedParties;
-        using (_logger.TimeOperation(nameof(GetFlattenedAuthorizedParties)))
-        {
-            return _partiesCache.GetOrSet(cacheKeyFlattened, _ => GetFlattenedAuthorizedParties(authorizedParties), token: cancellationToken);
-        }
+        return !flatten ? authorizedParties : GetFlattenedAuthorizedParties(authorizedParties);
     }
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
@@ -138,17 +127,14 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         return UserHasRequiredAuthLevel(minimumAuthenticationLevel);
     }
 
-
     // Create static empty lists to reuse and avoid allocations
     private static readonly List<string> EmptyRolesList = [];
     private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
 
     private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)
     {
-        // If we know there's always only one level of nesting, we can optimize specifically for this case
         var topLevelCount = authorizedParties.AuthorizedParties.Count;
 
-        // Pre-calculate the total capacity needed
         var totalCapacity = topLevelCount;
         for (var i = 0; i < topLevelCount; i++)
         {
@@ -162,24 +148,20 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         // Preallocate the exact size needed
         var flattenedList = new List<AuthorizedParty>(totalCapacity);
 
-        // Process top-level parties first (no parent)
         for (var i = 0; i < topLevelCount; i++)
         {
             var party = authorizedParties.AuthorizedParties[i];
 
-            // Add a cloned version of the current party without subparties
             flattenedList.Add(new AuthorizedParty
             {
                 Party = party.Party,
                 ParentParty = null,
-                // Reuse empty lists for parties with no roles to reduce allocations
                 AuthorizedRoles = party.AuthorizedRoles.Count > 0
                     ? new List<string>(party.AuthorizedRoles)
                     : EmptyRolesList,
                 SubParties = EmptySubPartiesList
             });
 
-            // If this party has subparties, add them all at once
             if (!(party.SubParties?.Count > 0)) continue;
             var subCount = party.SubParties.Count;
             for (var j = 0; j < subCount; j++)
@@ -189,7 +171,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 {
                     Party = subParty.Party,
                     ParentParty = party.Party,
-                    AuthorizedRoles = subParty.AuthorizedRoles?.Count > 0
+                    AuthorizedRoles = subParty.AuthorizedRoles.Count > 0
                         ? new List<string>(subParty.AuthorizedRoles)
                         : EmptyRolesList,
                     SubParties = EmptySubPartiesList

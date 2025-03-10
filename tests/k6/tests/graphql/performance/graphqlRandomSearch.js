@@ -4,23 +4,10 @@ import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
 import { getGraphqlParty } from '../../performancetest_data/graphql-search.js';
 import { postGQ } from '../../../common/request.js';
+import { texts, texts_no_hit, resources } from '../../performancetest_common/readTestdata.js';
+
 const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
 const defaultNumberOfEndUsers = (__ENV.NUMBER_OF_ENDUSERS ?? 2799); // Max number of endusers from altinn-testtools now.
-
-const texts = [ "påkrevd", "rapportering", "sammendrag", "Utvidet Status", "ingen HTML-støtte", "et eller annet", "Skjema", "Skjema for rapportering av et eller annet", "Maks 200 tegn", "liste" ];
-const texts_no_hit = [ "sjøvegan", "larvik", "kvalsund", "jøssheim", "sørli"];
-const resources = [ 
-    "ttd-dialogporten-performance-test-01", 
-    "ttd-dialogporten-performance-test-02", 
-    "ttd-dialogporten-performance-test-03", 
-    "ttd-dialogporten-performance-test-04", 
-    "ttd-dialogporten-performance-test-05", 
-    "ttd-dialogporten-performance-test-06", 
-    "ttd-dialogporten-performance-test-07", 
-    "ttd-dialogporten-performance-test-08", 
-    "ttd-dialogporten-performance-test-09", 
-    "ttd-dialogporten-performance-test-10"
-];
 
 // Available enduser filters:
 // org, party, serviceResource, extendedStatus, externalReference, status, createdAfter, createdBefore, updatedAfter, updatedBefore, dueAfter, dueBefore, Search, searchLanguageCode, orderBy, limit

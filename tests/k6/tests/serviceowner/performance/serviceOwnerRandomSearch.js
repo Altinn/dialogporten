@@ -5,24 +5,10 @@ import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
 import { baseUrlServiceOwner } from '../../../common/config.js';
 import { getEnterpriseToken } from '../../performancetest_common/getTokens.js';
+import { texts, texts_no_hit, resources } from '../../performancetest_common/readTestdata.js';
 const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
 
-const texts = [ "påkrevd", "rapportering", "sammendrag", "Utvidet Status", "ingen HTML-støtte", "et eller annet", "Skjema", "Skjema for rapportering av et eller annet", "Maks 200 tegn", "liste" ];
-const texts_no_hit = [ "sjøvegan", "larvik", "kvalsund", "jøssheim", "sørli"];
-const resources = [ 
-    "ttd-dialogporten-performance-test-01", 
-    "ttd-dialogporten-performance-test-02", 
-    "ttd-dialogporten-performance-test-03", 
-    "ttd-dialogporten-performance-test-04", 
-    "ttd-dialogporten-performance-test-05", 
-    "ttd-dialogporten-performance-test-06", 
-    "ttd-dialogporten-performance-test-07", 
-    "ttd-dialogporten-performance-test-08", 
-    "ttd-dialogporten-performance-test-09", 
-    "ttd-dialogporten-performance-test-10"
-];
-
-// Available enduser filters:
+// Available serviceowner filters:
 // party, endUser, serviceResource, status, deleted, createdAfter, createdBefore, updatedAfter, updatedBefore, dueAfter, dueBefore, visibleAfter, visibleBefore, Search, searchLanguageCode, orderBy, limit
 
 const filter_combos = [
@@ -41,7 +27,6 @@ const filter_combos = [
 ];
 
 const orgNos = ["713431400"]
-
 
 export let options = {
     summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(95)', 'p(99)', 'p(99.5)', 'p(99.9)', 'count'],

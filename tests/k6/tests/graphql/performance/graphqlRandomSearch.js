@@ -1,10 +1,11 @@
-import http from 'k6/http';
 import { randomItem, uuidv4, URL} from '../../../common/k6-utils.js';
 import { getEndUserTokens } from '../../../common/token.js';
 import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
-import { baseUrlEndUser } from '../../../common/config.js';
+import { getGraphqlParty } from '../../performancetest_data/graphql-search.js';
+import { postGQ } from '../../../common/request.js';
 import { texts, texts_no_hit, resources } from '../../performancetest_common/readTestdata.js';
+
 const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
 const defaultNumberOfEndUsers = (__ENV.NUMBER_OF_ENDUSERS ?? 2799); // Max number of endusers from altinn-testtools now.
 
@@ -13,19 +14,22 @@ const defaultNumberOfEndUsers = (__ENV.NUMBER_OF_ENDUSERS ?? 2799); // Max numbe
 
 const filter_combos = [
     {label: "serviceresource", filters: ["serviceResource"]},
+    {label: "createdafter", filters: ["createdAfter"]},
     {label: "serviceresource-createdafter", filters: ["serviceResource", "createdAfter"]},
     {label: "serviceresource-createdbefore", filters: ["serviceResource", "createdBefore"]},
     {label: "party-createdafter", filters: ["party", "createdAfter"]},
     {label: "party-createdbefore", filters: ["party", "createdBefore"]},
-    {label: "search-party-createdafter", filters: ["Search", "party", "createdAfter"]},
-    {label: "search-serviceresource-createdafter", filters: ["Search", "serviceResource", "createdAfter"]},
-    {label: "search-serviceresource-createdafter-nohit", filters: ["Search", "serviceResource", "createdAfter"]},
-    {label: "search-serviceresource", filters: ["Search", "serviceresource"]},
-    {label: "search-party-createdafter", filters: ["Search", "party", "createdAfter"]},
-    {label: "search-party-createdafter-nohit", filters: ["Search", "party", "createdAfter"]},
-    {label: "search-party", filters: ["Search", "party"]},
-    {label: "party", filters: ["party"]},
-
+    {label: "search-serviceresource-createdafter", filters: ["search", "serviceResource", "createdAfter"]},
+    {label: "search-serviceresource-createdbefore", filters: ["search", "serviceResource", "createdBefore"]},
+    {label: "search-serviceresource-createdafter-nohit", filters: ["search", "serviceResource", "createdAfter"]},
+    {label: "search-serviceresource", filters: ["search", "serviceResource"]},
+    {label: "search-party-createdafter", filters: ["search", "party", "createdAfter"]},
+    {label: "search-party-createdbefore", filters: ["search", "party", "createdBefore"]},
+    {label: "search-party-createdafter-nohit", filters: ["search", "party", "createdAfter"]},
+    {label: "search-party-createdbefore-nohit", filters: ["search", "party", "createdBefore"]},
+    {label: "search-party", filters: ["search", "party"]},
+    {label: "search-party-nohit", filters: ["search", "party"]},
+    {label: "party", filters: ["party"]}
 ];
 
 export let options = {
@@ -59,7 +63,7 @@ function get_filter_value(filter, label, endUser) {
         case "deleted": return "Exclude";
         case "createdAfter": return new Date(Date.now() - 7*24*60*60*1000).toISOString();
         case "createdBefore": return new Date(Date.now() - 7*24*60*60*1000).toISOString();
-        case "Search": return label.includes("nohit") ? randomItem(texts_no_hit) : randomItem(texts);
+        case "search": return label.includes("nohit") ? randomItem(texts_no_hit) : randomItem(texts);
         default: return "urn:altinn:resource:" +randomItem(resources);
     }
 }
@@ -77,7 +81,7 @@ export function setup(numberOfEndUsers = defaultNumberOfEndUsers) {
 
 export default function(data) {
     const endUser = randomItem(Object.keys(data));
-    const [queryParams, label] = get_query_params(endUser);
+    const [searchParams, label] = get_query_params(endUser);
     const token = data[endUser];
     const traceparent = uuidv4();
     const paramsWithToken = {
@@ -94,16 +98,10 @@ export default function(data) {
         paramsWithToken.tags.traceparent = traceparent;
     }
 
-    const url = new URL(baseUrlEndUser + 'dialogs');
-    for (const key in queryParams) {
-        url.searchParams.append(key, queryParams[key]);    
-    }
-
-    describe('Perform enduser dialog list', () => {
-        let r = http.get(url.toString(), paramsWithToken);
+    describe('Perform graphql dialog list', () => {
+        let r = postGQ(getGraphqlParty(searchParams), paramsWithToken);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
-        return r
     });
 }
 

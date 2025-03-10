@@ -19,8 +19,6 @@ const filter_combos = [
     {label: "serviceresource-createdbefore", filters: ["serviceResource", "createdBefore"]},
     {label: "party-createdafter", filters: ["party", "createdAfter"]},
     {label: "party-createdbefore", filters: ["party", "createdBefore"]},
-    {label: "search-party-createdafter", filters: ["search", "party", "createdAfter"]},
-    {label: "search-party-createdbefore", filters: ["search", "party", "createdBefore"]},
     {label: "search-serviceresource-createdafter", filters: ["search", "serviceResource", "createdAfter"]},
     {label: "search-serviceresource-createdbefore", filters: ["search", "serviceResource", "createdBefore"]},
     {label: "search-serviceresource-createdafter-nohit", filters: ["search", "serviceResource", "createdAfter"]},

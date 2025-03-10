@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.57.7](https://github.com/Altinn/dialogporten/compare/v1.57.6...v1.57.7) (2025-03-09)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency htmlagilitypack to 1.11.74 ([#2024](https://github.com/Altinn/dialogporten/issues/2024)) ([4a1c549](https://github.com/Altinn/dialogporten/commit/4a1c54930490ae45ddeabc294c2c9b1e774fbfbf))
+* **deps:** update dependency verify.xunit to 28.13.0 ([#2026](https://github.com/Altinn/dialogporten/issues/2026)) ([c3d24bb](https://github.com/Altinn/dialogporten/commit/c3d24bb63c44d6c4b542c95474ae4c7231aa7da8))
+* **deps:** update microsoft dependencies ([#2027](https://github.com/Altinn/dialogporten/issues/2027)) ([0fe4ee3](https://github.com/Altinn/dialogporten/commit/0fe4ee3471bb1d079516f6d7708e892483b6517e))
+
+## [1.57.6](https://github.com/Altinn/dialogporten/compare/v1.57.5...v1.57.6) (2025-03-07)
+
+
+### Bug Fixes
+
+* **ci:** Add always() for performance tests ([#2022](https://github.com/Altinn/dialogporten/issues/2022)) ([82e28ec](https://github.com/Altinn/dialogporten/commit/82e28ecc699887e44c9f598ae535ebc27a4c32b6))
+* **db:** Add missing indexes for search ([#2015](https://github.com/Altinn/dialogporten/issues/2015)) ([69d75a6](https://github.com/Altinn/dialogporten/commit/69d75a6fee5685cb250da1641fa2f3c4de70c149))
+* Disallow search filter with CreatedAfter greater than CreatedBefore ([#2019](https://github.com/Altinn/dialogporten/issues/2019)) ([75af11e](https://github.com/Altinn/dialogporten/commit/75af11e4d0877979431498ef06c98157af6b7529))
+
+
+### Miscellaneous Chores
+
+* **graphql:** Remove HasOnlyAccessToSubParties from sub-party ([#2021](https://github.com/Altinn/dialogporten/issues/2021)) ([8b7a8b6](https://github.com/Altinn/dialogporten/commit/8b7a8b60714894c7d231ce1c872d145f879a7172))
+
 ## [1.57.5](https://github.com/Altinn/dialogporten/compare/v1.57.4...v1.57.5) (2025-03-06)
 
 

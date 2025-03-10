@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.57.7](https://github.com/Altinn/dialogporten/compare/v1.57.6...v1.57.7) (2025-03-09)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency htmlagilitypack to 1.11.74 ([#2024](https://github.com/Altinn/dialogporten/issues/2024)) ([4a1c549](https://github.com/Altinn/dialogporten/commit/4a1c54930490ae45ddeabc294c2c9b1e774fbfbf))
+* **deps:** update dependency verify.xunit to 28.13.0 ([#2026](https://github.com/Altinn/dialogporten/issues/2026)) ([c3d24bb](https://github.com/Altinn/dialogporten/commit/c3d24bb63c44d6c4b542c95474ae4c7231aa7da8))
+* **deps:** update microsoft dependencies ([#2027](https://github.com/Altinn/dialogporten/issues/2027)) ([0fe4ee3](https://github.com/Altinn/dialogporten/commit/0fe4ee3471bb1d079516f6d7708e892483b6517e))
+
 ## [1.57.6](https://github.com/Altinn/dialogporten/compare/v1.57.5...v1.57.6) (2025-03-07)
 
 

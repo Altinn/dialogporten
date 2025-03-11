@@ -49,6 +49,34 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 column: "ActorNameEntityId",
                 principalTable: "ActorName",
                 principalColumn: "Id");
+            
+            
+            migrationBuilder.Sql("""
+                                    INSERT INTO "ActorName" ("Id", "CreatedAt", "ActorId", "Name")
+                                    SELECT a."Id", -- Just borrow the Id from Actor to get uuid7
+                                           a."CreatedAt",
+                                           a."ActorId",
+                                           a."ActorName"
+                                    FROM "Actor" a
+                                    ON CONFLICT DO NOTHING;
+                                    
+                                    UPDATE "Actor" a
+                                    SET "ActorNameEntityId" = (
+                                        SELECT an."Id"
+                                            FROM "ActorName" an
+                                            WHERE a."ActorId" = an."ActorId"
+                                                AND "ActorName" = an."Name")
+                                      WHERE "ActorNameEntityId" IS NULL;
+                                 """);
+            
+            migrationBuilder.DropColumn(
+                name: "ActorId",
+                table: "Actor");
+
+            migrationBuilder.DropColumn(
+                name: "ActorName",
+                table: "Actor");
+
         }
 
         /// <inheritdoc />
@@ -68,6 +96,20 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.DropColumn(
                 name: "ActorNameEntityId",
                 table: "Actor");
+
+            migrationBuilder.AddColumn<string>(
+                name: "ActorId",
+                table: "Actor",
+                type: "character varying(255)",
+                maxLength: 255,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "ActorName",
+                table: "Actor",
+                type: "character varying(255)",
+                maxLength: 255,
+                nullable: true);
         }
     }
 }

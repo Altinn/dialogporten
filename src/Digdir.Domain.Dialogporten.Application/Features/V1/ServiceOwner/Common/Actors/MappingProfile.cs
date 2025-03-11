@@ -21,8 +21,7 @@ internal sealed class MappingProfile : Profile
         CreateMap<ActorDto, Actor>()
             .ForMember(dest => dest.ActorType, opt => opt.Ignore())
             .ForMember(dest => dest.ActorTypeId, opt => opt.MapFrom(src => src.ActorType))
-            .ForMember(dest => dest.ActorName, opt => opt.Ignore())
-            .ForMember(dest => dest.ActorId, opt => opt.Ignore());
+            .ForMember(dest => dest.ActorNameEntity, opt => opt.MapFrom(src => src));
 
         CreateMap<ActorDto, ActorName>()
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.ActorName))

@@ -9,4 +9,6 @@ public sealed class ActorName : IImmutableEntity
     public string? ActorId { get; set; }
     public string? Name { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+
+    public List<Actor> ActorEntities { get; set; } = [];
 }

@@ -11,6 +11,7 @@ public sealed class DialogApiAction : IEntity
 
     public string Action { get; set; } = null!;
     public string? AuthorizationAttribute { get; set; }
+    public string? Name { get; set; }
 
     // === Dependent relationships ===
     public Guid DialogId { get; set; }

@@ -343,6 +343,7 @@ public static class DialogGenerator
         return new Faker<ApiActionDto>()
             .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
             .RuleFor(o => o.Action, f => f.Random.AlphaNumeric(8))
+            .RuleFor(o => o.Name, f => f.Random.AlphaNumeric(8))
             .RuleFor(o => o.Endpoints, _ => GenerateFakeDialogApiActionEndpoints())
             .Generate(new Randomizer().Number(1, 4));
     }

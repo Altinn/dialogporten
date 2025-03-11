@@ -37,6 +37,7 @@ type ApiAction {
   action: String!
   authorizationAttribute: String
   isAuthorized: Boolean!
+  name: String
   endpoints: [ApiActionEndpoint!]!
 }
 

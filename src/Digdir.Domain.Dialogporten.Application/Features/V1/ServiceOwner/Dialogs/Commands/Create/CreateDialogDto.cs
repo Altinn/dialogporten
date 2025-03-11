@@ -361,6 +361,12 @@ public sealed class ApiActionDto
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
+    /// The logical name of the operation the API action refers to.
+    /// </summary>
+    /// <example>confirm</example>
+    public string? Name { get; set; }
+
+    /// <summary>
     /// The endpoints associated with the action.
     /// </summary>
     public List<ApiActionEndpointDto> Endpoints { get; set; } = [];

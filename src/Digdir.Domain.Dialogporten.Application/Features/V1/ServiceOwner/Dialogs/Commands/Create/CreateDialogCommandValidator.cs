@@ -392,6 +392,8 @@ internal sealed class CreateDialogDialogApiActionDtoValidator : AbstractValidato
             .MaximumLength(Constants.DefaultMaxStringLength);
         RuleFor(x => x.AuthorizationAttribute)
             .MaximumLength(Constants.DefaultMaxStringLength);
+        RuleFor(x => x.Name)
+            .MaximumLength(Constants.DefaultMaxStringLength);
         RuleFor(x => x.Endpoints)
             .NotEmpty()
             .ForEach(x => x.SetValidator(apiActionEndpointValidator));

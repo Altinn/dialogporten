@@ -151,6 +151,21 @@ public sealed class CreateDialogDto
 
 public sealed class TransmissionDto
 {
+    public TransmissionDto()
+    {
+    }
+    public TransmissionDto(Guid? id, DateTimeOffset createdAt, string? authorizationAttribute, Uri? extendedType, Guid? relatedTransmissionId, DialogTransmissionType.Values type, ActorDto sender, TransmissionContentDto content, List<TransmissionAttachmentDto> attachments)
+    {
+        Id = id;
+        CreatedAt = createdAt;
+        AuthorizationAttribute = authorizationAttribute;
+        ExtendedType = extendedType;
+        RelatedTransmissionId = relatedTransmissionId;
+        Type = type;
+        Sender = sender;
+        Content = content;
+        Attachments = attachments;
+    }
     /// <summary>
     /// A self-defined UUIDv7 may be provided to support idempotent creation of transmissions. If not provided, a new UUIDv7 will be generated.
     /// </summary>

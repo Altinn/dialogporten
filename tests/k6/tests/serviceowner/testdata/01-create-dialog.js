@@ -224,6 +224,7 @@ export default function (endUser = getDefaultEnduserSsn()) {
         "apiActions": [
             {
                 "action": "some_unauthorized_action",
+                "name": "confirm",
                 "endPoints": [
                     {
                         "url": "https://digdir.no",

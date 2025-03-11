@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.58.0](https://github.com/Altinn/dialogporten/compare/v1.57.7...v1.58.0) (2025-03-11)
+
+
+### Features
+
+* Add Name to ApiAction as optional field ([#2034](https://github.com/Altinn/dialogporten/issues/2034)) ([95ba41e](https://github.com/Altinn/dialogporten/commit/95ba41e154265e2774f1581e5fe25142bf3e579b))
+
+
+### Bug Fixes
+
+* **webapi:** Move swagger server override to correct post processing step ([#2037](https://github.com/Altinn/dialogporten/issues/2037)) ([e2ba5d5](https://github.com/Altinn/dialogporten/commit/e2ba5d567a236bd6b32bc0b5d1684801a106aa37))
+
+
+### Miscellaneous Chores
+
+* **performance:** Make improved tests for graphql search ([#2030](https://github.com/Altinn/dialogporten/issues/2030)) ([3688892](https://github.com/Altinn/dialogporten/commit/36888929f762074fca0acccd2348671b79ffd998))
+
 ## [1.57.7](https://github.com/Altinn/dialogporten/compare/v1.57.6...v1.57.7) (2025-03-09)
 
 

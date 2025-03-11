@@ -25,24 +25,11 @@ internal sealed class MappingProfile : Profile
         CreateMap<ActorName, ActorDto>()
             .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.Name))
             .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => IdentifierMasker.GetMaybeMaskedIdentifier(src.ActorId)));
-        // CreateMap<ActorName, ActorDto>()
-        //     .ConvertUsing<ActorNameEntityConverter>();
 
         foreach (var outputActor in derivedActorTypes)
         {
             CreateMap(outputActor, actorDtoType)
                 .IncludeBase(actorType, actorDtoType);
         }
-    }
-}
-
-internal abstract class ActorNameEntityConverter : ITypeConverter<ActorName, ActorDto>
-{
-    public ActorDto Convert(ActorName source, ActorDto destination, ResolutionContext context)
-    {
-        destination.ActorName = source.Name;
-        destination.ActorId = IdentifierMasker.GetMaybeMaskedIdentifier(source.ActorId);
-
-        return destination;
     }
 }

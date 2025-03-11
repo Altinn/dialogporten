@@ -206,7 +206,7 @@ static void BuildAndRun(string[] args)
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>
         {
-            config.PostProcess = (d, c) =>
+            config.PostProcess = (document, _) =>
             {
                 var dialogportenBaseUri = builder.Configuration
                     .GetSection(ApplicationSettings.ConfigurationSectionName)
@@ -215,8 +215,8 @@ static void BuildAndRun(string[] args)
                     .BaseUri
                     .ToString();
 
-                d.Servers.Clear();
-                d.Servers.Add(new OpenApiServer
+                document.Servers.Clear();
+                document.Servers.Add(new OpenApiServer
                 {
                     Url = dialogportenBaseUri
                 });

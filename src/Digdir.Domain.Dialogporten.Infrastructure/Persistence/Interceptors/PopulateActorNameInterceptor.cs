@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using MassTransit.Util;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -41,13 +40,13 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         }
 
         var dbContext = eventData.Context;
-
         if (dbContext is null)
         {
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        var actors = dbContext.ChangeTracker.Entries<ActorName>()
+        var actorNameEntities = dbContext.ChangeTracker
+            .Entries<ActorName>()
             .Where(e => e.State is EntityState.Added)
             .Where(e => e.Entity.ActorId is not null)
             .Select(e =>
@@ -58,32 +57,13 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             })
             .ToList();
 
-        var actorNameById = (await Task.WhenAll(actors
+        var actorNameById = (await Task.WhenAll(actorNameEntities
                 .Select(x => x.ActorId!)
                 .Distinct()
                 .Select(x => ActorNameByActorId(x, cancellationToken))))
             .ToDictionary(x => x.ActorId, x => x.ActorName);
 
-        foreach (var actor in actors)
-        {
-            actor.Name = actorNameById[actor.ActorId!];
-
-            if (!string.IsNullOrWhiteSpace(actor.Name))
-            {
-                continue;
-            }
-
-            // We don't want to fail the save operation if we are unable to look up the
-            // name for this particular actor, as it is used on enduser get operations.
-            if (actor.ActorEntities.All(x => x is DialogSeenLogSeenByActor))
-            {
-                continue;
-            }
-
-            _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actor.ActorId}");
-        }
-
-        if (!_domainContext.IsValid)
+        if (!TrySetActorNames(actorNameEntities, actorNameById))
         {
             _hasBeenExecuted = true;
             return InterceptionResult<int>.SuppressWithResult(0);
@@ -92,63 +72,81 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         // There may be an actorNameEntity with an Id where name is null.
         // One can argue that this method should consider those as well.
         // however we chose to put that responsibility to actorName clean up job.
-        var existingActorNames = await dbContext.Set<ActorName>()
-            .Where(x => actorNameById
-                .Select(x => new
-                {
-                    ActorId = (string?)x.Key,
-                    Name = x.Value
-                })
-                .Contains(new
-                {
-                    x.ActorId,
-                    x.Name
-                }))
-            .ToListAsync(cancellationToken);
+        var existingActorNames = await GetExistingActorNames(dbContext, actorNameById, cancellationToken);
+        ConsolidateActorNameInstances(dbContext, actorNameEntities, existingActorNames);
+        _hasBeenExecuted = true;
+        return await base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
 
-        var newAndExistingActorNameTuples = actors
-            .GroupBy(x => new
-            {
-                x.ActorId,
-                x.Name
-            })
-            .GroupJoin(existingActorNames,
-                x => x.Key,
-                x => new
-                {
-                    x.ActorId,
-                    x.Name
-                },
-                (left, right) => (left.ToList(), right.SingleOrDefault()));
-
-        foreach (var (newActorNames, existingActorName) in newAndExistingActorNameTuples)
+    private bool TrySetActorNames(List<ActorName> actorNameEntities, Dictionary<string, string?> actorNameById)
+    {
+        foreach (var actorName in actorNameEntities)
         {
-            var (mainInstance, discardInstances) = newActorNames switch
+            actorName.Name = actorNameById[actorName.ActorId!];
+
+            // We don't want to fail the save operation if we are unable to look up the
+            // name for this particular actor, as it is used on enduser get operations.
+            if (!string.IsNullOrWhiteSpace(actorName.Name)
+                || actorName.ActorEntities.All(x => x is DialogSeenLogSeenByActor))
+            {
+                continue;
+            }
+
+            _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actorName.ActorId}");
+        }
+
+        return _domainContext.IsValid;
+    }
+
+    private void ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> addedActorNames, List<ActorName> existingActorNames)
+    {
+        var actorNamePairs = addedActorNames
+            .GroupBy(x => new { x.ActorId, x.Name })
+            .GroupJoin(
+                inner: existingActorNames,
+                outerKeySelector: x => x.Key,
+                innerKeySelector: x => new { x.ActorId, x.Name },
+                resultSelector: (left, right) => (left.ToList(), right.SingleOrDefault()));
+
+        foreach (var (newActorNames, existingActorName) in actorNamePairs)
+        {
+            var (mainActorName, discardActorNames) = newActorNames switch
             {
                 _ when existingActorName is not null => (existingActorName, newActorNames),
                 [var first, ..] => (first, newActorNames.Except([first]).ToList()),
                 _ => throw new UnreachableException()
             };
 
-            mainInstance.CreateId();
-            mainInstance.Create(_transactionTime.Value);
-
-            foreach (var actor in discardInstances.SelectMany(x => x.ActorEntities))
+            mainActorName.CreateId();
+            mainActorName.Create(_transactionTime.Value);
+            foreach (var actor in discardActorNames.SelectMany(x => x.ActorEntities))
             {
-                actor.ActorNameEntity = mainInstance;
+                actor.ActorNameEntity = mainActorName;
             }
 
-            foreach (var discardInstance in discardInstances)
+            foreach (var discardInstance in discardActorNames)
             {
                 dbContext.Entry(discardInstance).State = EntityState.Detached;
             }
         }
-
-        _hasBeenExecuted = true;
-        return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
-    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken = default)
+
+    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken)
     {
         return (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
+    }
+
+    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, Dictionary<string, string?> items, CancellationToken cancellationToken)
+    {
+        // Why are we doing "composite key contains" this way, you ask? 
+        // See https://stackoverflow.com/a/26201371/2301766
+        var actorIds = items.Select(x => x.Key);
+        var actorNames = items.Select(x => x.Value);
+        var existingActorNames = await dbContext.Set<ActorName>()
+            .Where(x => actorIds.Contains(x.ActorId) && actorNames.Contains(x.Name))
+            .ToListAsync(cancellationToken);
+        return existingActorNames
+            .Where(x => items.Any(xx => xx.Key == x.ActorId && xx.Value == x.Name))
+            .ToList();
     }
 }

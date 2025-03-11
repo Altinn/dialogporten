@@ -121,10 +121,12 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<PopulateActorNameInterceptor>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
             .AddDbContext<DialogDbContext>((services, options) =>
-                options.UseNpgsql(_dbContainer.GetConnectionString(), o =>
+                options.UseNpgsql(_dbContainer.GetConnectionString() + ";Include Error Detail=true", o =>
                     {
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     })
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors()
                     .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
                     .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>()))
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())

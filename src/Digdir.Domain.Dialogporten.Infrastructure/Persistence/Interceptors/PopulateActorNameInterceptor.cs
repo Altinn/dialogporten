@@ -48,7 +48,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         var actorNameEntities = dbContext.ChangeTracker
             .Entries<ActorName>()
             .Where(e => e.State is EntityState.Added)
-            .Where(e => e.Entity.ActorId is not null)
+            .Where(e => e.Entity.ActorId is not null || e.Entity.Name is not null)
             .Select(e =>
             {
                 var entity = e.Entity;
@@ -57,30 +57,30 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             })
             .ToList();
 
-        var actorNameById = (await Task.WhenAll(actorNameEntities
-                .Select(x => x.ActorId!)
-                .Distinct()
-                .Select(x => ActorNameByActorId(x, cancellationToken))))
-            .ToDictionary(x => x.ActorId, x => x.ActorName);
-
-        if (!TrySetActorNames(actorNameEntities, actorNameById))
+        if (!await TrySetActorNames(actorNameEntities, cancellationToken))
         {
             _hasBeenExecuted = true;
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        // There may be an actorNameEntity with an Id where name is null.
-        // One can argue that this method should consider those as well.
-        // however we chose to put that responsibility to actorName clean up job.
-        var existingActorNames = await GetExistingActorNames(dbContext, actorNameById, cancellationToken);
-        ConsolidateActorNameInstances(dbContext, actorNameEntities, existingActorNames);
+        await ConsolidateActorNameInstances(dbContext, actorNameEntities, cancellationToken);
         _hasBeenExecuted = true;
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private bool TrySetActorNames(List<ActorName> actorNameEntities, Dictionary<string, string?> actorNameById)
+    private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
-        foreach (var actorName in actorNameEntities)
+        var relevantActorNameEntities = actorNameEntities
+            .Where(x => x.ActorId is not null)
+            .ToList();
+
+        var actorNameById = (await Task.WhenAll(relevantActorNameEntities
+                .Select(x => x.ActorId!)
+                .Distinct()
+                .Select(x => ActorNameByActorId(x, cancellationToken))))
+            .ToDictionary(x => x.ActorId, x => x.ActorName);
+
+        foreach (var actorName in relevantActorNameEntities)
         {
             actorName.Name = actorNameById[actorName.ActorId!];
 
@@ -98,12 +98,17 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         return _domainContext.IsValid;
     }
 
-    private void ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> addedActorNames, List<ActorName> existingActorNames)
+    private async Task ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> added, CancellationToken cancellationToken)
     {
-        var actorNamePairs = addedActorNames
+        // There may be an actorNameEntity with an Id where name is null.
+        // One can argue that this method should consider those as well.
+        // however we chose to put that responsibility to actorName clean up job.
+        var existing = await GetExistingActorNames(dbContext, added, cancellationToken);
+
+        var actorNamePairs = added
             .GroupBy(x => new { x.ActorId, x.Name })
             .GroupJoin(
-                inner: existingActorNames,
+                inner: existing,
                 outerKeySelector: x => x.Key,
                 innerKeySelector: x => new { x.ActorId, x.Name },
                 resultSelector: (left, right) => (left.ToList(), right.SingleOrDefault()));
@@ -136,17 +141,21 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         return (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
     }
 
-    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, Dictionary<string, string?> items, CancellationToken cancellationToken)
+    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         // Why are we doing "composite key contains" this way, you ask? 
         // See https://stackoverflow.com/a/26201371/2301766
-        var actorIds = items.Select(x => x.Key);
-        var actorNames = items.Select(x => x.Value);
+        var distinctIdNameTupples = actorNameEntities
+            .Select(x => (x.ActorId, x.Name))
+            .Distinct()
+            .ToList();
+        var actorIds = distinctIdNameTupples.Select(x => x.ActorId).Distinct();
+        var actorNames = distinctIdNameTupples.Select(x => x.Name).Distinct();
         var existingActorNames = await dbContext.Set<ActorName>()
             .Where(x => actorIds.Contains(x.ActorId) && actorNames.Contains(x.Name))
             .ToListAsync(cancellationToken);
         return existingActorNames
-            .Where(x => items.Any(xx => xx.Key == x.ActorId && xx.Value == x.Name))
+            .Where(x => distinctIdNameTupples.Any(xx => xx.ActorId == x.ActorId && xx.Name == x.Name))
             .ToList();
     }
 }

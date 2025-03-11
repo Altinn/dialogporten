@@ -117,18 +117,6 @@ static void BuildAndRun(string[] args)
             {
                 s.PostProcess = document =>
                 {
-                    var dialogportenBaseUri = builder.Configuration
-                        .GetSection(ApplicationSettings.ConfigurationSectionName)
-                        .Get<ApplicationSettings>()!
-                        .Dialogporten
-                        .BaseUri
-                        .ToString();
-
-                    document.Servers.Clear();
-                    document.Servers.Add(new OpenApiServer
-                    {
-                        Url = dialogportenBaseUri
-                    });
                     document.Generator = null;
                     document.ReplaceProblemDetailsDescriptions();
                     document.MakeCollectionsNullable();
@@ -216,7 +204,24 @@ static void BuildAndRun(string[] args)
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
         })
         .UseAddSwaggerCorsHeader()
-        .UseSwaggerGen(uiConfig: uiConfig =>
+        .UseSwaggerGen(config: config =>
+        {
+            config.PostProcess = (d, c) =>
+            {
+                var dialogportenBaseUri = builder.Configuration
+                    .GetSection(ApplicationSettings.ConfigurationSectionName)
+                    .Get<ApplicationSettings>()!
+                    .Dialogporten
+                    .BaseUri
+                    .ToString();
+
+                d.Servers.Clear();
+                d.Servers.Add(new OpenApiServer
+                {
+                    Url = dialogportenBaseUri
+                });
+            };
+        }, uiConfig: uiConfig =>
         {
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;

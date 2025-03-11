@@ -349,6 +349,8 @@ internal sealed class UpdateDialogDialogApiActionDtoValidator : AbstractValidato
             .MaximumLength(Constants.DefaultMaxStringLength);
         RuleFor(x => x.AuthorizationAttribute)
             .MaximumLength(Constants.DefaultMaxStringLength);
+        RuleFor(x => x.Name)
+            .MaximumLength(Constants.DefaultMaxStringLength);
         RuleFor(x => x.Endpoints)
             .UniqueBy(x => x.Id);
         RuleFor(x => x.Endpoints)

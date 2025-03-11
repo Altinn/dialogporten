@@ -21,7 +21,11 @@ internal sealed class MappingProfile : Profile
         CreateMap<ActorDto, Actor>()
             .ForMember(dest => dest.ActorType, opt => opt.Ignore())
             .ForMember(dest => dest.ActorTypeId, opt => opt.MapFrom(src => src.ActorType))
-            .ForMember(dest => dest.ActorNameEntity, opt => opt.MapFrom(src => src));
+            .ForMember(dest => dest.ActorNameEntity, opt =>
+            {
+                opt.Condition(x => x.ActorName is not null || x.ActorId is not null);
+                opt.MapFrom(src => src);
+            });
 
         CreateMap<ActorDto, ActorName>()
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.ActorName))
@@ -33,10 +37,9 @@ internal sealed class MappingProfile : Profile
                 .IncludeBase(actorDtoType, actorType);
         }
 
-        CreateMap<Actor, ActorDto>().IncludeMembers(src => src.ActorNameEntity)
-            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => src.ActorNameEntity == null ? "aaa" : src.ActorNameEntity.ActorId))
-            .ForMember(dest => dest.ActorType, opt => opt.MapFrom(src => src.ActorTypeId))
-            .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.ActorNameEntity == null ? "aaa" : src.ActorNameEntity.Name));
+        CreateMap<Actor, ActorDto>()
+            .IncludeMembers(src => src.ActorNameEntity)
+            .ForMember(dest => dest.ActorType, opt => opt.MapFrom(src => src.ActorTypeId));
 
         CreateMap<ActorName, ActorDto>()
             .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.Name))

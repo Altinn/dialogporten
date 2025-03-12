@@ -91,6 +91,12 @@ public sealed class CreateDialogDto
     public DateTimeOffset? ExpiresAt { get; set; }
 
     /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
+    /// When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
+    /// <summary>
     /// If set, will override the date and time when the dialog is set as created.
     /// If not supplied, the current date /time will be used.
     /// </summary>

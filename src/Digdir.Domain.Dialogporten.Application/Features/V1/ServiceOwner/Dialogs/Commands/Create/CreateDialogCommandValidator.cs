@@ -98,9 +98,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.Status)
             .IsInEnum();
 
-        RuleFor(x => x.Content)
-            .SetValidator(contentValidator);
-
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .ForEach(x => x.SetValidator(searchTagValidator));
@@ -125,6 +122,31 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
+
+        // Make Content validation dependent on IsApiOnly
+        When(x => !x.IsApiOnly, () =>
+        {
+            RuleFor(x => x.Content)
+                .NotEmpty()
+                .SetValidator(contentValidator);
+
+            // For regular dialogs, explicitly require Title and Summary properties
+            RuleFor(x => x.Content.Title)
+                .NotNull()
+                .WithMessage("Title must not be empty for regular dialogs.");
+
+            RuleFor(x => x.Content.Summary)
+                .NotNull()
+                .WithMessage("Summary must not be empty for regular dialogs.");
+        });
+
+        // When IsApiOnly=true, only validate Content if it's provided
+        When(x => x.IsApiOnly, () =>
+        {
+            RuleFor(x => x.Content)
+                .SetValidator(contentValidator!)
+                .When(x => x.Content != null);
+        });
 
         RuleFor(x => x.Transmissions)
             .UniqueBy(x => x.Id);
@@ -216,10 +238,21 @@ internal sealed class CreateDialogContentDtoValidator : AbstractValidator<Conten
             switch (propMetadata.NullabilityInfo.WriteState)
             {
                 case NullabilityState.NotNull:
-                    RuleFor(x => propertySelector.GetValue(x) as ContentValueDto)
-                        .NotNull()
-                        .WithMessage($"{propertyName} must not be empty.")
-                        .SetValidator(new ContentValueDtoValidator(contentType, user)!);
+                    if (propertyName is "Title" or "Summary")
+                    {
+                        // For Title and Summary, only validate if they're provided
+                        RuleFor(x => propertySelector.GetValue(x) as ContentValueDto)
+                            .SetValidator(new ContentValueDtoValidator(contentType, user)!)
+                            .When(x => propMetadata.Property.GetValue(x) is not null);
+                    }
+                    else
+                    {
+                        // For all other required properties, enforce as usual
+                        RuleFor(x => propertySelector.GetValue(x) as ContentValueDto)
+                            .NotNull()
+                            .WithMessage($"{propertyName} must not be empty.")
+                            .SetValidator(new ContentValueDtoValidator(contentType, user)!);
+                    }
                     break;
                 case NullabilityState.Nullable:
                     RuleFor(x => propMetadata.Property.GetValue(x) as ContentValueDto)

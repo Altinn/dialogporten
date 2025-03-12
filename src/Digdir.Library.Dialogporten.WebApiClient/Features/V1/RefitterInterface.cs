@@ -2080,13 +2080,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string AuthorizationAttribute { get; set; }
 
         /// <summary>
-        /// The logical name of the operation the API action refers to.
-        /// </summary>
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
 
@@ -3318,13 +3311,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool? IsAuthorized { get; set; }
 
         /// <summary>
-        /// The logical name of the operation the API action refers to.
-        /// </summary>
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
 
@@ -4076,13 +4062,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("authorizationAttribute")]
         public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// The logical name of the operation the API action refers to.
-        /// </summary>
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
 
         /// <summary>
         /// The endpoints associated with the action.

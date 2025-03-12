@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
@@ -15,12 +14,10 @@ using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using FluentAssertions;
 using HotChocolate.Subscriptions;
 using MassTransit;
-using MassTransit.Testing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -39,6 +36,8 @@ public class DialogApplication : IAsyncLifetime
     private Respawner _respawner = null!;
     private ServiceProvider _rootProvider = null!;
     private ServiceProvider _fixtureRootProvider = null!;
+    private readonly List<object> _publishedEvents = [];
+
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
         .WithImage("postgres:16.3")
         .Build();
@@ -83,35 +82,14 @@ public class DialogApplication : IAsyncLifetime
         _rootProvider = serviceCollection.BuildServiceProvider();
     }
 
-    /// <summary>
-    /// This method lets you configure the IoC container for an integration test.
-    /// It will be reset to the default configuration after each test.
-    /// You may only call this or equivalent methods once per test.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if the method is called more than once per test.</exception>
-    public async Task<ITestHarness> ConfigureServicesWithMassTransitTestHarness(Action<IServiceCollection>? configure = null)
-    {
-        ConfigureServices(x =>
-        {
-            x.RemoveAll<IPublishEndpoint>()
-                .AddMassTransitTestHarness(cfg =>
-                {
-                    var openTestEventConsumer = typeof(TestDomainEventConsumer<>);
-                    foreach (var domainEventType in DomainExtensions.GetDomainEventTypes())
-                    {
-                        cfg.AddConsumer(openTestEventConsumer.MakeGenericType(domainEventType));
-                    }
-                });
-            configure?.Invoke(x);
-        });
-        var harness = _rootProvider.GetRequiredService<ITestHarness>();
-        await harness.Start();
-        return harness;
-    }
-
     private IServiceCollection BuildServiceCollection()
     {
         var serviceCollection = new ServiceCollection();
+
+        var publishEndpointSubstitute = Substitute.For<IPublishEndpoint>();
+        publishEndpointSubstitute
+            .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<CancellationToken>()))
+            .Do(x => _publishedEvents.Add(x[0]));
 
         return serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
@@ -131,7 +109,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
             .AddScoped<IOptions<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
-            .AddScoped<IPublishEndpoint>(_ => Substitute.For<IPublishEndpoint>())
+            .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
@@ -220,13 +198,6 @@ public class DialogApplication : IAsyncLifetime
         await _dbContainer.DisposeAsync();
     }
 
-    private async Task Publish(INotification notification)
-    {
-        using var scope = _rootProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
-        await mediator.Publish(notification);
-    }
-
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request)
     {
         using var scope = _rootProvider.CreateScope();
@@ -236,6 +207,7 @@ public class DialogApplication : IAsyncLifetime
 
     public async Task ResetState()
     {
+        _publishedEvents.Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();
         await _respawner.ResetAsync(connection);
@@ -266,16 +238,7 @@ public class DialogApplication : IAsyncLifetime
         });
     }
 
-    public List<CloudEvent> PopPublishedCloudEvents()
-    {
-        using var scope = _rootProvider.CreateScope();
-        var cloudBus = scope.ServiceProvider.GetRequiredService<ICloudEventBus>() as IntegrationTestCloudBus;
-
-        var events = cloudBus!.Events.ToList();
-        cloudBus.Events.Clear();
-
-        return events;
-    }
+    public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
 
     public async Task<List<T>> GetDbEntities<T>() where T : class
     {

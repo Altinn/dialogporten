@@ -49,8 +49,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 column: "ActorNameEntityId",
                 principalTable: "ActorName",
                 principalColumn: "Id");
-            
-            
+
+
             migrationBuilder.Sql("""
                                     INSERT INTO "ActorName" ("Id", "CreatedAt", "ActorId", "Name")
                                     SELECT a."Id", -- Just borrow the Id from Actor to get uuid7
@@ -58,6 +58,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                                            a."ActorId",
                                            a."ActorName"
                                     FROM "Actor" a
+                                    WHERE "ActorTypeId" != 2
                                     ON CONFLICT DO NOTHING;
                                     
                                     UPDATE "Actor" a
@@ -68,7 +69,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                                                 AND "ActorName" = an."Name")
                                       WHERE "ActorNameEntityId" IS NULL;
                                  """);
-            
+
             migrationBuilder.DropColumn(
                 name: "ActorId",
                 table: "Actor");

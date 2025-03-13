@@ -108,7 +108,7 @@ cd .\src\Digdir.Domain.Dialogporten.Infrastructure\
 dotnet ef migrations add TestMigration
 ```
 
-## Restoring a database from an Azure backup
+### Restoring a database from an Azure backup
 See [docs/RestoreDatabase.md](docs/RestoreDatabase.md)
 
 ## Testing

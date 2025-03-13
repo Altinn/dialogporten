@@ -65,6 +65,18 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.Content)
             .SetValidator(contentValidator);
 
+        // For regular dialogs (IsApiOnly=false), Title and Summary are required
+        When(x => !x.IsApiOnly, () =>
+        {
+            RuleFor(x => x.Content.Title)
+                .NotNull()
+                .WithMessage("Title must not be empty for non-API-only dialogs.");
+
+            RuleFor(x => x.Content.Summary)
+                .NotNull()
+                .WithMessage("Summary must not be empty for non-API-only dialogs.");
+        });
+
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .ForEach(x => x.SetValidator(searchTagValidator));
@@ -242,7 +254,14 @@ internal sealed class UpdateDialogContentDtoValidator : AbstractValidator<Conten
 
     public UpdateDialogContentDtoValidator(IUser? user)
     {
-        foreach (var (propertyName, propMetadata) in SourcePropertyMetaDataByName)
+        // We need to explicitly validate Title and Summary properties since they have special conditions
+        // based on the IsApiOnly flag in the parent object (which we don't have access to here)
+        var titleProperty = SourcePropertyMetaDataByName["Title"];
+        var summaryProperty = SourcePropertyMetaDataByName["Summary"];
+
+        // For other properties, use the standard validation approach
+        foreach (var (propertyName, propMetadata) in SourcePropertyMetaDataByName
+            .Where(kvp => kvp is { Key: not "Title" and not "Summary" }))
         {
             switch (propMetadata.NullabilityInfo.WriteState)
             {
@@ -257,7 +276,7 @@ internal sealed class UpdateDialogContentDtoValidator : AbstractValidator<Conten
                     RuleFor(x => propMetadata.Property.GetValue(x) as ContentValueDto)
                         .SetValidator(
                             new ContentValueDtoValidator(DialogContentType.Parse(propertyName), user)!)
-                        .When(x => propMetadata.Property.GetValue(x) is not null);
+                        .When(x => propMetadata.Property.GetValue(x) is ContentValueDto);
                     break;
                 case NullabilityState.Unknown:
                     break;
@@ -265,6 +284,8 @@ internal sealed class UpdateDialogContentDtoValidator : AbstractValidator<Conten
                     break;
             }
         }
+
+        // These rules will be conditionally applied by UpdateDialogDtoValidator based on IsApiOnly
     }
 }
 

@@ -58,7 +58,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                                            a."ActorId",
                                            a."ActorName"
                                     FROM "Actor" a
-                                    WHERE "ActorTypeId" != 2
+                                    WHERE a."ActorTypeId" != 2
                                     ON CONFLICT DO NOTHING;
                                     
                                     UPDATE "Actor" a

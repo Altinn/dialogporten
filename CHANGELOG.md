@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.58.2](https://github.com/Altinn/dialogporten/compare/v1.58.1...v1.58.2) (2025-03-13)
+
+
+### Bug Fixes
+
+* **apps:** ensure we use at23 as backend instead of tt02 in test env ([#2035](https://github.com/Altinn/dialogporten/issues/2035)) ([40dea13](https://github.com/Altinn/dialogporten/commit/40dea131ee868b6ee464436e8ed625555fdf7a8e))
+* **test:** Simplify domain event tests, remove MassTransit harness ([#2045](https://github.com/Altinn/dialogporten/issues/2045)) ([e2765d7](https://github.com/Altinn/dialogporten/commit/e2765d7afeb57057baf235ee1277bebfe640b8f7))
+
 ## [1.58.1](https://github.com/Altinn/dialogporten/compare/v1.58.0...v1.58.1) (2025-03-12)
 
 

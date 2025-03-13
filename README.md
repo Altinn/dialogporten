@@ -107,6 +107,10 @@ Or change your directory to the infrastructure project and then run the command.
 cd .\src\Digdir.Domain.Dialogporten.Infrastructure\
 dotnet ef migrations add TestMigration
 ```
+
+## Restoring a database from an Azure backup
+See [docs/RestoreDatabase.md](docs/RestoreDatabase.md)
+
 ## Testing
 
 Besides ordinary unit and integration tests, there are test suites for both functional and non-functional end-to-end tests implemented with [K6](https://k6.io/).

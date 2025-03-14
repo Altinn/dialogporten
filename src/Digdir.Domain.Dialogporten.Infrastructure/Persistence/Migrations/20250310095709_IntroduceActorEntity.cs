@@ -50,7 +50,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 principalTable: "ActorName",
                 principalColumn: "Id");
 
-
             migrationBuilder.Sql("""
                                     INSERT INTO "ActorName" ("Id", "CreatedAt", "ActorId", "Name")
                                     SELECT a."Id", -- Just borrow the Id from Actor to get uuid7
@@ -77,7 +76,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.DropColumn(
                 name: "ActorName",
                 table: "Actor");
-
         }
 
         /// <inheritdoc />

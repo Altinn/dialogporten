@@ -67,7 +67,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                                             FROM "ActorName" an
                                             WHERE a."ActorId" = an."ActorId"
                                                 AND "ActorName" = an."Name")
-                                      WHERE "ActorNameEntityId" IS NULL;
+                                      WHERE "ActorNameEntityId" IS NULL AND a."ActorTypeId" != 2;
                                  """);
 
             migrationBuilder.DropColumn(

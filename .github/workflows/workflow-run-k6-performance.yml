@@ -62,7 +62,7 @@ jobs:
       id: populate_kubeconfig_with_k6_context
       shell: bash
       run: |
-        if ! az aks install-cli; then
+        if ! az aks install-cli --client-version 1.32 ; then
           echo "Failed to install kubectl CLI"
           exit 1
         fi

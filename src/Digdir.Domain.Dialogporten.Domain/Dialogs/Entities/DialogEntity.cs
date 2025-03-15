@@ -92,7 +92,7 @@ public sealed class DialogEntity :
     public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, string? endUserName)
     {
         var lastSeenAt = SeenLog
-                             .Where(x => x.SeenBy.ActorId == endUserId)
+                             .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
                              .MaxBy(x => x.CreatedAt)
                              ?.CreatedAt
                          ?? DateTimeOffset.MinValue;
@@ -109,8 +109,11 @@ public sealed class DialogEntity :
             SeenBy = new DialogSeenLogSeenByActor
             {
                 ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorId = endUserId,
-                ActorName = endUserName
+                ActorNameEntity = new ActorName
+                {
+                    Name = endUserName,
+                    ActorId = endUserId
+                }
             }
         });
         _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));

@@ -19,8 +19,11 @@ internal sealed class MappingProfile : Profile
             .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(actorType))
             .ToList();
 
-        CreateMap<Actor, ActorDto>()
-            .ForMember(dest => dest.ActorType, opt => opt.MapFrom(src => src.ActorTypeId))
+        CreateMap<Actor, ActorDto>().IncludeMembers(src => src.ActorNameEntity)
+            .ForMember(dest => dest.ActorType, opt => opt.MapFrom(src => src.ActorTypeId));
+
+        CreateMap<ActorName, ActorDto>()
+            .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.Name))
             .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => IdentifierMasker.GetMaybeMaskedIdentifier(src.ActorId)));
 
         foreach (var outputActor in derivedActorTypes)

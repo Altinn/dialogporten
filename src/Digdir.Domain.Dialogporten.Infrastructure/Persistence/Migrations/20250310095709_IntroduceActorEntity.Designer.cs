@@ -3,6 +3,7 @@ using System;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,16 +12,17 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    partial class DialogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250310095709_IntroduceActorEntity")]
+    partial class IntroduceActorEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.Actor", b =>
@@ -346,10 +348,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("DialogId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -867,13 +865,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedAt");
 
-                    b.HasIndex("Deleted");
-
                     b.HasIndex("DueAt");
-
-                    b.HasIndex("ExtendedStatus");
-
-                    b.HasIndex("ExternalReference");
 
                     b.HasIndex("Org");
 
@@ -886,8 +878,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("StatusId");
 
                     b.HasIndex("UpdatedAt");
-
-                    b.HasIndex("VisibleFrom");
 
                     b.HasIndex("Org", "IdempotentKey")
                         .IsUnique()
@@ -918,12 +908,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DialogId");
-
-                    b.HasIndex("Value");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Value"), "gin");
-                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Value"), new[] { "gin_trgm_ops" });
+                    b.HasIndex("DialogId", "Value")
+                        .IsUnique();
 
                     b.ToTable("DialogSearchTag");
                 });
@@ -1320,11 +1306,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(4095)");
 
                     b.HasKey("LocalizationSetId", "LanguageCode");
-
-                    b.HasIndex("Value");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Value"), "gin");
-                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Value"), new[] { "gin_trgm_ops" });
 
                     b.ToTable("Localization");
                 });

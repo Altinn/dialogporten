@@ -45,7 +45,8 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         var dialog = await _db.Dialogs
             .AsNoTracking()
             .Include(x => x.SeenLog)
-            .ThenInclude(x => x.SeenBy)
+                .ThenInclude(x => x.SeenBy)
+                .ThenInclude(x => x.ActorNameEntity)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                 cancellationToken: cancellationToken);
@@ -79,7 +80,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
             .Select(x =>
             {
                 var dto = _mapper.Map<SeenLogDto>(x);
-                dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == x.SeenBy.ActorId;
+                dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == x.SeenBy.ActorNameEntity?.ActorId;
                 return dto;
             })
             .ToList();

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 
@@ -19,7 +20,16 @@ internal sealed class MappingProfile : Profile
 
         CreateMap<ActorDto, Actor>()
             .ForMember(dest => dest.ActorType, opt => opt.Ignore())
-            .ForMember(dest => dest.ActorTypeId, opt => opt.MapFrom(src => src.ActorType));
+            .ForMember(dest => dest.ActorTypeId, opt => opt.MapFrom(src => src.ActorType))
+            .ForMember(dest => dest.ActorNameEntity, opt =>
+            {
+                opt.Condition(x => x.ActorName is not null || x.ActorId is not null);
+                opt.MapFrom(src => src);
+            });
+
+        CreateMap<ActorDto, ActorName>()
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.ActorName))
+            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => src.ActorId));
 
         foreach (var inputActor in derivedActorTypes)
         {
@@ -28,8 +38,12 @@ internal sealed class MappingProfile : Profile
         }
 
         CreateMap<Actor, ActorDto>()
-            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => src.ActorId))
+            .IncludeMembers(src => src.ActorNameEntity)
             .ForMember(dest => dest.ActorType, opt => opt.MapFrom(src => src.ActorTypeId));
+
+        CreateMap<ActorName, ActorDto>()
+            .ForMember(dest => dest.ActorName, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.ActorId, opt => opt.MapFrom(src => src.ActorId));
 
         foreach (var outputActor in derivedActorTypes)
         {

@@ -60,13 +60,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                                     WHERE a."ActorTypeId" != 2
                                     ON CONFLICT DO NOTHING;
                                     
-                                    UPDATE "Actor" a
-                                    SET "ActorNameEntityId" = (
-                                        SELECT an."Id"
-                                            FROM "ActorName" an
-                                            WHERE a."ActorId" = an."ActorId"
-                                                AND "ActorName" = an."Name")
-                                      WHERE "ActorNameEntityId" IS NULL AND a."ActorTypeId" != 2;
+                                 UPDATE "Actor" a
+                                 SET "ActorNameEntityId" = (
+                                     SELECT an."Id"
+                                     FROM "ActorName" an
+                                     WHERE 
+                                         (a."ActorId" IS NOT DISTINCT FROM an."ActorId")
+                                         AND (a."ActorName" IS NOT DISTINCT FROM an."Name")
+                                 )
+                                 WHERE "ActorNameEntityId" IS NULL AND a."ActorTypeId" != 2;
                                  """);
 
             migrationBuilder.DropColumn(

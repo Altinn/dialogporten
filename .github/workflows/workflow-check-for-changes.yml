@@ -2,17 +2,17 @@ name: "Check for file changes"
 
 on:
   workflow_call:
-    inputs:
-      infra_base_sha:
-        description: "Base SHA for infrastructure changes"
-        required: false
-        default: ''
-        type: string
-      apps_base_sha:
-        description: "Base SHA for application changes"
-        required: false
-        default: ''
-        type: string
+#    inputs:
+#      infra_base_sha:
+#        description: "Base SHA for infrastructure changes"
+#        required: false
+#        default: ''
+#        type: string
+#      apps_base_sha:
+#        description: "Base SHA for application changes"
+#        required: false
+#        default: ''
+#        type: string
     outputs:
       hasInfraChanges:
         description: "Infrastructure related files changed"
@@ -44,50 +44,50 @@ jobs:
     name: Filter
     runs-on: ubuntu-latest
     outputs:
-      hasInfraChanges: ${{ steps.filter.outputs.azure_any_modified == 'true' }}
-      hasSlackNotifierChanges: ${{ steps.filter.outputs.slackNotifier_any_modified == 'true'}}
-      hasBackendChanges: ${{ steps.filter-backend.outputs.backend_any_modified == 'true' }}
-      hasTestChanges: ${{ steps.filter-backend.outputs.tests_any_modified == 'true' }}
-      hasSwaggerSchemaChanges: ${{ steps.filter-backend.outputs.swagger_schema_any_modified == 'true'}}
-      hasGqlSchemaChanges: ${{ steps.filter-backend.outputs.gql_schema_any_modified == 'true'}}
-      hasMigrationChanges: ${{ steps.filter-backend.outputs.migration_any_modified == 'true'}}
-      hasWebApiClientChanges: ${{ steps.filter-backend.outputs.web_api_client_any_modified == 'true'}}
+      hasInfraChanges: ${{ steps.check-changes.outputs.hasInfraChanges == 'true' }}
+      hasSlackNotifierChanges: ${{ steps.check-changes.outputs.hasSlackNotifierChanges == 'true' }}
+      hasBackendChanges: ${{ steps.check-changes.outputs.hasBackendChanges == 'true' }}
+      hasTestChanges: ${{ steps.check-changes.outputs.hasTestChanges == 'true' }}
+      hasSwaggerSchemaChanges: ${{ steps.check-changes.outputs.hasSwaggerSchemaChanges == 'true' }}
+      hasGqlSchemaChanges: ${{ steps.check-changes.outputs.hasGqlSchemaChanges == 'true' }}
+      hasMigrationChanges: ${{ steps.check-changes.outputs.hasMigrationChanges == 'true' }}
+      hasWebApiClientChanges: ${{ steps.check-changes.outputs.hasWebApiClientChanges == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: tj-actions/changed-files@v45
-        id: filter
-        with:
-          base_sha: ${{ inputs.infra_base_sha }}
-          files_yaml: |
-            azure:
-              - '.github/**/*'
-              - '.azure/infrastructure/**/*'
-              - '.azure/modules/**/*'
-            slackNotifier:
-              - '.github/**/*'
-              - 'src/Digdir.Tool.Dialogporten.SlackNotifier/**/*'
+      - name: Check for file changes
+        id: check-changes
+        run: |
+          set_output() {
+            echo "$1=$2" >> "$GITHUB_ENV"
+            echo "$1=$2" >> "$GITHUB_OUTPUT"
+          }
 
-      - uses: tj-actions/changed-files@v45
-        id: filter-backend
-        with:
-          base_sha: ${{ inputs.apps_base_sha }}
-          files_yaml: |
-            backend:
-              - '.github/**/*'
-              - 'src/**/*'
-              - '.azure/applications/**/*'
-              - '.azure/modules/containerApp/**/*'
-            tests:
-              - 'tests/**/*'
-            web_api_client:
-              - 'src/Digdir.Library.Dialogporten.WebApiClient/**/*'
-            swagger_schema:
-              - 'docs/schema/V1/swagger.verified.json'
-            gql_schema:
-              - 'docs/schema/V1/schema.verified.graphql'
-            migration: 
-              - 'src/Digdir.Domain.Dialogporten.Infrastructure/Persistence/Migrations/**/*'
+#          BASE_SHA="${{ inputs.infra_base_sha || inputs.apps_base_sha }}"
+          if [ -z "$BASE_SHA" ]; then
+            BASE_SHA=$(git rev-parse origin/main)
+          fi
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
+
+          check_changes() {
+            local pattern="$1"
+            local output_var="$2"
+            if echo "$CHANGED_FILES" | grep -E "$pattern" > /dev/null; then
+              set_output "$output_var" "true"
+            else
+              set_output "$output_var" "false"
+            fi
+          }
+
+          check_changes "^.github/|^.azure/infrastructure/|^.azure/modules/" "hasInfraChanges"
+          check_changes "^.github/|^src/Digdir.Tool.Dialogporten.SlackNotifier/" "hasSlackNotifierChanges"
+          check_changes "^.github/|^src/|^.azure/applications/|^.azure/modules/containerApp/" "hasBackendChanges"
+          check_changes "^tests/" "hasTestChanges"
+          check_changes "^src/Digdir.Library.Dialogporten.WebApiClient/" "hasWebApiClientChanges"
+          check_changes "^docs/schema/V1/swagger.verified.json" "hasSwaggerSchemaChanges"
+          check_changes "^docs/schema/V1/schema.verified.graphql" "hasGqlSchemaChanges"
+          check_changes "^src/Digdir.Domain.Dialogporten.Infrastructure/Persistence/Migrations/" "hasMigrationChanges"

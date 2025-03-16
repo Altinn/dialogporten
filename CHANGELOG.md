@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.58.2](https://github.com/Altinn/dialogporten/compare/v1.58.1...v1.58.2) (2025-03-16)
+
+
+### Bug Fixes
+
+* **apps:** ensure we use at23 as backend instead of tt02 in test env ([#2035](https://github.com/Altinn/dialogporten/issues/2035)) ([40dea13](https://github.com/Altinn/dialogporten/commit/40dea131ee868b6ee464436e8ed625555fdf7a8e))
+* **test:** Simplify domain event tests, remove MassTransit harness ([#2045](https://github.com/Altinn/dialogporten/issues/2045)) ([e2765d7](https://github.com/Altinn/dialogporten/commit/e2765d7afeb57057baf235ee1277bebfe640b8f7))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency fastendpoints.swagger to 5.35.0 ([#2058](https://github.com/Altinn/dialogporten/issues/2058)) ([0688d73](https://github.com/Altinn/dialogporten/commit/0688d7309b09aacd7106502cfd52c459f3bc6257))
+* **deps:** update grafana/loki docker tag to v3.4.2 ([#2056](https://github.com/Altinn/dialogporten/issues/2056)) ([83f2f74](https://github.com/Altinn/dialogporten/commit/83f2f74fef044250c06e19e76748772bb5a35782))
+* **deps:** update masstransit monorepo to 8.3.7 ([#2057](https://github.com/Altinn/dialogporten/issues/2057)) ([33d74a5](https://github.com/Altinn/dialogporten/commit/33d74a5e54da31d0c6f63644900ab132e87dde57))
+
 ## [1.58.1](https://github.com/Altinn/dialogporten/compare/v1.58.0...v1.58.1) (2025-03-12)
 
 

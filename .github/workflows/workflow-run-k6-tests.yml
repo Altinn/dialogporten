@@ -32,14 +32,14 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         ref: ${{ inputs.ref }}
 
     # todo: change to use the new https://github.com/grafana/setup-k6-action and https://github.com/grafana/run-k6-action
     # grafana/k6-action is deprecated
     - name: Run K6 tests (${{ inputs.testSuitePath }})
-      uses: grafana/k6-action@v0.3.1
+      uses: grafana/k6-action@e4714b734f2b0afaabeb7b4a69142745548ab9ec # v0.3.1
       with:
         filename: ${{ inputs.testSuitePath }}
         flags: --quiet --log-output=stdout --include-system-env-vars
@@ -50,13 +50,13 @@ jobs:
         TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
 
     - name: Store test summary
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
       with:
         name: k6-summary-report
         path: junit.xml
 
     - name: 'Publish test results'
-      uses: EnricoMi/publish-unit-test-result-action@v2
+      uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
       if: always()
       with:
         action_fail: true

@@ -65,7 +65,24 @@ if (!baseUrls[__ENV.API_VERSION]["serviceowner"][__ENV.API_ENVIRONMENT]) {
 
 export const baseUrlEndUser = baseUrls[__ENV.API_VERSION]["enduser"][__ENV.API_ENVIRONMENT];
 export const baseUrlServiceOwner = baseUrls[__ENV.API_VERSION]["serviceowner"][__ENV.API_ENVIRONMENT];
-export const tokenGeneratorEnv = __ENV.API_ENVIRONMENT == "yt01" ? "yt01" : "tt02"; // yt01 is the only environment that has a separate token generator environment
+export const tokenGeneratorEnv = (() => {
+    switch (__ENV.API_ENVIRONMENT) {
+        case 'localdev':
+            return 'at23';
+        case 'localdev_docker':
+            return 'at23';
+        case 'staging':
+            return 'tt02';
+        case 'yt01':
+            return 'yt01';
+        case 'test':
+            return 'at23';
+        case 'prod':
+            return 'tt02';
+        default:
+            throw new Error(`Invalid API environment: ${__ENV.API_ENVIRONMENT}. Please ensure it's set correctly in your environment variables.`);
+    }
+})();
 
 export const baseUrlGraphql = baseUrls[__ENV.API_VERSION]["graphql"][__ENV.API_ENVIRONMENT];
 

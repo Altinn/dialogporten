@@ -127,7 +127,7 @@ get_postgres_info() {
     echo "name=$name"
     echo "hostname=$hostname"
     echo "port=$port"
-    echo "connection_string=postgresql://${username}:<retrieve-password-from-keyvault>@localhost:${port}/dialogporten"
+    echo "connection_string=postgresql://${username}:<retrieve-password-from-keyvault>@localhost:${local_port:-$port}/dialogporten"
 }
 
 get_redis_info() {
@@ -149,19 +149,20 @@ get_redis_info() {
     echo "name=$name"
     echo "hostname=$hostname"
     echo "port=$port"
-    echo "connection_string=redis://:<retrieve-password-from-keyvault>@${hostname}:${port}"
+    echo "connection_string=redis://:<retrieve-password-from-keyvault>@${hostname}:${local_port:-$port}"
 }
 
 setup_ssh_tunnel() {
     local env=$1
     local hostname=$2
-    local port=$3
+    local remote_port=$3
+    local local_port=${4:-$remote_port}
     
     log_info "Starting SSH tunnel..."
     az ssh vm \
         -g "dp-be-${env}-rg" \
         -n "dp-be-${env}-ssh-jumper" \
-        -- -L "${port}:${hostname}:${port}"
+        -- -L "${local_port}:${hostname}:${remote_port}"
 }
 
 prompt_selection() {
@@ -181,7 +182,6 @@ prompt_selection() {
     done
 }
 
-# Add this function near the top with other utility functions
 to_upper() {
     echo "$1" | tr '[:lower:]' '[:upper:]'
 }
@@ -247,26 +247,30 @@ Database:    ${BOLD}${YELLOW}${db_type}${NC}"
     # Print connection details
     print_box "$(to_upper "$db_type") Connection Info" "\
 Server:    ${hostname}
-Port:      ${port}
+Local Port: ${local_port:-$port}
+Remote Port: ${port}
 
 Connection String:
 ${BOLD}${connection_string}${NC}"
     
-    setup_ssh_tunnel "$environment" "${hostname}" "${port}"
+    setup_ssh_tunnel "$environment" "${hostname}" "${port}" "${local_port:-$port}"
 }
 
 # Parse command line arguments
 environment=""
 db_type=""
+local_port=""
 
-while getopts "e:t:h" opt; do
+while getopts "e:t:p:h" opt; do
     case $opt in
         e) environment="$OPTARG" ;;
         t) db_type="$OPTARG" ;;
+        p) local_port="$OPTARG" ;;
         h)
-            echo "Usage: $0 [-e environment] [-t database_type]"
+            echo "Usage: $0 [-e environment] [-t database_type] [-p local_port]"
             echo "  -e: Environment (test, yt01, staging, prod)"
             echo "  -t: Database type (postgres, redis)"
+            echo "  -p: Local port to forward to (defaults to remote port)"
             exit 0
             ;;
         *)
@@ -276,4 +280,5 @@ while getopts "e:t:h" opt; do
     esac
 done
 
-main "$environment" "$db_type" 
+main "$environment" "$db_type"
+

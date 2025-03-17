@@ -17,8 +17,7 @@ using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using MassTransit.Internals;
-using MassTransit.Testing;
+using Digdir.Domain.Dialogporten.Domain.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Events;
 
@@ -53,7 +52,9 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         domainEventTypes.ForEach(domainEventType =>
         {
             Action act = () => CloudEventTypes.Get(domainEventType.Name);
-            act.Should().NotThrow($"all domain events must have a mapping in {nameof(CloudEventTypes)} ({domainEventType.Name} is missing)");
+            act.Should()
+                .NotThrow(
+                    $"all domain events must have a mapping in {nameof(CloudEventTypes)} ({domainEventType.Name} is missing)");
         });
     }
 
@@ -67,76 +68,55 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         allActivityTypes.ForEach(activityType =>
         {
             Action act = () => CloudEventTypes.Get(activityType.ToString());
-            act.Should().NotThrow($"all activity types must have a mapping in {nameof(CloudEventTypes)} ({activityType} is missing)");
+            act.Should()
+                .NotThrow(
+                    $"all activity types must have a mapping in {nameof(CloudEventTypes)} ({activityType} is missing)");
         });
     }
 
     [Fact]
-    public async Task Creates_CloudEvents_When_Dialog_Created()
+    public async Task Creates_DomainEvents_When_Dialog_Created()
     {
         // Arrange
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
-
         var allActivityTypes = Enum.GetValues<DialogActivityType.Values>().ToList();
         var activities = allActivityTypes
             .Select(activityType => DialogGenerator.GenerateFakeDialogActivity(activityType))
             .ToList();
+
         var transmissionOpenedActivity = activities
             .Single(x => x.Type == DialogActivityType.Values.TransmissionOpened);
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1).First();
         transmissionOpenedActivity.TransmissionId = transmission.Id;
+
         var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(
             activities: activities,
+            transmissions: [transmission],
             attachments: DialogGenerator.GenerateFakeDialogAttachments(3));
-        var dto = createDialogCommand.Dto;
-        dto.Transmissions.Add(transmission);
 
         // Act
         await Application.Send(createDialogCommand);
 
-        await harness.Consumed
-            .SelectAsync<DialogCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
-
-        await harness.Consumed
-            .SelectAsync<DialogActivityCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .Take(activities.Count)
-            .ToListAsync();
-
-        await harness.Consumed
-            .SelectAsync<DialogTransmissionCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
-
-        var cloudEvents = Application.PopPublishedCloudEvents();
+        var domainEvents = Application.GetPublishedEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dto.Id.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == dto.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == dto.Party);
+        domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
+        domainEvents.OfType<DialogTransmissionCreatedDomainEvent>().Should().HaveCount(1);
+        domainEvents.OfType<DialogActivityCreatedDomainEvent>().Should().HaveCount(activities.Count);
 
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogCreatedDomainEvent)));
-
-        allActivityTypes.ForEach(activityType =>
-            cloudEvents.Should().ContainSingle(cloudEvent =>
-                cloudEvent.Type == CloudEventTypes.Get(activityType.ToString())));
-
-        cloudEvents.Count(cloudEvent => cloudEvent.Type == CloudEventTypes.Get(nameof(DialogTransmissionCreatedDomainEvent)))
-            .Should().Be(dto.Transmissions.Count);
-
-        cloudEvents.Count
+        domainEvents.Count
             .Should()
             // +1 for the dialog created event
-            .Be(dto.Activities.Count + dto.Transmissions.Count + 1);
+            .Be(createDialogCommand.Dto.Activities.Count +
+                createDialogCommand.Dto.Transmissions.Count + 1);
     }
 
     [Fact]
     public async Task Creates_CloudEvent_When_Dialog_Updates()
     {
         // Arrange
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(
             activities: [],
+            transmissions: [],
             progress: 0,
             attachments: []);
 
@@ -158,25 +138,21 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         };
 
         await Application.Send(updateDialogCommand);
-        await harness.Consumed
-            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
-        var cloudEvents = Application.PopPublishedCloudEvents();
+
+        var publishedEvents = Application.GetPublishedEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dto.Id!.Value.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == dto.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == dto.Party);
+        publishedEvents.OfType<DialogUpdatedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
 
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogUpdatedDomainEvent)));
+        // Created + Updated
+        publishedEvents.Count.Should().Be(2);
     }
 
     [Fact]
     public async Task Creates_Update_Event_And_Activity_Created_Event_When_Activity_Is_Added()
     {
         // Arrange
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         await Application.Send(createDialogCommand);
@@ -202,32 +178,21 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         await Application.Send(updateDialogCommand);
 
-        await harness.Consumed
-            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
-
-        await harness.Consumed
-            .SelectAsync<DialogActivityCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
-        var cloudEvents = Application.PopPublishedCloudEvents();
+        var publishedEvents = Application.GetPublishedEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dto.Id!.Value.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == dto.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == dto.Party);
+        publishedEvents.OfType<DialogUpdatedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogActivityCreatedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
 
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogUpdatedDomainEvent)));
-
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogActivityType.Values.DialogClosed)));
+        // Created + Updated + ActivityCreated
+        publishedEvents.Count.Should().Be(3);
     }
 
     [Fact]
     public async Task Creates_Update_Event_And_Transmission_Created_Event_When_Transmission_Is_Added()
     {
         // Arrange
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         await Application.Send(createDialogCommand);
@@ -258,38 +223,23 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         // Act
         await Application.Send(updateDialogCommand);
 
-        await harness.Consumed
-            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
-
-        await harness.Consumed
-            .SelectAsync<DialogTransmissionCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
-
-        var cloudEvents = Application.PopPublishedCloudEvents();
+        var publishedEvents = Application.GetPublishedEvents();
 
         // Assert
-        cloudEvents.Should().HaveCount(3); // DialogUpdated, TransmissionCreated, DialogCreated
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dto.Id!.Value.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == dto.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == dto.Party);
+        publishedEvents.OfType<DialogUpdatedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogTransmissionCreatedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
 
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogUpdatedDomainEvent)));
-
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogTransmissionCreatedDomainEvent)));
+        // Created + Updated + TransmissionCreated
+        publishedEvents.Count.Should().Be(3);
     }
 
     [Fact]
     public async Task Creates_CloudEvent_When_Attachments_Updates()
     {
         // Arrange
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(
-            id: dialogId,
-            attachments: []);
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(dialogId);
 
         await Application.Send(createDialogCommand);
 
@@ -316,26 +266,23 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         };
 
         await Application.Send(updateDialogCommand);
-        await harness.Consumed
-            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == dialogId)
-            .FirstOrDefault();
-        var cloudEvents = Application.PopPublishedCloudEvents();
+
+        var publishedEvents = Application.GetPublishedEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dialogId.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.Dto.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Dto.Party);
+        publishedEvents.OfType<DialogUpdatedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
 
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogUpdatedDomainEvent)));
+        // Created + Updated
+        publishedEvents.Count.Should().Be(2);
     }
+
     [Fact]
     public async Task Creates_CloudEvents_When_Dialog_Deleted()
     {
         // Arrange
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(id: dialogId, attachments: [], activities: []);
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(dialogId);
 
         await Application.Send(createDialogCommand);
 
@@ -345,27 +292,23 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             Id = dialogId
         };
         await Application.Send(deleteDialogCommand);
-        await harness.Consumed
-            .SelectAsync<DialogDeletedDomainEvent>(x => x.Context.Message.DialogId == dialogId)
-            .FirstOrDefault();
-        var cloudEvents = Application.PopPublishedCloudEvents();
+
+        var publishedEvents = Application.GetPublishedEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dialogId.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.Dto.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Dto.Party);
+        publishedEvents.OfType<DialogDeletedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
 
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogDeletedDomainEvent)));
+        // Created + Deleted
+        publishedEvents.Count.Should().Be(2);
     }
 
     [Fact]
     public async Task Creates_DialogDeletedEvent_When_Dialog_Purged()
     {
         // Arrange
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(id: dialogId, attachments: [], activities: []);
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(dialogId);
 
         await Application.Send(createDialogCommand);
 
@@ -376,25 +319,21 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         };
 
         await Application.Send(purgeCommand);
-        await harness.Consumed
-            .SelectAsync<DialogDeletedDomainEvent>(x => x.Context.Message.DialogId == dialogId)
-            .FirstOrDefault();
-        var cloudEvents = Application.PopPublishedCloudEvents();
+
+        var publishedEvents = Application.GetPublishedEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dialogId.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.Dto.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Dto.Party);
+        publishedEvents.OfType<DialogDeletedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
 
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogDeletedDomainEvent)));
+        // Created + Deleted
+        publishedEvents.Count.Should().Be(2);
     }
 
     [Fact]
     public async Task Creates_CloudEvent_When_Dialog_Is_Restored()
     {
         // Arrange
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
         var dialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(dialogId);
 
@@ -415,27 +354,21 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         await Application.Send(restoreDialogCommand);
 
-        await harness.Consumed
-            .SelectAsync<DialogRestoredDomainEvent>(x => x.Context.Message.DialogId == dialogId)
-            .FirstOrDefault();
-
-        var cloudEvents = Application.PopPublishedCloudEvents();
+        var publishedEvents = Application.GetPublishedEvents();
 
         // Assert
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.ResourceInstance == dialogId.ToString());
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Resource == createDialogCommand.Dto.ServiceResource);
-        cloudEvents.Should().OnlyContain(cloudEvent => cloudEvent.Subject == createDialogCommand.Dto.Party);
+        publishedEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogDeletedDomainEvent>().Should().HaveCount(1);
+        publishedEvents.OfType<DialogRestoredDomainEvent>().Should().HaveCount(1);
 
-        cloudEvents.Should().ContainSingle(cloudEvent =>
-            cloudEvent.Type == CloudEventTypes.Get(nameof(DialogRestoredDomainEvent)));
+        // Created + Restored + Deleted
+        publishedEvents.Count.Should().Be(3);
     }
 
     [Fact]
     public async Task AltinnEvents_Should_Be_Disabled_When_DisableAltinnEvents_Is_Set()
     {
         // Arrange - Create
-        var harness = await Application.ConfigureServicesWithMassTransitTestHarness();
-
         var activity = DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information);
         var initialProgress = 1;
 
@@ -448,12 +381,6 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         // Act - Create
         await Application.Send(createDialogCommand);
-        await harness.Consumed
-            .SelectAsync<DialogCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
-        await harness.Consumed
-            .SelectAsync<DialogActivityCreatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
 
         // Arrange - Update
         var getDialogResult = await Application.Send(new GetDialogQuery { DialogId = dto.Id!.Value });
@@ -470,9 +397,6 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         // Act - Update
         await Application.Send(updateDialogCommand);
-        await harness.Consumed
-            .SelectAsync<DialogUpdatedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
 
         // Arrange - Delete
         var deleteDialogCommand = new DeleteDialogCommand
@@ -483,9 +407,6 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         // Act - Delete
         await Application.Send(deleteDialogCommand);
-        await harness.Consumed
-            .SelectAsync<DialogDeletedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
 
         // Arrange - Restore
         var restoreDialogCommand = new RestoreDialogCommand
@@ -496,9 +417,6 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         // Act - Restore
         await Application.Send(restoreDialogCommand);
-        await harness.Consumed
-            .SelectAsync<DialogRestoredDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
 
         // Arrange - Purge
         var purgeCommand = new PurgeDialogCommand
@@ -509,12 +427,19 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         // Act - Purge
         await Application.Send(purgeCommand);
-        await harness.Consumed
-            .SelectAsync<DialogDeletedDomainEvent>(x => x.Context.Message.DialogId == dto.Id)
-            .FirstOrDefault();
 
         // Assert
-        var cloudEvents = Application.PopPublishedCloudEvents();
-        cloudEvents.Should().BeEmpty();
+        var publishedEvents = Application.GetPublishedEvents();
+
+        publishedEvents
+            .OfType<IDomainEvent>()
+            .Should()
+            .NotBeEmpty();
+
+        publishedEvents
+            .OfType<IDomainEvent>()
+            .All(x => x.Metadata[Constants.DisableAltinnEvents] == bool.TrueString)
+            .Should()
+            .BeTrue();
     }
 }

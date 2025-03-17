@@ -390,6 +390,12 @@ public sealed class DialogApiActionDto
     public bool IsAuthorized { get; set; }
 
     /// <summary>
+    /// The logical name of the operation the API action refers to.
+    /// </summary>
+    /// <example>confirm</example>
+    public string? Name { get; set; }
+
+    /// <summary>
     /// The endpoints associated with the action.
     /// </summary>
     public List<DialogApiActionEndpointDto> Endpoints { get; set; } = [];

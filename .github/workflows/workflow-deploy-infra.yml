@@ -55,7 +55,7 @@ jobs:
       contents: read
     steps:
       - name: "Checkout GitHub Action"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ inputs.ref }}
 
@@ -67,7 +67,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Fetch secret keys from source Azure Key Vault
-        uses: azure/CLI@v2
+        uses: azure/CLI@089eac9d8cc39f5d003e94f8b65efc51076c9cbd # v2.1.0
         id: keyvault-keys
         with:
           inlineScript: |
@@ -84,7 +84,7 @@ jobs:
           echo "::set-output name=postgresqlPassword::$password"
 
       - name: Dryrun Deploy infrastructure (${{ inputs.environment }})
-        uses: azure/arm-deploy@v2
+        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2.0.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -108,7 +108,7 @@ jobs:
           parameters: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
 
       - name: Deploy infrastructure (${{ inputs.environment }})
-        uses: azure/arm-deploy@v2
+        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2.0.0
         if: ${{ !inputs.dryRun }}
         id: deploy
         env:

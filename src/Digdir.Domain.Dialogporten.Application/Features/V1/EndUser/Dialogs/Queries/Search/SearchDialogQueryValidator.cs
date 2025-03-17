@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using FluentValidation;
+using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.ValidationErrorStrings;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 
@@ -52,5 +53,20 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
 
         RuleForEach(x => x.Status).IsInEnum();
         RuleForEach(x => x.SystemLabel).IsInEnum();
+
+        RuleFor(x => x.CreatedAfter)
+            .LessThanOrEqualTo(x => x.CreatedBefore)
+            .When(x => x.CreatedAfter is not null && x.CreatedBefore is not null)
+            .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
+
+        RuleFor(x => x.DueAfter)
+            .LessThanOrEqualTo(x => x.DueBefore)
+            .When(x => x.DueAfter is not null && x.DueBefore is not null)
+            .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
+
+        RuleFor(x => x.UpdatedAfter)
+            .LessThanOrEqualTo(x => x.UpdatedBefore)
+            .When(x => x.UpdatedAfter is not null && x.UpdatedBefore is not null)
+            .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
     }
 }

@@ -27,11 +27,4 @@ internal static class AspNetCoreOpenApiDocumentGeneratorSettingsExtensions
 
         return settings;
     }
-
-    public static AspNetCoreOpenApiDocumentGeneratorSettings AddServiceOwnerSuffixToSchemas(
-        this AspNetCoreOpenApiDocumentGeneratorSettings settings)
-    {
-        settings.SchemaSettings.SchemaNameGenerator = new SuffixedSchemaNameGenerator();
-        return settings;
-    }
 }

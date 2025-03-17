@@ -134,6 +134,7 @@ public sealed class ApiAction
     public string Action { get; set; } = null!;
     public string? AuthorizationAttribute { get; set; }
     public bool IsAuthorized { get; set; }
+    public string? Name { get; set; }
 
     public List<ApiActionEndpoint> Endpoints { get; set; } = [];
 }

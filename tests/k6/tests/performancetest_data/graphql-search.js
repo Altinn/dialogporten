@@ -1,7 +1,23 @@
-export function getGraphqlParty(identifier) {
+
+
+export function getGraphqlParty(inputs) {
+    let inputStr  = "";
+    const notListElements = ["createdAfter", "createdBefore", "updatedAfter", "updatedBefore", "dueAfter", "dueBefore", "search"];
+    for (var key in inputs) {
+        if (inputStr.length > 0) {
+            inputStr += ", ";
+        }
+        if (notListElements.includes(key)) {
+            inputStr += `${key}: "${inputs[key]}" `
+        }
+        else {
+            inputStr += `${key}:  [ "${inputs[key]}" ] `
+        }
+    }
+
     return `
         query getAllDialogsForParties {
-            searchDialogs(input: { party: ["urn:altinn:person:identifier-no:${identifier}"]}) {
+            searchDialogs(input: { ${inputStr} }) {
             items {
                 id
                 party

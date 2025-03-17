@@ -24,10 +24,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
         with:
           global-json-file: ./global.json
 
@@ -35,7 +35,7 @@ jobs:
         run: dotnet pack --configuration Release -p:Version="${{ inputs.version }}" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg --output . "${{ inputs.path }}"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: package
           path: '*.*nupkg'

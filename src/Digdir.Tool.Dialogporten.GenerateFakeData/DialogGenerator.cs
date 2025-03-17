@@ -35,6 +35,7 @@ public static class DialogGenerator
         DateTimeOffset? updatedAt = null,
         DateTimeOffset? dueAt = null,
         DateTimeOffset? expiresAt = null,
+        DateTimeOffset? visibleFrom = null,
         string? process = null,
         DialogStatus.Values? status = null,
         ContentDto? content = null,
@@ -62,6 +63,7 @@ public static class DialogGenerator
                 updatedAt,
                 dueAt,
                 expiresAt,
+                visibleFrom,
                 process,
                 status,
                 content,
@@ -86,6 +88,7 @@ public static class DialogGenerator
         DateTimeOffset? updatedAt = null,
         DateTimeOffset? dueAt = null,
         DateTimeOffset? expiresAt = null,
+        DateTimeOffset? visibleFrom = null,
         string? process = null,
         DialogStatus.Values? status = null,
         ContentDto? content = null,
@@ -111,6 +114,7 @@ public static class DialogGenerator
             updatedAt,
             dueAt,
             expiresAt,
+            visibleFrom,
             process,
             status,
             content,
@@ -137,6 +141,7 @@ public static class DialogGenerator
         DateTimeOffset? updatedAt = null,
         DateTimeOffset? dueAt = null,
         DateTimeOffset? expiresAt = null,
+        DateTimeOffset? visibleFrom = null,
         string? process = null,
         DialogStatus.Values? status = null,
         ContentDto? content = null,
@@ -159,6 +164,7 @@ public static class DialogGenerator
             .RuleFor(o => o.UpdatedAt, f => updatedAt ?? default)
             .RuleFor(o => o.DueAt, f => dueAt ?? f.Date.Future(10, RefTime))
             .RuleFor(o => o.ExpiresAt, f => expiresAt ?? f.Date.Future(20, RefTime.AddYears(11)))
+            .RuleFor(o => o.VisibleFrom, _ => visibleFrom ?? null)
             .RuleFor(o => o.Status, f => status ?? f.PickRandom<DialogStatus.Values>())
             .RuleFor(o => o.Content, _ => content ?? GenerateFakeDialogContent())
             .RuleFor(o => o.SearchTags, _ => searchTags ?? GenerateFakeSearchTags())
@@ -337,6 +343,7 @@ public static class DialogGenerator
         return new Faker<ApiActionDto>()
             .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
             .RuleFor(o => o.Action, f => f.Random.AlphaNumeric(8))
+            .RuleFor(o => o.Name, f => f.Random.AlphaNumeric(8))
             .RuleFor(o => o.Endpoints, _ => GenerateFakeDialogApiActionEndpoints())
             .Generate(new Randomizer().Number(1, 4));
     }

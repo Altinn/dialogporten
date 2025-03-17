@@ -4,6 +4,7 @@ param environment = 'yt01'
 param location = 'norwayeast'
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param jobSchedule = '*/5 * * * *' // Runs every 5 minutes
+param replicaTimeOutInSeconds = 600
 
 //secrets
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')

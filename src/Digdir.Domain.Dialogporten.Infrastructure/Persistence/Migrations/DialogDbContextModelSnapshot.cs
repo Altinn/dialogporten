@@ -1775,7 +1775,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.Actor", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", "ActorNameEntity")
-                        .WithMany()
+                        .WithMany("ActorEntities")
                         .HasForeignKey("ActorNameEntityId");
 
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Actors.ActorType", "ActorType")
@@ -2178,6 +2178,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("TransmissionContent");
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", b =>
+                {
+                    b.Navigation("ActorEntities");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Attachments.Attachment", b =>

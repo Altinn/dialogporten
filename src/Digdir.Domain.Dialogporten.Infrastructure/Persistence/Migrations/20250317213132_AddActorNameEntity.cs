@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class IntroduceActorEntity : Migration
+    public partial class AddActorNameEntity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -10,18 +10,25 @@ inputs:
     required: true
   subscription-id:
     description: 'Azure Subscription ID'
-    required: true
+    required: false
+  allow-no-subscriptions:
+    description: 'Allow login without subscription ID'
+    required: false
+    default: 'false'
+
 env:
   AZ_CLI_VERSION: 2.70.0
+
 runs:
   using: "composite"
   steps:
     - name: OIDC Login to Azure Public Cloud
-      uses: azure/login@v2
+      uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2.2.0
       with:
         client-id: ${{ inputs.client-id }}
         tenant-id: ${{ inputs.tenant-id }}
-        subscription-id: ${{ inputs.subscription-id }}
+        subscription-id: ${{ inputs.allow-no-subscriptions == 'true' && '' || inputs.subscription-id }}
+        allow-no-subscriptions: ${{ inputs.allow-no-subscriptions }}
 
     - name: Upgrade Azure Bicep
       shell: bash

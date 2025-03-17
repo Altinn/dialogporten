@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.59.0](https://github.com/Altinn/dialogporten/compare/v1.58.3...v1.59.0) (2025-03-17)
+
+
+### Features
+
+* Introduce ActorNameEntity ([#1775](https://github.com/Altinn/dialogporten/issues/1775)) ([f6d15e9](https://github.com/Altinn/dialogporten/commit/f6d15e9ac3d677bc05eccf3af0a91ddb2da9cbeb))
+
+
+### Miscellaneous Chores
+
+* **webapi:** Add at23 token exchange as valid auth service for DP test. ([#2062](https://github.com/Altinn/dialogporten/issues/2062)) ([d946903](https://github.com/Altinn/dialogporten/commit/d946903ff3de04b29d7f5e699518d757e39528a5))
+
 ## [1.58.3](https://github.com/Altinn/dialogporten/compare/v1.58.2...v1.58.3) (2025-03-17)
 
 

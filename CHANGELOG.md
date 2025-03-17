@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.58.3](https://github.com/Altinn/dialogporten/compare/v1.58.2...v1.58.3) (2025-03-17)
+
+
+### Miscellaneous Chores
+
+* **ci:** Pin all GitHub actions to specific commits  ([#2060](https://github.com/Altinn/dialogporten/issues/2060)) ([bae9207](https://github.com/Altinn/dialogporten/commit/bae92077e8f1835944c877c56e7847f0f8fb003a))
+
 ## [1.58.2](https://github.com/Altinn/dialogporten/compare/v1.58.1...v1.58.2) (2025-03-16)
 
 

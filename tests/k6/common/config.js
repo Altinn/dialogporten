@@ -38,18 +38,50 @@ export const baseUrls = {
     }
 };
 
-export const defaultEndUserOrgNo = "310923044"; // ÆRLIG UROKKELIG TIGER AS
-export const defaultEndUserSsn = "08844397713"; // UROMANTISK LITTERATUR, has "DAGL" for 310923044
-export const defaultServiceOwnerOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "713431400" : "991825827";
-export const otherOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "974761076" : "889640782";
-export const otherOrgName = __ENV.API_ENVIRONMENT == "yt01" ? "skd" : "nav";
-export const otherServiceResource = __ENV.API_ENVIRONMENT == "yt01" ? "app_skd_formueinntekt-skattemelding-v2" : "app_nav_barnehagelister";
-export const notValidEnduserId = __ENV.API_ENVIRONMENT == "yt01" ? "08837297959" : "08895699684";
-
-
 if (__ENV.IS_DOCKER && __ENV.API_ENVIRONMENT == "localdev") {
     __ENV.API_ENVIRONMENT = "localdev_docker";
 }
+
+export const defaultEndUserOrgNo = "310923044"; // ÆRLIG UROKKELIG TIGER AS
+export const defaultEndUserSsn = "08844397713"; // UROMANTISK LITTERATUR, has "DAGL" for 310923044
+export const defaultServiceOwnerOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "713431400" : "991825827";
+export const otherOrgNo = (() => {
+    switch (__ENV.API_ENVIRONMENT) {
+        case 'at23':
+        case 'localdev':
+        case 'localdev_docker':    
+            return '310693677'; // brg
+        case 'yt01':
+            return '974761076'; // skd
+        default:
+            return '889640782'; // nav
+    }
+})();
+export const otherOrgName = (() => {
+    switch (__ENV.API_ENVIRONMENT) {
+        case 'at23':
+        case 'localdev':
+        case 'localdev_docker':
+            return 'brg';
+        case 'yt01':
+            return 'skd';
+        default:
+            return 'nav';
+    }
+})();
+export const otherServiceResource = (() => {
+    switch (__ENV.API_ENVIRONMENT) {
+        case 'at23':
+        case 'localdev':
+        case 'localdev_docker':
+            return 'appid-12';
+        case 'yt01':
+            return 'app_skd_formueinntekt-skattemelding-v2';
+        default:
+            return 'app_nav_barnehagelister';
+    }
+})();
+export const notValidEnduserId = __ENV.API_ENVIRONMENT == "yt01" ? "08837297959" : "08895699684";
 
 if (!baseUrls[__ENV.API_VERSION]) {
     throw new Error(`Invalid API version: ${__ENV.API_VERSION}. Please ensure it's set correctly in your environment variables.`);
@@ -68,15 +100,13 @@ export const baseUrlServiceOwner = baseUrls[__ENV.API_VERSION]["serviceowner"][_
 export const tokenGeneratorEnv = (() => {
     switch (__ENV.API_ENVIRONMENT) {
         case 'localdev':
-            return 'at23';
         case 'localdev_docker':
+        case 'test':
             return 'at23';
         case 'staging':
             return 'tt02';
         case 'yt01':
             return 'yt01';
-        case 'test':
-            return 'at23';
         case 'prod':
             return 'tt02';
         default:

@@ -32,6 +32,13 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
             return;
         }
 
+        // No need to store actor name for ServiceOwner label updates
+        var actorNameEntity = actorType == ActorType.Values.PartyRepresentative
+            ? new ActorName
+            {
+                ActorId = userId
+            } : null;
+
         // remove old label then add new one
         if (currentLabel != SystemLabel.Values.Default)
         {
@@ -42,7 +49,7 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
                 PerformedBy = new()
                 {
                     ActorTypeId = actorType,
-                    ActorId = userId
+                    ActorNameEntity = actorNameEntity
                 }
             });
         }
@@ -56,12 +63,11 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
                 PerformedBy = new()
                 {
                     ActorTypeId = actorType,
-                    ActorId = userId
+                    ActorNameEntity = actorNameEntity
                 }
             });
         }
 
         SystemLabelId = newLabel;
     }
-
 }

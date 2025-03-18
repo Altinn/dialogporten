@@ -71,15 +71,25 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             .Include(x => x.Transmissions)
                 .ThenInclude(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.Transmissions).ThenInclude(x => x.Sender)
-            .Include(x => x.Transmissions).ThenInclude(x => x.Attachments).ThenInclude(x => x.Urls)
-            .Include(x => x.Transmissions).ThenInclude(x => x.Attachments).ThenInclude(x => x.DisplayName!.Localizations)
-            .Include(x => x.Activities).ThenInclude(x => x.Description!.Localizations)
-            .Include(x => x.Activities).ThenInclude(x => x.PerformedBy)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.Sender)
+                .ThenInclude(x => x.ActorNameEntity)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.Attachments)
+                .ThenInclude(x => x.Urls)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.Attachments)
+                .ThenInclude(x => x.DisplayName!.Localizations)
+            .Include(x => x.Activities)
+                .ThenInclude(x => x.Description!.Localizations)
+            .Include(x => x.Activities)
+                .ThenInclude(x => x.PerformedBy)
+                .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.SeenLog
                     .Where(x => x.CreatedAt >= x.Dialog.UpdatedAt)
                     .OrderBy(x => x.CreatedAt))
                 .ThenInclude(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.DialogEndUserContext)
             .Where(x => !x.VisibleFrom.HasValue || x.VisibleFrom < _clock.UtcNowOffset)
             .IgnoreQueryFilters()
@@ -144,8 +154,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = dialog.SeenLog
             .Select(log =>
             {
+                var actorId = log.SeenBy.ActorNameEntity != null ? log.SeenBy.ActorNameEntity.ActorId : log.SeenBy.ActorNameEntity?.ActorId;
                 var logDto = _mapper.Map<DialogSeenLogDto>(log);
-                logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == log.SeenBy.ActorId;
+                logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == actorId;
                 return logDto;
             })
             .ToList();

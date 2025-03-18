@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.59.0](https://github.com/Altinn/dialogporten/compare/v1.58.3...v1.59.0) (2025-03-17)
+
+
+### Features
+
+* Introduce ActorNameEntity ([#1775](https://github.com/Altinn/dialogporten/issues/1775)) ([f6d15e9](https://github.com/Altinn/dialogporten/commit/f6d15e9ac3d677bc05eccf3af0a91ddb2da9cbeb))
+
+
+### Miscellaneous Chores
+
+* **webapi:** Add at23 token exchange as valid auth service for DP test. ([#2062](https://github.com/Altinn/dialogporten/issues/2062)) ([d946903](https://github.com/Altinn/dialogporten/commit/d946903ff3de04b29d7f5e699518d757e39528a5))
+
+## [1.58.3](https://github.com/Altinn/dialogporten/compare/v1.58.2...v1.58.3) (2025-03-17)
+
+
+### Miscellaneous Chores
+
+* **ci:** Pin all GitHub actions to specific commits  ([#2060](https://github.com/Altinn/dialogporten/issues/2060)) ([bae9207](https://github.com/Altinn/dialogporten/commit/bae92077e8f1835944c877c56e7847f0f8fb003a))
+
+## [1.58.2](https://github.com/Altinn/dialogporten/compare/v1.58.1...v1.58.2) (2025-03-16)
+
+
+### Bug Fixes
+
+* **apps:** ensure we use at23 as backend instead of tt02 in test env ([#2035](https://github.com/Altinn/dialogporten/issues/2035)) ([40dea13](https://github.com/Altinn/dialogporten/commit/40dea131ee868b6ee464436e8ed625555fdf7a8e))
+* **test:** Simplify domain event tests, remove MassTransit harness ([#2045](https://github.com/Altinn/dialogporten/issues/2045)) ([e2765d7](https://github.com/Altinn/dialogporten/commit/e2765d7afeb57057baf235ee1277bebfe640b8f7))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency fastendpoints.swagger to 5.35.0 ([#2058](https://github.com/Altinn/dialogporten/issues/2058)) ([0688d73](https://github.com/Altinn/dialogporten/commit/0688d7309b09aacd7106502cfd52c459f3bc6257))
+* **deps:** update grafana/loki docker tag to v3.4.2 ([#2056](https://github.com/Altinn/dialogporten/issues/2056)) ([83f2f74](https://github.com/Altinn/dialogporten/commit/83f2f74fef044250c06e19e76748772bb5a35782))
+* **deps:** update masstransit monorepo to 8.3.7 ([#2057](https://github.com/Altinn/dialogporten/issues/2057)) ([33d74a5](https://github.com/Altinn/dialogporten/commit/33d74a5e54da31d0c6f63644900ab132e87dde57))
+
 ## [1.58.1](https://github.com/Altinn/dialogporten/compare/v1.58.0...v1.58.1) (2025-03-12)
 
 

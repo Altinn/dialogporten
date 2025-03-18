@@ -95,14 +95,18 @@ public class DialogApplication : IAsyncLifetime
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
             .AddDistributedMemoryCache()
             .AddLogging()
-            .AddTransient<ConvertDomainEventsToOutboxMessagesInterceptor>()
+            .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
+            .AddScoped<PopulateActorNameInterceptor>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
             .AddDbContext<DialogDbContext>((services, options) =>
-                options.UseNpgsql(_dbContainer.GetConnectionString(), o =>
+                options.UseNpgsql(_dbContainer.GetConnectionString() + ";Include Error Detail=true", o =>
                     {
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     })
-                    .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()))
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors()
+                    .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
+                    .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>()))
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
             .AddScoped<IServiceOwnerNameRegistry>(_ => CreateServiceOwnerNameRegistrySubstitute())
@@ -138,12 +142,18 @@ public class DialogApplication : IAsyncLifetime
         var applicationSettingsSubstitute = Substitute.For<IOptions<ApplicationSettings>>();
 
         using var primaryKeyPair = Key.Create(SignatureAlgorithm.Ed25519,
-            new KeyCreationParameters { ExportPolicy = KeyExportPolicies.AllowPlaintextExport });
+            new KeyCreationParameters
+            {
+                ExportPolicy = KeyExportPolicies.AllowPlaintextExport
+            });
         var primaryPublicKey = primaryKeyPair.Export(KeyBlobFormat.RawPublicKey);
         var primaryPrivateKey = primaryKeyPair.Export(KeyBlobFormat.RawPrivateKey);
 
         using var secondaryKeyPair = Key.Create(SignatureAlgorithm.Ed25519,
-            new KeyCreationParameters { ExportPolicy = KeyExportPolicies.AllowPlaintextExport });
+            new KeyCreationParameters
+            {
+                ExportPolicy = KeyExportPolicies.AllowPlaintextExport
+            });
         var secondaryPublicKey = secondaryKeyPair.Export(KeyBlobFormat.RawPublicKey);
         var secondaryPrivateKey = secondaryKeyPair.Export(KeyBlobFormat.RawPrivateKey);
 
@@ -232,7 +242,10 @@ public class DialogApplication : IAsyncLifetime
         _respawner = await Respawner.CreateAsync(connection, new()
         {
             DbAdapter = DbAdapter.Postgres,
-            TablesToIgnore = new[] { new Table("__EFMigrationsHistory") }
+            TablesToIgnore = new[]
+                {
+                    new Table("__EFMigrationsHistory")
+                }
                 .Concat(GetLookupTables())
                 .ToArray()
         });

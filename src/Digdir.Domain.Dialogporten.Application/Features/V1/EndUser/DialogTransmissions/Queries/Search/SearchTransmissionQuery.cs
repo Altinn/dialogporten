@@ -45,6 +45,7 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
                 .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
             .Include(x => x.Transmissions)
                 .ThenInclude(x => x.Sender)
+                .ThenInclude(x => x.ActorNameEntity)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                 cancellationToken: cancellationToken);

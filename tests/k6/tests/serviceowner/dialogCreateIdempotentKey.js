@@ -5,7 +5,7 @@ import { otherOrgName, otherOrgNo, otherServiceResource } from '../../common/con
 export default function () {
 
     const dialogs = [];
-    const navOrg = {
+    const otherOrg = {
         orgName: otherOrgName,
         orgNo: otherOrgNo,
     };
@@ -31,7 +31,7 @@ export default function () {
         dialog.serviceResource = "urn:altinn:resource:" +otherServiceResource;
         dialog.activities[2].performedBy.actorId = "urn:altinn:organization:identifier-no:" + otherOrgNo;
 
-        let responseNav = postSO('dialogs', dialog, null, navOrg);
+        let responseNav = postSO('dialogs', dialog, null, otherOrg);
         expectStatusFor(responseNav).to.equal(201);
 
         expect(responseNav, 'response').to.have.validJsonBody();
@@ -39,7 +39,7 @@ export default function () {
 
         dialogs.push({
             id: responseNav.json(),
-            org: navOrg
+            org: otherOrg
         })
 
         dialog = dialogToInsert();

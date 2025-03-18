@@ -74,7 +74,7 @@ export const otherServiceResource = (() => {
         case 'at23':
         case 'localdev':
         case 'localdev_docker':
-            return 'appid-12';
+            return 'brg-maskinportenschemaid-1';
         case 'yt01':
             return 'app_skd_formueinntekt-skattemelding-v2';
         default:

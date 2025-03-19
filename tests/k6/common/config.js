@@ -45,42 +45,34 @@ if (__ENV.IS_DOCKER && __ENV.API_ENVIRONMENT == "localdev") {
 export const defaultEndUserOrgNo = "310923044"; // ÆRLIG UROKKELIG TIGER AS
 export const defaultEndUserSsn = "08844397713"; // UROMANTISK LITTERATUR, has "DAGL" for 310923044
 export const defaultServiceOwnerOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "713431400" : "991825827";
-export const otherOrgNo = (() => {
+export const otherOrg = (() => {
     switch (__ENV.API_ENVIRONMENT) {
         case 'at23':
         case 'localdev':
         case 'localdev_docker':    
-            return '310693677'; // brg
+            return {
+                orgNo: '974760673',
+                name: 'brg',
+                serviceResource: 'brg-dialogporten-automated-tests'
+            };
         case 'yt01':
-            return '974761076'; // skd
+            return {
+                orgNo: '974761076',
+                name: 'skd', 
+                serviceResource: 'app_skd_formueinntekt-skattemelding-v2'
+            };
         default:
-            return '889640782'; // nav
+            return {
+                orgNo: '889640782',
+                name: 'nav',
+                serviceResource: 'app_nav_barnehagelister'
+            };
     }
 })();
-export const otherOrgName = (() => {
-    switch (__ENV.API_ENVIRONMENT) {
-        case 'at23':
-        case 'localdev':
-        case 'localdev_docker':
-            return 'brg';
-        case 'yt01':
-            return 'skd';
-        default:
-            return 'nav';
-    }
-})();
-export const otherServiceResource = (() => {
-    switch (__ENV.API_ENVIRONMENT) {
-        case 'at23':
-        case 'localdev':
-        case 'localdev_docker':
-            return 'brg-maskinportenschemaid-1';
-        case 'yt01':
-            return 'app_skd_formueinntekt-skattemelding-v2';
-        default:
-            return 'app_nav_barnehagelister';
-    }
-})();
+
+export const otherOrgNo = otherOrg.orgNo;
+export const otherOrgName = otherOrg.name;
+export const otherServiceResource = otherOrg.serviceResource;
 export const notValidEnduserId = __ENV.API_ENVIRONMENT == "yt01" ? "08837297959" : "08895699684";
 
 if (!baseUrls[__ENV.API_VERSION]) {

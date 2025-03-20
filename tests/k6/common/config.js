@@ -47,7 +47,7 @@ export const defaultEndUserSsn = "08844397713"; // UROMANTISK LITTERATUR, has "D
 export const defaultServiceOwnerOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "713431400" : "991825827";
 export const otherOrg = (() => {
     switch (__ENV.API_ENVIRONMENT) {
-        case 'at23':
+        case 'test':
         case 'localdev':
         case 'localdev_docker':    
             return {

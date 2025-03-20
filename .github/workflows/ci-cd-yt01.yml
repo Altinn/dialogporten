@@ -4,7 +4,7 @@ run-name: CI/CD YT01 ${{ github.event.client_payload.version && format('({0})', 
 
 # Temporarily disabled due to db seeding
 on:
-  workflow-call:
+  workflow_call:
 #  repository_dispatch:
 #    types: [release_created]
 

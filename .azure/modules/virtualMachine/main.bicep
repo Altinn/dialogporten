@@ -75,6 +75,9 @@ param adminLoginGroupObjectId string
 @secure()
 param sshPublicKey string
 
+@description('Enable Just-in-Time access for the virtual machine')
+param enableJit bool = false
+
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
   name: name
   location: location
@@ -119,6 +122,25 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
     type: 'SystemAssigned'
   }
   tags: tags
+}
+
+resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-01-01' = if (enableJit) {
+  name: '${location}/${name}'
+  properties: {
+    virtualMachines: [
+      {
+        id: virtualMachine.id
+        ports: [
+          {
+            number: 22
+            protocol: '*'
+            allowedSourceAddressPrefix: '*'
+            maxRequestAccessDuration: 'PT1H'
+          }
+        ]
+      }
+    ]
+  }
 }
 
 resource aadLoginExtension 'Microsoft.Compute/virtualMachines/extensions@2024-07-01' = {

@@ -83,6 +83,7 @@ module virtualMachine '../../modules/virtualMachine/main.bicep' = {
     location: location
     tags: tags
     adminLoginGroupObjectId: adminLoginGroupObjectId
+    enableJit: true
     hardwareProfile: {
       vmSize: 'Standard_B1s'
     }

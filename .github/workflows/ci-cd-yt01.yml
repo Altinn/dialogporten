@@ -2,9 +2,11 @@
 name: CI/CD YT01
 run-name: CI/CD YT01 ${{ github.event.client_payload.version && format('({0})', github.event.client_payload.version) || '' }}
 
+# Temporarily disabled due to db seeding
 on:
-  repository_dispatch:
-    types: [release_created]
+  workflow_call:
+#  repository_dispatch:
+#    types: [release_created]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

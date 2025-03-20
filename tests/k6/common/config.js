@@ -61,12 +61,15 @@ export const otherOrg = (() => {
                 name: 'skd', 
                 serviceResource: 'app_skd_formueinntekt-skattemelding-v2'
             };
-        default:
+        case 'staging':
+        case 'prod':    
             return {
                 orgNo: '889640782',
                 name: 'nav',
                 serviceResource: 'app_nav_barnehagelister'
-            };
+            }; 
+        default:
+            throw new Error(`Invalid API environment: ${__ENV.API_ENVIRONMENT}. Please ensure it's set correctly in your environment variables.`);
     }
 })();
 

@@ -5,7 +5,7 @@ export default function () {
 
     let validSo = null;
     let invalidSo = { orgName: "other", orgNo: "310778737" };
-    let validSoAdmin = { orgName: "other", orgNo: "991825827", scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.admin" };
+    let validSoAdmin = { orgName: "other", orgNo: "310778737", scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.admin" };
 
     let dialog = dialogToInsert();
     let transmissionId = null; // known after successful insert

@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.59.1](https://github.com/Altinn/dialogporten/compare/v1.59.0...v1.59.1) (2025-03-20)
+
+
+### Bug Fixes
+
+* **apps:** ensure we use at23 as backend instead of tt02 in test env ([#2051](https://github.com/Altinn/dialogporten/issues/2051)) ([7f545d9](https://github.com/Altinn/dialogporten/commit/7f545d909a86a36a113be753276d3bfb87896985))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency htmlagilitypack to 1.12.0 ([#2069](https://github.com/Altinn/dialogporten/issues/2069)) ([e97f1e0](https://github.com/Altinn/dialogporten/commit/e97f1e0a7aac2675cdd64f285d6ce5bb8254def9))
+* **deps:** update dependency verify.xunit to 28.14.1 ([#2070](https://github.com/Altinn/dialogporten/issues/2070)) ([86ad72b](https://github.com/Altinn/dialogporten/commit/86ad72b5aa8644fc073ff102abe3dff5ddec3e0f))
+* **deps:** update dotnet monorepo ([#2067](https://github.com/Altinn/dialogporten/issues/2067)) ([11e94d8](https://github.com/Altinn/dialogporten/commit/11e94d8ffa5c8fa203df94338213e15b1a7f4813))
+* **deps:** update microsoft dependencies to 9.0.3 ([#2068](https://github.com/Altinn/dialogporten/issues/2068)) ([6f93489](https://github.com/Altinn/dialogporten/commit/6f9348925417baea5efc7215a8f5b2a87f6dc036))
+
 ## [1.59.0](https://github.com/Altinn/dialogporten/compare/v1.58.3...v1.59.0) (2025-03-17)
 
 

@@ -224,6 +224,45 @@ resource redisNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   tags: tags
 }
 
+resource serviceBusNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: '${namePrefix}-service-bus-nsg'
+  location: location
+  properties: {
+    securityRules: [
+      // todo: make more restrictive
+      {
+        name: 'AllowAnyCustomAnyInbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 100
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowAnyCustomAnyOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 100
+          direction: 'Outbound'
+        }
+      }
+    ]
+  }
+  tags: tags
+}
+
 resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: '${namePrefix}-ssh-jumper-nsg'
   location: location
@@ -296,45 +335,6 @@ resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
           destinationAddressPrefix: '*'
           access: 'Allow'
           priority: 130
-          direction: 'Outbound'
-        }
-      }
-    ]
-  }
-  tags: tags
-}
-
-resource serviceBusNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
-  name: '${namePrefix}-service-bus-nsg'
-  location: location
-  properties: {
-    securityRules: [
-      // todo: make more restrictive
-      {
-        name: 'AllowAnyCustomAnyInbound'
-        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
-        properties: {
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRange: '*'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-          access: 'Allow'
-          priority: 100
-          direction: 'Inbound'
-        }
-      }
-      {
-        name: 'AllowAnyCustomAnyOutbound'
-        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
-        properties: {
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRange: '*'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-          access: 'Allow'
-          priority: 100
           direction: 'Outbound'
         }
       }

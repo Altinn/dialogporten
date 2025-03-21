@@ -192,7 +192,7 @@ module sshJumper '../modules/ssh-jumper/main.bicep' = {
   params: {
     namePrefix: namePrefix
     location: location
-    subnetId: vnet.outputs.defaultSubnetId
+    subnetId: vnet.outputs.sshJumperSubnetId
     tags: tags
     sshPublicKey: secrets.sourceKeyVaultSshJumperSshPublicKey
     adminLoginGroupObjectId: sshJumperAdminLoginGroupObjectId

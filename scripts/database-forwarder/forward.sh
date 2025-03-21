@@ -2,6 +2,15 @@
 
 set -euo pipefail
 
+# Constants
+readonly PRODUCT_TAG="Dialogporten"
+readonly DEFAULT_POSTGRES_PORT=5432
+readonly DEFAULT_REDIS_PORT=6379
+readonly JIT_DURATION="PT1H"
+readonly VALID_ENVIRONMENTS=("test" "yt01" "staging" "prod")
+readonly VALID_DB_TYPES=("postgres" "redis")
+readonly SUBSCRIPTION_PREFIX="Dialogporten"
+
 # Colors and formatting
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
@@ -15,11 +24,10 @@ NC='\033[0m' # No Color
 get_subscription_name() {
     local env=$1
     case "$env" in
-        "test") echo "Dialogporten-Test" ;;
-        "yt01") echo "Dialogporten-Test" ;;
-        "staging") echo "Dialogporten-Staging" ;;
-        "prod") echo "Dialogporten-Prod" ;;
-        *) echo "" ;;
+        "test"|"yt01")  echo "${SUBSCRIPTION_PREFIX}-Test"     ;;
+        "staging")      echo "${SUBSCRIPTION_PREFIX}-Staging"   ;;
+        "prod")         echo "${SUBSCRIPTION_PREFIX}-Prod"      ;;
+        *)              echo ""                                 ;;
     esac
 }
 
@@ -102,13 +110,49 @@ get_subscription_id() {
     echo "$sub_id"
 }
 
+# Resource naming helper functions
+get_resource_group() {
+    local env=$1
+    echo "dp-be-${env}-rg"
+}
+
+get_jumper_vm_name() {
+    local env=$1
+    echo "dp-be-${env}-ssh-jumper"
+}
+
+validate_environment() {
+    local env=$1
+    for valid_env in "${VALID_ENVIRONMENTS[@]}"; do
+        if [[ "$env" == "$valid_env" ]]; then
+            return 0
+        fi
+    done
+    log_error "Invalid environment: $env"
+    log_info "Valid environments: ${VALID_ENVIRONMENTS[*]}"
+    exit 1
+}
+
+validate_db_type() {
+    local db_type=$1
+    for valid_type in "${VALID_DB_TYPES[@]}"; do
+        if [[ "$db_type" == "$valid_type" ]]; then
+            return 0
+        fi
+    done
+    log_error "Invalid database type: $db_type"
+    log_info "Valid database types: ${VALID_DB_TYPES[*]}"
+    exit 1
+}
+
 get_postgres_info() {
     local env=$1
     local subscription_id=$2
     
+    log_info "Fetching PostgreSQL server information..."
     local name
     name=$(az postgres flexible-server list --subscription "$subscription_id" \
-        --query "[?tags.Environment=='$env' && tags.Product=='Dialogporten'] | [0].name" -o tsv)
+        --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
     
     if [ -z "$name" ]; then
         log_error "Postgres server not found"
@@ -116,11 +160,11 @@ get_postgres_info() {
     fi
     
     local hostname="${name}.postgres.database.azure.com"
-    local port=5432
+    local port=$DEFAULT_POSTGRES_PORT
     
     local username
     username=$(az postgres flexible-server show \
-        --resource-group "dp-be-${env}-rg" \
+        --resource-group "$(get_resource_group "$env")" \
         --name "$name" \
         --query "administratorLogin" -o tsv)
     
@@ -134,9 +178,10 @@ get_redis_info() {
     local env=$1
     local subscription_id=$2
     
+    log_info "Fetching Redis server information..."
     local name
     name=$(az redis list --subscription "$subscription_id" \
-        --query "[?tags.Environment=='$env' && tags.Product=='Dialogporten'] | [0].name" -o tsv)
+        --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
     
     if [ -z "$name" ]; then
         log_error "Redis server not found"
@@ -144,12 +189,94 @@ get_redis_info() {
     fi
     
     local hostname="${name}.redis.cache.windows.net"
-    local port=6379
+    local port=$DEFAULT_REDIS_PORT
 
     echo "name=$name"
     echo "hostname=$hostname"
     echo "port=$port"
     echo "connection_string=redis://:<retrieve-password-from-keyvault>@${hostname}:${local_port:-$port}"
+}
+
+configure_jit_access() {
+    local env=$1
+    local subscription_id=$2
+    local resource_group
+    resource_group=$(get_resource_group "$env")
+    local vm_name
+    vm_name=$(get_jumper_vm_name "$env")
+    
+    log_info "Configuring JIT access..."
+    
+    # Get public IP
+    log_info "Detecting your public IP address..."
+    local my_ip
+    my_ip=$(curl -s https://ifconfig.me)
+    if [ -z "$my_ip" ]; then
+        log_error "Failed to get public IP address"
+        exit 1
+    fi
+    log_success "Public IP detected: $my_ip"
+    
+    # Get VM details
+    log_info "Fetching VM details..."
+    local vm_id
+    vm_id=$(az vm show --resource-group "$resource_group" --name "$vm_name" --query "id" -o tsv)
+    if [ -z "$vm_id" ]; then
+        log_error "Failed to get VM ID for $vm_name in resource group $resource_group"
+        exit 1
+    fi
+    log_success "Found VM with ID: $vm_id"
+    
+    local location
+    location=$(az vm show --resource-group "$resource_group" --name "$vm_name" --query "location" -o tsv)
+    if [ -z "$location" ]; then
+        log_error "Failed to get location for VM $vm_name"
+        exit 1
+    fi
+    log_success "VM is located in: $location"
+    
+    # Construct JIT API endpoint
+    local endpoint="https://management.azure.com/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.Security/locations/$location/jitNetworkAccessPolicies/default/initiate?api-version=2015-06-01-preview"
+    
+    # Construct JSON payload
+    log_info "Preparing JIT access request..."
+    
+    # Create temporary file for JSON payload
+    local temp_file
+    temp_file=$(mktemp)
+    trap 'rm -f "$temp_file"' EXIT  # Safety net cleanup
+    
+    # Write JSON to temporary file
+    cat > "$temp_file" << EOF
+{
+  "virtualMachines": [
+    {
+      "id": "$vm_id",
+      "ports": [
+        {
+          "number": 22,
+          "duration": "$JIT_DURATION",
+          "allowedSourceAddressPrefix": "$my_ip"
+        }
+      ]
+    }
+  ]
+}
+EOF
+    
+    # Request JIT access
+    log_info "Requesting JIT access..."
+    log_info "Using endpoint: $endpoint"
+    echo
+    
+    local jit_response
+    if ! jit_response=$(az rest --method post --uri "$endpoint" --headers "Content-Type=application/json" --body "@$temp_file" 2>&1); then
+        log_error "Failed to configure JIT access. Error: $jit_response"
+        log_info "Please ensure you have the necessary permissions and that JIT access is enabled for this VM"
+        exit 1
+    fi
+    
+    log_success "JIT access configured successfully (valid for 1 hour)"
 }
 
 setup_ssh_tunnel() {
@@ -159,9 +286,11 @@ setup_ssh_tunnel() {
     local local_port=${4:-$remote_port}
     
     log_info "Starting SSH tunnel..."
+    log_info "Connecting to ${hostname}:${remote_port} via local port ${local_port}"
+    
     az ssh vm \
-        -g "dp-be-${env}-rg" \
-        -n "dp-be-${env}-ssh-jumper" \
+        -g "$(get_resource_group "$env")" \
+        -n "$(get_jumper_vm_name "$env")" \
         -- -L "${local_port}:${hostname}:${remote_port}"
 }
 
@@ -197,13 +326,17 @@ main() {
     
     # If environment is not provided, prompt for it
     if [ -z "$environment" ]; then
-        environment=$(prompt_selection "Select environment (1-4):" "test" "yt01" "staging" "prod")
+        log_info "Please select target environment:"
+        environment=$(prompt_selection "Environment (1-${#VALID_ENVIRONMENTS[@]}): " "${VALID_ENVIRONMENTS[@]}")
     fi
+    validate_environment "$environment"
     
     # If db_type is not provided, prompt for it
     if [ -z "$db_type" ]; then
-        db_type=$(prompt_selection "Select database type (1-2):" "postgres" "redis")
+        log_info "Please select database type:"
+        db_type=$(prompt_selection "Database (1-${#VALID_DB_TYPES[@]}): " "${VALID_DB_TYPES[@]}")
     fi
+    validate_db_type "$db_type"
     
     # Print confirmation
     print_box "Configuration" "\
@@ -222,6 +355,9 @@ Database:    ${BOLD}${YELLOW}${db_type}${NC}"
     subscription_id=$(get_subscription_id "$environment")
     az account set --subscription "$subscription_id" >/dev/null 2>&1
     log_success "Azure subscription set"
+
+    # Configure JIT access before proceeding with database operations
+    configure_jit_access "$environment" "$subscription_id"
     
     local resource_info
     if [ "$db_type" = "postgres" ]; then
@@ -268,8 +404,8 @@ while getopts "e:t:p:h" opt; do
         p) local_port="$OPTARG" ;;
         h)
             echo "Usage: $0 [-e environment] [-t database_type] [-p local_port]"
-            echo "  -e: Environment (test, yt01, staging, prod)"
-            echo "  -t: Database type (postgres, redis)"
+            echo "  -e: Environment (${VALID_ENVIRONMENTS[*]})"
+            echo "  -t: Database type (${VALID_DB_TYPES[*]})"
             echo "  -p: Local port to forward to (defaults to remote port)"
             exit 0
             ;;

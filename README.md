@@ -68,7 +68,7 @@ If you need do debug the WebApi/GraphQl projects in an IDE, you can alternativel
 First, create a dotnet user secret for the DB connection string.
 
 ```powershell
-dotnet user-secrets set -p .\src\Digdir.Domain.Dialogporten.WebApi\ "Infrastructure:DialogDbConnectionString" "Server=localhost;Port=5432;Database=Dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;"
+dotnet user-secrets set -p "./src/Digdir.Domain.Dialogporten.WebApi" "Infrastructure:DialogDbConnectionString" "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;"
 ```
 
 Then run `podman compose` without the WebAPI/GraphQl projects.

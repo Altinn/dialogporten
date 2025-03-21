@@ -224,6 +224,86 @@ resource redisNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   tags: tags
 }
 
+resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: '${namePrefix}-ssh-jumper-nsg'
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowSSHInbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '22'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 100
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowPostgreSQLOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '5432'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '10.0.1.0/24'  // PostgreSQL subnet
+          access: 'Allow'
+          priority: 100
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowRedisOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '6379-6380'  // Redis ports (including SSL)
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '10.0.5.0/24'  // Redis subnet
+          access: 'Allow'
+          priority: 110
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowHTTPSOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 120
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowDNSOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '53'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 130
+          direction: 'Outbound'
+        }
+      }
+    ]
+  }
+  tags: tags
+}
+
 resource serviceBusNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: '${namePrefix}-service-bus-nsg'
   location: location
@@ -334,6 +414,15 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
           }
         }
       }
+      {
+        name: 'sshJumperSubnet'
+        properties: {
+          addressPrefix: '10.0.6.0/24'
+          networkSecurityGroup: {
+            id: sshJumperNSG.id
+          }
+        }
+      }
     ]
   }
   tags: tags
@@ -346,19 +435,20 @@ output postgresqlSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,
   'postgresqlSubnet'
-)
+  )
 output containerAppEnvironmentSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,
   'containerAppEnvSubnet'
-)
+  )
 output serviceBusSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,
   'serviceBusSubnet'
-)
+  )
 output redisSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,
   'redisSubnet'
-)
+  )
+output sshJumperSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'sshJumperSubnet')

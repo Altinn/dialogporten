@@ -100,8 +100,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,
             propertyName: nameof(CreateDialogDto.Transmissions),
-            maxDepth: 100,
-            maxWidth: 1));
+            maxDepth: 20,
+            maxWidth: 20));
 
         await _db.Dialogs.AddAsync(dialog, cancellationToken);
 

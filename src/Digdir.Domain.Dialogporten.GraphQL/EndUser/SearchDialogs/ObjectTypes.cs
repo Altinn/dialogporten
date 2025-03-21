@@ -70,6 +70,9 @@ public sealed class SearchDialog
 
     public SystemLabel SystemLabel { get; set; }
 
+    [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
+    public bool IsApiOnly { get; set; }
+
     public Activity? LatestActivity { get; set; }
 
     public SearchContent Content { get; set; } = null!;
@@ -106,6 +109,9 @@ public sealed class SearchDialogInput
 
     [GraphQLDescription("Filter by system label")]
     public List<SystemLabel>? SystemLabel { get; init; }
+
+    [GraphQLDescription("Whether to include API-only dialogs in the results. Defaults to true.")]
+    public bool? IncludeApiOnly { get; init; }
 
     [GraphQLDescription("Only return dialogs created after this date")]
     public DateTimeOffset? CreatedAfter { get; init; }

@@ -8,7 +8,7 @@ START_DATE="1970-01-02"
 END_DATE="1970-01-28"
 
 export DIALOG_AMOUNT="2000000"
-export CONN_STRING="" # DO NOT COMMIT
+export CONN_STRING="Server=localhost;Database=dialogporten;Port=5432;User Id=postgres;Password=supersecret;Ssl Mode=disable;Trust Server Certificate=true;" # DO NOT COMMIT
 
 # Detect platform (macOS or Linux)
 IS_MACOS=false
@@ -18,7 +18,7 @@ else
   IS_MACOS=true
 fi
 
-for (( i=1; i<=50; i++ ))
+for (( i=1; i<=4; i++ ))
 do
   # Set environment variables
   export FROM_DATE="$START_DATE"

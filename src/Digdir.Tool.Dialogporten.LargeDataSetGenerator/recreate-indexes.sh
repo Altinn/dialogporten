@@ -1,10 +1,10 @@
 #!/bin/bash
 
-DB_HOST="" # DO NOT COMMIT
+DB_HOST="localhost" # DO NOT COMMIT
 DB_PORT="5432"
 DB_NAME="dialogporten"
-DB_USER=""
-DB_PASSWORD="" # DO NOT COMMIT
+DB_USER="postgres"
+DB_PASSWORD="supersecret" # DO NOT COMMIT
 
 SQL_COMMAND=$(cat <<EOF
 DO

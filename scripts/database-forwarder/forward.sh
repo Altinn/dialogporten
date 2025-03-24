@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
+# =========================================================================
+# Database Connection Forwarder for Dialogporten
+# 
+# Sets up secure SSH tunnels to Azure database resources using a jumper VM.
+# Supports PostgreSQL and Redis connections across environments.
+# =========================================================================
 
 set -euo pipefail
 
+# =========================================================================
 # Constants
+# =========================================================================
 readonly PRODUCT_TAG="Dialogporten"
 readonly DEFAULT_POSTGRES_PORT=5432
 readonly DEFAULT_REDIS_PORT=6379
@@ -19,16 +27,9 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
-# Replace associative array with a function
-get_subscription_name() {
-    local env=$1
-    case "$env" in
-        "test"|"yt01")  echo "${SUBSCRIPTION_PREFIX}-Test"     ;;
-        "staging")      echo "${SUBSCRIPTION_PREFIX}-Staging"   ;;
-        "prod")         echo "${SUBSCRIPTION_PREFIX}-Prod"      ;;
-        *)              echo ""                                 ;;
-    esac
-}
+# =========================================================================
+# Utility Functions
+# =========================================================================
 
 # Logging functions
 log_info() {
@@ -51,6 +52,7 @@ log_title() {
     echo -e "\n${BOLD}${CYAN}$1${NC}"
 }
 
+# Print a formatted box with title and content
 print_box() {
     local title="$1"
     local content="$2"
@@ -79,156 +81,12 @@ print_box() {
     printf "╰%${width}s╯\n" | tr ' ' '─'
 }
 
-# Check prerequisites
-check_dependencies() {
-    if ! command -v az >/dev/null 2>&1; then
-        log_error "Azure CLI is not installed. Please visit: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli"
-        exit 1
-    fi
-    log_success "Azure CLI is installed"
+# Convert a string to uppercase
+to_upper() {
+    echo "$1" | tr '[:lower:]' '[:upper:]'
 }
 
-get_subscription_id() {
-    local env=$1
-    local subscription_name
-    subscription_name=$(get_subscription_name "$env")
-    
-    if [ -z "$subscription_name" ]; then
-        log_error "Invalid environment: $env"
-        exit 1
-    fi
-    
-    local sub_id
-    sub_id=$(az account show --subscription "$subscription_name" --query id -o tsv 2>/dev/null)
-    
-    if [ -z "$sub_id" ]; then
-        log_error "Could not find subscription '$subscription_name'. Please ensure you are logged in to the correct Azure account."
-        exit 1
-    fi
-    
-    echo "$sub_id"
-}
-
-# Resource naming helper functions
-get_resource_group() {
-    local env=$1
-    echo "dp-be-${env}-rg"
-}
-
-get_jumper_vm_name() {
-    local env=$1
-    echo "dp-be-${env}-ssh-jumper"
-}
-
-validate_environment() {
-    local env=$1
-    for valid_env in "${VALID_ENVIRONMENTS[@]}"; do
-        if [[ "$env" == "$valid_env" ]]; then
-            return 0
-        fi
-    done
-    log_error "Invalid environment: $env"
-    log_info "Valid environments: ${VALID_ENVIRONMENTS[*]}"
-    exit 1
-}
-
-validate_db_type() {
-    local db_type=$1
-    for valid_type in "${VALID_DB_TYPES[@]}"; do
-        if [[ "$db_type" == "$valid_type" ]]; then
-            return 0
-        fi
-    done
-    log_error "Invalid database type: $db_type"
-    log_info "Valid database types: ${VALID_DB_TYPES[*]}"
-    exit 1
-}
-
-validate_port() {
-    local port=$1
-    
-    # Check if the port is a number
-    if ! [[ "$port" =~ ^[0-9]+$ ]]; then
-        log_error "Port must be a number"
-        return 1
-    fi
-    
-    # Check if the port is within valid range (1-65535)
-    if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
-        log_error "Port must be between 1 and 65535"
-        return 1
-    fi
-    
-    return 0
-}
-
-get_postgres_info() {
-    local env=$1
-    local subscription_id=$2
-    
-    log_info "Fetching PostgreSQL server information..."
-    local name
-    name=$(az postgres flexible-server list --subscription "$subscription_id" \
-        --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
-    
-    if [ -z "$name" ]; then
-        log_error "Postgres server not found"
-        exit 1
-    fi
-    
-    local hostname="${name}.postgres.database.azure.com"
-    local port=$DEFAULT_POSTGRES_PORT
-    
-    local username
-    username=$(az postgres flexible-server show \
-        --resource-group "$(get_resource_group "$env")" \
-        --name "$name" \
-        --query "administratorLogin" -o tsv)
-    
-    echo "name=$name"
-    echo "hostname=$hostname"
-    echo "port=$port"
-    echo "connection_string=postgresql://${username}:<retrieve-password-from-keyvault>@localhost:${local_port:-$port}/dialogporten"
-}
-
-get_redis_info() {
-    local env=$1
-    local subscription_id=$2
-    
-    log_info "Fetching Redis server information..."
-    local name
-    name=$(az redis list --subscription "$subscription_id" \
-        --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
-    
-    if [ -z "$name" ]; then
-        log_error "Redis server not found"
-        exit 1
-    fi
-    
-    local hostname="${name}.redis.cache.windows.net"
-    local port=$DEFAULT_REDIS_PORT
-
-    echo "name=$name"
-    echo "hostname=$hostname"
-    echo "port=$port"
-    echo "connection_string=redis://:<retrieve-password-from-keyvault>@${hostname}:${local_port:-$port}"
-}
-
-setup_ssh_tunnel() {
-    local env=$1
-    local hostname=$2
-    local remote_port=$3
-    local local_port=${4:-$remote_port}
-    
-    log_info "Starting SSH tunnel..."
-    log_info "Connecting to ${hostname}:${remote_port} via local port ${local_port}"
-    
-    az ssh vm \
-        -g "$(get_resource_group "$env")" \
-        -n "$(get_jumper_vm_name "$env")" \
-        -- -L "${local_port}:${hostname}:${remote_port}"
-}
-
+# Show an interactive selection prompt
 prompt_selection() {
     local prompt=$1
     shift
@@ -246,10 +104,7 @@ prompt_selection() {
     done
 }
 
-to_upper() {
-    echo "$1" | tr '[:lower:]' '[:upper:]'
-}
-
+# Show help message
 print_help() {
     cat << EOF
 Database Connection Forwarder
@@ -290,11 +145,198 @@ Examples:
 EOF
 }
 
-# Main function
+# =========================================================================
+# Validation Functions
+# =========================================================================
+
+# Validate environment name
+validate_environment() {
+    local env=$1
+    for valid_env in "${VALID_ENVIRONMENTS[@]}"; do
+        if [[ "$env" == "$valid_env" ]]; then
+            return 0
+        fi
+    done
+    log_error "Invalid environment: $env"
+    log_info "Valid environments: ${VALID_ENVIRONMENTS[*]}"
+    exit 1
+}
+
+# Validate database type
+validate_db_type() {
+    local db_type=$1
+    for valid_type in "${VALID_DB_TYPES[@]}"; do
+        if [[ "$db_type" == "$valid_type" ]]; then
+            return 0
+        fi
+    done
+    log_error "Invalid database type: $db_type"
+    log_info "Valid database types: ${VALID_DB_TYPES[*]}"
+    exit 1
+}
+
+# Validate port number
+validate_port() {
+    local port=$1
+    
+    # Check if the port is a number
+    if ! [[ "$port" =~ ^[0-9]+$ ]]; then
+        log_error "Port must be a number"
+        return 1
+    fi
+    
+    # Check if the port is within valid range (1-65535)
+    if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+        log_error "Port must be between 1 and 65535"
+        return 1
+    fi
+    
+    return 0
+}
+
+# =========================================================================
+# Azure Functions
+# =========================================================================
+
+# Check prerequisites
+check_dependencies() {
+    if ! command -v az >/dev/null 2>&1; then
+        log_error "Azure CLI is not installed. Please visit: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli"
+        exit 1
+    fi
+    log_success "Azure CLI is installed"
+}
+
+# Get subscription name from environment
+get_subscription_name() {
+    local env=$1
+    case "$env" in
+        "test"|"yt01")  echo "${SUBSCRIPTION_PREFIX}-Test"     ;;
+        "staging")      echo "${SUBSCRIPTION_PREFIX}-Staging"   ;;
+        "prod")         echo "${SUBSCRIPTION_PREFIX}-Prod"      ;;
+        *)              echo ""                                 ;;
+    esac
+}
+
+# Get subscription ID for a given environment
+get_subscription_id() {
+    local env=$1
+    local subscription_name
+    subscription_name=$(get_subscription_name "$env")
+    
+    if [ -z "$subscription_name" ]; then
+        log_error "Invalid environment: $env"
+        exit 1
+    fi
+    
+    local sub_id
+    sub_id=$(az account show --subscription "$subscription_name" --query id -o tsv 2>/dev/null)
+    
+    if [ -z "$sub_id" ]; then
+        log_error "Could not find subscription '$subscription_name'. Please ensure you are logged in to the correct Azure account."
+        exit 1
+    fi
+    
+    echo "$sub_id"
+}
+
+# Resource naming helper functions
+get_resource_group() {
+    local env=$1
+    echo "dp-be-${env}-rg"
+}
+
+get_jumper_vm_name() {
+    local env=$1
+    echo "dp-be-${env}-ssh-jumper"
+}
+
+# =========================================================================
+# Database Functions
+# =========================================================================
+
+# Get PostgreSQL server information
+get_postgres_info() {
+    local env=$1
+    local subscription_id=$2
+    
+    log_info "Fetching PostgreSQL server information..."
+    local name
+    name=$(az postgres flexible-server list --subscription "$subscription_id" \
+        --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
+    
+    if [ -z "$name" ]; then
+        log_error "Postgres server not found"
+        exit 1
+    fi
+    
+    local hostname="${name}.postgres.database.azure.com"
+    local port=$DEFAULT_POSTGRES_PORT
+    
+    local username
+    username=$(az postgres flexible-server show \
+        --resource-group "$(get_resource_group "$env")" \
+        --name "$name" \
+        --query "administratorLogin" -o tsv)
+    
+    echo "name=$name"
+    echo "hostname=$hostname"
+    echo "port=$port"
+    echo "connection_string=postgresql://${username}:<retrieve-password-from-keyvault>@localhost:${local_port:-$port}/dialogporten"
+}
+
+# Get Redis server information
+get_redis_info() {
+    local env=$1
+    local subscription_id=$2
+    
+    log_info "Fetching Redis server information..."
+    local name
+    name=$(az redis list --subscription "$subscription_id" \
+        --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
+    
+    if [ -z "$name" ]; then
+        log_error "Redis server not found"
+        exit 1
+    fi
+    
+    local hostname="${name}.redis.cache.windows.net"
+    local port=$DEFAULT_REDIS_PORT
+
+    echo "name=$name"
+    echo "hostname=$hostname"
+    echo "port=$port"
+    echo "connection_string=redis://:<retrieve-password-from-keyvault>@${hostname}:${local_port:-$port}"
+}
+
+# Set up SSH tunnel to the database
+setup_ssh_tunnel() {
+    local env=$1
+    local hostname=$2
+    local remote_port=$3
+    local local_port=${4:-$remote_port}
+    
+    log_info "Starting SSH tunnel..."
+    log_info "Connecting to ${hostname}:${remote_port} via local port ${local_port}"
+    
+    az ssh vm \
+        -g "$(get_resource_group "$env")" \
+        -n "$(get_jumper_vm_name "$env")" \
+        -- -L "${local_port}:${hostname}:${remote_port}"
+}
+
+# =========================================================================
+# Main Function
+# =========================================================================
+
+# Main execution function
 main() {
     local environment=$1
     local db_type=$2
     local local_port=$3
+    
+    # Add trap to handle script termination
+    trap 'echo -e "\n${YELLOW}⚠${NC} Operation interrupted"; exit 130' INT TERM
     
     log_title "Database Connection Forwarder"
     
@@ -349,6 +391,7 @@ Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
     az account set --subscription "$subscription_id" >/dev/null 2>&1
     log_success "Azure subscription set"
 
+    # Get database information based on database type
     local resource_info
     if [ "$db_type" = "postgres" ]; then
         resource_info=$(get_postgres_info "$environment" "$subscription_id")
@@ -356,6 +399,7 @@ Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
         resource_info=$(get_redis_info "$environment" "$subscription_id")
     fi
     
+    # Parse the resource information
     local hostname="" port="" connection_string=""
     while IFS='=' read -r key value; do
         case "$key" in
@@ -365,6 +409,7 @@ Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
         esac
     done <<< "$resource_info"
     
+    # Validate that we have all required information
     if [ -z "$hostname" ] || [ -z "$port" ] || [ -z "$connection_string" ]; then
         log_error "Failed to get resource information"
         exit 1
@@ -379,8 +424,13 @@ Remote Port: ${port}
 Connection String:
 ${BOLD}${connection_string}${NC}"
     
+    # Set up the SSH tunnel
     setup_ssh_tunnel "$environment" "${hostname}" "${port}" "${local_port:-$port}"
 }
+
+# =========================================================================
+# Script Entry Point
+# =========================================================================
 
 # Parse command line arguments
 environment=""
@@ -416,4 +466,3 @@ done
 
 # Call main with all arguments
 main "${environment:-}" "${db_type:-}" "${local_port:-}"
-

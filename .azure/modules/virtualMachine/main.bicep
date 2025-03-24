@@ -126,6 +126,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
 
 resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-01-01' = if (enableJit) {
   name: '${location}/${name}'
+  kind: 'JitNetworkAccessPolicy'
   properties: {
     virtualMachines: [
       {
@@ -135,7 +136,7 @@ resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-0
             number: 22
             protocol: '*'
             allowedSourceAddressPrefix: '*'
-            maxRequestAccessDuration: 'PT1H'
+            maxRequestAccessDuration: 'PT24H'
           }
         ]
       }

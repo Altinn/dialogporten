@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.60.0](https://github.com/Altinn/dialogporten/compare/v1.59.0...v1.60.0) (2025-03-24)
+
+
+### Features
+
+* **infra:** enable JIT for ssh-jumper ([#2091](https://github.com/Altinn/dialogporten/issues/2091)) ([1efd7a4](https://github.com/Altinn/dialogporten/commit/1efd7a49a69a83b2a2d55e08f1d50427bea77ce0))
+* Loosen transmission hierarchy restrictions ([#2099](https://github.com/Altinn/dialogporten/issues/2099)) ([8dc9116](https://github.com/Altinn/dialogporten/commit/8dc9116a2e33c1daf15922a1e86810c7baa225c6))
+
+
+### Bug Fixes
+
+* **apps:** ensure we use at23 as backend instead of tt02 in test env ([#2051](https://github.com/Altinn/dialogporten/issues/2051)) ([7f545d9](https://github.com/Altinn/dialogporten/commit/7f545d909a86a36a113be753276d3bfb87896985))
+* **infra:** fix JIT for ssh-jumpers ([#2108](https://github.com/Altinn/dialogporten/issues/2108)) ([9307009](https://github.com/Altinn/dialogporten/commit/93070096ec7c1ecf251ae6d0946578bb24cb9400))
+* **infra:** restrict inbound network for ssh jumper ([#2107](https://github.com/Altinn/dialogporten/issues/2107)) ([e1f1b47](https://github.com/Altinn/dialogporten/commit/e1f1b4734c5666b556d5bbcc6acea2611d8d49e6))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-node action to v4.3.0 ([#2103](https://github.com/Altinn/dialogporten/issues/2103)) ([3b0db7c](https://github.com/Altinn/dialogporten/commit/3b0db7c9d06b3d298acdc2561c36de1fec31ac3d))
+* **deps:** update dependency htmlagilitypack to 1.12.0 ([#2069](https://github.com/Altinn/dialogporten/issues/2069)) ([e97f1e0](https://github.com/Altinn/dialogporten/commit/e97f1e0a7aac2675cdd64f285d6ce5bb8254def9))
+* **deps:** update dependency verify.xunit to 28.14.1 ([#2070](https://github.com/Altinn/dialogporten/issues/2070)) ([86ad72b](https://github.com/Altinn/dialogporten/commit/86ad72b5aa8644fc073ff102abe3dff5ddec3e0f))
+* **deps:** update dependency verify.xunit to 28.15.0 ([#2104](https://github.com/Altinn/dialogporten/issues/2104)) ([1ad0491](https://github.com/Altinn/dialogporten/commit/1ad04917dd1040371be406a568b390b55ae55627))
+* **deps:** update dotnet monorepo ([#2067](https://github.com/Altinn/dialogporten/issues/2067)) ([11e94d8](https://github.com/Altinn/dialogporten/commit/11e94d8ffa5c8fa203df94338213e15b1a7f4813))
+* **deps:** update jaegertracing/all-in-one docker tag to v1.67.0 ([#2105](https://github.com/Altinn/dialogporten/issues/2105)) ([4bcd777](https://github.com/Altinn/dialogporten/commit/4bcd777d2db4d99d704cfe243d4f436cec83ce50))
+* **deps:** update microsoft dependencies to 9.0.3 ([#2068](https://github.com/Altinn/dialogporten/issues/2068)) ([6f93489](https://github.com/Altinn/dialogporten/commit/6f9348925417baea5efc7215a8f5b2a87f6dc036))
+* **deps:** update prom/prometheus docker tag to v3.2.1 ([#2106](https://github.com/Altinn/dialogporten/issues/2106)) ([9cee1a5](https://github.com/Altinn/dialogporten/commit/9cee1a537e8733cdd62ef73a1f9cecb693f1db37))
+* **forwarder:** refactor ([#2109](https://github.com/Altinn/dialogporten/issues/2109)) ([9125b83](https://github.com/Altinn/dialogporten/commit/9125b836f645558526313a7182d0ed14a6d0f0f8))
+
 ## [1.59.0](https://github.com/Altinn/dialogporten/compare/v1.58.3...v1.59.0) (2025-03-17)
 
 

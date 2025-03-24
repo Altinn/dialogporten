@@ -7,6 +7,17 @@ param location string
 @description('Tags to apply to resources')
 param tags object
 
+// Network address ranges
+var vnetAddressPrefix = '10.0.0.0/16'
+
+// Subnet address prefixes
+var defaultSubnetPrefix = '10.0.0.0/24'
+var postgresqlSubnetPrefix = '10.0.1.0/24'
+var containerAppEnvSubnetPrefix = '10.0.2.0/23'  // required size for the container app environment is /23
+var serviceBusSubnetPrefix = '10.0.4.0/24'
+var redisSubnetPrefix = '10.0.5.0/24'
+var sshJumperSubnetPrefix = '10.0.6.0/24'
+
 resource defaultNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: '${namePrefix}-default-nsg'
   location: location
@@ -290,7 +301,7 @@ resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
           sourcePortRange: '*'
           destinationPortRange: '5432'
           sourceAddressPrefix: '*'
-          destinationAddressPrefix: '10.0.1.0/24'  // PostgreSQL subnet
+          destinationAddressPrefix: postgresqlSubnetPrefix
           access: 'Allow'
           priority: 100
           direction: 'Outbound'
@@ -304,7 +315,7 @@ resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
           sourcePortRange: '*'
           destinationPortRange: '6379-6380'  // Redis ports (including SSL)
           sourceAddressPrefix: '*'
-          destinationAddressPrefix: '10.0.5.0/24'  // Redis subnet
+          destinationAddressPrefix: redisSubnetPrefix
           access: 'Allow'
           priority: 110
           direction: 'Outbound'
@@ -349,14 +360,14 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   properties: {
     addressSpace: {
       addressPrefixes: [
-        '10.0.0.0/16'
+        vnetAddressPrefix
       ]
     }
     subnets: [
       {
         name: 'default'
         properties: {
-          addressPrefix: '10.0.0.0/24'
+          addressPrefix: defaultSubnetPrefix
           networkSecurityGroup: {
             id: defaultNSG.id
           }
@@ -365,7 +376,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'postgresqlSubnet'
         properties: {
-          addressPrefix: '10.0.1.0/24'
+          addressPrefix: postgresqlSubnetPrefix
           networkSecurityGroup: {
             id: postgresqlNSG.id
           }
@@ -388,8 +399,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'containerAppEnvSubnet'
         properties: {
-          // required size for the container app environment is /23
-          addressPrefix: '10.0.2.0/23'
+          addressPrefix: containerAppEnvSubnetPrefix
           networkSecurityGroup: {
             id: containerAppEnvironmentNSG.id
           }
@@ -399,7 +409,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'serviceBusSubnet'
         properties: {
-          addressPrefix: '10.0.4.0/24'
+          addressPrefix: serviceBusSubnetPrefix
           networkSecurityGroup: {
             id: serviceBusNSG.id
           }
@@ -408,7 +418,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'redisSubnet'
         properties: {
-          addressPrefix: '10.0.5.0/24'
+          addressPrefix: redisSubnetPrefix
           networkSecurityGroup: {
             id: redisNSG.id
           }
@@ -417,7 +427,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'sshJumperSubnet'
         properties: {
-          addressPrefix: '10.0.6.0/24'
+          addressPrefix: sshJumperSubnetPrefix
           networkSecurityGroup: {
             id: sshJumperNSG.id
           }

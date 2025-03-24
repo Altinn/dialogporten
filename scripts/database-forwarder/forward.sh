@@ -144,6 +144,24 @@ validate_db_type() {
     exit 1
 }
 
+validate_port() {
+    local port=$1
+    
+    # Check if the port is a number
+    if ! [[ "$port" =~ ^[0-9]+$ ]]; then
+        log_error "Port must be a number"
+        return 1
+    fi
+    
+    # Check if the port is within valid range (1-65535)
+    if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+        log_error "Port must be between 1 and 65535"
+        return 1
+    fi
+    
+    return 0
+}
+
 get_postgres_info() {
     local env=$1
     local subscription_id=$2
@@ -232,10 +250,51 @@ to_upper() {
     echo "$1" | tr '[:lower:]' '[:upper:]'
 }
 
+print_help() {
+    cat << EOF
+Database Connection Forwarder
+============================
+A tool to set up secure SSH tunnels to Azure database resources.
+
+Usage:
+    $0 [OPTIONS]
+
+Options:
+    -e, --environment ENV  Environment to connect to (${VALID_ENVIRONMENTS[*]})
+                          Each environment maps to a specific Azure subscription:
+                          - test/yt01  -> ${SUBSCRIPTION_PREFIX}-Test
+                          - staging    -> ${SUBSCRIPTION_PREFIX}-Staging
+                          - prod      -> ${SUBSCRIPTION_PREFIX}-Prod
+
+    -t, --type TYPE       Database type to connect to (${VALID_DB_TYPES[*]})
+                          - postgres: PostgreSQL Flexible Server (default port: $DEFAULT_POSTGRES_PORT)
+                          - redis:    Redis Cache (default port: $DEFAULT_REDIS_PORT)
+
+    -p, --port PORT       Local port to bind on localhost (127.0.0.1)
+                          If not specified, will use the default port for the selected database
+
+    -h, --help           Show this help message
+
+Examples:
+    # Interactive mode (will prompt for all options)
+    $0
+
+    # Connect to PostgreSQL in test environment
+    $0 -e test -t postgres
+    $0 --environment test --type postgres
+
+    # Connect to Redis in prod with custom local port
+    $0 -e prod -t redis -p 6380
+    $0 --environment prod --type redis --port 6380
+
+EOF
+}
+
 # Main function
 main() {
     local environment=$1
     local db_type=$2
+    local local_port=$3
     
     log_title "Database Connection Forwarder"
     
@@ -254,6 +313,22 @@ main() {
         db_type=$(prompt_selection "Database (1-${#VALID_DB_TYPES[@]}): " "${VALID_DB_TYPES[@]}")
     fi
     validate_db_type "$db_type"
+    
+    # If local_port is not provided, prompt for it
+    if [ -z "$local_port" ]; then
+        default_port=$([[ "$db_type" == "postgres" ]] && echo "$DEFAULT_POSTGRES_PORT" || echo "$DEFAULT_REDIS_PORT")
+        while true; do
+            log_info "Select the local port to bind on localhost (127.0.0.1)"
+            read -rp "Port to bind on localhost (default: $default_port): " local_port
+            local_port=${local_port:-$default_port}
+            
+            if validate_port "$local_port"; then
+                break
+            fi
+        done
+    else
+        validate_port "$local_port" || exit 1
+    fi
     
     # Print confirmation
     print_box "Configuration" "\
@@ -312,24 +387,33 @@ environment=""
 db_type=""
 local_port=""
 
-while getopts "e:t:p:h" opt; do
-    case $opt in
-        e) environment="$OPTARG" ;;
-        t) db_type="$OPTARG" ;;
-        p) local_port="$OPTARG" ;;
-        h)
-            echo "Usage: $0 [-e environment] [-t database_type] [-p local_port]"
-            echo "  -e: Environment (${VALID_ENVIRONMENTS[*]})"
-            echo "  -t: Database type (${VALID_DB_TYPES[*]})"
-            echo "  -p: Local port to forward to (defaults to remote port)"
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -e|--environment)
+            environment="$2"
+            shift 2
+            ;;
+        -t|--type)
+            db_type="$2"
+            shift 2
+            ;;
+        -p|--port)
+            local_port="$2"
+            shift 2
+            ;;
+        -h|--help)
+            print_help
             exit 0
             ;;
         *)
-            echo "Invalid option: -$OPTARG" >&2
+            log_error "Invalid option: $1"
+            log_info "Use -h or --help for help"
             exit 1
             ;;
     esac
 done
 
-main "$environment" "$db_type"
+# Call main with all arguments
+main "${environment:-}" "${db_type:-}" "${local_port:-}"
 

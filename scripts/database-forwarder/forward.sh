@@ -56,29 +56,43 @@ log_title() {
 print_box() {
     local title="$1"
     local content="$2"
-    local width=55
+    local width=70  # Reduced width for better readability
+    local padding=2  # Consistent padding for all lines
+    
+    # Function to calculate visible length of string (excluding ANSI codes)
+    get_visible_length() {
+        local str
+        str=$(printf "%b" "$1" | sed 's/\x1b\[[0-9;]*m//g')
+        echo "${#str}"
+    }
     
     # Top border
-    printf "╭%${width}s╮\n" | tr ' ' '─'
+    printf "╭%s\n" "$(printf '%*s' "$width" | tr ' ' '─')"
     
     # Title line with proper padding
-    printf "│ ${BOLD}%s${NC}%$((width - ${#title} - 1))s│\n" "$title"
+    local title_length=$(get_visible_length "$title")
+    printf "│%-${padding}s%b%*s\n" " " "$title" "$((width - title_length - padding))" ""
     
     # Empty line
-    printf "│%${width}s│\n" ""
+    printf "│%*s\n" "$width" ""
     
     # Content (handle multiple lines)
     while IFS= read -r line; do
-        # Remove escape sequences for length calculation
-        clean_line=$(echo -e "$line" | sed 's/\x1b\[[0-9;]*m//g')
-        # Calculate padding needed
-        padding=$((width - ${#clean_line} - 2))
-        # Print line with proper padding
-        printf "│ %b%${padding}s│\n" "$line" " "
+        # Skip empty lines
+        if [ -z "$line" ]; then
+            printf "│%*s\n" "$width" ""
+            continue
+        fi
+        
+        # Get the visible length of the line (excluding ANSI codes)
+        local visible_length=$(get_visible_length "$line")
+        
+        # Print the line with proper padding
+        printf "│%-${padding}s%b%*s\n" " " "$line" "$((width - visible_length - padding))" ""
     done <<< "$content"
     
     # Bottom border
-    printf "╰%${width}s╯\n" | tr ' ' '─'
+    printf "╰%s\n" "$(printf '%*s' "$width" | tr ' ' '─')"
 }
 
 # Convert a string to uppercase
@@ -436,12 +450,12 @@ Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
     
     # Print connection details
     print_box "$(to_upper "$db_type") Connection Info" "\
-Server:    ${hostname}
+Server:     ${hostname}
 Local Port: ${local_port:-$port}
 Remote Port: ${port}
 
 Connection String:
-${BOLD}${connection_string}${NC}"
+${BOLD}${connection_string/localhost/$''localhost}${NC}"
     
     # Set up the SSH tunnel
     setup_ssh_tunnel "$environment" "${hostname}" "${port}" "${local_port:-$port}"

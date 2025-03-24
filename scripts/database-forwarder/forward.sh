@@ -6,7 +6,6 @@ set -euo pipefail
 readonly PRODUCT_TAG="Dialogporten"
 readonly DEFAULT_POSTGRES_PORT=5432
 readonly DEFAULT_REDIS_PORT=6379
-readonly JIT_DURATION="PT1H"
 readonly VALID_ENVIRONMENTS=("test" "yt01" "staging" "prod")
 readonly VALID_DB_TYPES=("postgres" "redis")
 readonly SUBSCRIPTION_PREFIX="Dialogporten"
@@ -197,88 +196,6 @@ get_redis_info() {
     echo "connection_string=redis://:<retrieve-password-from-keyvault>@${hostname}:${local_port:-$port}"
 }
 
-configure_jit_access() {
-    local env=$1
-    local subscription_id=$2
-    local resource_group
-    resource_group=$(get_resource_group "$env")
-    local vm_name
-    vm_name=$(get_jumper_vm_name "$env")
-    
-    log_info "Configuring JIT access..."
-    
-    # Get public IP
-    log_info "Detecting your public IP address..."
-    local my_ip
-    my_ip=$(curl -s https://ifconfig.me)
-    if [ -z "$my_ip" ]; then
-        log_error "Failed to get public IP address"
-        exit 1
-    fi
-    log_success "Public IP detected: $my_ip"
-    
-    # Get VM details
-    log_info "Fetching VM details..."
-    local vm_id
-    vm_id=$(az vm show --resource-group "$resource_group" --name "$vm_name" --query "id" -o tsv)
-    if [ -z "$vm_id" ]; then
-        log_error "Failed to get VM ID for $vm_name in resource group $resource_group"
-        exit 1
-    fi
-    log_success "Found VM with ID: $vm_id"
-    
-    local location
-    location=$(az vm show --resource-group "$resource_group" --name "$vm_name" --query "location" -o tsv)
-    if [ -z "$location" ]; then
-        log_error "Failed to get location for VM $vm_name"
-        exit 1
-    fi
-    log_success "VM is located in: $location"
-    
-    # Construct JIT API endpoint
-    local endpoint="https://management.azure.com/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.Security/locations/$location/jitNetworkAccessPolicies/default/initiate?api-version=2015-06-01-preview"
-    
-    # Construct JSON payload
-    log_info "Preparing JIT access request..."
-    
-    # Create temporary file for JSON payload
-    local temp_file
-    temp_file=$(mktemp)
-    trap 'rm -f "$temp_file"' EXIT  # Safety net cleanup
-    
-    # Write JSON to temporary file
-    cat > "$temp_file" << EOF
-{
-  "virtualMachines": [
-    {
-      "id": "$vm_id",
-      "ports": [
-        {
-          "number": 22,
-          "duration": "$JIT_DURATION",
-          "allowedSourceAddressPrefix": "$my_ip"
-        }
-      ]
-    }
-  ]
-}
-EOF
-    
-    # Request JIT access
-    log_info "Requesting JIT access..."
-    log_info "Using endpoint: $endpoint"
-    echo
-    
-    local jit_response
-    if ! jit_response=$(az rest --method post --uri "$endpoint" --headers "Content-Type=application/json" --body "@$temp_file" 2>&1); then
-        log_error "Failed to configure JIT access. Error: $jit_response"
-        log_info "Please ensure you have the necessary permissions and that JIT access is enabled for this VM"
-        exit 1
-    fi
-    
-    log_success "JIT access configured successfully (valid for 1 hour)"
-}
-
 setup_ssh_tunnel() {
     local env=$1
     local hostname=$2
@@ -356,9 +273,6 @@ Database:    ${BOLD}${YELLOW}${db_type}${NC}"
     az account set --subscription "$subscription_id" >/dev/null 2>&1
     log_success "Azure subscription set"
 
-    # Configure JIT access before proceeding with database operations
-    configure_jit_access "$environment" "$subscription_id"
-    
     local resource_info
     if [ "$db_type" = "postgres" ]; then
         resource_info=$(get_postgres_info "$environment" "$subscription_id")

@@ -280,72 +280,16 @@ resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   properties: {
     securityRules: [
       {
-        name: 'AllowSSHInbound'
-        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '22'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-          access: 'Allow'
-          priority: 100
-          direction: 'Inbound'
-        }
-      }
-      {
-        name: 'AllowPostgreSQLOutbound'
-        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '5432'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: postgresqlSubnetPrefix
-          access: 'Allow'
-          priority: 100
-          direction: 'Outbound'
-        }
-      }
-      {
-        name: 'AllowRedisOutbound'
-        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '6379-6380'  // Redis ports (including SSL)
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: redisSubnetPrefix
-          access: 'Allow'
-          priority: 110
-          direction: 'Outbound'
-        }
-      }
-      {
-        name: 'AllowHTTPSOutbound'
-        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '443'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-          access: 'Allow'
-          priority: 120
-          direction: 'Outbound'
-        }
-      }
-      {
-        name: 'AllowDNSOutbound'
+        name: 'AllowAnyCustomAnyOutbound'
         type: 'Microsoft.Network/networkSecurityGroups/securityRules'
         properties: {
           protocol: '*'
           sourcePortRange: '*'
-          destinationPortRange: '53'
+          destinationPortRange: '*'
           sourceAddressPrefix: '*'
           destinationAddressPrefix: '*'
           access: 'Allow'
-          priority: 130
+          priority: 100
           direction: 'Outbound'
         }
       }

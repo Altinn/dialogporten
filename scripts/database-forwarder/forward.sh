@@ -275,6 +275,19 @@ configure_jit_access() {
     local vm_name
     vm_name=$(get_jumper_vm_name "$env")
 
+    # Create temporary file
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Define cleanup function
+    cleanup() {
+        local tf="$1"
+        [ -f "$tf" ] && rm -f "$tf"
+    }
+    
+    # Set up cleanup trap using the cleanup function
+    trap "cleanup '$temp_file'" EXIT
+
     log_info "Configuring JIT access..."
 
     # Get public IP
@@ -282,9 +295,38 @@ configure_jit_access() {
     local my_ip
     my_ip=$(curl -s https://ifconfig.me)
     if [ -z "$my_ip" ]; then
-        log_error "Failed to get public IP address"
+        log_error "Failed to get public IP address from ifconfig.me"
         exit 1
     fi
+    
+    # Validate IP format from ifconfig.me
+    if ! [[ "$my_ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || ! [[ "$(echo "$my_ip" | tr '.' '\n' | sort -n | tail -n1)" -le 255 ]]; then
+        log_error "Invalid IP address format from ifconfig.me: $my_ip"
+        exit 1
+    fi
+    
+    # Double check IP with a second service
+    local my_ip_2
+    my_ip_2=$(curl -s https://api.ipify.org)
+    if [ -z "$my_ip_2" ]; then
+        log_error "Failed to get public IP address from ipify.org"
+        exit 1
+    fi
+    
+    # Validate IP format from ipify.org
+    if ! [[ "$my_ip_2" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || ! [[ "$(echo "$my_ip_2" | tr '.' '\n' | sort -n | tail -n1)" -le 255 ]]; then
+        log_error "Invalid IP address format from ipify.org: $my_ip_2"
+        exit 1
+    fi
+    
+    # Compare the two IPs
+    if [ "$my_ip" != "$my_ip_2" ]; then
+        log_error "Inconsistent IP addresses detected:"
+        log_error "ifconfig.me: $my_ip"
+        log_error "ipify.org:   $my_ip_2"
+        exit 1
+    fi
+    
     log_success "Public IP detected: $my_ip"
 
     # Get VM details
@@ -310,11 +352,6 @@ configure_jit_access() {
 
     # Construct JSON payload
     log_info "Preparing JIT access request..."
-
-    # Create temporary file for JSON payload
-    local temp_file
-    temp_file=$(mktemp)
-    trap 'rm -f "$temp_file"' EXIT  # Safety net cleanup
 
     # Write JSON to temporary file
     cat > "$temp_file" << EOF

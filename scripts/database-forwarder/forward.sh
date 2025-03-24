@@ -306,7 +306,7 @@ configure_jit_access() {
     log_success "VM is located in: $location"
 
     # Construct JIT API endpoint
-    local endpoint="https://management.azure.com/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.Security/locations/$location/jitNetworkAccessPolicies/${location}%2F${vm_name}/initiate?api-version=2015-06-01-preview"
+    local endpoint="https://management.azure.com/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.Security/locations/$location/jitNetworkAccessPolicies/${vm_name}/initiate?api-version=2020-01-01"
 
     # Construct JSON payload
     log_info "Preparing JIT access request..."
@@ -326,7 +326,7 @@ configure_jit_access() {
         {
           "number": 22,
           "duration": "$JIT_DURATION",
-          "allowedSourceAddressPrefix": "$my_ip"
+          "allowedSourceAddressPrefix": "$my_ip/32"
         }
       ]
     }

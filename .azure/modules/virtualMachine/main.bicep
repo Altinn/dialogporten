@@ -126,7 +126,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
 
 resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-01-01' = if (enableJit) {
   name: '${location}/${name}'
-  kind: 'JitNetworkAccessPolicy'
+  kind: 'Basic'
   properties: {
     virtualMachines: [
       {

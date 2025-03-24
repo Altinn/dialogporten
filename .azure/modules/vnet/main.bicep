@@ -7,6 +7,17 @@ param location string
 @description('Tags to apply to resources')
 param tags object
 
+// Network address ranges
+var vnetAddressPrefix = '10.0.0.0/16'
+
+// Subnet address prefixes
+var defaultSubnetPrefix = '10.0.0.0/24'
+var postgresqlSubnetPrefix = '10.0.1.0/24'
+var containerAppEnvSubnetPrefix = '10.0.2.0/23'  // required size for the container app environment is /23
+var serviceBusSubnetPrefix = '10.0.4.0/24'
+var redisSubnetPrefix = '10.0.5.0/24'
+var sshJumperSubnetPrefix = '10.0.6.0/24'
+
 resource defaultNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: '${namePrefix}-default-nsg'
   location: location
@@ -263,20 +274,44 @@ resource serviceBusNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   tags: tags
 }
 
+resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: '${namePrefix}-ssh-jumper-nsg'
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowAnyCustomAnyOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 100
+          direction: 'Outbound'
+        }
+      }
+    ]
+  }
+  tags: tags
+}
+
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   name: '${namePrefix}-vnet'
   location: location
   properties: {
     addressSpace: {
       addressPrefixes: [
-        '10.0.0.0/16'
+        vnetAddressPrefix
       ]
     }
     subnets: [
       {
         name: 'default'
         properties: {
-          addressPrefix: '10.0.0.0/24'
+          addressPrefix: defaultSubnetPrefix
           networkSecurityGroup: {
             id: defaultNSG.id
           }
@@ -285,7 +320,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'postgresqlSubnet'
         properties: {
-          addressPrefix: '10.0.1.0/24'
+          addressPrefix: postgresqlSubnetPrefix
           networkSecurityGroup: {
             id: postgresqlNSG.id
           }
@@ -308,8 +343,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'containerAppEnvSubnet'
         properties: {
-          // required size for the container app environment is /23
-          addressPrefix: '10.0.2.0/23'
+          addressPrefix: containerAppEnvSubnetPrefix
           networkSecurityGroup: {
             id: containerAppEnvironmentNSG.id
           }
@@ -319,7 +353,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'serviceBusSubnet'
         properties: {
-          addressPrefix: '10.0.4.0/24'
+          addressPrefix: serviceBusSubnetPrefix
           networkSecurityGroup: {
             id: serviceBusNSG.id
           }
@@ -328,9 +362,18 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
       {
         name: 'redisSubnet'
         properties: {
-          addressPrefix: '10.0.5.0/24'
+          addressPrefix: redisSubnetPrefix
           networkSecurityGroup: {
             id: redisNSG.id
+          }
+        }
+      }
+      {
+        name: 'sshJumperSubnet'
+        properties: {
+          addressPrefix: sshJumperSubnetPrefix
+          networkSecurityGroup: {
+            id: sshJumperNSG.id
           }
         }
       }
@@ -346,19 +389,20 @@ output postgresqlSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,
   'postgresqlSubnet'
-)
+  )
 output containerAppEnvironmentSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,
   'containerAppEnvSubnet'
-)
+  )
 output serviceBusSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,
   'serviceBusSubnet'
-)
+  )
 output redisSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,
   'redisSubnet'
-)
+  )
+output sshJumperSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'sshJumperSubnet')

@@ -17,6 +17,7 @@ readonly DEFAULT_REDIS_PORT=6379
 readonly VALID_ENVIRONMENTS=("test" "yt01" "staging" "prod")
 readonly VALID_DB_TYPES=("postgres" "redis")
 readonly SUBSCRIPTION_PREFIX="Dialogporten"
+readonly JIT_DURATION="PT1H"  # 1 hour duration for JIT access
 
 # Colors and formatting
 BLUE='\033[0;34m'
@@ -265,6 +266,126 @@ get_jumper_vm_name() {
     echo "dp-be-${env}-ssh-jumper"
 }
 
+# Configure Just-In-Time access for the jumper VM
+configure_jit_access() {
+    local env=$1
+    local subscription_id=$2
+    local resource_group
+    resource_group=$(get_resource_group "$env")
+    local vm_name
+    vm_name=$(get_jumper_vm_name "$env")
+
+    # Create temporary file
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Define cleanup function
+    cleanup() {
+        local tf="$1"
+        [ -f "$tf" ] && rm -f "$tf"
+    }
+    
+    # Set up cleanup trap using the cleanup function
+    trap "cleanup '$temp_file'" EXIT
+
+    log_info "Configuring JIT access..."
+
+    # Get public IP
+    log_info "Detecting your public IP address..."
+    local my_ip
+    my_ip=$(curl -s https://ifconfig.me)
+    if [ -z "$my_ip" ]; then
+        log_error "Failed to get public IP address from ifconfig.me"
+        exit 1
+    fi
+    
+    # Validate IP format from ifconfig.me
+    if ! [[ "$my_ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || ! [[ "$(echo "$my_ip" | tr '.' '\n' | sort -n | tail -n1)" -le 255 ]]; then
+        log_error "Invalid IP address format from ifconfig.me: $my_ip"
+        exit 1
+    fi
+    
+    # Double check IP with a second service
+    local my_ip_2
+    my_ip_2=$(curl -s https://api.ipify.org)
+    if [ -z "$my_ip_2" ]; then
+        log_error "Failed to get public IP address from ipify.org"
+        exit 1
+    fi
+    
+    # Validate IP format from ipify.org
+    if ! [[ "$my_ip_2" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || ! [[ "$(echo "$my_ip_2" | tr '.' '\n' | sort -n | tail -n1)" -le 255 ]]; then
+        log_error "Invalid IP address format from ipify.org: $my_ip_2"
+        exit 1
+    fi
+    
+    # Compare the two IPs
+    if [ "$my_ip" != "$my_ip_2" ]; then
+        log_error "Inconsistent IP addresses detected:"
+        log_error "ifconfig.me: $my_ip"
+        log_error "ipify.org:   $my_ip_2"
+        exit 1
+    fi
+    
+    log_success "Public IP detected: $my_ip"
+
+    # Get VM details
+    log_info "Fetching VM details..."
+    local vm_id
+    vm_id=$(az vm show --resource-group "$resource_group" --name "$vm_name" --query "id" -o tsv)
+    if [ -z "$vm_id" ]; then
+        log_error "Failed to get VM ID for $vm_name in resource group $resource_group"
+        exit 1
+    fi
+    log_success "Found VM with ID: $vm_id"
+
+    local location
+    location=$(az vm show --resource-group "$resource_group" --name "$vm_name" --query "location" -o tsv)
+    if [ -z "$location" ]; then
+        log_error "Failed to get location for VM $vm_name"
+        exit 1
+    fi
+    log_success "VM is located in: $location"
+
+    # Construct JIT API endpoint
+    local endpoint="https://management.azure.com/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.Security/locations/$location/jitNetworkAccessPolicies/${vm_name}/initiate?api-version=2020-01-01"
+
+    # Construct JSON payload
+    log_info "Preparing JIT access request..."
+
+    # Write JSON to temporary file
+    cat > "$temp_file" << EOF
+{
+  "virtualMachines": [
+    {
+      "id": "$vm_id",
+      "ports": [
+        {
+          "number": 22,
+          "duration": "$JIT_DURATION",
+          "allowedSourceAddressPrefix": "$my_ip/32"
+        }
+      ]
+    }
+  ]
+}
+EOF
+
+    # Request JIT access
+    log_info "Requesting JIT access..."
+    log_info "Using endpoint: $endpoint"
+    echo
+
+    local jit_response
+    if ! jit_response=$(az rest --method post --uri "$endpoint" --headers "Content-Type=application/json" --body "@$temp_file" 2>&1); then
+        log_error "Failed to configure JIT access. Error: $jit_response"
+        log_info "Please ensure you have the necessary permissions and that JIT access is enabled for this VM"
+        exit 1
+    fi
+
+    log_success "JIT access configured successfully (valid for 1 hour)"
+}
+
 # =========================================================================
 # Database Functions
 # =========================================================================
@@ -455,7 +576,10 @@ Local Port: ${local_port:-$port}
 Remote Port: ${port}
 
 Connection String:
-${BOLD}${connection_string/localhost/$''localhost}${NC}"
+${BOLD}${connection_string/localhost/$'\n'localhost}${NC}"
+    
+    # Configure JIT access before proceeding with database operations
+    configure_jit_access "$environment" "$subscription_id"
     
     # Set up the SSH tunnel
     setup_ssh_tunnel "$environment" "${hostname}" "${port}" "${local_port:-$port}"

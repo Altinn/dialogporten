@@ -258,7 +258,8 @@ main() {
     # Print confirmation
     print_box "Configuration" "\
 Environment: ${BOLD}${CYAN}${environment}${NC}
-Database:    ${BOLD}${YELLOW}${db_type}${NC}"
+Database:    ${BOLD}${YELLOW}${db_type}${NC}
+Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
     
     read -rp "Proceed? (y/N) " confirm
     if [[ ! $confirm =~ ^[Yy]$ ]]; then

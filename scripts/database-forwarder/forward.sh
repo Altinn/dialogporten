@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
+# =========================================================================
+# Database Connection Forwarder for Dialogporten
+# 
+# Sets up secure SSH tunnels to Azure database resources using a jumper VM.
+# Supports PostgreSQL and Redis connections across environments.
+# =========================================================================
 
 set -euo pipefail
+
+# =========================================================================
+# Constants
+# =========================================================================
+readonly PRODUCT_TAG="Dialogporten"
+readonly DEFAULT_POSTGRES_PORT=5432
+readonly DEFAULT_REDIS_PORT=6379
+readonly VALID_ENVIRONMENTS=("test" "yt01" "staging" "prod")
+readonly VALID_DB_TYPES=("postgres" "redis")
+readonly SUBSCRIPTION_PREFIX="Dialogporten"
 
 # Colors and formatting
 BLUE='\033[0;34m'
@@ -11,17 +27,9 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
-# Replace associative array with a function
-get_subscription_name() {
-    local env=$1
-    case "$env" in
-        "test") echo "Dialogporten-Test" ;;
-        "yt01") echo "Dialogporten-Test" ;;
-        "staging") echo "Dialogporten-Staging" ;;
-        "prod") echo "Dialogporten-Prod" ;;
-        *) echo "" ;;
-    esac
-}
+# =========================================================================
+# Utility Functions
+# =========================================================================
 
 # Logging functions
 log_info() {
@@ -44,33 +52,165 @@ log_title() {
     echo -e "\n${BOLD}${CYAN}$1${NC}"
 }
 
+# Print a formatted box with title and content
 print_box() {
     local title="$1"
     local content="$2"
-    local width=55
+    local width=70  # Reduced width for better readability
+    local padding=2  # Consistent padding for all lines
+    
+    # Function to calculate visible length of string (excluding ANSI codes)
+    get_visible_length() {
+        local str
+        str=$(printf "%b" "$1" | sed 's/\x1b\[[0-9;]*m//g')
+        echo "${#str}"
+    }
     
     # Top border
-    printf "╭%${width}s╮\n" | tr ' ' '─'
+    printf "╭%s\n" "$(printf '%*s' "$width" | tr ' ' '─')"
     
     # Title line with proper padding
-    printf "│ ${BOLD}%s${NC}%$((width - ${#title} - 1))s│\n" "$title"
+    local title_length=$(get_visible_length "$title")
+    printf "│%-${padding}s%b%*s\n" " " "$title" "$((width - title_length - padding))" ""
     
     # Empty line
-    printf "│%${width}s│\n" ""
+    printf "│%*s\n" "$width" ""
     
     # Content (handle multiple lines)
     while IFS= read -r line; do
-        # Remove escape sequences for length calculation
-        clean_line=$(echo -e "$line" | sed 's/\x1b\[[0-9;]*m//g')
-        # Calculate padding needed
-        padding=$((width - ${#clean_line} - 2))
-        # Print line with proper padding
-        printf "│ %b%${padding}s│\n" "$line" " "
+        # Skip empty lines
+        if [ -z "$line" ]; then
+            printf "│%*s\n" "$width" ""
+            continue
+        fi
+        
+        # Get the visible length of the line (excluding ANSI codes)
+        local visible_length=$(get_visible_length "$line")
+        
+        # Print the line with proper padding
+        printf "│%-${padding}s%b%*s\n" " " "$line" "$((width - visible_length - padding))" ""
     done <<< "$content"
     
     # Bottom border
-    printf "╰%${width}s╯\n" | tr ' ' '─'
+    printf "╰%s\n" "$(printf '%*s' "$width" | tr ' ' '─')"
 }
+
+# Convert a string to uppercase
+to_upper() {
+    echo "$1" | tr '[:lower:]' '[:upper:]'
+}
+
+# Show an interactive selection prompt
+prompt_selection() {
+    local prompt=$1
+    shift
+    local options=("$@")
+    local selected
+    
+    trap 'echo -e "\nOperation cancelled by user"; exit 130' INT
+    
+    PS3="$prompt "
+    select selected in "${options[@]}"; do
+        if [ -n "$selected" ]; then
+            echo "$selected"
+            return
+        fi
+    done
+}
+
+# Show help message
+print_help() {
+    cat << EOF
+Database Connection Forwarder
+============================
+A tool to set up secure SSH tunnels to Azure database resources.
+
+Usage:
+    $0 [OPTIONS]
+
+Options:
+    -e, --environment ENV  Environment to connect to (${VALID_ENVIRONMENTS[*]})
+                          Each environment maps to a specific Azure subscription:
+                          - test/yt01  -> ${SUBSCRIPTION_PREFIX}-Test
+                          - staging    -> ${SUBSCRIPTION_PREFIX}-Staging
+                          - prod      -> ${SUBSCRIPTION_PREFIX}-Prod
+
+    -t, --type TYPE       Database type to connect to (${VALID_DB_TYPES[*]})
+                          - postgres: PostgreSQL Flexible Server (default port: $DEFAULT_POSTGRES_PORT)
+                          - redis:    Redis Cache (default port: $DEFAULT_REDIS_PORT)
+
+    -p, --port PORT       Local port to bind on localhost (127.0.0.1)
+                          If not specified, will use the default port for the selected database
+
+    -h, --help           Show this help message
+
+Examples:
+    # Interactive mode (will prompt for all options)
+    $0
+
+    # Connect to PostgreSQL in test environment
+    $0 -e test -t postgres
+    $0 --environment test --type postgres
+
+    # Connect to Redis in prod with custom local port
+    $0 -e prod -t redis -p 6380
+    $0 --environment prod --type redis --port 6380
+
+EOF
+}
+
+# =========================================================================
+# Validation Functions
+# =========================================================================
+
+# Validate environment name
+validate_environment() {
+    local env=$1
+    for valid_env in "${VALID_ENVIRONMENTS[@]}"; do
+        if [[ "$env" == "$valid_env" ]]; then
+            return 0
+        fi
+    done
+    log_error "Invalid environment: $env"
+    log_info "Valid environments: ${VALID_ENVIRONMENTS[*]}"
+    exit 1
+}
+
+# Validate database type
+validate_db_type() {
+    local db_type=$1
+    for valid_type in "${VALID_DB_TYPES[@]}"; do
+        if [[ "$db_type" == "$valid_type" ]]; then
+            return 0
+        fi
+    done
+    log_error "Invalid database type: $db_type"
+    log_info "Valid database types: ${VALID_DB_TYPES[*]}"
+    exit 1
+}
+
+# Validate port number
+validate_port() {
+    local port=$1
+    
+    # Check if the port is a number
+    if ! [[ "$port" =~ ^[0-9]+$ ]]; then
+        log_error "Port must be a number"
+        return 1
+    fi
+    
+    # Check if the port is within valid range (1-65535)
+    if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+        log_error "Port must be between 1 and 65535"
+        return 1
+    fi
+    
+    return 0
+}
+
+# =========================================================================
+# Azure Functions
+# =========================================================================
 
 # Check prerequisites
 check_dependencies() {
@@ -81,6 +221,18 @@ check_dependencies() {
     log_success "Azure CLI is installed"
 }
 
+# Get subscription name from environment
+get_subscription_name() {
+    local env=$1
+    case "$env" in
+        "test"|"yt01")  echo "${SUBSCRIPTION_PREFIX}-Test"     ;;
+        "staging")      echo "${SUBSCRIPTION_PREFIX}-Staging"   ;;
+        "prod")         echo "${SUBSCRIPTION_PREFIX}-Prod"      ;;
+        *)              echo ""                                 ;;
+    esac
+}
+
+# Get subscription ID for a given environment
 get_subscription_id() {
     local env=$1
     local subscription_name
@@ -102,13 +254,30 @@ get_subscription_id() {
     echo "$sub_id"
 }
 
+# Resource naming helper functions
+get_resource_group() {
+    local env=$1
+    echo "dp-be-${env}-rg"
+}
+
+get_jumper_vm_name() {
+    local env=$1
+    echo "dp-be-${env}-ssh-jumper"
+}
+
+# =========================================================================
+# Database Functions
+# =========================================================================
+
+# Get PostgreSQL server information
 get_postgres_info() {
     local env=$1
     local subscription_id=$2
     
+    log_info "Fetching PostgreSQL server information..."
     local name
     name=$(az postgres flexible-server list --subscription "$subscription_id" \
-        --query "[?tags.Environment=='$env' && tags.Product=='Dialogporten'] | [0].name" -o tsv)
+        --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
     
     if [ -z "$name" ]; then
         log_error "Postgres server not found"
@@ -116,11 +285,11 @@ get_postgres_info() {
     fi
     
     local hostname="${name}.postgres.database.azure.com"
-    local port=5432
+    local port=$DEFAULT_POSTGRES_PORT
     
     local username
     username=$(az postgres flexible-server show \
-        --resource-group "dp-be-${env}-rg" \
+        --resource-group "$(get_resource_group "$env")" \
         --name "$name" \
         --query "administratorLogin" -o tsv)
     
@@ -130,13 +299,15 @@ get_postgres_info() {
     echo "connection_string=postgresql://${username}:<retrieve-password-from-keyvault>@localhost:${local_port:-$port}/dialogporten"
 }
 
+# Get Redis server information
 get_redis_info() {
     local env=$1
     local subscription_id=$2
     
+    log_info "Fetching Redis server information..."
     local name
     name=$(az redis list --subscription "$subscription_id" \
-        --query "[?tags.Environment=='$env' && tags.Product=='Dialogporten'] | [0].name" -o tsv)
+        --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
     
     if [ -z "$name" ]; then
         log_error "Redis server not found"
@@ -144,7 +315,7 @@ get_redis_info() {
     fi
     
     local hostname="${name}.redis.cache.windows.net"
-    local port=6379
+    local port=$DEFAULT_REDIS_PORT
 
     echo "name=$name"
     echo "hostname=$hostname"
@@ -152,6 +323,7 @@ get_redis_info() {
     echo "connection_string=redis://:<retrieve-password-from-keyvault>@${hostname}:${local_port:-$port}"
 }
 
+# Set up SSH tunnel to the database
 setup_ssh_tunnel() {
     local env=$1
     local hostname=$2
@@ -159,37 +331,45 @@ setup_ssh_tunnel() {
     local local_port=${4:-$remote_port}
     
     log_info "Starting SSH tunnel..."
+    log_info "Connecting to ${hostname}:${remote_port} via local port ${local_port}"
+    
     az ssh vm \
-        -g "dp-be-${env}-rg" \
-        -n "dp-be-${env}-ssh-jumper" \
+        -g "$(get_resource_group "$env")" \
+        -n "$(get_jumper_vm_name "$env")" \
         -- -L "${local_port}:${hostname}:${remote_port}"
 }
 
-prompt_selection() {
-    local prompt=$1
-    shift
-    local options=("$@")
-    local selected
-    
-    trap 'echo -e "\nOperation cancelled by user"; exit 130' INT
-    
-    PS3="$prompt "
-    select selected in "${options[@]}"; do
-        if [ -n "$selected" ]; then
-            echo "$selected"
-            return
-        fi
-    done
+# =========================================================================
+# Easter Eggs
+# =========================================================================
+
+show_coffee_break() {
+    cat << "EOF"
+   ( (
+    ) )
+  ........
+  |      |]
+  \      /
+   `----'
+
+Time for a coffee break! ☕
+Remember: Database connections are like good coffee - they should be secure and well-filtered.
+EOF
+    sleep 2  # Pause to enjoy the coffee
 }
 
-to_upper() {
-    echo "$1" | tr '[:lower:]' '[:upper:]'
-}
+# =========================================================================
+# Main Function
+# =========================================================================
 
-# Main function
+# Main execution function
 main() {
     local environment=$1
     local db_type=$2
+    local local_port=$3
+    
+    # Add trap to handle script termination
+    trap 'echo -e "\n${YELLOW}⚠${NC} Operation interrupted"; exit 130' INT TERM
     
     log_title "Database Connection Forwarder"
     
@@ -197,18 +377,39 @@ main() {
     
     # If environment is not provided, prompt for it
     if [ -z "$environment" ]; then
-        environment=$(prompt_selection "Select environment (1-4):" "test" "yt01" "staging" "prod")
+        log_info "Please select target environment:"
+        environment=$(prompt_selection "Environment (1-${#VALID_ENVIRONMENTS[@]}): " "${VALID_ENVIRONMENTS[@]}")
     fi
+    validate_environment "$environment"
     
     # If db_type is not provided, prompt for it
     if [ -z "$db_type" ]; then
-        db_type=$(prompt_selection "Select database type (1-2):" "postgres" "redis")
+        log_info "Please select database type:"
+        db_type=$(prompt_selection "Database (1-${#VALID_DB_TYPES[@]}): " "${VALID_DB_TYPES[@]}")
+    fi
+    validate_db_type "$db_type"
+    
+    # If local_port is not provided, prompt for it
+    if [ -z "$local_port" ]; then
+        default_port=$([[ "$db_type" == "postgres" ]] && echo "$DEFAULT_POSTGRES_PORT" || echo "$DEFAULT_REDIS_PORT")
+        while true; do
+            log_info "Select the local port to bind on localhost (127.0.0.1)"
+            read -rp "Port to bind on localhost (default: $default_port): " local_port
+            local_port=${local_port:-$default_port}
+            
+            if validate_port "$local_port"; then
+                break
+            fi
+        done
+    else
+        validate_port "$local_port" || exit 1
     fi
     
     # Print confirmation
     print_box "Configuration" "\
 Environment: ${BOLD}${CYAN}${environment}${NC}
-Database:    ${BOLD}${YELLOW}${db_type}${NC}"
+Database:    ${BOLD}${YELLOW}${db_type}${NC}
+Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
     
     read -rp "Proceed? (y/N) " confirm
     if [[ ! $confirm =~ ^[Yy]$ ]]; then
@@ -222,7 +423,8 @@ Database:    ${BOLD}${YELLOW}${db_type}${NC}"
     subscription_id=$(get_subscription_id "$environment")
     az account set --subscription "$subscription_id" >/dev/null 2>&1
     log_success "Azure subscription set"
-    
+
+    # Get database information based on database type
     local resource_info
     if [ "$db_type" = "postgres" ]; then
         resource_info=$(get_postgres_info "$environment" "$subscription_id")
@@ -230,6 +432,7 @@ Database:    ${BOLD}${YELLOW}${db_type}${NC}"
         resource_info=$(get_redis_info "$environment" "$subscription_id")
     fi
     
+    # Parse the resource information
     local hostname="" port="" connection_string=""
     while IFS='=' read -r key value; do
         case "$key" in
@@ -239,6 +442,7 @@ Database:    ${BOLD}${YELLOW}${db_type}${NC}"
         esac
     done <<< "$resource_info"
     
+    # Validate that we have all required information
     if [ -z "$hostname" ] || [ -z "$port" ] || [ -z "$connection_string" ]; then
         log_error "Failed to get resource information"
         exit 1
@@ -246,39 +450,56 @@ Database:    ${BOLD}${YELLOW}${db_type}${NC}"
     
     # Print connection details
     print_box "$(to_upper "$db_type") Connection Info" "\
-Server:    ${hostname}
+Server:     ${hostname}
 Local Port: ${local_port:-$port}
 Remote Port: ${port}
 
 Connection String:
-${BOLD}${connection_string}${NC}"
+${BOLD}${connection_string/localhost/$''localhost}${NC}"
     
+    # Set up the SSH tunnel
     setup_ssh_tunnel "$environment" "${hostname}" "${port}" "${local_port:-$port}"
 }
+
+# =========================================================================
+# Script Entry Point
+# =========================================================================
 
 # Parse command line arguments
 environment=""
 db_type=""
 local_port=""
 
-while getopts "e:t:p:h" opt; do
-    case $opt in
-        e) environment="$OPTARG" ;;
-        t) db_type="$OPTARG" ;;
-        p) local_port="$OPTARG" ;;
-        h)
-            echo "Usage: $0 [-e environment] [-t database_type] [-p local_port]"
-            echo "  -e: Environment (test, yt01, staging, prod)"
-            echo "  -t: Database type (postgres, redis)"
-            echo "  -p: Local port to forward to (defaults to remote port)"
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -e|--environment)
+            environment="$2"
+            shift 2
+            ;;
+        -t|--type)
+            db_type="$2"
+            shift 2
+            ;;
+        -p|--port)
+            local_port="$2"
+            shift 2
+            ;;
+        -h|--help)
+            print_help
             exit 0
             ;;
+        -c|--coffee)
+            show_coffee_break
+            shift
+            ;;
         *)
-            echo "Invalid option: -$OPTARG" >&2
+            log_error "Invalid option: $1"
+            log_info "Use -h or --help for help"
             exit 1
             ;;
     esac
 done
 
-main "$environment" "$db_type"
-
+# Call main with all arguments
+main "${environment:-}" "${db_type:-}" "${local_port:-}"

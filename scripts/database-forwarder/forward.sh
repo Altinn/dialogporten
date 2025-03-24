@@ -326,6 +326,25 @@ setup_ssh_tunnel() {
 }
 
 # =========================================================================
+# Easter Eggs
+# =========================================================================
+
+show_coffee_break() {
+    cat << "EOF"
+   ( (
+    ) )
+  ........
+  |      |]
+  \      /
+   `----'
+
+Time for a coffee break! ☕
+Remember: Database connections are like good coffee - they should be secure and well-filtered.
+EOF
+    sleep 2  # Pause to enjoy the coffee
+}
+
+# =========================================================================
 # Main Function
 # =========================================================================
 
@@ -455,6 +474,10 @@ while [[ $# -gt 0 ]]; do
         -h|--help)
             print_help
             exit 0
+            ;;
+        -c|--coffee)
+            show_coffee_break
+            shift
             ;;
         *)
             log_error "Invalid option: $1"

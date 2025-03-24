@@ -280,16 +280,58 @@ resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   properties: {
     securityRules: [
       {
-        name: 'AllowAnyCustomAnyOutbound'
+        name: 'AllowPostgreSQLOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '5432'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: postgresqlSubnetPrefix
+          access: 'Allow'
+          priority: 100
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowRedisOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '6379-6380'  // Redis ports (including SSL)
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: redisSubnetPrefix
+          access: 'Allow'
+          priority: 110
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowHTTPSOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 120
+          direction: 'Outbound'
+        }
+      }
+      {
+        name: 'AllowDNSOutbound'
         type: 'Microsoft.Network/networkSecurityGroups/securityRules'
         properties: {
           protocol: '*'
           sourcePortRange: '*'
-          destinationPortRange: '*'
+          destinationPortRange: '53'
           sourceAddressPrefix: '*'
           destinationAddressPrefix: '*'
           access: 'Allow'
-          priority: 100
+          priority: 130
           direction: 'Outbound'
         }
       }

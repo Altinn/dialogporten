@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.60.1](https://github.com/Altinn/dialogporten/compare/v1.60.0...v1.60.1) (2025-03-24)
+
+
+### Miscellaneous Chores
+
+* **ci:** Re-enable deploy to yt01 ([#2114](https://github.com/Altinn/dialogporten/issues/2114)) ([57c0dab](https://github.com/Altinn/dialogporten/commit/57c0dab9bee6cc2ed1ff646a7692f9efc3da4c1b))
+* **database-forwarder:** enhance security with JIT and some refactors ([#2110](https://github.com/Altinn/dialogporten/issues/2110)) ([417f931](https://github.com/Altinn/dialogporten/commit/417f93132b31374876e28506d99a6f9e937524dc))
+
 ## [1.60.0](https://github.com/Altinn/dialogporten/compare/v1.59.0...v1.60.0) (2025-03-24)
 
 

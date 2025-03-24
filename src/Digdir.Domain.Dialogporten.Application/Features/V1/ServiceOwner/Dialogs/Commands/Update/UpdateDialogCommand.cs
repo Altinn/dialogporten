@@ -126,8 +126,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,
             propertyName: nameof(UpdateDialogDto.Transmissions),
-            maxDepth: 100,
-            maxWidth: 1));
+            maxDepth: 20,
+            maxWidth: 20));
 
         VerifyActivityTransmissionRelations(dialog);
 

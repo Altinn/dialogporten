@@ -136,7 +136,7 @@ resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-0
             number: 22
             protocol: '*'
             allowedSourceAddressPrefix: '*'
-            maxRequestAccessDuration: 'PT24H'
+            maxRequestAccessDuration: 'PT8H'
           }
         ]
       }

@@ -37,6 +37,11 @@ try
     }
 
     var connString = Environment.GetEnvironmentVariable("CONN_STRING");
+    if (string.IsNullOrWhiteSpace(connString))
+    {
+        Console.Error.WriteLine("No connection string found, exiting...");
+        Environment.Exit(1);
+    }
     var startingDate = DateTimeOffset.Parse(Environment.GetEnvironmentVariable("FROM_DATE")!);
     var endDate = DateTimeOffset.Parse(Environment.GetEnvironmentVariable("TO_DATE")!);
     var dialogAmount = int.Parse(Environment.GetEnvironmentVariable("DIALOG_AMOUNT")!);
@@ -50,23 +55,32 @@ try
 
     await using var dataSource = NpgsqlDataSource.Create(connString!);
     var dialogsDto = new SeedDatabaseDto(startingDate, endDate, dialogAmount);
-    var tasks = new List<Task>();
 
     const int taskRetryDelayInMs = 10000;
     const int taskRetryLimit = 1000;
     const int logThreshold = 500_000;
 
-    void CreateCopyTasks(CopyTaskDto copyTaskDto)
+
+    var actorFetchStartTimestamp = Stopwatch.GetTimestamp();
+    await ActorName.FetchInsertedActorNames();
+    Console.WriteLine($"Fetched {ActorName.InsertedActorNames.Count} actor names in {Stopwatch.GetElapsedTime(actorFetchStartTimestamp)}");
+
+    var actorNameTasks = new List<Task>();
+    CreateCopyTasks(new CopyTaskDto(ActorName.Generate, "actor names", ActorName.CopyCommand, NumberOfTasks: 20), actorNameTasks);
+    await Task.WhenAll(actorNameTasks);
+
+    var tasks = new List<Task>();
+    void CreateCopyTasks(CopyTaskDto copyTaskDto, List<Task> taskList)
     {
         for (var splitIndex = 0; splitIndex < copyTaskDto.NumberOfTasks; splitIndex++)
         {
-            RunCopyTask(copyTaskDto, splitIndex);
+            RunCopyTask(copyTaskDto, splitIndex, taskList);
         }
     }
 
-    void RunCopyTask(CopyTaskDto copyTaskDto, int splitIndex)
+    void RunCopyTask(CopyTaskDto copyTaskDto, int splitIndex, List<Task> taskList)
     {
-        tasks.Add(Task.Run(async () =>
+        taskList.Add(Task.Run(async () =>
         {
             var startTimestamp = Stopwatch.GetTimestamp();
             var counter = 0;
@@ -133,14 +147,18 @@ try
         foreach (var timestamp in dialogsDto.GetDialogTimestamps(copyTaskDto.NumberOfTasks, splitIndex))
         {
             var data = copyTaskDto.Generator(timestamp);
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                continue;
+            }
 
             if (copyTaskDto.SingleLinePerTimestamp)
             {
-                await textWriter.WriteLineAsync((string?)data);
+                await textWriter.WriteLineAsync(data);
             }
             else
             {
-                await textWriter.WriteAsync((string?)data);
+                await textWriter.WriteAsync(data);
             }
 
             if (timestamp.DialogCounter % logThreshold == 0)
@@ -153,34 +171,32 @@ try
     }
 
     // Localizations, 28 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(Localization.Generate, "localizations", Localization.CopyCommand, NumberOfTasks: 12));
+    CreateCopyTasks(new CopyTaskDto(Localization.Generate, "localizations", Localization.CopyCommand, NumberOfTasks: 12), tasks);
 
     // LocalizationSets, 14 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(LocalizationSet.Generate, "localization sets", LocalizationSet.CopyCommand, NumberOfTasks: 7));
+    CreateCopyTasks(new CopyTaskDto(LocalizationSet.Generate, "localization sets", LocalizationSet.CopyCommand, NumberOfTasks: 7), tasks);
 
     // AttachmentUrls, 6 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(AttachmentUrl.Generate, "attachment URLs", AttachmentUrl.CopyCommand, NumberOfTasks: 6));
+    CreateCopyTasks(new CopyTaskDto(AttachmentUrl.Generate, "attachment URLs", AttachmentUrl.CopyCommand, NumberOfTasks: 6), tasks);
 
     // Actors, 5 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(Actor.Generate, "actors", Actor.CopyCommand, NumberOfTasks: 4));
+    CreateCopyTasks(new CopyTaskDto(Actor.Generate, "actors", Actor.CopyCommand, NumberOfTasks: 4), tasks);
 
     // TransmissionContent, 4 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(TransmissionContent.Generate, "transmission content", TransmissionContent.CopyCommand, NumberOfTasks: 2));
+    CreateCopyTasks(new CopyTaskDto(TransmissionContent.Generate, "transmission content", TransmissionContent.CopyCommand, NumberOfTasks: 2), tasks);
 
     // No split, 2-3 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(DialogContent.Generate, "dialog content", DialogContent.CopyCommand));
-    CreateCopyTasks(new CopyTaskDto(Transmission.Generate, "transmissions", Transmission.CopyCommand));
-    CreateCopyTasks(new CopyTaskDto(GuiAction.Generate, "dialog gui actions", GuiAction.CopyCommand));
-    CreateCopyTasks(new CopyTaskDto(Activity.Generate, "activities", Activity.CopyCommand));
-    CreateCopyTasks(new CopyTaskDto(Attachment.Generate, "attachments", Attachment.CopyCommand));
-    CreateCopyTasks(new CopyTaskDto(SearchTags.Generate, "search tags", SearchTags.CopyCommand));
+    CreateCopyTasks(new CopyTaskDto(DialogContent.Generate, "dialog content", DialogContent.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto(Transmission.Generate, "transmissions", Transmission.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto(GuiAction.Generate, "dialog gui actions", GuiAction.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto(Activity.Generate, "activities", Activity.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto(Attachment.Generate, "attachments", Attachment.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto(SearchTags.Generate, "search tags", SearchTags.CopyCommand), tasks);
 
     // Single line per dialog
-    CreateCopyTasks(new CopyTaskDto(SeenLog.Generate, "seen logs", SeenLog.CopyCommand, SingleLinePerTimestamp: true));
-    CreateCopyTasks(new CopyTaskDto(EndUserContext.Generate, "end user contexts", EndUserContext.CopyCommand, SingleLinePerTimestamp: true));
-    CreateCopyTasks(new CopyTaskDto(Dialog.Generate, "dialogs", Dialog.CopyCommand, SingleLinePerTimestamp: true));
-
-
+    CreateCopyTasks(new CopyTaskDto(SeenLog.Generate, "seen logs", SeenLog.CopyCommand, SingleLinePerTimestamp: true), tasks);
+    CreateCopyTasks(new CopyTaskDto(EndUserContext.Generate, "end user contexts", EndUserContext.CopyCommand, SingleLinePerTimestamp: true), tasks);
+    CreateCopyTasks(new CopyTaskDto(Dialog.Generate, "dialogs", Dialog.CopyCommand, SingleLinePerTimestamp: true), tasks);
 
     await Task.WhenAll(tasks);
 

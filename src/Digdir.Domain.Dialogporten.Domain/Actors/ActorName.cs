@@ -1,4 +1,3 @@
-using Digdir.Library.Entity.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Actors;

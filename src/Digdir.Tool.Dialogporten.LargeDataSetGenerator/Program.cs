@@ -37,6 +37,11 @@ try
     }
 
     var connString = Environment.GetEnvironmentVariable("CONN_STRING");
+    if (string.IsNullOrWhiteSpace(connString))
+    {
+        Console.Error.WriteLine("No connection string found, exiting...");
+        Environment.Exit(1);
+    }
     var startingDate = DateTimeOffset.Parse(Environment.GetEnvironmentVariable("FROM_DATE")!);
     var endDate = DateTimeOffset.Parse(Environment.GetEnvironmentVariable("TO_DATE")!);
     var dialogAmount = int.Parse(Environment.GetEnvironmentVariable("DIALOG_AMOUNT")!);

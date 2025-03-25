@@ -322,7 +322,7 @@ configure_jit_access() {
     # Compare the two IPs
     if [ "$my_ip" != "$my_ip_2" ]; then
         log_error "Inconsistent IP addresses detected:"
-        log_error "ifconfig.me: $my_ip"
+        log_error "ipinfo.io: $my_ip"
         log_error "ipify.org:   $my_ip_2"
         exit 1
     fi

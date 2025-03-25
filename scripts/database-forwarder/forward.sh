@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =========================================================================
 # Database Connection Forwarder for Dialogporten
-# 
+#
 # Sets up secure SSH tunnels to Azure database resources using a jumper VM.
 # Supports PostgreSQL and Redis connections across environments.
 # =========================================================================
@@ -59,24 +59,24 @@ print_box() {
     local content="$2"
     local width=70  # Reduced width for better readability
     local padding=2  # Consistent padding for all lines
-    
+
     # Function to calculate visible length of string (excluding ANSI codes)
     get_visible_length() {
         local str
         str=$(printf "%b" "$1" | sed 's/\x1b\[[0-9;]*m//g')
         echo "${#str}"
     }
-    
+
     # Top border
     printf "╭%s\n" "$(printf '%*s' "$width" | tr ' ' '─')"
-    
+
     # Title line with proper padding
     local title_length=$(get_visible_length "$title")
     printf "│%-${padding}s%b%*s\n" " " "$title" "$((width - title_length - padding))" ""
-    
+
     # Empty line
     printf "│%*s\n" "$width" ""
-    
+
     # Content (handle multiple lines)
     while IFS= read -r line; do
         # Skip empty lines
@@ -84,14 +84,14 @@ print_box() {
             printf "│%*s\n" "$width" ""
             continue
         fi
-        
+
         # Get the visible length of the line (excluding ANSI codes)
         local visible_length=$(get_visible_length "$line")
-        
+
         # Print the line with proper padding
         printf "│%-${padding}s%b%*s\n" " " "$line" "$((width - visible_length - padding))" ""
     done <<< "$content"
-    
+
     # Bottom border
     printf "╰%s\n" "$(printf '%*s' "$width" | tr ' ' '─')"
 }
@@ -107,9 +107,9 @@ prompt_selection() {
     shift
     local options=("$@")
     local selected
-    
+
     trap 'echo -e "\nOperation cancelled by user"; exit 130' INT
-    
+
     PS3="$prompt "
     select selected in "${options[@]}"; do
         if [ -n "$selected" ]; then
@@ -193,19 +193,19 @@ validate_db_type() {
 # Validate port number
 validate_port() {
     local port=$1
-    
+
     # Check if the port is a number
     if ! [[ "$port" =~ ^[0-9]+$ ]]; then
         log_error "Port must be a number"
         return 1
     fi
-    
+
     # Check if the port is within valid range (1-65535)
     if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
         log_error "Port must be between 1 and 65535"
         return 1
     fi
-    
+
     return 0
 }
 
@@ -238,20 +238,20 @@ get_subscription_id() {
     local env=$1
     local subscription_name
     subscription_name=$(get_subscription_name "$env")
-    
+
     if [ -z "$subscription_name" ]; then
         log_error "Invalid environment: $env"
         exit 1
     fi
-    
+
     local sub_id
     sub_id=$(az account show --subscription "$subscription_name" --query id -o tsv 2>/dev/null)
-    
+
     if [ -z "$sub_id" ]; then
         log_error "Could not find subscription '$subscription_name'. Please ensure you are logged in to the correct Azure account."
         exit 1
     fi
-    
+
     echo "$sub_id"
 }
 
@@ -278,13 +278,13 @@ configure_jit_access() {
     # Create temporary file
     local temp_file
     temp_file=$(mktemp)
-    
+
     # Define cleanup function
     cleanup() {
         local tf="$1"
         [ -f "$tf" ] && rm -f "$tf"
     }
-    
+
     # Set up cleanup trap using the cleanup function
     trap "cleanup '$temp_file'" EXIT
 
@@ -293,18 +293,18 @@ configure_jit_access() {
     # Get public IP
     log_info "Detecting your public IP address..."
     local my_ip
-    my_ip=$(curl -s https://ifconfig.me)
+    my_ip=$(curl -s https://ipinfo.io/json | jq -r '.ip')
     if [ -z "$my_ip" ]; then
-        log_error "Failed to get public IP address from ifconfig.me"
+        log_error "Failed to get public IP address from ipinfo.io"
         exit 1
     fi
-    
-    # Validate IP format from ifconfig.me
+
+    # Validate IP format from ipinfo.io
     if ! [[ "$my_ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || ! [[ "$(echo "$my_ip" | tr '.' '\n' | sort -n | tail -n1)" -le 255 ]]; then
-        log_error "Invalid IP address format from ifconfig.me: $my_ip"
+        log_error "Invalid IP address format from ipinfo.io: $my_ip"
         exit 1
     fi
-    
+
     # Double check IP with a second service
     local my_ip_2
     my_ip_2=$(curl -s https://api.ipify.org)
@@ -312,13 +312,13 @@ configure_jit_access() {
         log_error "Failed to get public IP address from ipify.org"
         exit 1
     fi
-    
+
     # Validate IP format from ipify.org
     if ! [[ "$my_ip_2" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || ! [[ "$(echo "$my_ip_2" | tr '.' '\n' | sort -n | tail -n1)" -le 255 ]]; then
         log_error "Invalid IP address format from ipify.org: $my_ip_2"
         exit 1
     fi
-    
+
     # Compare the two IPs
     if [ "$my_ip" != "$my_ip_2" ]; then
         log_error "Inconsistent IP addresses detected:"
@@ -326,7 +326,7 @@ configure_jit_access() {
         log_error "ipify.org:   $my_ip_2"
         exit 1
     fi
-    
+
     log_success "Public IP detected: $my_ip"
 
     # Get VM details
@@ -394,26 +394,26 @@ EOF
 get_postgres_info() {
     local env=$1
     local subscription_id=$2
-    
+
     log_info "Fetching PostgreSQL server information..."
     local name
     name=$(az postgres flexible-server list --subscription "$subscription_id" \
         --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
-    
+
     if [ -z "$name" ]; then
         log_error "Postgres server not found"
         exit 1
     fi
-    
+
     local hostname="${name}.postgres.database.azure.com"
     local port=$DEFAULT_POSTGRES_PORT
-    
+
     local username
     username=$(az postgres flexible-server show \
         --resource-group "$(get_resource_group "$env")" \
         --name "$name" \
         --query "administratorLogin" -o tsv)
-    
+
     echo "name=$name"
     echo "hostname=$hostname"
     echo "port=$port"
@@ -424,17 +424,17 @@ get_postgres_info() {
 get_redis_info() {
     local env=$1
     local subscription_id=$2
-    
+
     log_info "Fetching Redis server information..."
     local name
     name=$(az redis list --subscription "$subscription_id" \
         --query "[?tags.Environment=='$env' && tags.Product=='$PRODUCT_TAG'] | [0].name" -o tsv)
-    
+
     if [ -z "$name" ]; then
         log_error "Redis server not found"
         exit 1
     fi
-    
+
     local hostname="${name}.redis.cache.windows.net"
     local port=$DEFAULT_REDIS_PORT
 
@@ -450,10 +450,10 @@ setup_ssh_tunnel() {
     local hostname=$2
     local remote_port=$3
     local local_port=${4:-$remote_port}
-    
+
     log_info "Starting SSH tunnel..."
     log_info "Connecting to ${hostname}:${remote_port} via local port ${local_port}"
-    
+
     az ssh vm \
         -g "$(get_resource_group "$env")" \
         -n "$(get_jumper_vm_name "$env")" \
@@ -488,28 +488,28 @@ main() {
     local environment=$1
     local db_type=$2
     local local_port=$3
-    
+
     # Add trap to handle script termination
     trap 'echo -e "\n${YELLOW}⚠${NC} Operation interrupted"; exit 130' INT TERM
-    
+
     log_title "Database Connection Forwarder"
-    
+
     check_dependencies
-    
+
     # If environment is not provided, prompt for it
     if [ -z "$environment" ]; then
         log_info "Please select target environment:"
         environment=$(prompt_selection "Environment (1-${#VALID_ENVIRONMENTS[@]}): " "${VALID_ENVIRONMENTS[@]}")
     fi
     validate_environment "$environment"
-    
+
     # If db_type is not provided, prompt for it
     if [ -z "$db_type" ]; then
         log_info "Please select database type:"
         db_type=$(prompt_selection "Database (1-${#VALID_DB_TYPES[@]}): " "${VALID_DB_TYPES[@]}")
     fi
     validate_db_type "$db_type"
-    
+
     # If local_port is not provided, prompt for it
     if [ -z "$local_port" ]; then
         default_port=$([[ "$db_type" == "postgres" ]] && echo "$DEFAULT_POSTGRES_PORT" || echo "$DEFAULT_REDIS_PORT")
@@ -517,7 +517,7 @@ main() {
             log_info "Select the local port to bind on localhost (127.0.0.1)"
             read -rp "Port to bind on localhost (default: $default_port): " local_port
             local_port=${local_port:-$default_port}
-            
+
             if validate_port "$local_port"; then
                 break
             fi
@@ -525,21 +525,21 @@ main() {
     else
         validate_port "$local_port" || exit 1
     fi
-    
+
     # Print confirmation
     print_box "Configuration" "\
 Environment: ${BOLD}${CYAN}${environment}${NC}
 Database:    ${BOLD}${YELLOW}${db_type}${NC}
 Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
-    
+
     read -rp "Proceed? (y/N) " confirm
     if [[ ! $confirm =~ ^[Yy]$ ]]; then
         log_warning "Operation cancelled by user"
         exit 0
     fi
-    
+
     log_info "Setting up connection for ${BOLD}${environment}${NC} environment"
-    
+
     local subscription_id
     subscription_id=$(get_subscription_id "$environment")
     az account set --subscription "$subscription_id" >/dev/null 2>&1
@@ -552,7 +552,7 @@ Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
     else
         resource_info=$(get_redis_info "$environment" "$subscription_id")
     fi
-    
+
     # Parse the resource information
     local hostname="" port="" connection_string=""
     while IFS='=' read -r key value; do
@@ -562,13 +562,13 @@ Local Port:  ${BOLD}${local_port:-"<default>"}${NC}"
             "connection_string") connection_string="$value" ;;
         esac
     done <<< "$resource_info"
-    
+
     # Validate that we have all required information
     if [ -z "$hostname" ] || [ -z "$port" ] || [ -z "$connection_string" ]; then
         log_error "Failed to get resource information"
         exit 1
     fi
-    
+
     # Print connection details
     print_box "$(to_upper "$db_type") Connection Info" "\
 Server:     ${hostname}
@@ -577,10 +577,10 @@ Remote Port: ${port}
 
 Connection String:
 ${BOLD}${connection_string/localhost/$'\n'localhost}${NC}"
-    
+
     # Configure JIT access before proceeding with database operations
     configure_jit_access "$environment" "$subscription_id"
-    
+
     # Set up the SSH tunnel
     setup_ssh_tunnel "$environment" "${hostname}" "${port}" "${local_port:-$port}"
 }

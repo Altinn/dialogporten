@@ -6,7 +6,7 @@ public interface ISilentUpdateContext
     void AddMetadata(string key, string value);
 }
 
-public static class DomainEventContextExtensions
+public static class SilentUpdateContextExtensions
 {
     public static bool IsSilentUpdate(this ISilentUpdateContext context) =>
         context.Metadata.TryGetValue(Constants.IsSilentUpdate, out var value)

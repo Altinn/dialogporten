@@ -293,7 +293,7 @@ configure_jit_access() {
     # Get public IP
     log_info "Detecting your public IP address..."
     local my_ip
-    my_ip=$(curl -s https://ipinfo.io/json | jq -r '.ip')
+    my_ip=$(curl -s https://ipinfo.io/json | grep -o '"ip": *"[^"]*"' | sed 's/"ip": *"\([^"]*\)"/\1/')
     if [ -z "$my_ip" ]; then
         log_error "Failed to get public IP address from ipinfo.io"
         exit 1

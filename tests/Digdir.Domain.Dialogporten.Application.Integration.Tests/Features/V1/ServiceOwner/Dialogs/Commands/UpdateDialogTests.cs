@@ -18,6 +18,38 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class UpdateDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
+    public async Task UpdateDialogCommand_Should_Set_New_Revision_If_IsSilentUpdate_Is_Set()
+    {
+        // Arrange
+        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+        var oldRevision = getDialogDto.AsT0.Revision;
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+
+        // Update progress
+        updateDialogDto.Progress = (updateDialogDto.Progress % 100) + 1;
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto,
+            IsSilentUpdate = true
+        });
+
+        // Assert
+        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+        success.Revision.Should().NotBeEmpty();
+        success.Revision.Should().NotBe(oldRevision);
+    }
+
+
+    [Fact]
     public async Task UpdateDialogCommand_Should_Not_Set_SystemLabel_If_IsSilentUpdate_Is_Set()
     {
         // Arrange

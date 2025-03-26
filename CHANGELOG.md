@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.60.2](https://github.com/Altinn/dialogporten/compare/v1.60.1...v1.60.2) (2025-03-26)
+
+
+### Bug Fixes
+
+* Add ActorNames to LargeDataSetGenerator ([#2113](https://github.com/Altinn/dialogporten/issues/2113)) ([7662943](https://github.com/Altinn/dialogporten/commit/7662943422aeeb3ed8f2ff5425138070b318d6a9))
+* **database-forwarder:** Use ipinfo.io instead of ifconfig.me ([#2117](https://github.com/Altinn/dialogporten/issues/2117)) ([b0af5a6](https://github.com/Altinn/dialogporten/commit/b0af5a674719978a5d8d6dd7fe9662cda58cc705))
+* **infra:** decrease time to 8 hours for jit requests ([#2116](https://github.com/Altinn/dialogporten/issues/2116)) ([dcf5809](https://github.com/Altinn/dialogporten/commit/dcf580915d6c5706dd20e0ccc2762ce19f181b1e))
+
+
+### Miscellaneous Chores
+
+* **ci:** Change maintainer for changed-files action ([#2126](https://github.com/Altinn/dialogporten/issues/2126)) ([cedcd1a](https://github.com/Altinn/dialogporten/commit/cedcd1ad6ae6573cafd373efcf17f4b4aa19e134))
+* **deps-dev:** bump vite from 6.2.0 to 6.2.3 in /docs/schema/V1 ([#2119](https://github.com/Altinn/dialogporten/issues/2119)) ([6a894ca](https://github.com/Altinn/dialogporten/commit/6a894cab7557022de31003a57a2d509dea613d8a))
+* **deps:** update actions/setup-dotnet action to v4.3.1 ([#2120](https://github.com/Altinn/dialogporten/issues/2120)) ([dd14219](https://github.com/Altinn/dialogporten/commit/dd14219f7714771f4bf26d908e2a69481c6f13fa))
+* **deps:** update dependency medo.uuid7 to 3.1.0 ([#2121](https://github.com/Altinn/dialogporten/issues/2121)) ([3378d7f](https://github.com/Altinn/dialogporten/commit/3378d7f43c2f2b777eb3439a8b86c0d0e3e8fffa))
+* **deps:** update dependency verify.xunit to 28.16.0 ([#2122](https://github.com/Altinn/dialogporten/issues/2122)) ([ded3948](https://github.com/Altinn/dialogporten/commit/ded3948a66ac81ada7b35d5c16b762490a8d8a39))
+* **deps:** update masstransit monorepo to 8.4.0 ([#2123](https://github.com/Altinn/dialogporten/issues/2123)) ([0f2e89e](https://github.com/Altinn/dialogporten/commit/0f2e89eebbcef097facd65766d203be6426ee07e))
+
 ## [1.60.1](https://github.com/Altinn/dialogporten/compare/v1.60.0...v1.60.1) (2025-03-24)
 
 

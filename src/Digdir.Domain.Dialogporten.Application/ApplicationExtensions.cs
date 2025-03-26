@@ -64,7 +64,7 @@ public static class ApplicationExtensions
             .AddTransient<IClock, Clock>()
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainAltinnEventOptOutBehaviour<,>));
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBeaviour<,>));
 
         if (!environment.IsDevelopment())
         {

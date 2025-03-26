@@ -1,6 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
@@ -25,17 +26,22 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     private readonly DialogDbContext _dialogDbContext;
     private readonly ITransactionTime _transactionTime;
     private readonly IDomainContext _domainContext;
+    private readonly ISilentUpdateContext _silentUpdateContext;
     private readonly SaveChangesOptions _saveChangesOptions = new();
 
     private IDbContextTransaction? _transaction;
 
     private bool _enableConcurrencyCheck;
 
-    public UnitOfWork(DialogDbContext dialogDbContext, ITransactionTime transactionTime, IDomainContext domainContext)
+    public UnitOfWork(DialogDbContext dialogDbContext,
+        ITransactionTime transactionTime,
+        IDomainContext domainContext,
+        ISilentUpdateContext silentUpdateContext)
     {
         _dialogDbContext = dialogDbContext ?? throw new ArgumentNullException(nameof(dialogDbContext));
         _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
+        _silentUpdateContext = silentUpdateContext ?? throw new ArgumentNullException(nameof(silentUpdateContext));
     }
 
     public IUnitOfWork EnableConcurrencyCheck<TEntity>(
@@ -108,6 +114,11 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         if (!_dialogDbContext.ChangeTracker.HasChanges())
         {
             return new Success();
+        }
+
+        if (_silentUpdateContext.IsSilentUpdate())
+        {
+            DisableUpdatableFilter();
         }
 
         await _dialogDbContext.ChangeTracker.HandleAuditableEntities(

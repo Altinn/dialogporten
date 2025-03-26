@@ -16,7 +16,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
     private readonly Lazy<ITopicEventSender> _topicEventSender;
     private readonly ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> _logger;
     private readonly Lazy<IPublishEndpoint> _publishEndpoint;
-    private readonly IDomainEventContext _domainEventContext;
+    private readonly ISilentUpdateContext _silentUpdateContext;
 
     private List<IDomainEvent> _domainEvents = [];
 
@@ -25,13 +25,13 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         Lazy<ITopicEventSender> topicEventSender,
         ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> logger,
         Lazy<IPublishEndpoint> publishEndpoint,
-        IDomainEventContext domainEventContext)
+        ISilentUpdateContext silentUpdateContext)
     {
         _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
         _topicEventSender = topicEventSender ?? throw new ArgumentNullException(nameof(topicEventSender));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
-        _domainEventContext = domainEventContext;
+        _silentUpdateContext = silentUpdateContext;
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -63,7 +63,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         EnsureLazyLoadedServices();
         foreach (var domainEvent in _domainEvents)
         {
-            domainEvent.Metadata = _domainEventContext.Metadata;
+            domainEvent.Metadata = _silentUpdateContext.Metadata;
             domainEvent.OccurredAt = _transactionTime.Value;
         }
 

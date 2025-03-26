@@ -8,5 +8,5 @@ public static class Constants
 
     public const string ServiceResourcePrefix = "urn:altinn:resource:";
 
-    public const string DisableAltinnEvents = "DisableAltinnEvents";
+    public const string IsSilentUpdate = "IsSilentUpdate";
 }

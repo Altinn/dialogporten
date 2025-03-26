@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -16,6 +17,66 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class UpdateDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
+    [Fact]
+    public async Task UpdateDialogCommand_Should_Not_Set_SystemLabel_If_IsSilentUpdate_Is_Set()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.SystemLabel = SystemLabel.Values.Bin;
+        var createCommandResponse = await Application.Send(createDialogCommand);
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+        updateDialogDto.SearchTags.Add(new() { Value = "crouching tiger, hidden update" });
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto,
+            IsSilentUpdate = true
+        });
+
+        updateResponse.TryPickT0(out _, out _).Should().BeTrue();
+
+        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+
+        // Assert
+        getDialogDtoAfterUpdate.AsT0.SystemLabel.Should().Be(getDialogDto.AsT0.SystemLabel);
+    }
+
+    [Fact]
+    public async Task UpdateDialogCommand_Should_Not_Set_UpdatedAt_If_IsSilentUpdate_Is_Set()
+    {
+        // Arrange
+        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+        updateDialogDto.Process = "updated:process";
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto,
+            IsSilentUpdate = true
+        });
+
+        updateResponse.TryPickT0(out _, out _).Should().BeTrue();
+
+        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+
+        // Assert
+        getDialogDtoAfterUpdate.AsT0.UpdatedAt.Should().Be(getDialogDto.AsT0.UpdatedAt);
+    }
+
     [Fact]
     public async Task UpdateDialogCommand_Should_Return_New_Revision()
     {

@@ -24,12 +24,12 @@ using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Co
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, IAltinnEventDisabler
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
-    public bool DisableAltinnEvents { get; set; }
+    public bool IsSilentUpdate { get; set; }
 }
 
 [GenerateOneOf]
@@ -67,9 +67,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
-        if (request.DisableAltinnEvents && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        if (request.IsSilentUpdate && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
-            return new Forbidden(Constants.DisableAltinnEventsRequiresAdminScope);
+            return new Forbidden(Constants.SilentUpdateRequiresAdminScope);
         }
 
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
@@ -170,7 +170,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return forbiddenResult;
         }
 
-        if (!request.DisableAltinnEvents)
+        if (!request.IsSilentUpdate)
         {
             UpdateLabel(dialog);
         }

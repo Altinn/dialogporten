@@ -67,7 +67,7 @@ public sealed class PatchDialogsController : ControllerBase
         [FromRoute] Guid dialogId,
         [FromHeader(Name = Constants.IfMatch)] Guid? etag,
         [FromBody] JsonPatchDocument<UpdateDialogDto> patchDocument,
-        [OpenApiIgnore][FromQuery] bool? disableAltinnEvents,
+        [OpenApiIgnore][FromQuery] bool? isSilentUpdate,
         CancellationToken ct)
     {
         var dialogQueryResult = await _sender.Send(new GetDialogQuery { DialogId = dialogId }, ct);
@@ -93,7 +93,7 @@ public sealed class PatchDialogsController : ControllerBase
             Id = dialogId,
             IfMatchDialogRevision = etag,
             Dto = updateDialogDto,
-            DisableAltinnEvents = disableAltinnEvents ?? false,
+            IsSilentUpdate = isSilentUpdate ?? false,
         };
 
         var result = await _sender.Send(command, ct);

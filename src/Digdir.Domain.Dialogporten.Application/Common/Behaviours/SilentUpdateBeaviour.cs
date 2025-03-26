@@ -8,38 +8,38 @@ using AuthConstants = Digdir.Domain.Dialogporten.Application.Common.Authorizatio
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 
-internal sealed class DomainAltinnEventOptOutBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>, IAltinnEventDisabler
+internal sealed class SilentUpdateBeaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>, ISilentUpdater
 {
-    private readonly IDomainEventContext _domainEventContext;
+    private readonly ISilentUpdateContext _silentUpdateContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
-    public DomainAltinnEventOptOutBehaviour(IDomainEventContext domainEventContext, IUserResourceRegistry userResourceRegistry)
+    public SilentUpdateBeaviour(ISilentUpdateContext silentUpdateContext, IUserResourceRegistry userResourceRegistry)
     {
-        _domainEventContext = domainEventContext;
+        _silentUpdateContext = silentUpdateContext;
         _userResourceRegistry = userResourceRegistry;
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (request.DisableAltinnEvents && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        if (request.IsSilentUpdate && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
-            var forbidden = new Forbidden(AuthConstants.DisableAltinnEventsRequiresAdminScope);
+            var forbidden = new Forbidden(AuthConstants.SilentUpdateRequiresAdminScope);
             return OneOfExtensions.TryConvertToOneOf<TResponse>(forbidden, out var result)
                 ? result
-                : throw new ForbiddenException(AuthConstants.DisableAltinnEventsRequiresAdminScope);
+                : throw new ForbiddenException(AuthConstants.SilentUpdateRequiresAdminScope);
         }
 
-        if (request.DisableAltinnEvents)
+        if (request.IsSilentUpdate)
         {
-            _domainEventContext.AddMetadata(Constants.DisableAltinnEvents, bool.TrueString);
+            _silentUpdateContext.AddMetadata(Constants.IsSilentUpdate, bool.TrueString);
         }
 
         return await next();
     }
 }
 
-public interface IAltinnEventDisabler
+public interface ISilentUpdater
 {
-    bool DisableAltinnEvents { get; }
+    bool IsSilentUpdate { get; }
 }

@@ -66,7 +66,7 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
             Id = req.DialogId,
             IfMatchDialogRevision = req.IfMatchDialogRevision,
             Dto = updateDialogDto,
-            DisableAltinnEvents = req.DisableAltinnEvents ?? false,
+            IsSilentUpdate = req.IsSilentUpdate ?? false,
         };
 
         var result = await _sender.Send(updateDialogCommand, ct);
@@ -98,5 +98,5 @@ public sealed class CreateActivityRequest : ActivityDto
     public Guid? IfMatchDialogRevision { get; set; }
 
     [HideFromDocs]
-    public bool? DisableAltinnEvents { get; init; }
+    public bool? IsSilentUpdate { get; init; }
 }

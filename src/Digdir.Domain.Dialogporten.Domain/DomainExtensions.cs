@@ -12,5 +12,5 @@ public static class DomainExtensions
             .Where(x => x.IsAssignableTo(typeof(IDomainEvent)));
 
     public static IServiceCollection AddDomain(this IServiceCollection services)
-        => services.AddScoped<IDomainEventContext, DomainEventContext>();
+        => services.AddScoped<ISilentUpdateContext, SilentUpdateContext>();
 }

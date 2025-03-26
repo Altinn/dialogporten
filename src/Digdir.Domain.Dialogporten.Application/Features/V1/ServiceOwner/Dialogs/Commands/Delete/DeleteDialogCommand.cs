@@ -12,11 +12,11 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 
-public sealed class DeleteDialogCommand : IRequest<DeleteDialogResult>, IAltinnEventDisabler
+public sealed class DeleteDialogCommand : IRequest<DeleteDialogResult>, ISilentUpdater
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
-    public bool DisableAltinnEvents { get; set; }
+    public bool IsSilentUpdate { get; set; }
 }
 
 [GenerateOneOf]

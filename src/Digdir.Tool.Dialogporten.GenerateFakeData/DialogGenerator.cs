@@ -45,9 +45,9 @@ public static class DialogGenerator
         List<ApiActionDto>? apiActions = null,
         List<ActivityDto>? activities = null,
         List<TransmissionDto>? transmissions = null,
-        bool disableAltinnEvents = false) => new()
+        bool isSilentUpdate = false) => new()
         {
-            DisableAltinnEvents = disableAltinnEvents,
+            IsSilentUpdate = isSilentUpdate,
             Dto = GenerateFakeDialogs(
                 seed,
                 1,

@@ -3,8 +3,8 @@
     <ItemGroup>
         <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.1"/>
         <PackageReference Include="HotChocolate.Subscriptions.Redis" Version="15.0.3"/>
-        <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.3.7"/>
-        <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.3.7"/>
+        <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.4.0"/>
+        <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.4.0"/>
         <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.2"/>
         <PackageReference Include="Altinn.Authorization.ABAC" Version="0.0.8"/>
         <PackageReference Include="Bogus" Version="35.6.2"/>

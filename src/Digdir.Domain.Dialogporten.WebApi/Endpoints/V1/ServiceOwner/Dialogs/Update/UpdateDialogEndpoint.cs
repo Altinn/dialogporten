@@ -40,7 +40,6 @@ public sealed class UpdateDialogEndpoint : Endpoint<UpdateDialogRequest>
             IfMatchDialogRevision = req.IfMatchDialogRevision,
             Dto = req.Dto,
             DisableAltinnEvents = req.DisableAltinnEvents ?? false,
-            DisableSystemLabelReset = req.DisableSystemLabelReset ?? false
         };
 
         var updateDialogResult = await _sender.Send(command, ct);
@@ -71,7 +70,4 @@ public sealed class UpdateDialogRequest
 
     [HideFromDocs]
     public bool? DisableAltinnEvents { get; init; }
-
-    [HideFromDocs]
-    public bool? DisableSystemLabelReset { get; init; }
 }

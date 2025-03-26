@@ -30,7 +30,6 @@ public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, IAltinnE
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
     public bool DisableAltinnEvents { get; set; }
-    public bool DisableSystemLabelReset { get; set; }
 }
 
 [GenerateOneOf]
@@ -68,9 +67,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
-        if (request.DisableSystemLabelReset && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        if (request.DisableAltinnEvents && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
-            return new Forbidden(Constants.DisableSystemLabelResetRequiresAdminScope);
+            return new Forbidden(Constants.DisableAltinnEventsRequiresAdminScope);
         }
 
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
@@ -171,7 +170,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return forbiddenResult;
         }
 
-        if (!request.DisableSystemLabelReset)
+        if (!request.DisableAltinnEvents)
         {
             UpdateLabel(dialog);
         }

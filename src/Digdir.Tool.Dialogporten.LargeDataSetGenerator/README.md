@@ -6,7 +6,8 @@ This project generates large data sets for `yt01`, our performance environment.
 #### Long-running jobs in yt01
 Long-running jobs in yt01 should be done from the [ssh jumper](../../scripts/database-forwarder/README.md) in Azure.
 
-1. Suspend the CI/CD pipeline for YT01 in GitHub Actions
+1. Suspend the CI/CD pipeline for YT01 in GitHub Actions GUI
+   "Actions" => "CI/CD YT01" => "Disable workflow", menu top right
 2. Turn off all container apps and jobs, WebAPIs, GraphQL, Service, Sync jobs
 3. Find the VM in the resource group => Operations => Updates => Update Settings =>  
    Select "Disable" on periodic assessment, and "ImageDefault" on patch orchestration, click Save

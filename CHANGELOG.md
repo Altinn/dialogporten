@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.61.0](https://github.com/Altinn/dialogporten/compare/v1.60.2...v1.61.0) (2025-03-27)
+
+
+### Features
+
+* **webapi:** Consolidate flags to IsSilentUpdate ([#2128](https://github.com/Altinn/dialogporten/issues/2128)) ([f6afdd7](https://github.com/Altinn/dialogporten/commit/f6afdd7bf6a16a9c582417e207d6cb00ba498125))
+
+
+### Bug Fixes
+
+* **infra:** ensure we enable periodic assessment updates for ssh-jumpers ([#2129](https://github.com/Altinn/dialogporten/issues/2129)) ([d34a94c](https://github.com/Altinn/dialogporten/commit/d34a94c221a21c96759877a90146b63530169fa8))
+
 ## [1.60.2](https://github.com/Altinn/dialogporten/compare/v1.60.1...v1.60.2) (2025-03-26)
 
 

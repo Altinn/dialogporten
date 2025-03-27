@@ -108,7 +108,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
             rebootSetting: 'IfRequired'
             bypassPlatformSafetyChecksOnUserSchedule: false
           }
-          assessmentMode: 'ImageDefault'
+          assessmentMode: 'AutomaticByPlatform'
         }
       }
       secrets: []

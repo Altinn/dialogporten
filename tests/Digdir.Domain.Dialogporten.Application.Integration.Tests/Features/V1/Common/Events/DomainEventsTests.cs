@@ -366,14 +366,14 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
-    public async Task AltinnEvents_Should_Be_Disabled_When_DisableAltinnEvents_Is_Set()
+    public async Task AltinnEvents_Should_Be_Disabled_When_IsSilentUpdate_Is_Set()
     {
         // Arrange - Create
         var activity = DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information);
         var initialProgress = 1;
 
         var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(
-            disableAltinnEvents: true,
+            isSilentUpdate: true,
             activities: [activity],
             attachments: [],
             progress: initialProgress);
@@ -392,7 +392,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         {
             Id = dto.Id!.Value,
             Dto = updateDialogDto,
-            DisableAltinnEvents = true
+            IsSilentUpdate = true
         };
 
         // Act - Update
@@ -402,7 +402,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         var deleteDialogCommand = new DeleteDialogCommand
         {
             Id = dto.Id!.Value,
-            DisableAltinnEvents = true
+            IsSilentUpdate = true
         };
 
         // Act - Delete
@@ -412,7 +412,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         var restoreDialogCommand = new RestoreDialogCommand
         {
             DialogId = dto.Id!.Value,
-            DisableAltinnEvents = true
+            IsSilentUpdate = true
         };
 
         // Act - Restore
@@ -422,7 +422,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         var purgeCommand = new PurgeDialogCommand
         {
             DialogId = dto.Id!.Value,
-            DisableAltinnEvents = true
+            IsSilentUpdate = true
         };
 
         // Act - Purge
@@ -438,7 +438,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         publishedEvents
             .OfType<IDomainEvent>()
-            .All(x => x.Metadata[Constants.DisableAltinnEvents] == bool.TrueString)
+            .All(x => x.Metadata[Constants.IsSilentUpdate] == bool.TrueString)
             .Should()
             .BeTrue();
     }

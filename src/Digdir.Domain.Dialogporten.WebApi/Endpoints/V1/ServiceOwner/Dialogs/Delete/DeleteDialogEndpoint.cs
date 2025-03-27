@@ -37,7 +37,7 @@ public sealed class DeleteDialogEndpoint : Endpoint<DeleteDialogRequest>
         {
             Id = req.DialogId,
             IfMatchDialogRevision = req.IfMatchDialogRevision,
-            DisableAltinnEvents = req.DisableAltinnEvents ?? false
+            IsSilentUpdate = req.IsSilentUpdate ?? false
         };
         var result = await _sender.Send(command, ct);
         await result.Match(
@@ -61,5 +61,5 @@ public sealed class DeleteDialogRequest
     public Guid? IfMatchDialogRevision { get; set; }
 
     [HideFromDocs]
-    public bool? DisableAltinnEvents { get; init; }
+    public bool? IsSilentUpdate { get; init; }
 }

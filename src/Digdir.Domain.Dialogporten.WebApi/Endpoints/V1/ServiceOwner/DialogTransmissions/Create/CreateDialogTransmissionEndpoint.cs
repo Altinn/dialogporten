@@ -66,8 +66,7 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
             Id = req.DialogId,
             IfMatchDialogRevision = req.IfMatchDialogRevision,
             Dto = updateDialogDto,
-            DisableAltinnEvents = req.DisableAltinnEvents ?? false,
-            DisableSystemLabelReset = req.DisableSystemLabelReset ?? false
+            IsSilentUpdate = req.IsSilentUpdate ?? false,
         };
 
         var result = await _sender.Send(updateDialogCommand, ct);
@@ -97,8 +96,5 @@ public sealed class CreateTransmissionRequest : TransmissionDto
     public Guid? IfMatchDialogRevision { get; set; }
 
     [HideFromDocs]
-    public bool? DisableAltinnEvents { get; init; }
-
-    [HideFromDocs]
-    public bool? DisableSystemLabelReset { get; init; }
+    public bool? IsSilentUpdate { get; init; }
 }

@@ -21,9 +21,9 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
-public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, IAltinnEventDisabler
+public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater
 {
-    public bool DisableAltinnEvents { get; init; }
+    public bool IsSilentUpdate { get; init; }
     public CreateDialogDto Dto { get; set; } = null!;
 }
 

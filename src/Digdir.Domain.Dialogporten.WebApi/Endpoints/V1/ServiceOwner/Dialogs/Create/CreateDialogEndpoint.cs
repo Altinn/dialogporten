@@ -34,7 +34,7 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
 
     public override async Task HandleAsync(CreateDialogRequest req, CancellationToken ct)
     {
-        var command = new CreateDialogCommand { Dto = req.Dto, DisableAltinnEvents = req.DisableAltinnEvents ?? false };
+        var command = new CreateDialogCommand { Dto = req.Dto, IsSilentUpdate = req.IsSilentUpdate ?? false };
         var result = await _sender.Send(command, ct);
         await result.Match(
             success =>
@@ -53,7 +53,7 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
 public sealed class CreateDialogRequest
 {
     [HideFromDocs]
-    public bool? DisableAltinnEvents { get; init; }
+    public bool? IsSilentUpdate { get; init; }
 
     [FromBody]
     public CreateDialogDto Dto { get; set; } = null!;

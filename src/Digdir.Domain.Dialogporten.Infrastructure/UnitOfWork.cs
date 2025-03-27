@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
@@ -26,7 +27,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     private readonly DialogDbContext _dialogDbContext;
     private readonly ITransactionTime _transactionTime;
     private readonly IDomainContext _domainContext;
-    private readonly ISilentUpdateContext _silentUpdateContext;
+    private readonly IApplicationContext _applicationContext;
     private readonly SaveChangesOptions _saveChangesOptions = new();
 
     private IDbContextTransaction? _transaction;
@@ -36,12 +37,12 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     public UnitOfWork(DialogDbContext dialogDbContext,
         ITransactionTime transactionTime,
         IDomainContext domainContext,
-        ISilentUpdateContext silentUpdateContext)
+        IApplicationContext applicationContext)
     {
         _dialogDbContext = dialogDbContext ?? throw new ArgumentNullException(nameof(dialogDbContext));
         _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
-        _silentUpdateContext = silentUpdateContext ?? throw new ArgumentNullException(nameof(silentUpdateContext));
+        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public IUnitOfWork EnableConcurrencyCheck<TEntity>(
@@ -116,7 +117,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             return new Success();
         }
 
-        if (_silentUpdateContext.IsSilentUpdate())
+        if (_applicationContext.IsSilentUpdate())
         {
             DisableUpdatableFilter();
         }

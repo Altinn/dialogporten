@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
@@ -16,7 +17,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
     private readonly Lazy<ITopicEventSender> _topicEventSender;
     private readonly ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> _logger;
     private readonly Lazy<IPublishEndpoint> _publishEndpoint;
-    private readonly ISilentUpdateContext _silentUpdateContext;
+    private readonly IApplicationContext _applicationContext;
 
     private List<IDomainEvent> _domainEvents = [];
 
@@ -25,13 +26,13 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         Lazy<ITopicEventSender> topicEventSender,
         ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> logger,
         Lazy<IPublishEndpoint> publishEndpoint,
-        ISilentUpdateContext silentUpdateContext)
+        IApplicationContext applicationContext)
     {
         _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
         _topicEventSender = topicEventSender ?? throw new ArgumentNullException(nameof(topicEventSender));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
-        _silentUpdateContext = silentUpdateContext;
+        _applicationContext = applicationContext;
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -63,7 +64,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         EnsureLazyLoadedServices();
         foreach (var domainEvent in _domainEvents)
         {
-            domainEvent.Metadata = _silentUpdateContext.Metadata;
+            domainEvent.Metadata = _applicationContext.Metadata;
             domainEvent.OccurredAt = _transactionTime.Value;
         }
 

@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.Domain;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using MediatR.NotificationPublishers;
 
 namespace Digdir.Domain.Dialogporten.Application;
@@ -31,11 +31,7 @@ public static class ApplicationExtensions
         // display names without an added space.
         // 'CreatedAt', not 'Created At'.
         ValidatorOptions.Global.DisplayNameResolver = (_, member, _) => member?.Name;
-
         services
-            // Domain
-            .AddDomain()
-
             // Framework
             .AddAutoMapper(thisAssembly)
             .AddMediatR(x =>
@@ -51,6 +47,7 @@ public static class ApplicationExtensions
             .AddSingleton<ICompactJwsGenerator, Ed25519Generator>()
 
             // Scoped
+            .AddScoped<IApplicationContext, ApplicationContext>()
             .AddScoped<IDomainContext, DomainContext>()
             .AddScoped<ITransactionTime, TransactionTime>()
             .AddScoped<IDialogTokenGenerator, DialogTokenGenerator>()

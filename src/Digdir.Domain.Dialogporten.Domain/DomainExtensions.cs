@@ -10,7 +10,4 @@ public static class DomainExtensions
         => DomainAssemblyMarker.Assembly.DefinedTypes
             .Where(x => !x.IsAbstract && !x.IsInterface && !x.IsGenericType)
             .Where(x => x.IsAssignableTo(typeof(IDomainEvent)));
-
-    public static IServiceCollection AddDomain(this IServiceCollection services)
-        => services.AddScoped<ISilentUpdateContext, SilentUpdateContext>();
 }

@@ -8,13 +8,13 @@ using AuthConstants = Digdir.Domain.Dialogporten.Application.Common.Authorizatio
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 
-internal sealed class SilentUpdateBeaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+internal sealed class SilentUpdateBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>, ISilentUpdater
 {
     private readonly IApplicationContext _applicationContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
-    public SilentUpdateBeaviour(IApplicationContext applicationContext, IUserResourceRegistry userResourceRegistry)
+    public SilentUpdateBehaviour(IApplicationContext applicationContext, IUserResourceRegistry userResourceRegistry)
     {
         _applicationContext = applicationContext;
         _userResourceRegistry = userResourceRegistry;

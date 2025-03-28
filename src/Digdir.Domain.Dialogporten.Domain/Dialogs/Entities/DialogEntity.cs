@@ -44,6 +44,11 @@ public sealed class DialogEntity :
 
     public string? PrecedingProcess { get; set; }
 
+    /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
 
     // === Dependent relationships ===
     public DialogStatus.Values StatusId { get; set; }

@@ -60,6 +60,9 @@ public sealed class Dialog
 
     public DialogStatus Status { get; set; }
 
+    [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
+    public bool IsApiOnly { get; set; }
+
     public Content Content { get; set; } = null!;
     public List<Attachment> Attachments { get; set; } = [];
     public List<GuiAction> GuiActions { get; set; } = [];

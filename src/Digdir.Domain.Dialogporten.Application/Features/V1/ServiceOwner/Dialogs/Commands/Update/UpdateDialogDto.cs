@@ -67,6 +67,12 @@ public sealed class UpdateDialogDto
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
+    /// When true, human-readable content like title and summary are not required.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
+    /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
     public ContentDto Content { get; set; } = null!;

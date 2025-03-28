@@ -32,5 +32,6 @@ export {
     setVisibleFrom,
     setActivities,
     addActivity,
-    setSystemLabel
+    setSystemLabel,
+    setIsApiOnly
 } from './dialog.js';

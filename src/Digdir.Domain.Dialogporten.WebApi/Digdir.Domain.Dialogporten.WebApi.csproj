@@ -26,6 +26,12 @@
         <ProjectReference Include="..\Digdir.Tool.Dialogporten.GenerateFakeData\Digdir.Tool.Dialogporten.GenerateFakeData.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="parties">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
     <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration)=='Release'">
         <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_net90) aspnetcore2openapi /nobuild:true /project:$(MSBuildProjectFullPath) /configuration:$(Configuration) /output:$(TargetDir)/swagger.json"/>
     </Target>

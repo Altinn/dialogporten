@@ -14,6 +14,13 @@ using Digdir.Library.Entity.Abstractions.Features.Versionable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
+public sealed class ElasticDialog
+{
+    public Guid DialogId { get; set; }
+    public string PartyServiceResourceId { get; set; } = null!;
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 public sealed class DialogEntity :
     IEntity,
     ISoftDeletableEntity,

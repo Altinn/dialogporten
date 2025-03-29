@@ -4,11 +4,11 @@
 START_TIME=$(date +%s)
 
 # Initial dates
-START_DATE="1970-01-02"
-END_DATE="1970-01-28"
+START_DATE="1997-01-02"
+END_DATE="1997-01-28"
 
-export DIALOG_AMOUNT="2000000"
-export CONN_STRING="" # DO NOT COMMIT
+export DIALOG_AMOUNT="200000"
+export CONN_STRING="Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;Command Timeout=0;" # DO NOT COMMIT
 
 # Detect platform (macOS or Linux)
 IS_MACOS=false
@@ -18,7 +18,7 @@ else
   IS_MACOS=true
 fi
 
-for (( i=1; i<=50; i++ ))
+for (( i=1; i<=10; i++ ))
 do
   # Set environment variables
   export FROM_DATE="$START_DATE"

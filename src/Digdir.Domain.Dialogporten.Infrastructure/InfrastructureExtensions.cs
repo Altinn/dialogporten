@@ -66,10 +66,11 @@ public static class InfrastructureExtensions
                     services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
                 );
             })
-            .AddHostedService<DevelopmentMigratorHostedService>()
-            .AddHostedService<DevelopmentCleanupOutboxHostedService>()
-            .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()
-            .AddHostedService<DevelopmentResourcePolicyInformationSyncHostedService>()
+            // .AddHostedService<DevelopmentMigratorHostedService>()
+            // .AddHostedService<DevelopmentCleanupOutboxHostedService>()
+            // .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()
+            .AddHostedService<ElasticSync>()
+            // .AddHostedService<DevelopmentResourcePolicyInformationSyncHostedService>()
             .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient, includeInternalTypes: true)
             .AddPolicyRegistry((_, registry) =>
             {

@@ -85,17 +85,18 @@ internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, Ela
                         p => p
                             .Terms(c => c
                                 .Field(f => f.PartyServiceResourceId)
+                                .ExecutionHint(TermsAggregationExecutionHint.Map)
                                 .MinDocCount(1)
                                 .Size(1000000)
                             )
                     )
-                    .Add("agg_dialog_per_month", d => d.DateHistogram(
-                        y => y
-                            .Field(x => x.CreatedAt)
-                            .CalendarInterval(CalendarInterval.Month).Format("yyyy-MM")
-                            .MinDocCount(1)
-                        )
-                    )
+                // .Add("agg_dialog_per_month", d => d.DateHistogram(
+                //     y => y
+                //         .Field(x => x.CreatedAt)
+                //         .CalendarInterval(CalendarInterval.Month).Format("yyyy-MM")
+                //         .MinDocCount(1)
+                //     )
+                // )
                 ), cancellationToken);
 
         var endTime = Stopwatch.GetTimestamp();

@@ -53,43 +53,138 @@ internal sealed class ElasticSync : IHostedService
             }
         }
 
-        var dialogStream = dbContext.Dialogs
-            .AsNoTracking()
-            .Select(d => new ElasticDialog
-            {
-                DialogId = d.Id,
-                PartyServiceResourceId = d.Party + d.ServiceResource,
-                CreatedAt = d.CreatedAt
-            })
-            .AsAsyncEnumerable();
-
-        const int batchSize = 1000;
-        var batch = new List<ElasticDialog>(batchSize);
+        const int batchSize = 10000;
+        var processedCount = 0;
 
         var syncStartTimestamp = Stopwatch.GetTimestamp();
-        await foreach (var dialog in dialogStream.WithCancellation(cancellationToken))
+        try
         {
-            batch.Add(dialog);
+            Guid? lastSeenId = null;
+            var moreData = true;
 
-            if (batch.Count >= batchSize)
+            while (moreData)
             {
-                // await IndexBatchAsync(batch, elasticClient, indexName, cancellationToken);
+                var query = dbContext.Dialogs
+                    .AsNoTracking();
+
+                if (lastSeenId.HasValue)
+                {
+                    query = query.Where(d => d.Id > lastSeenId.Value); // cleaner than CompareTo
+                }
+
+                query = query.OrderBy(d => d.Id)
+                    .Take(batchSize);
+
+
+                var dialogs = await query
+                    .Select(d => new ElasticDialog
+                    {
+                        DialogId = d.Id,
+                        PartyServiceResourceId = d.Party + d.ServiceResource,
+                        CreatedAt = d.CreatedAt
+                    })
+                    .ToListAsync(cancellationToken);
+
+                moreData = dialogs.Count == batchSize;
+                if (moreData)
+                {
+                    lastSeenId = dialogs[^1].DialogId;
+                }
+
+                var batchStartTimestamp = Stopwatch.GetTimestamp();
+
                 var batchResponse = await elasticClient.BulkAsync(b => b
-                    .Index(indexName)
-                    .IndexMany(batch, (b, d) => b
-                        .Id(d.DialogId.ToString())
-                    ), cancellationToken);
+                .Index(indexName)
+                .IndexMany(dialogs, (b, d) => b
+                .Id(d.DialogId.ToString())
+                ), cancellationToken);
                 if (batchResponse.Errors)
                 {
                     Console.WriteLine("fail");
                 }
-                batch.Clear();
+                // Update count
+                processedCount += dialogs.Count;
+
+                // Only log every 10 batches (50,000 rows)
+                if (processedCount % (batchSize * 10) != 0) continue;
+                var batchEndTimestamp = Stopwatch.GetTimestamp();
+                var batchElapsedTime = (batchEndTimestamp - batchStartTimestamp) / (double)Stopwatch.Frequency * 1000;
+                Console.WriteLine($"Batch elapsed time: {batchElapsedTime} ms, processed: {processedCount}");
             }
+
+            // var skip = 0;
+            // var moreData = true;
+            //
+            // while (moreData)
+            // {
+            //     var dialogs = await dbContext.Dialogs
+            //         .AsNoTracking()
+            //         .OrderBy(d => d.Id)
+            //         .Skip(skip)
+            //         .Take(batchSize)
+            //         .Select(d => new ElasticDialog
+            //         {
+            //             DialogId = d.Id,
+            //             PartyServiceResourceId = d.Party + d.ServiceResource,
+            //             CreatedAt = d.CreatedAt
+            //         })
+            //         .ToListAsync(cancellationToken);
+            //
+            //     moreData = dialogs.Count == batchSize;
+            //     skip += dialogs.Count;
+            //
+            //     var batchStartTimestamp = Stopwatch.GetTimestamp();
+            //     var batchResponse = await elasticClient.BulkAsync(b => b
+            //         .Index(indexName)
+            //         .IndexMany(dialogs, (b, d) => b
+            //             .Id(d.DialogId.ToString())
+            //         ), cancellationToken);
+            //     if (batchResponse.Errors)
+            //     {
+            //         Console.WriteLine("fail");
+            //     }
+            //     // only log every 50 batches
+            //     if (skip % (batchSize * 10) != 0) continue;
+            //     var batchEndTimestamp = Stopwatch.GetTimestamp();
+            //     var batchElapsedTime = (batchEndTimestamp - batchStartTimestamp) / (double)Stopwatch.Frequency * 1000;
+            //     Console.WriteLine($"Batch elapsed time: {batchElapsedTime} ms, skip: {skip}");
+            // }
+
+            // await foreach (var dialog in dialogStream.WithCancellation(cancellationToken))
+            // {
+            //     Console.WriteLine($"Fetched dialog {dialog.DialogId}");
+            //     batch.Add(dialog);
+            //
+            //     if (batch.Count >= batchSize)
+            //     {
+            //         var batchStartTimestamp = Stopwatch.GetTimestamp();
+            //         Console.WriteLine("Sending batch to Elasticsearch...");
+            //         var batchResponse = await elasticClient.BulkAsync(b => b
+            //             .Index(indexName)
+            //             .IndexMany(batch, (b, d) => b
+            //                 .Id(d.DialogId.ToString())
+            //             ), cancellationToken);
+            //         Console.WriteLine("Got response from Elasticsearch.");
+            //         if (batchResponse.Errors)
+            //         {
+            //             Console.WriteLine("fail");
+            //         }
+            //         batch.Clear();
+            //         var batchEndTimestamp = Stopwatch.GetTimestamp();
+            //         var batchElapsedTime = (batchEndTimestamp - batchStartTimestamp) / (double)Stopwatch.Frequency * 1000;
+            //         Console.WriteLine($"Batch elapsed time: {batchElapsedTime} ms");
+            //     }
+            // }
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
 
         var endTimestamp = Stopwatch.GetTimestamp();
         var elapsedTime = (endTimestamp - syncStartTimestamp) / (double)Stopwatch.Frequency * 1000;
-        // write it out in hours, minutes, and seconds
         var elapsedTimeSpan = TimeSpan.FromMilliseconds(elapsedTime);
         var hours = elapsedTimeSpan.Hours;
         var minutes = elapsedTimeSpan.Minutes;

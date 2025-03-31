@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Elastic.Clients.Elasticsearch;
@@ -80,25 +79,7 @@ internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, Ela
                                                     .Terms(t => t
                                                         .Field("dialogs.serviceResource")
                                                         .MinDocCount(1)
-                                                        .Size(1_000_000)
-                                                    )
-                                            )
-                                            .Add("reverse_nested_count",
-                                                rn => rn.ReverseNested(new ReverseNestedAggregation())
-                                                    .Aggregations(countAggs => countAggs
-                                                        .Add("count_dialogs", d => d
-                                                            .ValueCount(v => v
-                                                                .Field(f => f.Dialogs.First().DialogId)
-                                                            )
-                                                        )
-                                                    )
-                                            )
-
-                                        )
-                                )
-                            )
-                    )
-                ), cancellationToken);
+                                                        .Size(1_000_000)))))))), cancellationToken);
 
         var endTime = Stopwatch.GetTimestamp();
         var elapsedTime = (endTime - startTime) / (double)Stopwatch.Frequency * 1000;

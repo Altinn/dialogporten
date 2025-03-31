@@ -20,74 +20,51 @@ public sealed partial class ElasticResult : OneOfBase<double>;
 
 internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, ElasticResult>
 {
-    // private readonly IDialogDbContext _db;
-    // private readonly IMapper _mapper;
-    // private readonly IClock _clock;
-    // private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
     public ElasticThingyHandler(
-        // IDialogDbContext db,
-        // IMapper mapper,
-        // IClock clock,
-        // IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization)
     {
-        // _db = db ?? throw new ArgumentNullException(nameof(db));
-        // _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        // _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        // _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
     public async Task<ElasticResult> Handle(ElasticRequest request, CancellationToken cancellationToken)
     {
         var startTime = Stopwatch.GetTimestamp();
-        // var searchExpression = Expressions.LocalizedSearchExpression(request.Search, request.SearchLanguageCode);
+
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
             request.Party,
             request.ServiceResource,
             cancellationToken: cancellationToken);
 
-        var partyServiceResources = authorizedResources.ResourcesByParties
-            .SelectMany(kvp => kvp.Value.Select(serviceResource => $"{kvp.Key}{serviceResource}"))
+        var parties = authorizedResources.ResourcesByParties
+            .Select(k => k.Key)
             .ToList();
-        //
-        // var mustPreFilters = new List<Func<QueryDescriptor<ElasticDialog>>>();
-        //
-        // foreach (var partyServiceResource in partyServiceResources)
-        // {
-        //     var partyServiceResourceId = partyServiceResource;
-        //     mustPreFilters.Add(() => new QueryDescriptor<ElasticDialog>()
-        //         .Match(m => m
-        //             .Field(f => f.PartyServiceResourceId)
-        //             .Query(partyServiceResourceId)));
-        // }
 
-        var mustPreFilters = partyServiceResources
-            .Select(partyServiceResource => (Action<QueryDescriptor<ElasticDialog>>)(q => q
+        var mustPreFilters = parties
+            .Select(party => (Action<QueryDescriptor<ElasticParty>>)(q => q
                 .Match(m => m
-                    .Field(f => f.PartyServiceResourceId)
-                    .Query(partyServiceResource))))
+                    .Field(f => f.Party)
+                    .Query(party))))
             .ToArray();
 
         var elasticClient = new ElasticsearchClient();
 
         var response = await elasticClient
-            .SearchAsync<ElasticDialog>(search => search
-                .Index(nameof(ElasticDialog).ToLowerInvariant())
+            .SearchAsync<ElasticParty>(search => search
+                .Index(nameof(ElasticParty).ToLowerInvariant())
                 .Size(0)
                 .Query(query => query
                     .Bool(b => b.Should(mustPreFilters))
                 )
                 .Aggregations(ags => ags
-                    .Add("agg_party_serviceresource",
+                    .Add("agg_party",
                         p => p
                             .Terms(c => c
-                                .Field(f => f.PartyServiceResourceId)
-                                .ExecutionHint(TermsAggregationExecutionHint.Map)
+                                .Field(f => f.Party)
                                 .MinDocCount(1)
-                                .Size(1000000)
+                                .Size(1_000_000)
                             )
                     )
                 // .Add("agg_dialog_per_month", d => d.DateHistogram(

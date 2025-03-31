@@ -14,10 +14,16 @@ using Digdir.Library.Entity.Abstractions.Features.Versionable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
+public sealed class ElasticParty
+{
+    public string Party { get; set; } = null!;
+    public List<ElasticDialog> Dialogs { get; set; } = [];
+}
+
 public sealed class ElasticDialog
 {
     public Guid DialogId { get; set; }
-    public string PartyServiceResourceId { get; set; } = null!;
+    public string ServiceResource { get; set; } = null!;
     public DateTimeOffset CreatedAt { get; set; }
 }
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Elastic.Clients.Elasticsearch;
@@ -25,7 +26,6 @@ internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, Ela
     public ElasticThingyHandler(
         IAltinnAuthorization altinnAuthorization)
     {
-
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
@@ -49,6 +49,10 @@ internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, Ela
                     .Query(party))))
             .ToArray();
 
+        if (mustPreFilters.Length == 0)
+        {
+            throw new DivideByZeroException("bruh no party 4 u");
+        }
         var elasticClient = new ElasticsearchClient();
 
         var response = await elasticClient
@@ -66,14 +70,34 @@ internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, Ela
                                 .MinDocCount(1)
                                 .Size(1_000_000)
                             )
+                            .Aggregations(a => a
+                                .Add("nested_dialogs",
+                                    n => n
+                                        .Nested(n => n.Path(f => f.Dialogs))
+                                        .Aggregations(na => na
+                                            .Add("agg_serviceResource",
+                                                sr => sr
+                                                    .Terms(t => t
+                                                        .Field("dialogs.serviceResource")
+                                                        .MinDocCount(1)
+                                                        .Size(1_000_000)
+                                                    )
+                                            )
+                                            .Add("reverse_nested_count",
+                                                rn => rn.ReverseNested(new ReverseNestedAggregation())
+                                                    .Aggregations(countAggs => countAggs
+                                                        .Add("count_dialogs", d => d
+                                                            .ValueCount(v => v
+                                                                .Field(f => f.Dialogs.First().DialogId)
+                                                            )
+                                                        )
+                                                    )
+                                            )
+
+                                        )
+                                )
+                            )
                     )
-                // .Add("agg_dialog_per_month", d => d.DateHistogram(
-                //     y => y
-                //         .Field(x => x.CreatedAt)
-                //         .CalendarInterval(CalendarInterval.Month).Format("yyyy-MM")
-                //         .MinDocCount(1)
-                //     )
-                // )
                 ), cancellationToken);
 
         var endTime = Stopwatch.GetTimestamp();

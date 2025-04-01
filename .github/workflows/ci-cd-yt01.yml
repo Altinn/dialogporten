@@ -125,6 +125,7 @@ jobs:
           - tests/k6/tests/serviceowner/performance/createDialogWithThresholds.js
           - tests/k6/tests/serviceowner/performance/createTransmissionsWithThresholds.js
           - tests/k6/tests/enduser/performance/enduserSearchWithThresholds.js
+          - tests/k6/tests/graphql/performance/graphqlSearchWithThresholds.js
       fail-fast: false
     with:
       environment: yt01

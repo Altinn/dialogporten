@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.61.1](https://github.com/Altinn/dialogporten/compare/v1.61.0...v1.61.1) (2025-04-01)
+
+
+### Bug Fixes
+
+* **webapi:** Make CreatedAt and UpdatedAt nullable ([#2146](https://github.com/Altinn/dialogporten/issues/2146)) ([60ab46f](https://github.com/Altinn/dialogporten/commit/60ab46fc20d9efa13e65e88f4482d92907d5d3e1))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump vite from 6.2.3 to 6.2.4 in /docs/schema/V1 ([#2140](https://github.com/Altinn/dialogporten/issues/2140)) ([f5fdf01](https://github.com/Altinn/dialogporten/commit/f5fdf01db1269fefdf20eac71fbffea4d2965a4a))
+* **deps:** update actions/upload-artifact action to v4.6.2 ([#2135](https://github.com/Altinn/dialogporten/issues/2135)) ([00cf0a4](https://github.com/Altinn/dialogporten/commit/00cf0a4db8392353aea69a3db2a404fab2716dfe))
+* **deps:** update dependency vitest to v3.0.9 ([#2141](https://github.com/Altinn/dialogporten/issues/2141)) ([9197f65](https://github.com/Altinn/dialogporten/commit/9197f657a9763f0b86a9fe6c34a84c998286cc64))
+* **deps:** update hotchocolate monorepo to 15.1.1 ([#2136](https://github.com/Altinn/dialogporten/issues/2136)) ([33bd09a](https://github.com/Altinn/dialogporten/commit/33bd09afaa3d31ca96dc9d80e5457997aea67217))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.122.1 ([#2137](https://github.com/Altinn/dialogporten/issues/2137)) ([165afae](https://github.com/Altinn/dialogporten/commit/165afae3df3ac25b03e2109fd000952c0defbc2d))
+* **deps:** update xunit-dotnet monorepo ([#2138](https://github.com/Altinn/dialogporten/issues/2138)) ([801dcde](https://github.com/Altinn/dialogporten/commit/801dcde8b9b1c7e5025895b8defdd34c9ba4cfd6))
+* **performance:** improved graphql search and added graphql threshold tests to ci/cd yt01 ([#2142](https://github.com/Altinn/dialogporten/issues/2142)) ([fa2d7dd](https://github.com/Altinn/dialogporten/commit/fa2d7dd2dd79e8ef6978d4d144e146690cef62af))
+
 ## [1.61.0](https://github.com/Altinn/dialogporten/compare/v1.60.2...v1.61.0) (2025-03-27)
 
 

@@ -38,6 +38,9 @@ on:
       hasMigrationChanges:
         description: "Migration related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasMigrationChanges }}
+      hasSchemaPackageChanges:
+        description: "Schema package content or infrastructure has changed"
+        value: ${{ jobs.check-for-changes.outputs.hasSchemaPackageChanges }}
 
 jobs:
   check-for-changes:
@@ -52,6 +55,7 @@ jobs:
       hasGqlSchemaChanges: ${{ steps.filter-backend.outputs.gql_schema_any_modified == 'true'}}
       hasMigrationChanges: ${{ steps.filter-backend.outputs.migration_any_modified == 'true'}}
       hasWebApiClientChanges: ${{ steps.filter-backend.outputs.web_api_client_any_modified == 'true'}}
+      hasSchemaPackageChanges: ${{ steps.filter-backend.outputs.schema_package_any_modified == 'true'}}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -91,3 +95,5 @@ jobs:
               - 'docs/schema/V1/schema.verified.graphql'
             migration: 
               - 'src/Digdir.Domain.Dialogporten.Infrastructure/Persistence/Migrations/**/*'
+            schema_package:
+              - 'docs/schema/V1/**/*'

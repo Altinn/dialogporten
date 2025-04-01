@@ -11,7 +11,7 @@ This package includes:
 To use this package, include it in your project dependencies using npm:
 To install the Dialogporten Schema Package in your JavaScript project, follow these steps:
 
-1. Ensure you have npm installed. You can check by running `npm -v` in your terminal. If npm is not installed, download and install Node.js from [nodejs.org](https://nodejs.org/), which includes npm.
+1. Ensure you have `npm` installed. You can check by running `npm -v` in your terminal. If npm is not installed, download and install Node.js from [nodejs.org](https://nodejs.org/), which includes npm.
 
 2. Add the Dialogporten Schema Package to your project dependencies. Run the following command in your project directory:
    ```bash

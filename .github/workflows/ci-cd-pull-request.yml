@@ -24,6 +24,20 @@ jobs:
     needs: [ check-for-changes ]
     if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
 
+  validate-schema:
+    name: Validate Schema
+    needs: [ check-for-changes ]
+    if: ${{ needs.check-for-changes.outputs.hasSchemaPackageChanges == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Build and test schema
+        uses: ./.github/actions/build-schema
+        with:
+          working-directory: docs/schema/V1
+
   build-infrastructure:
     uses: ./.github/workflows/workflow-build-infrastructure.yml
     needs: [ check-for-changes ]

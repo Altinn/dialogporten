@@ -8,9 +8,9 @@ This directory holds a performance test with POST for `graphql`. The test file `
 ## Test files
 The test file associated with this performance test is 
 - `graphql-search.js`
->>Does graphql-queries on `party` and `search` for a random set of endusers and random `words`, some giving no hits. Equal to the nway af does searches.
+>>Does graphql-queries on `party` and `search` for a random set of endusers and random `words`, some giving no hits. Equal to the way AF does searches.
 - `graphqlRandomSearch.js`
->>Does random graphql-queries on a predefineds list of search-combinations, picking random values for the parameters
+>>Does random graphql-queries on a predefined list of search-combinations, picking random values for the parameters
 - `graphqlSearchWithThresholds.js`
 >>Does the same as `graphql-search.js`, failing the test if response times exceed 500ms. Runs in the CI/CD yt01 pipeline
 

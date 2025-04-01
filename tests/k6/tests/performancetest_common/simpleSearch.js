@@ -150,7 +150,7 @@ export function getUrl(url, paramsWithToken, getFunction = getEU) {
  * @param {Object} enduser - The enduser object containing the token.
  * @returns {void}
  */
-export function graphqlSearch(enduser, searchParams, token,  traceCalls) {
+export function graphqlSearch(enduser, searchParams, token,  traceCalls, label) {
     if (token == null) {
         token = getPersonalToken({ ssn: enduser, scopes: "digdir:dialogporten" });
     }
@@ -161,7 +161,7 @@ export function graphqlSearch(enduser, searchParams, token,  traceCalls) {
             traceparent: traceparent,
             'User-Agent': 'dialogporten-k6-graphql-search'
         },
-        tags: { name: 'graphql search' }
+        tags: { name: label }
     };
     if (traceCalls) {
         paramsWithToken.tags.traceparent = traceparent;

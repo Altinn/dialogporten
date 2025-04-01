@@ -169,3 +169,14 @@ jobs:
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
+
+  send-deployment-to-swarmia:
+    name: Send deployment to Swarmia
+    if: ${{ always() && !failure() && !cancelled() }}
+    uses: ./.github/workflows/workflow-swarmia-deployment.yml
+    needs: [ deploy-infra, deploy-apps ]
+    with:
+      app-name: dialogporten
+      environment: 'test'
+    secrets:
+      token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}

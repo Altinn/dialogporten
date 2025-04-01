@@ -1,0 +1,34 @@
+# this workflow is taken from the Swarmia docs: https://help.swarmia.com/sending-deployment-information-to-swarmia
+name: Send deployment to Swarmia Deployment API
+
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  send-deployment-to-swarmia:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Send deployment to Swarmia
+      run: |
+        JSON_STRING=$( jq --null-input --compact-output \
+          --arg version "${{ github.sha }}" \
+          --arg appName "${{ inputs.app-name }}" \
+          --arg environment "${{ inputs.environment }}" \
+          --arg commitSha "${{ github.sha }}" \
+          --arg repositoryFullName "${{ github.repository }}" \
+          '{"version": $version, "appName": $appName, "environment": $environment, "commitSha": $commitSha, "repositoryFullName": $repositoryFullName}' )
+
+        curl -H "Authorization: ${{ secrets.token }}" \
+          -H "Content-Type: application/json" \
+          -d "$JSON_STRING" \
+          https://hook.swarmia.com/deployments

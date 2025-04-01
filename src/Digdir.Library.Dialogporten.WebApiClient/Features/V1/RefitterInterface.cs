@@ -3608,7 +3608,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
         /// If set, will override the date and time when the dialog is set as last updated.
@@ -3616,7 +3616,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("updatedAt")]
-        public System.DateTimeOffset UpdatedAt { get; set; }
+        public System.DateTimeOffset? UpdatedAt { get; set; }
 
         /// <summary>
         /// The aggregated status of the dialog.

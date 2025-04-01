@@ -95,14 +95,14 @@ public sealed class CreateDialogDto
     /// If not supplied, the current date /time will be used.
     /// </summary>
     /// <example>2022-12-31T23:59:59Z</example>
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? CreatedAt { get; set; }
 
     /// <summary>
     /// If set, will override the date and time when the dialog is set as last updated.
     /// If not supplied, the current date /time will be used.
     /// </summary>
     /// <example>2022-12-31T23:59:59Z</example>
-    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
     /// <summary>
     /// The aggregated status of the dialog.

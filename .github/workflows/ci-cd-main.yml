@@ -174,9 +174,10 @@ jobs:
     name: Send deployment to Swarmia
     if: ${{ always() && !failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-swarmia-deployment.yml
-    needs: [ deploy-infra, deploy-apps ]
+    needs: [ deploy-infra, deploy-apps, get-current-version, generate-git-short-sha ]
     with:
       app-name: dialogporten
       environment: 'test'
+      version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}

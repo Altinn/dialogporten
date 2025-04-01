@@ -78,13 +78,33 @@ param sshPublicKey string
 @description('Enable Just-in-Time access for the virtual machine')
 param enableJit bool = false
 
+@description('Specifies which availability zones to use when not using availability sets. Default is zone 1.')
+param availabilityZones array = ['1']
+
+@description('Whether to use availability set instead of zones. Default is false (using zones)')
+param useAvailabilitySet bool = false
+
+resource availabilitySet 'Microsoft.Compute/availabilitySets@2024-07-01' = if (useAvailabilitySet) {
+  name: '${name}-as'
+  location: location
+  sku: {
+    name: 'Aligned'
+  }
+  properties: {
+    platformFaultDomainCount: 2
+    platformUpdateDomainCount: 5
+  }
+  tags: tags
+}
+
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
   name: name
   location: location
-  zones: [
-    '1'
-  ]
+  zones: (!useAvailabilitySet) ? availabilityZones : null
   properties: {
+    availabilitySet: useAvailabilitySet ? {
+      id: availabilitySet.id
+    } : null
     hardwareProfile: hardwareProfile
     additionalCapabilities: additionalCapabilities
     storageProfile: storageProfile

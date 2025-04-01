@@ -84,6 +84,7 @@ module virtualMachine '../../modules/virtualMachine/main.bicep' = {
     tags: tags
     adminLoginGroupObjectId: adminLoginGroupObjectId
     enableJit: true
+    useAvailabilitySet: true
     hardwareProfile: {
       vmSize: 'Standard_B1s'
     }

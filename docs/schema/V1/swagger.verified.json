@@ -2368,6 +2368,7 @@
             "description": "If set, will override the date and time when the dialog is set as created.\nIf not supplied, the current date /time will be used.",
             "example": "2022-12-31T23:59:59Z",
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "dueAt": {
@@ -2477,6 +2478,7 @@
             "description": "If set, will override the date and time when the dialog is set as last updated.\nIf not supplied, the current date /time will be used.",
             "example": "2022-12-31T23:59:59Z",
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "visibleFrom": {

@@ -319,7 +319,8 @@ public static class DialogGenerator
     public static List<ActivityDto> GenerateFakeDialogActivities(int? count = null,
         DialogActivityType.Values? type = null)
     {
-        // Temporarily removing the ActivityType TransmissionOpened from the list of possible types for random picking.
+        // Temporarily removing the ActivityType TransmissionOpened, CorrespondenceConfirmed, and CorrespondenceOpened
+        // from the list of possible types for random picking.
         // Going to have a look at re-writing the generator https://github.com/altinn/dialogporten/issues/1123
         var activityTypes = Enum.GetValues<DialogActivityType.Values>()
             .Where(x => x is not DialogActivityType.Values.TransmissionOpened

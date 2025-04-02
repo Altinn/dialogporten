@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -91,6 +92,15 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         CreateDialogEndUserContext(request, dialog);
         await EnsureNoExistingUserDefinedIds(dialog, cancellationToken);
 
+        var activityTypes = dialog.Activities
+            .Select(x => x.TypeId)
+            .Distinct();
+
+        if (!ActivityTypeAuthorization.UsingAllowedActivityTypes(activityTypes, _user, out var errorMessage))
+        {
+            return new Forbidden(errorMessage);
+        }
+
         // Ensure transmissions have a UUIDv7 ID, needed for the transmission hierarchy validation.
         foreach (var transmission in dialog.Transmissions)
         {
@@ -111,6 +121,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             domainError => domainError,
             concurrencyError => throw new UnreachableException("Should never get a concurrency error when creating a new dialog"));
     }
+
+
 
     private async Task<Guid?> GetExistingDialogIdByIdempotentKey(DialogEntity dialog, CancellationToken cancellationToken)
     {

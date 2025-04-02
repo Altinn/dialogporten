@@ -89,7 +89,7 @@ resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-p
   name: containerAppEnvironmentName
 }
 
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: '${namePrefix}-service-identity'
   location: location
   tags: tags
@@ -130,7 +130,7 @@ var containerAppEnvVars = [
   }
 ]
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
   name: environmentKeyVaultName
 }
 

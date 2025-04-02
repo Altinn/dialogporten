@@ -78,7 +78,7 @@ param sshPublicKey string
 @description('Enable Just-in-Time access for the virtual machine')
 param enableJit bool = false
 
-resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-11-01' = {
   name: name
   location: location
   zones: [
@@ -144,7 +144,7 @@ resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-0
   }
 }
 
-resource aadLoginExtension 'Microsoft.Compute/virtualMachines/extensions@2024-07-01' = {
+resource aadLoginExtension 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
   parent: virtualMachine
   name: 'AADSSHLoginForLinux'
   location: location

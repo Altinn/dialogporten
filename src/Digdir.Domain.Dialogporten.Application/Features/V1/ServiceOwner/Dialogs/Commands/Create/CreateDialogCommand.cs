@@ -122,8 +122,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             concurrencyError => throw new UnreachableException("Should never get a concurrency error when creating a new dialog"));
     }
 
-
-
     private async Task<Guid?> GetExistingDialogIdByIdempotentKey(DialogEntity dialog, CancellationToken cancellationToken)
     {
         if (dialog.IdempotentKey is null || string.IsNullOrEmpty(dialog.Org))

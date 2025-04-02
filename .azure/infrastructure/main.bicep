@@ -171,7 +171,7 @@ module vnet '../modules/vnet/main.bicep' = {
 // Create references to existing resources
 // #######################################
 
-resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
   name: secrets.sourceKeyVaultName
   scope: az.resourceGroup(secrets.sourceKeyVaultSubscriptionId, secrets.sourceKeyVaultResourceGroup)
 }

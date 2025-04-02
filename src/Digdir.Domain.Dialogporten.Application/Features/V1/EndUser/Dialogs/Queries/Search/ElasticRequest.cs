@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Elastic.Clients.Elasticsearch;
-using Elastic.Clients.Elasticsearch.Aggregations;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using MediatR;
 using OneOf;
@@ -15,8 +14,26 @@ public sealed class ElasticRequest : IRequest<ElasticResult>
     public List<string> ServiceResource { get; set; } = [];
 }
 
+public sealed class NahActualDto
+{
+    public double EsQueryTime { get; set; }
+    public List<ElasticPartyResult> Parties { get; set; } = [];
+}
+public sealed class ElasticPartyResult
+{
+    public string Party { get; set; } = string.Empty;
+    public List<ElasticDialogResult> Dialogs { get; set; } = new();
+}
+
+public sealed class ElasticDialogResult
+{
+    public Guid DialogId { get; set; }
+    public string ServiceResource { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 [GenerateOneOf]
-public sealed partial class ElasticResult : OneOfBase<double>;
+public sealed partial class ElasticResult : OneOfBase<NahActualDto>;
 
 internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, ElasticResult>
 {
@@ -37,11 +54,11 @@ internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, Ela
             request.ServiceResource,
             cancellationToken: cancellationToken);
 
-        var parties = authorizedResources.ResourcesByParties
+        var authorizedParties = authorizedResources.ResourcesByParties
             .Select(k => k.Key)
             .ToList();
 
-        var mustPreFilters = parties
+        var mustPreFilters = authorizedParties
             .Select(party => (Action<QueryDescriptor<ElasticParty>>)(q => q
                 .Match(m => m
                     .Field(f => f.Party)
@@ -87,6 +104,35 @@ internal sealed class ElasticThingyHandler : IRequestHandler<ElasticRequest, Ela
 
         Console.WriteLine(response);
 
-        return elapsedTime;
+        var parties = new List<ElasticPartyResult>();
+
+        // foreach (var party in response.Aggregations?["agg_party"])
+        // {
+        //     var partyResult = new ElasticPartyResult
+        //     {
+        //         Party = party.Key,
+        //         Dialogs = new List<ElasticDialogResult>()
+        //     };
+        //
+        //     foreach (var dialog in party.Nested["nested_dialogs"].Aggregations["agg_serviceResource"].Buckets)
+        //     {
+        //         var dialogResult = new ElasticDialogResult
+        //         {
+        //             DialogId = Guid.NewGuid(), // Placeholder for actual DialogId
+        //             ServiceResource = dialog.Key,
+        //             CreatedAt = DateTimeOffset.UtcNow // Placeholder for actual CreatedAt
+        //         };
+        //         partyResult.Dialogs.Add(dialogResult);
+        //     }
+        //
+        //     parties.Add(partyResult);
+        // }
+
+
+        return new NahActualDto
+        {
+            EsQueryTime = elapsedTime,
+            Parties = parties
+        };
     }
 }

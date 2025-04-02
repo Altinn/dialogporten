@@ -9,7 +9,7 @@ public sealed class ElasticEndpoint : Endpoint<Test>
 {
     private readonly ISender _sender;
 
-    // private static readonly List<string> Parties = File.ReadAllLines("./parties").ToList();
+    private static readonly List<string> Parties = File.ReadAllLines("./parties").ToList();
     public ElasticEndpoint(ISender sender)
     {
         _sender = sender ?? throw new ArgumentNullException(nameof(sender));
@@ -25,13 +25,13 @@ public sealed class ElasticEndpoint : Endpoint<Test>
 
     public override async Task HandleAsync(Test req, CancellationToken ct)
     {
-        // var random = new Random();
-        // var selectedParties = Parties
-        //     .OrderBy(_ => random.Next())
-        //     .Take(req.NumOfParti)
-        //     .ToList();
+        var random = new Random();
+        var selectedParties = Parties
+            .OrderBy(_ => random.Next())
+            .Take(req.NumOfParti)
+            .ToList();
 
-        List<string> selectedParties = ["urn:altinn:organization:identifier-no:000382310"];
+        // List<string> selectedParties = ["urn:altinn:organization:identifier-no:000382310"];
 
         var result = await _sender.Send(new ElasticRequest
         {
@@ -39,7 +39,7 @@ public sealed class ElasticEndpoint : Endpoint<Test>
             ServiceResource = []
         }, ct);
         await result.Match(
-            elapsedTimeInMs => SendOkAsync(elapsedTimeInMs, ct));
+            oki => SendOkAsync(oki, ct));
     }
 }
 

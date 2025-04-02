@@ -143,5 +143,6 @@ jobs:
     with:
       app-name: dialogporten
       environment: 'prod'
+      version: ${{ inputs.version }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}

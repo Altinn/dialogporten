@@ -158,5 +158,6 @@ jobs:
     with:
       app-name: dialogporten
       environment: 'staging'
+      version: ${{ github.event.client_payload.version }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}

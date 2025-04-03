@@ -22,6 +22,10 @@ env:
 runs:
   using: "composite"
   steps:
+    - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+      with:
+        egress-policy: audit
+
     - name: OIDC Login to Azure Public Cloud
       uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2.2.0
       with:

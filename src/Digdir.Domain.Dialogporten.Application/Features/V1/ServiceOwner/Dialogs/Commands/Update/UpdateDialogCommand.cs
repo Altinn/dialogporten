@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -118,6 +119,15 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         ValidateTimeFields(dialog);
 
         await AppendActivity(dialog, request.Dto, cancellationToken);
+
+        var activityTypes = dialog.Activities
+            .Select(x => x.TypeId)
+            .Distinct();
+
+        if (!ActivityTypeAuthorization.UsingAllowedActivityTypes(activityTypes, _user, out var errorMessage))
+        {
+            return new Forbidden(errorMessage);
+        }
 
         await AppendTransmission(dialog, request.Dto, cancellationToken);
 

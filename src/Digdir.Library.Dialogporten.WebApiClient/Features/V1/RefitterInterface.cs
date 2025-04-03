@@ -2289,6 +2289,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [System.Runtime.Serialization.EnumMember(Value = @"FormSaved")]
         FormSaved = 14,
 
+        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceOpened")]
+        CorrespondenceOpened = 15,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceConfirmed")]
+        CorrespondenceConfirmed = 16,
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]

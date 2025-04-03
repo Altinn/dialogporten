@@ -375,6 +375,10 @@ enum ActivityType {
   FORM_SUBMITTED
   "Indicates that a form associated with the dialog has been saved."
   FORM_SAVED
+  "Indicates that a correspondence has been opened."
+  CORRESPONDENCE_OPENED
+  "Indicates that a correspondence has been confirmed."
+  CORRESPONDENCE_CONFIRMED
 }
 
 enum ActorType {

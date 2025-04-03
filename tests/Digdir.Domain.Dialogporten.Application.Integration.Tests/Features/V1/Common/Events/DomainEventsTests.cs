@@ -7,6 +7,8 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using FluentAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
@@ -17,7 +19,9 @@ using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using Digdir.Domain.Dialogporten.Domain.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Events;
 
@@ -78,6 +82,13 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     public async Task Creates_DomainEvents_When_Dialog_Created()
     {
         // Arrange
+        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.CorrespondenceScope)]);
+        Application.ConfigureServices(services =>
+        {
+            services.RemoveAll<IUser>();
+            services.AddSingleton<IUser>(userWithLegacyScope);
+        });
+
         var allActivityTypes = Enum.GetValues<DialogActivityType.Values>().ToList();
         var activities = allActivityTypes
             .Select(activityType => DialogGenerator.GenerateFakeDialogActivity(activityType))

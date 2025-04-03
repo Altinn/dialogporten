@@ -1,3 +1,5 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.NotificationCondition;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
@@ -6,6 +8,8 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.NotificationCondition;
 
@@ -20,7 +24,6 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         from NotificationConditionType conditionType in Enum.GetValues(typeof(NotificationConditionType))
         select new object[] { activityType, conditionType, expectedSendNotificationValue };
 
-
     [Theory, MemberData(nameof(NotificationConditionTestData))]
     public async Task SendNotification_Should_Be_True_When_Conditions_Are_Met(
         DialogActivityType.Values activityType,
@@ -28,6 +31,13 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         bool expectedSendNotificationValue)
     {
         // Arrange
+        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.CorrespondenceScope)]);
+        Application.ConfigureServices(services =>
+        {
+            services.RemoveAll<IUser>();
+            services.AddSingleton<IUser>(userWithLegacyScope);
+        });
+
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         switch (conditionType)
         {

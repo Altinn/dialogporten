@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.62.0](https://github.com/Altinn/dialogporten/compare/v1.61.1...v1.62.0) (2025-04-03)
+
+
+### Features
+
+* Add activity types for open/confirm correspondence ([#2159](https://github.com/Altinn/dialogporten/issues/2159)) ([86f834a](https://github.com/Altinn/dialogporten/commit/86f834aee9ab3da55ad006a48560b581a6e282a8))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency automapper to v14 ([#2151](https://github.com/Altinn/dialogporten/issues/2151)) ([ac9df18](https://github.com/Altinn/dialogporten/commit/ac9df18c00197a614fec312ef7be6199310b86fc))
+* **deps:** update dependency node to v22 ([#2152](https://github.com/Altinn/dialogporten/issues/2152)) ([43e5537](https://github.com/Altinn/dialogporten/commit/43e5537a7fb4b0d3b85d56449fefb363457914a2))
+* **deps:** update dependency xunit.runner.visualstudio to v3 ([#2153](https://github.com/Altinn/dialogporten/issues/2153)) ([66a4732](https://github.com/Altinn/dialogporten/commit/66a473298f8541013e9d96fd3bad15de051542d0))
+* **deps:** update microsoft dependencies (major) ([#2155](https://github.com/Altinn/dialogporten/issues/2155)) ([3173d12](https://github.com/Altinn/dialogporten/commit/3173d128416a2c6363914c763dd3b3a3e5f3d7df))
+
 ## [1.61.1](https://github.com/Altinn/dialogporten/compare/v1.61.0...v1.61.1) (2025-04-01)
 
 

@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using MassTransit;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 

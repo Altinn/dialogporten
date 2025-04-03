@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
@@ -33,7 +33,7 @@ internal sealed class SyncPolicyCommandHandler : IRequestHandler<SyncPolicyComma
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<SyncPolicyResult> Handle(SyncPolicyCommand request,
+    public async ValueTask<SyncPolicyResult> Handle(SyncPolicyCommand request,
         CancellationToken cancellationToken)
     {
         // Get the last updated timestamp from parameter, or the database (with a time skew), or use a default

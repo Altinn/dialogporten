@@ -16,7 +16,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -61,7 +61,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
     }
 
-    public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
+    public async ValueTask<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
     {
         var dialog = _mapper.Map<DialogEntity>(request.Dto);
 

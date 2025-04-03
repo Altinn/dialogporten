@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.Abstractions.Features.SoftDeletable;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -37,7 +37,7 @@ internal sealed class RestoreDialogCommandHandler : IRequestHandler<RestoreDialo
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<RestoreDialogResult> Handle(RestoreDialogCommand request, CancellationToken cancellationToken)
+    public async ValueTask<RestoreDialogResult> Handle(RestoreDialogCommand request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

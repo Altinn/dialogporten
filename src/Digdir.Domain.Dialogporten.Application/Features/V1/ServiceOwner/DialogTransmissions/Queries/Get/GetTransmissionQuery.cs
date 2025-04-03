@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -33,7 +33,7 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
+    public async ValueTask<GetTransmissionResult> Handle(GetTransmissionQuery request,
         CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);

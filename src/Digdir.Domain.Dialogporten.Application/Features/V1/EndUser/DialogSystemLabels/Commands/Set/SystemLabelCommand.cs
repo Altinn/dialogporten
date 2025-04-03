@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -34,7 +34,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SystemLabel
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<SetSystemLabelResult> Handle(
+    public async ValueTask<SetSystemLabelResult> Handle(
         SystemLabelCommand request,
         CancellationToken cancellationToken)
     {

@@ -2,7 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActi
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.DialogActivities.NotificationCondition;
 

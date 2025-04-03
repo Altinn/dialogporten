@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -39,7 +39,7 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
     }
 
-    public async Task<GetSeenLogResult> Handle(GetSeenLogQuery request,
+    public async ValueTask<GetSeenLogResult> Handle(GetSeenLogQuery request,
         CancellationToken cancellationToken)
     {
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);

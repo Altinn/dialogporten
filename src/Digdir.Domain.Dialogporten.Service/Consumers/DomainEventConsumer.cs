@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using MassTransit;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Service.Consumers;
 
@@ -9,7 +9,9 @@ public sealed class DomainEventConsumer<THandler, TEvent>(THandler handler) : IC
     where TEvent : class, IDomainEvent
 {
     private readonly THandler _handler = handler ?? throw new ArgumentNullException(nameof(handler));
-    public Task Consume(ConsumeContext<TEvent> context) => _handler.Handle(context.Message, context.CancellationToken);
+    public Task Consume(ConsumeContext<TEvent> context) => _handler
+        .Handle(context.Message, context.CancellationToken)
+        .AsTask();
 }
 
 public sealed class DomainEventConsumerDefinition<THandler, TEvent> : ConsumerDefinition<DomainEventConsumer<THandler, TEvent>>

@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Parties.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using FastEndpoints;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Parties.Get;
 

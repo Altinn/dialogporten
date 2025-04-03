@@ -33,7 +33,7 @@ using ZiggyCreatures.Caching.Fusion.NullObjects;
 using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using MassTransit;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 

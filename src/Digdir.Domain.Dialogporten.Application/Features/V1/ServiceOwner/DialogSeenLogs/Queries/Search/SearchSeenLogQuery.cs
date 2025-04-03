@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -34,7 +34,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         _userResourceRegistry = userResourceRegistry;
     }
 
-    public async Task<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

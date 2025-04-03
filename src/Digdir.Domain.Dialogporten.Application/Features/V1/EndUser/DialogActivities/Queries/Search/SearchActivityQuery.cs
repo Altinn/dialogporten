@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -34,7 +34,7 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
     {
         var dialog = await _db.Dialogs
             .Include(x => x.Activities)

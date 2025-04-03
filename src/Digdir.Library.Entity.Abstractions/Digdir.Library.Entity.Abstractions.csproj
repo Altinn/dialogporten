@@ -6,7 +6,7 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Digdir.Library.Entity.EntityFrameworkCore"/>
-        <PackageReference Include="MediatR.Contracts" Version="2.0.1"/>
+        <PackageReference Include="Mediator.Abstractions" Version="2.1.7" />
         <PackageReference Include="Medo.Uuid7" Version="3.1.0"/>
     </ItemGroup>
 

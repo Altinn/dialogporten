@@ -1,7 +1,7 @@
 using Cocona;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Janitor;
 

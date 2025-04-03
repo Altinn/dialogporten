@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -50,7 +50,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
     }
 
-    public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

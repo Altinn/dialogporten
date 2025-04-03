@@ -3,11 +3,11 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using MediatR;
 using OneOf;
 using Microsoft.EntityFrameworkCore;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search;
 
@@ -38,7 +38,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
     }
 
-    public async Task<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
     {
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 

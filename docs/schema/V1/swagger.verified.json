@@ -5134,7 +5134,7 @@
             "style": "form"
           },
           {
-            "description": "Whether to include API-only dialogs in search results. \nIf false, dialogs marked with IsApiOnly=true will be excluded.\nDefaults to true.",
+            "description": "Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.",
             "in": "query",
             "name": "includeApiOnly",
             "schema": {
@@ -6045,7 +6045,7 @@
             "style": "form"
           },
           {
-            "description": "Whether to include API-only dialogs in search results. \nIf false, dialogs marked with IsApiOnly=true will be excluded.\nDefaults to true.",
+            "description": "Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.",
             "in": "query",
             "name": "includeApiOnly",
             "schema": {

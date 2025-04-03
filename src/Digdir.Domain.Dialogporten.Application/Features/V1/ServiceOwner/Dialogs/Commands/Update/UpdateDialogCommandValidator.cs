@@ -305,6 +305,8 @@ internal sealed class UpdateDialogContentDtoValidator : AbstractValidator<Conten
                     break;
             }
         }
+
+        // These rules will be conditionally applied by UpdateDialogDtoValidator based on IsApiOnly
     }
 }
 

@@ -123,14 +123,14 @@ export default function () {
 
         // Create a simplified version of the dialog for update
         dialog.isApiOnly = false,
-        dialog.content = {
-            Title: {
-                value: [{ languageCode: "nb", value: "Updated title" }]
-            },
-            Summary: {
-                value: [{ languageCode: "nb", value: "Updated summary" }]
-            }
-        };
+            dialog.content = {
+                Title: {
+                    value: [{ languageCode: "nb", value: "Updated title" }]
+                },
+                Summary: {
+                    value: [{ languageCode: "nb", value: "Updated summary" }]
+                }
+            };
         dialog.transmissions = [];
         dialog.activities = [];
 

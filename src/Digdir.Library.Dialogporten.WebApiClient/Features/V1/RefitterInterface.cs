@@ -119,9 +119,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public IEnumerable<DialogEndUserContextsEntities_SystemLabel> SystemLabel { get; set; }
 
         /// <summary>
-        /// Whether to include API-only dialogs in search results. 
-If false, dialogs marked with IsApiOnly=true will be excluded.
-Defaults to true.
+        /// Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.
         /// </summary>
         [Query] 
         public bool? IncludeApiOnly { get; set; }

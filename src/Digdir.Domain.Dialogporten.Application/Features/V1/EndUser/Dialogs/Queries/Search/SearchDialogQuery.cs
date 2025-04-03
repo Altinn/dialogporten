@@ -92,9 +92,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public List<SystemLabel.Values>? SystemLabel { get; set; }
 
     /// <summary>
-    /// Whether to include API-only dialogs in search results. 
-    /// If false, dialogs marked with IsApiOnly=true will be excluded.
-    /// Defaults to true.
+    /// Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.
     /// </summary>
     public bool? IncludeApiOnly { get; init; } = true;
 

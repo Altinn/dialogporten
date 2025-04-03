@@ -124,6 +124,8 @@ type Dialog {
   dialogToken: String
   systemLabel: SystemLabel!
   status: DialogStatus!
+  "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
+  isApiOnly: Boolean!
   content: Content!
   attachments: [Attachment!]!
   guiActions: [GuiAction!]!
@@ -210,6 +212,8 @@ type SearchDialog {
   dueAt: DateTime
   status: DialogStatus!
   systemLabel: SystemLabel!
+  "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
+  isApiOnly: Boolean!
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!
@@ -302,6 +306,8 @@ input SearchDialogInput {
   status: [DialogStatus!]
   "Filter by system label"
   systemLabel: [SystemLabel!]
+  "Whether to include API-only dialogs in the results. Defaults to true."
+  includeApiOnly: Boolean
   "Only return dialogs created after this date"
   createdAfter: DateTime
   "Only return dialogs created before this date"

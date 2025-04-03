@@ -119,6 +119,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public IEnumerable<DialogEndUserContextsEntities_SystemLabel> SystemLabel { get; set; }
 
         /// <summary>
+        /// Whether to include API-only dialogs in search results. 
+If false, dialogs marked with IsApiOnly=true will be excluded.
+Defaults to true.
+        /// </summary>
+        [Query] 
+        public bool? IncludeApiOnly { get; set; }
+
+        /// <summary>
         /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
         /// </summary>
         [Query] 
@@ -1639,6 +1647,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public DialogsEntities_DialogStatus Status { get; set; }
 
         /// <summary>
+        /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
+        /// <br/>When true, human-readable content like title and summary are not required.
+        /// </summary>
+
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; }
+
+        /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
 
@@ -2080,6 +2096,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string AuthorizationAttribute { get; set; }
 
         /// <summary>
+        /// The logical name of the operation the API action refers to.
+        /// </summary>
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
 
@@ -2450,6 +2473,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
         /// <summary>
+        /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
+        /// </summary>
+
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; }
+
+        /// <summary>
         /// The latest entry in the dialog's activity log.
         /// </summary>
 
@@ -2784,6 +2814,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public DialogsEntities_DialogStatus Status { get; set; }
+
+        /// <summary>
+        /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
+        /// </summary>
+
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; }
 
         /// <summary>
         /// Current display state.
@@ -3311,6 +3348,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool? IsAuthorized { get; set; }
 
         /// <summary>
+        /// The logical name of the operation the API action refers to.
+        /// </summary>
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
 
@@ -3587,6 +3631,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
+
+        /// <summary>
+        /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
+        /// <br/>When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
+        /// </summary>
+
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; }
 
         /// <summary>
         /// If set, will override the date and time when the dialog is set as created.
@@ -4062,6 +4114,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("authorizationAttribute")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// The logical name of the operation the API action refers to.
+        /// </summary>
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The endpoints associated with the action.

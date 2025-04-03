@@ -242,7 +242,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        transmission.Content.Summary.Value = [];
+        transmission.Content!.Summary.Value = [];
         transmission.Content.Title.Value = [];
 
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
@@ -265,7 +265,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        transmission.Content.Summary.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
+        transmission.Content!.Summary.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
         transmission.Content.Title.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
 
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
@@ -296,7 +296,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content.AdditionalInfo = CreateHtmlContentValueDto();
+        createDialogCommand.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto();
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -315,7 +315,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content.AdditionalInfo = CreateHtmlContentValueDto();
+        createDialogCommand.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto();
 
         var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
@@ -337,7 +337,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content.Title = CreateHtmlContentValueDto();
+        createDialogCommand.Dto.Content!.Title = CreateHtmlContentValueDto();
 
         var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
@@ -363,7 +363,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content.Title = new ContentValueDto
+        createDialogCommand.Dto.Content!.Title = new ContentValueDto
         {
             MediaType = MediaTypes.LegacyEmbeddableHtml,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
@@ -394,7 +394,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Arrange
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
-        createDialogCommand.Dto.Content.MainContentReference = new ContentValueDto
+        createDialogCommand.Dto.Content!.MainContentReference = new ContentValueDto
         {
             MediaType = MediaTypes.LegacyEmbeddableHtml,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]

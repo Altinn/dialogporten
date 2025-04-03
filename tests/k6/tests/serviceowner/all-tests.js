@@ -1,5 +1,4 @@
 // This file is generated, see "scripts" directory
-import { default as apionly-tests } from './apionly-tests.js';
 import { default as authentication } from './authentication.js';
 import { default as authorization } from './authorization.js';
 import { default as concurrency } from './concurrency.js';
@@ -18,7 +17,6 @@ import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
 import { default as dialogUpdateApiOnly } from './dialogUpdateApiOnly.js';
 
 export default function() {
-  apionly-tests();
   authentication();
   authorization();
   concurrency();

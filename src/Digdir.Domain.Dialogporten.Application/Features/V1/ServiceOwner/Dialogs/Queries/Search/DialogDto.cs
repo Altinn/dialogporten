@@ -10,7 +10,7 @@ public sealed class DialogDto : DialogDtoBase
     /// The content of the dialog in search results.
     /// </summary>
     [JsonPropertyOrder(100)] // ILU MAGNUS
-    public ContentDto Content { get; set; } = null!;
+    public ContentDto? Content { get; set; } = null!;
 }
 
 public sealed class ContentDto

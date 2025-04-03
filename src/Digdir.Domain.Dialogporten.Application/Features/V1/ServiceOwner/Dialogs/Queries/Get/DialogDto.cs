@@ -134,6 +134,11 @@ public sealed class DialogDto
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
+    /// <summary>
     /// Current display state.
     /// </summary>
     public SystemLabel.Values SystemLabel { get; set; }
@@ -141,7 +146,7 @@ public sealed class DialogDto
     /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
-    public ContentDto Content { get; set; } = null!;
+    public ContentDto? Content { get; set; }
 
     /// <summary>
     /// The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.

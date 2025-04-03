@@ -36,7 +36,7 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
-        IValidator<ContentDto> contentValidator)
+        IValidator<ContentDto?> contentValidator)
     {
         RuleFor(x => x.Progress)
             .InclusiveBetween(0, 100);
@@ -62,19 +62,36 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.Status)
             .IsInEnum();
 
-        RuleFor(x => x.Content)
-            .SetValidator(contentValidator);
+        // When IsApiOnly is set to true, we only validate content if it's provided
+        // on both the dialog and the transmission level.
+        When(x => x.IsApiOnly, () =>
+        {
+            RuleFor(x => x.Content)
+                .SetValidator(contentValidator)
+                .When(x => x.Content is not null);
 
-        // For regular dialogs (IsApiOnly=false), Title and Summary are required
+            RuleFor(x => x.Transmissions)
+                .UniqueBy(x => x.Id);
+            RuleForEach(x => x.Transmissions)
+                .SetValidator(transmissionValidator,
+                    UpdateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
+                    UpdateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
+
+        });
+
         When(x => !x.IsApiOnly, () =>
         {
-            RuleFor(x => x.Content.Title)
-                .NotNull()
-                .WithMessage("Title must not be empty for non-API-only dialogs.");
+            RuleFor(x => x.Content)
+                .NotEmpty()
+                .SetValidator(contentValidator);
 
-            RuleFor(x => x.Content.Summary)
-                .NotNull()
-                .WithMessage("Summary must not be empty for non-API-only dialogs.");
+            RuleFor(x => x.Transmissions)
+                .UniqueBy(x => x.Id);
+            RuleForEach(x => x.Transmissions)
+                .SetValidator(transmissionValidator,
+                    UpdateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
+                    UpdateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
+
         });
 
         RuleFor(x => x.SearchTags)
@@ -106,11 +123,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .UniqueBy(x => x.Id);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
-
-        RuleFor(x => x.Transmissions)
-            .UniqueBy(x => x.Id);
-        RuleForEach(x => x.Transmissions)
-            .SetValidator(transmissionValidator);
 
         RuleFor(x => x.Activities)
             .UniqueBy(x => x.Id);
@@ -207,9 +219,14 @@ internal sealed class UpdateDialogDialogTransmissionContentDtoValidator : Abstra
 
 internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValidator<TransmissionDto>
 {
+
+    public const string AllowEmptyContentRuleSet = "AllowEmptyContent";
+    public const string AlwaysValidateContentRuleSet = "AlwaysValidateContent";
+    public const string DefaultRuleSet = "Default";
+
     public UpdateDialogDialogTransmissionDtoValidator(
         IValidator<ActorDto> actorValidator,
-        IValidator<TransmissionContentDto> contentValidator,
+        IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator)
     {
         RuleFor(x => x.Id)
@@ -234,9 +251,20 @@ internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValid
             .MaximumLength(Constants.DefaultMaxStringLength);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
-        RuleFor(x => x.Content)
-            .NotEmpty()
-            .SetValidator(contentValidator);
+
+        RuleSet(AllowEmptyContentRuleSet, () =>
+        {
+            RuleFor(x => x.Content)
+                .SetValidator(contentValidator)
+                .When(x => x.Content is not null);
+        });
+
+        RuleSet(AlwaysValidateContentRuleSet, () =>
+        {
+            RuleFor(x => x.Content)
+                .NotEmpty()
+                .SetValidator(contentValidator);
+        });
     }
 }
 
@@ -254,14 +282,7 @@ internal sealed class UpdateDialogContentDtoValidator : AbstractValidator<Conten
 
     public UpdateDialogContentDtoValidator(IUser? user)
     {
-        // We need to explicitly validate Title and Summary properties since they have special conditions
-        // based on the IsApiOnly flag in the parent object (which we don't have access to here)
-        var titleProperty = SourcePropertyMetaDataByName["Title"];
-        var summaryProperty = SourcePropertyMetaDataByName["Summary"];
-
-        // For other properties, use the standard validation approach
-        foreach (var (propertyName, propMetadata) in SourcePropertyMetaDataByName
-            .Where(kvp => kvp is { Key: not "Title" and not "Summary" }))
+        foreach (var (propertyName, propMetadata) in SourcePropertyMetaDataByName)
         {
             switch (propMetadata.NullabilityInfo.WriteState)
             {
@@ -284,8 +305,6 @@ internal sealed class UpdateDialogContentDtoValidator : AbstractValidator<Conten
                     break;
             }
         }
-
-        // These rules will be conditionally applied by UpdateDialogDtoValidator based on IsApiOnly
     }
 }
 

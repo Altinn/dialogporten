@@ -124,7 +124,6 @@ public class DialogDtoBase
 
     /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
-    /// When true, human-readable content like title and summary are not required.
     /// </summary>
     public bool IsApiOnly { get; set; }
 

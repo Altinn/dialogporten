@@ -457,4 +457,55 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT0(out var success, out _).Should().BeTrue();
         success.Should().NotBeNull();
     }
+
+    [Fact]
+    public async Task Can_Create_Dialog_With_Default_DateTimeOffset_For_UpdatedAt_Without_Setting_CreatedAt()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        createDialogCommand.Dto.UpdatedAt = default(DateTimeOffset);
+
+        // Act
+        var createDialogResponse = await Application.Send(createDialogCommand);
+        var getDialogResponse = await Application.Send(new GetDialogQuery
+        {
+            DialogId = dialogId
+        });
+
+        // Assert
+        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+        dialog.Should().NotBeNull();
+        dialog.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
+        dialog.UpdatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
+    public async Task Can_Create_Dialog_With_Default_DateTimeOffset_For_UpdatedAt_And_CreatedAt_Set()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        createDialogCommand.Dto.UpdatedAt = default(DateTimeOffset);
+        createDialogCommand.Dto.CreatedAt = DateTimeOffset.UtcNow;
+
+        // Act
+        var createDialogResponse = await Application.Send(createDialogCommand);
+        var getDialogResponse = await Application.Send(new GetDialogQuery
+        {
+            DialogId = dialogId
+        });
+
+        // Assert
+        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+        dialog.Should().NotBeNull();
+        dialog.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
+        dialog.UpdatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
+    }
 }

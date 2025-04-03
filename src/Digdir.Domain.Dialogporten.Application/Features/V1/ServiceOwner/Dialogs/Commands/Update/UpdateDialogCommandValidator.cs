@@ -297,7 +297,7 @@ internal sealed class UpdateDialogContentDtoValidator : AbstractValidator<Conten
                     RuleFor(x => propMetadata.Property.GetValue(x) as ContentValueDto)
                         .SetValidator(
                             new ContentValueDtoValidator(DialogContentType.Parse(propertyName), user)!)
-                        .When(x => propMetadata.Property.GetValue(x) is ContentValueDto);
+                        .When(x => propMetadata.Property.GetValue(x) is not null);
                     break;
                 case NullabilityState.Unknown:
                     break;
@@ -305,8 +305,6 @@ internal sealed class UpdateDialogContentDtoValidator : AbstractValidator<Conten
                     break;
             }
         }
-
-        // These rules will be conditionally applied by UpdateDialogDtoValidator based on IsApiOnly
     }
 }
 

@@ -122,7 +122,7 @@ export default function () {
         const futureDateISOString = futureDate.toISOString();
 
         // Create a simplified version of the dialog for update
-        dialog.isApiOnly = false,
+        dialog.isApiOnly = false;
             dialog.content = {
                 Title: {
                     value: [{ languageCode: "nb", value: "Updated title" }]

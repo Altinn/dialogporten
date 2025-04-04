@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.62.1](https://github.com/Altinn/dialogporten/compare/v1.62.0...v1.62.1) (2025-04-04)
+
+
+### Bug Fixes
+
+* **webapi:** Allow default(DateTimeOffset) for CreatedAt and UpdatedAt ([#2161](https://github.com/Altinn/dialogporten/issues/2161)) ([f5bf6f1](https://github.com/Altinn/dialogporten/commit/f5bf6f1ea27b6e9ffa0d4acb95dd1a89c5bb65d3))
+
+
+### Miscellaneous Chores
+
+* **ci:** Use step-security/harden-runner ([#2163](https://github.com/Altinn/dialogporten/issues/2163)) ([0678b74](https://github.com/Altinn/dialogporten/commit/0678b742ce02e17f13e2f08ebcad4dfc7ac4d9f4))
+
 ## [1.62.0](https://github.com/Altinn/dialogporten/compare/v1.61.1...v1.62.0) (2025-04-03)
 
 

@@ -46,13 +46,14 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.CreatedAt)
             .NotEmpty()
                 .WithMessage($"{{PropertyName}} must not be empty when '{nameof(CreateDialogDto.UpdatedAt)} is set.")
-                .When(x => x.UpdatedAt.HasValue);
+                .When(x => x.UpdatedAt.HasValue && x.UpdatedAt != default(DateTimeOffset));
 
         RuleFor(x => x.UpdatedAt)
             .IsInPast()
             .GreaterThanOrEqualTo(x => x.CreatedAt)
                 .WithMessage($"'{{PropertyName}}' must be greater than or equal to '{nameof(CreateDialogDto.CreatedAt)}'.")
-                .When(x => x.CreatedAt.HasValue && x.UpdatedAt.HasValue);
+                .When(x => x.CreatedAt.HasValue && x.CreatedAt != default(DateTimeOffset) &&
+                           x.UpdatedAt.HasValue && x.UpdatedAt != default(DateTimeOffset));
 
         RuleFor(x => x.IdempotentKey)
             .MaximumLength(36);

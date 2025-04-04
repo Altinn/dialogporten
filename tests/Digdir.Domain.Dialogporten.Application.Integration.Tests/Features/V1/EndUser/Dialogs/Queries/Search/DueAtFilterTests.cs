@@ -10,8 +10,8 @@ public class DueAtFilterTests : ApplicationCollectionFixture
 {
     public DueAtFilterTests(DialogApplication application) : base(application) { }
 
-    [Theory, MemberData(nameof(DueAtTestData))]
-    public async Task Should_Filter_On_Due_Date(DateFilterTestData testData)
+    [Theory, ClassData(typeof(DynamicDateFilterTestData))]
+    public async Task Should_Filter_On_Due_Date(int? afterYear, int? beforeYear, int expectedCount, int[] expectedYears)
     {
         // Arrange
         var currentYear = DateTimeOffset.UtcNow.Year;
@@ -30,16 +30,16 @@ public class DueAtFilterTests : ApplicationCollectionFixture
         var response = await Application.Send(new SearchDialogQuery
         {
             Party = [Party],
-            DueAfter = testData.AfterYear.HasValue ? CreateDateFromYear(testData.AfterYear.Value) : null,
-            DueBefore = testData.BeforeYear.HasValue ? CreateDateFromYear(testData.BeforeYear.Value) : null
+            DueAfter = afterYear.HasValue ? CreateDateFromYear(afterYear.Value) : null,
+            DueBefore = beforeYear.HasValue ? CreateDateFromYear(beforeYear.Value) : null
         });
 
         // Assert
         response.TryPickT0(out var result, out _).Should().BeTrue();
         result.Should().NotBeNull();
 
-        result.Items.Should().HaveCount(testData.ExpectedCount);
-        foreach (var year in testData.ExpectedYears)
+        result.Items.Should().HaveCount(expectedCount);
+        foreach (var year in expectedYears)
         {
             var dialogId = year switch
             {
@@ -68,47 +68,5 @@ public class DueAtFilterTests : ApplicationCollectionFixture
         // Assert
         response.TryPickT1(out var result, out _).Should().BeTrue();
         result.Should().NotBeNull();
-    }
-
-    public static IEnumerable<object[]> DueAtTestData()
-    {
-        var currentYear = DateTimeOffset.UtcNow.Year;
-
-        // The numbers added to "currentYear" here represent future years relative to the current year.
-        // This is done to create test data for dialogs that are due "soon" (1 to 4 years ahead).
-        // This approach ensures that the tests remain valid and relevant regardless of the current date.
-        return new List<object[]>
-        {
-            new object[]
-            {
-                new DateFilterTestData
-                {
-                    AfterYear = currentYear + 3,
-                    BeforeYear = null,
-                    ExpectedCount = 2,
-                    ExpectedYears = [currentYear + 3, currentYear + 4]
-                }
-            },
-            new object[]
-            {
-                new DateFilterTestData
-                {
-                    AfterYear = null,
-                    BeforeYear = currentYear + 2,
-                    ExpectedCount = 2,
-                    ExpectedYears = [currentYear + 1, currentYear + 2]
-                }
-            },
-            new object[]
-            {
-                new DateFilterTestData
-                {
-                    AfterYear = currentYear + 1,
-                    BeforeYear = currentYear + 2,
-                    ExpectedCount = 2,
-                    ExpectedYears = [currentYear + 1, currentYear + 2]
-                }
-            }
-        };
     }
 }

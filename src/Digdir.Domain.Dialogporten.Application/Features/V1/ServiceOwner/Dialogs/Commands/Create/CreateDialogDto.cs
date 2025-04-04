@@ -210,7 +210,7 @@ public sealed class TransmissionDto
     /// <summary>
     /// The transmission unstructured text content.
     /// </summary>
-    public TransmissionContentDto? Content { get; set; } = null!;
+    public TransmissionContentDto? Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

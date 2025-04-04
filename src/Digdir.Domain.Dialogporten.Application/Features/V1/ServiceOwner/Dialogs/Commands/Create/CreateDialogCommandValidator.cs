@@ -125,39 +125,37 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
         // When IsApiOnly is set to true, we only validate content if it's provided
         // on both the dialog and the transmission level.
+        RuleFor(x => x.Transmissions)
+            .UniqueBy(x => x.Id);
+
         When(x => x.IsApiOnly, () =>
-        {
-            RuleFor(x => x.Content)
-                .SetValidator(contentValidator)
-                .When(x => x.Content is not null);
+            {
+                RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null);
 
-            RuleFor(x => x.Transmissions)
-                .UniqueBy(x => x.Id);
-            RuleForEach(x => x.Transmissions)
-                .IsIn(x => x.Transmissions,
-                    dependentKeySelector: transmission => transmission.RelatedTransmissionId,
-                    principalKeySelector: transmission => transmission.Id)
-                .SetValidator(transmissionValidator,
-                    CreateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
-                    CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
-        });
+                RuleForEach(x => x.Transmissions)
+                    .IsIn(x => x.Transmissions,
+                        dependentKeySelector: transmission => transmission.RelatedTransmissionId,
+                        principalKeySelector: transmission => transmission.Id)
+                    .SetValidator(transmissionValidator,
+                        CreateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
+                        CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
+            })
+            .Otherwise(() =>
+            {
+                RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator);
 
-        When(x => !x.IsApiOnly, () =>
-        {
-            RuleFor(x => x.Content)
-                .NotEmpty()
-                .SetValidator(contentValidator);
-
-            RuleFor(x => x.Transmissions)
-                .UniqueBy(x => x.Id);
-            RuleForEach(x => x.Transmissions)
-                .IsIn(x => x.Transmissions,
-                    dependentKeySelector: transmission => transmission.RelatedTransmissionId,
-                    principalKeySelector: transmission => transmission.Id)
-                .SetValidator(transmissionValidator,
-                    CreateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
-                    CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
-        });
+                RuleForEach(x => x.Transmissions)
+                    .IsIn(x => x.Transmissions,
+                        dependentKeySelector: transmission => transmission.RelatedTransmissionId,
+                        principalKeySelector: transmission => transmission.Id)
+                    .SetValidator(transmissionValidator,
+                        CreateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
+                        CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
+            });
 
         RuleFor(x => x.Activities)
             .UniqueBy(x => x.Id);

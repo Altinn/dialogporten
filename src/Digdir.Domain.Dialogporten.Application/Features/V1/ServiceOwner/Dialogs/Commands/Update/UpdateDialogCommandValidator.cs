@@ -62,36 +62,30 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.Status)
             .IsInEnum();
 
-        // When IsApiOnly is set to true, we only validate content if it's provided
-        // on both the dialog and the transmission level.
+        RuleFor(x => x.Transmissions)
+            .UniqueBy(x => x.Id);
+
         When(x => x.IsApiOnly, () =>
         {
             RuleFor(x => x.Content)
                 .SetValidator(contentValidator)
                 .When(x => x.Content is not null);
 
-            RuleFor(x => x.Transmissions)
-                .UniqueBy(x => x.Id);
             RuleForEach(x => x.Transmissions)
                 .SetValidator(transmissionValidator,
                     UpdateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
                     UpdateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
-
-        });
-
-        When(x => !x.IsApiOnly, () =>
+        })
+        .Otherwise(() =>
         {
             RuleFor(x => x.Content)
                 .NotEmpty()
                 .SetValidator(contentValidator);
 
-            RuleFor(x => x.Transmissions)
-                .UniqueBy(x => x.Id);
             RuleForEach(x => x.Transmissions)
                 .SetValidator(transmissionValidator,
                     UpdateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
                     UpdateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
-
         });
 
         RuleFor(x => x.SearchTags)

@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 
@@ -21,7 +21,7 @@ internal sealed class IdempotentNotificationHandler<TNotification> :
         _processingContextFactory = processingContextFactory ?? throw new ArgumentNullException(nameof(processingContextFactory));
     }
 
-    public async Task Handle(TNotification notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(TNotification notification, CancellationToken cancellationToken)
     {
         var handlerName = _decorated.GetType().FullName ?? throw new InvalidOperationException("Could not determine the handler name.");
         var transaction = _processingContextFactory.GetExistingContext(notification.EventId);

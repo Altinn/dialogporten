@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
@@ -36,7 +36,7 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<SyncSubjectMapResult> Handle(SyncSubjectMapCommand request, CancellationToken cancellationToken)
+    public async ValueTask<SyncSubjectMapResult> Handle(SyncSubjectMapCommand request, CancellationToken cancellationToken)
     {
         // Get the last updated timestamp from parameter, or the database (with a time skew), or use a default
         var lastUpdated = request.Since

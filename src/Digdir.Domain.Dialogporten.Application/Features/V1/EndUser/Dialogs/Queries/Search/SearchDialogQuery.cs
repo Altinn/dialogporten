@@ -11,7 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -141,7 +141,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
         var searchExpression = Expressions.LocalizedSearchExpression(request.Search, request.SearchLanguageCode);
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(

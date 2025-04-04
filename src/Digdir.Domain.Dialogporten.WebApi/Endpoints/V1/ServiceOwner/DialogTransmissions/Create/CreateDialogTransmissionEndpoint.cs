@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.DialogTransmissions.Get;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using FastEndpoints;
-using MediatR;
+using Mediator;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 using IMapper = AutoMapper.IMapper;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;

@@ -1,6 +1,6 @@
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application.Common;
 

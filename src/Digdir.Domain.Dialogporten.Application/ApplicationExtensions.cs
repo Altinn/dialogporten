@@ -3,14 +3,13 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using FluentValidation;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
-using MediatR.NotificationPublishers;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application;
 
@@ -34,12 +33,7 @@ public static class ApplicationExtensions
         services
             // Framework
             .AddAutoMapper(thisAssembly)
-            .AddMediatR(x =>
-            {
-                x.RegisterServicesFromAssembly(thisAssembly);
-                x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
-                x.NotificationPublisherType = typeof(TaskWhenAllPublisher);
-            })
+            .AddMediator(opt => opt.ServiceLifetime = ServiceLifetime.Scoped)
             .AddValidatorsFromAssembly(thisAssembly, ServiceLifetime.Transient, includeInternalTypes: true,
                 filter: type => !type.ValidatorType.IsAssignableTo(typeof(IIgnoreOnAssemblyScan)))
 

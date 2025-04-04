@@ -2,7 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -34,7 +34,7 @@ internal sealed class NotificationConditionQueryHandler : IRequestHandler<Notifi
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    public async Task<NotificationConditionResult> Handle(NotificationConditionQuery request, CancellationToken cancellationToken)
+    public async ValueTask<NotificationConditionResult> Handle(NotificationConditionQuery request, CancellationToken cancellationToken)
     {
         var dialog = await _db.Dialogs
             .AsNoTracking()

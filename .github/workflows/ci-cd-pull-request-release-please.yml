@@ -72,6 +72,10 @@ jobs:
     needs: [dry-run-deploy-infra-staging, dry-run-deploy-apps-staging]
     runs-on: ubuntu-latest
     steps:
+      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
       - name: Slackify markdown in pull request body
         id: slackify
         uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1

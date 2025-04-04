@@ -17,6 +17,10 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+      with:
+        egress-policy: audit
+
     - name: Set up Node.js
       uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
       with:
@@ -36,4 +40,4 @@ runs:
     - name: Run build
       shell: bash
       run: npm run build
-      working-directory: ${{ inputs.working-directory }} 
+      working-directory: ${{ inputs.working-directory }}

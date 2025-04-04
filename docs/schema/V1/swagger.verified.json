@@ -680,6 +680,10 @@
             "format": "guid",
             "type": "string"
           },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
           "org": {
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
@@ -1310,6 +1314,10 @@
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
+            "type": "boolean"
           },
           "latestActivity": {
             "description": "The latest entry in the dialog\u0027s activity log.",
@@ -2362,6 +2370,7 @@
           },
           "content": {
             "description": "The dialog unstructured text content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_Content"
@@ -2418,6 +2427,10 @@
             "description": "An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.",
             "nullable": true,
             "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.\nWhen true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.",
+            "type": "boolean"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
@@ -2590,6 +2603,7 @@
           },
           "content": {
             "description": "The transmission unstructured text content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_TransmissionContent"
@@ -3042,6 +3056,7 @@
           },
           "content": {
             "description": "The dialog unstructured text content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_Content"
@@ -3079,6 +3094,10 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
+            "type": "boolean"
           },
           "precedingProcess": {
             "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
@@ -3225,6 +3244,7 @@
           },
           "content": {
             "description": "The transmission unstructured text content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent"
@@ -3515,6 +3535,7 @@
           },
           "content": {
             "description": "The dialog unstructured text content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_Content"
@@ -3575,6 +3596,10 @@
             "description": "An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.\n            ",
             "nullable": true,
             "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
           },
           "org": {
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
@@ -4210,6 +4235,7 @@
         "properties": {
           "content": {
             "description": "The content of the dialog in search results.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_Content"
@@ -4256,6 +4282,10 @@
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
           },
           "latestActivity": {
             "description": "The latest entry in the dialog\u0027s activity log.",
@@ -4460,6 +4490,7 @@
           },
           "content": {
             "description": "The transmission unstructured text content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent"
@@ -5105,6 +5136,15 @@
               "type": "array"
             },
             "style": "form"
+          },
+          {
+            "description": "Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.",
+            "in": "query",
+            "name": "includeApiOnly",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
           },
           {
             "description": "Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate",
@@ -6007,6 +6047,15 @@
               "type": "array"
             },
             "style": "form"
+          },
+          {
+            "description": "Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.",
+            "in": "query",
+            "name": "includeApiOnly",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
           },
           {
             "description": "Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate",

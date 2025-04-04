@@ -67,9 +67,15 @@ public sealed class UpdateDialogDto
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
+    /// When true, human-readable content like title and summary are not required.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
+    /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
-    public ContentDto Content { get; set; } = null!;
+    public ContentDto? Content { get; set; }
 
     /// <summary>
     /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
@@ -160,7 +166,7 @@ public class TransmissionDto
     /// <summary>
     /// The transmission unstructured text content.
     /// </summary>
-    public TransmissionContentDto Content { get; set; } = null!;
+    public TransmissionContentDto? Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

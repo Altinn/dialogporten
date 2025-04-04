@@ -34,7 +34,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
-        IValidator<ContentDto> contentValidator)
+        IValidator<ContentDto?> contentValidator)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
@@ -98,9 +98,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.Status)
             .IsInEnum();
 
-        RuleFor(x => x.Content)
-            .SetValidator(contentValidator);
-
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .ForEach(x => x.SetValidator(searchTagValidator));
@@ -126,13 +123,38 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
 
+        // When IsApiOnly is set to true, we only validate content if it's provided
+        // on both the dialog and the transmission level.
         RuleFor(x => x.Transmissions)
             .UniqueBy(x => x.Id);
+
         RuleForEach(x => x.Transmissions)
             .IsIn(x => x.Transmissions,
                 dependentKeySelector: transmission => transmission.RelatedTransmissionId,
-                principalKeySelector: transmission => transmission.Id)
-            .SetValidator(transmissionValidator);
+                principalKeySelector: transmission => transmission.Id);
+
+        When(x => x.IsApiOnly, () =>
+            {
+                RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null);
+
+                RuleForEach(x => x.Transmissions)
+                    .SetValidator(transmissionValidator,
+                        CreateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
+                        CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
+            })
+            .Otherwise(() =>
+            {
+                RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator);
+
+                RuleForEach(x => x.Transmissions)
+                    .SetValidator(transmissionValidator,
+                        CreateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
+                        CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
+            });
 
         RuleFor(x => x.Activities)
             .UniqueBy(x => x.Id);
@@ -161,9 +183,13 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
 internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValidator<TransmissionDto>
 {
+    public const string AllowEmptyContentRuleSet = "AllowEmptyContent";
+    public const string AlwaysValidateContentRuleSet = "AlwaysValidateContent";
+    public const string DefaultRuleSet = "Default";
+
     public CreateDialogDialogTransmissionDtoValidator(
         IValidator<ActorDto> actorValidator,
-        IValidator<TransmissionContentDto> contentValidator,
+        IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator)
     {
         RuleFor(x => x.Id)
@@ -188,9 +214,20 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
             .MaximumLength(Constants.DefaultMaxStringLength);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
-        RuleFor(x => x.Content)
-            .NotEmpty()
-            .SetValidator(contentValidator);
+
+        RuleSet(AllowEmptyContentRuleSet, () =>
+        {
+            RuleFor(x => x.Content)
+                .SetValidator(contentValidator)
+                .When(x => x.Content is not null);
+        });
+
+        RuleSet(AlwaysValidateContentRuleSet, () =>
+        {
+            RuleFor(x => x.Content)
+                .NotEmpty()
+                .SetValidator(contentValidator);
+        });
     }
 }
 

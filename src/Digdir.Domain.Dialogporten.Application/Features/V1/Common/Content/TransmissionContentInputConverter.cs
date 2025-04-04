@@ -78,7 +78,7 @@ internal sealed class TransmissionContentOutputConverter<TTransmissionContent> :
 {
     public TTransmissionContent? Convert(List<DialogTransmissionContent>? sources, TTransmissionContent? destination, ResolutionContext context)
     {
-        if (sources is null)
+        if (sources is null || sources.Count == 0)
         {
             return null;
         }

@@ -128,6 +128,11 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.Transmissions)
             .UniqueBy(x => x.Id);
 
+        RuleForEach(x => x.Transmissions)
+            .IsIn(x => x.Transmissions,
+                dependentKeySelector: transmission => transmission.RelatedTransmissionId,
+                principalKeySelector: transmission => transmission.Id);
+
         When(x => x.IsApiOnly, () =>
             {
                 RuleFor(x => x.Content)
@@ -135,9 +140,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
                     .When(x => x.Content is not null);
 
                 RuleForEach(x => x.Transmissions)
-                    .IsIn(x => x.Transmissions,
-                        dependentKeySelector: transmission => transmission.RelatedTransmissionId,
-                        principalKeySelector: transmission => transmission.Id)
                     .SetValidator(transmissionValidator,
                         CreateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
                         CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
@@ -149,9 +151,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
                     .SetValidator(contentValidator);
 
                 RuleForEach(x => x.Transmissions)
-                    .IsIn(x => x.Transmissions,
-                        dependentKeySelector: transmission => transmission.RelatedTransmissionId,
-                        principalKeySelector: transmission => transmission.Id)
                     .SetValidator(transmissionValidator,
                         CreateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
                         CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);

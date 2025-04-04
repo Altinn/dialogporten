@@ -123,4 +123,28 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         response.TryPickT0(out var success, out _).Should().BeTrue();
         success.Should().NotBeNull();
     }
+
+    [Fact]
+    public async Task Cannot_Create_Transmission_With_Empty_Content()
+    {
+        // Arrange
+        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+
+        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+
+        // Omitting the property the payload to the WebAPI will set this to null
+        transmission.Content = null!;
+
+        createCommand.Dto.Transmissions = [transmission];
+
+        // Act
+        var response = await Application.Send(createCommand);
+
+        // Assert
+        response.TryPickT2(out var validationError, out _).Should().BeTrue();
+        validationError.Errors.Should().HaveCount(1);
+        validationError.Errors.Should()
+            .ContainSingle(e => e.ErrorMessage
+                .Contains(nameof(transmission.Content)));
+    }
 }

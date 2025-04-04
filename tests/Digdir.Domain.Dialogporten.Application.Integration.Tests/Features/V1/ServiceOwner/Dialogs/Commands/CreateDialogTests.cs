@@ -457,4 +457,24 @@ public class CreateDialogTests : ApplicationCollectionFixture
         response.TryPickT0(out var success, out _).Should().BeTrue();
         success.Should().NotBeNull();
     }
+
+    [Fact]
+    public async Task Cannot_Create_Dialog_With_Empty_Content()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+
+        // Omitting the property the payload to the WebAPI will set this to null
+        createDialogCommand.Dto.Content = null!;
+
+        // Act
+        var response = await Application.Send(createDialogCommand);
+
+        // Assert
+        response.TryPickT2(out var validationError, out _).Should().BeTrue();
+        validationError.Should().NotBeNull();
+        validationError.Errors.Should()
+            .ContainSingle(x => x.ErrorMessage
+                .Contains(nameof(createDialogCommand.Dto.Content)));
+    }
 }

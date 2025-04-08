@@ -10,16 +10,6 @@
   "repository": {
     "url": "git+https://github.com/Altinn/dialogporten.git"
   },
-  "scripts": {
-    "build": "./gql-to-js.js",
-    "prepublishOnly": "npm run build",
-    "test": "npm run build && vitest run --test-timeout=10000"
-  },
-  "devDependencies": {
-    "vitest": "3.0.9",
-    "glob": "11.0.1",
-    "graphql-tag": "2.12.6"
-  },
   "license": "ISC",
   "type": "module"
 }

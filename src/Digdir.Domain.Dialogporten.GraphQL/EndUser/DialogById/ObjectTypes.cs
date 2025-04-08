@@ -101,7 +101,7 @@ public enum TransmissionType
     [GraphQLDescription("Critical information about the process")]
     Alert = 5,
 
-    [GraphQLDescription("Information about a formal decision (\"resolution\")")]
+    [GraphQLDescription("Information about a formal decision ('resolution')")]
     Decision = 6,
 
     [GraphQLDescription("A normal submission of some information/form")]

@@ -455,7 +455,7 @@ enum TransmissionType {
   REQUEST
   "Critical information about the process"
   ALERT
-  "Information about a formal decision (\"resolution\")"
+  "Information about a formal decision ('resolution')"
   DECISION
   "A normal submission of some information\/form"
   SUBMISSION

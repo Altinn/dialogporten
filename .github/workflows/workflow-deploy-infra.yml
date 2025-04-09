@@ -102,14 +102,13 @@ jobs:
           AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY }}
         with:
           scope: subscription
-          template: ./.azure/infrastructure/main.bicep
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          deploymentMode: Incremental
-          deploymentName: dp-be-${{ inputs.environment }}-${{ inputs.version }}
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          additionalArguments: '--what-if'
-          parameters: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
+          type: deployment
+          operation: whatIf
+          name: dp-be-${{ inputs.environment }}-${{ inputs.version }} 
+          template-file: ./.azure/infrastructure/main.bicep
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          location: ${{ inputs.region }}
+          parameters-file: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
 
       - name: Deploy infrastructure (${{ inputs.environment }})
         uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.0.0
@@ -126,13 +125,13 @@ jobs:
           AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY }}
         with:
           scope: subscription
-          template: ./.azure/infrastructure/main.bicep
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          deploymentMode: Incremental
-          deploymentName: dp-be-${{ inputs.environment }}-${{ inputs.version }}
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          parameters: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
+          type: deployment
+          operation: create
+          name: dp-be-${{ inputs.environment }}-${{ inputs.version }} 
+          template-file: ./.azure/infrastructure/main.bicep
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          location: ${{ inputs.region }}
+          parameters-file: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
 
       - name: Logout from azure
         if: ${{failure() || success()}}

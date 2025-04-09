@@ -35,7 +35,7 @@ internal sealed class SilentUpdateBehaviour<TRequest, TResponse> : IPipelineBeha
             _applicationContext.AddMetadata(Constants.IsSilentUpdate, bool.TrueString);
         }
 
-        return await next();
+        return await next(cancellationToken);
     }
 }
 

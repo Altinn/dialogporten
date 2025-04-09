@@ -85,7 +85,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy migration job (${{ inputs.environment }})
-        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2.0.0
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -106,7 +106,7 @@ jobs:
           parameters: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Deploy migration job (${{ inputs.environment }})
-        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2.0.0
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -180,7 +180,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy app ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2.0.0
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -205,7 +205,7 @@ jobs:
           parameters: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy app ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2.0.0
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -280,7 +280,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy job ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2.0.0
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -302,7 +302,7 @@ jobs:
           parameters: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy job ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2.0.0
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:

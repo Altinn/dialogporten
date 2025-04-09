@@ -1,7 +1,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 

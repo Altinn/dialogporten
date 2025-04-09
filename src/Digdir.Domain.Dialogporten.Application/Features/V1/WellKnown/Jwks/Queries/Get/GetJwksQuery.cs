@@ -1,4 +1,4 @@
-﻿using MediatR;
+﻿using Mediator;
 using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.WellKnown.Jwks.Queries.Get;
@@ -15,7 +15,7 @@ internal sealed class GetJwksQueryHandler : IRequestHandler<GetJwksQuery, GetJwk
         _applicationSettings = applicationSettings.Value;
     }
 
-    public async Task<GetJwksDto> Handle(GetJwksQuery request, CancellationToken cancellationToken)
+    public async ValueTask<GetJwksDto> Handle(GetJwksQuery request, CancellationToken cancellationToken)
     {
         return await Task.FromResult(new GetJwksDto
         {

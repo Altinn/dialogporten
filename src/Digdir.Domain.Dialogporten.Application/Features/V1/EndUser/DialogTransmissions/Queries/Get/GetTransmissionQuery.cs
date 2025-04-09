@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -33,7 +33,7 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
+    public async ValueTask<GetTransmissionResult> Handle(GetTransmissionQuery request,
         CancellationToken cancellationToken)
     {
         var dialog = await _dbContext.Dialogs

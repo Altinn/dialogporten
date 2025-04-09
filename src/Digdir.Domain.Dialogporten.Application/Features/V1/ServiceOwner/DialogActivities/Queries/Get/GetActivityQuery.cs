@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
@@ -33,7 +33,7 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<GetActivityResult> Handle(GetActivityQuery request,
+    public async ValueTask<GetActivityResult> Handle(GetActivityQuery request,
         CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);

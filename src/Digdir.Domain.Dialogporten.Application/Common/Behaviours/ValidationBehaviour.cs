@@ -1,7 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using FluentValidation;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 
@@ -15,11 +15,12 @@ internal sealed class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavi
         _validators = validators ?? throw new ArgumentNullException(nameof(validators));
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
+        MessageHandlerDelegate<TRequest, TResponse> next)
     {
         if (!_validators.Any())
         {
-            return await next();
+            return await next(request, cancellationToken);
         }
 
         var context = new ValidationContext<TRequest>(request);
@@ -31,7 +32,7 @@ internal sealed class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavi
 
         if (failures.Count == 0)
         {
-            return await next();
+            return await next(request, cancellationToken);
         }
 
         if (OneOfExtensions.TryConvertToOneOf<TResponse>(new ValidationError(failures), out var result))

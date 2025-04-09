@@ -14,7 +14,7 @@ using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using FluentAssertions;
 using HotChocolate.Subscriptions;
 using MassTransit;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

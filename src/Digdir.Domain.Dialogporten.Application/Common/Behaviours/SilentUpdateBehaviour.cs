@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Common.Exceptions;
-using MediatR;
+using Mediator;
 using AuthConstants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours;
@@ -20,7 +20,8 @@ internal sealed class SilentUpdateBehaviour<TRequest, TResponse> : IPipelineBeha
         _userResourceRegistry = userResourceRegistry;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
+        MessageHandlerDelegate<TRequest, TResponse> next)
     {
         if (request.IsSilentUpdate && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
@@ -35,7 +36,7 @@ internal sealed class SilentUpdateBehaviour<TRequest, TResponse> : IPipelineBeha
             _applicationContext.AddMetadata(Constants.IsSilentUpdate, bool.TrueString);
         }
 
-        return await next();
+        return await next(request, cancellationToken);
     }
 }
 

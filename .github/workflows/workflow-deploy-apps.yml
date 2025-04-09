@@ -115,7 +115,7 @@ jobs:
           AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
         with:
-          scope: resourcegroup
+          scope: resourceGroup
           type: deployment
           operation: create
           name: "web-api-migration-job-${{ inputs.version }}"
@@ -193,7 +193,7 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
           AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
         with:
-          scope: resourcegroup
+          scope: resourceGroup
           type: deployment
           operation: whatIf
           name: "${{ matrix.name }}-${{ inputs.version }}"
@@ -217,7 +217,7 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
           AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
         with:
-          scope: resourcegroup
+          scope: resourceGroup
           type: deployment
           operation: create
           name: "${{ matrix.name }}-${{ inputs.version }}"
@@ -289,7 +289,7 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
           AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
         with:
-          scope: resourcegroup
+          scope: resourceGroup
           type: deployment
           operation: whatIf
           name: "${{ matrix.name }}-${{ inputs.version }}"

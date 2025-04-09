@@ -96,8 +96,8 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
         with:
           scope: resourcegroup
-          type: whatIf
-          operation: create
+          type: deployment
+          operation: whatIf
           name: "web-api-migration-job-${{ inputs.version }}"
           template-file: ./.azure/applications/web-api-migration-job/main.bicep
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}

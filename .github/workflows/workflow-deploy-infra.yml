@@ -102,8 +102,8 @@ jobs:
           AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY }}
         with:
           scope: subscription
-          type: whatIf
-          operation: create
+          type: deployment
+          operation: whatIf
           name: dp-be-${{ inputs.environment }}-${{ inputs.version }} 
           template-file: ./.azure/infrastructure/main.bicep
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

@@ -125,14 +125,15 @@ jobs:
           AZURE_SOURCE_KEY_VAULT_NAME: ${{ secrets.AZURE_SOURCE_KEY_VAULT_NAME }}
           AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SSH_JUMPER_SSH_PUBLIC_KEY }}
         with:
+          name: dp-be-${{ inputs.environment }}-${{ inputs.version }} 
           scope: subscription
-          template: ./.azure/infrastructure/main.bicep
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          template-file: ./.azure/infrastructure/main.bicep
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           deploymentMode: Incremental
-          deploymentName: dp-be-${{ inputs.environment }}-${{ inputs.version }}
-          region: ${{ inputs.region }}
+          name: dp-be-${{ inputs.environment }}-${{ inputs.version }}
+          location: ${{ inputs.region }}
           failOnStdErr: false
-          parameters: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
+          parameters-file: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
 
       - name: Logout from azure
         if: ${{failure() || success()}}

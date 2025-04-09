@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.62.3](https://github.com/Altinn/dialogporten/compare/v1.62.2...v1.62.3) (2025-04-09)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dotnet monorepo ([#2179](https://github.com/Altinn/dialogporten/issues/2179)) ([b76fcb3](https://github.com/Altinn/dialogporten/commit/b76fcb3c9ebf96f8e5c59a9267ad0361f90bd796))
+
 ## [1.62.2](https://github.com/Altinn/dialogporten/compare/v1.62.1...v1.62.2) (2025-04-09)
 
 

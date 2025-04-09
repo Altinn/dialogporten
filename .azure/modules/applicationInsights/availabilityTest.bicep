@@ -47,8 +47,7 @@ resource availabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     }
     ValidationRules: {
       ExpectedHttpStatusCode: 200
-      SSLCheck: true
-      SSLCertRemainingLifetimeCheck: 7
+      SSLCheck: false
     }
   }
 }

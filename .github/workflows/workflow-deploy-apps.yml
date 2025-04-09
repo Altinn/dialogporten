@@ -96,6 +96,7 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
         with:
           scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           type: deployment
           operation: whatIf
           name: "web-api-migration-job-${{ inputs.version }}"
@@ -116,6 +117,7 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
         with:
           scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           type: deployment
           operation: create
           name: "web-api-migration-job-${{ inputs.version }}"
@@ -194,6 +196,7 @@ jobs:
           AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
         with:
           scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           type: deployment
           operation: whatIf
           name: "${{ matrix.name }}-${{ inputs.version }}"
@@ -218,6 +221,7 @@ jobs:
           AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
         with:
           scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           type: deployment
           operation: create
           name: "${{ matrix.name }}-${{ inputs.version }}"
@@ -290,6 +294,7 @@ jobs:
           AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
         with:
           scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           type: deployment
           operation: whatIf
           name: "${{ matrix.name }}-${{ inputs.version }}"
@@ -311,6 +316,7 @@ jobs:
           AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
         with:
           scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           type: deployment
           operation: create
           name: "${{ matrix.name }}-${{ inputs.version }}"

@@ -57,7 +57,6 @@ jobs:
       AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
     with:
       environment: ${{ inputs.environment }}
-      region: norwayeast
       version: ${{ inputs.version }}
       runMigration: ${{ inputs.runMigration }}
       ref: "refs/tags/v${{ inputs.version }}"

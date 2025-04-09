@@ -64,12 +64,11 @@ jobs:
       AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
     with:
       environment: prod
-      region: norwayeast
       version: ${{ github.event.client_payload.version }}
       dryRun: true
       runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       ref: "refs/tags/v${{ github.event.client_payload.version }}"
-      
+
   send-slack-message-on-failure:
     name: Send Slack message on failure
     needs: [dry-run-deploy-infra, dry-run-deploy-apps]

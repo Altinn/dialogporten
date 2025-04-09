@@ -26,9 +26,6 @@ on:
         required: true
 
     inputs:
-      region:
-        required: true
-        type: string
       environment:
         required: true
         type: string
@@ -102,7 +99,6 @@ jobs:
           name: "web-api-migration-job-${{ inputs.version }}"
           template-file: ./.azure/applications/web-api-migration-job/main.bicep
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          location: ${{ inputs.region }}
           parameters-file: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Deploy migration job (${{ inputs.environment }})
@@ -123,7 +119,6 @@ jobs:
           name: "web-api-migration-job-${{ inputs.version }}"
           template-file: ./.azure/applications/web-api-migration-job/main.bicep
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          location: ${{ inputs.region }}
           parameters-file: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Start migration job
@@ -202,7 +197,6 @@ jobs:
           name: "${{ matrix.name }}-${{ inputs.version }}"
           template-file: ./.azure/applications/${{ matrix.name }}/main.bicep
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          location: ${{ inputs.region }}
           parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy app ${{ matrix.name }}(${{ inputs.environment }})
@@ -227,7 +221,6 @@ jobs:
           name: "${{ matrix.name }}-${{ inputs.version }}"
           template-file: ./.azure/applications/${{ matrix.name }}/main.bicep
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          location: ${{ inputs.region }}
           parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Verify deployment (${{ matrix.name }})
@@ -300,7 +293,6 @@ jobs:
           name: "${{ matrix.name }}-${{ inputs.version }}"
           template-file: ./.azure/applications/${{ matrix.name }}/main.bicep
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          location: ${{ inputs.region }}
           parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy job ${{ matrix.name }}(${{ inputs.environment }})
@@ -322,7 +314,6 @@ jobs:
           name: "${{ matrix.name }}-${{ inputs.version }}"
           template-file: ./.azure/applications/${{ matrix.name }}/main.bicep
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          location: ${{ inputs.region }}
           parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Logout from azure

@@ -96,14 +96,13 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
         with:
           scope: resourcegroup
-          template: ./.azure/applications/web-api-migration-job/main.bicep
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          deploymentMode: Incremental
-          deploymentName: "web-api-migration-job-${{ inputs.version }}"
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          additionalArguments: '--what-if'
-          parameters: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
+          type: whatIf
+          operation: create
+          name: "web-api-migration-job-${{ inputs.version }}"
+          template-file: ./.azure/applications/web-api-migration-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          location: ${{ inputs.region }}
+          parameters-file: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Deploy migration job (${{ inputs.environment }})
         uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
@@ -117,13 +116,13 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
         with:
           scope: resourcegroup
-          template: ./.azure/applications/web-api-migration-job/main.bicep
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          deploymentMode: Incremental
-          deploymentName: "web-api-migration-job-${{ inputs.version }}"
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          parameters: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
+          type: deployment
+          operation: create
+          name: "web-api-migration-job-${{ inputs.version }}"
+          template-file: ./.azure/applications/web-api-migration-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          location: ${{ inputs.region }}
+          parameters-file: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Start migration job
         uses: azure/CLI@089eac9d8cc39f5d003e94f8b65efc51076c9cbd # v2.1.0

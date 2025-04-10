@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
@@ -110,8 +111,8 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Filter by system label")]
     public List<SystemLabel>? SystemLabel { get; init; }
 
-    [GraphQLDescription("Whether to include API-only dialogs in the results. Defaults to true.")]
-    public bool? IncludeApiOnly { get; init; }
+    [GraphQLDescription("If set to 'either', the result will include both API and non-API dialogs. If set to 'false', the result will only include non-API dialogs. If set to 'true', the result will only include API dialogs")]
+    public TrinaryFilter? ApiDialog { get; init; } = TrinaryFilter.Either;
 
     [GraphQLDescription("Only return dialogs created after this date")]
     public DateTimeOffset? CreatedAfter { get; init; }

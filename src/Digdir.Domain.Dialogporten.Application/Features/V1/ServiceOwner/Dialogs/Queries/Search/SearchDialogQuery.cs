@@ -52,7 +52,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public List<DialogStatus.Values>? Status { get; init; }
 
-    private TrinaryFilter? _deleted = TrinaryFilter.False;
+    private TrinaryFilter _deleted = TrinaryFilter.False;
     /// <summary>
     /// If set to 'either', the result will include both deleted and non-deleted dialogs. If set to 'false', the result will only include non-deleted dialogs. If set to 'true', the result will only include deleted dialogs
     /// </summary>

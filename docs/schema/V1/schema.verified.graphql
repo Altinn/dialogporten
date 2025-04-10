@@ -125,7 +125,7 @@ type Dialog {
   systemLabel: SystemLabel!
   status: DialogStatus!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
-  ApiDialog: Boolean!
+  apiDialog: Boolean!
   content: Content!
   attachments: [Attachment!]!
   guiActions: [GuiAction!]!
@@ -213,7 +213,7 @@ type SearchDialog {
   status: DialogStatus!
   systemLabel: SystemLabel!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
-  ApiDialog: Boolean!
+  apiDialog: Boolean!
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!
@@ -306,8 +306,8 @@ input SearchDialogInput {
   status: [DialogStatus!]
   "Filter by system label"
   systemLabel: [SystemLabel!]
-  "Whether to include API-only dialogs in the results. Defaults to true."
-  includeApiOnly: Boolean
+  "If set to 'either', the result will include both API and non-API dialogs. If set to 'false', the result will only include non-API dialogs. If set to 'true', the result will only include API dialogs"
+  apiDialog: TrinaryFilter
   "Only return dialogs created after this date"
   createdAfter: DateTime
   "Only return dialogs created before this date"
@@ -467,6 +467,12 @@ enum TransmissionType {
   SUBMISSION
   "A submission correcting\/overriding some previously submitted information"
   CORRECTION
+}
+
+enum TrinaryFilter {
+  EITHER
+  TRUE
+  FALSE
 }
 
 "The authorize directive."

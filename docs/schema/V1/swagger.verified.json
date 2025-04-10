@@ -331,18 +331,18 @@
         },
         "type": "object"
       },
-      "V1Common_DeletedFilter": {
+      "V1Common_TrinaryFilter": {
         "description": "",
         "enum": [
-          "Exclude",
-          "Include",
-          "Only"
+          "Either",
+          "True",
+          "False"
         ],
         "type": "string",
         "x-enumNames": [
-          "Exclude",
-          "Include",
-          "Only"
+          "Either",
+          "True",
+          "False"
         ]
       },
       "V1CommonContent_ContentValue": {
@@ -5138,12 +5138,16 @@
             "style": "form"
           },
           {
-            "description": "Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.",
+            "description": "If set to \u0027include\u0027, the result will include both API and non-API dialogs. If set to \u0027exclude\u0027, the result will only include non-API dialogs. If set to \u0027only\u0027, the result will only include API dialogs",
             "in": "query",
-            "name": "includeApiOnly",
+            "name": "apiOnly",
             "schema": {
-              "nullable": true,
-              "type": "boolean"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/V1Common_TrinaryFilter"
+                }
+              ],
+              "nullable": true
             }
           },
           {
@@ -5939,7 +5943,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/components/schemas/V1Common_DeletedFilter"
+                  "$ref": "#/components/schemas/V1Common_TrinaryFilter"
                 }
               ],
               "nullable": true
@@ -6049,12 +6053,16 @@
             "style": "form"
           },
           {
-            "description": "Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.",
+            "description": "If set to \u0027include\u0027, the result will include both API and non-API dialogs. If set to \u0027exclude\u0027, the result will only include non-API dialogs. If set to \u0027only\u0027, the result will only include API dialogs",
             "in": "query",
-            "name": "includeApiOnly",
+            "name": "apiOnly",
             "schema": {
-              "nullable": true,
-              "type": "boolean"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/V1Common_TrinaryFilter"
+                }
+              ],
+              "nullable": true
             }
           },
           {

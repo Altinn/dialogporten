@@ -822,11 +822,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("character varying(36)");
 
-                    b.Property<bool>("IsApiOnly")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
                     b.Property<string>("Org")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -889,8 +884,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("ExtendedStatus");
 
                     b.HasIndex("ExternalReference");
-
-                    b.HasIndex("IsApiOnly");
 
                     b.HasIndex("Org");
 

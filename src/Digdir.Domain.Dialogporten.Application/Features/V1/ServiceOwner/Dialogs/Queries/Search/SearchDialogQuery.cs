@@ -52,14 +52,14 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public List<DialogStatus.Values>? Status { get; init; }
 
-    private DeletedFilter? _deleted = DeletedFilter.Exclude;
+    private TrinaryFilter? _deleted = TrinaryFilter.False;
     /// <summary>
     /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
     /// </summary>
-    public DeletedFilter? Deleted
+    public TrinaryFilter? Deleted
     {
         get => _deleted;
-        set => _deleted = value ?? DeletedFilter.Exclude;
+        set => _deleted = value ?? TrinaryFilter.False;
     }
 
     /// <summary>
@@ -111,10 +111,15 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public List<SystemLabel.Values>? SystemLabel { get; set; }
 
+    private TrinaryFilter? _apiOnly = TrinaryFilter.Either;
     /// <summary>
-    /// Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.
+    /// If set to 'include', the result will include both API and non-API dialogs. If set to 'exclude', the result will only include non-API dialogs. If set to 'only', the result will only include API dialogs
     /// </summary>
-    public bool? IncludeApiOnly { get; init; } = true;
+    public TrinaryFilter? ApiOnly
+    {
+        get => _apiOnly;
+        set => _apiOnly = value ?? TrinaryFilter.Either;
+    }
 
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
@@ -207,9 +212,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
                 x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
             )
-            .WhereIf(request.Deleted == DeletedFilter.Exclude, x => !x.Deleted)
-            .WhereIf(request.Deleted == DeletedFilter.Only, x => x.Deleted)
-            .WhereIf(request.IncludeApiOnly == false, x => !x.IsApiOnly)
+            .WhereIf(request.Deleted != TrinaryFilter.Either,
+                x => x.Deleted == (request.Deleted == TrinaryFilter.True))
+            .WhereIf(request.ApiOnly != TrinaryFilter.Either,
+                x => x.ApiDialog == (request.ApiOnly == TrinaryFilter.True))
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)

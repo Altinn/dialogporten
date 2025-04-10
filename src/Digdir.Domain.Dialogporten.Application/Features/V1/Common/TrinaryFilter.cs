@@ -1,8 +1,8 @@
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 
-public enum DeletedFilter
+public enum TrinaryFilter
 {
-    Exclude = 1,
-    Include = 2,
-    Only = 3
+    Either = 1,
+    True = 2,
+    False = 3,
 }

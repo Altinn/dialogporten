@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -91,10 +92,15 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public List<SystemLabel.Values>? SystemLabel { get; set; }
 
+    private TrinaryFilter? _apiOnly = TrinaryFilter.Either;
     /// <summary>
-    /// Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.
+    /// If set to 'include', the result will include both API and non-API dialogs. If set to 'exclude', the result will only include non-API dialogs. If set to 'only', the result will only include API dialogs
     /// </summary>
-    public bool? IncludeApiOnly { get; init; } = true;
+    public TrinaryFilter? ApiOnly
+    {
+        get => _apiOnly;
+        set => _apiOnly = value ?? TrinaryFilter.Either;
+    }
 
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
@@ -183,7 +189,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
                 x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
             )
-            .WhereIf(request.IncludeApiOnly == false, x => !x.IsApiOnly)
+            .WhereIf(request.ApiOnly != TrinaryFilter.Either,
+                x => x.ApiDialog == (request.ApiOnly == TrinaryFilter.True))
             .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
             .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)

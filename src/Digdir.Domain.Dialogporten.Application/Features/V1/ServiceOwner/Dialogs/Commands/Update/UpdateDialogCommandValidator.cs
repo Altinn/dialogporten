@@ -65,6 +65,8 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.Transmissions)
             .UniqueBy(x => x.Id);
 
+        // When IsApiOnly is set to true, we only validate content if it's provided
+        // on both the dialog and the transmission level.
         When(x => x.IsApiOnly, () =>
         {
             RuleFor(x => x.Content)

@@ -56,7 +56,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
         /// </summary>
         [Query] 
-        public V1Common_DeletedFilter? Deleted { get; set; }
+        public V1Common_TrinaryFilter? Deleted { get; set; }
 
         /// <summary>
         /// Only return dialogs created after this date
@@ -119,10 +119,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public IEnumerable<DialogEndUserContextsEntities_SystemLabel> SystemLabel { get; set; }
 
         /// <summary>
-        /// Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.
+        /// If set to 'include', the result will include both API and non-API dialogs. If set to 'exclude', the result will only include non-API dialogs. If set to 'only', the result will only include API dialogs
         /// </summary>
         [Query] 
-        public bool? IncludeApiOnly { get; set; }
+        public V1Common_TrinaryFilter? ApiOnly { get; set; }
 
         /// <summary>
         /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
@@ -2923,17 +2923,17 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum V1Common_DeletedFilter
+    public enum V1Common_TrinaryFilter
     {
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Exclude")]
-        Exclude = 0,
+        [System.Runtime.Serialization.EnumMember(Value = @"Either")]
+        Either = 0,
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Include")]
-        Include = 1,
+        [System.Runtime.Serialization.EnumMember(Value = @"True")]
+        True = 1,
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Only")]
-        Only = 2,
+        [System.Runtime.Serialization.EnumMember(Value = @"False")]
+        False = 2,
 
     }
 

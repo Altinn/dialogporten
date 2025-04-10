@@ -8,7 +8,7 @@ import {
     purgeSO,
     uuidv4,
     setTitle,
-    setIsApiOnly,
+    setApiDialog,
     customConsole as console
 } from '../../common/testimports.js'
 import { extend } from '../../common/extend.js';
@@ -20,7 +20,7 @@ export default function () {
 
     describe('Create a regular dialog for update testing', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, false); // Explicitly set to false for clarity
+        setApiDialog(dialog, false); // Explicitly set to false for clarity
 
         let uniqueTitle = "Update test dialog " + uuidv4().substring(0, 8);
         setTitle(dialog, uniqueTitle);
@@ -41,7 +41,7 @@ export default function () {
 
         let dialog = r.json();
 
-        dialog.isApiOnly = true;
+        dialog.ApiDialog = true;
         dialog.content = null;
         dialog.activities = []; // don't add activities
 
@@ -69,7 +69,7 @@ export default function () {
 
     describe('Create an API-only dialog for update testing', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, true);
+        setApiDialog(dialog, true);
 
         // Remove content since it's API-only
         delete dialog.content;
@@ -91,7 +91,7 @@ export default function () {
 
         let dialog = r.json();
 
-        dialog.isApiOnly = false;
+        dialog.ApiDialog = false;
         dialog.activities = []; // don't add activities
         dialog.transmissions = []; // don't add transmissions
 
@@ -122,7 +122,7 @@ export default function () {
         const futureDateISOString = futureDate.toISOString();
 
         // Create a simplified version of the dialog for update
-        dialog.isApiOnly = false;
+        dialog.ApiDialog = false;
             dialog.content = {
                 Title: {
                     value: [{ languageCode: "nb", value: "Updated title" }]

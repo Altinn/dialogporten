@@ -94,7 +94,7 @@ public sealed class CreateDialogDto
     /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
     /// When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
     /// </summary>
-    public bool IsApiOnly { get; set; }
+    public bool ApiDialog { get; set; }
 
     /// <summary>
     /// If set, will override the date and time when the dialog is set as created.

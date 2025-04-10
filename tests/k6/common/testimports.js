@@ -33,5 +33,5 @@ export {
     setActivities,
     addActivity,
     setSystemLabel,
-    setIsApiOnly
+    setApiDialog
 } from './dialog.js';

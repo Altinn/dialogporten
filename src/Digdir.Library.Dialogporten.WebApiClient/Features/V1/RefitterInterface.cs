@@ -1649,8 +1649,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>When true, human-readable content like title and summary are not required.
         /// </summary>
 
-        [JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
+        [JsonPropertyName("ApiDialog")]
+        public bool ApiDialog { get; set; }
 
         /// <summary>
         /// The dialog unstructured text content.
@@ -2480,8 +2480,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
 
-        [JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
+        [JsonPropertyName("ApiDialog")]
+        public bool ApiDialog { get; set; }
 
         /// <summary>
         /// The latest entry in the dialog's activity log.
@@ -2823,8 +2823,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
 
-        [JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
+        [JsonPropertyName("ApiDialog")]
+        public bool ApiDialog { get; set; }
 
         /// <summary>
         /// Current display state.
@@ -3641,8 +3641,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
         /// </summary>
 
-        [JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
+        [JsonPropertyName("ApiDialog")]
+        public bool ApiDialog { get; set; }
 
         /// <summary>
         /// If set, will override the date and time when the dialog is set as created.

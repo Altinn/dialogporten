@@ -2,6 +2,7 @@ using AppAny.HotChocolate.FluentValidation;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
@@ -48,10 +49,10 @@ public partial class Queries
         SearchDialogInput input,
         CancellationToken cancellationToken)
     {
-        var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
+        SearchDialogQuery? searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
 
         if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(
-                input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)
+                input.ContinuationToken, out ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>? continuationTokenSet) && input.ContinuationToken != null)
         {
             return new SearchDialogsPayload
             {
@@ -61,7 +62,7 @@ public partial class Queries
 
         searchDialogQuery.ContinuationToken = continuationTokenSet;
 
-        if (!input.OrderBy.TryToOrderSet(out var orderSet) && input.OrderBy != null)
+        if (!input.OrderBy.TryToOrderSet(out OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>? orderSet) && input.OrderBy != null)
         {
             return new SearchDialogsPayload
             {
@@ -71,12 +72,12 @@ public partial class Queries
 
         searchDialogQuery.OrderBy = orderSet;
 
-        var result = await mediator.Send(searchDialogQuery, cancellationToken);
+        SearchDialogResult result = await mediator.Send(searchDialogQuery, cancellationToken);
 
         return result.Match(
             paginatedList =>
             {
-                var mappedResult = mapper.Map<SearchDialogsPayload>(paginatedList);
+                SearchDialogsPayload? mappedResult = mapper.Map<SearchDialogsPayload>(paginatedList);
                 mappedResult.OrderBy = paginatedList.OrderBy.AsSpan().ToSearchDialogSortTypeList();
                 return mappedResult;
             },

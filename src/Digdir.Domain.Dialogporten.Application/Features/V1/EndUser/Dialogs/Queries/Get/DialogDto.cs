@@ -120,7 +120,7 @@ public sealed class DialogDto
     /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
     /// </summary>
-    public bool IsApiOnly { get; set; }
+    public bool ApiDialog { get; set; }
 
     /// <summary>
     /// Current display state.

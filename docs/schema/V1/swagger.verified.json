@@ -680,7 +680,7 @@
             "format": "guid",
             "type": "string"
           },
-          "isApiOnly": {
+          "ApiDialog": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
             "type": "boolean"
           },
@@ -1315,7 +1315,7 @@
             "format": "guid",
             "type": "string"
           },
-          "isApiOnly": {
+          "ApiDialog": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
             "type": "boolean"
           },
@@ -2428,7 +2428,7 @@
             "nullable": true,
             "type": "string"
           },
-          "isApiOnly": {
+          "ApiDialog": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.\nWhen true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.",
             "type": "boolean"
           },
@@ -3095,7 +3095,7 @@
             "nullable": true,
             "type": "array"
           },
-          "isApiOnly": {
+          "ApiDialog": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
             "type": "boolean"
           },
@@ -3597,7 +3597,7 @@
             "nullable": true,
             "type": "string"
           },
-          "isApiOnly": {
+          "ApiDialog": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
             "type": "boolean"
           },
@@ -4283,7 +4283,7 @@
             "format": "guid",
             "type": "string"
           },
-          "isApiOnly": {
+          "ApiDialog": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
             "type": "boolean"
           },

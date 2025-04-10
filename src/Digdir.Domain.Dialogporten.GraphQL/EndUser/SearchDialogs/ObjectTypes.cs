@@ -71,7 +71,7 @@ public sealed class SearchDialog
     public SystemLabel SystemLabel { get; set; }
 
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
-    public bool IsApiOnly { get; set; }
+    public bool ApiDialog { get; set; }
 
     public Activity? LatestActivity { get; set; }
 

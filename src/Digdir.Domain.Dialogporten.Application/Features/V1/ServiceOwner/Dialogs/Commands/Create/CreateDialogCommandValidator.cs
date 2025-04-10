@@ -131,9 +131,9 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
                 dependentKeySelector: transmission => transmission.RelatedTransmissionId,
                 principalKeySelector: transmission => transmission.Id);
 
-        // When IsApiOnly is set to true, we only validate content if it's provided
+        // When ApiDialog is set to true, we only validate content if it's provided
         // on both the dialog and the transmission level.
-        When(x => x.IsApiOnly, () =>
+        When(x => x.ApiDialog, () =>
             {
                 RuleFor(x => x.Content)
                     .SetValidator(contentValidator)

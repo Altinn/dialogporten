@@ -125,7 +125,7 @@ type Dialog {
   systemLabel: SystemLabel!
   status: DialogStatus!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
-  isApiOnly: Boolean!
+  ApiDialog: Boolean!
   content: Content!
   attachments: [Attachment!]!
   guiActions: [GuiAction!]!
@@ -213,7 +213,7 @@ type SearchDialog {
   status: DialogStatus!
   systemLabel: SystemLabel!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
-  isApiOnly: Boolean!
+  ApiDialog: Boolean!
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!

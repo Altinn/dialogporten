@@ -7,7 +7,7 @@ import {
     purgeSO,
     uuidv4,
     setTitle,
-    setIsApiOnly,
+    setApiDialog,
     customConsole as console
 } from '../../common/testimports.js'
 
@@ -18,7 +18,7 @@ export default function () {
 
     describe('Create API-only dialog without content', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, true);
+        setApiDialog(dialog, true);
 
         // Remove content test validation rule relaxation for API-only dialogs
         delete dialog.content;
@@ -33,7 +33,7 @@ export default function () {
 
     describe('Create API-only dialog with content', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, true);
+        setApiDialog(dialog, true);
 
         let r = postSO('dialogs', dialog);
         expectStatusFor(r).to.equal(201);
@@ -44,7 +44,7 @@ export default function () {
 
     describe('Create API-only dialog with only transmission content', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, true);
+        setApiDialog(dialog, true);
 
         delete dialog.content;
 
@@ -57,7 +57,7 @@ export default function () {
 
     describe('Create API-only dialog with only dialog content', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, true);
+        setApiDialog(dialog, true);
 
         dialog.transmissions.forEach(t => delete t.content);
 
@@ -106,9 +106,9 @@ export default function () {
         expect(apiOnlyDialogFound, 'API-only dialog not found').to.be.false;
     });
 
-    describe('Create regular dialog with IsApiOnly=false', () => {
+    describe('Create regular dialog with ApiDialog=false', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, false);
+        setApiDialog(dialog, false);
 
         let uniqueTitle = "Regular dialog test " + uuidv4().substring(0, 8);
         setTitle(dialog, uniqueTitle);
@@ -122,7 +122,7 @@ export default function () {
 
     describe('Create regular dialog with empty title should fail', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, false);
+        setApiDialog(dialog, false);
 
         // Remove title should fail for regular dialogs
         delete dialog.content.Title;
@@ -137,7 +137,7 @@ export default function () {
 
     describe('Create API-only dialog with empty (non-null) content should fail', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, true);
+        setApiDialog(dialog, true);
 
         // If content is supplied at all, it must pass regular validation
         delete dialog.content.Title;
@@ -152,7 +152,7 @@ export default function () {
 
     describe('Create API-only dialog with empty (non-null) transmission content should fail', () => {
         let dialog = dialogToInsert();
-        setIsApiOnly(dialog, true);
+        setApiDialog(dialog, true);
 
         // If content is supplied at all, it must pass regular validation
         delete dialog.content;

@@ -125,7 +125,7 @@ public class DialogDtoBase
     /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
     /// </summary>
-    public bool IsApiOnly { get; set; }
+    public bool ApiDialog { get; set; }
 
     /// <summary>
     /// The latest entry in the dialog's activity log.

@@ -49,10 +49,10 @@ public partial class Queries
         SearchDialogInput input,
         CancellationToken cancellationToken)
     {
-        SearchDialogQuery? searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
+        var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
 
         if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(
-                input.ContinuationToken, out ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>? continuationTokenSet) && input.ContinuationToken != null)
+                input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)
         {
             return new SearchDialogsPayload
             {
@@ -62,7 +62,7 @@ public partial class Queries
 
         searchDialogQuery.ContinuationToken = continuationTokenSet;
 
-        if (!input.OrderBy.TryToOrderSet(out OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>? orderSet) && input.OrderBy != null)
+        if (!input.OrderBy.TryToOrderSet(out var orderSet) && input.OrderBy != null)
         {
             return new SearchDialogsPayload
             {
@@ -72,12 +72,12 @@ public partial class Queries
 
         searchDialogQuery.OrderBy = orderSet;
 
-        SearchDialogResult result = await mediator.Send(searchDialogQuery, cancellationToken);
+        var result = await mediator.Send(searchDialogQuery, cancellationToken);
 
         return result.Match(
             paginatedList =>
             {
-                SearchDialogsPayload? mappedResult = mapper.Map<SearchDialogsPayload>(paginatedList);
+                var mappedResult = mapper.Map<SearchDialogsPayload>(paginatedList);
                 mappedResult.OrderBy = paginatedList.OrderBy.AsSpan().ToSearchDialogSortTypeList();
                 return mappedResult;
             },

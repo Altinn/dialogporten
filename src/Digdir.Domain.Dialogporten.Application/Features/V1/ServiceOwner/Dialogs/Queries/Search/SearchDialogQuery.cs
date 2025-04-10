@@ -54,7 +54,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
 
     private TrinaryFilter? _deleted = TrinaryFilter.False;
     /// <summary>
-    /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
+    /// If set to 'either', the result will include both deleted and non-deleted dialogs. If set to 'false', the result will only include non-deleted dialogs. If set to 'true', the result will only include deleted dialogs
     /// </summary>
     public TrinaryFilter? Deleted
     {

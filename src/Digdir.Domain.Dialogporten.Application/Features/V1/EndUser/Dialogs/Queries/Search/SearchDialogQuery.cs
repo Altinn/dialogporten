@@ -94,7 +94,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
 
     private TrinaryFilter? _apiOnly = TrinaryFilter.Either;
     /// <summary>
-    /// If set to 'include', the result will include both API and non-API dialogs. If set to 'exclude', the result will only include non-API dialogs. If set to 'only', the result will only include API dialogs
+    /// If set to 'either', the result will include both API and non-API dialogs. If set to 'false', the result will only include non-API dialogs. If set to 'true', the result will only include API dialogs
     /// </summary>
     public TrinaryFilter? ApiOnly
     {

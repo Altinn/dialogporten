@@ -4,12 +4,20 @@ using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Com
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
-public sealed class DateFilterTestData
+public sealed class DynamicDateFilterTestData : TheoryData<int?, int?, int, int[]>
 {
-    public int? AfterYear { get; init; }
-    public int? BeforeYear { get; init; }
-    public int ExpectedCount { get; init; }
-    public required int[] ExpectedYears { get; init; }
+    // The numbers added to "currentYear" here represent future years relative to the current year.
+    // This is done to create test data for dialogs that are due or visible "soon" (1 to 4 years ahead).
+    // This approach ensures that the tests remain valid and relevant regardless of the current date.
+    public DynamicDateFilterTestData()
+    {
+        var currentYear = DateTimeOffset.UtcNow.Year;
+
+        // AfterYear, BeforeYear, ExpectedCount, ExpectedYears
+        Add(currentYear + 3, null, 2, [currentYear + 3, currentYear + 4]);
+        Add(null, currentYear + 2, 2, [currentYear + 1, currentYear + 2]);
+        Add(currentYear + 1, currentYear + 2, 2, [currentYear + 1, currentYear + 2]);
+    }
 }
 
 internal static class Common

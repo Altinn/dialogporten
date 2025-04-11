@@ -19,7 +19,7 @@ internal sealed class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavi
     {
         if (!_validators.Any())
         {
-            return await next();
+            return await next(cancellationToken);
         }
 
         var context = new ValidationContext<TRequest>(request);
@@ -31,7 +31,7 @@ internal sealed class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavi
 
         if (failures.Count == 0)
         {
-            return await next();
+            return await next(cancellationToken);
         }
 
         if (OneOfExtensions.TryConvertToOneOf<TResponse>(new ValidationError(failures), out var result))

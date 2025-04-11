@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.62.3](https://github.com/Altinn/dialogporten/compare/v1.62.2...v1.62.3) (2025-04-09)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dotnet monorepo ([#2179](https://github.com/Altinn/dialogporten/issues/2179)) ([b76fcb3](https://github.com/Altinn/dialogporten/commit/b76fcb3c9ebf96f8e5c59a9267ad0361f90bd796))
+
+## [1.62.2](https://github.com/Altinn/dialogporten/compare/v1.62.1...v1.62.2) (2025-04-09)
+
+
+### Bug Fixes
+
+* **infra:** remove ssl check in availability tests ([#2182](https://github.com/Altinn/dialogporten/issues/2182)) ([12f2392](https://github.com/Altinn/dialogporten/commit/12f23924b4469d4c235a40f46bb421eb3497a863))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump vite from 6.2.4 to 6.2.5 in /docs/schema/V1 ([#2168](https://github.com/Altinn/dialogporten/issues/2168)) ([168141a](https://github.com/Altinn/dialogporten/commit/168141ad554420ad575710814d2944175fcaa91c))
+* **deps:** update azure/login action to v2.3.0 ([#2180](https://github.com/Altinn/dialogporten/issues/2180)) ([4cbffbf](https://github.com/Altinn/dialogporten/commit/4cbffbfe2292371b07983addb2e6593401d364b6))
+* **deps:** update dependency mediatr to 12.5.0 ([#2181](https://github.com/Altinn/dialogporten/issues/2181)) ([ec249cb](https://github.com/Altinn/dialogporten/commit/ec249cb989895d0ace0d490d4ab35a284c5ad843))
+* **deps:** update dependency refitter.sourcegenerator to 1.5.3 ([#2178](https://github.com/Altinn/dialogporten/issues/2178)) ([1cbabd3](https://github.com/Altinn/dialogporten/commit/1cbabd335332b8ddfec1bf351f1940ff6f74da74))
+* **deps:** update hotchocolate monorepo to 15.1.3 ([#2169](https://github.com/Altinn/dialogporten/issues/2169)) ([2c6591b](https://github.com/Altinn/dialogporten/commit/2c6591b3567484fd6e1162b6d77fb059736cd62e))
+
+## [1.62.1](https://github.com/Altinn/dialogporten/compare/v1.62.0...v1.62.1) (2025-04-04)
+
+
+### Bug Fixes
+
+* **webapi:** Allow default(DateTimeOffset) for CreatedAt and UpdatedAt ([#2161](https://github.com/Altinn/dialogporten/issues/2161)) ([f5bf6f1](https://github.com/Altinn/dialogporten/commit/f5bf6f1ea27b6e9ffa0d4acb95dd1a89c5bb65d3))
+
+
+### Miscellaneous Chores
+
+* **ci:** Use step-security/harden-runner ([#2163](https://github.com/Altinn/dialogporten/issues/2163)) ([0678b74](https://github.com/Altinn/dialogporten/commit/0678b742ce02e17f13e2f08ebcad4dfc7ac4d9f4))
+
 ## [1.62.0](https://github.com/Altinn/dialogporten/compare/v1.61.1...v1.62.0) (2025-04-03)
 
 

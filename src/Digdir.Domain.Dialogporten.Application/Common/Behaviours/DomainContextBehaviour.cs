@@ -35,7 +35,7 @@ internal sealed class DomainContextBehaviour<TRequest, TResponse> : IPipelineBeh
 
         try
         {
-            response = await next();
+            response = await next(cancellationToken);
         }
         catch (DomainException ex)
         {

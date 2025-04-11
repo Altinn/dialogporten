@@ -25,15 +25,5 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm ci
+      run: ./gql-to-js.sh
       working-directory: ${{ inputs.working-directory }}
-
-    - name: Run tests
-      shell: bash
-      run: npm run test
-      working-directory: ${{ inputs.working-directory }}
-
-    - name: Run build
-      shell: bash
-      run: npm run build
-      working-directory: ${{ inputs.working-directory }} 

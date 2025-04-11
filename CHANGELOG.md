@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.62.4](https://github.com/Altinn/dialogporten/compare/v1.62.3...v1.62.4) (2025-04-11)
+
+
+### Miscellaneous Chores
+
+* **webapi:** Revert "trivial: Disable SwaggerUI in production ([#2183](https://github.com/Altinn/dialogporten/issues/2183))" ([#2191](https://github.com/Altinn/dialogporten/issues/2191)) ([4677f26](https://github.com/Altinn/dialogporten/commit/4677f26221c60797c8f2e68481e50d5577f61414))
+
 ## [1.62.3](https://github.com/Altinn/dialogporten/compare/v1.62.2...v1.62.3) (2025-04-09)
 
 

@@ -1,6 +1,10 @@
 import { customConsole as console } from './console.js';
 import { sentinelValue } from './config.js';
 
+export function setIsApiOnly(dialog, isApiOnly = true) {
+    dialog.isApiOnly = isApiOnly;
+}
+
 export function setTitle(dialog, title, language = "nb") {
     setContent(dialog, "Title", title, language);
 }

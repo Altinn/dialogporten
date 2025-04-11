@@ -40,5 +40,9 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.HasIndex(x => x.ExternalReference);
 
         builder.HasIndex(x => x.Process);
+
+        builder.HasIndex(x => x.IsApiOnly);
+        builder.Property(x => x.IsApiOnly)
+            .HasDefaultValue(false);
     }
 }

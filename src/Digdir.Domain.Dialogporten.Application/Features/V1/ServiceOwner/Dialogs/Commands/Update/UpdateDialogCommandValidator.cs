@@ -36,7 +36,7 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
-        IValidator<ContentDto> contentValidator)
+        IValidator<ContentDto?> contentValidator)
     {
         RuleFor(x => x.Progress)
             .InclusiveBetween(0, 100);
@@ -62,8 +62,31 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.Status)
             .IsInEnum();
 
-        RuleFor(x => x.Content)
-            .SetValidator(contentValidator);
+        RuleFor(x => x.Transmissions)
+            .UniqueBy(x => x.Id);
+
+        When(x => x.IsApiOnly, () =>
+        {
+            RuleFor(x => x.Content)
+                .SetValidator(contentValidator)
+                .When(x => x.Content is not null);
+
+            RuleForEach(x => x.Transmissions)
+                .SetValidator(transmissionValidator,
+                    UpdateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
+                    UpdateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
+        })
+        .Otherwise(() =>
+        {
+            RuleFor(x => x.Content)
+                .NotEmpty()
+                .SetValidator(contentValidator);
+
+            RuleForEach(x => x.Transmissions)
+                .SetValidator(transmissionValidator,
+                    UpdateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
+                    UpdateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
+        });
 
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
@@ -94,11 +117,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .UniqueBy(x => x.Id);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
-
-        RuleFor(x => x.Transmissions)
-            .UniqueBy(x => x.Id);
-        RuleForEach(x => x.Transmissions)
-            .SetValidator(transmissionValidator);
 
         RuleFor(x => x.Activities)
             .UniqueBy(x => x.Id);
@@ -195,9 +213,14 @@ internal sealed class UpdateDialogDialogTransmissionContentDtoValidator : Abstra
 
 internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValidator<TransmissionDto>
 {
+
+    public const string AllowEmptyContentRuleSet = "AllowEmptyContent";
+    public const string AlwaysValidateContentRuleSet = "AlwaysValidateContent";
+    public const string DefaultRuleSet = "Default";
+
     public UpdateDialogDialogTransmissionDtoValidator(
         IValidator<ActorDto> actorValidator,
-        IValidator<TransmissionContentDto> contentValidator,
+        IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator)
     {
         RuleFor(x => x.Id)
@@ -222,9 +245,20 @@ internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValid
             .MaximumLength(Constants.DefaultMaxStringLength);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
-        RuleFor(x => x.Content)
-            .NotEmpty()
-            .SetValidator(contentValidator);
+
+        RuleSet(AllowEmptyContentRuleSet, () =>
+        {
+            RuleFor(x => x.Content)
+                .SetValidator(contentValidator)
+                .When(x => x.Content is not null);
+        });
+
+        RuleSet(AlwaysValidateContentRuleSet, () =>
+        {
+            RuleFor(x => x.Content)
+                .NotEmpty()
+                .SetValidator(contentValidator);
+        });
     }
 }
 

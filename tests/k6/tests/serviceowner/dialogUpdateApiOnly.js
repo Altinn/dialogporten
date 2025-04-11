@@ -91,7 +91,7 @@ export default function () {
 
         let dialog = r.json();
 
-        dialog.ApiDialog = false;
+        setApiDialog(dialog, false);
         dialog.activities = []; // don't add activities
         dialog.transmissions = []; // don't add transmissions
 
@@ -99,6 +99,7 @@ export default function () {
         let updateResponse = putSO(`dialogs/${dialogId}`, dialog, {
             headers: { "If-Match": dialog.revision }
         });
+        // console.log('Update Response:', JSON.stringify(updateResponse.json(), null, 2));
         expectStatusFor(updateResponse).to.equal(400); // Bad Request due to validation
         expect(updateResponse, 'error response').to.have.validJsonBody();
 

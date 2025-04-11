@@ -111,14 +111,14 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public List<SystemLabel.Values>? SystemLabel { get; set; }
 
-    private TrinaryFilter? _apiOnly = TrinaryFilter.Either;
+    private TrinaryFilter? _apiDialog = TrinaryFilter.Either;
     /// <summary>
-    /// If set to 'include', the result will include both API and non-API dialogs. If set to 'exclude', the result will only include non-API dialogs. If set to 'only', the result will only include API dialogs
+    /// If set to 'either', the result will include both API and non-API dialogs. If set to 'false', the result will only include non-API dialogs. If set to 'true', the result will only include API dialogs
     /// </summary>
-    public TrinaryFilter? ApiOnly
+    public TrinaryFilter? ApiDialog
     {
-        get => _apiOnly;
-        set => _apiOnly = value ?? TrinaryFilter.Either;
+        get => _apiDialog;
+        set => _apiDialog = value ?? TrinaryFilter.Either;
     }
 
     /// <summary>
@@ -214,8 +214,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             )
             .WhereIf(request.Deleted != TrinaryFilter.Either,
                 x => x.Deleted == (request.Deleted == TrinaryFilter.True))
-            .WhereIf(request.ApiOnly != TrinaryFilter.Either,
-                x => x.ApiDialog == (request.ApiOnly == TrinaryFilter.True))
+            .WhereIf(request.ApiDialog != TrinaryFilter.Either,
+                x => x.ApiDialog == (request.ApiDialog == TrinaryFilter.True))
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)

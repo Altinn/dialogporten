@@ -615,6 +615,10 @@
             "nullable": true,
             "type": "array"
           },
+          "apiDialog": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
           "attachments": {
             "description": "The attachments associated with the dialog (on an aggregate level).",
             "items": {
@@ -679,10 +683,6 @@
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "type": "string"
-          },
-          "ApiDialog": {
-            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
-            "type": "boolean"
           },
           "org": {
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
@@ -1272,6 +1272,10 @@
       "V1EndUserDialogsQueriesSearch_Dialog": {
         "additionalProperties": false,
         "properties": {
+          "apiDialog": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
+            "type": "boolean"
+          },
           "content": {
             "description": "The content of the dialog in search results.",
             "oneOf": [
@@ -1314,10 +1318,6 @@
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "type": "string"
-          },
-          "ApiDialog": {
-            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
-            "type": "boolean"
           },
           "latestActivity": {
             "description": "The latest entry in the dialog\u0027s activity log.",
@@ -2360,6 +2360,10 @@
             "nullable": true,
             "type": "array"
           },
+          "apiDialog": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.\nWhen true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.",
+            "type": "boolean"
+          },
           "attachments": {
             "description": "The attachments associated with the dialog (on an aggregate level).",
             "items": {
@@ -2427,10 +2431,6 @@
             "description": "An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.",
             "nullable": true,
             "type": "string"
-          },
-          "ApiDialog": {
-            "description": "Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.\nWhen true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.",
-            "type": "boolean"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
@@ -3046,6 +3046,10 @@
             "nullable": true,
             "type": "array"
           },
+          "apiDialog": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
+            "type": "boolean"
+          },
           "attachments": {
             "description": "The attachments associated with the dialog (on an aggregate level).",
             "items": {
@@ -3094,10 +3098,6 @@
             },
             "nullable": true,
             "type": "array"
-          },
-          "ApiDialog": {
-            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
-            "type": "boolean"
           },
           "precedingProcess": {
             "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
@@ -3525,6 +3525,10 @@
             "nullable": true,
             "type": "array"
           },
+          "apiDialog": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
           "attachments": {
             "description": "The attachments associated with the dialog (on an aggregate level).",
             "items": {
@@ -3596,10 +3600,6 @@
             "description": "An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.\n            ",
             "nullable": true,
             "type": "string"
-          },
-          "ApiDialog": {
-            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
-            "type": "boolean"
           },
           "org": {
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
@@ -4233,6 +4233,10 @@
       "V1ServiceOwnerDialogsQueriesSearch_Dialog": {
         "additionalProperties": false,
         "properties": {
+          "apiDialog": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
           "content": {
             "description": "The content of the dialog in search results.",
             "nullable": true,
@@ -4282,10 +4286,6 @@
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "type": "string"
-          },
-          "ApiDialog": {
-            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
-            "type": "boolean"
           },
           "latestActivity": {
             "description": "The latest entry in the dialog\u0027s activity log.",
@@ -5138,9 +5138,9 @@
             "style": "form"
           },
           {
-            "description": "If set to \u0027include\u0027, the result will include both API and non-API dialogs. If set to \u0027exclude\u0027, the result will only include non-API dialogs. If set to \u0027only\u0027, the result will only include API dialogs",
+            "description": "If set to \u0027either\u0027, the result will include both API and non-API dialogs. If set to \u0027false\u0027, the result will only include non-API dialogs. If set to \u0027true\u0027, the result will only include API dialogs",
             "in": "query",
-            "name": "apiOnly",
+            "name": "apiDialog",
             "schema": {
               "allOf": [
                 {
@@ -5937,7 +5937,7 @@
             "style": "form"
           },
           {
-            "description": "If set to \u0027include\u0027, the result will include both deleted and non-deleted dialogs. If set to \u0027exclude\u0027, the result will only include non-deleted dialogs. If set to \u0027only\u0027, the result will only include deleted dialogs",
+            "description": "If set to \u0027either\u0027, the result will include both deleted and non-deleted dialogs. If set to \u0027false\u0027, the result will only include non-deleted dialogs. If set to \u0027true\u0027, the result will only include deleted dialogs",
             "in": "query",
             "name": "deleted",
             "schema": {
@@ -6055,7 +6055,7 @@
           {
             "description": "If set to \u0027include\u0027, the result will include both API and non-API dialogs. If set to \u0027exclude\u0027, the result will only include non-API dialogs. If set to \u0027only\u0027, the result will only include API dialogs",
             "in": "query",
-            "name": "apiOnly",
+            "name": "apiDialog",
             "schema": {
               "allOf": [
                 {

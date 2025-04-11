@@ -203,12 +203,8 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
         })
-        .UseAddSwaggerCorsHeader();
-
-    // Disable SwaggerUI in production
-    if (builder.Environment.EnvironmentName != "prod")
-    {
-        app.UseSwaggerGen(config: config =>
+        .UseAddSwaggerCorsHeader()
+        .UseSwaggerGen(config: config =>
         {
             config.PostProcess = (document, _) =>
             {
@@ -233,7 +229,6 @@ static void BuildAndRun(string[] args)
             var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
         });
-    }
 
     app.Run();
 }

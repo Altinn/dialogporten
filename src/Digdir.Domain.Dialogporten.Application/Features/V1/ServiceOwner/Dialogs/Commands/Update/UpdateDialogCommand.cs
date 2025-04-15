@@ -25,13 +25,12 @@ using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Co
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater, IRequireDataLoader
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
     public bool IsSilentUpdate { get; set; }
-    public Dictionary<string, object?> PreloadedData { get; } = [];
 }
 
 [GenerateOneOf]
@@ -48,6 +47,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private readonly IDomainContext _domainContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
+    private readonly IDataLoaderContext _dataLoaderContext;
 
     public UpdateDialogCommandHandler(
         IDialogDbContext db,
@@ -56,7 +56,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IUserResourceRegistry userResourceRegistry,
-        IServiceResourceAuthorizer serviceResourceAuthorizer)
+        IServiceResourceAuthorizer serviceResourceAuthorizer,
+        IDataLoaderContext dataLoaderContext)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -65,6 +66,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
+        _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
     }
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
@@ -74,7 +76,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden(Constants.SilentUpdateRequiresAdminScope);
         }
 
-        var dialog = UpdateDialogDataLoader.GetPreloadedData(request);
+        var dialog = UpdateDialogDataLoader.GetPreloadedData(_dataLoaderContext);
 
         if (dialog is null)
         {

@@ -23,6 +23,8 @@ internal static class DataLoaderExtensions
             services.AddTransient(loader.Service, loader.Implementation);
         }
 
+        services.AddScoped<IDataLoaderContext, DataLoaderContext>();
+
         return services;
     }
 }

@@ -23,7 +23,7 @@ internal sealed class DataLoaderBehaviour<TRequest, TResponse>
         // ConcurrentDictionary<string, object?>
         foreach (var loader in _loaders)
         {
-            request.PreloadedData[loader.GetType().Name] = await loader.Load(request, cancellationToken);
+            request.PreloadedData[loader.GetKey()] = await loader.Load(request, cancellationToken);
         }
 
         return await next(cancellationToken);

@@ -21,10 +21,6 @@ internal sealed class UpdateDialogDataLoader : TypedDataLoader<UpdateDialogComma
     public override async Task<DialogEntity?> Load(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-        if (resourceIds.Count == 0)
-        {
-            return null;
-        }
 
         var dialog = await _dialogDbContext.Dialogs
             .Include(x => x.Activities)

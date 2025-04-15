@@ -76,7 +76,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         var dialog = UpdateDialogDataLoader.GetPreloadedData(request);
 
-        if (dialog == null)
+        if (dialog is null)
         {
             return new EntityNotFound<DialogEntity>(request.Id);
         }

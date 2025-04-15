@@ -77,7 +77,8 @@ export function enduserSearch(enduser, token, traceCalls) {
         paramsWithToken.tags.enduser = enduser.ssn;
     }
     let defaultParty = "urn:altinn:person:identifier-no:" + enduser;
-    let defaultFilter = "?Party=" + defaultParty;
+    let search = "&Search=" + "perf-search-tag"
+    let defaultFilter = "?Party=" + defaultParty + search;
     describe('Perform enduser dialog list', () => {
         let r = getEU('dialogs' + defaultFilter, paramsWithToken);
         expectStatusFor(r).to.equal(200);

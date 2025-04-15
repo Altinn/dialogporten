@@ -46,13 +46,13 @@ TOKEN_GENERATOR_PASSWORD:<passwd>
 ```
     Replace `<username>` and `<passwd>`, same as for generating tokens above. 
 ##### IMPORTANT: Ensure this file is added to .gitignore to prevent accidental commits of sensitive information. Never commit actual credentials to version control.
-4. Run `act` using the command below. Replace `<vus>` and `<duration>` with the desired values:
+4. Run `act` using the command below. Replace `<path-to-testscript>`, `<vus>` and `<duration>` with the desired values:
 ```shell
 act workflow_dispatch -j k6-performance -s GITHUB_TOKEN=`gh auth token` \
 --container-architecture linux/amd64 --artifact-server-path $HOME/.act \ 
 --input vus=<vus> --input duration=<duration> \ 
---input testSuitePath=tests/k6/tests/graphql/performance/graphql-search.js
+--input testSuitePath=<path-to-testscript>
 ```
 
 ## Test Results
-Test results can be found in GitHub action run log, grafana and in App Insights.
+Test results can be found in GitHub action run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus)

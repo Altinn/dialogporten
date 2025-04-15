@@ -85,4 +85,4 @@ Replace `<(test|staging|yt01)>` with the appropriate environment where the test 
 This script will remove any dialogs created during the performance test, ensuring a clean state for future tests.
 
 ### Test Results
-The test results can be found in the GitHub Actions run log, grafana and in App Insights.
+The test results can be found in the GitHub Actions run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus)

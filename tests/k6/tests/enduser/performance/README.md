@@ -1,16 +1,12 @@
 # Enduser get dialogs
 
-This directory holds a performance test for all GET endpoints for `api/v1/enduser/dialogs`. The performance test is implemented in the `enduser-search.js` file. The purpose of this test is to measure the response time and performance of each endpoint when accessed sequentially for different end users. By running this test, you can identify any bottlenecks or performance issues in the API. This test can be executed from the command line or as part of a GitHub Actions workflow. For more information on how to run the test and view the results, refer to the sections below.
+This directory holds a performance test for all GET endpoints for `api/v1/enduser/dialogs`. The performance test are implemented in the `enduser-search.js`, `enduserRandomSearch.js`, `enduserSearchBreakpoint.js` and `enduserSearchWithThresholds.js` files. The purpose of these tests are to measure the response time and performance of each endpoint when accessed sequentially for different end users. By running this test, you can identify any bottlenecks or performance issues in the API. These tests can be executed from the command line or as part of a GitHub Actions workflow. For more information on how to run the test and view the results, refer to the sections below.
 
 ## Prerequisites
 - [K6 prerequisites](../../README.md#Prerequisites)
 
-## Test file
-The test file associated with this performance test is 
-- `enduser-search.js`
-
 ## Test description
-The test has a list of enduser (ssn), and the following endpoints are visited in
+The tests has a list of enduser (ssn), and the following endpoints are visited in
 sequence for each enduser:
 - api/v1/enduser/dialogs?Party=urn:altinn:person:identifier-no:`<ssn>`
 - api/v1/enduser/dialogs/`<dialogId>`
@@ -22,16 +18,27 @@ sequence for each enduser:
 - api/v1/enduser/dialogs/`<dialogId>`/transmissions/`<transmissionId>`
 - api/v1/enduser/dialogs/`<dialogId>`/labellog
 
+## Test file
+All the tests listed below performs the steps listed above: 
+- `enduser-search.js`
+>>A simple test that performs the listed operation without any variations in search parameters
+- `enduserRandomSearch.js`
+>>The GET dialogs call uses random list of available url parameters, with som evariations in values
+- `enduserSearchBreakpoint.js`
+>>The purpose of this test is to gradually increase the load until certain thresholds are reached, indicating that the system breakpoint is reached
+- `enduserSearchWithThreshold.js`
+>>Does the same as `enduser-search.js`, but with threshold-values for response times. Runs in the CI/CD workflow for yt01 
+
 ## Run test
 ### From cli
 1. Navigate to the following directory:
 ```shell
 cd tests/k6/tests/enduser/performance
 ```
-2. Run the test using the following command. Replace `<test|staging|yt01>`, `<vus>`, and `<duration>` with the desired values:
+2. Run the test using the following command. Replace `<test file>`, `<test|staging|yt01>`, `<vus>`, and `<duration>` with the desired values:
 ```shell
 TOKEN_GENERATOR_USERNAME=<username> TOKEN_GENERATOR_PASSWORD=<passwd> \
-k6 run enduser-search.js -e API_VERSION=v1 \
+k6 run <test file> -e API_VERSION=v1 \
 -e API_ENVIRONMENT=<test|staging|yt01> \
 --vus=<vus> --duration=<duration>
 ```
@@ -54,13 +61,13 @@ TOKEN_GENERATOR_PASSWORD:<passwd>
 ```
     Replace `<username>` and `<passwd>`, same as for generating tokens above. 
 ##### IMPORTANT: Ensure this file is added to .gitignore to prevent accidental commits of sensitive information. Never commit actual credentials to version control.
-4. Run `act` using the command below. Replace `<vus>` and `<duration>` with the desired values:
+4. Run `act` using the command below. Replace `<path-to-testscript>`, `<vus>` and `<duration>` with the desired values:
 ```shell
 act workflow_dispatch -j k6-performance -s GITHUB_TOKEN=`gh auth token` \
 --container-architecture linux/amd64 --artifact-server-path $HOME/.act \ 
 --input vus=<vus> --input duration=<duration> \ 
---input testSuitePath=tests/k6/tests/enduser/performance/enduser-search.js
+--input testSuitePath=<path-to-testscript>
 ```
 
 ## Test Results
-Test results can be found in GitHub action run log, grafana and in App Insights. 
+Test results can be found in GitHub action run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus) 

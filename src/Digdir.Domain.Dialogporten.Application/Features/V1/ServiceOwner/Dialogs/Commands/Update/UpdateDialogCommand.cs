@@ -19,18 +19,18 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using OneOf;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater, IRequireData
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
     public bool IsSilentUpdate { get; set; }
+    public Dictionary<string, object?> Data { get; set; } = [];
 }
 
 [GenerateOneOf]
@@ -73,30 +73,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden(Constants.SilentUpdateRequiresAdminScope);
         }
 
-        var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
+        var dialog = request.GetRequiredData<DialogEntity>(UpdateDialogDataLoader.Key);
 
-        var dialog = await _db.Dialogs
-            .Include(x => x.Activities)
-            .Include(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.SearchTags)
-            .Include(x => x.Attachments)
-                .ThenInclude(x => x.DisplayName!.Localizations)
-            .Include(x => x.Attachments)
-                .ThenInclude(x => x.Urls)
-            .Include(x => x.GuiActions)
-                .ThenInclude(x => x.Title!.Localizations)
-            .Include(x => x.GuiActions)
-                .ThenInclude(x => x.Prompt!.Localizations)
-            .Include(x => x.ApiActions)
-                .ThenInclude(x => x.Endpoints)
-            .Include(x => x.Transmissions)
-            .Include(x => x.DialogEndUserContext)
-            .IgnoreQueryFilters()
-            .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
-        if (dialog is null)
+        if (dialog == null)
         {
             return new EntityNotFound<DialogEntity>(request.Id);
         }

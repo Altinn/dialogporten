@@ -59,6 +59,8 @@ public static class ApplicationExtensions
             .AddTransient<IUserRegistry, UserRegistry>()
             .AddTransient<IUserParties, UserParties>()
             .AddTransient<IClock, Clock>()
+            .AddDataLoaders()
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DataLoaderBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>));

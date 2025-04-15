@@ -2,6 +2,7 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -24,13 +25,13 @@ using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Co
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater, IRequireData
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater, IRequireDataLoader
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
     public bool IsSilentUpdate { get; set; }
-    public Dictionary<string, object?> Data { get; set; } = [];
+    public Dictionary<string, object?> PreloadedData { get; } = [];
 }
 
 [GenerateOneOf]
@@ -73,7 +74,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden(Constants.SilentUpdateRequiresAdminScope);
         }
 
-        var dialog = request.GetRequiredData<DialogEntity>(UpdateDialogDataLoader.Key);
+        var dialog = UpdateDialogDataLoader.GetPreloadedData(request);
 
         if (dialog == null)
         {

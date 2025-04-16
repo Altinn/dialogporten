@@ -50,6 +50,7 @@ To run the performance test using GitHub Actions, follow these steps:
 3. Tag the performance test with a descriptive name.
 
 ### GitHub Action with act
+Running with act was mainly used for debugging github workflows without commiting and running from the github site. 
 To run the performance test locally using GitHub Actions and act, perform the following steps:
 1. [Install act](https://nektosact.com/installation/).
 2. Navigate to the root of the repository.
@@ -73,4 +74,5 @@ act workflow_dispatch \
 ```
 
 ## Test Results
-Test results can be found in GitHub action run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus) 
+The test results from tests run from Github actions can be found in GitHub action run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus).
+Otherwise, see the output from your CLI

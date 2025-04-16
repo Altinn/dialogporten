@@ -23,11 +23,6 @@ The test files associated with this performance test are:
 |serviceOwnerSearchWithThresholds.js|Does the same as `serviceowner-search.js`, but with threshold-values for response times. Runs in the CI/CD workflow for yt01, and runs with one VU for 30s|
 |purge-dialogs.js|Script that tries to clean up after a load test|
 
-- `create-dialog.js`
-- `create-remove-dialog.js`
-- `create-transmissions.js`
-- `serviceowner-search.js`
-- `purge-dialogs.js` (used for cleanup after test)
 
 ### Run Test
 To run the performance test, follow the instructions below:
@@ -53,6 +48,7 @@ To run the performance test using GitHub Actions, follow these steps:
 3. Tag the performance test with a descriptive name.
 
 #### GitHub Action with act
+Running with act was mainly used for debugging github workflows without commiting and running from the github site. 
 To run the performance test locally using GitHub Actions and act, perform the following steps:
 1. [Install act](https://nektosact.com/installation/).
 2. Navigate to the root of the repository.
@@ -108,4 +104,5 @@ Replace `<(test|staging|yt01)>` with the appropriate environment where the test 
 This script will remove any dialogs created during the performance test, ensuring a clean state for future tests.
 
 ### Test Results
-The test results can be found in the GitHub Actions run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus)
+The test results from tests run from Github actions can be found in the GitHub Actions run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus). 
+Otherwise, see the output from your CLI

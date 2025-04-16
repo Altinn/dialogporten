@@ -15,7 +15,7 @@ The test files associated with this performance test are:
 |createDialogBreakpoint.js|Gradually increases the load until limits are reached, then the test aborts|
 |createDialogWithThresholds.js|Runs a test with response time thresholds. Used in CI/CD pipeline for yt01, and runs with only one VU for 30s|
 |create-transmissions.js|First, creates a dialog and then creates a number of transmissions per dialog.|
-|createTransmissionsBreakpoint.js|Gradually increases the loan until limits are reached, the the test aborts|
+|createTransmissionsBreakpoint.js|Gradually increases the load until limits are reached, then the test aborts|
 |createTransmissionsWithThresholds.js|Runs the test with response time thresholds. Used in CI/CD pipeline for yt01, and runs with only one VU for 30s|
 |serviceowner-search.js|Does a simple search on enduser and service resource and first GET dialogs, and then drills down into details, same way as [enduser search](../../enduser/performance/README.md#test-description)|
 |serviceOwnerRandomSearch.js|The GET dialogs call uses random list of available url parameters, with some variations in values|

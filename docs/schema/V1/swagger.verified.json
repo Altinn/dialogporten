@@ -3095,10 +3095,6 @@
             "nullable": true,
             "type": "array"
           },
-          "isApiOnly": {
-            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
-            "type": "boolean"
-          },
           "precedingProcess": {
             "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
             "nullable": true,

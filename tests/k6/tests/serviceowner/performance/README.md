@@ -1,13 +1,28 @@
 ## Service Owner Performance Test
 
-This performance test directory focuses on evaluating the GET and POST endpoints of the `serviceowner` API. The test files associated with this performance test are `create-dialog.js`, `create-remove-dialog.js`, `serviceowner-search.js`, and `purge-dialogs.js`. These files are designed to measure the performance and scalability of the API endpoints under different scenarios. By running these tests, you can gain insights into the system's response time, throughput, and resource utilization. Use the instructions below to execute the performance test and analyze the results.
+This performance test directory focuses on evaluating the GET and POST endpoints of the `serviceowner` API. The test files associated with this performance test are `create-dialog.js`, `create-remove-dialog.js`, `create-transmissions.js`, `serviceowner-search.js`, `createDialogBreakpoint.js`, `createDialogWithThresholds.js`, `createTransmissionsBreakpoint.js`, `createTransmissionsWithThresholds.js`, `serviceOwnerRandomSearch.js`, `serviceOwnerSearchBreakpoint.js`, `serviceOwnerSearchWithThreshold.js` and `purge-dialogs.js`. These files are designed to measure the performance and scalability of the API endpoints under different scenarios. By running these tests, you can gain insights into the system's response time, throughput, and resource utilization. Use the instructions below to execute the performance test and analyze the results.
 
 ### Prerequisites
 Before running the performance test, make sure you have met the following prerequisites:
 - [K6 prerequisites](../../../README.md#Prerequisites)
 
 ### Test Files
-The test files associated with this performance test are 
+The test files associated with this performance test are:
+|Filename|Description|
+|:---:|:---:|
+|create-dialog.js|Create dialogs|
+|create-remove-dialog.js|Create a dialog and immediately removes it|
+|createDialogBreakpoint.js|Gradually increases the load until limits are reached, then the test aborts|
+|createDialogWithThresholds.js|Runs a test with response time thresholds. Used in CI/CD pipeline for yt01, and runs with only one VU for 30s|
+|create-transmissions.js|First, creates a dialog and then creates a number of transmissions per dialog.|
+|createTransmissionsBreakpoint.js|Gradually increases the loan until limits are reached, the the test aborts|
+|createTransmissionsWithThresholds.js|Runs the test with response time thresholds. Used in CI/CD pipeline for yt01, and runs with only one VU for 30s|
+|serviceowner-search.js|Does a simple search on enduser and service resource and first GET dialogs, and then drills down into details, same way as [enduser search](../../enduser/performance/README.md#test-description)|
+|serviceOwnerRandomSearch.js|The GET dialogs call uses random list of available url parameters, with some variations in values|
+|serviceOwnerSearchBreakpoint.js|The purpose of this test is to gradually increase the load until certain thresholds are reached, indicating that the system breakpoint is reached|
+|serviceOwnerSearchWithThresholds.js|Does the same as `serviceowner-search.js`, but with threshold-values for response times. Runs in the CI/CD workflow for yt01, and runs with one VU for 30s|
+|purge-dialogs.js|Script that tries to clean up after a load test|
+
 - `create-dialog.js`
 - `create-remove-dialog.js`
 - `create-transmissions.js`
@@ -50,17 +65,25 @@ TOKEN_GENERATOR_PASSWORD:<passwd>
 ##### IMPORTANT: Ensure this file is added to .gitignore to prevent accidental commits of sensitive information. Never commit actual credentials to version control.
 4. Run `act` using the command below. Replace `<path-to-testscript>`, `<vus>`, `<duration>` and `<(personal|enterprise|both)>` with the desired values:
 ```shell
-act workflow_dispatch -j k6-performance -s GITHUB_TOKEN=`gh auth token` \
---container-architecture linux/amd64 --artifact-server-path $HOME/.act \ 
---input vus=<vus> --input duration=<duration> \ 
+act workflow_dispatch \
+-j k6-performance \
+-s GITHUB_TOKEN=`gh auth token` \
+--container-architecture linux/amd64 \
+--artifact-server-path $HOME/.act \ 
+--input vus=<vus> \
+--input duration=<duration> \ 
 --input testSuitePath=<path-to-testscript> 
 ```
 
 Example of command:
 ```shell
-act workflow_dispatch -j k6-performance -s GITHUB_TOKEN=`gh auth token` \
---container-architecture linux/amd64 --artifact-server-path $HOME/.act \ 
---input vus=10 --input duration=5m \ 
+act workflow_dispatch \
+-j k6-performance \
+-s GITHUB_TOKEN=`gh auth token` \
+--container-architecture linux/amd64 \
+--artifact-server-path $HOME/.act \ 
+--input vus=10 \
+--input duration=5m \ 
 --input testSuitePath=tests/k6/tests/serviceowner/performance/create-dialog.js
 ```
 

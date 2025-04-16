@@ -8,7 +8,7 @@ This directory holds a performance test for all GET endpoints for `api/v1/enduse
 ## Test description
 The tests has a list of enduser (ssn), and the following endpoints are visited in
 sequence for each enduser:
-- api/v1/enduser/dialogs?Party=urn:altinn:person:identifier-no:`<ssn>`
+- api/v1/enduser/dialogs?Party=urn:altinn:person:identifier-no:`<ssn>`&search=`<search string>`
 - api/v1/enduser/dialogs/`<dialogId>`
 - api/v1/enduser/dialogs/`<dialogId>`/activities
 - api/v1/enduser/dialogs/`<dialogId>`/activities/`<activityId>`
@@ -18,18 +18,17 @@ sequence for each enduser:
 - api/v1/enduser/dialogs/`<dialogId>`/transmissions/`<transmissionId>`
 - api/v1/enduser/dialogs/`<dialogId>`/labellog
 
-## Test file
+## Test files
 All the tests listed below performs the steps listed above: 
-- `enduser-search.js`
->>A simple test that performs the listed operation without any variations in search parameters
-- `enduserRandomSearch.js`
->>The GET dialogs call uses random list of available url parameters, with som evariations in values
-- `enduserSearchBreakpoint.js`
->>The purpose of this test is to gradually increase the load until certain thresholds are reached, indicating that the system breakpoint is reached
-- `enduserSearchWithThreshold.js`
->>Does the same as `enduser-search.js`, but with threshold-values for response times. Runs in the CI/CD workflow for yt01 
+| Test | description |
+|:----:|:-----------:|
+|enduser-search.js| A simple test that performs the listed operation without any variations in search parameters|
+|enduserRandomSearch.js|The GET dialogs call uses random list of available url parameters, with some variations in values|
+|enduserSearchBreakpoint.js|The purpose of this test is to gradually increase the load until certain thresholds are reached, indicating that the system breakpoint is reached|
+|enduserSearchWithThreshold.js|Does the same as `enduser-search.js`, but with threshold-values for response times. Runs in the CI/CD workflow for yt01 |
 
-## Run test
+
+## Run tests
 ### From cli
 1. Navigate to the following directory:
 ```shell
@@ -63,9 +62,13 @@ TOKEN_GENERATOR_PASSWORD:<passwd>
 ##### IMPORTANT: Ensure this file is added to .gitignore to prevent accidental commits of sensitive information. Never commit actual credentials to version control.
 4. Run `act` using the command below. Replace `<path-to-testscript>`, `<vus>` and `<duration>` with the desired values:
 ```shell
-act workflow_dispatch -j k6-performance -s GITHUB_TOKEN=`gh auth token` \
---container-architecture linux/amd64 --artifact-server-path $HOME/.act \ 
---input vus=<vus> --input duration=<duration> \ 
+act workflow_dispatch \
+-j k6-performance \
+-s GITHUB_TOKEN=`gh auth token` \
+--container-architecture linux/amd64 \
+--artifact-server-path $HOME/.act \ 
+--input vus=<vus> \
+--input duration=<duration> \ 
 --input testSuitePath=<path-to-testscript>
 ```
 

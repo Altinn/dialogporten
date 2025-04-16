@@ -14,12 +14,10 @@ internal sealed class MappingProfile : Profile
         // See IntermediateSearchDialogDto
         CreateMap<IntermediateDialogDto, DialogDto>();
         CreateMap<DialogEntity, IntermediateDialogDto>()
-            /*
             .ForMember(dest => dest.LatestActivity, opt => opt.MapFrom(src => src.Activities
                 .OrderByDescending(activity => activity.CreatedAt).ThenByDescending(activity => activity.Id)
                 .FirstOrDefault()
             ))
-            */
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.MapFrom(src => src.SeenLog
                 .Where(x => x.CreatedAt >= x.Dialog.UpdatedAt)
                 .OrderByDescending(x => x.CreatedAt)

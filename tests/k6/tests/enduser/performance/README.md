@@ -34,12 +34,15 @@ All the tests listed below performs the steps listed above:
 ```shell
 cd tests/k6/tests/enduser/performance
 ```
-2. Run the test using the following command. Replace `<test file>`, `<test|staging|yt01>`, `<vus>`, and `<duration>` with the desired values:
+2. Run the test using the following command. Replace `<test file>`, `<test|staging|yt01>`, `<vus>`, and `<duration>` with the desired values. If the environment variables (-e options) are set beforehand, they can be omitted:
 ```shell
-TOKEN_GENERATOR_USERNAME=<username> TOKEN_GENERATOR_PASSWORD=<passwd> \
-k6 run <test file> -e API_VERSION=v1 \
+k6 run <test file> \
+-e API_VERSION=v1 \
 -e API_ENVIRONMENT=<test|staging|yt01> \
---vus=<vus> --duration=<duration>
+-e TOKEN_GENERATOR_USERNAME=<username> \
+-e TOKEN_GENERATOR_PASSWORD=<passwd> \
+--vus=<vus> \
+--duration=<duration>
 ```
 3. Refer to the k6 documentation for more information on usage.
 

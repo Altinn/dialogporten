@@ -20,9 +20,10 @@ The test files associated with this performance test are:
 ```shell
 cd tests/k6/tests/graphql/performance
 ```
-2. Run the test using the following command. Replace `<test file>`, `<(test|staging|yt01)>`, `<vus>`, and `<duration>` with the desired values:
+2. Run the test using the following command. Replace `<test file>`, `<(test|staging|yt01)>`, `<vus>`, and `<duration>` with the desired values. If the environment variables (-e options) are set beforehand, they can be omitted:
 ```shell
-k6 run <test file> -e API_VERSION=v1 \
+k6 run <test file> \
+-e API_VERSION=v1 \
 -e TOKEN_GENERATOR_USERNAME=<username> \
 -e TOKEN_GENERATOR_PASSWORD=<passwd> \
 -e API_ENVIRONMENT=<(test|staging|yt01)> \

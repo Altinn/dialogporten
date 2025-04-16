@@ -147,4 +147,25 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .ContainSingle(e => e.ErrorMessage
                 .Contains(nameof(transmission.Content)));
     }
+
+    [Fact]
+    public async Task Can_Create_Dialog_With_Empty_Transmission_Content_If_IsApiOnly()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+
+        // Omitting the property the payload to the WebAPI will set this to null
+        transmission.Content = null!;
+
+        createDialogCommand.Dto.Transmissions = [transmission];
+        createDialogCommand.Dto.IsApiOnly = true;
+
+        // Act
+        var createDialogResponse = await Application.Send(createDialogCommand);
+
+        // Assert
+        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+    }
 }

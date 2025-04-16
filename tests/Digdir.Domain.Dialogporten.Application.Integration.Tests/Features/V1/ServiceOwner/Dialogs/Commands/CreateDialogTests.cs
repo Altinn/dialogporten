@@ -529,4 +529,23 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ContainSingle(x => x.ErrorMessage
                 .Contains(nameof(createDialogCommand.Dto.Content)));
     }
+
+    [Fact]
+    public async Task Can_Create_Dialog_With_Empty_Content_If_IsApiOnly()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+
+        // Omitting the property the payload to the WebAPI will set this to null
+        createDialogCommand.Dto.Content = null!;
+        createDialogCommand.Dto.IsApiOnly = true;
+
+        // Act
+        var createDialogResponse = await Application.Send(createDialogCommand);
+
+        // Assert
+        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+
+    }
 }

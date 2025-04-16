@@ -1,29 +1,53 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
 internal sealed class UpdateDialogCommandValidator : AbstractValidator<UpdateDialogCommand>
 {
-    public UpdateDialogCommandValidator(IValidator<UpdateDialogDto> updateDialogDtoValidator)
+    public const string ExistingDialog = "ExistingDialog";
+
+    public UpdateDialogCommandValidator(
+        IDialogDbContext dialogDbContext,
+        IValidator<UpdateDialogDto> updateDialogDtoValidator)
     {
         RuleFor(x => x.Id)
             .NotEmpty();
+
+        RuleFor(x => x)
+            .CustomAsync(async (command, context, cancellationToken) =>
+            {
+                var existingDialog = await dialogDbContext.Dialogs
+                    .AsNoTracking()
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(d => d.Id == command.Id, cancellationToken);
+
+                if (existingDialog != null)
+                {
+                    ((IValidationContext)context).RootContextData[ExistingDialog] = existingDialog;
+                }
+            });
+
         RuleFor(x => x.Dto)
             .NotEmpty()
-            .SetValidator(updateDialogDtoValidator);
+            .SetValidator(updateDialogDtoValidator)
+            .When((_, context) => ((IValidationContext)context).RootContextData.ContainsKey(ExistingDialog), ApplyConditionTo.CurrentValidator);
     }
 }
 
@@ -65,7 +89,7 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.Transmissions)
             .UniqueBy(x => x.Id);
 
-        When(x => x.IsApiOnly, () =>
+        When((_, context) => ExistingDialog(context).IsApiOnly, () =>
         {
             RuleFor(x => x.Content)
                 .SetValidator(contentValidator)
@@ -137,6 +161,16 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .IsValidUri()
             .MaximumLength(Constants.DefaultMaxUriLength)
             .When(x => x.PrecedingProcess is not null);
+    }
+
+    private static DialogEntity ExistingDialog(ValidationContext<UpdateDialogDto> context)
+    {
+        var parentContext = ((IValidationContext)context).ParentContext;
+
+        return parentContext != null && parentContext.RootContextData.TryGetValue(UpdateDialogCommandValidator.ExistingDialog, out var data) &&
+            data is DialogEntity existingDialog
+            ? existingDialog
+            : throw new UnreachableException("Expected parent context to contain an existing dialog. When() condition in parent validator should have been false.");
     }
 }
 

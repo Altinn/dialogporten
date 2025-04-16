@@ -215,6 +215,85 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         domainError.Errors.Should().Contain(e => e.ErrorMessage.Contains("already exists"));
     }
 
+    [Fact]
+    public async Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog()
+    {
+        // Arrange
+        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+        updateDialogDto.Content = null!;
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto
+        });
+
+        // Assert
+        updateResponse.TryPickT3(out var validationError, out _).Should().BeTrue();
+        validationError.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Can_Update_Content_To_Null_If_IsApiOnlyTrue_Dialog()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.IsApiOnly = true;
+        var createCommandResponse = await Application.Send(createDialogCommand);
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+        updateDialogDto.Content = null!;
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto
+        });
+
+        // Assert
+        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Should_Validate_Supplied_Content_If_IsApiOnlyTrue_Dialog()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.IsApiOnly = true;
+        var createCommandResponse = await Application.Send(createDialogCommand);
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+        updateDialogDto.Content!.Title = null!; // Content is supplied, but title is not (only summary)
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto
+        });
+
+        // Assert
+        updateResponse.TryPickT3(out var validationError, out _).Should().BeTrue();
+        validationError.Should().NotBeNull();
+    }
+
     private async Task<(CreateDialogCommand, CreateDialogResult)> GenerateDialogWithActivity()
     {
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();

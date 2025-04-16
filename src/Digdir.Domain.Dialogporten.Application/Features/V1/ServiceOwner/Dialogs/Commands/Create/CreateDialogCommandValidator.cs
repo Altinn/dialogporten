@@ -124,8 +124,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
 
-        // When IsApiOnly is set to true, we only validate content if it's provided
-        // on both the dialog and the transmission level.
         RuleFor(x => x.Transmissions)
             .UniqueBy(x => x.Id);
 
@@ -134,6 +132,8 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
                 dependentKeySelector: transmission => transmission.RelatedTransmissionId,
                 principalKeySelector: transmission => transmission.Id);
 
+        // When IsApiOnly is set to true, we only validate content if it's provided
+        // on both the dialog and the transmission level.
         When(x => x.IsApiOnly, () =>
             {
                 RuleFor(x => x.Content)

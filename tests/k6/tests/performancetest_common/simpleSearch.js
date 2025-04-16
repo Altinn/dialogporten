@@ -150,7 +150,7 @@ export function getUrl(url, paramsWithToken, getFunction = getEU) {
  * @param {Object} enduser - The enduser object containing the token.
  * @returns {void}
  */
-export function graphqlSearch(enduser, token,  traceCalls) {
+export function graphqlSearch(enduser, searchParams, token,  traceCalls, label) {
     if (token == null) {
         token = getPersonalToken({ ssn: enduser, scopes: "digdir:dialogporten" });
     }
@@ -161,14 +161,14 @@ export function graphqlSearch(enduser, token,  traceCalls) {
             traceparent: traceparent,
             'User-Agent': 'dialogporten-k6-graphql-search'
         },
-        tags: { name: 'graphql search' }
+        tags: { name: label }
     };
     if (traceCalls) {
         paramsWithToken.tags.traceparent = traceparent;
         paramsWithToken.tags.enduser = enduser.ssn;
     }
     describe('Perform graphql dialog list', () => {
-        let r = postGQ(getGraphqlParty(enduser.ssn), paramsWithToken);
+        let r = postGQ(getGraphqlParty(searchParams), paramsWithToken);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
         log(r.json().data.searchDialogs.items, traceCalls, enduser);

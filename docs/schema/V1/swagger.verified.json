@@ -91,7 +91,9 @@
           "SentToSendIn",
           "SentToPayment",
           "FormSubmitted",
-          "FormSaved"
+          "FormSaved",
+          "CorrespondenceOpened",
+          "CorrespondenceConfirmed"
         ],
         "type": "string",
         "x-enumNames": [
@@ -109,7 +111,9 @@
           "SentToSendIn",
           "SentToPayment",
           "FormSubmitted",
-          "FormSaved"
+          "FormSaved",
+          "CorrespondenceOpened",
+          "CorrespondenceConfirmed"
         ]
       },
       "DialogsEntitiesTransmissions_DialogTransmissionType": {
@@ -841,6 +845,12 @@
           "isAuthorized": {
             "description": "True if the authenticated user is authorized for this action. If not, the action will not be available\nand all endpoints will be replaced with a fixed placeholder.",
             "type": "boolean"
+          },
+          "name": {
+            "description": "The logical name of the operation the API action refers to.",
+            "example": "confirm",
+            "nullable": true,
+            "type": "string"
           }
         },
         "type": "object"
@@ -2132,6 +2142,12 @@
             "format": "guid",
             "nullable": true,
             "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the operation the API action refers to.",
+            "example": "confirm",
+            "nullable": true,
+            "type": "string"
           }
         },
         "type": "object"
@@ -2356,6 +2372,7 @@
             "description": "If set, will override the date and time when the dialog is set as created.\nIf not supplied, the current date /time will be used.",
             "example": "2022-12-31T23:59:59Z",
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "dueAt": {
@@ -2465,6 +2482,7 @@
             "description": "If set, will override the date and time when the dialog is set as last updated.\nIf not supplied, the current date /time will be used.",
             "example": "2022-12-31T23:59:59Z",
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "visibleFrom": {
@@ -2787,6 +2805,12 @@
             "description": "A self-defined UUIDv7 may be provided to support idempotent additions of Api Actions. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the operation the API action refers to.",
+            "example": "confirm",
             "nullable": true,
             "type": "string"
           }
@@ -3733,6 +3757,12 @@
             "description": "True if the authenticated user (set in the query) is authorized for this action.",
             "nullable": true,
             "type": "boolean"
+          },
+          "name": {
+            "description": "The logical name of the operation the API action refers to.",
+            "example": "confirm",
+            "nullable": true,
+            "type": "string"
           }
         },
         "type": "object"
@@ -7372,10 +7402,5 @@
         ]
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://localhost:7214/"
-    }
-  ]
+  }
 }

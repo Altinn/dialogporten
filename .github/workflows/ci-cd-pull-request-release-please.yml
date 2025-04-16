@@ -63,7 +63,6 @@ jobs:
       AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
     with:
       environment: staging
-      region: norwayeast
       dryRun: true
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
 
@@ -72,14 +71,18 @@ jobs:
     needs: [dry-run-deploy-infra-staging, dry-run-deploy-apps-staging]
     runs-on: ubuntu-latest
     steps:
+      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
       - name: Slackify markdown in pull request body
         id: slackify
-        uses: LoveToKnow/slackify-markdown-action@v1.1.1
+        uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1
         with:
           text: ${{ github.event.pull_request.body }}
       - name: Send GitHub slack message
         id: slack
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
         with:
           errors: true
           method: chat.postMessage

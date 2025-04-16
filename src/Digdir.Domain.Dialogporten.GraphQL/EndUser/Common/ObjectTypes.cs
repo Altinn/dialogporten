@@ -96,6 +96,12 @@ public enum ActivityType
 
     [GraphQLDescription("Indicates that a form associated with the dialog has been saved.")]
     FormSaved = 15,
+
+    [GraphQLDescription("Indicates that a correspondence has been opened.")]
+    CorrespondenceOpened = 16,
+
+    [GraphQLDescription("Indicates that a correspondence has been confirmed.")]
+    CorrespondenceConfirmed = 17,
 }
 
 public enum DialogStatus

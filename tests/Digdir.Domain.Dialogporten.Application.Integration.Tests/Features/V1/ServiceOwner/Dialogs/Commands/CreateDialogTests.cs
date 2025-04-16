@@ -2,14 +2,19 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain;
+using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -423,5 +428,84 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Assert
         response.TryPickT0(out var success, out _).Should().BeTrue();
         success.Revision.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task Can_Create_Actors_With_Same_Name_Without_ActorId()
+    {
+        // Arrange
+        var transmissions = DialogGenerator.GenerateFakeDialogTransmissions(2);
+        transmissions[0].Sender = new ActorDto
+        {
+            ActorType = ActorType.Values.PartyRepresentative,
+            ActorName = "Fredrik",
+            ActorId = null
+        };
+
+        transmissions[1].Sender = new ActorDto
+        {
+            ActorType = ActorType.Values.PartyRepresentative,
+            ActorName = "Fredrik",
+            ActorId = null
+        };
+        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(transmissions: transmissions);
+
+        // Act
+        var response = await Application.Send(createDialogCommand);
+
+        // Assert
+        response.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Can_Create_Dialog_With_Default_DateTimeOffset_For_UpdatedAt_Without_Setting_CreatedAt()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        createDialogCommand.Dto.UpdatedAt = default(DateTimeOffset);
+
+        // Act
+        var createDialogResponse = await Application.Send(createDialogCommand);
+        var getDialogResponse = await Application.Send(new GetDialogQuery
+        {
+            DialogId = dialogId
+        });
+
+        // Assert
+        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+        dialog.Should().NotBeNull();
+        dialog.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
+        dialog.UpdatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
+    public async Task Can_Create_Dialog_With_Default_DateTimeOffset_For_UpdatedAt_And_CreatedAt_Set()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        createDialogCommand.Dto.UpdatedAt = default(DateTimeOffset);
+        createDialogCommand.Dto.CreatedAt = DateTimeOffset.UtcNow;
+
+        // Act
+        var createDialogResponse = await Application.Send(createDialogCommand);
+        var getDialogResponse = await Application.Send(new GetDialogQuery
+        {
+            DialogId = dialogId
+        });
+
+        // Assert
+        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+        dialog.Should().NotBeNull();
+        dialog.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
+        dialog.UpdatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
     }
 }

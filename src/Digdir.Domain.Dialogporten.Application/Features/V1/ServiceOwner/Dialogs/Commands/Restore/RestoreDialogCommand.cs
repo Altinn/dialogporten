@@ -12,11 +12,11 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 
-public sealed class RestoreDialogCommand : IRequest<RestoreDialogResult>, IAltinnEventDisabler
+public sealed class RestoreDialogCommand : IRequest<RestoreDialogResult>, ISilentUpdater
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
-    public bool DisableAltinnEvents { get; set; }
+    public bool IsSilentUpdate { get; set; }
 }
 
 [GenerateOneOf]

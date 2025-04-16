@@ -26,15 +26,19 @@ jobs:
     outputs:
       version-exists: ${{ steps.check-published-version.outputs.version-exists }}
     steps:
+      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ inputs.ref }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org/'
 
       - name: Fetch package name
@@ -61,32 +65,19 @@ jobs:
     if: needs.check-published-version.outputs.version-exists == 'false'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Build and test schema
+        uses: ./.github/actions/build-schema
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org/'
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: ${{ env.WORKING_DIRECTORY }}
+          working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Update package version
         run: |
           jq '.version = "${{ inputs.version }}"' package.json > temp.json
           mv temp.json package.json
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Run tests
-        run: npm run test
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Run build
-        run: npm run build
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Publish package

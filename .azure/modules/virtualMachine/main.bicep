@@ -75,7 +75,10 @@ param adminLoginGroupObjectId string
 @secure()
 param sshPublicKey string
 
-resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
+@description('Enable Just-in-Time access for the virtual machine')
+param enableJit bool = false
+
+resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-11-01' = {
   name: name
   location: location
   zones: [
@@ -105,7 +108,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
             rebootSetting: 'IfRequired'
             bypassPlatformSafetyChecksOnUserSchedule: false
           }
-          assessmentMode: 'ImageDefault'
+          assessmentMode: 'AutomaticByPlatform'
         }
       }
       secrets: []
@@ -121,7 +124,27 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-07-01' = {
   tags: tags
 }
 
-resource aadLoginExtension 'Microsoft.Compute/virtualMachines/extensions@2024-07-01' = {
+resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-01-01' = if (enableJit) {
+  name: '${location}/${name}'
+  kind: 'Basic'
+  properties: {
+    virtualMachines: [
+      {
+        id: virtualMachine.id
+        ports: [
+          {
+            number: 22
+            protocol: '*'
+            allowedSourceAddressPrefix: '*'
+            maxRequestAccessDuration: 'PT8H'
+          }
+        ]
+      }
+    ]
+  }
+}
+
+resource aadLoginExtension 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
   parent: virtualMachine
   name: 'AADSSHLoginForLinux'
   location: location

@@ -18,11 +18,25 @@ jobs:
   check-for-changes:
     name: Check for changes
     uses: ./.github/workflows/workflow-check-for-changes.yml
-  
+
   build:
     uses: ./.github/workflows/workflow-build-and-test.yml
     needs: [ check-for-changes ]
     if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
+
+  validate-schema:
+    name: Validate Schema
+    needs: [ check-for-changes ]
+    if: ${{ needs.check-for-changes.outputs.hasSchemaPackageChanges == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Build and test schema
+        uses: ./.github/actions/build-schema
+        with:
+          working-directory: docs/schema/V1
 
   build-infrastructure:
     uses: ./.github/workflows/workflow-build-infrastructure.yml
@@ -34,7 +48,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     with:
       environment: "test"
-  
+
   dry-run-deploy-infra:
     name: Dry run deploy infrastructure
     uses: ./.github/workflows/workflow-deploy-infra.yml
@@ -84,7 +98,6 @@ jobs:
       AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
     with:
       environment: test
-      region: norwayeast
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       dryRun: true

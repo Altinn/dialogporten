@@ -26,9 +26,6 @@ on:
         required: true
 
     inputs:
-      region:
-        required: true
-        type: string
       environment:
         required: true
         type: string
@@ -68,8 +65,12 @@ jobs:
       id-token: write
       contents: read
     steps:
+      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
       - name: "Checkout GitHub Action"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ inputs.ref }}
 
@@ -81,7 +82,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy migration job (${{ inputs.environment }})
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -91,18 +92,17 @@ jobs:
           AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
         with:
-          scope: resourcegroup
-          template: ./.azure/applications/web-api-migration-job/main.bicep
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          deploymentMode: Incremental
-          deploymentName: "web-api-migration-job-${{ inputs.version }}"
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          additionalArguments: '--what-if'
-          parameters: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: whatIf
+          name: "web-api-migration-job-${{ inputs.version }}"
+          template-file: ./.azure/applications/web-api-migration-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Deploy migration job (${{ inputs.environment }})
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -112,24 +112,24 @@ jobs:
           AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
         with:
-          scope: resourcegroup
-          template: ./.azure/applications/web-api-migration-job/main.bicep
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          deploymentMode: Incremental
-          deploymentName: "web-api-migration-job-${{ inputs.version }}"
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          parameters: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: create
+          name: "web-api-migration-job-${{ inputs.version }}"
+          template-file: ./.azure/applications/web-api-migration-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Start migration job
-        uses: azure/CLI@v2
+        uses: azure/CLI@089eac9d8cc39f5d003e94f8b65efc51076c9cbd # v2.1.0
         if: ${{!inputs.dryRun}}
         with:
           inlineScript: |
             az containerapp job start -n ${{ steps.deploy.outputs.name }} -g ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
       - name: Verify migration
-        uses: azure/CLI@v2
+        uses: azure/CLI@089eac9d8cc39f5d003e94f8b65efc51076c9cbd # v2.1.0
         if: ${{!inputs.dryRun}}
         id: verify-migration
         timeout-minutes: 60
@@ -164,7 +164,7 @@ jobs:
       REVISION_SUFFIX: "${{ github.run_id }}-${{ inputs.version }}-${{ github.run_attempt}}"
     steps:
       - name: "Checkout GitHub Action"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ inputs.ref }}
 
@@ -176,7 +176,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy app ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -190,18 +190,17 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
           AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
         with:
-          scope: resourcegroup
-          template: ./.azure/applications/${{ matrix.name }}/main.bicep
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          deploymentMode: Incremental
-          deploymentName: "${{ matrix.name }}-${{ inputs.version }}"
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          additionalArguments: '--what-if'
-          parameters: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: whatIf
+          name: "${{ matrix.name }}-${{ inputs.version }}"
+          template-file: ./.azure/applications/${{ matrix.name }}/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy app ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -215,17 +214,17 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
           AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
         with:
-          scope: resourcegroup
-          template: ./.azure/applications/${{ matrix.name }}/main.bicep
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          deploymentMode: Incremental
-          deploymentName: ${{ matrix.name }}-${{ inputs.version }}
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          parameters: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: create
+          name: "${{ matrix.name }}-${{ inputs.version }}"
+          template-file: ./.azure/applications/${{ matrix.name }}/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Verify deployment (${{ matrix.name }})
-        uses: azure/CLI@v2
+        uses: azure/CLI@089eac9d8cc39f5d003e94f8b65efc51076c9cbd # v2.1.0
         if: ${{!inputs.dryRun}}
         id: verify-deployment
         timeout-minutes: 10
@@ -255,8 +254,16 @@ jobs:
           - name: sync-subject-resource-mappings-job
           - name: sync-resource-policy-information-job
     steps:
+      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
+      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
       - name: "Checkout GitHub Action"
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ inputs.ref }}
 
@@ -268,7 +275,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy job ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -279,18 +286,17 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
           AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
         with:
-          scope: resourcegroup
-          template: ./.azure/applications/${{ matrix.name }}/main.bicep
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          deploymentMode: Incremental
-          deploymentName: ${{ matrix.name }}-${{ inputs.version }}
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          additionalArguments: '--what-if'
-          parameters: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: whatIf
+          name: "${{ matrix.name }}-${{ inputs.version }}"
+          template-file: ./.azure/applications/${{ matrix.name }}/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy job ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@b63eaec8b9f6816ac93b70400c64e60fae54530f # v2.1.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -301,14 +307,14 @@ jobs:
           AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
           AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
         with:
-          scope: resourcegroup
-          template: ./.azure/applications/${{ matrix.name }}/main.bicep
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          deploymentMode: Incremental
-          deploymentName: ${{ matrix.name }}-${{ inputs.version }}
-          region: ${{ inputs.region }}
-          failOnStdErr: false
-          parameters: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: create
+          name: "${{ matrix.name }}-${{ inputs.version }}"
+          template-file: ./.azure/applications/${{ matrix.name }}/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Logout from azure
         if: ${{failure() || success()}}

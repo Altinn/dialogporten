@@ -45,9 +45,9 @@ public static class DialogGenerator
         List<ApiActionDto>? apiActions = null,
         List<ActivityDto>? activities = null,
         List<TransmissionDto>? transmissions = null,
-        bool disableAltinnEvents = false) => new()
+        bool isSilentUpdate = false) => new()
         {
-            DisableAltinnEvents = disableAltinnEvents,
+            IsSilentUpdate = isSilentUpdate,
             Dto = GenerateFakeDialogs(
                 seed,
                 1,
@@ -160,8 +160,8 @@ public static class DialogGenerator
             .RuleFor(o => o.Progress, f => progress ?? f.Random.Number(0, 100))
             .RuleFor(o => o.ExtendedStatus, f => extendedStatus ?? f.Random.AlphaNumeric(10))
             .RuleFor(o => o.ExternalReference, f => externalReference ?? f.Random.AlphaNumeric(10))
-            .RuleFor(o => o.CreatedAt, f => createdAt ?? default)
-            .RuleFor(o => o.UpdatedAt, f => updatedAt ?? default)
+            .RuleFor(o => o.CreatedAt, f => createdAt ?? null)
+            .RuleFor(o => o.UpdatedAt, f => updatedAt ?? null)
             .RuleFor(o => o.DueAt, f => dueAt ?? f.Date.Future(10, RefTime))
             .RuleFor(o => o.ExpiresAt, f => expiresAt ?? f.Date.Future(20, RefTime.AddYears(11)))
             .RuleFor(o => o.VisibleFrom, _ => visibleFrom ?? null)
@@ -319,10 +319,14 @@ public static class DialogGenerator
     public static List<ActivityDto> GenerateFakeDialogActivities(int? count = null,
         DialogActivityType.Values? type = null)
     {
-        // Temporarily removing the ActivityType TransmissionOpened from the list of possible types for random picking.
+        // Temporarily removing the ActivityType TransmissionOpened, CorrespondenceConfirmed, and CorrespondenceOpened
+        // from the list of possible types for random picking.
         // Going to have a look at re-writing the generator https://github.com/altinn/dialogporten/issues/1123
         var activityTypes = Enum.GetValues<DialogActivityType.Values>()
-            .Where(x => x != DialogActivityType.Values.TransmissionOpened).ToList();
+            .Where(x => x is not DialogActivityType.Values.TransmissionOpened
+                and not DialogActivityType.Values.CorrespondenceConfirmed
+                and not DialogActivityType.Values.CorrespondenceOpened)
+            .ToList();
 
         return new Faker<ActivityDto>()
             .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
@@ -343,6 +347,7 @@ public static class DialogGenerator
         return new Faker<ApiActionDto>()
             .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
             .RuleFor(o => o.Action, f => f.Random.AlphaNumeric(8))
+            .RuleFor(o => o.Name, f => f.Random.AlphaNumeric(8))
             .RuleFor(o => o.Endpoints, _ => GenerateFakeDialogApiActionEndpoints())
             .Generate(new Randomizer().Number(1, 4));
     }

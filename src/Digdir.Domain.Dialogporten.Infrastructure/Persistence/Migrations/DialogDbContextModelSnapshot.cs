@@ -17,7 +17,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
@@ -30,13 +30,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<string>("ActorId")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("ActorName")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<Guid?>("ActorNameEntityId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("ActorTypeId")
                         .HasColumnType("integer");
@@ -58,6 +53,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActorNameEntityId");
+
                     b.HasIndex("ActorTypeId");
 
                     b.ToTable("Actor");
@@ -65,6 +62,36 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasDiscriminator().HasValue("Actor");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("ActorId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId", "Name")
+                        .IsUnique();
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("ActorId", "Name"), false);
+
+                    b.ToTable("ActorName");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.ActorType", b =>
@@ -319,6 +346,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("DialogId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -602,6 +633,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 15,
                             Name = "FormSaved"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Name = "CorrespondenceOpened"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Name = "CorrespondenceConfirmed"
                         });
                 });
 
@@ -1743,11 +1784,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.Actor", b =>
                 {
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", "ActorNameEntity")
+                        .WithMany("ActorEntities")
+                        .HasForeignKey("ActorNameEntityId");
+
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Actors.ActorType", "ActorType")
                         .WithMany()
                         .HasForeignKey("ActorTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ActorNameEntity");
 
                     b.Navigation("ActorType");
                 });
@@ -2141,6 +2188,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("TransmissionContent");
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", b =>
+                {
+                    b.Navigation("ActorEntities");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Attachments.Attachment", b =>

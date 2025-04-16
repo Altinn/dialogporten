@@ -97,3 +97,18 @@ export function validateTestData(data, serviceOwners=null) {
         index: exec.vu.iterationInInstance % myEndUsers.length
     };
 }
+
+export const texts = [ "påkrevd", "rapportering", "sammendrag", "Utvidet Status", "ingen HTML-støtte", "et eller annet", "Skjema", "Skjema for rapportering av et eller annet", "Maks 200 tegn", "liste" ];
+export const texts_no_hit = [ "sjøvegan", "larvik", "kvalsund", "jøssheim", "sørli"];
+export const resources = [ 
+    "ttd-dialogporten-performance-test-01", 
+    "ttd-dialogporten-performance-test-02", 
+    "ttd-dialogporten-performance-test-03", 
+    "ttd-dialogporten-performance-test-04", 
+    "ttd-dialogporten-performance-test-05", 
+    "ttd-dialogporten-performance-test-06", 
+    "ttd-dialogporten-performance-test-07", 
+    "ttd-dialogporten-performance-test-08", 
+    "ttd-dialogporten-performance-test-09", 
+    "ttd-dialogporten-performance-test-10"
+];

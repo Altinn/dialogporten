@@ -23,6 +23,9 @@
         <None Update="parties">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="person_names">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>

@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -24,13 +25,12 @@ using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Co
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, IAltinnEventDisabler
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
-    public bool DisableAltinnEvents { get; set; }
-    public bool DisableSystemLabelReset { get; set; }
+    public bool IsSilentUpdate { get; set; }
 }
 
 [GenerateOneOf]
@@ -68,9 +68,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
-        if (request.DisableSystemLabelReset && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        if (request.IsSilentUpdate && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
-            return new Forbidden(Constants.DisableSystemLabelResetRequiresAdminScope);
+            return new Forbidden(Constants.SilentUpdateRequiresAdminScope);
         }
 
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
@@ -120,14 +120,23 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         await AppendActivity(dialog, request.Dto, cancellationToken);
 
+        var activityTypes = dialog.Activities
+            .Select(x => x.TypeId)
+            .Distinct();
+
+        if (!ActivityTypeAuthorization.UsingAllowedActivityTypes(activityTypes, _user, out var errorMessage))
+        {
+            return new Forbidden(errorMessage);
+        }
+
         await AppendTransmission(dialog, request.Dto, cancellationToken);
 
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,
             propertyName: nameof(UpdateDialogDto.Transmissions),
-            maxDepth: 100,
-            maxWidth: 1));
+            maxDepth: 20,
+            maxWidth: 20));
 
         VerifyActivityTransmissionRelations(dialog);
 
@@ -171,7 +180,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return forbiddenResult;
         }
 
-        if (!request.DisableSystemLabelReset)
+        if (!request.IsSilentUpdate)
         {
             UpdateLabel(dialog);
         }

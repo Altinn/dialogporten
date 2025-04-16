@@ -1,7 +1,19 @@
 ### Large Data Set Generator
 
-This project generates large data sets for `yt01`, our performance environment.   
-Run using the `runner.sh` script. 
+This project generates large data sets for `yt01`, our performance environment.
+
+
+#### Long-running jobs in yt01
+Long-running jobs in yt01 should be done from the [ssh jumper](../../scripts/database-forwarder/README.md) in Azure.
+
+1. Suspend the CI/CD pipeline for YT01 in GitHub Actions GUI
+   "Actions" => "CI/CD YT01" => "Disable workflow", menu top right
+2. Turn off all container apps and jobs, WebAPIs, GraphQL, Service, Sync jobs
+3. Find the VM in the resource group => Operations => Updates => Update Settings =>  
+   Select "Disable" on periodic assessment, and "ImageDefault" on patch orchestration, click Save
+4. Connect to the jumper
+5. Clone the repository if you haven't already
+6. Run using the `runner.sh` script. 
 
 #### Date ranges and number of loops:  
 When changing start/end dates, only change the year. (The year should be the same for both start and end dates.)
@@ -59,7 +71,6 @@ COPY "X" ("Y", "X") FROM STDIN (FORMAT csv, HEADER false)
 - **Constraint and Index Management**
     - Add a script to remove all constraints and indexes using the SQL commands found in `Sql.cs`.
     - Optimize the parallel restoration of constraints and indexes to reduce processing time.
-
 
 - **Fine-Tuning Parallelism**
     - Investigate increasing the number of threads for Actors, LocalizationSets, and Localizations.

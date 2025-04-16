@@ -1,0 +1,29 @@
+name: 'Build Schema'
+description: 'Sets up Node.js, installs dependencies, runs tests and builds the schema'
+
+inputs:
+  working-directory:
+    description: 'Directory containing the schema package.json'
+    required: true
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
+  registry-url:
+    description: 'Node package registry URL'
+    required: false
+    default: 'https://registry.npmjs.org/'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: ${{ inputs.registry-url }}
+
+    - name: Install dependencies
+      shell: bash
+      run: ./gql-to-js.sh
+      working-directory: ${{ inputs.working-directory }}

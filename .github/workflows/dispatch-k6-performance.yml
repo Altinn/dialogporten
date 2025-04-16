@@ -55,6 +55,7 @@ on:
           - 'tests/k6/tests/serviceowner/performance/create-transmissions.js'
           - 'tests/k6/tests/serviceowner/performance/serviceOwnerRandomSearch.js'
           - 'tests/k6/tests/enduser/performance/enduserRandomSearch.js'
+          - 'tests/k6/tests/graphql/performance/graphqlRandomSearch.js'
 
 run-name: ${{ inputs.tag }} ${{ inputs.vus }}/${{ inputs.duration }}/${{ inputs.parallelism }}
 jobs:

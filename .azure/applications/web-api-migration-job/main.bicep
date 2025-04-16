@@ -37,7 +37,7 @@ resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-p
   name: containerAppEnvironmentName
 }
 
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: '${namePrefix}-migration-job-identity'
   location: location
   tags: tags

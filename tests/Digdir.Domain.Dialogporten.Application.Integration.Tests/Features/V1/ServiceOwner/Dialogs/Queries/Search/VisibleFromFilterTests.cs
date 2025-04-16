@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -26,8 +25,8 @@ public class VisibleFromFilterTests : ApplicationCollectionFixture
         result.Should().NotBeNull();
     }
 
-    [Theory, MemberData(nameof(GetVisibleFromTestData))]
-    public async Task Should_Filter_On_VisibleFrom_Date(DateFilterTestData testData)
+    [Theory, ClassData(typeof(DynamicDateFilterTestData))]
+    public async Task Should_Filter_On_VisibleFrom_Date(int? afterYear, int? beforeYear, int expectedCount, int[] expectedYears)
     {
         // Arrange
         var currentYear = DateTimeOffset.UtcNow.Year;
@@ -45,16 +44,16 @@ public class VisibleFromFilterTests : ApplicationCollectionFixture
         // Act
         var response = await Application.Send(new SearchDialogQuery
         {
-            VisibleAfter = testData.AfterYear.HasValue ? CreateDateFromYear(testData.AfterYear.Value) : null,
-            VisibleBefore = testData.BeforeYear.HasValue ? CreateDateFromYear(testData.BeforeYear.Value) : null
+            VisibleAfter = afterYear.HasValue ? CreateDateFromYear(afterYear.Value) : null,
+            VisibleBefore = beforeYear.HasValue ? CreateDateFromYear(beforeYear.Value) : null
         });
 
         // Assert
         response.TryPickT0(out var result, out _).Should().BeTrue();
         result.Should().NotBeNull();
 
-        result.Items.Should().HaveCount(testData.ExpectedCount);
-        foreach (var year in testData.ExpectedYears)
+        result.Items.Should().HaveCount(expectedCount);
+        foreach (var year in expectedYears)
         {
             var dialogId = year switch
             {
@@ -67,47 +66,5 @@ public class VisibleFromFilterTests : ApplicationCollectionFixture
 
             result.Items.Should().ContainSingle(x => x.Id == dialogId);
         }
-    }
-
-    public static IEnumerable<object[]> GetVisibleFromTestData()
-    {
-        var currentYear = DateTimeOffset.UtcNow.Year;
-
-        // The numbers added to "currentYear" here represent future years relative to the current year.
-        // This is done to create test data for dialogs that are visible "soon" (1 to 4 years ahead).
-        // This approach ensures that the tests remain valid and relevant regardless of the current date.
-        return new List<object[]>
-        {
-            new object[]
-            {
-                new DateFilterTestData
-                {
-                    AfterYear = currentYear + 3,
-                    BeforeYear = null,
-                    ExpectedCount = 2,
-                    ExpectedYears = [currentYear + 3, currentYear + 4]
-                }
-            },
-            new object[]
-            {
-                new DateFilterTestData
-                {
-                    AfterYear = null,
-                    BeforeYear = currentYear + 2,
-                    ExpectedCount = 2,
-                    ExpectedYears = [currentYear + 1, currentYear + 2]
-                }
-            },
-            new object[]
-            {
-                new DateFilterTestData
-                {
-                    AfterYear = currentYear + 1,
-                    BeforeYear = currentYear + 2,
-                    ExpectedCount = 2,
-                    ExpectedYears = [currentYear + 1, currentYear + 2]
-                }
-            }
-        };
     }
 }

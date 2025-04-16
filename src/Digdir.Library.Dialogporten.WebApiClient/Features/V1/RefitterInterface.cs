@@ -2080,6 +2080,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string AuthorizationAttribute { get; set; }
 
         /// <summary>
+        /// The logical name of the operation the API action refers to.
+        /// </summary>
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
 
@@ -2267,6 +2274,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"FormSaved")]
         FormSaved = 14,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceOpened")]
+        CorrespondenceOpened = 15,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceConfirmed")]
+        CorrespondenceConfirmed = 16,
 
     }
 
@@ -3311,6 +3324,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool? IsAuthorized { get; set; }
 
         /// <summary>
+        /// The logical name of the operation the API action refers to.
+        /// </summary>
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
 
@@ -3594,7 +3614,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
         /// If set, will override the date and time when the dialog is set as last updated.
@@ -3602,7 +3622,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("updatedAt")]
-        public System.DateTimeOffset UpdatedAt { get; set; }
+        public System.DateTimeOffset? UpdatedAt { get; set; }
 
         /// <summary>
         /// The aggregated status of the dialog.
@@ -4062,6 +4082,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("authorizationAttribute")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// The logical name of the operation the API action refers to.
+        /// </summary>
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The endpoints associated with the action.

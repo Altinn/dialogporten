@@ -12,11 +12,11 @@ using OneOf;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
-public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>, IAltinnEventDisabler
+public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>, ISilentUpdater
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
-    public bool DisableAltinnEvents { get; set; }
+    public bool IsSilentUpdate { get; set; }
 }
 
 [GenerateOneOf]

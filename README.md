@@ -68,7 +68,7 @@ If you need do debug the WebApi/GraphQl projects in an IDE, you can alternativel
 First, create a dotnet user secret for the DB connection string.
 
 ```powershell
-dotnet user-secrets set -p .\src\Digdir.Domain.Dialogporten.WebApi\ "Infrastructure:DialogDbConnectionString" "Server=localhost;Port=5432;Database=Dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;"
+dotnet user-secrets set -p "./src/Digdir.Domain.Dialogporten.WebApi" "Infrastructure:DialogDbConnectionString" "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;"
 ```
 
 Then run `podman compose` without the WebAPI/GraphQl projects.
@@ -107,6 +107,10 @@ Or change your directory to the infrastructure project and then run the command.
 cd .\src\Digdir.Domain.Dialogporten.Infrastructure\
 dotnet ef migrations add TestMigration
 ```
+
+### Restoring a database from an Azure backup
+See [docs/RestoreDatabase.md](docs/RestoreDatabase.md)
+
 ## Testing
 
 Besides ordinary unit and integration tests, there are test suites for both functional and non-functional end-to-end tests implemented with [K6](https://k6.io/).

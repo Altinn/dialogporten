@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -21,9 +22,9 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
-public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, IAltinnEventDisabler
+public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater
 {
-    public bool DisableAltinnEvents { get; init; }
+    public bool IsSilentUpdate { get; init; }
     public CreateDialogDto Dto { get; set; } = null!;
 }
 
@@ -91,6 +92,15 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         CreateDialogEndUserContext(request, dialog);
         await EnsureNoExistingUserDefinedIds(dialog, cancellationToken);
 
+        var activityTypes = dialog.Activities
+            .Select(x => x.TypeId)
+            .Distinct();
+
+        if (!ActivityTypeAuthorization.UsingAllowedActivityTypes(activityTypes, _user, out var errorMessage))
+        {
+            return new Forbidden(errorMessage);
+        }
+
         // Ensure transmissions have a UUIDv7 ID, needed for the transmission hierarchy validation.
         foreach (var transmission in dialog.Transmissions)
         {
@@ -100,8 +110,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,
             propertyName: nameof(CreateDialogDto.Transmissions),
-            maxDepth: 100,
-            maxWidth: 1));
+            maxDepth: 20,
+            maxWidth: 20));
 
         await _db.Dialogs.AddAsync(dialog, cancellationToken);
 

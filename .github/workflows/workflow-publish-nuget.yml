@@ -23,11 +23,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
         with:
           global-json-file: ./global.json
 
@@ -35,10 +39,10 @@ jobs:
         run: dotnet pack --configuration Release -p:Version="${{ inputs.version }}" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg --output . "${{ inputs.path }}"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: package
           path: '*.*nupkg'
-          
-      - name: Push to NuGet   
+
+      - name: Push to NuGet
         run: dotnet nuget push *.nupkg --source "${{ inputs.source }}" --api-key ${{secrets.NUGET_API_KEY}}

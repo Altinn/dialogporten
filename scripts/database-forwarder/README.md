@@ -19,16 +19,21 @@ Run the script without arguments for interactive mode:
 
 ### Command-line Arguments
 
-You can also specify the environment and database type directly:
+You can also specify the environment, database type, and local port directly:
 ```bash
-./forward.sh -e test -t postgres
-./forward.sh -e prod -t redis
+./forward.sh -e test -t postgres -p 5433  # Use custom local port 5433
+./forward.sh -e prod -t redis -p 6380     # Use custom local port 6380
 ```
 
 Available options:
 - `-e`: Environment (test, yt01, staging, prod)
 - `-t`: Database type (postgres, redis)
+- `-p`: Local port to bind on localhost (defaults to standard port for selected database)
 - `-h`: Show help message
+
+Default ports:
+- PostgreSQL: 5432
+- Redis: 6379
 
 ## Connecting to Databases
 
@@ -36,11 +41,12 @@ Available options:
 
 1. Start the forwarding tool:
 ```bash
-./forward.sh -e test -t postgres
+./forward.sh -e test -t postgres        # Uses default port 5432
+./forward.sh -e test -t postgres -p 5433  # Uses custom port 5433
 ```
 2. Once the tunnel is established, you can connect using:
    - Host: localhost
-   - Port: 5432
+   - Port: 5432 (or your custom port if specified with -p)
    - Database: dialogporten
    - Username: shown in the connection string
    - Password: retrieve from Azure Key Vault
@@ -52,7 +58,7 @@ psql "host=localhost port=5432 dbname=dialogporten user=<username>"
 
 Example using pgAdmin:
 - Host: localhost
-- Port: 5432
+- Port: 5432 (or your custom port)
 - Database: dialogporten
 - Username: (from connection string)
 - Password: (from Key Vault)
@@ -61,11 +67,12 @@ Example using pgAdmin:
 
 1. Start the forwarding tool:
 ```bash
-./forward.sh -e test -t redis
+./forward.sh -e test -t redis         # Uses default port 6379
+./forward.sh -e test -t redis -p 6380 # Uses custom port 6380
 ```
 2. Once the tunnel is established, you can connect using:
    - Host: localhost
-   - Port: 6379
+   - Port: 6379 (or your custom port if specified with -p)
    - Password: shown in the connection string
 
 Example using redis-cli:
@@ -75,7 +82,8 @@ redis-cli -h localhost -p 6379 -a "<password>"
 
 Example connection string for applications:
 ```plaintext
-redis://:<password>@localhost:6379
+redis://:<password>@localhost:6379  # Using default port
+redis://:<password>@localhost:6380  # Using custom port
 ```
 
 ## Troubleshooting

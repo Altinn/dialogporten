@@ -38,6 +38,9 @@ on:
       hasMigrationChanges:
         description: "Migration related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasMigrationChanges }}
+      hasSchemaPackageChanges:
+        description: "Schema package content or infrastructure has changed"
+        value: ${{ jobs.check-for-changes.outputs.hasSchemaPackageChanges }}
 
 jobs:
   check-for-changes:
@@ -52,13 +55,18 @@ jobs:
       hasGqlSchemaChanges: ${{ steps.filter-backend.outputs.gql_schema_any_modified == 'true'}}
       hasMigrationChanges: ${{ steps.filter-backend.outputs.migration_any_modified == 'true'}}
       hasWebApiClientChanges: ${{ steps.filter-backend.outputs.web_api_client_any_modified == 'true'}}
+      hasSchemaPackageChanges: ${{ steps.filter-backend.outputs.schema_package_any_modified == 'true'}}
     steps:
+      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
-      - uses: tj-actions/changed-files@v45
+      - uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1 # v45.0.1
         id: filter
         with:
           base_sha: ${{ inputs.infra_base_sha }}
@@ -71,7 +79,7 @@ jobs:
               - '.github/**/*'
               - 'src/Digdir.Tool.Dialogporten.SlackNotifier/**/*'
 
-      - uses: tj-actions/changed-files@v45
+      - uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1 # v45.0.1
         id: filter-backend
         with:
           base_sha: ${{ inputs.apps_base_sha }}
@@ -91,3 +99,5 @@ jobs:
               - 'docs/schema/V1/schema.verified.graphql'
             migration: 
               - 'src/Digdir.Domain.Dialogporten.Infrastructure/Persistence/Migrations/**/*'
+            schema_package:
+              - 'docs/schema/V*/**/*'

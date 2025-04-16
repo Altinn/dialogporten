@@ -14,11 +14,7 @@ public static class Constants
     public const string IdportenLoaHigh = "idporten-loa-high";
     public const string AltinnAuthLevelTooLow = "Altinn authentication level too low.";
 
-    public const string DisableAltinnEventsRequiresAdminScope =
-        "Disabling Altinn events requires service owner admin scope.";
-
-    public const string DisableSystemLabelResetRequiresAdminScope =
-        "Disabling SystemLabel reset requires service owner admin scope.";
+    public const string SilentUpdateRequiresAdminScope = "IsSilentUpdate requires service owner admin scope.";
 
     public static readonly ImmutableArray<string> SupportedResourceTypes =
     [

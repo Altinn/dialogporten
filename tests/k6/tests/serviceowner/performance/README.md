@@ -49,6 +49,7 @@ To run the performance tests using GitHub Actions, follow these steps:
 1. Go to the [GitHub Actions](https://github.com/altinn/dialogporten/actions/workflows/dispatch-k6-performance.yml) page.
 2. Select "Run workflow" and fill in the required parameters.
 3. Tag the performance test with a descriptive name.
+
 Currently breakpoint-tests and threshold-tests can not be run from the github-action run workflow
 
 #### GitHub Action with act

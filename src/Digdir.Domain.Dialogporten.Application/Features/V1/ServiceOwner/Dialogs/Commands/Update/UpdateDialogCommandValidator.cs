@@ -80,12 +80,12 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
 
         // When IsApiOnly is set to true, we only validate content if it's provided
         // on both the dialog and the transmission level.
-        When(UpdateDialogCommandValidator.IsApiOnly,
-                () => RuleFor(x => x.Content)
+        When(UpdateDialogCommandValidator.IsApiOnly, () =>
+                RuleFor(x => x.Content)
                     .SetValidator(contentValidator)
                     .When(x => x.Content is not null))
-            .Otherwise(
-                () => RuleFor(x => x.Content)
+            .Otherwise(() =>
+                RuleFor(x => x.Content)
                     .NotEmpty()
                     .SetValidator(contentValidator));
 
@@ -245,12 +245,12 @@ internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValid
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
 
-        When(UpdateDialogCommandValidator.IsApiOnly,
-                () => RuleFor(x => x.Content)
+        When(UpdateDialogCommandValidator.IsApiOnly, () =>
+                RuleFor(x => x.Content)
                     .SetValidator(contentValidator)
                     .When(x => x.Content is not null))
-            .Otherwise(
-                () => RuleFor(x => x.Content)
+            .Otherwise(() =>
+                RuleFor(x => x.Content)
                     .NotEmpty()
                     .SetValidator(contentValidator));
     }

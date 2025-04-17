@@ -17,12 +17,20 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 internal sealed class CreateDialogCommandValidator : AbstractValidator<CreateDialogCommand>
 {
+    private const string IsApiOnlyKey = "IsApiOnly";
+
     public CreateDialogCommandValidator(IValidator<CreateDialogDto> createDialogDtoValidator)
     {
+        RuleFor(x => x)
+            .Custom((x, ctx) => ctx.RootContextData[IsApiOnlyKey] = x.Dto.IsApiOnly);
+
         RuleFor(x => x.Dto)
             .NotEmpty()
             .SetValidator(createDialogDtoValidator);
     }
+
+    public static bool IsApiOnly<T>(T _, IValidationContext context)
+        => context.RootContextData.TryGetValue(IsApiOnlyKey, out var isApiOnly) && (bool)isApiOnly;
 }
 
 internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogDto>
@@ -34,7 +42,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
-        IValidator<ContentDto> contentValidator)
+        IValidator<ContentDto?> contentValidator)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
@@ -99,9 +107,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.Status)
             .IsInEnum();
 
-        RuleFor(x => x.Content)
-            .SetValidator(contentValidator);
-
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .ForEach(x => x.SetValidator(searchTagValidator));
@@ -129,10 +134,24 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
         RuleFor(x => x.Transmissions)
             .UniqueBy(x => x.Id);
+
         RuleForEach(x => x.Transmissions)
             .IsIn(x => x.Transmissions,
                 dependentKeySelector: transmission => transmission.RelatedTransmissionId,
-                principalKeySelector: transmission => transmission.Id)
+                principalKeySelector: transmission => transmission.Id);
+
+        // When IsApiOnly is set to true, we only validate content if it's provided
+        // on both the dialog and the transmission level.
+        When(CreateDialogCommandValidator.IsApiOnly, () =>
+                RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null))
+            .Otherwise(() =>
+                RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator));
+
+        RuleForEach(x => x.Transmissions)
             .SetValidator(transmissionValidator);
 
         RuleFor(x => x.Activities)
@@ -164,7 +183,7 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
 {
     public CreateDialogDialogTransmissionDtoValidator(
         IValidator<ActorDto> actorValidator,
-        IValidator<TransmissionContentDto> contentValidator,
+        IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator)
     {
         RuleFor(x => x.Id)
@@ -189,9 +208,15 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
             .MaximumLength(Constants.DefaultMaxStringLength);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
-        RuleFor(x => x.Content)
-            .NotEmpty()
-            .SetValidator(contentValidator);
+
+        When(CreateDialogCommandValidator.IsApiOnly, () =>
+                RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null))
+            .Otherwise(() =>
+                RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator));
     }
 }
 

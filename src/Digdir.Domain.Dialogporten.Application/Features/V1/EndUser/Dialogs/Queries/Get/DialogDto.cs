@@ -116,6 +116,12 @@ public sealed class DialogDto
     /// The aggregated status of the dialog.
     /// </summary>
     public DialogStatus.Values Status { get; set; }
+
+    /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
     /// <summary>
     /// Current display state.
     /// </summary>

@@ -75,7 +75,7 @@ internal sealed class DialogContentOutputConverter<TDialogContent> :
 {
     public TDialogContent? Convert(List<DialogContent>? sources, TDialogContent? destination, ResolutionContext context)
     {
-        if (sources is null)
+        if (sources is null || sources.Count == 0)
         {
             return null;
         }

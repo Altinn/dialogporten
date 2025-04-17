@@ -66,10 +66,12 @@ public sealed class UpdateDialogDto
     /// </summary>
     public DialogStatus.Values Status { get; set; }
 
+    // IsApiOnly is immutable after creation and not included in the update DTO
+
     /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
-    public ContentDto Content { get; set; } = null!;
+    public ContentDto? Content { get; set; }
 
     /// <summary>
     /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
@@ -160,7 +162,7 @@ public class TransmissionDto
     /// <summary>
     /// The transmission unstructured text content.
     /// </summary>
-    public TransmissionContentDto Content { get; set; } = null!;
+    public TransmissionContentDto? Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

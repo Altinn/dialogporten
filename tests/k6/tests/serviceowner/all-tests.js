@@ -14,7 +14,6 @@ import { default as dialogDetails } from './dialogDetails.js';
 import { default as dialogRestore } from './dialogRestore.js';
 import { default as dialogSearch } from './dialogSearch.js';
 import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
-import { default as dialogUpdateApiOnly } from './dialogUpdateApiOnly.js';
 
 export default function() {
   authentication();
@@ -32,5 +31,4 @@ export default function() {
   dialogRestore();
   dialogSearch();
   dialogUpdateActivity();
-  dialogUpdateApiOnly();
 }

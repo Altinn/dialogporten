@@ -73,7 +73,7 @@ export default function () {
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
 
-        // Verify that our API-only dialog is included in the results when IncludeApiOnly=true (default)
+        // Verify that our API-only dialog is included in the results when ExcludeApiOnly=false (default)
         let apiOnlyDialogId = dialogIds[0];
         let apiOnlyDialogFound = false;
 
@@ -88,11 +88,11 @@ export default function () {
     });
 
     describe('Search for dialogs excluding API-only dialogs', () => {
-        let r = getSO('dialogs?IncludeApiOnly=false&CreatedAfter=2023-01-01');
+        let r = getSO('dialogs?ExcludeApiOnly=true&CreatedAfter=2023-01-01');
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
 
-        // Verify that our API-only dialog is excluded when IncludeApiOnly=false
+        // Verify that our API-only dialog is excluded when ExcludeApiOnly=true
         let apiOnlyDialogId = dialogIds[0];
         let apiOnlyDialogFound = false;
 

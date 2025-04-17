@@ -15,40 +15,29 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
 internal sealed class UpdateDialogCommandValidator : AbstractValidator<UpdateDialogCommand>
 {
-    public const string ExistingDialog = "ExistingDialog";
-
     public UpdateDialogCommandValidator(
-        IDialogDbContext dialogDbContext,
         IValidator<UpdateDialogDto> updateDialogDtoValidator)
     {
         RuleFor(x => x.Id)
             .NotEmpty();
 
-        RuleFor(x => x)
-            .CustomAsync(async (command, context, cancellationToken) =>
-            {
-                var existingDialog = await dialogDbContext.Dialogs
-                    .AsNoTracking()
-                    .IgnoreQueryFilters()
-                    .FirstOrDefaultAsync(d => d.Id == command.Id, cancellationToken);
-
-                if (existingDialog != null)
-                {
-                    ((IValidationContext)context).RootContextData[ExistingDialog] = existingDialog;
-                }
-            });
-
         RuleFor(x => x.Dto)
             .NotEmpty()
             .SetValidator(updateDialogDtoValidator)
-            .When((_, context) => ((IValidationContext)context).RootContextData.ContainsKey(ExistingDialog), ApplyConditionTo.CurrentValidator);
+            .When(DialogIsPreloaded);
     }
+
+    public static bool IsApiOnly<T>(T _, IValidationContext context)
+        => UpdateDialogDataLoader.GetPreloadedData(context)?.IsApiOnly ?? false;
+
+    private static bool DialogIsPreloaded<T>(T _, IValidationContext context)
+        => context.RootContextData.TryGetValue(UpdateDialogDataLoader.Key, out var dialog) &&
+           dialog is not null;
 }
 
 internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogDto>
@@ -89,28 +78,19 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.Transmissions)
             .UniqueBy(x => x.Id);
 
-        When((_, context) => ExistingDialog(context).IsApiOnly, () =>
-        {
-            RuleFor(x => x.Content)
-                .SetValidator(contentValidator)
-                .When(x => x.Content is not null);
+        // When IsApiOnly is set to true, we only validate content if it's provided
+        // on both the dialog and the transmission level.
+        When(UpdateDialogCommandValidator.IsApiOnly,
+                () => RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null))
+            .Otherwise(
+                () => RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator));
 
-            RuleForEach(x => x.Transmissions)
-                .SetValidator(transmissionValidator,
-                    UpdateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
-                    UpdateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
-        })
-        .Otherwise(() =>
-        {
-            RuleFor(x => x.Content)
-                .NotEmpty()
-                .SetValidator(contentValidator);
-
-            RuleForEach(x => x.Transmissions)
-                .SetValidator(transmissionValidator,
-                    UpdateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
-                    UpdateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
-        });
+        RuleForEach(x => x.Transmissions)
+            .SetValidator(transmissionValidator);
 
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
@@ -161,16 +141,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .IsValidUri()
             .MaximumLength(Constants.DefaultMaxUriLength)
             .When(x => x.PrecedingProcess is not null);
-    }
-
-    private static DialogEntity ExistingDialog(ValidationContext<UpdateDialogDto> context)
-    {
-        var parentContext = ((IValidationContext)context).ParentContext;
-
-        return parentContext != null && parentContext.RootContextData.TryGetValue(UpdateDialogCommandValidator.ExistingDialog, out var data) &&
-            data is DialogEntity existingDialog
-            ? existingDialog
-            : throw new UnreachableException("Expected parent context to contain an existing dialog. When() condition in parent validator should have been false.");
     }
 }
 
@@ -247,11 +217,6 @@ internal sealed class UpdateDialogDialogTransmissionContentDtoValidator : Abstra
 
 internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValidator<TransmissionDto>
 {
-
-    public const string AllowEmptyContentRuleSet = "AllowEmptyContent";
-    public const string AlwaysValidateContentRuleSet = "AlwaysValidateContent";
-    public const string DefaultRuleSet = "Default";
-
     public UpdateDialogDialogTransmissionDtoValidator(
         IValidator<ActorDto> actorValidator,
         IValidator<TransmissionContentDto?> contentValidator,
@@ -280,19 +245,14 @@ internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValid
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
 
-        RuleSet(AllowEmptyContentRuleSet, () =>
-        {
-            RuleFor(x => x.Content)
-                .SetValidator(contentValidator)
-                .When(x => x.Content is not null);
-        });
-
-        RuleSet(AlwaysValidateContentRuleSet, () =>
-        {
-            RuleFor(x => x.Content)
-                .NotEmpty()
-                .SetValidator(contentValidator);
-        });
+        When(UpdateDialogCommandValidator.IsApiOnly,
+                () => RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null))
+            .Otherwise(
+                () => RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator));
     }
 }
 

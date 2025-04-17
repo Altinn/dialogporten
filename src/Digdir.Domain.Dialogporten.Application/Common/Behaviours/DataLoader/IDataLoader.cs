@@ -1,3 +1,4 @@
+using FluentValidation;
 using MediatR;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
@@ -65,7 +66,7 @@ internal abstract class TypedDataLoader<TRequest, TResponse, TData, TSelf> :
     where TSelf : TypedDataLoader<TRequest, TResponse, TData, TSelf>
     where TRequest : IRequest<TResponse>
 {
-    private static readonly string Key = typeof(TSelf).FullName!;
+    public static readonly string Key = typeof(TSelf).FullName!;
 
     /// <inheritdoc/>
     public string GetKey() => Key;
@@ -79,4 +80,7 @@ internal abstract class TypedDataLoader<TRequest, TResponse, TData, TSelf> :
 
     /// <inheritdoc/>
     public static TData? GetPreloadedData(IDataLoaderContext context) => (TData?)context.Get(Key);
+
+    /// <inheritdoc/>
+    public static TData? GetPreloadedData(IValidationContext context) => (TData?)context.RootContextData[Key];
 }

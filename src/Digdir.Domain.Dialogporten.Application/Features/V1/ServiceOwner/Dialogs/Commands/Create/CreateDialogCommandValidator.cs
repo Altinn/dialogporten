@@ -17,12 +17,20 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 internal sealed class CreateDialogCommandValidator : AbstractValidator<CreateDialogCommand>
 {
+    private const string IsApiOnlyKey = "IsApiOnly";
+
     public CreateDialogCommandValidator(IValidator<CreateDialogDto> createDialogDtoValidator)
     {
+        RuleFor(x => x)
+            .Custom((x, ctx) => ctx.RootContextData[IsApiOnlyKey] = x.Dto.IsApiOnly);
+
         RuleFor(x => x.Dto)
             .NotEmpty()
             .SetValidator(createDialogDtoValidator);
     }
+
+    public static bool IsApiOnly<T>(T _, IValidationContext context)
+        => context.RootContextData.TryGetValue(IsApiOnlyKey, out var isApiOnly) && (bool)isApiOnly;
 }
 
 internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogDto>
@@ -134,28 +142,17 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
         // When IsApiOnly is set to true, we only validate content if it's provided
         // on both the dialog and the transmission level.
-        When(x => x.IsApiOnly, () =>
-            {
-                RuleFor(x => x.Content)
+        When(CreateDialogCommandValidator.IsApiOnly,
+                () => RuleFor(x => x.Content)
                     .SetValidator(contentValidator)
-                    .When(x => x.Content is not null);
-
-                RuleForEach(x => x.Transmissions)
-                    .SetValidator(transmissionValidator,
-                        CreateDialogDialogTransmissionDtoValidator.AllowEmptyContentRuleSet,
-                        CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
-            })
-            .Otherwise(() =>
-            {
-                RuleFor(x => x.Content)
+                    .When(x => x.Content is not null))
+            .Otherwise(
+                () => RuleFor(x => x.Content)
                     .NotEmpty()
-                    .SetValidator(contentValidator);
+                    .SetValidator(contentValidator));
 
-                RuleForEach(x => x.Transmissions)
-                    .SetValidator(transmissionValidator,
-                        CreateDialogDialogTransmissionDtoValidator.AlwaysValidateContentRuleSet,
-                        CreateDialogDialogTransmissionDtoValidator.DefaultRuleSet);
-            });
+        RuleForEach(x => x.Transmissions)
+            .SetValidator(transmissionValidator);
 
         RuleFor(x => x.Activities)
             .UniqueBy(x => x.Id);
@@ -184,10 +181,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
 internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValidator<TransmissionDto>
 {
-    public const string AllowEmptyContentRuleSet = "AllowEmptyContent";
-    public const string AlwaysValidateContentRuleSet = "AlwaysValidateContent";
-    public const string DefaultRuleSet = "Default";
-
     public CreateDialogDialogTransmissionDtoValidator(
         IValidator<ActorDto> actorValidator,
         IValidator<TransmissionContentDto?> contentValidator,
@@ -216,19 +209,14 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
 
-        RuleSet(AllowEmptyContentRuleSet, () =>
-        {
-            RuleFor(x => x.Content)
-                .SetValidator(contentValidator)
-                .When(x => x.Content is not null);
-        });
-
-        RuleSet(AlwaysValidateContentRuleSet, () =>
-        {
-            RuleFor(x => x.Content)
-                .NotEmpty()
-                .SetValidator(contentValidator);
-        });
+        When(CreateDialogCommandValidator.IsApiOnly,
+                () => RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null))
+            .Otherwise(
+                () => RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator));
     }
 }
 

@@ -94,7 +94,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Whether to exclude API-only dialogs from the results. Defaults to false.
     /// </summary>
-    public bool ExcludeApiOnly { get; init; }
+    public bool? ExcludeApiOnly { get; init; }
 
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
@@ -183,7 +183,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
                 x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
             )
-            .WhereIf(request.ExcludeApiOnly, x => !x.IsApiOnly)
+            .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
             .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)

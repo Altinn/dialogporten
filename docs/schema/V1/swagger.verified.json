@@ -5137,8 +5137,8 @@
             "description": "Whether to exclude API-only dialogs from the results. Defaults to false.",
             "in": "query",
             "name": "excludeApiOnly",
-            "required": true,
             "schema": {
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -6048,8 +6048,8 @@
             "description": "Whether to exclude API-only dialogs from the results. Defaults to false.",
             "in": "query",
             "name": "excludeApiOnly",
-            "required": true,
             "schema": {
+              "nullable": true,
               "type": "boolean"
             }
           },

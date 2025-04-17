@@ -306,8 +306,8 @@ input SearchDialogInput {
   status: [DialogStatus!]
   "Filter by system label"
   systemLabel: [SystemLabel!]
-  "Whether to include API-only dialogs in the results. Defaults to true."
-  includeApiOnly: Boolean
+  "Whether to exclude API-only dialogs from the results. Defaults to false."
+  excludeApiOnly: Boolean
   "Only return dialogs created after this date"
   createdAfter: DateTime
   "Only return dialogs created before this date"

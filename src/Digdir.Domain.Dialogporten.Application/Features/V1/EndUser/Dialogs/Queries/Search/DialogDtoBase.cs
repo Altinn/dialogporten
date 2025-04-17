@@ -105,6 +105,7 @@ public class DialogDtoBase
     /// Current display state.
     /// </summary>
     public SystemLabel.Values SystemLabel { get; set; }
+
     /// <summary>
     /// The latest entry in the dialog's activity log.
     /// </summary>

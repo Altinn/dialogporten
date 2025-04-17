@@ -110,8 +110,8 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Filter by system label")]
     public List<SystemLabel>? SystemLabel { get; init; }
 
-    [GraphQLDescription("Whether to include API-only dialogs in the results. Defaults to true.")]
-    public bool? IncludeApiOnly { get; init; }
+    [GraphQLDescription("Whether to exclude API-only dialogs from the results. Defaults to false.")]
+    public bool? ExcludeApiOnly { get; init; } = false;
 
     [GraphQLDescription("Only return dialogs created after this date")]
     public DateTimeOffset? CreatedAfter { get; init; }

@@ -112,9 +112,9 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public List<SystemLabel.Values>? SystemLabel { get; set; }
 
     /// <summary>
-    /// Whether to include API-only dialogs in search results. If false, dialogs marked with IsApiOnly=true will be excluded. Defaults to true.
+    /// Whether to exclude API-only dialogs from the results. Defaults to false.
     /// </summary>
-    public bool? IncludeApiOnly { get; init; } = true;
+    public bool ExcludeApiOnly { get; init; }
 
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
@@ -209,7 +209,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             )
             .WhereIf(request.Deleted == DeletedFilter.Exclude, x => !x.Deleted)
             .WhereIf(request.Deleted == DeletedFilter.Only, x => x.Deleted)
-            .WhereIf(request.IncludeApiOnly == false, x => !x.IsApiOnly)
+            .WhereIf(request.ExcludeApiOnly, x => !x.IsApiOnly)
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)

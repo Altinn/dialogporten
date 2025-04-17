@@ -2,10 +2,12 @@
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
+using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using OneOf.Types;
@@ -98,8 +100,9 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine(ex);
             await RollbackTransactionAsync(cancellationToken);
             throw;
         }
@@ -127,21 +130,31 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             _saveChangesOptions,
             cancellationToken);
 
-        if (!_enableConcurrencyCheck)
+        try
         {
-            // Attempt to save changes without a concurrency check
-            await ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken);
+            if (!_enableConcurrencyCheck)
+            {
+                // Attempt to save changes without a concurrency check
+                await ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken);
+            }
+            else
+            {
+                try
+                {
+                    await _dialogDbContext.SaveChangesAsync(cancellationToken);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return new ConcurrencyError();
+                }
+            }
         }
-        else
+        catch (UniqueConstraintException ex)
         {
-            try
-            {
-                await _dialogDbContext.SaveChangesAsync(cancellationToken);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return new ConcurrencyError();
-            }
+            Console.WriteLine(ex);
+            var msg = (ex.InnerException!.Data["Detail"] as string)!.Replace('"', '\'');
+            var tblName = ex.InnerException.Data["TableName"] as string;
+            _domainContext.AddError("", $"{tblName} - {msg}");
         }
 
         // Interceptors can add domain errors, so check again

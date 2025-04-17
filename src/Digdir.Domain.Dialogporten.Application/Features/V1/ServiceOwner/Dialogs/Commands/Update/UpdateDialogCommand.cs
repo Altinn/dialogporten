@@ -100,7 +100,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _mapper.Map(request.Dto, dialog);
         ValidateTimeFields(dialog);
 
-        await AppendActivity(dialog, request.Dto, cancellationToken);
+        AppendActivity(dialog, request.Dto);
 
         var activityTypes = dialog.Activities
             .Select(x => x.TypeId)
@@ -111,7 +111,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden(errorMessage);
         }
 
-        await AppendTransmission(dialog, request.Dto, cancellationToken);
+        AppendTransmission(dialog, request.Dto);
 
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
@@ -176,6 +176,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             domainError => domainError,
             concurrencyError => concurrencyError);
     }
+
     private void UpdateLabel(DialogEntity dialog)
     {
         if (!_user.TryGetOrganizationNumber(out var organizationNumber))
@@ -216,16 +217,16 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
     }
 
-    private async Task AppendActivity(DialogEntity dialog, UpdateDialogDto dto, CancellationToken cancellationToken)
+    private void AppendActivity(DialogEntity dialog, UpdateDialogDto dto)
     {
         var newDialogActivities = _mapper.Map<List<DialogActivity>>(dto.Activities);
 
-        var existingIds = await _db.GetExistingIds(newDialogActivities, cancellationToken);
-        if (existingIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogActivity>(existingIds));
-            return;
-        }
+        // var existingIds = await _db.GetExistingIds(newDialogActivities, cancellationToken);
+        // if (existingIds.Count != 0)
+        // {
+        // _domainContext.AddError(DomainFailure.EntityExists<DialogActivity>(existingIds));
+        //     return;
+        // }
 
         dialog.Activities.AddRange(newDialogActivities);
 
@@ -260,27 +261,27 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
     }
 
-    private async Task AppendTransmission(DialogEntity dialog, UpdateDialogDto dto, CancellationToken cancellationToken)
+    private void AppendTransmission(DialogEntity dialog, UpdateDialogDto dto)
     {
         var newDialogTransmissions = _mapper.Map<List<DialogTransmission>>(dto.Transmissions);
 
-        var existingIds = await _db.GetExistingIds(newDialogTransmissions, cancellationToken);
-        if (existingIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingIds));
-            return;
-        }
+        // var existingIds = await _db.GetExistingIds(newDialogTransmissions, cancellationToken);
+        // if (existingIds.Count != 0)
+        // {
+        //     _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingIds));
+        //     return;
+        // }
 
-        var newTransmissionAttachments = newDialogTransmissions
-            .SelectMany(x => x.Attachments)
-            .ToList();
+        // var newTransmissionAttachments = newDialogTransmissions
+        //     .SelectMany(x => x.Attachments)
+        //     .ToList();
 
-        var existingTransmissionAttachmentIds = await _db.GetExistingIds(newTransmissionAttachments, cancellationToken);
-        if (existingTransmissionAttachmentIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogTransmissionAttachment>(existingTransmissionAttachmentIds));
-            return;
-        }
+        // var existingTransmissionAttachmentIds = await _db.GetExistingIds(newTransmissionAttachments, cancellationToken);
+        // if (existingTransmissionAttachmentIds.Count != 0)
+        // {
+        //     _domainContext.AddError(DomainFailure.EntityExists<DialogTransmissionAttachment>(existingTransmissionAttachmentIds));
+        //     return;
+        // }
 
         dialog.Transmissions.AddRange(newDialogTransmissions);
         // Tell ef explicitly to add transmissions as new to the database.

@@ -21,28 +21,25 @@ internal sealed class UpdateDialogDataLoader : TypedDataLoader<UpdateDialogComma
     public override async Task<DialogEntity?> Load(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-
-        var dialog = await _dialogDbContext.Dialogs
+        return await _dialogDbContext.Dialogs
             .Include(x => x.Activities)
             .Include(x => x.Content)
-            .ThenInclude(x => x.Value.Localizations)
+                .ThenInclude(x => x.Value.Localizations)
             .Include(x => x.SearchTags)
             .Include(x => x.Attachments)
-            .ThenInclude(x => x.DisplayName!.Localizations)
+                .ThenInclude(x => x.DisplayName!.Localizations)
             .Include(x => x.Attachments)
-            .ThenInclude(x => x.Urls)
+                .ThenInclude(x => x.Urls)
             .Include(x => x.GuiActions)
-            .ThenInclude(x => x.Title!.Localizations)
+                .ThenInclude(x => x.Title!.Localizations)
             .Include(x => x.GuiActions)
-            .ThenInclude(x => x.Prompt!.Localizations)
+                .ThenInclude(x => x.Prompt!.Localizations)
             .Include(x => x.ApiActions)
-            .ThenInclude(x => x.Endpoints)
+                .ThenInclude(x => x.Endpoints)
             .Include(x => x.Transmissions)
             .Include(x => x.DialogEndUserContext)
             .IgnoreQueryFilters()
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
-        return dialog;
     }
 }

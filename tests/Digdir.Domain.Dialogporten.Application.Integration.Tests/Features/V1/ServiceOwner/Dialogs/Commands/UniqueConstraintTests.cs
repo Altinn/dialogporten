@@ -20,7 +20,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
 {
     public UniqueConstraintTests(DialogApplication application) : base(application) { }
 
-    // Create
+    # region Create
     [Fact]
     public async Task Cannot_Create_Dialog_With_Existing_Id()
     {
@@ -226,8 +226,9 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             .ContainSingle(x => x.ErrorMessage
                 .Contains(attachment.Id.ToString()!));
     }
+    #endregion
 
-    // Update
+    # region Update
     [Fact]
     public async Task Cannot_Append_Transmission_With_Existing_Id()
     {
@@ -316,4 +317,6 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             .ContainSingle(x => x.ErrorMessage
                 .Contains(activity.Id.ToString()!));
     }
+
+    #endregion
 }

@@ -154,8 +154,14 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             Console.WriteLine(ex);
             var msg = (ex.InnerException!.Data["Detail"] as string)!.Replace('"', '\'');
             var tblName = ex.InnerException.Data["TableName"] as string;
-            _domainContext.AddError("", $"{tblName} - {msg}");
+            // 500 if not found?
+            _domainContext.AddError(tblName!, msg);
         }
+        // catch (FooException)
+        // {
+        //     // other exceptions
+        //     // log/throw
+        // }
 
         // Interceptors can add domain errors, so check again
         return !_domainContext.IsValid

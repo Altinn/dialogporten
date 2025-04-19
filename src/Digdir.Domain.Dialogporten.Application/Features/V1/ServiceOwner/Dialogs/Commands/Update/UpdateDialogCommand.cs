@@ -221,13 +221,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         var newDialogActivities = _mapper.Map<List<DialogActivity>>(dto.Activities);
 
-        // var existingIds = await _db.GetExistingIds(newDialogActivities, cancellationToken);
-        // if (existingIds.Count != 0)
-        // {
-        // _domainContext.AddError(DomainFailure.EntityExists<DialogActivity>(existingIds));
-        //     return;
-        // }
-
         dialog.Activities.AddRange(newDialogActivities);
 
         // Tell ef explicitly to add activities as new to the database.
@@ -264,24 +257,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private void AppendTransmission(DialogEntity dialog, UpdateDialogDto dto)
     {
         var newDialogTransmissions = _mapper.Map<List<DialogTransmission>>(dto.Transmissions);
-
-        // var existingIds = await _db.GetExistingIds(newDialogTransmissions, cancellationToken);
-        // if (existingIds.Count != 0)
-        // {
-        //     _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingIds));
-        //     return;
-        // }
-
-        // var newTransmissionAttachments = newDialogTransmissions
-        //     .SelectMany(x => x.Attachments)
-        //     .ToList();
-
-        // var existingTransmissionAttachmentIds = await _db.GetExistingIds(newTransmissionAttachments, cancellationToken);
-        // if (existingTransmissionAttachmentIds.Count != 0)
-        // {
-        //     _domainContext.AddError(DomainFailure.EntityExists<DialogTransmissionAttachment>(existingTransmissionAttachmentIds));
-        //     return;
-        // }
 
         dialog.Transmissions.AddRange(newDialogTransmissions);
         // Tell ef explicitly to add transmissions as new to the database.

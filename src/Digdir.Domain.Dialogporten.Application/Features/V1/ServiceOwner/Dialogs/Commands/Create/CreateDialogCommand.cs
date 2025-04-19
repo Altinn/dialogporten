@@ -84,7 +84,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         CreateDialogEndUserContext(request, dialog);
-        // await EnsureNoExistingUserDefinedIds(dialog, cancellationToken);
 
         var activityTypes = dialog.Activities
             .Select(x => x.TypeId)

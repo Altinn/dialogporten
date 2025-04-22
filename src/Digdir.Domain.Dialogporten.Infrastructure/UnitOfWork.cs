@@ -130,31 +130,19 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
         try
         {
-            if (!_enableConcurrencyCheck)
-            {
+            await (_enableConcurrencyCheck
+                ? _dialogDbContext.SaveChangesAsync(cancellationToken)
                 // Attempt to save changes without a concurrency check
-                await ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken);
-            }
-            else
-            {
-                try
-                {
-                    await _dialogDbContext.SaveChangesAsync(cancellationToken);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    return new ConcurrencyError();
-                }
-            }
+                : ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken));
         }
-        catch (UniqueConstraintException ex)
+        catch (DbUpdateConcurrencyException) when (_enableConcurrencyCheck)
         {
-            if (ex.InnerException?.Data["Detail"] is not string message ||
-                ex.InnerException.Data["TableName"] is not string tableName)
-            {
-                throw;
-            }
-
+            return new ConcurrencyError();
+        }
+        catch (UniqueConstraintException ex) when
+            (ex.InnerException?.Data["Detail"] is string message &&
+             ex.InnerException.Data["TableName"] is string tableName)
+        {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
 

@@ -99,9 +99,8 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
             return result;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine(ex);
             await RollbackTransactionAsync(cancellationToken);
             throw;
         }

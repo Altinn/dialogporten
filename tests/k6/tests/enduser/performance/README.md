@@ -25,7 +25,7 @@ All the tests listed below performs the steps listed above:
 |enduser-search.js| A simple test that performs the listed operation without any variations in search parameters|
 |enduserRandomSearch.js|The GET dialogs call uses random list of available url parameters, with some variations in values|
 |enduserSearchBreakpoint.js|The purpose of this test is to gradually increase the load until certain thresholds are reached, indicating that the system breakpoint is reached|
-|enduserSearchWithThreshold.js|Does the same as `enduser-search.js`, but with threshold-values for response times. Runs in the CI/CD workflow for yt01 |
+|enduserSearchWithThresholds.js|Does the same as `enduser-search.js`, but with threshold-values for response times. Runs in the CI/CD workflow for yt01 |
 
 
 ## Run tests

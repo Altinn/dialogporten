@@ -221,6 +221,18 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         var newDialogActivities = _mapper.Map<List<DialogActivity>>(dto.Activities);
 
+        var existingIds = _db.DialogActivities
+            .Local
+            .Select(x => x.Id)
+            .Intersect(newDialogActivities.Select(x => x.Id))
+            .ToArray();
+
+        if (existingIds.Length != 0)
+        {
+            _domainContext.AddError(DomainFailure.EntityExists<DialogActivity>(existingIds));
+            return;
+        }
+
         dialog.Activities.AddRange(newDialogActivities);
 
         // Tell ef explicitly to add activities as new to the database.
@@ -257,6 +269,18 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private void AppendTransmission(DialogEntity dialog, UpdateDialogDto dto)
     {
         var newDialogTransmissions = _mapper.Map<List<DialogTransmission>>(dto.Transmissions);
+
+        var existingIds = _db.DialogTransmissions
+            .Local
+            .Select(x => x.Id)
+            .Intersect(newDialogTransmissions.Select(x => x.Id))
+            .ToArray();
+
+        if (existingIds.Length != 0)
+        {
+            _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingIds));
+            return;
+        }
 
         dialog.Transmissions.AddRange(newDialogTransmissions);
         // Tell ef explicitly to add transmissions as new to the database.

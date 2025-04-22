@@ -214,6 +214,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
         await Application.Send(createDialogCommand);
 
         createDialogCommand.Dto.Id = IdentifiableExtensions.CreateVersion7();
+        dialogTransmission.Id = IdentifiableExtensions.CreateVersion7();
 
         // Act
         var duplicateCreateResponse = await Application.Send(createDialogCommand);

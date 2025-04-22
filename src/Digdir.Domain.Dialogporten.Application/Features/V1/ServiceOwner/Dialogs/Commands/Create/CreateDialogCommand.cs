@@ -11,9 +11,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
@@ -83,6 +80,12 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             dialog.Org = serviceResourceInformation.OwnOrgShortName;
         }
 
+        var dialogId = await GetExistingDialogIdByIdempotentKey(dialog, cancellationToken);
+        if (dialogId is not null)
+        {
+            return new Conflict(nameof(dialog.IdempotentKey), $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
+        }
+
         CreateDialogEndUserContext(request, dialog);
 
         var activityTypes = dialog.Activities
@@ -109,12 +112,26 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         _db.Dialogs.Add(dialog);
 
-
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
         return saveResult.Match<CreateDialogResult>(
             success => new CreateDialogSuccess(dialog.Id, dialog.Revision),
             domainError => domainError,
             concurrencyError => throw new UnreachableException("Should never get a concurrency error when creating a new dialog"));
+    }
+
+    private async Task<Guid?> GetExistingDialogIdByIdempotentKey(DialogEntity dialog, CancellationToken cancellationToken)
+    {
+        if (dialog.IdempotentKey is null || string.IsNullOrEmpty(dialog.Org))
+        {
+            return null;
+        }
+
+        var dialogId = await _db.Dialogs
+            .Where(x => x.Org == dialog.Org && x.IdempotentKey == dialog.IdempotentKey)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return dialogId == Guid.Empty ? null : dialogId;
     }
 
     private void CreateDialogEndUserContext(CreateDialogCommand request, DialogEntity dialog)

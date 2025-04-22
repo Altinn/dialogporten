@@ -1,9 +1,8 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common;
+﻿using System.Diagnostics.CodeAnalysis;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Common;
-using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
@@ -108,6 +107,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         }
     }
 
+    [SuppressMessage("Style", "IDE0019:Use pattern matching")]
     private async Task<SaveChangesResult> SaveChangesAsync_Internal(CancellationToken cancellationToken)
     {
         if (!_domainContext.IsValid)
@@ -151,17 +151,14 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         }
         catch (UniqueConstraintException ex)
         {
-            Console.WriteLine(ex);
-            var msg = (ex.InnerException!.Data["Detail"] as string)!.Replace('"', '\'');
-            var tblName = ex.InnerException.Data["TableName"] as string;
-            // 500 if not found?
-            _domainContext.AddError(tblName!, msg);
+            if (ex.InnerException?.Data["Detail"] is not string message ||
+                ex.InnerException.Data["TableName"] is not string tableName)
+            {
+                throw;
+            }
+
+            _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
-        // catch (FooException)
-        // {
-        //     // other exceptions
-        //     // log/throw
-        // }
 
         // Interceptors can add domain errors, so check again
         return !_domainContext.IsValid

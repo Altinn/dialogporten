@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using static Digdir.Domain.Dialogporten.Domain.Common.Constants;

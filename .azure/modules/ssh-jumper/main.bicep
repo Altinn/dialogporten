@@ -93,8 +93,8 @@ module virtualMachine '../../modules/virtualMachine/main.bicep' = {
     storageProfile: {
       imageReference: {
         publisher: 'canonical'
-        offer: '0001-com-ubuntu-server-focal'
-        sku: '20_04-lts-gen2'
+        offer: 'ubuntu-24_04-lts'
+        sku: 'server'
         version: 'latest'
       }
       osDisk: {

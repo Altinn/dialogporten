@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 

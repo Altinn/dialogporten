@@ -1,5 +1,4 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -18,6 +17,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
+using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence;
@@ -50,8 +50,12 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<ResourcePolicyInformation> ResourcePolicyInformation => Set<ResourcePolicyInformation>();
     public DbSet<ActorName> ActorName => Set<ActorName>();
 
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-    //    optionsBuilder.LogTo(Console.WriteLine);
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // optionsBuilder.LogTo(Console.WriteLine);
+        optionsBuilder.UseExceptionProcessor();
+    }
+
     internal bool TrySetOriginalRevision<TEntity>(
         TEntity? entity,
         Guid? revision)
@@ -111,7 +115,6 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     {
         // Explicitly configure the Actor entity so that it will register as TPH in the database
         modelBuilder.Entity<Actor>();
-
 
         modelBuilder
             .HasPostgresExtension(Constants.PostgreSqlTrigram)

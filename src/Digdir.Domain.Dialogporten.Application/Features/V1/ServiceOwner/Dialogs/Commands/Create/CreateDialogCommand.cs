@@ -11,9 +11,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
@@ -90,7 +87,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         CreateDialogEndUserContext(request, dialog);
-        await EnsureNoExistingUserDefinedIds(dialog, cancellationToken);
 
         var activityTypes = dialog.Activities
             .Select(x => x.TypeId)
@@ -106,6 +102,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         {
             transmission.Id = transmission.Id.CreateVersion7IfDefault();
         }
+
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,
@@ -113,7 +110,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             maxDepth: 20,
             maxWidth: 20));
 
-        await _db.Dialogs.AddAsync(dialog, cancellationToken);
+        _db.Dialogs.Add(dialog);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
         return saveResult.Match<CreateDialogResult>(
@@ -128,6 +125,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         {
             return null;
         }
+
         var dialogId = await _db.Dialogs
             .Where(x => x.Org == dialog.Org && x.IdempotentKey == dialog.IdempotentKey)
             .Select(x => x.Id)
@@ -155,50 +153,4 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);
     }
-
-    private async Task EnsureNoExistingUserDefinedIds(DialogEntity dialog, CancellationToken cancellationToken)
-    {
-        var existingDialogIds = await _db.GetExistingIds([dialog], cancellationToken);
-        if (existingDialogIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogEntity>(existingDialogIds));
-        }
-
-        var existingActivityIds = await _db.GetExistingIds(dialog.Activities, cancellationToken);
-        if (existingActivityIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogActivity>(existingActivityIds));
-        }
-
-        var existingTransmissionIds = await _db.GetExistingIds(dialog.Transmissions, cancellationToken);
-        if (existingTransmissionIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingTransmissionIds));
-        }
-
-        var existingTransmissionAttachmentIds = await _db.GetExistingIds(dialog.Transmissions.SelectMany(t => t.Attachments), cancellationToken);
-        if (existingTransmissionAttachmentIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogTransmissionAttachment>(existingTransmissionAttachmentIds));
-        }
-
-        var existingAttachmentIds = await _db.GetExistingIds(dialog.Attachments, cancellationToken);
-        if (existingAttachmentIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogAttachment>(existingAttachmentIds));
-        }
-
-        var existingGuiActionIds = await _db.GetExistingIds(dialog.GuiActions, cancellationToken);
-        if (existingGuiActionIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogGuiAction>(existingGuiActionIds));
-        }
-
-        var existingApiActionIds = await _db.GetExistingIds(dialog.ApiActions, cancellationToken);
-        if (existingApiActionIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogApiAction>(existingApiActionIds));
-        }
-    }
-
 }

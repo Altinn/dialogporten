@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.63.1](https://github.com/Altinn/dialogporten/compare/v1.63.0...v1.63.1) (2025-04-22)
+
+
+### Miscellaneous Chores
+
+* **app:** Use EntityFramework.Exceptions ([#2209](https://github.com/Altinn/dialogporten/issues/2209)) ([7899a78](https://github.com/Altinn/dialogporten/commit/7899a78d0be1d016579fdeccbde37a707f68c33c)), closes [#1715](https://github.com/Altinn/dialogporten/issues/1715)
+
 ## [1.63.0](https://github.com/Altinn/dialogporten/compare/v1.62.5...v1.63.0) (2025-04-22)
 
 

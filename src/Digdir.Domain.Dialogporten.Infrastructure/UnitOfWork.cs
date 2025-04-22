@@ -106,7 +106,6 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         }
     }
 
-    [SuppressMessage("Style", "IDE0019:Use pattern matching")]
     private async Task<SaveChangesResult> SaveChangesAsync_Internal(CancellationToken cancellationToken)
     {
         if (!_domainContext.IsValid)

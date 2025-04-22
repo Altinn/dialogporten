@@ -8,6 +8,8 @@ param appInsightsPurgeDataOn30Days = true
 
 param redisVersion = '6.0'
 
+param containerAppEnvZoneRedundancyEnabled = false
+
 // secrets
 param dialogportenPgAdminPassword = readEnvironmentVariable('PG_ADMIN_PASSWORD')
 param sourceKeyVaultSubscriptionId = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID')

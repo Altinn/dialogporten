@@ -19,6 +19,9 @@ param appInsightsConnectionString string
 @description('The ID of the user-assigned managed identity')
 param userAssignedIdentityId string
 
+@description('Whether zone redundancy should be enabled for the container app environment')
+param zoneRedundancyEnabled bool
+
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: appInsightWorkspaceName
 }
@@ -55,10 +58,8 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-10-02-preview' 
         destinations: ['appInsights']
       }
     }
-    zoneRedundant: true
-    availabilityZones: [
-      '1', '2','3'
-    ]
+    zoneRedundant: zoneRedundancyEnabled
+    availabilityZones: zoneRedundancyEnabled ? ['1', '2', '3'] : null
   }
   tags: tags
 }

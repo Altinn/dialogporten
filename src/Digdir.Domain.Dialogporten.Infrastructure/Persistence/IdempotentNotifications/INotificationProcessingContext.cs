@@ -65,14 +65,16 @@ internal sealed class NotificationProcessingContext : INotificationProcessingCon
         }
     }
 
-    public async Task AckHandler(string handlerName, CancellationToken cancellationToken = default)
+    public Task AckHandler(string handlerName, CancellationToken cancellationToken = default)
     {
         EnsureAlive();
-        await _db.NotificationAcknowledgements.AddAsync(new()
+        _db.NotificationAcknowledgements.Add(new()
         {
             EventId = _eventId,
             NotificationHandler = handlerName
-        }, cancellationToken);
+        });
+
+        return Task.CompletedTask;
     }
 
     public Task<bool> HandlerIsAcked(string handlerName, CancellationToken cancellationToken = default)

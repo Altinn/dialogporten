@@ -92,9 +92,9 @@ module virtualMachine '../../modules/virtualMachine/main.bicep' = {
     }
     storageProfile: {
       imageReference: {
-        publisher: 'canonical'
-        offer: 'ubuntu-24_04-lts'
-        sku: 'server'
+        publisher: 'Canonical'
+        offer: '0001-com-ubuntu-server-jammy'
+        sku: '22_04-lts-gen2'
         version: 'latest'
       }
       osDisk: {

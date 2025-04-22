@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.63.2](https://github.com/Altinn/dialogporten/compare/v1.63.1...v1.63.2) (2025-04-22)
+
+
+### Bug Fixes
+
+* **infra:** upgrade os version for virtual machines ([#2215](https://github.com/Altinn/dialogporten/issues/2215)) ([bd90f0c](https://github.com/Altinn/dialogporten/commit/bd90f0cbc464a15f1887671ac3813767eee4894b))
+
 ## [1.63.1](https://github.com/Altinn/dialogporten/compare/v1.63.0...v1.63.1) (2025-04-22)
 
 

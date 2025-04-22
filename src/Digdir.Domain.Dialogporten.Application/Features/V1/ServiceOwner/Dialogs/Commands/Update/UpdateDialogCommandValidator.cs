@@ -1,11 +1,14 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
@@ -17,14 +20,24 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 internal sealed class UpdateDialogCommandValidator : AbstractValidator<UpdateDialogCommand>
 {
-    public UpdateDialogCommandValidator(IValidator<UpdateDialogDto> updateDialogDtoValidator)
+    public UpdateDialogCommandValidator(
+        IValidator<UpdateDialogDto> updateDialogDtoValidator)
     {
         RuleFor(x => x.Id)
             .NotEmpty();
+
         RuleFor(x => x.Dto)
             .NotEmpty()
-            .SetValidator(updateDialogDtoValidator);
+            .SetValidator(updateDialogDtoValidator)
+            .When(DialogIsPreloaded);
     }
+
+    public static bool IsApiOnly<T>(T _, IValidationContext context)
+        => UpdateDialogDataLoader.GetPreloadedData(context)?.IsApiOnly ?? false;
+
+    private static bool DialogIsPreloaded<T>(T _, IValidationContext context)
+        => context.RootContextData.TryGetValue(UpdateDialogDataLoader.Key, out var dialog) &&
+           dialog is not null;
 }
 
 internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogDto>
@@ -36,7 +49,7 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
-        IValidator<ContentDto> contentValidator)
+        IValidator<ContentDto?> contentValidator)
     {
         RuleFor(x => x.Progress)
             .InclusiveBetween(0, 100);
@@ -62,8 +75,22 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.Status)
             .IsInEnum();
 
-        RuleFor(x => x.Content)
-            .SetValidator(contentValidator);
+        RuleFor(x => x.Transmissions)
+            .UniqueBy(x => x.Id);
+
+        // When IsApiOnly is set to true, we only validate content if it's provided
+        // on both the dialog and the transmission level.
+        When(UpdateDialogCommandValidator.IsApiOnly, () =>
+                RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null))
+            .Otherwise(() =>
+                RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator));
+
+        RuleForEach(x => x.Transmissions)
+            .SetValidator(transmissionValidator);
 
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
@@ -94,11 +121,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .UniqueBy(x => x.Id);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
-
-        RuleFor(x => x.Transmissions)
-            .UniqueBy(x => x.Id);
-        RuleForEach(x => x.Transmissions)
-            .SetValidator(transmissionValidator);
 
         RuleFor(x => x.Activities)
             .UniqueBy(x => x.Id);
@@ -197,7 +219,7 @@ internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValid
 {
     public UpdateDialogDialogTransmissionDtoValidator(
         IValidator<ActorDto> actorValidator,
-        IValidator<TransmissionContentDto> contentValidator,
+        IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator)
     {
         RuleFor(x => x.Id)
@@ -222,9 +244,15 @@ internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValid
             .MaximumLength(Constants.DefaultMaxStringLength);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
-        RuleFor(x => x.Content)
-            .NotEmpty()
-            .SetValidator(contentValidator);
+
+        When(UpdateDialogCommandValidator.IsApiOnly, () =>
+                RuleFor(x => x.Content)
+                    .SetValidator(contentValidator)
+                    .When(x => x.Content is not null))
+            .Otherwise(() =>
+                RuleFor(x => x.Content)
+                    .NotEmpty()
+                    .SetValidator(contentValidator));
     }
 }
 

@@ -105,6 +105,13 @@ public class DialogDtoBase
     /// Current display state.
     /// </summary>
     public SystemLabel.Values SystemLabel { get; set; }
+
+    /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
+    /// When true, human-readable content like title and summary are not required.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
     /// <summary>
     /// The latest entry in the dialog's activity log.
     /// </summary>

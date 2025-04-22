@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.62.5](https://github.com/Altinn/dialogporten/compare/v1.62.4...v1.62.5) (2025-04-16)
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-node action to v4.4.0 ([#2201](https://github.com/Altinn/dialogporten/issues/2201)) ([4ed2600](https://github.com/Altinn/dialogporten/commit/4ed2600c487c1e6076c9eede09faacb70b3c8c06))
+* **deps:** update azure/bicep-deploy action to v2.1.0 ([#2195](https://github.com/Altinn/dialogporten/issues/2195)) ([90c8631](https://github.com/Altinn/dialogporten/commit/90c86315249e97d654d589d347665e8ae2b25d28))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.19.0 ([#2196](https://github.com/Altinn/dialogporten/issues/2196)) ([e65033a](https://github.com/Altinn/dialogporten/commit/e65033a0a9e391ae88df53d594be0f7a313d067b))
+* **deps:** update grafana/loki docker tag to v3.4.3 ([#2194](https://github.com/Altinn/dialogporten/issues/2194)) ([5a35eae](https://github.com/Altinn/dialogporten/commit/5a35eae52cc73c672b77d5af1bfd08f6ac1b84cc))
+* **deps:** update jaegertracing/all-in-one docker tag to v1.68.0 ([#2202](https://github.com/Altinn/dialogporten/issues/2202)) ([ed87bde](https://github.com/Altinn/dialogporten/commit/ed87bde98c873c7bbfaa1675efba4c9f45faa796))
+* **deps:** update microsoft dependencies to 9.0.4 ([#2200](https://github.com/Altinn/dialogporten/issues/2200)) ([ae87686](https://github.com/Altinn/dialogporten/commit/ae876868d4d9f9108e8ba3d959579db16851129e))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.123.0 ([#2203](https://github.com/Altinn/dialogporten/issues/2203)) ([abf50bd](https://github.com/Altinn/dialogporten/commit/abf50bdf7ffd65ced7a7410cc25b79bf6bfaa254))
+
 ## [1.62.4](https://github.com/Altinn/dialogporten/compare/v1.62.3...v1.62.4) (2025-04-11)
 
 

@@ -91,6 +91,12 @@ public sealed class CreateDialogDto
     public DateTimeOffset? ExpiresAt { get; set; }
 
     /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
+    /// When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
+    /// <summary>
     /// If set, will override the date and time when the dialog is set as created.
     /// If not supplied, the current date /time will be used.
     /// </summary>
@@ -116,7 +122,7 @@ public sealed class CreateDialogDto
     /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
-    public ContentDto Content { get; set; } = null!;
+    public ContentDto? Content { get; set; }
 
     /// <summary>
     /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
@@ -204,7 +210,7 @@ public sealed class TransmissionDto
     /// <summary>
     /// The transmission unstructured text content.
     /// </summary>
-    public TransmissionContentDto Content { get; set; } = null!;
+    public TransmissionContentDto? Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

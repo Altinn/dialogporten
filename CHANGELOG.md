@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.63.0](https://github.com/Altinn/dialogporten/compare/v1.62.5...v1.63.0) (2025-04-22)
+
+
+### Features
+
+* add IsApiOnly flag to dialogs ([#2043](https://github.com/Altinn/dialogporten/issues/2043)) ([ade2f11](https://github.com/Altinn/dialogporten/commit/ade2f11d85e22c0f9ae42292c6b6bb0c287a006b))
+
+
+### Miscellaneous Chores
+
+* **app:** add-data-preloader ([#2206](https://github.com/Altinn/dialogporten/issues/2206)) ([95d778c](https://github.com/Altinn/dialogporten/commit/95d778c333977a9583bad319b0a83c0ebd33b7c8))
+* **deps:** update dependency bogus to 35.6.3 ([#2211](https://github.com/Altinn/dialogporten/issues/2211)) ([dce0e9e](https://github.com/Altinn/dialogporten/commit/dce0e9e2d16a189137c7d595d635ad82eecea5bb))
+* **deps:** update dependency verify.xunit to v29 ([#2212](https://github.com/Altinn/dialogporten/issues/2212)) ([1fb3a11](https://github.com/Altinn/dialogporten/commit/1fb3a11bc54e64b46a2b84cb99ebc9f19a37db09))
+
 ## [1.62.5](https://github.com/Altinn/dialogporten/compare/v1.62.4...v1.62.5) (2025-04-16)
 
 

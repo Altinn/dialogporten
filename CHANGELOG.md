@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.63.3](https://github.com/Altinn/dialogporten/compare/v1.63.2...v1.63.3) (2025-04-25)
+
+
+### Bug Fixes
+
+* **app:** Respect user defined ids for Attachement, GuiAction and ApiAction on update dialog. ([#2224](https://github.com/Altinn/dialogporten/issues/2224)) ([9401008](https://github.com/Altinn/dialogporten/commit/94010085824e1cf62cdaad6fcc959a4f30c73447))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency htmlagilitypack to 1.12.1 ([#2218](https://github.com/Altinn/dialogporten/issues/2218)) ([d72c0c0](https://github.com/Altinn/dialogporten/commit/d72c0c079001b059a70d4651902a38f034066d97))
+* **deps:** update dependency testcontainers.postgresql to 4.4.0 ([#2219](https://github.com/Altinn/dialogporten/issues/2219)) ([6319256](https://github.com/Altinn/dialogporten/commit/63192564ca4c7aff6c24d5f89c7e604895ac0360))
+* **deps:** update prom/prometheus docker tag to v3.3.0 ([#2220](https://github.com/Altinn/dialogporten/issues/2220)) ([64aefbe](https://github.com/Altinn/dialogporten/commit/64aefbe933a66fd542612e8ea5f1d02024f29395))
+
 ## [1.63.2](https://github.com/Altinn/dialogporten/compare/v1.63.1...v1.63.2) (2025-04-22)
 
 

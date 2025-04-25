@@ -37,8 +37,6 @@ To run the performance test using GitHub Actions, follow these steps:
 2. Select "Run workflow" and fill in the required parameters.
 3. Tag the performance test with a descriptive name.
 
-Currently threshold-tests can not be run from the github-action run workflow
-
 ### GitHub Action with act
 Running with act was mainly used for debugging github workflows without commiting and running from the github site. 
 To run the performance test locally using GitHub Actions and act, perform the following steps:

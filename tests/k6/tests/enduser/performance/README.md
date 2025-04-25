@@ -1,12 +1,12 @@
 # Enduser get dialogs
 
-This directory holds a performance test for all GET endpoints for `api/v1/enduser/dialogs`. The performance test are implemented in the `enduser-search.js`, `enduserRandomSearch.js`, `enduserSearchBreakpoint.js` and `enduserSearchWithThresholds.js` files. The purpose of these tests are to measure the response time and performance of each endpoint when accessed sequentially for different end users. By running this test, you can identify any bottlenecks or performance issues in the API. These tests can be executed from the command line or as part of a GitHub Actions workflow. For more information on how to run the test and view the results, refer to the sections below.
+This directory holds a performance test for all GET endpoints for `api/v1/enduser/dialogs`. The tests are implemented in the `enduser-search.js`, `enduserRandomSearch.js`, `enduserSearchBreakpoint.js` and `enduserSearchWithThresholds.js` files. The purpose of these tests is to measure the response time and performance of each endpoint when accessed sequentially for different end users. By running these tests, you can identify any bottlenecks or performance issues in the API. They can be executed from the command line or as part of a GitHub Actions workflow. For more information on how to run the tests and view the results, refer to the sections below.
 
 ## Prerequisites
 - [K6 prerequisites](../../README.md#Prerequisites)
 
 ## Test description
-The tests has a list of enduser (ssn), and the following endpoints are visited in
+The tests have a list of enduser (ssn), and the following endpoints are visited in
 sequence for each enduser:
 - api/v1/enduser/dialogs?Party=urn:altinn:person:identifier-no:`<ssn>`&search=`<search string>`
 - api/v1/enduser/dialogs/`<dialogId>`
@@ -52,7 +52,7 @@ To run the performance test using GitHub Actions, follow these steps:
 2. Select "Run workflow" and fill in the required parameters.
 3. Tag the performance test with a descriptive name. 
 
-Currently breakpoint-tests and threshold-tests can not be run from the github-action run workflow
+To run breakpoint-tests, follow the same flow from [this action](https://github.com/altinn/dialogporten/actions/workflows/dispatch-k6-breakpoint.yml)
 
 ### GitHub Action with act
 Running with act was mainly used for debugging github workflows without commiting and running from the github site. 

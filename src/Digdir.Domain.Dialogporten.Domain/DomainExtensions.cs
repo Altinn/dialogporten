@@ -1,6 +1,4 @@
-using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Digdir.Domain.Dialogporten.Domain;
 

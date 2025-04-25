@@ -30,8 +30,7 @@ internal sealed class MappingProfile : Profile
             .ForMember(x => x.Id, opt => opt.Ignore());
 
         CreateMap<ApiActionDto, DialogApiAction>()
-            .IgnoreComplexDestinationProperties()
-            .ForMember(x => x.Id, opt => opt.Ignore());
+            .IgnoreComplexDestinationProperties();
 
         CreateMap<ApiActionEndpointDto, DialogApiActionEndpoint>()
             .IgnoreComplexDestinationProperties()
@@ -41,15 +40,13 @@ internal sealed class MappingProfile : Profile
 
         CreateMap<GuiActionDto, DialogGuiAction>()
             .IgnoreComplexDestinationProperties()
-            .ForMember(x => x.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Priority, opt => opt.Ignore())
             .ForMember(dest => dest.PriorityId, opt => opt.MapFrom(src => src.Priority))
             .ForMember(dest => dest.HttpMethod, opt => opt.Ignore())
             .ForMember(dest => dest.HttpMethodId, opt => opt.MapFrom(src => src.HttpMethod));
 
         CreateMap<AttachmentDto, DialogAttachment>()
-            .IgnoreComplexDestinationProperties()
-            .ForMember(x => x.Id, opt => opt.Ignore());
+            .IgnoreComplexDestinationProperties();
 
         CreateMap<AttachmentUrlDto, AttachmentUrl>()
             .IgnoreComplexDestinationProperties()

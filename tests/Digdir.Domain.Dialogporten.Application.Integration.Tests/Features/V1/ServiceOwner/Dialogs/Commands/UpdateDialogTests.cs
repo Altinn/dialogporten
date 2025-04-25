@@ -4,12 +4,18 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
+using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
+using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
+using GuiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.GuiActionDto;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
@@ -292,6 +298,117 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         // Assert
         updateResponse.TryPickT3(out var validationError, out _).Should().BeTrue();
         validationError.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Should_Allow_User_Defined_Id_For_Attachement()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var createCommandResponse = await Application.Send(createDialogCommand);
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+
+        var attachment = new AttachmentDto
+        {
+            Id = Guid.CreateVersion7(),
+            DisplayName = [new() { LanguageCode = "nb", Value = "Test attachment" }],
+            Urls = [new() { Url = new Uri("https://example.com"), ConsumerType = AttachmentUrlConsumerType.Values.Gui }]
+        };
+        updateDialogDto.Attachments.Add(attachment);
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto
+        });
+        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+
+        // Assert
+        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+        getDialogDtoAfterUpdate.TryPickT0(out var currentDialog, out _).Should().BeTrue();
+        currentDialog.Attachments.Should().ContainSingle(x => x.Id == attachment.Id);
+    }
+
+    [Fact]
+    public async Task Should_Allow_User_Defined_Id_For_ApiAction()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var createCommandResponse = await Application.Send(createDialogCommand);
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+
+        var apiAction = new ApiActionDto
+        {
+            Id = Guid.CreateVersion7(),
+            Action = "Test action",
+            Name = "Test action",
+            Endpoints = [new() { Url = new("https://example.com"), HttpMethod = HttpVerb.Values.GET }]
+        };
+        updateDialogDto.ApiActions.Add(apiAction);
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto
+        });
+        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+
+        // Assert
+        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+        getDialogDtoAfterUpdate.TryPickT0(out var currentDialog, out _).Should().BeTrue();
+        currentDialog.ApiActions.Should().Contain(x => x.Id == apiAction.Id);
+    }
+
+    [Fact]
+    public async Task Should_Allow_User_Defined_Id_For_GuiAction()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var createCommandResponse = await Application.Send(createDialogCommand);
+
+        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
+        var getDialogDto = await Application.Send(getDialogQuery);
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
+
+        var guiAction = new GuiActionDto
+        {
+            Id = Guid.CreateVersion7(),
+            Action = "Test action",
+            Title = [new() { LanguageCode = "nb", Value = "Test action" }],
+            Priority = DialogGuiActionPriority.Values.Tertiary,
+            Url = new Uri("https://example.com"),
+        };
+        updateDialogDto.GuiActions.Add(guiAction);
+
+        // Act
+        var updateResponse = await Application.Send(new UpdateDialogCommand
+        {
+            Id = createCommandResponse.AsT0.DialogId,
+            Dto = updateDialogDto
+        });
+        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+
+        // Assert
+        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+        getDialogDtoAfterUpdate.TryPickT0(out var currentDialog, out _).Should().BeTrue();
+        currentDialog.GuiActions.Should().Contain(x => x.Id == guiAction.Id);
     }
 
     private async Task<(CreateDialogCommand, CreateDialogResult)> GenerateDialogWithActivity()

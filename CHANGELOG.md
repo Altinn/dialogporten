@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.63.3](https://github.com/Altinn/dialogporten/compare/v1.63.2...v1.63.3) (2025-04-25)
+
+
+### Bug Fixes
+
+* **app:** Respect user defined ids for Attachement, GuiAction and ApiAction on update dialog. ([#2224](https://github.com/Altinn/dialogporten/issues/2224)) ([9401008](https://github.com/Altinn/dialogporten/commit/94010085824e1cf62cdaad6fcc959a4f30c73447))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency htmlagilitypack to 1.12.1 ([#2218](https://github.com/Altinn/dialogporten/issues/2218)) ([d72c0c0](https://github.com/Altinn/dialogporten/commit/d72c0c079001b059a70d4651902a38f034066d97))
+* **deps:** update dependency testcontainers.postgresql to 4.4.0 ([#2219](https://github.com/Altinn/dialogporten/issues/2219)) ([6319256](https://github.com/Altinn/dialogporten/commit/63192564ca4c7aff6c24d5f89c7e604895ac0360))
+* **deps:** update prom/prometheus docker tag to v3.3.0 ([#2220](https://github.com/Altinn/dialogporten/issues/2220)) ([64aefbe](https://github.com/Altinn/dialogporten/commit/64aefbe933a66fd542612e8ea5f1d02024f29395))
+
+## [1.63.2](https://github.com/Altinn/dialogporten/compare/v1.63.1...v1.63.2) (2025-04-22)
+
+
+### Bug Fixes
+
+* **infra:** upgrade os version for virtual machines ([#2215](https://github.com/Altinn/dialogporten/issues/2215)) ([bd90f0c](https://github.com/Altinn/dialogporten/commit/bd90f0cbc464a15f1887671ac3813767eee4894b))
+
+## [1.63.1](https://github.com/Altinn/dialogporten/compare/v1.63.0...v1.63.1) (2025-04-22)
+
+
+### Miscellaneous Chores
+
+* **app:** Use EntityFramework.Exceptions ([#2209](https://github.com/Altinn/dialogporten/issues/2209)) ([7899a78](https://github.com/Altinn/dialogporten/commit/7899a78d0be1d016579fdeccbde37a707f68c33c)), closes [#1715](https://github.com/Altinn/dialogporten/issues/1715)
+
+## [1.63.0](https://github.com/Altinn/dialogporten/compare/v1.62.5...v1.63.0) (2025-04-22)
+
+
+### Features
+
+* add IsApiOnly flag to dialogs ([#2043](https://github.com/Altinn/dialogporten/issues/2043)) ([ade2f11](https://github.com/Altinn/dialogporten/commit/ade2f11d85e22c0f9ae42292c6b6bb0c287a006b))
+
+
+### Miscellaneous Chores
+
+* **app:** add-data-preloader ([#2206](https://github.com/Altinn/dialogporten/issues/2206)) ([95d778c](https://github.com/Altinn/dialogporten/commit/95d778c333977a9583bad319b0a83c0ebd33b7c8))
+* **deps:** update dependency bogus to 35.6.3 ([#2211](https://github.com/Altinn/dialogporten/issues/2211)) ([dce0e9e](https://github.com/Altinn/dialogporten/commit/dce0e9e2d16a189137c7d595d635ad82eecea5bb))
+* **deps:** update dependency verify.xunit to v29 ([#2212](https://github.com/Altinn/dialogporten/issues/2212)) ([1fb3a11](https://github.com/Altinn/dialogporten/commit/1fb3a11bc54e64b46a2b84cb99ebc9f19a37db09))
+
 ## [1.62.5](https://github.com/Altinn/dialogporten/compare/v1.62.4...v1.62.5) (2025-04-16)
 
 

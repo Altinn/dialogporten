@@ -124,11 +124,17 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
                 .EmptyIfNull()
                 .Count(x => x.Priority == DialogGuiActionPriority.Values.Tertiary) <= 5)
             .WithMessage("Only five tertiary GUI actions are allowed.")
+            .UniqueBy(x => x.Id)
             .ForEach(x => x.SetValidator(guiActionValidator));
+
+        RuleFor(x => x.ApiActions)
+            .UniqueBy(x => x.Id);
 
         RuleForEach(x => x.ApiActions)
             .SetValidator(apiActionValidator);
 
+        RuleFor(x => x.Attachments)
+            .UniqueBy(x => x.Id);
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
 

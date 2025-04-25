@@ -1,6 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
-using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.GraphQl;

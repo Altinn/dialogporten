@@ -1,17 +1,20 @@
 # Graphql get dialogs
 
-This directory holds a performance test with POST for `graphql`. The test files `graphql-search.js`, `graphqlRandomSearch.js` and `graphqlSearchWithThresholds.js` are responsible for executing the performance tests. 
+This directory holds a performance test with POST for `GraphQL`. The test files `graphql-search.js`, `graphqlRandomSearch.js` and `graphqlSearchWithThresholds.js` are responsible for executing the performance tests.
 
 ## Prerequisites
 - [K6 prerequisites](../../README.md#Prerequisites)
 
 ## Test files
+## Test files
+
 The test files associated with this performance test are:
-| Filename | Description |
-|:---:|:---:|
-|graphql-search.js|Does graphql-queries on `party` and `search` for a random set of endusers and random `words`, some giving no hits. Equal to the way AF does searches|
-|graphqlRandomSearch.js|Does random graphql-queries on a predefined list of search-combinations, picking random values for the parameters|
-|graphqlSearchWithThresholds.js|Does the same as `graphql-search.js`, failing the test if response times exceed 500ms. Runs in the CI/CD yt01 pipeline|
+
+| Filename                          | Description                                                                                                                       |
+|:---------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------|
+| graphql-search.js                 | Performs GraphQL queries on `party` and `search` for a random set of end users and random words, some yielding no hits—mirroring AF. |
+| graphqlRandomSearch.js            | Performs random GraphQL queries from a predefined list of search combinations, selecting parameters at random.                     |
+| graphqlSearchWithThresholds.js    | Same as `graphql-search.js` but fails if response times exceed 500 ms; used in the CI/CD yt01 pipeline.                           |
 
 
 ## Run tests
@@ -38,7 +41,7 @@ To run the performance test using GitHub Actions, follow these steps:
 3. Tag the performance test with a descriptive name.
 
 ### GitHub Action with act
-Running with act was mainly used for debugging github workflows without commiting and running from the github site. 
+Running with act is primarily used for debugging GitHub workflows locally without committing to the repository. 
 To run the performance test locally using GitHub Actions and act, perform the following steps:
 1. [Install act](https://nektosact.com/installation/).
 2. Navigate to the root of the repository.
@@ -52,15 +55,15 @@ TOKEN_GENERATOR_PASSWORD:<passwd>
 4. Run `act` using the command below. Replace `<path-to-testscript>`, `<vus>` and `<duration>` with the desired values:
 ```shell
 act workflow_dispatch \
--j k6-performance -\
+-j k6-performance \
 s GITHUB_TOKEN=`gh auth token` \
 --container-architecture linux/amd64 \
---artifact-server-path $HOME/.act \ 
+--artifact-server-path $HOME/.act \
 --input vus=<vus> \
 --input duration=<duration> \ 
 --input testSuitePath=<path-to-testscript>
 ```
 
 ## Test Results
-The test results from tests run from Github actions can be found in GitHub action run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus).
+The test results from tests run from GitHub Actions can be found in the GitHub Actions run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus).
 Otherwise, see the output from your CLI

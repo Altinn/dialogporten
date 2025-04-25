@@ -55,7 +55,7 @@ To run the performance test using GitHub Actions, follow these steps:
 To run breakpoint-tests, follow the same flow from [this action](https://github.com/altinn/dialogporten/actions/workflows/dispatch-k6-breakpoint.yml)
 
 ### GitHub Action with act
-Running with act was mainly used for debugging github workflows without commiting and running from the github site. 
+Running with act is primarily used for debugging GitHub workflows locally without committing to the repository.
 To run the performance test locally using GitHub Actions and act, perform the following steps:
 1. [Install act](https://nektosact.com/installation/).
 2. Navigate to the root of the repository.
@@ -79,5 +79,5 @@ act workflow_dispatch \
 ```
 
 ## Test Results
-The test results from tests run from Github actions can be found in GitHub action run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus).
+The test results from tests run from GitHub Actions can be found in the GitHub Actions run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus).
 Otherwise, see the output from your CLI

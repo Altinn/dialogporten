@@ -198,6 +198,10 @@ internal static class AggregateExtensions
                     $"is empty or contains null values.");
             }
 
+            // Adding a new entity with a custom primary key and hitting this error? Here's the deal:
+            // EF checks the key to guess if it's new or existing. If the key is set, EF thinks
+            // it's existing and marks it as Modified. To add it properly, manually set
+            // childEntry.State = EntityState.Added. This can be done through DbContext.Add(entity).
             var parentEntity = await childEntry.Context
                 .FindAsync(parentType, parentPrimaryKey, cancellationToken: cancellationToken)
                 ?? throw new InvalidOperationException(

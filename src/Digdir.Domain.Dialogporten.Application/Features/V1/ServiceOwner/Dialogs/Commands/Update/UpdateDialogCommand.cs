@@ -142,7 +142,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             .Merge(request.Dto.GuiActions,
                 destinationKeySelector: x => x.Id,
                 sourceKeySelector: x => x.Id,
-                create: _mapper.Map<List<DialogGuiAction>>,
+                create: CreateGuiActions,
                 update: _mapper.Update,
                 delete: DeleteDelegate.NoOp);
 
@@ -287,12 +287,20 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _db.DialogTransmissions.AddRange(newDialogTransmissions);
     }
 
+    private IEnumerable<DialogGuiAction> CreateGuiActions(IEnumerable<GuiActionDto> creatables)
+    {
+        var guiActions = _mapper.Map<List<DialogGuiAction>>(creatables);
+        _db.DialogGuiActions.AddRange(guiActions);
+        return guiActions;
+    }
+
     private IEnumerable<DialogApiAction> CreateApiActions(IEnumerable<ApiActionDto> creatables)
     {
         return creatables.Select(x =>
         {
             var apiAction = _mapper.Map<DialogApiAction>(x);
             apiAction.Endpoints = _mapper.Map<List<DialogApiActionEndpoint>>(x.Endpoints);
+            _db.DialogApiActions.Add(apiAction);
             return apiAction;
         });
     }
@@ -319,6 +327,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         {
             var attachment = _mapper.Map<DialogAttachment>(attachmentDto);
             attachment.Urls = _mapper.Map<List<AttachmentUrl>>(attachmentDto.Urls);
+            _db.DialogAttachments.Add(attachment);
             return attachment;
         });
     }

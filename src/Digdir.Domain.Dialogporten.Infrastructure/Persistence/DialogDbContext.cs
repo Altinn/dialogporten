@@ -49,6 +49,8 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<NotificationAcknowledgement> NotificationAcknowledgements => Set<NotificationAcknowledgement>();
     public DbSet<ResourcePolicyInformation> ResourcePolicyInformation => Set<ResourcePolicyInformation>();
     public DbSet<ActorName> ActorName => Set<ActorName>();
+    public DbSet<DialogAttachment> DialogAttachments => Set<DialogAttachment>();
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

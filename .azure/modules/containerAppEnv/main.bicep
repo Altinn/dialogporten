@@ -19,11 +19,11 @@ param appInsightsConnectionString string
 @description('The ID of the user-assigned managed identity')
 param userAssignedIdentityId string
 
-resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-02-01' existing = {
   name: appInsightWorkspaceName
 }
 
-resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-10-02-preview' = {
+resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-01-01' = {
   name: '${namePrefix}-cae'
   location: location
   identity: {

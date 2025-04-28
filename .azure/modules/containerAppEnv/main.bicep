@@ -22,7 +22,7 @@ param userAssignedIdentityId string
 @description('Whether zone redundancy should be enabled for the container app environment')
 param zoneRedundancyEnabled bool
 
-resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-02-01' existing = {
   name: appInsightWorkspaceName
 }
 

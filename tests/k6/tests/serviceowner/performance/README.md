@@ -109,5 +109,5 @@ Replace `<(test|staging|yt01)>` with the appropriate environment where the test 
 This script will remove any dialogs created during the performance test, ensuring a clean state for future tests.
 
 ### Test Results
-The test results from tests run from GitHub Actions can be found in the GitHub Actions run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/ccbb2351-2ae2-462f-ae0e-f2c893ad1028/k6-prometheus). 
+The test results from tests run from GitHub Actions can be found in the GitHub Actions run log and [grafana](https://altinn-grafana-test-b2b8dpdkcvfuhfd3.eno.grafana.azure.com/d/eek8vrtzba8e8a/k6-prometheus-dialogporten?orgId=1&refresh=30s&var-DS_PROMETHEUS=k6tests-amw&var-namespace=dialogporten&var-testid=All&var-quantile_stat=p99&from=now-30m&to=now&var-adhoc_filter=url%7C%21~%7Ctesttools). 
 Otherwise, see the output from your CLI

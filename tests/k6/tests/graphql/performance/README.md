@@ -56,7 +56,7 @@ TOKEN_GENERATOR_PASSWORD:<passwd>
 ```shell
 act workflow_dispatch \
 -j k6-performance \
-s GITHUB_TOKEN=`gh auth token` \
+-s GITHUB_TOKEN=`gh auth token` \
 --container-architecture linux/amd64 \
 --artifact-server-path $HOME/.act \
 --input vus=<vus> \

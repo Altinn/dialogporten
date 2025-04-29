@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.64.0](https://github.com/Altinn/dialogporten/compare/v1.63.3...v1.64.0) (2025-04-28)
+
+
+### Features
+
+* **infra:** enable HA for container app envs ([#2167](https://github.com/Altinn/dialogporten/issues/2167)) ([3e915ea](https://github.com/Altinn/dialogporten/commit/3e915ea67a45be17157d62a544b34a6cb1f08fcc))
+
+
+### Miscellaneous Chores
+
+* **deps:** update fusioncache dependencies to 2.2.0 ([#2227](https://github.com/Altinn/dialogporten/issues/2227)) ([e3540ca](https://github.com/Altinn/dialogporten/commit/e3540ca4f2104cf4ba8b5de98522e9fe38e65e3a))
+* **deps:** update nginx docker tag to v1.27.5 ([#2226](https://github.com/Altinn/dialogporten/issues/2226)) ([91854e7](https://github.com/Altinn/dialogporten/commit/91854e767bbdc2beb9609a9362c32c1403269233))
+
 ## [1.63.3](https://github.com/Altinn/dialogporten/compare/v1.63.2...v1.63.3) (2025-04-25)
 
 

@@ -1,6 +1,6 @@
 # Graphql get dialogs
 
-This directory holds a performance test with POST for `GraphQL`. The test files `graphql-search.js`, `graphqlRandomSearch.js` and `graphqlSearchWithThresholds.js` are responsible for executing the performance tests.
+These performance tests execute POST requests against GraphQL endpoints using the scripts `graphql-search.js`, `graphqlRandomSearch.js`, and `graphqlSearchWithThresholds.js`
 
 ## Prerequisites
 - [K6 prerequisites](../../README.md#Prerequisites)
@@ -24,7 +24,7 @@ cd tests/k6/tests/graphql/performance
 ```
 2. Run the test using the following command. Replace `<test file>`, `<(test|staging|yt01)>`, `<vus>`, and `<duration>` with the desired values. If the environment variables (-e options) are set beforehand, they can be omitted:
 ```shell
-k6 run <test file> \
+k6 run <test-file> \
 -e API_VERSION=v1 \
 -e TOKEN_GENERATOR_USERNAME=<username> \
 -e TOKEN_GENERATOR_PASSWORD=<passwd> \
@@ -59,7 +59,7 @@ act workflow_dispatch \
 --container-architecture linux/amd64 \
 --artifact-server-path $HOME/.act \
 --input vus=<vus> \
---input duration=<duration> \ 
+--input duration=<duration> \
 --input testSuitePath=<path-to-testscript>
 ```
 

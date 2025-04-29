@@ -1,6 +1,6 @@
 ## Service Owner Performance Test
 
-This performance test directory focuses on evaluating the GET and POST endpoints of the `serviceowner` API. The test files associated with this performance test are `create-dialog.js`, `create-remove-dialog.js`, `create-transmissions.js`, `serviceowner-search.js`, `createDialogBreakpoint.js`, `createDialogWithThresholds.js`, `createTransmissionsBreakpoint.js`, `createTransmissionsWithThresholds.js`, `serviceOwnerRandomSearch.js`, `serviceOwnerSearchBreakpoint.js`, `serviceOwnerSearchWithThreshold.js` and `purge-dialogs.js`. These files are designed to measure the performance and scalability of the API endpoints under different scenarios. By running these tests, you can gain insights into the system's response time, throughput, and resource utilization. Use the instructions below to execute the performance test and analyze the results.
+This performance test directory focuses on evaluating the GET and POST endpoints of the `serviceowner` API. The tests are designed to measure the performance and scalability of the API endpoints under different scenarios. By running them, you can gain insights into the system's response time, throughput, and resource utilization. Use the instructions below to execute the performance test and analyze the results.
 
 ### Prerequisites
 Before running the performance test, make sure you have met the following prerequisites:
@@ -8,6 +8,7 @@ Before running the performance test, make sure you have met the following prereq
 
 ### Test Files
 The test files associated with this performance test are:
+
 |Filename|Description|
 |:---:|:---:|
 |create-dialog.js|Create dialogs|
@@ -70,9 +71,9 @@ act workflow_dispatch \
 -j k6-performance \
 -s GITHUB_TOKEN=`gh auth token` \
 --container-architecture linux/amd64 \
---artifact-server-path $HOME/.act \ 
+--artifact-server-path $HOME/.act \
 --input vus=<vus> \
---input duration=<duration> \ 
+--input duration=<duration> \
 --input testSuitePath=<path-to-testscript> 
 ```
 

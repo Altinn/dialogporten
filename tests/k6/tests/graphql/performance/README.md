@@ -6,7 +6,6 @@ This directory holds a performance test with POST for `GraphQL`. The test files 
 - [K6 prerequisites](../../README.md#Prerequisites)
 
 ## Test files
-## Test files
 
 The test files associated with this performance test are:
 

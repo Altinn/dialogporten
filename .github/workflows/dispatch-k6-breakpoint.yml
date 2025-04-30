@@ -36,6 +36,11 @@ on:
         required: true
         default: 1
         type: number
+      numberOfEndUsers:
+        description: 'Number of end users'
+        required: true
+        default: 2799
+        type: number 
       abortOnFail:
         description: 'Abort on fail'
         required: true
@@ -67,6 +72,7 @@ jobs:
       vus: ${{ fromJson(inputs.targetVus) }}
       duration: ${{ inputs.duration }}
       parallelism: ${{ fromJson(inputs.parallelism) }}
+      numberOfEndUsers: ${{ fromJson(inputs.numberOfEndUsers) }}
       abortOnFail: ${{ inputs.abortOnFail }}
       breakpoint: true
 

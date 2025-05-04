@@ -92,22 +92,15 @@ public static class Program
         var consumerTasks = new List<Task>();
         for (var i = 0; i < Consumers; i++)
         {
-            if (options.Submit)
+            Func<Task> consumerAction = options switch
             {
                 // ReSharper disable once AccessToDisposedClosure
-                consumerTasks.Add(Task.Run(() =>
-                    ConsumeDialogsAndPost(options, reader, client, cancellationToken), cancellationToken));
-            }
-            else if (options.WriteToDisk)
-            {
-                consumerTasks.Add(Task.Run(() =>
-                    ConsumeDialogsAndWriteToFile(reader, cancellationToken), cancellationToken));
-            }
-            else // Benchmark
-            {
-                consumerTasks.Add(Task.Run(() =>
-                    ConsumeDialogsAndDiscards(reader, cancellationToken), cancellationToken));
-            }
+                { Submit: true } => () => ConsumeDialogsAndPost(options, reader, client, cancellationToken),
+                { WriteToDisk: true } => () => ConsumeDialogsAndWriteToFile(reader, cancellationToken),
+                _ => () => ConsumeDialogsAndDiscards(reader, cancellationToken)
+            };
+
+            consumerTasks.Add(Task.Run(consumerAction, cancellationToken));
         }
 
         await producerTask;
@@ -292,17 +285,7 @@ public static class Program
     {
         await foreach (var _ in reader.ReadAllAsync(cancellationToken))
         {
-            try
-            {
-                Interlocked.Increment(ref _dialogCounter);
-            }
-            catch (Exception ex)
-            {
-                if (!cancellationToken.IsCancellationRequested)
-                {
-                    Console.WriteLine($"\nException occurred while processing dialog: {ex.Message}");
-                }
-            }
+            Interlocked.Increment(ref _dialogCounter);
         }
     }
 
@@ -314,7 +297,7 @@ public static class Program
             try
             {
                 var json = JsonSerializer.Serialize(item.Item2, JsonSerializerOptions);
-                await File.WriteAllTextAsync($"{OutputDirectory}/dialog_{string.Format(CultureInfo.InvariantCulture, "{0:D6}", item.Item1)}.json", json, cancellationToken);
+                await File.WriteAllTextAsync($"{OutputDirectory}/dialog_{item.Item1:D6}.json", json, cancellationToken);
                 Interlocked.Increment(ref _dialogCounter);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -325,7 +308,7 @@ public static class Program
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    Console.WriteLine($"\nException occurred while posting dialog: {ex.Message}");
+                    Console.WriteLine($"\nException occurred while writing dialog to file: {ex.Message}");
                 }
             }
         }

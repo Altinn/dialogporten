@@ -28,22 +28,22 @@ public static class DialogGenerator
         .RuleFor(o => o.Value, f => f.Random.AlphaNumeric(10));
 
     private static readonly Faker<AttachmentUrlDto> AttachmentUrlFaker = new Faker<AttachmentUrlDto>()
-        .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps))) // Potential Optimization: Use string or reuse Uri instances
+        .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
         .RuleFor(o => o.ConsumerType, f => f.PickRandom<AttachmentUrlConsumerType.Values>());
 
     private static readonly Faker<AttachmentDto> AttachmentFaker = new Faker<AttachmentDto>()
         .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.DisplayName, f => GenerateFakeLocalizations(f.Random.Number(2, 5)))
-        .RuleFor(o => o.Urls, _ => AttachmentUrlFaker.Generate(MyRandomizer.Number(1, 3))); // Reuse static faker
+        .RuleFor(o => o.Urls, _ => AttachmentUrlFaker.Generate(MyRandomizer.Number(1, 3)));
 
     private static readonly Faker<ApiActionEndpointDto> ApiActionEndpointFaker = new Faker<ApiActionEndpointDto>()
-        .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps))) // Potential Optimization
+        .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
         .RuleFor(o => o.HttpMethod, f => f.PickRandom<HttpVerb.Values>())
         .RuleFor(o => o.Version, f => "v" + f.Random.Number(100, 999))
         .RuleFor(o => o.Deprecated, f => f.Random.Bool())
-        .RuleFor(o => o.RequestSchema, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps))) // Potential Optimization
-        .RuleFor(o => o.ResponseSchema, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps))) // Potential Optimization
-        .RuleFor(o => o.DocumentationUrl, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps))); // Potential Optimization
+        .RuleFor(o => o.RequestSchema, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
+        .RuleFor(o => o.ResponseSchema, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
+        .RuleFor(o => o.DocumentationUrl, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)));
 
     private static readonly Faker<ApiActionDto> ApiActionFaker = new Faker<ApiActionDto>()
         .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
@@ -304,11 +304,6 @@ public static class DialogGenerator
     private static readonly int BirthDateRangeDays = (BirthDateRangeEnd - BirthDateRangeBegin).Days;
 
     private static string GenerateFakePid()
-    {
-        return GenerateNewFakePid();
-    }
-
-    private static string GenerateNewFakePid() // Renamed original logic
     {
         int c1, c2;
         string pidWithoutControlDigits;

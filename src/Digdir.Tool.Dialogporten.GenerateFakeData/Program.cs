@@ -30,7 +30,8 @@ public static class Program
 
     private static int _dialogCounter;
     private static readonly Stopwatch Stopwatch = new();
-    private static readonly Randomizer MyRandomizer = new();
+    private static Randomizer MyRandomizer => _threadRandomizer ??= new Randomizer();
+    [ThreadStatic] private static Randomizer? _threadRandomizer;
 
     private static async Task RunAsync(Options options)
     {
@@ -252,13 +253,18 @@ public static class Program
             try
             {
                 var json = JsonSerializer.Serialize(item.Item2, JsonSerializerOptions);
-                var content = new StringContent(json, Encoding.Unicode, "application/json");
+                using var request = new HttpRequestMessage(HttpMethod.Post, options.Url)
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                };
 
-                client.DefaultRequestHeaders.Authorization = !string.IsNullOrWhiteSpace(options.Token)
-                    ? new AuthenticationHeaderValue("Bearer", options.Token)
-                    : null;
+                if (!string.IsNullOrWhiteSpace(options.Token))
+                {
+                    request.Headers.Authorization =
+                        new AuthenticationHeaderValue("Bearer", options.Token);
+                }
 
-                var response = await client.PostAsync(options.Url, content, cancellationToken);
+                var response = await client.SendAsync(request, cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {

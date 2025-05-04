@@ -18,8 +18,11 @@ namespace Digdir.Tool.Dialogporten.GenerateFakeData;
 public static class DialogGenerator
 {
     private static readonly DateTime RefTime = new(2026, 1, 1);
-    private static readonly Randomizer MyRandomizer = new();
-    private static readonly Faker MyFaker = new();
+
+    [ThreadStatic] private static Randomizer? _rnd;
+    [ThreadStatic] private static Faker? _faker;
+    private static Randomizer MyRandomizer => _rnd ??= new Randomizer();
+    private static Faker MyFaker => _faker ??= new Faker();
 
     private static readonly Faker<SearchTagDto> SearchTagFaker = new Faker<SearchTagDto>()
         .RuleFor(o => o.Value, f => f.Random.AlphaNumeric(10));

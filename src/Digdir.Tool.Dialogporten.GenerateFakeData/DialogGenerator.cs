@@ -373,6 +373,9 @@ public static class DialogGenerator
         if (type != null)
         {
             activity.Type = type.Value;
+            activity.Description = (activity.Type == DialogActivityType.Values.Information
+                ? GenerateFakeLocalizations(MyRandomizer.Number(4, 8)) // Potential Optimization
+                : null)!;
         }
 
         return activity;

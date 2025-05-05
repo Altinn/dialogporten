@@ -183,7 +183,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         }
 
         var paginatedList = await dialogQuery
-            .AsSingleQuery()
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
             .WhereIf(!request.ServiceResource.IsNullOrEmpty(),

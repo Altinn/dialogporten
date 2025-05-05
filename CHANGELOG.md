@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.64.1](https://github.com/Altinn/dialogporten/compare/v1.64.0...v1.64.1) (2025-05-05)
+
+
+### Bug Fixes
+
+* Reduce isolation level for outbox ([#2243](https://github.com/Altinn/dialogporten/issues/2243)) ([59b7489](https://github.com/Altinn/dialogporten/commit/59b74894633748ad97c38931ddc70c95ddbf369b))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency microsoft.azure.appconfiguration.aspnetcore to 8.1.2 ([#2234](https://github.com/Altinn/dialogporten/issues/2234)) ([f70b4a5](https://github.com/Altinn/dialogporten/commit/f70b4a5914f53e0bd3e7b7ebad046d76fad467c5))
+* **deps:** update dependency verify.xunit to 29.3.0 ([#2235](https://github.com/Altinn/dialogporten/issues/2235)) ([5a1324e](https://github.com/Altinn/dialogporten/commit/5a1324ef1c671c4717d9f9e42a1b48c5e7e84cc0))
+* **deps:** update dotnet monorepo ([#2232](https://github.com/Altinn/dialogporten/issues/2232)) ([0ec9632](https://github.com/Altinn/dialogporten/commit/0ec9632027f7130b9f69c6dcacd718e7ce0b718a))
+* **deps:** update grafana docker tag to v11.2.2 ([#2237](https://github.com/Altinn/dialogporten/issues/2237)) ([166121f](https://github.com/Altinn/dialogporten/commit/166121f775aa75fc8aa02f88af45bf0208e6d99e))
+* Improve dialog generator ([#2242](https://github.com/Altinn/dialogporten/issues/2242)) ([072db77](https://github.com/Altinn/dialogporten/commit/072db77bdc6a6df41d12b325916d3b7340757a28))
+
 ## [1.64.0](https://github.com/Altinn/dialogporten/compare/v1.63.3...v1.64.0) (2025-04-28)
 
 

@@ -209,14 +209,11 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 .ToList();
         }
 
-        using (_logger.TimeOperation(nameof(AuthorizationHelper.CollapseSubjectResources)))
-        {
-            return await AuthorizationHelper.CollapseSubjectResources(
-                authorizedParties,
-                request.ConstraintServiceResources,
-                GetAllSubjectResources,
-                cancellationToken);
-        }
+        return await AuthorizationHelper.CollapseSubjectResources(
+            authorizedParties,
+            request.ConstraintServiceResources,
+            GetAllSubjectResources,
+            cancellationToken);
     }
     private async Task<List<SubjectResource>> GetAllSubjectResources(CancellationToken cancellationToken) =>
         await _subjectResourcesCache.GetOrSetAsync(nameof(SubjectResource), async ct =>

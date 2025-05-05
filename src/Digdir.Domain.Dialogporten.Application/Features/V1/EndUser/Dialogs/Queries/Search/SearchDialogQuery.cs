@@ -161,7 +161,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
         var paginatedList = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
-            .AsSingleQuery()
             .AsNoTracking()
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)

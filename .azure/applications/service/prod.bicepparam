@@ -8,6 +8,10 @@ param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_V
 param appConfigurationName = readEnvironmentVariable('AZURE_APP_CONFIGURATION_NAME')
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')
 param serviceBusNamespaceName = readEnvironmentVariable('AZURE_SERVICE_BUS_NAMESPACE_NAME')
+param resources = {
+    cpu: 2
+    memory: '4Gi'
+}
 
 param otelTraceSamplerRatio = '1'
 

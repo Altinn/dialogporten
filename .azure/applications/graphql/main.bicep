@@ -132,7 +132,7 @@ var probes = [
 
 @description('The scaling configuration for the container app')
 param scale Scale = {
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 10
   rules: [
     {

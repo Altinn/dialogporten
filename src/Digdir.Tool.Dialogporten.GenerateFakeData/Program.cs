@@ -1,9 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Channels;
 using Bogus;
 using CommandLine;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -13,10 +14,11 @@ namespace Digdir.Tool.Dialogporten.GenerateFakeData;
 public static class Program
 {
     private const int RefreshRateMs = 200; // How often the progress is updated
-    private const int DialogsPerBatch = 20; // How many dialogs to generate per call DialogGenerator
-    private const int BoundedCapacity = 300; // Max number of dialogs in the queue
-    private const int Consumers = 4; // Number of consumers posting to the API
+    private const int DialogsPerBatch = 5; // How many dialogs to generate per call DialogGenerator
+    private const int BoundedCapacity = 1000; // Max number of dialogs in the queue
+    private const int Consumers = 20; // Number of consumers posting to the API
     private const string FailedDirectory = "failed"; // Directory to write failed requests to
+    private const string OutputDirectory = "output"; // Directory to write files to when not posting to the API
 
     public static async Task Main(string[] args) => await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(RunAsync);
 
@@ -28,20 +30,51 @@ public static class Program
 
     private static int _dialogCounter;
     private static readonly Stopwatch Stopwatch = new();
+    private static Randomizer MyRandomizer => _threadRandomizer ??= new Randomizer();
+    [ThreadStatic] private static Randomizer? _threadRandomizer;
+
     private static async Task RunAsync(Options options)
     {
-        if (!options.Submit)
+        if (options is { Submit: false, WriteToDisk: false, Benchmark: false })
         {
             Randomizer.Seed = new Random(options.Seed);
             var dialogs = DialogGenerator.GenerateFakeDialogs(
-                seed: new Randomizer().Number(int.MaxValue),
-                count: options.Count, serviceResourceGenerator: () => MaybeGetRandomResource(options), partyGenerator: () => MaybeGetRandomParty(options));
+                count: options.Count, serviceResourceGenerator: () => MaybeGetRandomResource(options),
+                partyGenerator: () => MaybeGetRandomParty(options));
             var serialized = JsonSerializer.Serialize(dialogs, JsonSerializerOptions);
             Console.WriteLine(serialized);
             return;
         }
 
-        var dialogQueue = new BlockingCollection<(int, CreateDialogDto)>(BoundedCapacity);
+        if (options is { Submit: true, WriteToDisk: true })
+        {
+            Console.WriteLine("You can only choose one of --submit or --write");
+            return;
+        }
+
+        if (options is { Submit: true, Benchmark: true } or { WriteToDisk: true, Benchmark: true })
+        {
+            Console.WriteLine("You cannot supply --submit or --write together with --benchmark");
+            return;
+        }
+
+        if (options.WriteToDisk)
+        {
+            Directory.CreateDirectory(OutputDirectory);
+        }
+
+        var channel = Channel.CreateBounded<(int, CreateDialogDto)>(
+            new BoundedChannelOptions(BoundedCapacity)
+            {
+                SingleWriter = false,
+                SingleReader = false,
+                // When the channel is full, WriteAsync will wait (backpressure).
+                FullMode = BoundedChannelFullMode.Wait
+            });
+
+        var writer = channel.Writer;
+        var reader = channel.Reader;
+
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
@@ -53,15 +86,21 @@ public static class Program
         Console.WriteLine($"Generating {options.Count} fake dialogs...");
         Stopwatch.Start();
 
-        var producerTask = Task.Run(() => ProduceDialogs(options, dialogQueue, cancellationToken), cancellationToken);
+        var producerTask = Task.Run(() => ProduceDialogs(options, writer, cancellationToken), cancellationToken);
         var progressTask = Task.Run(() => UpdateProgress(options, cancellationToken), cancellationToken);
 
         var consumerTasks = new List<Task>();
         for (var i = 0; i < Consumers; i++)
         {
-            // ReSharper disable once AccessToDisposedClosure
-            consumerTasks.Add(Task.Run(() =>
-                ConsumeDialogsAndPost(options, dialogQueue, client, cancellationToken), cancellationToken));
+            Func<Task> consumerAction = options switch
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                { Submit: true } => () => ConsumeDialogsAndPost(options, reader, client, cancellationToken),
+                { WriteToDisk: true } => () => ConsumeDialogsAndWriteToFile(reader, cancellationToken),
+                _ => () => ConsumeDialogsAndDiscards(reader, cancellationToken)
+            };
+
+            consumerTasks.Add(Task.Run(consumerAction, cancellationToken));
         }
 
         await producerTask;
@@ -74,8 +113,12 @@ public static class Program
         await progressTask;
     }
 
+    private const double RateCalculationIntervalMilliseconds = 1000;
     private static async Task UpdateProgress(Options options, CancellationToken cancellationToken)
     {
+        var lastRateElapsedMilliseconds = 0L;
+        var lastRateDialogCount = 0.0;
+        var rateLastPeriod = 0.0;
         while (!cancellationToken.IsCancellationRequested)
         {
             if (_dialogCounter == 0 || Stopwatch.ElapsedMilliseconds == 0)
@@ -84,10 +127,21 @@ public static class Program
                 continue;
             }
 
+            var elapsedSinceLastRateCalc = Stopwatch.ElapsedMilliseconds - lastRateElapsedMilliseconds;
+
+            if (elapsedSinceLastRateCalc >= RateCalculationIntervalMilliseconds)
+            {
+                var dialogsInInterval = _dialogCounter - lastRateDialogCount;
+                rateLastPeriod = dialogsInInterval / elapsedSinceLastRateCalc;
+                lastRateDialogCount = _dialogCounter;
+                lastRateElapsedMilliseconds = Stopwatch.ElapsedMilliseconds;
+            }
+
             Console.Write(
-                "\rProgress: {0}/{1} dialogs created, {2:F1} dialogs/second.",
+                "\rProgress: {0}/{1} dialogs created, {2:F1} dialogs/second ({3:F1} dialogs/second total).",
                 _dialogCounter,
                 options.Count,
+                rateLastPeriod * 1000,
                 _dialogCounter / Stopwatch.Elapsed.TotalSeconds);
 
             await Task.Delay(RefreshRateMs, cancellationToken);
@@ -98,98 +152,112 @@ public static class Program
         }
 
         Console.WriteLine(
-            "\r{0}/{1} dialogs created in {2:F1} seconds ({3:F1} dialogs/second).",
+            "\r{0}/{1} dialogs created in {2:F1} seconds ({3:F1} dialogs/second).                               ",
             _dialogCounter,
             options.Count,
             Stopwatch.Elapsed.TotalSeconds,
             _dialogCounter / Stopwatch.Elapsed.TotalSeconds);
     }
 
-    private static void ProduceDialogs(Options options, BlockingCollection<(int, CreateDialogDto)> dialogQueue, CancellationToken cancellationToken)
+    private static async Task ProduceDialogs(Options options, ChannelWriter<(int, CreateDialogDto)> writer, CancellationToken cancellationToken)
     {
-        Randomizer.Seed = new Random(options.Seed);
         var totalDialogs = options.Count;
         var dialogCounter = 0;
 
-        while (dialogCounter < totalDialogs && !cancellationToken.IsCancellationRequested)
+        try
         {
-            var dialogsToGenerate = Math.Min(DialogsPerBatch, totalDialogs - dialogCounter);
-            var dialogs = DialogGenerator.GenerateFakeDialogs(
-                seed: new Randomizer().Number(int.MaxValue),
-                count: dialogsToGenerate, serviceResourceGenerator: () => MaybeGetRandomResource(options), partyGenerator: () => MaybeGetRandomParty(options)).Take(dialogsToGenerate);
-            foreach (var dialog in dialogs)
+            while (dialogCounter < totalDialogs && !cancellationToken.IsCancellationRequested)
             {
-                dialogQueue.Add((dialogCounter + 1, dialog), cancellationToken);
-                dialogCounter++;
+                var dialogsToGenerate = Math.Min(DialogsPerBatch, totalDialogs - dialogCounter);
+                var dialogs = DialogGenerator.GenerateFakeDialogs(
+                        count: dialogsToGenerate,
+                        serviceResourceGenerator: () => MaybeGetRandomResource(options),
+                        partyGenerator: () => MaybeGetRandomParty(options))
+                    .Take(dialogsToGenerate);
 
-                if (dialogCounter >= totalDialogs)
-                    break;
+                foreach (var dialog in dialogs)
+                {
+                    await writer.WriteAsync((dialogCounter + 1, dialog), cancellationToken);
+                    dialogCounter++;
+
+                    if (dialogCounter >= totalDialogs)
+                        break;
+                }
             }
         }
-
-        dialogQueue.CompleteAdding();
+        finally
+        {
+            writer.Complete();
+        }
     }
 
     private static List<string> _resourceList = [];
     private static string? MaybeGetRandomResource(Options options)
     {
         if (options.ResourceListPath == string.Empty) return null;
-        if (_resourceList.Count == 0)
+        if (_resourceList.Count != 0)
         {
-            if (!File.Exists(options.ResourceListPath))
-            {
-                throw new FileNotFoundException($"{options.ResourceListPath} was not found");
-            }
-
-            _resourceList = File.ReadLines(options.ResourceListPath).ToList();
-            if (_resourceList.Count == 0)
-            {
-                throw new InvalidOperationException(
-                    $"{options.ResourceListPath} needs to contain newline separated resources (eg. urn:altinn:resource:foobar)");
-            }
+            return _resourceList[MyRandomizer.Number(_resourceList.Count - 1)];
         }
 
-        return _resourceList[new Randomizer().Number(_resourceList.Count - 1)];
+        if (!File.Exists(options.ResourceListPath))
+        {
+            throw new FileNotFoundException($"{options.ResourceListPath} was not found");
+        }
+
+        _resourceList = File.ReadLines(options.ResourceListPath).ToList();
+        if (_resourceList.Count == 0)
+        {
+            throw new InvalidOperationException(
+                $"{options.ResourceListPath} needs to contain newline separated resources (eg. urn:altinn:resource:foobar)");
+        }
+
+        return _resourceList[MyRandomizer.Number(_resourceList.Count - 1)];
     }
 
     private static List<string> _partyList = [];
     private static string? MaybeGetRandomParty(Options options)
     {
         if (options.PartyListPath == string.Empty) return null;
-        if (_partyList.Count == 0)
+        if (_partyList.Count != 0)
         {
-            if (!File.Exists(options.PartyListPath))
-            {
-                throw new FileNotFoundException($"{options.PartyListPath} was not found");
-            }
-
-            _partyList = File.ReadLines(options.PartyListPath).ToList();
-            if (_partyList.Count == 0)
-            {
-                throw new InvalidOperationException(
-                    $"{options.PartyListPath} needs to contain newline separated parties (eg. urn:altinn:person:identifier-no:12345678901)");
-            }
+            return _partyList[MyRandomizer.Number(_partyList.Count - 1)];
         }
 
-        return _partyList[new Randomizer().Number(_partyList.Count - 1)];
+        if (!File.Exists(options.PartyListPath))
+        {
+            throw new FileNotFoundException($"{options.PartyListPath} was not found");
+        }
+
+        _partyList = File.ReadLines(options.PartyListPath).ToList();
+        if (_partyList.Count == 0)
+        {
+            throw new InvalidOperationException(
+                $"{options.PartyListPath} needs to contain newline separated parties (eg. urn:altinn:person:identifier-no:12345678901)");
+        }
+
+        return _partyList[MyRandomizer.Number(_partyList.Count - 1)];
     }
 
-    private static async Task ConsumeDialogsAndPost(Options options, BlockingCollection<(int, CreateDialogDto)> dialogQueue,
-        HttpClient client, CancellationToken cancellationToken)
+    private static async Task ConsumeDialogsAndPost(Options options, ChannelReader<(int, CreateDialogDto)> reader, HttpClient client, CancellationToken cancellationToken)
     {
-        while (!dialogQueue.IsCompleted)
+        await foreach (var item in reader.ReadAllAsync(cancellationToken))
         {
             try
             {
-                if (!dialogQueue.TryTake(out (int index, CreateDialogDto dialog) item, Timeout.Infinite,
-                        cancellationToken))
+                var json = JsonSerializer.Serialize(item.Item2, JsonSerializerOptions);
+                using var request = new HttpRequestMessage(HttpMethod.Post, options.Url)
                 {
-                    continue;
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                };
+
+                if (!string.IsNullOrWhiteSpace(options.Token))
+                {
+                    request.Headers.Authorization =
+                        new AuthenticationHeaderValue("Bearer", options.Token);
                 }
 
-                var json = JsonSerializer.Serialize(item.dialog, JsonSerializerOptions);
-                var content = new StringContent(json, Encoding.Unicode, "application/json");
-                var response = await client.PostAsync(options.Url, content, cancellationToken);
+                var response = await client.SendAsync(request, cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -198,11 +266,49 @@ public static class Program
 
                 Interlocked.Increment(ref _dialogCounter);
             }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
             catch (Exception ex)
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
                     Console.WriteLine($"\nException occurred while posting dialog: {ex.Message}");
+                }
+            }
+        }
+    }
+
+    private static async Task ConsumeDialogsAndDiscards(ChannelReader<(int, CreateDialogDto)> reader,
+        CancellationToken cancellationToken)
+    {
+        await foreach (var _ in reader.ReadAllAsync(cancellationToken))
+        {
+            Interlocked.Increment(ref _dialogCounter);
+        }
+    }
+
+    private static async Task ConsumeDialogsAndWriteToFile(ChannelReader<(int, CreateDialogDto)> reader,
+        CancellationToken cancellationToken)
+    {
+        await foreach (var item in reader.ReadAllAsync(cancellationToken))
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(item.Item2, JsonSerializerOptions);
+                await File.WriteAllTextAsync($"{OutputDirectory}/dialog_{item.Item1:D6}.json", json, cancellationToken);
+                Interlocked.Increment(ref _dialogCounter);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    Console.WriteLine($"\nException occurred while writing dialog to file: {ex.Message}");
                 }
             }
         }
@@ -247,8 +353,17 @@ public sealed class Options
     [Option('a', "api", Required = false, HelpText = "Attempt to create the generated dialogs using service owner API.")]
     public bool Submit { get; set; } = false;
 
+    [Option('w', "write", Required = false, HelpText = "Attempt to create the generated dialogs as files.")]
+    public bool WriteToDisk { get; set; } = false;
+
+    [Option('d', "discard", Required = false, HelpText = "Generate as fast as possible and discard.")]
+    public bool Benchmark { get; set; } = false;
+
     [Option('u', "url", Required = false,
         Default = "https://localhost:7214/api/v1/serviceowner/dialogs",
         HelpText = "Service owner endpoint to post dialogs")]
     public string Url { get; set; } = null!;
+
+    [Option('t', "token", Required = false, HelpText = "Bearer token to send as authorization header.")]
+    public string Token { get; set; } = string.Empty;
 }

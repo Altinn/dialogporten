@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.64.2](https://github.com/Altinn/dialogporten/compare/v1.64.1...v1.64.2) (2025-05-05)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.5.4 ([#2238](https://github.com/Altinn/dialogporten/issues/2238)) ([53e0001](https://github.com/Altinn/dialogporten/commit/53e0001fd376151b02805f070fb0055a7d18b5fe))
+* **deps:** update dependency verify.xunit to 29.3.1 ([#2239](https://github.com/Altinn/dialogporten/issues/2239)) ([795e963](https://github.com/Altinn/dialogporten/commit/795e963e34e26fca1aaae2edff4f9ebf43e8a3c0))
+* **deps:** update docker/build-push-action action to v6.16.0 ([#2240](https://github.com/Altinn/dialogporten/issues/2240)) ([599520c](https://github.com/Altinn/dialogporten/commit/599520c0e17baea6db727adaf7f2d344180b394a))
+* **infra:** Scale up container app CPU/Memory ([#2247](https://github.com/Altinn/dialogporten/issues/2247)) ([04782e7](https://github.com/Altinn/dialogporten/commit/04782e75b15862a2f20d451ad2ae14c53b5501cf))
+
 ## [1.64.1](https://github.com/Altinn/dialogporten/compare/v1.64.0...v1.64.1) (2025-05-05)
 
 

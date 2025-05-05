@@ -174,7 +174,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Gets a list of dialog transmissions</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.5.3.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.5.4.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Gets a list of dialog transmissions</summary>

@@ -6,7 +6,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 internal static class AuthorizationHelper
 {
     public static async Task<DialogSearchAuthorizationResult> CollapseSubjectResources(
-        AuthorizedPartiesResult authorizedParties,
+        AuthorizedPartiesResult authorizedParties, // Do NOT mutate as this might be a reference to a memory cache
+        List<string> constraintParties,
         List<string> constraintResources,
         Func<CancellationToken, Task<List<SubjectResource>>> getAllSubjectResources,
         CancellationToken cancellationToken)
@@ -20,11 +21,11 @@ internal static class AuthorizationHelper
         if (authorizedParties.AuthorizedParties.Count == 0)
             return result;
 
-        // Step 1: Pre-filter parties with roles and build the unique subjects set
+        // Step 1: Pre-filter parties with roles and build the unique subjects set. Skip any parties that are not in the constraints (if supplied)
         var uniqueSubjects = new HashSet<string>(100);
         var partiesWithRoles = new List<(string Party, List<string> Roles)>();
 
-        foreach (var party in authorizedParties.AuthorizedParties)
+        foreach (var party in authorizedParties.AuthorizedParties.Where(p => constraintParties.Count == 0 || constraintParties.Contains(p.Party)))
         {
             if (!(party.AuthorizedRoles.Count > 0)) continue;
             partiesWithRoles.Add((party.Party, party.AuthorizedRoles));

@@ -194,7 +194,12 @@ public static class InfrastructureExtensions
             x.AddEntityFrameworkOutbox<DialogDbContext>(o =>
             {
                 o.UsePostgres();
-                o.UseBusOutbox();
+                o.UseBusOutbox(x =>
+                {
+                    x.MessageDeliveryLimit = 100;
+                });
+
+                o.QueryMessageLimit = 500;
             });
 
             foreach (var customConfiguration in customConfigurations)

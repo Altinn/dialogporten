@@ -5,6 +5,10 @@ param location = 'norwayeast'
 param apimIp = '51.13.85.197'
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param revisionSuffix = readEnvironmentVariable('REVISION_SUFFIX')
+param resources = {
+    cpu: 2
+    memory: '4Gi'
+}
 
 param otelTraceSamplerRatio = '0.0'
 

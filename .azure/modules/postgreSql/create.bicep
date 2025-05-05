@@ -200,9 +200,6 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
   dependsOn: [pgms_wait_sampling_query_capture_mode]
 }
 
-
-
-
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: appInsightWorkspaceName
 }

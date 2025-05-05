@@ -2,6 +2,7 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -19,7 +20,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using OneOf;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
@@ -47,6 +47,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private readonly IDomainContext _domainContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
+    private readonly IDataLoaderContext _dataLoaderContext;
 
     public UpdateDialogCommandHandler(
         IDialogDbContext db,
@@ -55,7 +56,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IUserResourceRegistry userResourceRegistry,
-        IServiceResourceAuthorizer serviceResourceAuthorizer)
+        IServiceResourceAuthorizer serviceResourceAuthorizer,
+        IDataLoaderContext dataLoaderContext)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -64,6 +66,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
+        _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
     }
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
@@ -73,28 +76,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden(Constants.SilentUpdateRequiresAdminScope);
         }
 
-        var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-
-        var dialog = await _db.Dialogs
-            .Include(x => x.Activities)
-            .Include(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.SearchTags)
-            .Include(x => x.Attachments)
-                .ThenInclude(x => x.DisplayName!.Localizations)
-            .Include(x => x.Attachments)
-                .ThenInclude(x => x.Urls)
-            .Include(x => x.GuiActions)
-                .ThenInclude(x => x.Title!.Localizations)
-            .Include(x => x.GuiActions)
-                .ThenInclude(x => x.Prompt!.Localizations)
-            .Include(x => x.ApiActions)
-                .ThenInclude(x => x.Endpoints)
-            .Include(x => x.Transmissions)
-            .Include(x => x.DialogEndUserContext)
-            .IgnoreQueryFilters()
-            .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var dialog = UpdateDialogDataLoader.GetPreloadedData(_dataLoaderContext);
 
         if (dialog is null)
         {
@@ -118,7 +100,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _mapper.Map(request.Dto, dialog);
         ValidateTimeFields(dialog);
 
-        await AppendActivity(dialog, request.Dto, cancellationToken);
+        AppendActivity(dialog, request.Dto);
 
         var activityTypes = dialog.Activities
             .Select(x => x.TypeId)
@@ -129,7 +111,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden(errorMessage);
         }
 
-        await AppendTransmission(dialog, request.Dto, cancellationToken);
+        AppendTransmission(dialog, request.Dto);
 
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
@@ -160,7 +142,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             .Merge(request.Dto.GuiActions,
                 destinationKeySelector: x => x.Id,
                 sourceKeySelector: x => x.Id,
-                create: _mapper.Map<List<DialogGuiAction>>,
+                create: CreateGuiActions,
                 update: _mapper.Update,
                 delete: DeleteDelegate.NoOp);
 
@@ -194,6 +176,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             domainError => domainError,
             concurrencyError => concurrencyError);
     }
+
     private void UpdateLabel(DialogEntity dialog)
     {
         if (!_user.TryGetOrganizationNumber(out var organizationNumber))
@@ -234,12 +217,17 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
     }
 
-    private async Task AppendActivity(DialogEntity dialog, UpdateDialogDto dto, CancellationToken cancellationToken)
+    private void AppendActivity(DialogEntity dialog, UpdateDialogDto dto)
     {
         var newDialogActivities = _mapper.Map<List<DialogActivity>>(dto.Activities);
 
-        var existingIds = await _db.GetExistingIds(newDialogActivities, cancellationToken);
-        if (existingIds.Count != 0)
+        var existingIds = _db.DialogActivities
+            .Local
+            .Select(x => x.Id)
+            .Intersect(newDialogActivities.Select(x => x.Id))
+            .ToArray();
+
+        if (existingIds.Length != 0)
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogActivity>(existingIds));
             return;
@@ -278,25 +266,19 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
     }
 
-    private async Task AppendTransmission(DialogEntity dialog, UpdateDialogDto dto, CancellationToken cancellationToken)
+    private void AppendTransmission(DialogEntity dialog, UpdateDialogDto dto)
     {
         var newDialogTransmissions = _mapper.Map<List<DialogTransmission>>(dto.Transmissions);
 
-        var existingIds = await _db.GetExistingIds(newDialogTransmissions, cancellationToken);
-        if (existingIds.Count != 0)
+        var existingIds = _db.DialogTransmissions
+            .Local
+            .Select(x => x.Id)
+            .Intersect(newDialogTransmissions.Select(x => x.Id))
+            .ToArray();
+
+        if (existingIds.Length != 0)
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingIds));
-            return;
-        }
-
-        var newTransmissionAttachments = newDialogTransmissions
-            .SelectMany(x => x.Attachments)
-            .ToList();
-
-        var existingTransmissionAttachmentIds = await _db.GetExistingIds(newTransmissionAttachments, cancellationToken);
-        if (existingTransmissionAttachmentIds.Count != 0)
-        {
-            _domainContext.AddError(DomainFailure.EntityExists<DialogTransmissionAttachment>(existingTransmissionAttachmentIds));
             return;
         }
 
@@ -305,12 +287,20 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _db.DialogTransmissions.AddRange(newDialogTransmissions);
     }
 
+    private IEnumerable<DialogGuiAction> CreateGuiActions(IEnumerable<GuiActionDto> creatables)
+    {
+        var guiActions = _mapper.Map<List<DialogGuiAction>>(creatables);
+        _db.DialogGuiActions.AddRange(guiActions);
+        return guiActions;
+    }
+
     private IEnumerable<DialogApiAction> CreateApiActions(IEnumerable<ApiActionDto> creatables)
     {
         return creatables.Select(x =>
         {
             var apiAction = _mapper.Map<DialogApiAction>(x);
             apiAction.Endpoints = _mapper.Map<List<DialogApiActionEndpoint>>(x.Endpoints);
+            _db.DialogApiActions.Add(apiAction);
             return apiAction;
         });
     }
@@ -337,6 +327,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         {
             var attachment = _mapper.Map<DialogAttachment>(attachmentDto);
             attachment.Urls = _mapper.Map<List<AttachmentUrl>>(attachmentDto.Urls);
+            _db.DialogAttachments.Add(attachment);
             return attachment;
         });
     }

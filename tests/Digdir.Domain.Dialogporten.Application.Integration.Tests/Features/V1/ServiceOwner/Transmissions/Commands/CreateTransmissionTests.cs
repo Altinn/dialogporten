@@ -49,7 +49,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
         const string contentUrl = "https://example.com/transmission";
         transmission.Id = transmissionId;
-        transmission.Content.ContentReference = new ContentValueDto
+        transmission.Content!.ContentReference = new ContentValueDto
         {
             MediaType = MediaTypes.EmbeddableMarkdown,
             Value = [new LocalizationDto { LanguageCode = "nb", Value = contentUrl }]
@@ -83,7 +83,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
 
-        transmission.Content.ContentReference = new ContentValueDto
+        transmission.Content!.ContentReference = new ContentValueDto
         {
             MediaType = MediaTypes.EmbeddableMarkdown,
             Value = [new LocalizationDto { LanguageCode = "nb", Value = "http://example.com/transmission" }]
@@ -121,6 +121,51 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
         // Assert
         response.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Cannot_Create_Transmission_With_Empty_Content()
+    {
+        // Arrange
+        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+
+        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+
+        // Omitting the property the payload to the WebAPI will set this to null
+        transmission.Content = null!;
+
+        createCommand.Dto.Transmissions = [transmission];
+
+        // Act
+        var response = await Application.Send(createCommand);
+
+        // Assert
+        response.TryPickT2(out var validationError, out _).Should().BeTrue();
+        validationError.Errors.Should().HaveCount(1);
+        validationError.Errors.Should()
+            .ContainSingle(e => e.ErrorMessage
+                .Contains(nameof(transmission.Content)));
+    }
+
+    [Fact]
+    public async Task Can_Create_Dialog_With_Empty_Transmission_Content_If_IsApiOnly()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+
+        // Omitting the property the payload to the WebAPI will set this to null
+        transmission.Content = null!;
+
+        createDialogCommand.Dto.Transmissions = [transmission];
+        createDialogCommand.Dto.IsApiOnly = true;
+
+        // Act
+        var createDialogResponse = await Application.Send(createDialogCommand);
+
+        // Assert
+        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
         success.Should().NotBeNull();
     }
 }

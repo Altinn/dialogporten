@@ -1,7 +1,7 @@
 services:
   # OpenTelemetry Collector
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.122.1
+    image: otel/opentelemetry-collector-contrib:0.123.0
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./local-otel-configuration/otel-collector-config.yaml:/etc/otel-collector-config.yaml
@@ -16,7 +16,7 @@ services:
 
   # Jaeger for trace visualization
   jaeger:
-    image: jaegertracing/all-in-one:1.67.0
+    image: jaegertracing/all-in-one:1.68.0
     ports:
       - "16686:16686" # Jaeger UI
       - "14250:14250" # Model used by collector
@@ -31,7 +31,7 @@ services:
 
   # Prometheus for metrics
   prometheus:
-    image: prom/prometheus:v3.2.1
+    image: prom/prometheus:v3.3.0
     volumes:
       - ./local-otel-configuration/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -39,7 +39,7 @@ services:
 
   # Loki for log aggregation
   loki:
-    image: grafana/loki:3.4.2
+    image: grafana/loki:3.4.3
     ports:
       - "3100:3100"
     volumes:
@@ -54,7 +54,7 @@ services:
 
   # Grafana for metrics visualization
   grafana:
-    image: grafana/grafana:10.4.15
+    image: grafana/grafana:11.2.2
     ports:
       - "3000:3000"
     environment:

@@ -2,6 +2,7 @@
 import { default as authentication } from './authentication.js';
 import { default as authorization } from './authorization.js';
 import { default as concurrency } from './concurrency.js';
+import { default as dialogApiOnly } from './dialogApiOnly.js';
 import { default as dialogCreateActivity } from './dialogCreateActivity.js';
 import { default as dialogCreateExternalResource } from './dialogCreateExternalResource.js';
 import { default as dialogCreateIdempotentKey } from './dialogCreateIdempotentKey.js';
@@ -18,6 +19,7 @@ export default function() {
   authentication();
   authorization();
   concurrency();
+  dialogApiOnly();
   dialogCreateActivity();
   dialogCreateExternalResource();
   dialogCreateIdempotentKey();

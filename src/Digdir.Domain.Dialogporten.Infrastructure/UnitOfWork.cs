@@ -1,11 +1,12 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common;
+﻿using System.Diagnostics.CodeAnalysis;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
+using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using OneOf.Types;
@@ -127,21 +128,22 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             _saveChangesOptions,
             cancellationToken);
 
-        if (!_enableConcurrencyCheck)
+        try
         {
-            // Attempt to save changes without a concurrency check
-            await ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken);
+            await (_enableConcurrencyCheck
+                ? _dialogDbContext.SaveChangesAsync(cancellationToken)
+                // Attempt to save changes without a concurrency check
+                : ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken));
         }
-        else
+        catch (DbUpdateConcurrencyException) when (_enableConcurrencyCheck)
         {
-            try
-            {
-                await _dialogDbContext.SaveChangesAsync(cancellationToken);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return new ConcurrencyError();
-            }
+            return new ConcurrencyError();
+        }
+        catch (UniqueConstraintException ex) when
+            (ex.InnerException?.Data["Detail"] is string message &&
+             ex.InnerException.Data["TableName"] is string tableName)
+        {
+            _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
 
         // Interceptors can add domain errors, so check again

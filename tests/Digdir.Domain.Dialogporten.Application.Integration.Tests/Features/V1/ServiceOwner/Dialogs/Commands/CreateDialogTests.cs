@@ -3,18 +3,15 @@ using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -242,7 +239,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        transmission.Content.Summary.Value = [];
+        transmission.Content!.Summary.Value = [];
         transmission.Content.Title.Value = [];
 
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
@@ -265,7 +262,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        transmission.Content.Summary.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
+        transmission.Content!.Summary.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
         transmission.Content.Title.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
 
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
@@ -296,7 +293,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content.AdditionalInfo = CreateHtmlContentValueDto();
+        createDialogCommand.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto();
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -315,7 +312,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content.AdditionalInfo = CreateHtmlContentValueDto();
+        createDialogCommand.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto();
 
         var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
@@ -337,7 +334,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content.Title = CreateHtmlContentValueDto();
+        createDialogCommand.Dto.Content!.Title = CreateHtmlContentValueDto();
 
         var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
         Application.ConfigureServices(services =>
@@ -363,7 +360,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content.Title = new ContentValueDto
+        createDialogCommand.Dto.Content!.Title = new ContentValueDto
         {
             MediaType = MediaTypes.LegacyEmbeddableHtml,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
@@ -394,7 +391,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         // Arrange
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
-        createDialogCommand.Dto.Content.MainContentReference = new ContentValueDto
+        createDialogCommand.Dto.Content!.MainContentReference = new ContentValueDto
         {
             MediaType = MediaTypes.LegacyEmbeddableHtml,
             Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
@@ -507,5 +504,45 @@ public class CreateDialogTests : ApplicationCollectionFixture
         dialog.Should().NotBeNull();
         dialog.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
         dialog.UpdatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
+    }
+
+
+    [Fact]
+    public async Task Cannot_Create_Dialog_With_Empty_Content()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+
+        // Omitting the property the payload to the WebAPI will set this to null
+        createDialogCommand.Dto.Content = null!;
+
+        // Act
+        var response = await Application.Send(createDialogCommand);
+
+        // Assert
+        response.TryPickT2(out var validationError, out _).Should().BeTrue();
+        validationError.Should().NotBeNull();
+        validationError.Errors.Should()
+            .ContainSingle(x => x.ErrorMessage
+                .Contains(nameof(createDialogCommand.Dto.Content)));
+    }
+
+    [Fact]
+    public async Task Can_Create_Dialog_With_Empty_Content_If_IsApiOnly()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+
+        // Omitting the property the payload to the WebAPI will set this to null
+        createDialogCommand.Dto.Content = null!;
+        createDialogCommand.Dto.IsApiOnly = true;
+
+        // Act
+        var createDialogResponse = await Application.Send(createDialogCommand);
+
+        // Assert
+        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Should().NotBeNull();
+
     }
 }

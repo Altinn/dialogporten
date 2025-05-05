@@ -1,6 +1,6 @@
 import { default as run, options as _options, setup as _setup } from "./enduser-search.js";
 
-const numberOfEndUsers = 100; // Remove when altinn-testtools bulk get of endusers/tokens is fast
+const numberOfEndUsers = 500; // Remove when altinn-testtools bulk get of endusers/tokens is fast
 export let options = {
     summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(95)', 'p(99)', 'p(99.5)', 'p(99.9)', 'count'],
     vus: 1,

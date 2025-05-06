@@ -54,7 +54,7 @@ public sealed class UserRegistry : IUserRegistry
 
     public UserId GetCurrentUserId()
     {
-        var principal = _user.GetPrincipal();
+        var principal = AmbientUserPrincipal.Current ?? _user.GetPrincipal();
         var (userType, externalId) = principal.GetUserType();
         if (userType == UserIdType.Unknown)
         {

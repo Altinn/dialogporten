@@ -35,6 +35,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using MassTransit;
 using MediatR;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 
@@ -317,9 +318,14 @@ public static class InfrastructureExtensions
     {
         services.AddHealthChecks()
             .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies", "redis"])
-            .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"]);
+            .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"])
+            .AddCheck<WarmupHealthCheck>("warmup", tags: ["warmup"]);
 
-        services.AddSingleton<RedisHealthCheck>();
+        services
+            .AddSingleton<RedisHealthCheck>()
+            .AddSingleton<WarmupState>()
+            .AddSingleton<WarmupHealthCheck>()
+            .AddHostedService<WarmupService>();
 
         return services;
     }

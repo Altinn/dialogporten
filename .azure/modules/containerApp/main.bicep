@@ -106,8 +106,6 @@ param probes Probes = {
 }
 
 var probeList = [
-
-
   {
     periodSeconds: probes.startup.periodSeconds
     initialDelaySeconds: probes.startup.initialDelaySeconds

@@ -109,6 +109,7 @@ var probeList = [
   {
     periodSeconds: probes.startup.periodSeconds
     initialDelaySeconds: probes.startup.initialDelaySeconds
+    successThreshold: probes.startup.successThreshold
     failureThreshold: probes.startup.failureThreshold
     timeoutSeconds: probes.startup.timeoutSeconds
     type: 'Startup'

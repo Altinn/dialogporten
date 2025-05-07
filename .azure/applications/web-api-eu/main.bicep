@@ -101,31 +101,6 @@ var containerAppEnvVars = [
   }
 ]
 
-@description('The health probe configuration for the container app')
-param probes Probes = {
-  startup: {
-    periodSeconds: 10
-    initialDelaySeconds: 10
-    successThreshold: 1
-    failureThreshold: 3
-    timeoutSeconds: 2
-  }
-  readiness: {
-    periodSeconds: 5
-    initialDelaySeconds: 15
-    successThreshold: 1
-    failureThreshold: 3
-    timeoutSeconds: 2
-  }
-  liveness: {
-    periodSeconds: 5
-    initialDelaySeconds: 20
-    successThreshold: 1
-    failureThreshold: 3
-    timeoutSeconds: 2
-  }
-}
-
 @description('The scaling configuration for the container app')
 param scale Scale = {
   minReplicas: 1
@@ -171,7 +146,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     apimIp: apimIp
     tags: tags
     resources: resources
-    probes: probes
     revisionSuffix: revisionSuffix
     scale: scale
     userAssignedIdentityId: managedIdentity.id

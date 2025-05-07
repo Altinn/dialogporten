@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
@@ -8,7 +9,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.DialogSystemLabels.Set;
 
-public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SystemLabelCommand>
+public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetDialogSystemLabelRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
@@ -27,9 +28,17 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<Syst
             StatusCodes.Status412PreconditionFailed,
             StatusCodes.Status422UnprocessableEntity));
     }
-    public override async Task HandleAsync(SystemLabelCommand req, CancellationToken ct)
+
+    public override async Task HandleAsync(SetDialogSystemLabelRequest req, CancellationToken ct)
     {
-        var result = await _sender.Send(req, ct);
+        var command = new SetSystemLabelCommand
+        {
+            DialogId = req.DialogId,
+            Label = req.Label,
+            IfMatchDialogRevision = req.IfMatchDialogRevision
+        };
+
+        var result = await _sender.Send(command, ct);
         await result.Match(
             success =>
             {
@@ -42,4 +51,14 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<Syst
             validationError => this.BadRequestAsync(validationError, ct),
             concurrencyError => this.PreconditionFailed(ct));
     }
+}
+
+public sealed class SetDialogSystemLabelRequest
+{
+    [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
+    public Guid? IfMatchDialogRevision { get; set; }
+
+    public Guid DialogId { get; set; }
+
+    public SystemLabel.Values Label { get; set; }
 }

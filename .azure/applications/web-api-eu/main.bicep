@@ -101,9 +101,12 @@ var containerAppEnvVars = [
   }
 ]
 
+@description('Minimum number of replicas')
+param minReplicas int = 1
+
 @description('The scaling configuration for the container app')
 param scale Scale = {
-  minReplicas: 1
+  minReplicas: minReplicas
   maxReplicas: 20
   rules: [
     {

@@ -35,7 +35,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var getDialogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogsGetGetDialog(dialogId, null!, CancellationToken.None);
+            .V1ServiceOwnerDialogsGetDialog(dialogId, null!, CancellationToken.None);
 
         getDialogResponse.IsSuccessful.Should().BeFalse();
         getDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -48,7 +48,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var transmissionId = Guid.NewGuid();
 
         var getTransmissionResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogTransmissionsGetGetDialogTransmission(dialogId, transmissionId,
+            .V1ServiceOwnerDialogTransmissionsGetDialogTransmission(dialogId, transmissionId,
                 CancellationToken.None);
 
         getTransmissionResponse.IsSuccessful.Should().BeFalse();
@@ -83,7 +83,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var transmissionId = Guid.NewGuid();
 
         var getTransmissionResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogTransmissionsGetGetDialogTransmission(dialogId, transmissionId,
+            .V1ServiceOwnerDialogTransmissionsGetDialogTransmission(dialogId, transmissionId,
                 CancellationToken.None);
 
         getTransmissionResponse.IsSuccessful.Should().BeFalse();
@@ -96,7 +96,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var searchTransmissionResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogTransmissionsSearchSearchDialogTransmission(dialogId, CancellationToken.None);
+            .V1ServiceOwnerDialogTransmissionsSearchDialogTransmission(dialogId, CancellationToken.None);
 
         searchTransmissionResponse.IsSuccessful.Should().BeFalse();
         searchTransmissionResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -109,7 +109,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var activityId = Guid.NewGuid();
 
         var getActivityResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogActivitiesGetGetDialogActivity(dialogId, activityId, CancellationToken.None);
+            .V1ServiceOwnerDialogActivitiesGetDialogActivity(dialogId, activityId, CancellationToken.None);
 
         getActivityResponse.IsSuccessful.Should().BeFalse();
         getActivityResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -121,7 +121,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var searchActivityResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogActivitiesSearchSearchDialogActivity(dialogId, CancellationToken.None);
+            .V1ServiceOwnerDialogActivitiesSearchDialogActivity(dialogId, CancellationToken.None);
 
         searchActivityResponse.IsSuccessful.Should().BeFalse();
         searchActivityResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -134,7 +134,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var seenLogId = Guid.NewGuid();
 
         var getSeenLogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogSeenLogsGetGetDialogSeenLog(dialogId, seenLogId, CancellationToken.None);
+            .V1ServiceOwnerDialogSeenLogsGetDialogSeenLog(dialogId, seenLogId, CancellationToken.None);
 
         getSeenLogResponse.IsSuccessful.Should().BeFalse();
         getSeenLogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -193,7 +193,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var purgeDialogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogsPurgePurgeDialog(dialogId, null, CancellationToken.None);
+            .V1ServiceOwnerDialogsPurgeDialog(dialogId, null, CancellationToken.None);
 
         purgeDialogResponse.IsSuccessful.Should().BeFalse();
         purgeDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);

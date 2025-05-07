@@ -1,6 +1,6 @@
 targetScope = 'resourceGroup'
 
-import { Scale } from '../../modules/containerApp/main.bicep'
+import { Scale, Probes } from '../../modules/containerApp/main.bicep'
 
 @description('The tag of the image to be used')
 @minLength(3)
@@ -45,6 +45,31 @@ param environmentKeyVaultName string
 @description('The ratio of traces to sample (between 0.0 and 1.0). Lower values reduce logging volume.')
 @minLength(1)
 param otelTraceSamplerRatio string
+
+@description('The health probe configuration for the container app')
+param probes Probes = {
+  startup: {
+    periodSeconds: 10
+    initialDelaySeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
+  }
+  readiness: {
+    periodSeconds: 5
+    initialDelaySeconds: 15
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
+  }
+  liveness: {
+    periodSeconds: 5
+    initialDelaySeconds: 20
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
+  }
+}
 
 @description('The scaling configuration for the container app')
 param scale Scale = {
@@ -138,38 +163,6 @@ var serviceName = 'service'
 
 var containerAppName = '${namePrefix}-${serviceName}'
 
-var port = 8080
-
-var probes = [
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Liveness'
-    httpGet: {
-      path: '/health/liveness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Readiness'
-    httpGet: {
-      path: '/health/readiness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Startup'
-    httpGet: {
-      path: '/health/startup'
-      port: port
-    }
-  }
-]
-
 module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'
   params: {
@@ -205,7 +198,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     tags: tags
     resources: resources
     probes: probes
-    port: port
     revisionSuffix: revisionSuffix
     userAssignedIdentityId: managedIdentity.id
     scale: scale

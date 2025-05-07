@@ -1,6 +1,6 @@
 targetScope = 'resourceGroup'
 
-import { Scale } from '../../modules/containerApp/main.bicep'
+import { Scale, Probes } from '../../modules/containerApp/main.bicep'
 
 @description('The tag of the image to be used')
 @minLength(3)
@@ -98,37 +98,30 @@ var containerAppEnvVars = [
   }
 ]
 
-var port = 8080
-
-var probes = [
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Liveness'
-    httpGet: {
-      path: '/health/liveness'
-      port: port
-    }
+@description('The health probe configuration for the container app')
+param probes Probes = {
+  startup: {
+    periodSeconds: 10
+    initialDelaySeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
   }
-  {
+  readiness: {
     periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Readiness'
-    httpGet: {
-      path: '/health/readiness'
-      port: port
-    }
+    initialDelaySeconds: 15
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
   }
-  {
+  liveness: {
     periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Startup'
-    httpGet: {
-      path: '/health/startup'
-      port: port
-    }
+    initialDelaySeconds: 20
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
   }
-]
+}
 
 @description('The scaling configuration for the container app')
 param scale Scale = {
@@ -177,7 +170,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     resources: resources
     revisionSuffix: revisionSuffix
     probes: probes
-    port: port
     scale: scale
     userAssignedIdentityId: managedIdentity.id
   }

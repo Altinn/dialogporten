@@ -31,6 +31,9 @@ param revisionSuffix string
 @description('The probes for the container app')
 param probes array = []
 
+@description('The workload profile to use for the container app')
+param workloadProfileName string = 'Consumption'
+
 @export()
 type ScaleRule = {
   name: string
@@ -99,6 +102,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       ingress: ingress
     }
     environmentId: containerAppEnvId
+    workloadProfileName: workloadProfileName
     template: {
       revisionSuffix: cleanedRevisionSuffix
       scale: scale

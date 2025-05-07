@@ -1,6 +1,6 @@
 targetScope = 'resourceGroup'
 
-import { Scale, Probes } from '../../modules/containerApp/main.bicep'
+import { Scale } from '../../modules/containerApp/main.bicep'
 
 @description('The tag of the image to be used')
 @minLength(3)

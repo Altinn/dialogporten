@@ -59,10 +59,6 @@ var tags = {
   Product: 'Dialogporten'
 }
 
-// Use dedicated workload profile for yt01 and prod environments
-var useDedicatedProfile = environment == 'yt01' || environment == 'prod'
-var effectiveWorkloadProfileName = useDedicatedProfile ? 'Dedicated-D4' : workloadProfileName
-
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationName
 }
@@ -194,7 +190,7 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     revisionSuffix: revisionSuffix
     scale: scale
     userAssignedIdentityId: managedIdentity.id
-    workloadProfileName: effectiveWorkloadProfileName
+    workloadProfileName: workloadProfileName
   }
 }
 

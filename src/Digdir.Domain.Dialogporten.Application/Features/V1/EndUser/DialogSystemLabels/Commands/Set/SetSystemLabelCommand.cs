@@ -15,7 +15,6 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public SystemLabel.Values Label { get; set; }
-
 }
 
 public sealed record SetSystemLabelSuccess(Guid Revision);

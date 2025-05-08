@@ -15,8 +15,5 @@ param resources = {
 
 param otelTraceSamplerRatio = '0.0'
 
-// Use dedicated workload profile
-param workloadProfileName = 'Consumption'
-
 // secrets
 param appInsightConnectionString = readEnvironmentVariable('AZURE_APP_INSIGHTS_CONNECTION_STRING')

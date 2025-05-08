@@ -28,6 +28,15 @@ param resources object?
 @description('The suffix for the revision of the container app')
 param revisionSuffix string
 
+@description('The workload profile to use for the container app')
+param workloadProfileName string = 'Consumption'
+
+@description('The environment for the deployment')
+param environment string
+
+// Only set workload profile for test and yt01 environments
+var shouldSetWorkloadProfile = environment == 'yt01' || environment == 'test'
+
 @export()
 type ScaleRule = {
   name: string
@@ -185,6 +194,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       ingress: ingress
     }
     environmentId: containerAppEnvId
+    workloadProfileName: shouldSetWorkloadProfile ? workloadProfileName : null
     template: {
       revisionSuffix: cleanedRevisionSuffix
       scale: scale

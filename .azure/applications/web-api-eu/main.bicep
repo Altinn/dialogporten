@@ -49,6 +49,9 @@ param environmentKeyVaultName string
 @minLength(1)
 param otelTraceSamplerRatio string
 
+@description('The workload profile name to use, defaults to "Consumption"')
+param workloadProfileName string = 'Consumption'
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 var tags = {
@@ -153,6 +156,8 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     revisionSuffix: revisionSuffix
     scale: scale
     userAssignedIdentityId: managedIdentity.id
+    workloadProfileName: workloadProfileName
+    environment: environment
   }
 }
 

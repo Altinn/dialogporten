@@ -8,7 +8,7 @@ param location string
 param tags object
 
 @description('The environment for the deployment')
-param environment string = ''
+param environment string
 
 // Network address ranges
 var vnetAddressPrefix = '10.0.0.0/16'

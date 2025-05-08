@@ -139,43 +139,6 @@ resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' exis
 
 var containerAppName = '${namePrefix}-webapi-eu-ca'
 
-var port = 8080
-
-var probes = [
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    timeoutSeconds: 3
-    type: 'Liveness'
-    httpGet: {
-      path: '/health/liveness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 20
-    timeoutSeconds: 3
-    failureThreshold: 6
-    type: 'Readiness'
-    httpGet: {
-      path: '/health/readiness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 10
-    timeoutSeconds: 3
-    failureThreshold: 6
-    type: 'Startup'
-    httpGet: {
-      path: '/health/startup'
-      port: port
-    }
-  }
-]
-
 module containerApp '../../modules/containerApp/main.bicep' = {
   name: containerAppName
   params: {
@@ -187,7 +150,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     apimIp: apimIp
     tags: tags
     resources: resources
-    probes: probes
     revisionSuffix: revisionSuffix
     scale: scale
     userAssignedIdentityId: managedIdentity.id

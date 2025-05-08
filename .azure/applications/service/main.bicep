@@ -46,9 +46,6 @@ param environmentKeyVaultName string
 @minLength(1)
 param otelTraceSamplerRatio string
 
-@description('The workload profile name to use, defaults to "Consumption"')
-param workloadProfileName string = 'Consumption'
-
 @description('Minimum number of replicas')
 @minValue(1)
 param minReplicas int = 1
@@ -182,7 +179,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     revisionSuffix: revisionSuffix
     userAssignedIdentityId: managedIdentity.id
     scale: scale
-    workloadProfileName: workloadProfileName
     // TODO: Once all container apps use user-assigned identities, remove this comment and ensure userAssignedIdentityId is always provided
   }
   dependsOn: [

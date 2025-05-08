@@ -293,7 +293,7 @@ configure_jit_access() {
     # Get public IP
     log_info "Detecting your public IP address..."
     local my_ip
-    my_ip=$(curl -s https://ipinfo.io/json | jq -r '.ip')
+    my_ip=$(curl -s https://ipinfo.io/json | grep -o '"ip": *"[^"]*"' | sed 's/"ip": *"\([^"]*\)"/\1/')
     if [ -z "$my_ip" ]; then
         log_error "Failed to get public IP address from ipinfo.io"
         exit 1
@@ -457,7 +457,7 @@ setup_ssh_tunnel() {
     az ssh vm \
         -g "$(get_resource_group "$env")" \
         -n "$(get_jumper_vm_name "$env")" \
-        -- -L "${local_port}:${hostname}:${remote_port}"
+        -- -tt -L "${local_port}:${hostname}:${remote_port}"
 }
 
 # =========================================================================

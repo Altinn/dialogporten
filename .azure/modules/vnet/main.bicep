@@ -7,6 +7,9 @@ param location string
 @description('Tags to apply to resources')
 param tags object
 
+@description('The environment for the deployment')
+param environment string = ''
+
 // Network address ranges
 var vnetAddressPrefix = '10.0.0.0/16'
 
@@ -17,6 +20,10 @@ var containerAppEnvSubnetPrefix = '10.0.2.0/23'  // required size for the contai
 var serviceBusSubnetPrefix = '10.0.4.0/24'
 var redisSubnetPrefix = '10.0.5.0/24'
 var sshJumperSubnetPrefix = '10.0.6.0/24'
+
+// Determine whether to add delegation for container app environment.
+// this is temporary so we don't have to tear down the staging and prod environments yet
+var addContainerAppDelegation = environment == 'yt01' || environment == 'test'
 
 resource defaultNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: '${namePrefix}-default-nsg'
@@ -348,6 +355,14 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
             id: containerAppEnvironmentNSG.id
           }
           privateLinkServiceNetworkPolicies: 'Disabled'
+          delegations: addContainerAppDelegation ? [
+            {
+              name: 'containerAppEnvironment'
+              properties: {
+                serviceName: 'Microsoft.App/environments'
+              }
+            }
+          ] : []
         }
       }
       {

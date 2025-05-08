@@ -48,6 +48,14 @@ param appInsightsPurgeDataOn30Days bool = false
 @description('Whether zone redundancy should be enabled for the container app environment')
 param containerAppEnvZoneRedundancyEnabled bool
 
+@description('Workload profiles to enable in the container app environment')
+param workloadProfiles array = [
+  {
+    name: 'Consumption'
+    workloadProfileType: 'Consumption'
+  }
+]
+
 import { Sku as KeyVaultSku } from '../modules/keyvault/create.bicep'
 param keyVaultSku KeyVaultSku
 
@@ -296,6 +304,7 @@ module containerAppEnv '../modules/containerAppEnv/main.bicep' = {
     subnetId: vnet.outputs.containerAppEnvironmentSubnetId
     tags: tags
     zoneRedundancyEnabled: containerAppEnvZoneRedundancyEnabled
+    workloadProfiles: workloadProfiles
   }
 }
 

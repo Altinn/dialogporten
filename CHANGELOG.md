@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.64.4](https://github.com/Altinn/dialogporten/compare/v1.64.3...v1.64.4) (2025-05-08)
+
+
+### Miscellaneous Chores
+
+* **webapi:** Bump kestrel max request size to 200k bytes ([#2265](https://github.com/Altinn/dialogporten/issues/2265)) ([40197ea](https://github.com/Altinn/dialogporten/commit/40197eac0a10edbf0971a1406dca61bd88cb9042))
+
 ## [1.64.3](https://github.com/Altinn/dialogporten/compare/v1.64.2...v1.64.3) (2025-05-08)
 
 

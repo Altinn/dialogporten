@@ -8,6 +8,22 @@ param redisVersion = '6.0'
 
 param containerAppEnvZoneRedundancyEnabled = true
 
+// Workload profiles configuration
+param workloadProfiles = [
+  {
+    name: 'Consumption'
+    workloadProfileType: 'Consumption'
+    minimumCount: 0
+    maximumCount: 10
+  }
+  {
+    name: 'Dedicated-D8'
+    workloadProfileType: 'D8'
+    minimumCount: 2
+    maximumCount: 5
+  }
+]
+
 // secrets
 param dialogportenPgAdminPassword = readEnvironmentVariable('PG_ADMIN_PASSWORD')
 param sourceKeyVaultSubscriptionId = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID')

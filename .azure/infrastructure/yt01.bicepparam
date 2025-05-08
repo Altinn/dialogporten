@@ -59,3 +59,19 @@ param serviceBusSku = {
 param sshJumperAdminLoginGroupObjectId = 'c12e51e3-5cbd-4229-8a31-5394c423fb5f'
 
 param apimUrl = 'https://platform.yt01.altinn.cloud/dialogporten'
+
+// Workload profiles configuration
+param workloadProfiles = [
+  {
+    name: 'Consumption'
+    workloadProfileType: 'Consumption'
+    minimumCount: 0
+    maximumCount: 10
+  }
+  {
+    name: 'Dedicated-D8'
+    workloadProfileType: 'D8'
+    minimumCount: 2
+    maximumCount: 5
+  }
+]

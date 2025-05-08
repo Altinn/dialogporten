@@ -14,6 +14,9 @@ param resources = {
 
 param otelTraceSamplerRatio = '1'
 
+// Use dedicated workload profile
+param workloadProfileName = 'Dedicated-D8'
+
 // secrets
 param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_VAULT_NAME')
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')

@@ -27,6 +27,8 @@ param workloadProfiles array = [
   {
     name: 'Consumption'
     workloadProfileType: 'Consumption'
+    minimumCount: 0
+    maximumCount: 10
   }
 ]
 

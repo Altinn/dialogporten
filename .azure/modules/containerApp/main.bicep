@@ -28,9 +28,6 @@ param resources object?
 @description('The suffix for the revision of the container app')
 param revisionSuffix string
 
-@description('The workload profile to use for the container app')
-param workloadProfileName string = 'Consumption'
-
 @export()
 type ScaleRule = {
   name: string
@@ -188,7 +185,6 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       ingress: ingress
     }
     environmentId: containerAppEnvId
-    workloadProfileName: workloadProfileName
     template: {
       revisionSuffix: cleanedRevisionSuffix
       scale: scale

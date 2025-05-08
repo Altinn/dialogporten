@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.65.0](https://github.com/Altinn/dialogporten/compare/v1.64.4...v1.65.0) (2025-05-08)
+
+
+### Features
+
+* **infra:** add workload profiles for container apps ([#2259](https://github.com/Altinn/dialogporten/issues/2259)) ([4a5500b](https://github.com/Altinn/dialogporten/commit/4a5500bfa5757215d30c1940520e7d90b7dcfdb4))
+
+
+### Bug Fixes
+
+* **infra:** change to workload profiles for test and yt01 ([#2271](https://github.com/Altinn/dialogporten/issues/2271)) ([7feb4c0](https://github.com/Altinn/dialogporten/commit/7feb4c096273a3189d7877321f386bcb6bcf415f))
+* **infra:** Remove count from consumption workload profile ([#2268](https://github.com/Altinn/dialogporten/issues/2268)) ([ac88d85](https://github.com/Altinn/dialogporten/commit/ac88d85a4911c7daf9aaad53816de1296c3710ab))
+* **infra:** revert workload profiles for CAE ([#2270](https://github.com/Altinn/dialogporten/issues/2270)) ([aea9209](https://github.com/Altinn/dialogporten/commit/aea92096a09d0ac3f377c1ba8b777ff92f682605))
+
+
+### Miscellaneous Chores
+
+* **database-forwarder:** ensure it works cross platform ([#2127](https://github.com/Altinn/dialogporten/issues/2127)) ([1bff01e](https://github.com/Altinn/dialogporten/commit/1bff01e75933bf3f7fe64c25ca6b7b2507072f35))
+* **performance:** removed search without enduserid and use enduserid instead of enduser ([#2263](https://github.com/Altinn/dialogporten/issues/2263)) ([2044f09](https://github.com/Altinn/dialogporten/commit/2044f09fdb06dcde9fbbfa623f9468707d551fe6))
+
 ## [1.64.4](https://github.com/Altinn/dialogporten/compare/v1.64.3...v1.64.4) (2025-05-08)
 
 

@@ -46,9 +46,13 @@ param environmentKeyVaultName string
 @minLength(1)
 param otelTraceSamplerRatio string
 
+@description('Minimum number of replicas')
+@minValue(1)
+param minReplicas int = 1
+
 @description('The scaling configuration for the container app')
 param scale Scale = {
-  minReplicas: 1
+  minReplicas: minReplicas
   maxReplicas: 10
   rules: [
     {
@@ -138,38 +142,6 @@ var serviceName = 'service'
 
 var containerAppName = '${namePrefix}-${serviceName}'
 
-var port = 8080
-
-var probes = [
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Liveness'
-    httpGet: {
-      path: '/health/liveness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Readiness'
-    httpGet: {
-      path: '/health/readiness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Startup'
-    httpGet: {
-      path: '/health/startup'
-      port: port
-    }
-  }
-]
-
 module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'
   params: {
@@ -204,8 +176,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     containerAppEnvId: containerAppEnvironment.id
     tags: tags
     resources: resources
-    probes: probes
-    port: port
     revisionSuffix: revisionSuffix
     userAssignedIdentityId: managedIdentity.id
     scale: scale

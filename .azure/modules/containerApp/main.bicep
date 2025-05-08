@@ -28,9 +28,6 @@ param resources object?
 @description('The suffix for the revision of the container app')
 param revisionSuffix string
 
-@description('The probes for the container app')
-param probes array = []
-
 @export()
 type ScaleRule = {
   name: string
@@ -57,6 +54,95 @@ param scale Scale = {
   maxReplicas: 1
   rules: []
 }
+
+@export()
+type Probes = {
+    startup: {
+      periodSeconds: int
+      initialDelaySeconds: int
+      successThreshold: int
+      failureThreshold: int
+      timeoutSeconds: int
+    }
+    liveness: {
+      periodSeconds: int
+      initialDelaySeconds: int
+      successThreshold: int
+      failureThreshold: int
+      timeoutSeconds: int
+    }
+    readiness: {
+      periodSeconds: int
+      initialDelaySeconds: int
+      successThreshold: int
+      failureThreshold: int
+      timeoutSeconds: int
+    }
+}
+
+@description('The health probe configuration for the container app')
+param probes Probes = {
+  startup: {
+    periodSeconds: 10
+    initialDelaySeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
+  }
+  readiness: {
+    periodSeconds: 5
+    initialDelaySeconds: 15
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
+  }
+  liveness: {
+    periodSeconds: 5
+    initialDelaySeconds: 20
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 2
+  }
+}
+
+var probeList = [
+  {
+    periodSeconds: probes.startup.periodSeconds
+    initialDelaySeconds: probes.startup.initialDelaySeconds
+    successThreshold: probes.startup.successThreshold
+    failureThreshold: probes.startup.failureThreshold
+    timeoutSeconds: probes.startup.timeoutSeconds
+    type: 'Startup'
+    httpGet: {
+      path: '/health/startup'
+      port: port
+    }
+  }
+  {
+    periodSeconds: probes.readiness.periodSeconds
+    initialDelaySeconds: probes.readiness.initialDelaySeconds
+    successThreshold: probes.readiness.successThreshold
+    failureThreshold: probes.readiness.failureThreshold
+    timeoutSeconds: probes.readiness.timeoutSeconds
+    type: 'Readiness'
+    httpGet: {
+      path: '/health/readiness'
+      port: port
+    }
+  }
+  {
+    periodSeconds: probes.liveness.periodSeconds
+    initialDelaySeconds: probes.liveness.initialDelaySeconds
+    failureThreshold: probes.liveness.failureThreshold
+    successThreshold: probes.liveness.successThreshold
+    timeoutSeconds: probes.liveness.timeoutSeconds
+    type: 'Liveness'
+    httpGet: {
+      path: '/health/liveness'
+      port: port
+    }
+  }
+]
 
 @description('The ID of the user-assigned managed identity')
 @minLength(1)
@@ -107,7 +193,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: name
           image: image
           env: envVariables
-          probes: probes
+          probes: probeList
           resources: resources
         }
       ]

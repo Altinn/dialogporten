@@ -30,6 +30,12 @@ param workloadProfiles array = [
   }
 ]
 
+@description('The environment for the deployment')
+param environment string
+
+// Only set workload profiles for test and yt01 environments
+var shouldSetWorkloadProfiles = environment == 'yt01' || environment == 'test'
+
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: appInsightWorkspaceName
 }
@@ -66,7 +72,7 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-10-02-preview' 
         destinations: ['appInsights']
       }
     }
-    workloadProfiles: workloadProfiles
+    workloadProfiles: shouldSetWorkloadProfiles ? workloadProfiles : []
     zoneRedundant: zoneRedundancyEnabled
     availabilityZones: zoneRedundancyEnabled ? ['1', '2', '3'] : null
   }

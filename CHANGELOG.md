@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.64.4](https://github.com/Altinn/dialogporten/compare/v1.64.3...v1.64.4) (2025-05-08)
+
+
+### Miscellaneous Chores
+
+* **webapi:** Bump kestrel max request size to 200k bytes ([#2265](https://github.com/Altinn/dialogporten/issues/2265)) ([40197ea](https://github.com/Altinn/dialogporten/commit/40197eac0a10edbf0971a1406dca61bd88cb9042))
+
+## [1.64.3](https://github.com/Altinn/dialogporten/compare/v1.64.2...v1.64.3) (2025-05-08)
+
+
+### Bug Fixes
+
+* **infra:** Consolidate and up health probe values ([#2255](https://github.com/Altinn/dialogporten/issues/2255)) ([f069923](https://github.com/Altinn/dialogporten/commit/f0699236e6875acd595ea24b2e3edfb6260fb246))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency uuidnext to 4.1.2 ([#2251](https://github.com/Altinn/dialogporten/issues/2251)) ([d27fd77](https://github.com/Altinn/dialogporten/commit/d27fd77afa9163855b7aefe8ac2a53d555d9fa5a))
+* **deps:** update dependency verify.xunit to 29.4.0 ([#2254](https://github.com/Altinn/dialogporten/issues/2254)) ([eae34dd](https://github.com/Altinn/dialogporten/commit/eae34ddf0f08e525f5f5318c95ebd34d6d34867c))
+* **infra:** Set min. replicas to two for prod ([#2256](https://github.com/Altinn/dialogporten/issues/2256)) ([a578491](https://github.com/Altinn/dialogporten/commit/a578491662cf34857b7d2fc1d40763649a760da1))
+* **infra:** Set Postgres idle transacion timeout ([#2248](https://github.com/Altinn/dialogporten/issues/2248)) ([26c5f28](https://github.com/Altinn/dialogporten/commit/26c5f28b7811c391df32ea6cb8d465acafb4cdc6))
+* **infra:** Upgrade Azure CLI to 2.72.0 ([#2258](https://github.com/Altinn/dialogporten/issues/2258)) ([5892847](https://github.com/Altinn/dialogporten/commit/58928470b8a4ded9f506af62043f606c7a4c04c6))
+
 ## [1.64.2](https://github.com/Altinn/dialogporten/compare/v1.64.1...v1.64.2) (2025-05-05)
 
 

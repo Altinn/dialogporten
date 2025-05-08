@@ -145,38 +145,6 @@ var serviceName = 'service'
 
 var containerAppName = '${namePrefix}-${serviceName}'
 
-var port = 8080
-
-var probes = [
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Liveness'
-    httpGet: {
-      path: '/health/liveness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Readiness'
-    httpGet: {
-      path: '/health/readiness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Startup'
-    httpGet: {
-      path: '/health/startup'
-      port: port
-    }
-  }
-]
-
 module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'
   params: {
@@ -211,8 +179,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     containerAppEnvId: containerAppEnvironment.id
     tags: tags
     resources: resources
-    probes: probes
-    port: port
     revisionSuffix: revisionSuffix
     userAssignedIdentityId: managedIdentity.id
     scale: scale

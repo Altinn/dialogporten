@@ -101,38 +101,6 @@ var containerAppEnvVars = [
   }
 ]
 
-var port = 8080
-
-var probes = [
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Liveness'
-    httpGet: {
-      path: '/health/liveness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Readiness'
-    httpGet: {
-      path: '/health/readiness'
-      port: port
-    }
-  }
-  {
-    periodSeconds: 5
-    initialDelaySeconds: 2
-    type: 'Startup'
-    httpGet: {
-      path: '/health/startup'
-      port: port
-    }
-  }
-]
-
 @description('Minimum number of replicas')
 @minValue(1)
 param minReplicas int = 1
@@ -183,8 +151,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     tags: tags
     resources: resources
     revisionSuffix: revisionSuffix
-    probes: probes
-    port: port
     scale: scale
     userAssignedIdentityId: managedIdentity.id
     workloadProfileName: workloadProfileName

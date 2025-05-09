@@ -9,8 +9,8 @@ namespace Digdir.Domain.Dialogporten.WebApiClient.E2E.Tests;
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class AuthorizedE2EFixture : TestBedFixture
 {
-    private static string _clientId = "";
-    private static string _encodedJwk = "";
+    // private static string _clientId = "";
+    // private static string _encodedJwk = "";
 
     protected override void AddServices(IServiceCollection services, IConfiguration? configuration)
     {
@@ -18,8 +18,8 @@ public sealed class AuthorizedE2EFixture : TestBedFixture
             .GetSection(nameof(DialogportenSettings))
             .Get<DialogportenSettings>()!;
 
-        settings.Maskinporten.ClientId = _clientId;
-        settings.Maskinporten.EncodedJwk = _encodedJwk;
+        // settings.Maskinporten.ClientId = _clientId;
+        // settings.Maskinporten.EncodedJwk = _encodedJwk;
 
         services.AddDialogportenClient(settings);
     }
@@ -35,8 +35,8 @@ public sealed class AuthorizedE2EFixture : TestBedFixture
     {
         configurationBuilder.AddUserSecrets<AuthorizedE2EFixture>(optional: true);
 
-        var config = configurationBuilder.Build();
-        _clientId = config["DialogportenSettings:Maskinporten:ClientId"]!;
-        _encodedJwk = config["DialogportenSettings:Maskinporten:EncodedJwk"]!;
+        // var config = configurationBuilder.Build();
+        // _clientId = config["DialogportenSettings:Maskinporten:ClientId"]!;
+        // _encodedJwk = config["DialogportenSettings:Maskinporten:EncodedJwk"]!;
     }
 }

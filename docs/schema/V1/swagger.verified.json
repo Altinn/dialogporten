@@ -1482,14 +1482,9 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogSystemLabelsCommandsSet_SystemLabelCommand": {
+      "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabelRequest": {
         "additionalProperties": false,
         "properties": {
-          "ifMatchDialogRevision": {
-            "format": "guid",
-            "nullable": true,
-            "type": "string"
-          },
           "label": {
             "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
           }
@@ -5600,19 +5595,28 @@
               "format": "guid",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/V1EndUserDialogSystemLabelsCommandsSet_SystemLabelCommand"
+                "$ref": "#/components/schemas/V1EndUserDialogSystemLabelsSet_SetDialogSystemLabelRequest"
               }
             }
           },
           "description": "",
           "required": true,
-          "x-name": "SystemLabelCommand",
+          "x-name": "SetDialogSystemLabelRequest",
           "x-position": 1
         },
         "responses": {

@@ -1,0 +1,349 @@
+﻿{
+  Id: Guid_1,
+  Revision: Guid_2,
+  Org: ttd,
+  ServiceResource: urn:altinn:resource:0889,
+  ServiceResourceType: localresourcetype,
+  Party: urn:altinn:person:identifier-no:22016793632,
+  Progress: 5,
+  Process: https://brandyn.info/robust/salmon,
+  ExtendedStatus: 573nvmfapy,
+  ExternalReference: k5b0y2o3ro,
+  DueAt: DateTimeOffset_1,
+  ExpiresAt: DateTimeOffset_2,
+  CreatedAt: DateTimeOffset_3,
+  UpdatedAt: DateTimeOffset_3,
+  Status: Completed,
+  IsApiOnly: false,
+  SystemLabel: Default,
+  Content: {
+    Title: {
+      Value: [
+        {
+          Value: generate Shoes & Computers,
+          LanguageCode: en
+        },
+        {
+          Value: Washington bypassing,
+          LanguageCode: nb
+        },
+        {
+          Value: Games, Home & Clothing Lane,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    },
+    Summary: {
+      Value: [
+        {
+          Value: invoice vortals cyan Cambridgeshire XML interface Bedfordshire,
+          LanguageCode: en
+        },
+        {
+          Value: Virtual quantifying Incredible Plastic Tuna Cambridgeshire payment innovate impactful,
+          LanguageCode: nb
+        },
+        {
+          Value: Tasty cross-platform optimal open-source deliverables Extensions North Carolina,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    },
+    AdditionalInfo: {
+      Value: [
+        {
+          Value: deposit Producer client-server Administrator index withdrawal Gorgeous Metal Sausages 1080p navigating Cross-platform Orchestrator redundant,
+          LanguageCode: en
+        },
+        {
+          Value: North Korean Won Palladium Cambridgeshire Chief Bedfordshire Falls policy Steel hacking withdrawal Global Groves,
+          LanguageCode: nb
+        },
+        {
+          Value: Ergonomic Plastic Soap Future Borders deliver PNG calculating green Borders monitor International Springs Money Market Account,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    }
+  },
+  SearchTags: [
+    {
+      Value: pefhizlldn
+    },
+    {
+      Value: m9prgxtd6g
+    },
+    {
+      Value: h1ywtx83i5
+    },
+    {
+      Value: cyueazcw5b
+    },
+    {
+      Value: gnba6h5mr7
+    }
+  ],
+  Attachments: [
+    {
+      Id: Guid_3,
+      DisplayName: [
+        {
+          Value: neural-net e-tailers Berkshire,
+          LanguageCode: en
+        },
+        {
+          Value: Personal Loan Account monitoring Mount,
+          LanguageCode: nb
+        },
+        {
+          Value: payment connect Intelligent,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_4,
+          Url: https://mozell.biz/fuchsia/facilitator/alarm,
+          ConsumerType: Api
+        },
+        {
+          Id: Guid_5,
+          Url: https://felicia.org/granular/executive,
+          ConsumerType: Gui
+        }
+      ]
+    },
+    {
+      Id: Guid_6,
+      DisplayName: [
+        {
+          Value: cross-platform hacking Handmade Concrete Mouse real-time,
+          LanguageCode: en
+        },
+        {
+          Value: Tennessee Organic Wisconsin California,
+          LanguageCode: nb
+        },
+        {
+          Value: Movies & Sports Incredible Rubber Ball Handmade Frozen Table Forward,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_7,
+          Url: https://dudley.name/legacy/payment/access,
+          ConsumerType: Api
+        }
+      ]
+    }
+  ],
+  Transmissions: [
+    {
+      Id: Guid_8,
+      CreatedAt: DateTimeOffset_4,
+      Type: Request,
+      Sender: {
+        ActorType: ServiceOwner
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: tangible,
+              LanguageCode: en
+            },
+            {
+              Value: TCP,
+              LanguageCode: nb
+            },
+            {
+              Value: sticky,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: indexing Associate Books, Computers & Health Avon Object-based unleash utilize,
+              LanguageCode: en
+            },
+            {
+              Value: payment capability sky blue Czech Koruna evolve Strategist panel,
+              LanguageCode: nb
+            },
+            {
+              Value: Tasty Practical didactic withdrawal Moldovan Leu Dominica Trail,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      }
+    }
+  ],
+  GuiActions: [
+    {
+      Id: Guid_9,
+      Action: 9xg0pp1l,
+      Url: https://hester.net/payment/driver/usb,
+      IsDeleteDialogAction: false,
+      Priority: Primary,
+      HttpMethod: GET,
+      Title: [
+        {
+          Value: Unbranded deposit Awesome Wooden Fish,
+          LanguageCode: en
+        },
+        {
+          Value: neural Sleek Metal Gloves e-business,
+          LanguageCode: nb
+        },
+        {
+          Value: Land Cambridgeshire Gorgeous Wooden Towels,
+          LanguageCode: nn
+        }
+      ]
+    }
+  ],
+  ApiActions: [
+    {
+      Id: Guid_10,
+      Action: k35pswu6,
+      Name: gus1qa5m,
+      Endpoints: [
+        {
+          Id: Guid_11,
+          Version: v612,
+          Url: https://theodore.info/checking-account,
+          HttpMethod: DELETE,
+          DocumentationUrl: https://friedrich.name/auto-loan-account/system,
+          RequestSchema: https://isaac.org/synthesizing/syrian-pound/needs-based,
+          ResponseSchema: https://chloe.net/white,
+          Deprecated: true
+        },
+        {
+          Id: Guid_12,
+          Version: v755,
+          Url: https://jacquelyn.name/home-loan-account/dominican-republic,
+          HttpMethod: HEAD,
+          DocumentationUrl: https://burnice.net/sleek,
+          RequestSchema: https://barry.name/fields/associate,
+          ResponseSchema: https://gardner.name/cove/auto-loan-account/lavender,
+          Deprecated: true
+        },
+        {
+          Id: Guid_13,
+          Version: v238,
+          Url: https://henderson.biz/silver,
+          HttpMethod: PUT,
+          DocumentationUrl: https://hobart.com/savings-account,
+          RequestSchema: https://jairo.name/refined-wooden-chips/north-carolina/creative,
+          ResponseSchema: https://hilma.name/computers-outdoors--beauty,
+          Deprecated: false
+        },
+        {
+          Id: Guid_14,
+          Version: v423,
+          Url: https://kieran.org/extensible/communities,
+          HttpMethod: TRACE,
+          DocumentationUrl: https://modesta.net/dynamic,
+          RequestSchema: https://mandy.info/accounts/djibouti-franc/innovate,
+          ResponseSchema: https://osborne.name/shoes-games--automotive/unbranded,
+          Deprecated: true
+        }
+      ]
+    },
+    {
+      Id: Guid_15,
+      Action: knx8q8ln,
+      Name: wu2a4t86,
+      Endpoints: [
+        {
+          Id: Guid_16,
+          Version: v163,
+          Url: https://isabelle.com/paanga/handcrafted/investment-account,
+          HttpMethod: OPTIONS,
+          DocumentationUrl: https://kitty.org/handcrafted/security/mississippi,
+          RequestSchema: https://brielle.name/bi-directional/assimilated,
+          ResponseSchema: https://flossie.org/cambridgeshire/ameliorated,
+          Deprecated: true
+        },
+        {
+          Id: Guid_17,
+          Version: v503,
+          Url: https://kendall.name/dynamic/http/buckinghamshire,
+          HttpMethod: DELETE,
+          DocumentationUrl: https://elva.info/application/circuit,
+          RequestSchema: https://malvina.net/program/handcrafted,
+          ResponseSchema: https://cole.name/shoes--shoes/monitor/impactful,
+          Deprecated: false
+        }
+      ]
+    },
+    {
+      Id: Guid_18,
+      Action: 9izodohw,
+      Name: fb5lvewq,
+      Endpoints: [
+        {
+          Id: Guid_19,
+          Version: v122,
+          Url: https://adriel.info/canada/corporate/benchmark,
+          HttpMethod: CONNECT,
+          DocumentationUrl: https://linda.org/strategic,
+          RequestSchema: https://ned.biz/reverse-engineered/monitor/platforms,
+          ResponseSchema: https://golda.biz/copy/virtual,
+          Deprecated: false
+        },
+        {
+          Id: Guid_20,
+          Version: v279,
+          Url: https://carli.info/reintermediate,
+          HttpMethod: POST,
+          DocumentationUrl: https://aleen.net/sdd/programming/configuration,
+          RequestSchema: https://sarah.com/health-electronics--baby/fantastic,
+          ResponseSchema: https://furman.biz/matrix,
+          Deprecated: false
+        },
+        {
+          Id: Guid_21,
+          Version: v951,
+          Url: https://kristy.biz/pixel/sdd,
+          HttpMethod: PUT,
+          DocumentationUrl: https://cleo.biz/parsing/backing-up/canyon,
+          RequestSchema: https://lina.biz/checking-account/quantifying,
+          ResponseSchema: https://dulce.biz/collaboration/refined-frozen-cheese/unbranded-plastic-pants,
+          Deprecated: false
+        }
+      ]
+    }
+  ],
+  Activities: [
+    {
+      Id: Guid_22,
+      CreatedAt: DateTimeOffset_5,
+      ExtendedType: https://jamir.biz/primary/synthesize/argentine-peso,
+      Type: SentToSigning,
+      PerformedBy: {
+        ActorType: PartyRepresentative,
+        ActorName: Cedrick Lemke
+      }
+    },
+    {
+      Id: Guid_23,
+      CreatedAt: DateTimeOffset_6,
+      ExtendedType: https://stephanie.org/saint-martin/transmitting/orange,
+      Type: SentToFormFill,
+      PerformedBy: {
+        ActorType: PartyRepresentative,
+        ActorName: Zakary Rutherford
+      }
+    }
+  ]
+}

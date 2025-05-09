@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.65.1](https://github.com/Altinn/dialogporten/compare/v1.65.0...v1.65.1) (2025-05-09)
+
+
+### Bug Fixes
+
+* **webapi:** Move set label revision from body to If-Match header ([#2260](https://github.com/Altinn/dialogporten/issues/2260)) ([cb46cd9](https://github.com/Altinn/dialogporten/commit/cb46cd94bc837986d7179265a31d0fd82fcbb05e))
+
 ## [1.65.0](https://github.com/Altinn/dialogporten/compare/v1.64.4...v1.65.0) (2025-05-08)
 
 

@@ -1,0 +1,375 @@
+﻿{
+  Id: Guid_1,
+  Revision: Guid_2,
+  Org: ttd,
+  ServiceResource: urn:altinn:resource:0757,
+  ServiceResourceType: localresourcetype,
+  Party: urn:altinn:person:identifier-no:08066598862,
+  Progress: 3,
+  Process: https://dewitt.info/mint-green/concrete,
+  ExtendedStatus: 7v0td324zn,
+  ExternalReference: gfl0crhtwf,
+  DueAt: DateTimeOffset_1,
+  ExpiresAt: DateTimeOffset_2,
+  CreatedAt: DateTimeOffset_3,
+  UpdatedAt: DateTimeOffset_3,
+  Status: Draft,
+  IsApiOnly: false,
+  SystemLabel: Default,
+  Content: {
+    Title: {
+      Value: [
+        {
+          Value: Foo,
+          LanguageCode: nb
+        },
+        {
+          Value: Bar,
+          LanguageCode: en
+        }
+      ],
+      MediaType: text/plain
+    },
+    Summary: {
+      Value: [
+        {
+          Value: copying Awesome Metal Bacon HTTP Director payment lime Books Accountability Lock,
+          LanguageCode: en
+        },
+        {
+          Value: Berkshire calculate payment Ohio turquoise Practical Meadow Managed Progressive,
+          LanguageCode: nb
+        },
+        {
+          Value: maximized Savings Account applications protocol Face to face Tasty Steel Hat networks Rustic Wooden Bike override,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    },
+    SenderName: {
+      Value: [
+        {
+          Value: Handmade e-business,
+          LanguageCode: en
+        },
+        {
+          Value: violet Brook,
+          LanguageCode: nb
+        },
+        {
+          Value: Investment Account Gorgeous Steel Salad,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    }
+  },
+  SearchTags: [
+    {
+      Value: x67bocabos
+    }
+  ],
+  Attachments: [
+    {
+      Id: Guid_3,
+      DisplayName: [
+        {
+          Value: Polarised Direct,
+          LanguageCode: en
+        },
+        {
+          Value: Future-proofed Handmade Rubber Tuna,
+          LanguageCode: nb
+        },
+        {
+          Value: bypassing Licensed,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_4,
+          Url: https://deondre.org/frozen/barbados-dollar/licensed-frozen-table,
+          ConsumerType: Api
+        },
+        {
+          Id: Guid_5,
+          Url: https://madge.biz/gorgeous-plastic-bacon/valleys/shoes-garden--games,
+          ConsumerType: Api
+        }
+      ]
+    },
+    {
+      Id: Guid_6,
+      DisplayName: [
+        {
+          Value: parse Junctions,
+          LanguageCode: en
+        },
+        {
+          Value: Tasty Rubber Shirt Ridges,
+          LanguageCode: nb
+        },
+        {
+          Value: Bedfordshire Bahamian Dollar,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_7,
+          Url: https://rico.info/payment/representative,
+          ConsumerType: Gui
+        },
+        {
+          Id: Guid_8,
+          Url: https://vince.com/associate,
+          ConsumerType: Api
+        },
+        {
+          Id: Guid_9,
+          Url: https://carmine.net/grocery-clothing--jewelery/buckinghamshire/guernsey,
+          ConsumerType: Gui
+        }
+      ]
+    },
+    {
+      Id: Guid_10,
+      DisplayName: [
+        {
+          Value: Russian Federation technologies bypassing Shoes & Toys,
+          LanguageCode: en
+        },
+        {
+          Value: Peso Uruguayo Intranet access RSS,
+          LanguageCode: nb
+        },
+        {
+          Value: Tactics open-source Ouguiya Michigan,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_11,
+          Url: https://aiyana.info/incredible-fresh-ball/transmit/colombian-peso,
+          ConsumerType: Api
+        }
+      ]
+    },
+    {
+      Id: Guid_12,
+      DisplayName: [
+        {
+          Value: Steel navigating,
+          LanguageCode: en
+        },
+        {
+          Value: Regional Fantastic,
+          LanguageCode: nb
+        },
+        {
+          Value: Investment Account Frozen,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_13,
+          Url: https://nico.com/quantify/navigating/calculating,
+          ConsumerType: Gui
+        }
+      ]
+    },
+    {
+      Id: Guid_14,
+      DisplayName: [
+        {
+          Value: Iran Associate Ergonomic Plastic Soap invoice,
+          LanguageCode: en
+        },
+        {
+          Value: Borders Cambridgeshire navigating web-readiness,
+          LanguageCode: nb
+        },
+        {
+          Value: Fantastic Granite Shoes Automotive & Computers Highway Barbados Dollar,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_15,
+          Url: https://providenci.info/automotive--music/movies/alarm,
+          ConsumerType: Api
+        }
+      ]
+    }
+  ],
+  Transmissions: [
+    {
+      Id: Guid_16,
+      CreatedAt: DateTimeOffset_4,
+      Type: Acceptance,
+      Sender: {
+        ActorType: ServiceOwner
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Yen Brazil unleash,
+              LanguageCode: en
+            },
+            {
+              Value: Metical tan View,
+              LanguageCode: nb
+            },
+            {
+              Value: capacitor violet Qatar,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Cotton SDD cultivate web services Dalasi Handmade Throughway Specialist Rhode Island,
+              LanguageCode: en
+            },
+            {
+              Value: driver Hawaii best-of-breed Small ability Cameroon Vista Granite South Dakota,
+              LanguageCode: nb
+            },
+            {
+              Value: auxiliary Rubber Ergonomic Tasty Berkshire feed Steel hub Borders,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      }
+    }
+  ],
+  GuiActions: [
+    {
+      Id: Guid_17,
+      Action: al8il9fe,
+      Url: https://kadin.info/ergonomic,
+      IsDeleteDialogAction: false,
+      Priority: Primary,
+      HttpMethod: GET,
+      Title: [
+        {
+          Value: white Markets protocol,
+          LanguageCode: en
+        },
+        {
+          Value: back up cross-platform Ergonomic,
+          LanguageCode: nb
+        },
+        {
+          Value: withdrawal Ohio digital,
+          LanguageCode: nn
+        }
+      ]
+    }
+  ],
+  ApiActions: [
+    {
+      Id: Guid_18,
+      Action: wqi331pv,
+      Name: gretkmgb,
+      Endpoints: [
+        {
+          Id: Guid_19,
+          Version: v162,
+          Url: https://kamryn.net/forks/connecting/http,
+          HttpMethod: PATCH,
+          DocumentationUrl: https://edgardo.net/capacitor/leading-edge,
+          RequestSchema: https://demarco.org/pci/practical-granite-car,
+          ResponseSchema: https://sally.biz/24365/teal/belize-dollar,
+          Deprecated: true
+        },
+        {
+          Id: Guid_20,
+          Version: v691,
+          Url: https://jada.name/e-business,
+          HttpMethod: PATCH,
+          DocumentationUrl: https://aric.biz/orange,
+          RequestSchema: https://brandyn.com/books-jewelery--music/cotton/handmade,
+          ResponseSchema: https://otha.biz/withdrawal/azure/withdrawal,
+          Deprecated: false
+        },
+        {
+          Id: Guid_21,
+          Version: v705,
+          Url: https://payton.info/intelligent,
+          HttpMethod: PUT,
+          DocumentationUrl: https://sigmund.org/mauritius-rupee,
+          RequestSchema: https://brock.info/ivory/ergonomic,
+          ResponseSchema: https://tianna.name/indexing/channels,
+          Deprecated: false
+        }
+      ]
+    }
+  ],
+  Activities: [
+    {
+      Id: Guid_22,
+      CreatedAt: DateTimeOffset_5,
+      ExtendedType: https://shayna.com/multi-byte/operations,
+      Type: Information,
+      PerformedBy: {
+        ActorType: PartyRepresentative,
+        ActorName: Eda Hudson
+      },
+      Description: [
+        {
+          Value: transmit streamline policy moderator Louisiana Ergonomic Metal Car Enhanced Handcrafted,
+          LanguageCode: en
+        },
+        {
+          Value: partnerships Ergonomic Cotton Bacon Groves toolset models SCSI world-class Optimization,
+          LanguageCode: nb
+        },
+        {
+          Value: Multi-layered extend Canyon initiatives Granite full-range salmon Generic,
+          LanguageCode: nn
+        }
+      ]
+    },
+    {
+      Id: Guid_23,
+      CreatedAt: DateTimeOffset_6,
+      ExtendedType: https://margarita.com/plaza/savings-account/deposit,
+      Type: DialogCreated,
+      PerformedBy: {
+        ActorType: PartyRepresentative,
+        ActorName: Shany Rosenbaum
+      }
+    },
+    {
+      Id: Guid_24,
+      CreatedAt: DateTimeOffset_7,
+      ExtendedType: https://spencer.biz/bi-directional/bedfordshire,
+      Type: DialogRestored,
+      PerformedBy: {
+        ActorType: PartyRepresentative,
+        ActorName: Clair Reilly
+      }
+    },
+    {
+      Id: Guid_25,
+      CreatedAt: DateTimeOffset_8,
+      ExtendedType: https://antonetta.biz/health,
+      Type: DialogCreated,
+      PerformedBy: {
+        ActorType: PartyRepresentative,
+        ActorName: Emilie Littel
+      }
+    }
+  ]
+}

@@ -2470,7 +2470,7 @@
             ]
           },
           "systemLabel": {
-            "description": "Set the system label of the dialog Migration purposes.",
+            "description": "Set the system label of the dialog.",
             "nullable": true,
             "oneOf": [
               {

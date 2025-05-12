@@ -10,9 +10,9 @@ using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.ServiceOwnerContext.Commands;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class UpdateDialogTests : ApplicationCollectionFixture
+public class UpdateServiceOwnerLabelsTests : ApplicationCollectionFixture
 {
-    public UpdateDialogTests(DialogApplication application) : base(application) { }
+    public UpdateServiceOwnerLabelsTests(DialogApplication application) : base(application) { }
 
     [Fact]
     public async Task Can_Update_Dialog_With_ServiceOwner_Labels()

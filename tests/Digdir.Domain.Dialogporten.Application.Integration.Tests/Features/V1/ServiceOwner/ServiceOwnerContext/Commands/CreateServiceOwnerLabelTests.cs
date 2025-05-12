@@ -7,9 +7,9 @@ using FluentAssertions;
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.ServiceOwnerContext.Commands;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class CreateDialogTests : ApplicationCollectionFixture
+public class CreateServiceOwnerLabelTests : ApplicationCollectionFixture
 {
-    public CreateDialogTests(DialogApplication application) : base(application) { }
+    public CreateServiceOwnerLabelTests(DialogApplication application) : base(application) { }
 
     [Fact]
     public async Task Can_Create_Dialog_With_ServiceOwner_Labels()

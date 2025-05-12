@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Globalization;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -122,6 +123,11 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public string? Search { get; init; }
 
     /// <summary>
+    /// Filter by one or more labels.
+    /// </summary>
+    public List<string>? Labels { get; set; }
+
+    /// <summary>
     /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
     /// </summary>
     public string? SearchLanguageCode
@@ -185,6 +191,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         var paginatedList = await dialogQuery
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
+            .Include(x => x.ServiceOwnerContext)
+                .ThenInclude(x => x.Labels)
             .WhereIf(!request.ServiceResource.IsNullOrEmpty(),
                 x => request.ServiceResource!.Contains(x.ServiceResource))
             .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
@@ -209,6 +217,12 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             )
             .WhereIf(request.Deleted == DeletedFilter.Exclude, x => !x.Deleted)
             .WhereIf(request.Deleted == DeletedFilter.Only, x => x.Deleted)
+            .WhereIf(request.Labels is not null && request.Labels.Count != 0, x =>
+                request.Labels!
+                    .Select(x => x.ToLower(CultureInfo.InvariantCulture))
+                    .All(label =>
+                        x.ServiceOwnerContext.Labels
+                            .Any(l => EF.Functions.ILike(l.Value, label + "%"))))
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()

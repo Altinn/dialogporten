@@ -6121,6 +6121,20 @@
             }
           },
           {
+            "description": "Filter by one or more labels.",
+            "explode": true,
+            "in": "query",
+            "name": "labels",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
             "description": "Limit free text search to texts with this language code, e.g. \u0027nb\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
             "in": "query",
             "name": "searchLanguageCode",

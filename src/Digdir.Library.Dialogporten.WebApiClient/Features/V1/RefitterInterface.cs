@@ -131,6 +131,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string Search { get; set; }
 
         /// <summary>
+        /// Filter by one or more labels.
+        /// </summary>
+        [Query(CollectionFormat.Multi)] 
+        public IEnumerable<string> Labels { get; set; }
+
+        /// <summary>
         /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
         /// </summary>
         [Query] 

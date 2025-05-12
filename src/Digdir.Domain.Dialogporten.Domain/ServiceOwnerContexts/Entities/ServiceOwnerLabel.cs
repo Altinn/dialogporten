@@ -2,7 +2,7 @@ using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 
-public class ServiceOwnerLabel : IImmutableEntity
+public sealed class ServiceOwnerLabel : IImmutableEntity
 {
     private string _value = null!;
     public Guid Id { get; set; }

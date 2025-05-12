@@ -5,7 +5,7 @@ using Digdir.Library.Entity.Abstractions.Features.Versionable;
 
 namespace Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 
-public class ServiceOwnerContext : IEntity, IVersionableEntity
+public sealed class ServiceOwnerContext : IEntity, IVersionableEntity
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.65.1](https://github.com/Altinn/dialogporten/compare/v1.65.0...v1.65.1) (2025-05-11)
+
+
+### Bug Fixes
+
+* **webapi:** Move set label revision from body to If-Match header ([#2260](https://github.com/Altinn/dialogporten/issues/2260)) ([cb46cd9](https://github.com/Altinn/dialogporten/commit/cb46cd94bc837986d7179265a31d0fd82fcbb05e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunit to 29.5.0 ([#2278](https://github.com/Altinn/dialogporten/issues/2278)) ([2b28caf](https://github.com/Altinn/dialogporten/commit/2b28caf2795c11c60157d5786807e38049e3d934))
+* **deps:** update dependency xunit.runner.visualstudio to 3.1.0 ([#2279](https://github.com/Altinn/dialogporten/issues/2279)) ([7e76176](https://github.com/Altinn/dialogporten/commit/7e7617693f4cad8379ec189c350c8a5663ab922b))
+* **deps:** update grafana/loki docker tag to v3.5.0 ([#2280](https://github.com/Altinn/dialogporten/issues/2280)) ([6ecace7](https://github.com/Altinn/dialogporten/commit/6ecace7ed45c3655e6b3b0e259e173298456d13b))
+* **deps:** update prom/prometheus docker tag to v3.3.1 ([#2277](https://github.com/Altinn/dialogporten/issues/2277)) ([595b322](https://github.com/Altinn/dialogporten/commit/595b32279b8c97677046c0b6f5329291fe01d8b1))
+
 ## [1.65.0](https://github.com/Altinn/dialogporten/compare/v1.64.4...v1.65.0) (2025-05-08)
 
 

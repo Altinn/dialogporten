@@ -42,6 +42,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
+        IValidator<ServiceOwnerLabelDto> serviceOwnerLabelValidator,
         IValidator<ContentDto?> contentValidator)
     {
         RuleFor(x => x.Id)
@@ -110,6 +111,10 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .ForEach(x => x.SetValidator(searchTagValidator));
+
+        RuleFor(x => x.ServiceOwnerLabels)
+            .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
+            .ForEach(x => x.SetValidator(serviceOwnerLabelValidator));
 
         RuleFor(x => x.GuiActions)
             .Must(x => x
@@ -372,6 +377,16 @@ internal sealed class CreateDialogTransmissionAttachmentUrlDtoValidator : Abstra
 internal sealed class CreateDialogSearchTagDtoValidator : AbstractValidator<SearchTagDto>
 {
     public CreateDialogSearchTagDtoValidator()
+    {
+        RuleFor(x => x.Value)
+            .MinimumLength(3)
+            .MaximumLength(Constants.MaxSearchTagLength);
+    }
+}
+
+internal sealed class CreateDialogServiceOwnerLabelDtoValidator : AbstractValidator<ServiceOwnerLabelDto>
+{
+    public CreateDialogServiceOwnerLabelDtoValidator()
     {
         RuleFor(x => x.Value)
             .MinimumLength(3)

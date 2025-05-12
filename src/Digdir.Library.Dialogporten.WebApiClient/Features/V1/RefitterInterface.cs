@@ -1661,6 +1661,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Tag> SearchTags { get; set; }
 
         /// <summary>
+        /// A list of labels, not visible in end-user APIs.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_ServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+
+        /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
         /// </summary>
 
@@ -1791,6 +1798,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
         /// <summary>
         /// A search tag value.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_ServiceOwnerLabel
+    {
+        /// <summary>
+        /// A label value.
         /// </summary>
 
         [JsonPropertyName("value")]
@@ -2843,6 +2862,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1ServiceOwnerDialogsQueriesGet_Tag> SearchTags { get; set; }
 
         /// <summary>
+        /// A list of labels, not visible in end-user APIs.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+
+        /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
         /// </summary>
 
@@ -2999,6 +3025,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
         /// <summary>
         /// A search tag value.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel
+    {
+        /// <summary>
+        /// A label value.
         /// </summary>
 
         [JsonPropertyName("value")]
@@ -3671,6 +3709,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public DialogEndUserContextsEntities_SystemLabel? SystemLabel { get; set; }
 
         /// <summary>
+        /// A list of labels, not visible in end-user APIs.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+
+        /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
 
@@ -3718,6 +3763,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("activities")]
         public ICollection<V1ServiceOwnerDialogsCommandsCreate_Activity> Activities { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel
+    {
+        /// <summary>
+        /// A label value.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
 
     }
 

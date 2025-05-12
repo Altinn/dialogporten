@@ -18,6 +18,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using OneOf;
@@ -121,6 +122,14 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             maxWidth: 20));
 
         VerifyActivityTransmissionRelations(dialog);
+
+        dialog.ServiceOwnerContext.Labels
+            .Merge(request.Dto.ServiceOwnerLabels,
+                destinationKeySelector: x => x.Value,
+                sourceKeySelector: x => x.Value,
+                create: _mapper.Map<List<ServiceOwnerLabel>>,
+                delete: DeleteDelegate.NoOp,
+                comparer: StringComparer.InvariantCultureIgnoreCase);
 
         dialog.SearchTags
             .Merge(request.Dto.SearchTags,

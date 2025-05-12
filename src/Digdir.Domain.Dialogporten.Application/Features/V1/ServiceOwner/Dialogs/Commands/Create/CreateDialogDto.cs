@@ -119,6 +119,12 @@ public sealed class CreateDialogDto
     /// Set the system label of the dialog Migration purposes.
     /// </summary>
     public SystemLabel.Values? SystemLabel { get; set; }
+
+    /// <summary>
+    /// A list of labels, not visible in end-user APIs.
+    /// </summary>
+    public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
+
     /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
@@ -290,6 +296,14 @@ public sealed class SearchTagDto
 {
     /// <summary>
     /// A search tag value.
+    /// </summary>
+    public string Value { get; set; } = null!;
+}
+
+public sealed class ServiceOwnerLabelDto
+{
+    /// <summary>
+    /// A label value.
     /// </summary>
     public string Value { get; set; } = null!;
 }

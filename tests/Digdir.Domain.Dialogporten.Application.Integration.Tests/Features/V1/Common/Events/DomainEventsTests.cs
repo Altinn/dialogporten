@@ -18,6 +18,7 @@ using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities;
+using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -452,5 +453,45 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .All(x => x.Metadata[Constants.IsSilentUpdate] == bool.TrueString)
             .Should()
             .BeTrue();
+    }
+
+    [Fact]
+    public async Task Updating_ServiceOwner_Label_Should_Not_Produce_DialogUpdatedEvent()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        await Application.Send(createDialogCommand);
+
+        var getDialogCommand = new GetDialogQuery
+        {
+            DialogId = dialogId,
+        };
+
+        var getDialogResponse = await Application.Send(getDialogCommand);
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(dialog);
+        updateDialogDto.ServiceOwnerLabels.Add(new() { Value = "Scadrial" });
+
+
+        // Act
+        await Application.Send(new UpdateDialogCommand
+        {
+            Dto = updateDialogDto,
+            Id = dialogId,
+        });
+
+        // Assert
+        var serviceOwnerLabels = await Application.GetDbEntities<ServiceOwnerLabel>();
+        serviceOwnerLabels.Should().HaveCount(1);
+
+        var publishedEvents = Application.GetPublishedEvents();
+        publishedEvents
+            .OfType<DialogUpdatedDomainEvent>()
+            .Should()
+            .BeEmpty();
     }
 }

@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
+using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
@@ -26,6 +27,10 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content));
 
         CreateMap<SearchTagDto, DialogSearchTag>()
+            .IgnoreComplexDestinationProperties()
+            .ForMember(x => x.Id, opt => opt.Ignore());
+
+        CreateMap<ServiceOwnerLabelDto, ServiceOwnerLabel>()
             .IgnoreComplexDestinationProperties()
             .ForMember(x => x.Id, opt => opt.Ignore());
 
@@ -86,6 +91,7 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.Activities, opt => opt.Ignore())
             .ForMember(dest => dest.Transmissions, opt => opt.Ignore());
         CreateMap<Queries.Get.SearchTagDto, SearchTagDto>();
+        CreateMap<Queries.Get.ServiceOwnerLabelDto, ServiceOwnerLabelDto>();
         CreateMap<Queries.Get.DialogActivityDto, ActivityDto>();
         CreateMap<Queries.Get.DialogApiActionDto, ApiActionDto>();
         CreateMap<Queries.Get.DialogApiActionEndpointDto, ApiActionEndpointDto>();

@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +88,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         CreateDialogEndUserContext(request, dialog);
+        CreateServiceOwnerContext(request, dialog);
 
         var activityTypes = dialog.Activities
             .Select(x => x.TypeId)
@@ -152,5 +154,16 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             request.Dto.SystemLabel.Value,
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);
+    }
+
+    private void CreateServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)
+    {
+        dialog.ServiceOwnerContext = new();
+        if (request.Dto.ServiceOwnerLabels.Count == 0)
+        {
+            return;
+        }
+
+        dialog.ServiceOwnerContext.Labels = _mapper.Map<List<ServiceOwnerLabel>>(request.Dto.ServiceOwnerLabels);
     }
 }

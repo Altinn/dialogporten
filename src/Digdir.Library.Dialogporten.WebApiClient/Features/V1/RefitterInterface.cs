@@ -134,7 +134,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Filter by one or more labels.
         /// </summary>
         [Query(CollectionFormat.Multi)] 
-        public IEnumerable<string> Labels { get; set; }
+        public IEnumerable<string> ServiceOwnerLabels { get; set; }
 
         /// <summary>
         /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
@@ -307,6 +307,53 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
         Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
+
+        /// <summary>Replace the service owner labels for a dialog</summary>
+        /// <remarks>
+        /// Replace the service owner labels for a dialog.
+        /// 
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog ServiceOwnerLabel was updated successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Put("/api/v1/serviceowner/dialogs/{dialogId}/serviceownerlabels")]
+        Task<IApiResponse> V1ServiceOwnerDialogServiceOwnerLabelsSetSetServiceOwnerLabels(System.Guid dialogId, [Body, AliasAs("SetServiceOwnerLabelsRequest")] V1ServiceOwnerDialogServiceOwnerLabelsSet_SetServiceOwnerLabelsRequest setServiceOwnerLabelsRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -1540,6 +1587,27 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogServiceOwnerLabelsSet_SetServiceOwnerLabelsRequest
+    {
+
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<V1ServiceOwnerServiceOwnerLabelsCommandsSet_ServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerServiceOwnerLabelsCommandsSet_ServiceOwnerLabel
+    {
+        /// <summary>
+        /// A label value.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
 
     }
 

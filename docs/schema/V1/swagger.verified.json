@@ -7292,6 +7292,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/serviceownerlabels": {
       "put": {
+        "description": "Replace the service owner labels for a dialog.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogServiceOwnerLabelsSet_SetServiceOwnerLabels",
         "parameters": [
           {
@@ -7328,7 +7329,16 @@
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "The dialog ServiceOwnerLabel was updated successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the ServiceOwner Context",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "content": {
@@ -7338,10 +7348,10 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -7354,7 +7364,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
           },
           "412": {
             "content": {
@@ -7364,7 +7374,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "422": {
             "content": {
@@ -7374,7 +7384,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [
@@ -7384,6 +7394,7 @@
             ]
           }
         ],
+        "summary": "Replace the service owner labels for a dialog",
         "tags": [
           "Serviceowner"
         ]

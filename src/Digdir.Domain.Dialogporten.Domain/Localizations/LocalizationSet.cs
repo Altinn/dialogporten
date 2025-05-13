@@ -4,7 +4,7 @@ using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Localizations;
 
-public abstract class LocalizationSet : IImmutableEntity
+public abstract class LocalizationSet : IIdentifiableEntity, IImmutableEntity
 {
     public Guid Id { get; set; }
 

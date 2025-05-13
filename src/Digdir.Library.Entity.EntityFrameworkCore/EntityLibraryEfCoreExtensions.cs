@@ -36,7 +36,7 @@ public static class EntityLibraryEfCoreExtensions
     ///     <item><see cref="ICreatableEntity"/></item>
     ///     <item><see cref="IUpdateableEntity"/></item>
     ///     <item><see cref="ISoftDeletableEntity"/></item>
-    ///     <item><see cref="IImmutableTimestampedEntity"/></item>
+    ///     <item><see cref="IImmutableEntity"/></item>
     ///     <item><see cref="ILookupEntity"/></item>
     ///     <item><see cref="IVersionableEntity"/></item>
     /// </list>

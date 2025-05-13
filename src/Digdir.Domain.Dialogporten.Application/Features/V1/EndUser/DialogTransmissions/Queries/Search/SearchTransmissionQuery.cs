@@ -36,10 +36,10 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
         var dialog = await _db.Dialogs
             .Include(x => x.Transmissions)
                 .ThenInclude(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
-                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LocalizationSetId).ThenBy(x => x.LanguageCode))
+                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.Transmissions)
                 .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LocalizationSetId).ThenBy(x => x.LanguageCode))
+                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.Transmissions)
                 .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                 .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))

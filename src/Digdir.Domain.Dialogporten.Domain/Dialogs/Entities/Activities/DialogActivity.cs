@@ -4,11 +4,13 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
+using Digdir.Library.Entity.Abstractions.Features.Creatable;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 
-public sealed class DialogActivity : IImmutableTimestampedEntity, IAggregateCreatedHandler, IEventPublisher
+public sealed class DialogActivity : IImmutableEntity, IIdentifiableEntity, ICreatableEntity, IAggregateCreatedHandler, IEventPublisher
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
@@ -54,7 +56,7 @@ public sealed class DialogActivityDescription : LocalizationSet
     public Guid ActivityId { get; set; }
 }
 
-public sealed class DialogActivityPerformedByActor : Actor, IImmutableTimestampedEntity
+public sealed class DialogActivityPerformedByActor : Actor, IImmutableEntity
 {
     public Guid ActivityId { get; set; }
     public DialogActivity Activity { get; set; } = null!;

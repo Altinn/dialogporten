@@ -11,13 +11,13 @@ internal static class ImmutableExtensions
     public static ChangeTracker HandleImmutableEntities(this ChangeTracker changeTracker)
     {
         var immutableEntities = changeTracker
-            .Entries<IImmutableTimestampedEntity>()
+            .Entries<IImmutableEntity>()
             .Where(x => x.State == EntityState.Modified);
 
         if (immutableEntities.Any())
         {
             throw new InvalidOperationException(
-                $"Entities marked with {nameof(IImmutableTimestampedEntity)} can not be modified. " +
+                $"Entities marked with {nameof(IImmutableEntity)} can not be modified. " +
                 $"The following entity types were attempted modified: " +
                 $"{string.Join(", ", immutableEntities.Select(x => x.Metadata.ClrType.Name).Distinct())}");
         }

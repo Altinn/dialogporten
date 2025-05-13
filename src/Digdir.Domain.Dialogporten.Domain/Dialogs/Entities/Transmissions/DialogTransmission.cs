@@ -10,7 +10,7 @@ using Digdir.Library.Entity.Abstractions.Features.Immutable;
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 
 public sealed class DialogTransmission :
-    IImmutableEntity,
+    IImmutableTimestampedEntity,
     IAggregateCreatedHandler,
     IEventPublisher
 {
@@ -61,13 +61,13 @@ public sealed class DialogTransmission :
     }
 }
 
-public sealed class DialogTransmissionSenderActor : Actor, IImmutableEntity
+public sealed class DialogTransmissionSenderActor : Actor, IImmutableTimestampedEntity
 {
     public Guid TransmissionId { get; set; }
     public DialogTransmission Transmission { get; set; } = null!;
 }
 
-public sealed class DialogTransmissionAttachment : Attachment, IImmutableEntity
+public sealed class DialogTransmissionAttachment : Attachment, IImmutableTimestampedEntity
 {
     public Guid TransmissionId { get; set; }
     public DialogTransmission Transmission { get; set; } = null!;

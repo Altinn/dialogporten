@@ -3,7 +3,7 @@ using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 
-public sealed class LabelAssignmentLog : IImmutableEntity
+public sealed class LabelAssignmentLog : IImmutableTimestampedEntity
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
@@ -16,7 +16,7 @@ public sealed class LabelAssignmentLog : IImmutableEntity
     public LabelAssignmentLogActor PerformedBy { get; set; } = null!;
 }
 
-public sealed class LabelAssignmentLogActor : Actor, IImmutableEntity
+public sealed class LabelAssignmentLogActor : Actor, IImmutableTimestampedEntity
 {
     public Guid LabelAssignmentLogId { get; set; }
     public LabelAssignmentLog LabelAssignmentLog { get; set; } = null!;

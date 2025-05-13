@@ -8,7 +8,7 @@ using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 
-public sealed class DialogActivity : IImmutableEntity, IAggregateCreatedHandler, IEventPublisher
+public sealed class DialogActivity : IImmutableTimestampedEntity, IAggregateCreatedHandler, IEventPublisher
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
@@ -54,7 +54,7 @@ public sealed class DialogActivityDescription : LocalizationSet
     public Guid ActivityId { get; set; }
 }
 
-public sealed class DialogActivityPerformedByActor : Actor, IImmutableEntity
+public sealed class DialogActivityPerformedByActor : Actor, IImmutableTimestampedEntity
 {
     public Guid ActivityId { get; set; }
     public DialogActivity Activity { get; set; } = null!;

@@ -2,7 +2,7 @@ using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Actors;
 
-public sealed class ActorName : IImmutableEntity
+public sealed class ActorName : IImmutableTimestampedEntity
 {
     public Guid Id { get; set; }
     public string? ActorId { get; set; }

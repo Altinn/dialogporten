@@ -2,7 +2,7 @@ using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
-public sealed class DialogSearchTag : IImmutableEntity
+public sealed class DialogSearchTag : IImmutableTimestampedEntity
 {
     private string _value = null!;
     public Guid Id { get; set; }

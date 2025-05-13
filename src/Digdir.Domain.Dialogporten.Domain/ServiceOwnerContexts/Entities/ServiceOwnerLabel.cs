@@ -4,6 +4,8 @@ namespace Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 
 public sealed class ServiceOwnerLabel : IImmutableEntity
 {
+    public const int MaxNumberOfLabels = 20;
+
     private string _value = null!;
     public Guid Id { get; set; }
 

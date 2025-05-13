@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.Http;
+using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -114,6 +115,8 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
         RuleFor(x => x.ServiceOwnerLabels)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
+            .Must(x => x.Count() <= ServiceOwnerLabel.MaxNumberOfLabels)
+                .WithMessage($"Maximum {ServiceOwnerLabel.MaxNumberOfLabels} service owner labels are allowed.")
             .ForEach(x => x.SetValidator(serviceOwnerLabelValidator));
 
         RuleFor(x => x.GuiActions)

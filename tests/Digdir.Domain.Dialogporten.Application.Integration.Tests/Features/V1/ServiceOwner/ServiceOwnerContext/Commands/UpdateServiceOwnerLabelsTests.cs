@@ -222,4 +222,72 @@ public class UpdateServiceOwnerLabelsTests : ApplicationCollectionFixture
             .Single(x => x.DialogId == dialogId).Revision;
         updatedServiceOwnerContextRevision.Should().NotBe(originalServiceOwnerContextRevision);
     }
+
+    [Fact]
+    public async Task Cannot_Update_To_More_Than_Maximum_ServiceOwner_Labels()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        await Application.Send(createDialogCommand);
+
+        var getDialogCommand = new GetDialogQuery
+        {
+            DialogId = dialogId,
+        };
+
+        var getDialogResponse = await Application.Send(getDialogCommand);
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+
+        var mapper = Application.GetMapper();
+        var updateDialogDto = mapper.Map<UpdateDialogDto>(dialog);
+        updateDialogDto.ServiceOwnerLabels = [];
+
+        for (var i = 0; i < ServiceOwnerLabel.MaxNumberOfLabels + 1; i++)
+        {
+            updateDialogDto.ServiceOwnerLabels.Add(new() { Value = $"label{i}" });
+        }
+
+        // Act
+        var response = await Application.Send(new UpdateDialogCommand
+        {
+            Dto = updateDialogDto,
+            Id = dialogId,
+        });
+
+        // Assert
+        response.TryPickT3(out var validationError, out _).Should().BeTrue();
+        validationError.Errors
+            .Should()
+            .ContainSingle(x => x.ErrorMessage
+                .Contains("Maximum") && x.ErrorMessage
+                .Contains($"{ServiceOwnerLabel.MaxNumberOfLabels}"));
+    }
+
+    // [Fact]
+    // public async Task Cannot_Create_More_Than_Maximum_ServiceOwner_Labels()
+    // {
+    //     // Arrange
+    //     var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+    //     var labels = new List<ServiceOwnerLabelDto>();
+    //
+    //     for (var i = 0; i < ServiceOwnerLabel.MaxNumberOfLabels + 1; i++)
+    //     {
+    //         labels.Add(new ServiceOwnerLabelDto { Value = $"label{i}" });
+    //     }
+    //
+    //     createDialogCommand.Dto.ServiceOwnerLabels = labels;
+    //
+    //     // Act
+    //     var response = await Application.Send(createDialogCommand);
+    //
+    //     // Assert
+    //     response.TryPickT2(out var validationError, out _).Should().BeTrue();
+    //     validationError.Errors
+    //         .Should()
+    //         .ContainSingle(x => x.ErrorMessage
+    //             .Contains("Maximum") && x.ErrorMessage
+    //             .Contains($"{ServiceOwnerLabel.MaxNumberOfLabels}"));
+    // }
 }

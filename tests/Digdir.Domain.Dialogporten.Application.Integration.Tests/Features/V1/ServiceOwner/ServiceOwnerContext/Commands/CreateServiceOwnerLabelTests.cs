@@ -87,4 +87,30 @@ public class CreateServiceOwnerLabelTests : ApplicationCollectionFixture
             .ContainSingle(x => x.ErrorMessage
                 .Contains("or fewer"));
     }
+
+    [Fact]
+    public async Task Cannot_Create_More_Than_Maximum_ServiceOwner_Labels()
+    {
+        // Arrange
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var labels = new List<ServiceOwnerLabelDto>();
+
+        for (var i = 0; i < ServiceOwnerLabel.MaxNumberOfLabels + 1; i++)
+        {
+            labels.Add(new ServiceOwnerLabelDto { Value = $"label{i}" });
+        }
+
+        createDialogCommand.Dto.ServiceOwnerLabels = labels;
+
+        // Act
+        var response = await Application.Send(createDialogCommand);
+
+        // Assert
+        response.TryPickT2(out var validationError, out _).Should().BeTrue();
+        validationError.Errors
+            .Should()
+            .ContainSingle(x => x.ErrorMessage
+                .Contains("Maximum") && x.ErrorMessage
+                .Contains($"{ServiceOwnerLabel.MaxNumberOfLabels}"));
+    }
 }

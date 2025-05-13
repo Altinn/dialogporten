@@ -17,6 +17,11 @@ namespace Digdir.Tool.Dialogporten.GenerateFakeData;
 
 public static class DialogGenerator
 {
+    static DialogGenerator()
+    {
+        Randomizer.Seed = new Random(123456);
+    }
+
     private static readonly DateTime RefTime = new(2026, 1, 1);
 
     [ThreadStatic] private static Randomizer? _rnd;

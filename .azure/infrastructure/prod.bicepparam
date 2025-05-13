@@ -17,7 +17,7 @@ param workloadProfiles = [
   {
     name: 'Dedicated-D8'
     workloadProfileType: 'D8'
-    minimumCount: 2
+    minimumCount: 3
     maximumCount: 5
   }
 ]

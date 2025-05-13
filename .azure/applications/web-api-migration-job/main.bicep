@@ -81,7 +81,6 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
     workloadProfileName: workloadProfileName
-    environment: environment
   }
 }
 

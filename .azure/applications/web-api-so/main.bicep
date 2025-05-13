@@ -157,7 +157,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     scale: scale
     userAssignedIdentityId: managedIdentity.id
     workloadProfileName: workloadProfileName
-    environment: environment
   }
 }
 

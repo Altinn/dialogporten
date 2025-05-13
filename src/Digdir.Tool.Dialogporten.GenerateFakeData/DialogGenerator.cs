@@ -104,6 +104,10 @@ public static class DialogGenerator
         .RuleFor(o => o.Process, _ => GenerateFakeProcessUri())
         .RuleFor(o => o.Transmissions, _ => GenerateFakeDialogTransmissions());
 
+    public static void SetSeed(int seed)
+    {
+        Randomizer.Seed = new Random(seed);
+    }
 
     public static CreateDialogCommand GenerateSimpleFakeCreateDialogCommand(Guid? id = null) => new()
     {

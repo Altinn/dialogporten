@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -65,8 +66,8 @@ public class CreateServiceOwnerLabelTests : ApplicationCollectionFixture
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var labels = new List<ServiceOwnerLabelDto>
         {
-            new() { Value = "a" },
-            new() { Value =  new string('a', 300) }
+            new() { Value = new string('a', Constants.MinSearchStringLength - 1) },
+            new() { Value = new string('a', Constants.DefaultMaxStringLength + 1) }
         };
 
         createDialogCommand.Dto.ServiceOwnerLabels = labels;

@@ -379,7 +379,7 @@ internal sealed class CreateDialogSearchTagDtoValidator : AbstractValidator<Sear
     public CreateDialogSearchTagDtoValidator()
     {
         RuleFor(x => x.Value)
-            .MinimumLength(3)
+            .MinimumLength(Constants.MinSearchStringLength)
             .MaximumLength(Constants.MaxSearchTagLength);
     }
 }
@@ -389,8 +389,8 @@ internal sealed class CreateDialogServiceOwnerLabelDtoValidator : AbstractValida
     public CreateDialogServiceOwnerLabelDtoValidator()
     {
         RuleFor(x => x.Value)
-            .MinimumLength(3)
-            .MaximumLength(Constants.MaxSearchTagLength);
+            .MinimumLength(Constants.MinSearchStringLength)
+            .MaximumLength(Constants.DefaultMaxStringLength);
     }
 }
 

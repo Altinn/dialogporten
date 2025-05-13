@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -152,8 +153,8 @@ public class UpdateServiceOwnerLabelsTests : ApplicationCollectionFixture
         var mapper = Application.GetMapper();
         var updateDialogDto = mapper.Map<UpdateDialogDto>(dialog);
 
-        updateDialogDto.ServiceOwnerLabels.Add(new() { Value = "a" });
-        updateDialogDto.ServiceOwnerLabels.Add(new() { Value = new string('a', 300) });
+        updateDialogDto.ServiceOwnerLabels.Add(new() { Value = new string('a', Constants.MinSearchStringLength - 1) });
+        updateDialogDto.ServiceOwnerLabels.Add(new() { Value = new string('a', Constants.DefaultMaxStringLength + 1) });
 
         // Act
         var response = await Application.Send(new UpdateDialogCommand

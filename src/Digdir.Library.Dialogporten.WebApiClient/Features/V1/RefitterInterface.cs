@@ -3707,7 +3707,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public DialogsEntities_DialogStatus Status { get; set; }
 
         /// <summary>
-        /// Set the system label of the dialog Migration purposes.
+        /// Set the system label of the dialog.
         /// </summary>
 
         [JsonPropertyName("systemLabel")]

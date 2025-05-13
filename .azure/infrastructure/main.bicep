@@ -305,7 +305,6 @@ module containerAppEnv '../modules/containerAppEnv/main.bicep' = {
     tags: tags
     zoneRedundancyEnabled: containerAppEnvZoneRedundancyEnabled
     workloadProfiles: workloadProfiles
-    environment: environment
   }
 }
 

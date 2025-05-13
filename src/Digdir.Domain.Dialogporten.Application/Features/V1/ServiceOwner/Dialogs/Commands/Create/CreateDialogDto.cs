@@ -116,7 +116,7 @@ public sealed class CreateDialogDto
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
-    /// Set the system label of the dialog Migration purposes.
+    /// Set the system label of the dialog.
     /// </summary>
     public SystemLabel.Values? SystemLabel { get; set; }
 

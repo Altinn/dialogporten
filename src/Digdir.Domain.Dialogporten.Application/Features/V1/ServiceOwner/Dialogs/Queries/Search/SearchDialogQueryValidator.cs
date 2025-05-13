@@ -42,6 +42,11 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
                          $"must be specified if '{nameof(SearchDialogQuery.EndUserId)}' is provided.")
             .When(x => x.EndUserId is not null);
 
+        RuleFor(x => x.Search)
+            .Must((x, _) => x.EndUserId is not null)
+            .WithMessage($"'{nameof(SearchDialogQuery.EndUserId)}' must be specified if {{PropertyName}} is provided.")
+            .When(x => x.Search is not null);
+
         RuleForEach(x => x.Party)
             .IsValidPartyIdentifier();
 

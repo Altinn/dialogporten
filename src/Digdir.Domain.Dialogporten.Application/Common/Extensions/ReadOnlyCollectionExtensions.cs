@@ -29,6 +29,11 @@ internal static class ReadOnlyCollectionExtensions
         int maxWidth = 1)
         where TKey : struct
     {
+        if (entities.Count == 0)
+        {
+            return [];
+        }
+
         entities.Select(keySelector).EnsureNonDefaultTKey();
 
         var maxDepthViolation = maxDepth + 1;

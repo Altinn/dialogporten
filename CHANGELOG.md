@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.65.1](https://github.com/Altinn/dialogporten/compare/v1.65.0...v1.65.1) (2025-05-11)
+
+
+### Bug Fixes
+
+* **webapi:** Move set label revision from body to If-Match header ([#2260](https://github.com/Altinn/dialogporten/issues/2260)) ([cb46cd9](https://github.com/Altinn/dialogporten/commit/cb46cd94bc837986d7179265a31d0fd82fcbb05e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunit to 29.5.0 ([#2278](https://github.com/Altinn/dialogporten/issues/2278)) ([2b28caf](https://github.com/Altinn/dialogporten/commit/2b28caf2795c11c60157d5786807e38049e3d934))
+* **deps:** update dependency xunit.runner.visualstudio to 3.1.0 ([#2279](https://github.com/Altinn/dialogporten/issues/2279)) ([7e76176](https://github.com/Altinn/dialogporten/commit/7e7617693f4cad8379ec189c350c8a5663ab922b))
+* **deps:** update grafana/loki docker tag to v3.5.0 ([#2280](https://github.com/Altinn/dialogporten/issues/2280)) ([6ecace7](https://github.com/Altinn/dialogporten/commit/6ecace7ed45c3655e6b3b0e259e173298456d13b))
+* **deps:** update prom/prometheus docker tag to v3.3.1 ([#2277](https://github.com/Altinn/dialogporten/issues/2277)) ([595b322](https://github.com/Altinn/dialogporten/commit/595b32279b8c97677046c0b6f5329291fe01d8b1))
+
+## [1.65.0](https://github.com/Altinn/dialogporten/compare/v1.64.4...v1.65.0) (2025-05-08)
+
+
+### Features
+
+* **infra:** add workload profiles for container apps ([#2259](https://github.com/Altinn/dialogporten/issues/2259)) ([4a5500b](https://github.com/Altinn/dialogporten/commit/4a5500bfa5757215d30c1940520e7d90b7dcfdb4))
+
+
+### Bug Fixes
+
+* **infra:** change to workload profiles for test and yt01 ([#2271](https://github.com/Altinn/dialogporten/issues/2271)) ([7feb4c0](https://github.com/Altinn/dialogporten/commit/7feb4c096273a3189d7877321f386bcb6bcf415f))
+* **infra:** Remove count from consumption workload profile ([#2268](https://github.com/Altinn/dialogporten/issues/2268)) ([ac88d85](https://github.com/Altinn/dialogporten/commit/ac88d85a4911c7daf9aaad53816de1296c3710ab))
+* **infra:** revert workload profiles for CAE ([#2270](https://github.com/Altinn/dialogporten/issues/2270)) ([aea9209](https://github.com/Altinn/dialogporten/commit/aea92096a09d0ac3f377c1ba8b777ff92f682605))
+
+
+### Miscellaneous Chores
+
+* **database-forwarder:** ensure it works cross platform ([#2127](https://github.com/Altinn/dialogporten/issues/2127)) ([1bff01e](https://github.com/Altinn/dialogporten/commit/1bff01e75933bf3f7fe64c25ca6b7b2507072f35))
+* **performance:** removed search without enduserid and use enduserid instead of enduser ([#2263](https://github.com/Altinn/dialogporten/issues/2263)) ([2044f09](https://github.com/Altinn/dialogporten/commit/2044f09fdb06dcde9fbbfa623f9468707d551fe6))
+
 ## [1.64.4](https://github.com/Altinn/dialogporten/compare/v1.64.3...v1.64.4) (2025-05-08)
 
 

@@ -175,6 +175,7 @@ module vnet '../modules/vnet/main.bicep' = {
     namePrefix: namePrefix
     location: location
     tags: tags
+    environment: environment
   }
 }
 
@@ -304,6 +305,7 @@ module containerAppEnv '../modules/containerAppEnv/main.bicep' = {
     tags: tags
     zoneRedundancyEnabled: containerAppEnvZoneRedundancyEnabled
     workloadProfiles: workloadProfiles
+    environment: environment
   }
 }
 

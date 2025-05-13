@@ -13,7 +13,7 @@ public sealed class Mutations
         [Service] IHttpContextAccessor httpContextAccessor,
         SetSystemLabelInput input)
     {
-        var command = mapper.Map<SystemLabelCommand>(input);
+        var command = mapper.Map<SetSystemLabelCommand>(input);
         var result = await mediator.Send(command);
 
         return result.Match(

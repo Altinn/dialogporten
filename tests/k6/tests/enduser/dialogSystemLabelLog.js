@@ -1,5 +1,5 @@
 import {
-    describe, expect, expectStatusFor, getEU, putEU, postSO, putSO, purgeSO
+    describe, expect, expectStatusFor, getEU, putEU, postSO, putSO, purgeSO, uuidv4
 } from '../../common/testimports.js'
 
 import {default as dialogToInsert} from '../serviceowner/testdata/01-create-dialog.js';
@@ -38,6 +38,23 @@ export default function () {
         expectStatusFor(response).to.equal(200);
         expect(response, 'response').to.have.validJsonBody();
         expect(response.json(), 'response body').to.have.lengthOf(3);
+    })
+
+    describe('Invalid revision if-match header results in 412 Precondition Failed', () => {
+
+        let body = {
+            'label': 'bin'
+        }
+
+        let invalidRevision = uuidv4();
+        let params = {
+            headers: {
+                'If-Match': invalidRevision
+            }
+        }
+
+        let response = putEU('dialogs/' + dialogId + '/systemlabels', body, params);
+        expectStatusFor(response).to.equal(412);
     })
 
     describe('Dialog update set system label to default', () => {

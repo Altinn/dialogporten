@@ -25,6 +25,9 @@ param environmentKeyVaultName string
 @description('The replica timeout for the job in seconds')
 param replicaTimeOutInSeconds int
 
+@description('The workload profile name to use, defaults to "Consumption"')
+param workloadProfileName string = 'Consumption'
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 var tags = {
@@ -77,6 +80,8 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     tags: tags
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
+    workloadProfileName: workloadProfileName
+    environment: environment
   }
 }
 

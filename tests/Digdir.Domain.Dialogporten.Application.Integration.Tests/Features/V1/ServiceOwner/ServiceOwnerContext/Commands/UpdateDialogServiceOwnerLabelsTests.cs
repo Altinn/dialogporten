@@ -48,8 +48,7 @@ public class UpdateDialogServiceOwnerLabelsTests : ApplicationCollectionFixture
 
         // Assert
         response.TryPickT0(out _, out _).Should().BeTrue();
-        var serviceOwnerLabels = await Application.GetDbEntities<ServiceOwnerLabel>();
-        serviceOwnerLabels.Should().HaveCount(2);
+        await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: 2);
     }
 
     [Fact]
@@ -102,7 +101,9 @@ public class UpdateDialogServiceOwnerLabelsTests : ApplicationCollectionFixture
         var dialogId = IdentifiableExtensions.CreateVersion7();
 
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        createDialogCommand.Dto.ServiceOwnerLabels = [new() { Value = "Sel" }];
+
+        const string label = "SEL";
+        createDialogCommand.Dto.ServiceOwnerLabels = [new() { Value = label }];
 
         await Application.Send(createDialogCommand);
 
@@ -116,7 +117,7 @@ public class UpdateDialogServiceOwnerLabelsTests : ApplicationCollectionFixture
 
         var mapper = Application.GetMapper();
         var updateDialogDto = mapper.Map<UpdateDialogDto>(dialog);
-        updateDialogDto.ServiceOwnerLabels.Add(new() { Value = "Sel" });
+        updateDialogDto.ServiceOwnerLabels.Add(new() { Value = label.ToLowerInvariant() });
 
         // Act
         var response = await Application.Send(new UpdateDialogCommand
@@ -209,13 +210,13 @@ public class UpdateDialogServiceOwnerLabelsTests : ApplicationCollectionFixture
             Id = dialogId,
         });
 
-        // Assert
         var getDialogResponseAfterUpdate = await Application.Send(getDialogCommand);
+
+        // Assert
         getDialogResponseAfterUpdate.TryPickT0(out var updatedDialog, out _).Should().BeTrue();
         updatedDialog.Revision.Should().Be(originalDialogRevision);
 
-        var serviceOwnerLabels = await Application.GetDbEntities<ServiceOwnerLabel>();
-        serviceOwnerLabels.Should().HaveCount(1);
+        await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: 1);
 
         var updatedServiceOwnerContextRevision =
             (await Application.GetDbEntities<Domain.ServiceOwnerContexts.Entities.ServiceOwnerContext>())

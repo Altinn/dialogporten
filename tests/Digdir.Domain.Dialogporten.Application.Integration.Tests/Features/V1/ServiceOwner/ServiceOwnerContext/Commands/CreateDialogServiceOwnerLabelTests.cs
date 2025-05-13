@@ -1,9 +1,9 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ServiceOwnerLabelDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.ServiceOwnerContext.Commands;
 
@@ -31,8 +31,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
 
         // Assert
         response.TryPickT0(out _, out _).Should().BeTrue();
-        var serviceOwnerLabels = await Application.GetDbEntities<ServiceOwnerLabel>();
-        serviceOwnerLabels.Should().HaveCount(labels.Count);
+        await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: labels.Count);
     }
 
     [Fact]
@@ -40,11 +39,13 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var labels = new List<ServiceOwnerLabelDto>
-        {
-            new() { Value = "Scadrial" },
-            new() { Value = "Scadrial" },
-        };
+        const string label = "SCADRIAL";
+
+        List<ServiceOwnerLabelDto> labels =
+        [
+            new() { Value = label },
+            new() { Value = label.ToLowerInvariant() }
+        ];
 
         createDialogCommand.Dto.ServiceOwnerLabels = labels;
 

@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -151,7 +152,10 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         // Arrange
         var searchServiceOwnerLabelQuery = new SearchDialogQuery
         {
-            Labels = ["a", new string('a', 300)]
+            Labels = [
+                new string('a', Constants.MinSearchStringLength - 1),
+                new string('a', Constants.DefaultMaxStringLength + 1)
+            ]
         };
 
         // Act

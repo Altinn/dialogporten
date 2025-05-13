@@ -27,7 +27,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         createDialogWithLabel.Dto.ServiceOwnerLabels = [new() { Value = label }];
         await Application.Send(createDialogWithLabel);
 
-        var searchServiceOwnerLabelQuery = new SearchDialogQuery { Labels = [label] };
+        var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label] };
 
         // Act
         var response = await Application.Send(searchServiceOwnerLabelQuery);
@@ -60,7 +60,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         createDialogWithTwoLabels.Dto.ServiceOwnerLabels = [new() { Value = label1 }, new() { Value = label2 }];
         await Application.Send(createDialogWithTwoLabels);
 
-        var searchServiceOwnerLabelQuery = new SearchDialogQuery { Labels = [label1, label2] };
+        var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label1, label2] };
 
         // Act
         var response = await Application.Send(searchServiceOwnerLabelQuery);
@@ -98,7 +98,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         createDialogWithTwoLabels.Dto.ServiceOwnerLabels = [new() { Value = label2 }];
         await Application.Send(createDialogWithTwoLabels);
 
-        var searchServiceOwnerLabelQuery = new SearchDialogQuery { Labels = [label1[..4]] };
+        var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label1[..4]] };
 
         // Act
         var response = await Application.Send(searchServiceOwnerLabelQuery);
@@ -133,7 +133,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         createDialogWithTwoLabels.Dto.ServiceOwnerLabels = [new() { Value = label2 }];
         await Application.Send(createDialogWithTwoLabels);
 
-        var searchServiceOwnerLabelQuery = new SearchDialogQuery { Labels = ["One"] };
+        var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = ["One"] };
 
         // Act
         var response = await Application.Send(searchServiceOwnerLabelQuery);
@@ -152,7 +152,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         // Arrange
         var searchServiceOwnerLabelQuery = new SearchDialogQuery
         {
-            Labels = [
+            ServiceOwnerLabels = [
                 new string('a', Constants.MinSearchStringLength - 1),
                 new string('a', Constants.DefaultMaxStringLength + 1)
             ]

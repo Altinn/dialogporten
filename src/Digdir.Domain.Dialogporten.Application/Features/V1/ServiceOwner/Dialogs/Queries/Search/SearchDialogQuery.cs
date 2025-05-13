@@ -125,7 +125,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by one or more labels.
     /// </summary>
-    public List<string>? Labels { get; set; }
+    public List<string>? ServiceOwnerLabels { get; set; }
 
     /// <summary>
     /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
@@ -217,8 +217,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             )
             .WhereIf(request.Deleted == DeletedFilter.Exclude, x => !x.Deleted)
             .WhereIf(request.Deleted == DeletedFilter.Only, x => x.Deleted)
-            .WhereIf(request.Labels is not null && request.Labels.Count != 0, x =>
-                request.Labels!
+            .WhereIf(request.ServiceOwnerLabels is not null && request.ServiceOwnerLabels.Count != 0, x =>
+                request.ServiceOwnerLabels!
                     .Select(x => x.ToLower(CultureInfo.InvariantCulture))
                     .All(label =>
                         x.ServiceOwnerContext.Labels

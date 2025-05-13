@@ -37,8 +37,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         result.Items.Should().HaveCount(1);
         result.Items[0].Id.Should().Be(labeledDialogId);
 
-        var dialogs = await Application.GetDbEntities<DialogEntity>();
-        dialogs.Should().HaveCount(2);
+        await Application.AssertEntityCountAsync<DialogEntity>(count: 2);
     }
 
     [Fact]
@@ -70,8 +69,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         result.Items.Should().HaveCount(1);
         result.Items[0].Id.Should().Be(dualLabeledDialogId);
 
-        var dialogs = await Application.GetDbEntities<DialogEntity>();
-        dialogs.Should().HaveCount(3);
+        await Application.AssertEntityCountAsync<DialogEntity>(count: 3);
     }
 
     [Fact]
@@ -109,8 +107,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         result.Items.Should().ContainSingle(x => x.Id == singleLabeledDialogId);
         result.Items.Should().ContainSingle(x => x.Id == dualLabeledDialogId);
 
-        var dialogs = await Application.GetDbEntities<DialogEntity>();
-        dialogs.Should().HaveCount(numberOfDialogs + 2);
+        await Application.AssertEntityCountAsync<DialogEntity>(count: numberOfDialogs + 2);
     }
 
     [Fact]
@@ -142,8 +139,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         response.TryPickT0(out var result, out _).Should().BeTrue();
         result.Items.Should().HaveCount(0);
 
-        var dialogs = await Application.GetDbEntities<DialogEntity>();
-        dialogs.Should().HaveCount(3);
+        await Application.AssertEntityCountAsync<DialogEntity>(count: 3);
     }
 
     [Fact]

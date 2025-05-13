@@ -476,7 +476,6 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         var updateDialogDto = mapper.Map<UpdateDialogDto>(dialog);
         updateDialogDto.ServiceOwnerLabels.Add(new() { Value = "Scadrial" });
 
-
         // Act
         await Application.Send(new UpdateDialogCommand
         {
@@ -485,8 +484,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         });
 
         // Assert
-        var serviceOwnerLabels = await Application.GetDbEntities<ServiceOwnerLabel>();
-        serviceOwnerLabels.Should().HaveCount(1);
+        await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: 1);
 
         var publishedEvents = Application.GetPublishedEvents();
         publishedEvents

@@ -13,7 +13,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSyste
 public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
 {
     public Guid DialogId { get; set; }
-    public Guid? IfMatchDialogRevision { get; set; }
+    public Guid? IfMatchEnduserContextRevision { get; set; }
     public SystemLabel.Values Label { get; set; }
 }
 
@@ -66,7 +66,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         dialog.DialogEndUserContext.UpdateLabel(request.Label, currentUserInformation.UserId.ExternalIdWithPrefix);
 
         var saveResult = await _unitOfWork
-                               .EnableConcurrencyCheck(dialog.DialogEndUserContext, request.IfMatchDialogRevision)
+                               .EnableConcurrencyCheck(dialog.DialogEndUserContext, request.IfMatchEnduserContextRevision)
                                .SaveChangesAsync(cancellationToken);
 
         return saveResult.Match<SetSystemLabelResult>(

@@ -35,7 +35,7 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetD
         {
             DialogId = req.DialogId,
             Label = req.Label,
-            IfMatchDialogRevision = req.IfMatchDialogRevision
+            IfMatchEnduserContextRevision = req.IfMatchEnduserContextRevision
         };
 
         var result = await _sender.Send(command, ct);
@@ -56,7 +56,7 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetD
 public sealed class SetDialogSystemLabelRequest
 {
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
-    public Guid? IfMatchDialogRevision { get; set; }
+    public Guid? IfMatchEnduserContextRevision { get; set; }
 
     public Guid DialogId { get; set; }
 

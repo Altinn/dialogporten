@@ -35,9 +35,10 @@ public static class Program
 
     private static async Task RunAsync(Options options)
     {
+        DialogGenerator.SetSeed(options.Seed);
+
         if (options is { Submit: false, WriteToDisk: false, Benchmark: false })
         {
-            Randomizer.Seed = new Random(options.Seed);
             var dialogs = DialogGenerator.GenerateFakeDialogs(
                 count: options.Count, serviceResourceGenerator: () => MaybeGetRandomResource(options),
                 partyGenerator: () => MaybeGetRandomParty(options));

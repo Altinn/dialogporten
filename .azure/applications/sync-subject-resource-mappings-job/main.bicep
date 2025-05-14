@@ -112,7 +112,6 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     args: 'sync-subject-resource-mappings'
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
-    environment: environment
     workloadProfileName: workloadProfileName
   }
 }

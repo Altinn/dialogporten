@@ -26,9 +26,6 @@ on:
       hasTestChanges:
         description: "Test related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasTestChanges }}
-      hasSlackNotifierChanges:
-        description: "Slack Notifier function related files changed"
-        value: ${{ jobs.check-for-changes.outputs.hasSlackNotifierChanges }}
       hasSwaggerSchemaChanges:
         description: "Swagger schema has changed"
         value: ${{ jobs.check-for-changes.outputs.hasSwaggerSchemaChanges }}
@@ -47,9 +44,8 @@ jobs:
     name: Filter
     runs-on: ubuntu-latest
     outputs:
-      hasInfraChanges: ${{ steps.filter.outputs.azure_any_modified == 'true' }}
-      hasSlackNotifierChanges: ${{ steps.filter.outputs.slackNotifier_any_modified == 'true'}}
-      hasBackendChanges: ${{ steps.filter-backend.outputs.backend_any_modified == 'true' }}
+      hasInfraChanges: ${{ steps.filter.outputs.azure_any_modified == 'true' || steps.filter.outputs.github_workflows_any_modified == 'true' }}
+      hasBackendChanges: ${{ steps.filter-backend.outputs.backend_any_modified == 'true' || steps.filter.outputs.github_workflows_any_modified == 'true' }}
       hasTestChanges: ${{ steps.filter-backend.outputs.tests_any_modified == 'true' }}
       hasSwaggerSchemaChanges: ${{ steps.filter-backend.outputs.swagger_schema_any_modified == 'true'}}
       hasGqlSchemaChanges: ${{ steps.filter-backend.outputs.gql_schema_any_modified == 'true'}}
@@ -72,12 +68,22 @@ jobs:
           base_sha: ${{ inputs.infra_base_sha }}
           files_yaml: |
             azure:
-              - '.github/**/*'
               - '.azure/infrastructure/**/*'
               - '.azure/modules/**/*'
-            slackNotifier:
+            github_workflows:
               - '.github/**/*'
-              - 'src/Digdir.Tool.Dialogporten.SlackNotifier/**/*'
+              - '!.github/ISSUE_TEMPLATE/**/*'
+              - '!.github/CODEOWNERS'
+              - '!.github/pull_request_template.md'
+
+      - name: Log infrastructure and workflow changes
+        run: |
+          echo "Infrastructure changes detected: ${{ steps.filter.outputs.azure_any_modified }}"
+          echo "Github workflows changes detected: ${{ steps.filter.outputs.github_workflows_any_modified }}"
+          echo "Changed infrastructure files:"
+          echo "${{ steps.filter.outputs.azure_modified_files }}"
+          echo "Changed github workflows files:"
+          echo "${{ steps.filter.outputs.github_workflows_modified_files }}"
 
       - uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1 # v45.0.1
         id: filter-backend
@@ -85,7 +91,6 @@ jobs:
           base_sha: ${{ inputs.apps_base_sha }}
           files_yaml: |
             backend:
-              - '.github/**/*'
               - 'src/**/*'
               - '.azure/applications/**/*'
               - '.azure/modules/containerApp/**/*'
@@ -101,3 +106,15 @@ jobs:
               - 'src/Digdir.Domain.Dialogporten.Infrastructure/Persistence/Migrations/**/*'
             schema_package:
               - 'docs/schema/V*/**/*'
+
+      - name: Log backend changes
+        run: |
+          echo "Backend changes detected: ${{ steps.filter-backend.outputs.backend_any_modified }}"
+          echo "Test changes detected: ${{ steps.filter-backend.outputs.tests_any_modified }}"
+          echo "Web API client changes detected: ${{ steps.filter-backend.outputs.web_api_client_any_modified }}"
+          echo "Swagger schema changes detected: ${{ steps.filter-backend.outputs.swagger_schema_any_modified }}"
+          echo "GraphQL schema changes detected: ${{ steps.filter-backend.outputs.gql_schema_any_modified }}"
+          echo "Migration changes detected: ${{ steps.filter-backend.outputs.migration_any_modified }}"
+          echo "Schema package changes detected: ${{ steps.filter-backend.outputs.schema_package_any_modified }}"
+          echo "Changed backend files:"
+          echo "${{ steps.filter-backend.outputs.backend_modified_files }}"

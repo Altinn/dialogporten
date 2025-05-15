@@ -5399,6 +5399,66 @@
         ]
       }
     },
+    "/api/v1/enduser/dialogs/{dialogId}/context/labellog": {
+      "get": {
+        "operationId": "V1EndUserDialogLabelAssignmentLogsSearch_DialogLabelAssignmentLog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/V1EndUserDialogLabelAssignmentLogQueriesSearch_LabelAssignmentLog"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "410": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
     "/api/v1/enduser/dialogs/{dialogId}/context/systemlabels": {
       "put": {
         "operationId": "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabel",
@@ -5486,66 +5546,6 @@
                 }
               }
             },
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "JWTBearerAuth": [
-              "digdir:dialogporten"
-            ]
-          }
-        ],
-        "tags": [
-          "Enduser"
-        ]
-      }
-    },
-    "/api/v1/enduser/dialogs/{dialogId}/labellog": {
-      "get": {
-        "operationId": "V1EndUserDialogLabelAssignmentLogsSearch_DialogLabelAssignmentLog",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "dialogId",
-            "required": true,
-            "schema": {
-              "format": "guid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/V1EndUserDialogLabelAssignmentLogQueriesSearch_LabelAssignmentLog"
-                  },
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "410": {
             "description": ""
           }
         },

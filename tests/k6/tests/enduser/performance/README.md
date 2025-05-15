@@ -16,7 +16,7 @@ sequence for each enduser:
 - api/v1/enduser/dialogs/`<dialogId>`/seenlog/`<seenlogId>`
 - api/v1/enduser/dialogs/`<dialogId>`/transmissions
 - api/v1/enduser/dialogs/`<dialogId>`/transmissions/`<transmissionId>`
-- api/v1/enduser/dialogs/`<dialogId>`/labellog
+- api/v1/enduser/dialogs/`<dialogId>`/context/labellog
 
 ## Test files
 All the tests listed below performs the steps listed above: 

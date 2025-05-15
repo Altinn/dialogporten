@@ -15,7 +15,7 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetD
 
     public override void Configure()
     {
-        Put("dialogs/{dialogId}/systemlabels");
+        Put("dialogs/{dialogId}/context/systemlabels");
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 

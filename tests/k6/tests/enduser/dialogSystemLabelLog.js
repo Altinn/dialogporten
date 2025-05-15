@@ -19,7 +19,7 @@ export default function () {
         let body = {
             'label': 'Bin'
         }
-        let response = putEU('dialogs/' + dialogId + '/systemlabels', body);
+        let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body);
         expectStatusFor(response).to.equal(204);
         response = getEU('dialogs/' + dialogId + '/labellog');
         expectStatusFor(response).to.equal(200);
@@ -32,7 +32,7 @@ export default function () {
         let body = {
             'label': 'archive'
         }
-        let response = putEU('dialogs/' + dialogId + '/systemlabels', body);
+        let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body);
         expectStatusFor(response).to.equal(204);
         response = getEU('dialogs/' + dialogId + '/labellog');
         expectStatusFor(response).to.equal(200);
@@ -53,7 +53,7 @@ export default function () {
             }
         }
 
-        let response = putEU('dialogs/' + dialogId + '/systemlabels', body, params);
+        let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body, params);
         expectStatusFor(response).to.equal(412);
     })
 

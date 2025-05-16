@@ -38,8 +38,6 @@ internal sealed class UpdateDialogDataLoader : TypedDataLoader<UpdateDialogComma
                 .ThenInclude(x => x.Endpoints)
             .Include(x => x.Transmissions)
             .Include(x => x.DialogEndUserContext)
-            .Include(x => x.ServiceOwnerContext)
-                .ThenInclude(x => x.Labels.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
             .IgnoreQueryFilters()
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);

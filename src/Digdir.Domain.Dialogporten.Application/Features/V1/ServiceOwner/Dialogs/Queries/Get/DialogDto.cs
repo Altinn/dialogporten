@@ -153,10 +153,10 @@ public sealed class DialogDto
     /// </summary>
     public List<SearchTagDto>? SearchTags { get; set; }
 
-    /// <summary>
-    /// A list of labels, not visible in end-user APIs.
-    /// </summary>
-    public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
+    // /// <summary>
+    // /// A list of labels, not visible in end-user APIs.
+    // /// </summary>
+    // public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
 
     /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).
@@ -187,6 +187,16 @@ public sealed class DialogDto
     /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
+
+    public ServiceOwnerContext ServiceOwnerContext { get; set; } = null!;
+}
+
+public sealed class ServiceOwnerContext
+{
+    /// <summary>
+    /// A list of labels, not visible in end-user APIs.
+    /// </summary>
+    public List<ServiceOwnerLabelDto> Labels { get; set; } = [];
 }
 
 public sealed class DialogTransmissionDto

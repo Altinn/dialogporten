@@ -454,42 +454,4 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .Should()
             .BeTrue();
     }
-
-    [Fact]
-    public async Task Updating_ServiceOwner_Label_Should_Not_Produce_DialogUpdatedEvent()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        await Application.Send(createDialogCommand);
-
-        var getDialogCommand = new GetDialogQuery
-        {
-            DialogId = dialogId,
-        };
-
-        var getDialogResponse = await Application.Send(getDialogCommand);
-        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(dialog);
-        updateDialogDto.ServiceOwnerLabels.Add(new() { Value = "Scadrial" });
-
-        // Act
-        await Application.Send(new UpdateDialogCommand
-        {
-            Dto = updateDialogDto,
-            Id = dialogId,
-        });
-
-        // Assert
-        await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: 1);
-
-        var publishedEvents = Application.GetPublishedEvents();
-        publishedEvents
-            .OfType<DialogUpdatedDomainEvent>()
-            .Should()
-            .BeEmpty();
-    }
 }

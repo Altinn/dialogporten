@@ -3132,14 +3132,6 @@
             "nullable": true,
             "type": "array"
           },
-          "serviceOwnerLabels": {
-            "description": "A list of labels, not visible in end-user APIs.",
-            "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_ServiceOwnerLabel"
-            },
-            "nullable": true,
-            "type": "array"
-          },
           "status": {
             "description": "The aggregated status of the dialog.",
             "oneOf": [
@@ -3227,16 +3219,6 @@
             "description": "The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to\n\u0022urn:dialogporten:unauthorized\u0022 if the user is not authorized to perform the action.",
             "example": "urn:dialogporten:unauthorized\nhttps://someendpoint.com/gui/some-service-instance-id",
             "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsCommandsUpdate_ServiceOwnerLabel": {
-        "additionalProperties": false,
-        "properties": {
-          "value": {
-            "description": "A label value.",
             "type": "string"
           }
         },
@@ -3689,13 +3671,8 @@
             "nullable": true,
             "type": "array"
           },
-          "serviceOwnerLabels": {
-            "description": "A list of labels, not visible in end-user APIs.",
-            "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel"
-            },
-            "nullable": true,
-            "type": "array"
+          "serviceOwnerContext": {
+            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext"
           },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
@@ -4206,6 +4183,20 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext": {
+        "additionalProperties": false,
+        "properties": {
+          "labels": {
+            "description": "A list of labels, not visible in end-user APIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"

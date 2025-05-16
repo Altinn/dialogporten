@@ -79,11 +79,6 @@ public sealed class UpdateDialogDto
     public List<SearchTagDto> SearchTags { get; set; } = [];
 
     /// <summary>
-    /// A list of labels, not visible in end-user APIs.
-    /// </summary>
-    public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
-
-    /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).
     /// </summary>
     public List<AttachmentDto> Attachments { get; set; } = [];
@@ -242,14 +237,6 @@ public sealed class SearchTagDto
 {
     /// <summary>
     /// A search tag value.
-    /// </summary>
-    public string Value { get; set; } = null!;
-}
-
-public sealed class ServiceOwnerLabelDto
-{
-    /// <summary>
-    /// A label value.
     /// </summary>
     public string Value { get; set; } = null!;
 }

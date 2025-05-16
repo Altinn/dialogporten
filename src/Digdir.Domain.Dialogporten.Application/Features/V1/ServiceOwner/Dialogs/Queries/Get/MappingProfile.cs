@@ -19,8 +19,10 @@ internal sealed class MappingProfile : Profile
         CreateMap<DialogEntity, DialogDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.Ignore())
-            .ForMember(dest => dest.ServiceOwnerLabels, opt => opt.MapFrom(src => src.ServiceOwnerContext.Labels))
+            // .ForMember(dest => dest.ServiceOwnerLabels, opt => opt.MapFrom(src => src.ServiceOwnerContext.Labels))
             .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId));
+
+        CreateMap<Domain.ServiceOwnerContexts.Entities.ServiceOwnerContext, ServiceOwnerContext>();
 
         CreateMap<ServiceOwnerLabel, ServiceOwnerLabelDto>();
 

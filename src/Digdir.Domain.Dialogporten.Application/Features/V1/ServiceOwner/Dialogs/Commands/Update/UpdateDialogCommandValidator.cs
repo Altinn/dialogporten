@@ -47,7 +47,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
-        IValidator<ServiceOwnerLabelDto> serviceOwnerLabelValidator,
         IValidator<ContentDto?> contentValidator)
     {
         RuleFor(x => x.Progress)
@@ -94,12 +93,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .ForEach(x => x.SetValidator(searchTagValidator));
-
-        RuleFor(x => x.ServiceOwnerLabels)
-            .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
-            .Must(x => x.Count() <= ServiceOwnerLabel.MaxNumberOfLabels)
-                .WithMessage($"Maximum {ServiceOwnerLabel.MaxNumberOfLabels} service owner labels are allowed.")
-            .ForEach(x => x.SetValidator(serviceOwnerLabelValidator));
 
         RuleFor(x => x.GuiActions)
             .Must(x => x
@@ -340,16 +333,6 @@ internal sealed class UpdateDialogSearchTagDtoValidator : AbstractValidator<Sear
         RuleFor(x => x.Value)
             .MinimumLength(Constants.MinSearchStringLength)
             .MaximumLength(Constants.MaxSearchTagLength);
-    }
-}
-
-internal sealed class UpdateDialogServiceOwnerLabelDtoValidator : AbstractValidator<ServiceOwnerLabelDto>
-{
-    public UpdateDialogServiceOwnerLabelDtoValidator()
-    {
-        RuleFor(x => x.Value)
-            .MinimumLength(Constants.MinSearchStringLength)
-            .MaximumLength(Constants.DefaultMaxStringLength);
     }
 }
 

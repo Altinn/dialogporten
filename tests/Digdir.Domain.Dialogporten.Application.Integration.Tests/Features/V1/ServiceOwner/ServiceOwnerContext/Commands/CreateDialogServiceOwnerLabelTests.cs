@@ -1,6 +1,8 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ServiceOwnerLabelDto;
@@ -16,7 +18,8 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public async Task Can_Create_Dialog_With_ServiceOwner_Labels()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
         var labels = new List<ServiceOwnerLabelDto>
         {
             new() { Value = "Scadrial" },
@@ -29,7 +32,16 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         // Act
         var response = await Application.Send(createDialogCommand);
 
+        var getDialogResponse = await Application.Send(new GetDialogQuery
+        {
+            DialogId = dialogId
+        });
+
         // Assert
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+        dialog.Should().NotBeNull();
+        dialog.ServiceOwnerContext.Labels.Should().HaveCount(labels.Count);
+
         response.TryPickT0(out _, out _).Should().BeTrue();
         await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: labels.Count);
     }

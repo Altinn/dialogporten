@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.66.0](https://github.com/Altinn/dialogporten/compare/v1.65.1...v1.66.0) (2025-05-16)
+
+
+### Features
+
+* **breaking:** Disallow so search without enduserid ([#2262](https://github.com/Altinn/dialogporten/issues/2262)) ([749ba06](https://github.com/Altinn/dialogporten/commit/749ba06857c32f9540a48d7b92e5ce6643bfca54))
+* **breaking:** Remove timestamps from Localization(Set) ([#2272](https://github.com/Altinn/dialogporten/issues/2272)) ([0dd228d](https://github.com/Altinn/dialogporten/commit/0dd228d6aa240b0e0f0e648c1f49eb6306dc20a2))
+
+
+### Bug Fixes
+
+* **e2e:** Add missing params on search test ([#2295](https://github.com/Altinn/dialogporten/issues/2295)) ([86f431c](https://github.com/Altinn/dialogporten/commit/86f431c0243a3db19ede0094e835beb3bc32bef2))
+* **infra:** enable workload profiles for staging and prod ([#2285](https://github.com/Altinn/dialogporten/issues/2285)) ([7827ce0](https://github.com/Altinn/dialogporten/commit/7827ce00dc662c5d1c58bf1d22a23ed0aa6bdee4))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.5.5 ([#2289](https://github.com/Altinn/dialogporten/issues/2289)) ([5ccca06](https://github.com/Altinn/dialogporten/commit/5ccca062191c2bc373a5ded69dd26aa99b682df6))
+* **deps:** update nginx docker tag to v1.28.0 ([#2292](https://github.com/Altinn/dialogporten/issues/2292)) ([f2d16fd](https://github.com/Altinn/dialogporten/commit/f2d16fdba8ebacc5ade9ed6d61de880f2c2ef458))
+* **deps:** update slackapi/slack-github-action action to v2.1.0 ([#2293](https://github.com/Altinn/dialogporten/issues/2293)) ([e9f1889](https://github.com/Altinn/dialogporten/commit/e9f18895f6aa5dc48fe7d3621efcc6b7d644e942))
+* **deps:** update step-security/harden-runner action to v2.12.0 ([#2294](https://github.com/Altinn/dialogporten/issues/2294)) ([b8e2d53](https://github.com/Altinn/dialogporten/commit/b8e2d537228f2eb577a488d3818d138b27de98b7))
+* **infra:** change the min and max instances for prod CAE ([#2286](https://github.com/Altinn/dialogporten/issues/2286)) ([fc3c7ab](https://github.com/Altinn/dialogporten/commit/fc3c7ab85ab1735dea00eb3ca4c3c7ef09b49479))
+* **webapi:** Add 'context' to enduser system label endpoint paths ([#2300](https://github.com/Altinn/dialogporten/issues/2300)) ([a2678de](https://github.com/Altinn/dialogporten/commit/a2678de5e0301df0b06ebbcb9c12cfd0020b2257))
+
 ## [1.65.1](https://github.com/Altinn/dialogporten/compare/v1.65.0...v1.65.1) (2025-05-11)
 
 

@@ -16,5 +16,5 @@ public sealed class ServiceOwnerContext : IEntity, IVersionableEntity
     public DialogEntity? Dialog { get; set; }
 
     [AggregateChild]
-    public List<ServiceOwnerLabel> Labels { get; set; } = [];
+    public List<ServiceOwnerLabel> ServiceOwnerLabels { get; set; } = [];
 }

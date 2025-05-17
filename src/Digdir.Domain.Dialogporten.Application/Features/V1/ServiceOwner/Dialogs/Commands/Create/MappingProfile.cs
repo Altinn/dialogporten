@@ -19,6 +19,8 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.Status, opt => opt.Ignore())
             .ForMember(dest => dest.StatusId, opt => opt.MapFrom(src => src.Status));
         CreateMap<SearchTagDto, DialogSearchTag>();
+
+        CreateMap<ServiceOwnerContext, Domain.ServiceOwnerContexts.Entities.ServiceOwnerContext>();
         CreateMap<ServiceOwnerLabelDto, ServiceOwnerLabel>();
 
         CreateMap<AttachmentDto, DialogAttachment>();

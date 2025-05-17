@@ -49,7 +49,7 @@ internal sealed class SetServiceOwnerLabelsCommandHandler : IRequestHandler<SetS
         var dialog = await _db
             .Dialogs
             .Include(x => x.ServiceOwnerContext)
-                .ThenInclude(x => x.Labels)
+                .ThenInclude(x => x.ServiceOwnerLabels)
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);
 
@@ -58,7 +58,7 @@ internal sealed class SetServiceOwnerLabelsCommandHandler : IRequestHandler<SetS
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        dialog.ServiceOwnerContext.Labels
+        dialog.ServiceOwnerContext.ServiceOwnerLabels
             .Merge(request.ServiceOwnerLabels,
                 destinationKeySelector: x => x.Value,
                 sourceKeySelector: x => x.Value,

@@ -192,7 +192,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
             .Include(x => x.ServiceOwnerContext)
-                .ThenInclude(x => x.Labels)
+                .ThenInclude(x => x.ServiceOwnerLabels)
             .WhereIf(!request.ServiceResource.IsNullOrEmpty(),
                 x => request.ServiceResource!.Contains(x.ServiceResource))
             .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
@@ -221,7 +221,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 request.ServiceOwnerLabels!
                     .Select(x => x.ToLower(CultureInfo.InvariantCulture))
                     .All(label =>
-                        x.ServiceOwnerContext.Labels
+                        x.ServiceOwnerContext.ServiceOwnerLabels
                             .Any(l => EF.Functions.ILike(l.Value, label + "%"))))
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => resourceIds.Contains(x.ServiceResource))

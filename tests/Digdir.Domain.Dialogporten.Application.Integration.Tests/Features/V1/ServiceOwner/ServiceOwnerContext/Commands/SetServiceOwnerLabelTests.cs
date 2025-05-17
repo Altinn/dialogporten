@@ -88,7 +88,7 @@ public class SetServiceOwnerLabelTests : ApplicationCollectionFixture
         var dialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
 
-        createDialogCommand.Dto.ServiceOwnerLabels = [new() { Value = "Sel" }];
+        createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = "Sel" }];
         await Application.Send(createDialogCommand);
 
         var setServiceOwnerLabelsCommand = new SetServiceOwnerLabelsCommand

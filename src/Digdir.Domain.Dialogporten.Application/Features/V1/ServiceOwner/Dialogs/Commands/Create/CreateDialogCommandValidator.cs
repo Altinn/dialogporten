@@ -113,11 +113,12 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .ForEach(x => x.SetValidator(searchTagValidator));
 
-        RuleFor(x => x.ServiceOwnerLabels)
+        RuleFor(x => x.ServiceOwnerContext!.ServiceOwnerLabels)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .Must(x => x.Count() <= ServiceOwnerLabel.MaxNumberOfLabels)
                 .WithMessage($"Maximum {ServiceOwnerLabel.MaxNumberOfLabels} service owner labels are allowed.")
-            .ForEach(x => x.SetValidator(serviceOwnerLabelValidator));
+            .ForEach(x => x.SetValidator(serviceOwnerLabelValidator))
+            .When(x => x.ServiceOwnerContext?.ServiceOwnerLabels is not null);
 
         RuleFor(x => x.GuiActions)
             .Must(x => x

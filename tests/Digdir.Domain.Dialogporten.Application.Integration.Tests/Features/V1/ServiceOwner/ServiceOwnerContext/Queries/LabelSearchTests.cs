@@ -24,7 +24,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
 
         var labeledDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogWithLabel = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: labeledDialogId);
-        createDialogWithLabel.Dto.ServiceOwnerLabels = [new() { Value = label }];
+        createDialogWithLabel.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label }];
         await Application.Send(createDialogWithLabel);
 
         var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label] };
@@ -51,12 +51,12 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         const string label2 = "Roshar";
 
         var createDialogWithOneLabel = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogWithOneLabel.Dto.ServiceOwnerLabels = [new() { Value = label1 }];
+        createDialogWithOneLabel.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label1 }];
         await Application.Send(createDialogWithOneLabel);
 
         var dualLabeledDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogWithTwoLabels = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dualLabeledDialogId);
-        createDialogWithTwoLabels.Dto.ServiceOwnerLabels = [new() { Value = label1 }, new() { Value = label2 }];
+        createDialogWithTwoLabels.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label1 }, new() { Value = label2 }];
         await Application.Send(createDialogWithTwoLabels);
 
         var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label1, label2] };
@@ -88,12 +88,12 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
 
         var singleLabeledDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogWithOneLabel = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: singleLabeledDialogId);
-        createDialogWithOneLabel.Dto.ServiceOwnerLabels = [new() { Value = label1 }];
+        createDialogWithOneLabel.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label1 }];
         await Application.Send(createDialogWithOneLabel);
 
         var dualLabeledDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogWithTwoLabels = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dualLabeledDialogId);
-        createDialogWithTwoLabels.Dto.ServiceOwnerLabels = [new() { Value = label2 }];
+        createDialogWithTwoLabels.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label2 }];
         await Application.Send(createDialogWithTwoLabels);
 
         var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label1[..4]] };
@@ -122,12 +122,12 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
 
         var singleLabeledDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogWithOneLabel = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: singleLabeledDialogId);
-        createDialogWithOneLabel.Dto.ServiceOwnerLabels = [new() { Value = label1 }];
+        createDialogWithOneLabel.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label1 }];
         await Application.Send(createDialogWithOneLabel);
 
         var dualLabeledDialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogWithTwoLabels = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dualLabeledDialogId);
-        createDialogWithTwoLabels.Dto.ServiceOwnerLabels = [new() { Value = label2 }];
+        createDialogWithTwoLabels.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label2 }];
         await Application.Send(createDialogWithTwoLabels);
 
         var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = ["One"] };

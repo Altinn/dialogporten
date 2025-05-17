@@ -27,7 +27,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             new() { Value = "Sel" }
         };
 
-        createDialogCommand.Dto.ServiceOwnerLabels = labels;
+        createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = labels;
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -40,7 +40,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         // Assert
         getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
         dialog.Should().NotBeNull();
-        dialog.ServiceOwnerContext.Labels.Should().HaveCount(labels.Count);
+        dialog.ServiceOwnerContext.ServiceOwnerLabels.Should().HaveCount(labels.Count);
 
         response.TryPickT0(out _, out _).Should().BeTrue();
         await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: labels.Count);
@@ -59,7 +59,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             new() { Value = label.ToLowerInvariant() }
         ];
 
-        createDialogCommand.Dto.ServiceOwnerLabels = labels;
+        createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = labels;
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -83,7 +83,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             new() { Value = new string('a', Constants.DefaultMaxStringLength + 1) }
         };
 
-        createDialogCommand.Dto.ServiceOwnerLabels = labels;
+        createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = labels;
 
         // Act
         var response = await Application.Send(createDialogCommand);
@@ -113,7 +113,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             labels.Add(new ServiceOwnerLabelDto { Value = $"label{i}" });
         }
 
-        createDialogCommand.Dto.ServiceOwnerLabels = labels;
+        createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = labels;
 
         // Act
         var response = await Application.Send(createDialogCommand);

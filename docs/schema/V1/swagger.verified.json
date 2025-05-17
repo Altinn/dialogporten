@@ -2456,13 +2456,13 @@
             "nullable": true,
             "type": "array"
           },
-          "serviceOwnerLabels": {
-            "description": "A list of labels, not visible in end-user APIs.",
-            "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel"
-            },
+          "serviceOwnerContext": {
             "nullable": true,
-            "type": "array"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerContext"
+              }
+            ]
           },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a resource in the Altinn Resource Registry, which the authenticated organization\nmust own, i.e., be listed as the \u0022competent authority\u0022 in the Resource Registry entry.",
@@ -2573,6 +2573,20 @@
             "example": "urn:dialogporten:unauthorized\nhttps://someendpoint.com/gui/some-service-instance-id",
             "format": "uri",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerContext": {
+        "additionalProperties": false,
+        "properties": {
+          "serviceOwnerLabels": {
+            "description": "A list of labels, not visible in end-user APIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -4190,7 +4204,7 @@
       "V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext": {
         "additionalProperties": false,
         "properties": {
-          "labels": {
+          "serviceOwnerLabels": {
             "description": "A list of labels, not visible in end-user APIs.",
             "items": {
               "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel"

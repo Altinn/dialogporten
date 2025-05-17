@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerLabels.Commands.Set;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -48,6 +49,31 @@ public class SetServiceOwnerLabelTests : ApplicationCollectionFixture
         response.TryPickT1(out var notFoundError, out _).Should().BeTrue();
         notFoundError.Should().NotBeNull();
         notFoundError.Message.Should().Contain(dialogId.ToString());
+    }
+
+    [Fact]
+    public async Task Can_Create_Dialog_Without_ServiceOwnerContext()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        createDialogCommand.Dto.ServiceOwnerContext = null;
+
+        // Act
+        var response = await Application.Send(createDialogCommand);
+
+        // Assert
+        response.TryPickT0(out _, out _).Should().BeTrue();
+        await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: 0);
+
+        var getDialogResponse = await Application.Send(new GetDialogQuery
+        {
+            DialogId = dialogId
+        });
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+
+        dialog.Should().NotBeNull();
+        dialog.ServiceOwnerContext.Should().NotBeNull();
     }
 
     [Fact]

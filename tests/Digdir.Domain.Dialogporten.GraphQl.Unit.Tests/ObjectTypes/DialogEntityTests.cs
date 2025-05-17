@@ -19,7 +19,8 @@ public class DialogEntityTests
             nameof(DialogEntity.SearchTags),
             nameof(DialogEntity.SeenLog),
             nameof(DialogEntity.DialogEndUserContext),
-            nameof(DialogEntity.IdempotentKey)
+            nameof(DialogEntity.IdempotentKey),
+            nameof(DialogEntity.ServiceOwnerContext)
         };
 
         var dialogProperties = typeof(DialogEntity)

@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.Http;
+using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
@@ -330,7 +331,7 @@ internal sealed class UpdateDialogSearchTagDtoValidator : AbstractValidator<Sear
     public UpdateDialogSearchTagDtoValidator()
     {
         RuleFor(x => x.Value)
-            .MinimumLength(3)
+            .MinimumLength(Constants.MinSearchStringLength)
             .MaximumLength(Constants.MaxSearchTagLength);
     }
 }

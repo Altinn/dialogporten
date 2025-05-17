@@ -2456,6 +2456,14 @@
             "nullable": true,
             "type": "array"
           },
+          "serviceOwnerContext": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerContext"
+              }
+            ]
+          },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a resource in the Altinn Resource Registry, which the authenticated organization\nmust own, i.e., be listed as the \u0022competent authority\u0022 in the Resource Registry entry.",
             "example": "urn:altinn:resource:some-service-identifier",
@@ -2564,6 +2572,30 @@
             "description": "The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to\n\u0022urn:dialogporten:unauthorized\u0022 if the user is not authorized to perform the action.",
             "example": "urn:dialogporten:unauthorized\nhttps://someendpoint.com/gui/some-service-instance-id",
             "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerContext": {
+        "additionalProperties": false,
+        "properties": {
+          "serviceOwnerLabels": {
+            "description": "A list of labels, not visible in end-user APIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "description": "A label value.",
             "type": "string"
           }
         },
@@ -3421,6 +3453,19 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogServiceOwnerLabelsSet_SetServiceOwnerLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "serviceOwnerLabels": {
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerServiceOwnerLabelsCommandsSet_ServiceOwnerLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsQueriesGet_Content": {
         "additionalProperties": false,
         "properties": {
@@ -3639,6 +3684,9 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "serviceOwnerContext": {
+            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext"
           },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
@@ -4149,6 +4197,30 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext": {
+        "additionalProperties": false,
+        "properties": {
+          "serviceOwnerLabels": {
+            "description": "A list of labels, not visible in end-user APIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "description": "A label value.",
+            "type": "string"
           }
         },
         "type": "object"
@@ -4847,6 +4919,16 @@
                 "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerServiceOwnerLabelsCommandsSet_ServiceOwnerLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "description": "A label value.",
+            "type": "string"
           }
         },
         "type": "object"
@@ -6067,6 +6149,20 @@
             }
           },
           {
+            "description": "Filter by one or more labels.",
+            "explode": true,
+            "in": "query",
+            "name": "serviceOwnerLabels",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
             "description": "Limit free text search to texts with this language code, e.g. \u0027nb\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
             "in": "query",
             "name": "searchLanguageCode",
@@ -7194,6 +7290,116 @@
           }
         ],
         "summary": "Gets a single dialog seen log record",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/serviceownerlabels": {
+      "put": {
+        "description": "Replace the service owner labels for a dialog.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "operationId": "V1ServiceOwnerDialogServiceOwnerLabelsSet_SetServiceOwnerLabels",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogServiceOwnerLabelsSet_SetServiceOwnerLabelsRequest"
+              }
+            }
+          },
+          "description": "",
+          "required": true,
+          "x-name": "SetServiceOwnerLabelsRequest",
+          "x-position": 1
+        },
+        "responses": {
+          "204": {
+            "description": "The dialog ServiceOwnerLabel was updated successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the ServiceOwner Context",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Replace the service owner labels for a dialog",
         "tags": [
           "Serviceowner"
         ]

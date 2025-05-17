@@ -1,9 +1,11 @@
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Library.Entity.Abstractions.Features.Creatable;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 
-public sealed class LabelAssignmentLog : IImmutableEntity
+public sealed class LabelAssignmentLog : IImmutableEntity, IIdentifiableEntity, ICreatableEntity
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

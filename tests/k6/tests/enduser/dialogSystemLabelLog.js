@@ -19,9 +19,9 @@ export default function () {
         let body = {
             'label': 'Bin'
         }
-        let response = putEU('dialogs/' + dialogId + '/systemlabels', body);
+        let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body);
         expectStatusFor(response).to.equal(204);
-        response = getEU('dialogs/' + dialogId + '/labellog');
+        response = getEU('dialogs/' + dialogId + '/context/labellog');
         expectStatusFor(response).to.equal(200);
         expect(response, 'response').to.have.validJsonBody();
         expect(response.json(), 'response body').to.have.lengthOf(1);
@@ -32,9 +32,9 @@ export default function () {
         let body = {
             'label': 'archive'
         }
-        let response = putEU('dialogs/' + dialogId + '/systemlabels', body);
+        let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body);
         expectStatusFor(response).to.equal(204);
-        response = getEU('dialogs/' + dialogId + '/labellog');
+        response = getEU('dialogs/' + dialogId + '/context/labellog');
         expectStatusFor(response).to.equal(200);
         expect(response, 'response').to.have.validJsonBody();
         expect(response.json(), 'response body').to.have.lengthOf(3);
@@ -53,7 +53,7 @@ export default function () {
             }
         }
 
-        let response = putEU('dialogs/' + dialogId + '/systemlabels', body, params);
+        let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body, params);
         expectStatusFor(response).to.equal(412);
     })
 
@@ -61,7 +61,7 @@ export default function () {
         dialog.progress = "60";
         let response = putSO('dialogs/' + dialogId, dialog);
         expectStatusFor(response).to.equal(204);
-        response = getEU('dialogs/' + dialogId + '/labellog');
+        response = getEU('dialogs/' + dialogId + '/context/labellog');
         expectStatusFor(response).to.equal(200);
         expect(response, 'response').to.have.validJsonBody();
         expect(response.json(), 'response body').to.have.lengthOf(4);

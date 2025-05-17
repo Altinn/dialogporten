@@ -1,10 +1,12 @@
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
+using Digdir.Library.Entity.Abstractions.Features.Creatable;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
-public sealed class DialogSeenLog : IImmutableEntity
+public sealed class DialogSeenLog : IImmutableEntity, IIdentifiableEntity, ICreatableEntity
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

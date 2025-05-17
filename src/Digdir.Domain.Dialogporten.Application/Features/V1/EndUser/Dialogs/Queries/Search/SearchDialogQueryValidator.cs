@@ -22,9 +22,9 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .Must(x => x is null || Localization.IsValidCultureCode(x))
             .WithMessage(searchQuery =>
                 (searchQuery.SearchLanguageCode == "no"
-                    ? LocalizationValidatorContants.InvalidCultureCodeErrorMessageWithNorwegianHint
-                    : LocalizationValidatorContants.InvalidCultureCodeErrorMessage) +
-                LocalizationValidatorContants.NormalizationErrorMessage);
+                    ? LocalizationValidatorConstants.InvalidCultureCodeErrorMessageWithNorwegianHint
+                    : LocalizationValidatorConstants.InvalidCultureCodeErrorMessage) +
+                LocalizationValidatorConstants.NormalizationErrorMessage);
 
         RuleFor(x => x)
             .Must(x => !x.ServiceResource.IsNullOrEmpty() || !x.Party.IsNullOrEmpty())

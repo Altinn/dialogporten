@@ -12,18 +12,15 @@ const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
 // party, endUser, serviceResource, status, deleted, createdAfter, createdBefore, updatedAfter, updatedBefore, dueAfter, dueBefore, visibleAfter, visibleBefore, Search, searchLanguageCode, orderBy, limit
 
 const filter_combos = [
-    {label: "enduser", filters: ["endUser"]},
-    {label: "enduser-serviceresource", filters: ["endUser", "serviceResource"]},
-    {label: "enduser-serviceresource-createdafter", filters: ["endUser", "serviceResource", "createdAfter"]},
-    {label: "enduser-serviceresource-createdbefore", filters: ["endUser", "serviceResource", "createdBefore"]},
-    {label: "enduser-createdafter", filters: ["endUser", "createdAfter"]},
-    {label: "enduser-createdbefore", filters: ["endUser", "createdBefore"]},
-    {label: "search-enduser-createdafter", filters: ["Search", "endUser", "createdAfter"]},
-    {label: "search-createdafter", filters: ["Search", "createdAfter"]},
-    {label: "search-serviceresource-enduser-createdafter", filters: ["Search", "serviceResource", "endUser", "createdAfter"]},
-    {label: "search-enduser-createdafter-nohit", filters: ["Search", "endUser", "createdAfter"]},
-    {label: "search", filters: ["Search"]},
-
+    {label: "enduser-party", filters: ["endUserId", "party"]},
+    {label: "enduser-serviceresource", filters: ["endUserId", "serviceResource"]},
+    {label: "enduser-serviceresource-createdafter", filters: ["endUserId", "serviceResource", "createdAfter"]},
+    {label: "enduser-serviceresource-createdbefore", filters: ["endUserId", "serviceResource", "createdBefore"]},
+    {label: "enduser-createdafter-party", filters: ["endUserId", "createdAfter", "party"]},
+    {label: "enduser-createdbefore-party", filters: ["endUserId", "createdBefore", "party"]},
+    {label: "search-enduser-createdafter-party", filters: ["Search", "endUserId", "createdAfter", "party"]},
+    {label: "search-serviceresource-enduserid-createdafter", filters: ["Search", "serviceResource", "endUserId", "createdAfter"]},
+    {label: "search-enduser-createdafter-party-nohit", filters: ["Search", "endUserId", "createdAfter", "party"]},
 ];
 
 const orgNos = ["713431400"]
@@ -52,7 +49,7 @@ function get_query_params() {
 
 function get_filter_value(filter, label) {
     switch (filter) {
-        case "endUser": return "urn:altinn:person:identifier-no:" +randomItem(endUsers).ssn;
+        case "endUserId": return "urn:altinn:person:identifier-no:" +randomItem(endUsers).ssn;
         case "serviceResource": return "urn:altinn:resource:" +randomItem(resources);
         case "party": return "urn:altinn:organization:identifier-no:" +randomItem(orgNos);
         case "status": return "New";

@@ -7,7 +7,7 @@ public sealed class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<SetSystemLabelInput, SystemLabelCommand>()
+        CreateMap<SetSystemLabelInput, SetSystemLabelCommand>()
             .ForMember(dest => dest.Label, opt => opt.MapFrom(src => src.Label));
     }
 }

@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 
-internal static class LocalizationValidatorContants
+internal static class LocalizationValidatorConstants
 {
     public const int MaximumLength = 255;
 
@@ -20,7 +20,7 @@ internal static class LocalizationValidatorContants
 
 internal sealed class LocalizationDtosValidator : AbstractValidator<IEnumerable<LocalizationDto>>
 {
-    public LocalizationDtosValidator(int maximumLength = LocalizationValidatorContants.MaximumLength)
+    public LocalizationDtosValidator(int maximumLength = LocalizationValidatorConstants.MaximumLength)
     {
         RuleFor(x => x)
             .UniqueBy(x => x.LanguageCode)
@@ -32,7 +32,7 @@ internal sealed class LocalizationDtosValidator : AbstractValidator<IEnumerable<
                     .Select(g => g.Key);
 
                 return $"Can not contain duplicate items: [{string.Join(", ", duplicates)}]. " +
-                       $"{LocalizationValidatorContants.NormalizationErrorMessage}";
+                       $"{LocalizationValidatorConstants.NormalizationErrorMessage}";
             })
             .ForEach(x => x.SetValidator(new LocalizationDtoValidator(maximumLength)));
     }
@@ -40,7 +40,7 @@ internal sealed class LocalizationDtosValidator : AbstractValidator<IEnumerable<
 
 internal sealed class LocalizationDtoValidator : AbstractValidator<LocalizationDto>
 {
-    public LocalizationDtoValidator(int maximumLength = LocalizationValidatorContants.MaximumLength)
+    public LocalizationDtoValidator(int maximumLength = LocalizationValidatorConstants.MaximumLength)
     {
         RuleFor(x => x)
             .NotNull();
@@ -54,8 +54,8 @@ internal sealed class LocalizationDtoValidator : AbstractValidator<LocalizationD
             .Must(Localization.IsValidCultureCode)
             .WithMessage(localization =>
                 (localization.LanguageCode == "no"
-                    ? LocalizationValidatorContants.InvalidCultureCodeErrorMessageWithNorwegianHint
-                    : LocalizationValidatorContants.InvalidCultureCodeErrorMessage) +
-                LocalizationValidatorContants.NormalizationErrorMessage);
+                    ? LocalizationValidatorConstants.InvalidCultureCodeErrorMessageWithNorwegianHint
+                    : LocalizationValidatorConstants.InvalidCultureCodeErrorMessage) +
+                LocalizationValidatorConstants.NormalizationErrorMessage);
     }
 }

@@ -1,5 +1,89 @@
 # Changelog
 
+## [1.65.1](https://github.com/Altinn/dialogporten/compare/v1.65.0...v1.65.1) (2025-05-11)
+
+
+### Bug Fixes
+
+* **webapi:** Move set label revision from body to If-Match header ([#2260](https://github.com/Altinn/dialogporten/issues/2260)) ([cb46cd9](https://github.com/Altinn/dialogporten/commit/cb46cd94bc837986d7179265a31d0fd82fcbb05e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunit to 29.5.0 ([#2278](https://github.com/Altinn/dialogporten/issues/2278)) ([2b28caf](https://github.com/Altinn/dialogporten/commit/2b28caf2795c11c60157d5786807e38049e3d934))
+* **deps:** update dependency xunit.runner.visualstudio to 3.1.0 ([#2279](https://github.com/Altinn/dialogporten/issues/2279)) ([7e76176](https://github.com/Altinn/dialogporten/commit/7e7617693f4cad8379ec189c350c8a5663ab922b))
+* **deps:** update grafana/loki docker tag to v3.5.0 ([#2280](https://github.com/Altinn/dialogporten/issues/2280)) ([6ecace7](https://github.com/Altinn/dialogporten/commit/6ecace7ed45c3655e6b3b0e259e173298456d13b))
+* **deps:** update prom/prometheus docker tag to v3.3.1 ([#2277](https://github.com/Altinn/dialogporten/issues/2277)) ([595b322](https://github.com/Altinn/dialogporten/commit/595b32279b8c97677046c0b6f5329291fe01d8b1))
+
+## [1.65.0](https://github.com/Altinn/dialogporten/compare/v1.64.4...v1.65.0) (2025-05-08)
+
+
+### Features
+
+* **infra:** add workload profiles for container apps ([#2259](https://github.com/Altinn/dialogporten/issues/2259)) ([4a5500b](https://github.com/Altinn/dialogporten/commit/4a5500bfa5757215d30c1940520e7d90b7dcfdb4))
+
+
+### Bug Fixes
+
+* **infra:** change to workload profiles for test and yt01 ([#2271](https://github.com/Altinn/dialogporten/issues/2271)) ([7feb4c0](https://github.com/Altinn/dialogporten/commit/7feb4c096273a3189d7877321f386bcb6bcf415f))
+* **infra:** Remove count from consumption workload profile ([#2268](https://github.com/Altinn/dialogporten/issues/2268)) ([ac88d85](https://github.com/Altinn/dialogporten/commit/ac88d85a4911c7daf9aaad53816de1296c3710ab))
+* **infra:** revert workload profiles for CAE ([#2270](https://github.com/Altinn/dialogporten/issues/2270)) ([aea9209](https://github.com/Altinn/dialogporten/commit/aea92096a09d0ac3f377c1ba8b777ff92f682605))
+
+
+### Miscellaneous Chores
+
+* **database-forwarder:** ensure it works cross platform ([#2127](https://github.com/Altinn/dialogporten/issues/2127)) ([1bff01e](https://github.com/Altinn/dialogporten/commit/1bff01e75933bf3f7fe64c25ca6b7b2507072f35))
+* **performance:** removed search without enduserid and use enduserid instead of enduser ([#2263](https://github.com/Altinn/dialogporten/issues/2263)) ([2044f09](https://github.com/Altinn/dialogporten/commit/2044f09fdb06dcde9fbbfa623f9468707d551fe6))
+
+## [1.64.4](https://github.com/Altinn/dialogporten/compare/v1.64.3...v1.64.4) (2025-05-08)
+
+
+### Miscellaneous Chores
+
+* **webapi:** Bump kestrel max request size to 200k bytes ([#2265](https://github.com/Altinn/dialogporten/issues/2265)) ([40197ea](https://github.com/Altinn/dialogporten/commit/40197eac0a10edbf0971a1406dca61bd88cb9042))
+
+## [1.64.3](https://github.com/Altinn/dialogporten/compare/v1.64.2...v1.64.3) (2025-05-08)
+
+
+### Bug Fixes
+
+* **infra:** Consolidate and up health probe values ([#2255](https://github.com/Altinn/dialogporten/issues/2255)) ([f069923](https://github.com/Altinn/dialogporten/commit/f0699236e6875acd595ea24b2e3edfb6260fb246))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency uuidnext to 4.1.2 ([#2251](https://github.com/Altinn/dialogporten/issues/2251)) ([d27fd77](https://github.com/Altinn/dialogporten/commit/d27fd77afa9163855b7aefe8ac2a53d555d9fa5a))
+* **deps:** update dependency verify.xunit to 29.4.0 ([#2254](https://github.com/Altinn/dialogporten/issues/2254)) ([eae34dd](https://github.com/Altinn/dialogporten/commit/eae34ddf0f08e525f5f5318c95ebd34d6d34867c))
+* **infra:** Set min. replicas to two for prod ([#2256](https://github.com/Altinn/dialogporten/issues/2256)) ([a578491](https://github.com/Altinn/dialogporten/commit/a578491662cf34857b7d2fc1d40763649a760da1))
+* **infra:** Set Postgres idle transacion timeout ([#2248](https://github.com/Altinn/dialogporten/issues/2248)) ([26c5f28](https://github.com/Altinn/dialogporten/commit/26c5f28b7811c391df32ea6cb8d465acafb4cdc6))
+* **infra:** Upgrade Azure CLI to 2.72.0 ([#2258](https://github.com/Altinn/dialogporten/issues/2258)) ([5892847](https://github.com/Altinn/dialogporten/commit/58928470b8a4ded9f506af62043f606c7a4c04c6))
+
+## [1.64.2](https://github.com/Altinn/dialogporten/compare/v1.64.1...v1.64.2) (2025-05-05)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.5.4 ([#2238](https://github.com/Altinn/dialogporten/issues/2238)) ([53e0001](https://github.com/Altinn/dialogporten/commit/53e0001fd376151b02805f070fb0055a7d18b5fe))
+* **deps:** update dependency verify.xunit to 29.3.1 ([#2239](https://github.com/Altinn/dialogporten/issues/2239)) ([795e963](https://github.com/Altinn/dialogporten/commit/795e963e34e26fca1aaae2edff4f9ebf43e8a3c0))
+* **deps:** update docker/build-push-action action to v6.16.0 ([#2240](https://github.com/Altinn/dialogporten/issues/2240)) ([599520c](https://github.com/Altinn/dialogporten/commit/599520c0e17baea6db727adaf7f2d344180b394a))
+* **infra:** Scale up container app CPU/Memory ([#2247](https://github.com/Altinn/dialogporten/issues/2247)) ([04782e7](https://github.com/Altinn/dialogporten/commit/04782e75b15862a2f20d451ad2ae14c53b5501cf))
+
+## [1.64.1](https://github.com/Altinn/dialogporten/compare/v1.64.0...v1.64.1) (2025-05-05)
+
+
+### Bug Fixes
+
+* Reduce isolation level for outbox ([#2243](https://github.com/Altinn/dialogporten/issues/2243)) ([59b7489](https://github.com/Altinn/dialogporten/commit/59b74894633748ad97c38931ddc70c95ddbf369b))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency microsoft.azure.appconfiguration.aspnetcore to 8.1.2 ([#2234](https://github.com/Altinn/dialogporten/issues/2234)) ([f70b4a5](https://github.com/Altinn/dialogporten/commit/f70b4a5914f53e0bd3e7b7ebad046d76fad467c5))
+* **deps:** update dependency verify.xunit to 29.3.0 ([#2235](https://github.com/Altinn/dialogporten/issues/2235)) ([5a1324e](https://github.com/Altinn/dialogporten/commit/5a1324ef1c671c4717d9f9e42a1b48c5e7e84cc0))
+* **deps:** update dotnet monorepo ([#2232](https://github.com/Altinn/dialogporten/issues/2232)) ([0ec9632](https://github.com/Altinn/dialogporten/commit/0ec9632027f7130b9f69c6dcacd718e7ce0b718a))
+* **deps:** update grafana docker tag to v11.2.2 ([#2237](https://github.com/Altinn/dialogporten/issues/2237)) ([166121f](https://github.com/Altinn/dialogporten/commit/166121f775aa75fc8aa02f88af45bf0208e6d99e))
+* Improve dialog generator ([#2242](https://github.com/Altinn/dialogporten/issues/2242)) ([072db77](https://github.com/Altinn/dialogporten/commit/072db77bdc6a6df41d12b325916d3b7340757a28))
+
 ## [1.64.0](https://github.com/Altinn/dialogporten/compare/v1.63.3...v1.64.0) (2025-04-28)
 
 

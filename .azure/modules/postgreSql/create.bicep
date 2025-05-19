@@ -150,6 +150,16 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     }
   }
 
+resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {
+  parent: postgres
+  name: 'idle_in_transaction_session_timeout'
+  properties: {
+    value: '86400000' // 24 hours
+    source: 'user-override'
+  }
+  dependsOn: [enable_extensions]
+}
+
 resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {
   parent: postgres
   name: 'track_io_timing'
@@ -157,7 +167,7 @@ resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configuratio
     value: 'on'
     source: 'user-override'
   }
-  dependsOn: [enable_extensions]
+  dependsOn: [idle_transactions_timeout]
 }
 
 resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {

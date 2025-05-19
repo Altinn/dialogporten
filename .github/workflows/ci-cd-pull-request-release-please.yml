@@ -75,11 +75,44 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: Calculate max pull request body length
+        id: calculate-max-length
+        run: |
+          # Static JSON structure length (excluding interpolated variables)
+          STATIC_JSON_LENGTH=1000 # Approximate length of static JSON structure
+          # Adjust based on your actual JSON structure
+          
+          # Calculate lengths of interpolated variables
+          REPO_LENGTH=${#GITHUB_REPOSITORY}
+          PR_NUMBER_LENGTH=${#GITHUB_EVENT_PULL_REQUEST_NUMBER}
+          
+          # Slack payload limit
+          SLACK_PAYLOAD_LIMIT=3000
+      
+          # Calculate maximum allowable length for pull_request.body
+          MAX_BODY_LENGTH=$((SLACK_PAYLOAD_LIMIT - STATIC_JSON_LENGTH - REPO_LENGTH - PR_NUMBER_LENGTH))
+      
+          echo "MAX_BODY_LENGTH=$MAX_BODY_LENGTH" >> $GITHUB_ENV
+
+      - name: Trim pull request body if necessary
+        id: trim-body
+        run: |
+          BODY="${{ github.event.pull_request.body }}"
+          MAX_LENGTH=${{ env.MAX_BODY_LENGTH }}
+          
+          if [ ${#BODY} -gt $MAX_LENGTH ]; then
+            TRIMMED_BODY="${BODY:0:$MAX_LENGTH}"
+            echo "TRIMMED_BODY=$TRIMMED_BODY" >> $GITHUB_ENV
+          else
+            echo "TRIMMED_BODY=$BODY" >> $GITHUB_ENV
+          fi
+
       - name: Slackify markdown in pull request body
         id: slackify
         uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1
         with:
-          text: ${{ github.event.pull_request.body }}
+          text: ${{ env.TRIMMED_BODY }}
+
       - name: Send GitHub slack message
         id: slack
         uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0

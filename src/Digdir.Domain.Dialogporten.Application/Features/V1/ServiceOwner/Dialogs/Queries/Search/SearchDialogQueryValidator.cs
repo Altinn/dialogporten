@@ -24,9 +24,9 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .Must(x => x is null || Localization.IsValidCultureCode(x))
             .WithMessage(searchQuery =>
                 (searchQuery.SearchLanguageCode == "no"
-                    ? LocalizationValidatorContants.InvalidCultureCodeErrorMessageWithNorwegianHint
-                    : LocalizationValidatorContants.InvalidCultureCodeErrorMessage) +
-                LocalizationValidatorContants.NormalizationErrorMessage);
+                    ? LocalizationValidatorConstants.InvalidCultureCodeErrorMessageWithNorwegianHint
+                    : LocalizationValidatorConstants.InvalidCultureCodeErrorMessage) +
+                LocalizationValidatorConstants.NormalizationErrorMessage);
 
         RuleFor(x => x.EndUserId)
             .Must(x => PartyIdentifier.TryParse(x, out var id) && id is NorwegianPersonIdentifier or SystemUserIdentifier)
@@ -36,6 +36,11 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .WithMessage($"Either '{nameof(SearchDialogQuery.ServiceResource)}' or '{nameof(SearchDialogQuery.Party)}' " +
                          $"must be specified if '{nameof(SearchDialogQuery.EndUserId)}' is provided.")
             .When(x => x.EndUserId is not null);
+
+        RuleFor(x => x.Search)
+            .Must((x, _) => x.EndUserId is not null)
+            .WithMessage($"'{nameof(SearchDialogQuery.EndUserId)}' must be specified if {{PropertyName}} is provided.")
+            .When(x => x.Search is not null);
 
         RuleForEach(x => x.Party)
             .IsValidPartyIdentifier();

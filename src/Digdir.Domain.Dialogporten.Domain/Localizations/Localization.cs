@@ -3,15 +3,12 @@ using System.Globalization;
 
 namespace Digdir.Domain.Dialogporten.Domain.Localizations;
 
-public sealed class Localization : IJoinEntity
+public sealed class Localization
 {
     private static readonly Dictionary<string, CultureInfo> NeutralCultureByValidCultureCodes =
         BuildNeutralCultureByValidCultureCodes();
 
     private string _languageCode = null!;
-
-    public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; }
 
     public string Value { get; set; } = null!;
 

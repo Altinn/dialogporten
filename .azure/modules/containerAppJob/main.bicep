@@ -32,6 +32,9 @@ param userAssignedIdentityId string
 @description('The replica timeout for the job in seconds')
 param replicaTimeOutInSeconds int
 
+@description('The workload profile to use for the job')
+param workloadProfileName string = 'Consumption'
+
 var isScheduled = !empty(cronExpression)
 
 var scheduledJobProperties = {
@@ -72,6 +75,7 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
       isScheduled ? scheduledJobProperties : manualJobProperties
     )
     environmentId: containerAppEnvId
+    workloadProfileName: workloadProfileName
     template: {
       containers: [
         {

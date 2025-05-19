@@ -36,6 +36,7 @@ export default function () {
     let extendedStatusToSearchFor = "status:" + uuidv4();
     let secondExtendedStatusToSearchFor = "status:" + uuidv4();
     let senderNameToSearchFor = uuidv4()
+    let defaultResource = "urn:altinn:resource:ttd-dialogporten-automated-tests";
     let auxParty = "urn:altinn:organization:identifier-no:" + getDefaultEnduserOrgNo();
     let auxResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2"; // This must exist in Resource Registry
     let endUserId = "urn:altinn:person:identifier-no:" + getDefaultEnduserSsn();
@@ -102,21 +103,21 @@ export default function () {
     });
 
     describe('Search for title', () => {
-        let r = getSO('dialogs/' + defaultFilter + '&Search=' + titleToSearchFor);
+        let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource +'&EndUserId=' + endUserId + '&Search=' + titleToSearchFor);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
     });
 
     describe('Search for body', () => {
-        let r = getSO('dialogs/' + defaultFilter + '&Search=' + additionalInfoToSearchFor);
+        let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource +'&EndUserId=' + endUserId + '&Search=' + additionalInfoToSearchFor);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
     });
 
     describe('Search for sender name ', () => {
-        let r = getSO('dialogs/' + defaultFilter + '&Search=' + senderNameToSearchFor);
+        let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource +'&EndUserId=' + endUserId + '&Search=' + senderNameToSearchFor);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);

@@ -44,7 +44,7 @@ function retrieveDialogContent(response, paramsWithToken, getFunction = getEU) {
     getContentChain(dialogId, paramsWithToken, 'get dialog activities', 'get dialog activity', '/activities/', getFunction);
     getContentChain(dialogId, paramsWithToken, 'get seenlogs', 'get seenlog', '/seenlog/', getFunction);
     if (getFunction == getEU) {
-        getContent(dialogId, paramsWithToken, 'get labellog', '/labellog', getFunction);
+        getContent(dialogId, paramsWithToken, 'get labellog', '/context/labellog', getFunction);
     }
     getContentChain(dialogId, paramsWithToken, 'get transmissions', 'get transmission', '/transmissions/', getFunction);
 }
@@ -93,7 +93,7 @@ export function enduserSearch(enduser, token, traceCalls) {
  * @param {string} dialogId - The dialog id.
  * @param {Object} paramsWithToken - The parameters with token.
  * @param {string} tag - Tagging the request.
- * @param {string} path - The path to append to the URL. Can be empty or /labellog.
+ * @param {string} path - The path to append to the URL. Can be empty or /context/labellog.
  * @param {function} getFunction - The get function to use.
  * @returns {void}
  */

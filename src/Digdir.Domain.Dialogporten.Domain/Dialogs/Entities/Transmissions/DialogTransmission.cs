@@ -5,12 +5,16 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
+using Digdir.Library.Entity.Abstractions.Features.Creatable;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 
 public sealed class DialogTransmission :
     IImmutableEntity,
+    IIdentifiableEntity,
+    ICreatableEntity,
     IAggregateCreatedHandler,
     IEventPublisher
 {

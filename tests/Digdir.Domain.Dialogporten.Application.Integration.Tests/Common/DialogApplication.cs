@@ -39,7 +39,7 @@ public class DialogApplication : IAsyncLifetime
     private readonly List<object> _publishedEvents = [];
 
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16.3")
+        .WithImage("postgres:16.8")
         .Build();
 
     public async Task InitializeAsync()

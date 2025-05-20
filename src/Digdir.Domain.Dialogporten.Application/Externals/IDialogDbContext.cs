@@ -44,7 +44,7 @@ public interface IDialogDbContext
 
     DbSet<SubjectResource> SubjectResources { get; }
     DbSet<DialogEndUserContext> DialogEndUserContexts { get; }
-    DbSet<DialogServiceOwnerContext> DialogServiceOwnerContexts { get; } // TODO, redo migration
+    DbSet<DialogServiceOwnerContext> DialogServiceOwnerContexts { get; }
     DbSet<LabelAssignmentLog> LabelAssignmentLogs { get; }
     DbSet<ResourcePolicyInformation> ResourcePolicyInformation { get; }
 

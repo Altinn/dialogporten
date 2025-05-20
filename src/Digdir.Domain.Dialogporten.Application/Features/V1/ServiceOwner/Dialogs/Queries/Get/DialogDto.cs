@@ -188,10 +188,10 @@ public sealed class DialogDto
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
 
-    public ServiceOwnerContext ServiceOwnerContext { get; set; } = null!;
+    public DialogServiceOwnerContextDto ServiceOwnerContext { get; set; } = null!;
 }
 
-public sealed class ServiceOwnerContext
+public sealed class DialogServiceOwnerContextDto
 {
     /// <summary>
     /// A list of labels, not visible in end-user APIs.

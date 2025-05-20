@@ -22,7 +22,7 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.ServiceOwnerContext, opt => opt.MapFrom(src => src.DialogServiceOwnerContext))
             .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId));
 
-        CreateMap<DialogServiceOwnerContext, ServiceOwnerContext>();
+        CreateMap<DialogServiceOwnerContext, DialogServiceOwnerContextDto>();
         CreateMap<DialogServiceOwnerLabel, ServiceOwnerLabelDto>();
 
         CreateMap<DialogSeenLogSeenByActor, ActorDto>();

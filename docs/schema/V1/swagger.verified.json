@@ -3673,7 +3673,7 @@
             "type": "array"
           },
           "serviceOwnerContext": {
-            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext"
+            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext"
           },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
@@ -4033,6 +4033,20 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext": {
+        "additionalProperties": false,
+        "properties": {
+          "serviceOwnerLabels": {
+            "description": "A list of labels, not visible in end-user APIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsQueriesGet_DialogTransmission": {
         "additionalProperties": false,
         "properties": {
@@ -4184,20 +4198,6 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext": {
-        "additionalProperties": false,
-        "properties": {
-          "serviceOwnerLabels": {
-            "description": "A list of labels, not visible in end-user APIs.",
-            "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel"
-            },
-            "nullable": true,
-            "type": "array"
           }
         },
         "type": "object"

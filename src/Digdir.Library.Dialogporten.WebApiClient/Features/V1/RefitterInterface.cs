@@ -2919,7 +2919,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastUpdate { get; set; }
 
         [JsonPropertyName("serviceOwnerContext")]
-        public V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext ServiceOwnerContext { get; set; }
+        public V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
 
     }
 
@@ -3573,7 +3573,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGet_ServiceOwnerContext
+    public partial class V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext
     {
         /// <summary>
         /// A list of labels, not visible in end-user APIs.

@@ -211,6 +211,48 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
         Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsGetServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
 
+        /// <summary>Add a service owner label to a dialog</summary>
+        /// <remarks>
+        /// Add a label to the service owner context.
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>201</term>
+        /// <description>Created</description>
+        /// </item>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog DialogServiceOwnerLabel was updated successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels{label}")]
+        Task<IApiResponse<string>> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreateServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
         /// <returns>

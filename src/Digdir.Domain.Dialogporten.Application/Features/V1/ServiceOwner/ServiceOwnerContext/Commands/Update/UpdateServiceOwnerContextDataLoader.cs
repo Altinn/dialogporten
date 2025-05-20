@@ -26,7 +26,7 @@ internal sealed class UpdateServiceOwnerContextDataLoader : TypedDataLoader<Upda
 
         var serviceOwnerContext = await _dialogDbContext
             .DialogServiceOwnerContexts
-            .Where(x => x.Dialog.Id == request.Id)
+            .Where(x => x.Dialog.Id == request.DialogId)
             .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 

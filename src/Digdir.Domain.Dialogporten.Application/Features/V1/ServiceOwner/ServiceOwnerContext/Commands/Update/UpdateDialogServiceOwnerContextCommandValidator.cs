@@ -10,7 +10,7 @@ internal sealed class UpdateDialogServiceOwnerContextCommandValidator : Abstract
     public UpdateDialogServiceOwnerContextCommandValidator(
         IValidator<UpdateServiceOwnerContextDto> updateServiceOwnerContextDtoValidator)
     {
-        RuleFor(x => x.Id)
+        RuleFor(x => x.DialogId)
             .NotEmpty();
 
         RuleFor(x => x.Dto)

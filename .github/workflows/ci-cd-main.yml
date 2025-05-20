@@ -95,7 +95,7 @@ jobs:
     with:
       environment: test
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-      runMigration: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
+      runMigration: ${{ github.event_name == 'workflow_dispatch' }}
 
   generate-timestamp:
     name: Generate timestamp

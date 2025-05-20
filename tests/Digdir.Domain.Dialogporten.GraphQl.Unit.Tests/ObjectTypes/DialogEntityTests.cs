@@ -20,7 +20,7 @@ public class DialogEntityTests
             nameof(DialogEntity.SeenLog),
             nameof(DialogEntity.DialogEndUserContext),
             nameof(DialogEntity.IdempotentKey),
-            nameof(DialogEntity.ServiceOwnerContext)
+            nameof(DialogEntity.DialogServiceOwnerContext)
         };
 
         var dialogProperties = typeof(DialogEntity)

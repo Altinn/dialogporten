@@ -1,0 +1,57 @@
+using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using OneOf;
+
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.ServiceOwnerLabels.Queries.Get;
+
+public sealed class GetServiceOwnerLabelsQuery : IRequest<GetServiceOwnerLabelsResult>
+{
+    public Guid DialogId { get; set; }
+}
+
+[GenerateOneOf]
+public sealed partial class GetServiceOwnerLabelsResult : OneOfBase<ServiceOwnerLabelResultDto, EntityNotFound>;
+
+internal sealed class GetDialogQueryHandler : IRequestHandler<GetServiceOwnerLabelsQuery, GetServiceOwnerLabelsResult>
+{
+    private readonly IDialogDbContext _db;
+    private readonly IMapper _mapper;
+    private readonly IUserResourceRegistry _userResourceRegistry;
+
+    public GetDialogQueryHandler(
+        IDialogDbContext db,
+        IMapper mapper,
+        IUserResourceRegistry userResourceRegistry)
+    {
+        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+    }
+
+    public async Task<GetServiceOwnerLabelsResult> Handle(GetServiceOwnerLabelsQuery request, CancellationToken cancellationToken)
+    {
+        var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
+
+        var serviceOwnerContext = await _db
+            .DialogServiceOwnerContexts
+            .Where(x => x.Dialog.Id == request.DialogId)
+            .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+        if (serviceOwnerContext is null)
+        {
+            return new EntityNotFound<DialogEntity>(request.DialogId);
+        }
+
+        return new ServiceOwnerLabelResultDto
+        {
+            Revision = serviceOwnerContext.Revision,
+            Labels = _mapper.Map<List<ServiceOwnerLabelDto>>(serviceOwnerContext.ServiceOwnerLabels),
+        };
+    }
+}

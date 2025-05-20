@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
-using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -43,7 +43,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         dialog.ServiceOwnerContext.ServiceOwnerLabels.Should().HaveCount(labels.Count);
 
         response.TryPickT0(out _, out _).Should().BeTrue();
-        await Application.AssertEntityCountAsync<ServiceOwnerLabel>(count: labels.Count);
+        await Application.AssertEntityCountAsync<DialogServiceOwnerLabel>(count: labels.Count);
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var labels = new List<ServiceOwnerLabelDto>();
 
-        for (var i = 0; i < ServiceOwnerLabel.MaxNumberOfLabels + 1; i++)
+        for (var i = 0; i < DialogServiceOwnerLabel.MaxNumberOfLabels + 1; i++)
         {
             labels.Add(new ServiceOwnerLabelDto { Value = $"label{i}" });
         }
@@ -124,6 +124,6 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             .Should()
             .ContainSingle(x => x.ErrorMessage
                 .Contains("Maximum") && x.ErrorMessage
-                .Contains($"{ServiceOwnerLabel.MaxNumberOfLabels}"));
+                .Contains($"{DialogServiceOwnerLabel.MaxNumberOfLabels}"));
     }
 }

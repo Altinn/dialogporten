@@ -8,7 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
-using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
@@ -19,11 +19,11 @@ internal sealed class MappingProfile : Profile
         CreateMap<DialogEntity, DialogDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.Ignore())
-            // .ForMember(dest => dest.ServiceOwnerLabels, opt => opt.MapFrom(src => src.ServiceOwnerContext.Labels))
+            .ForMember(dest => dest.ServiceOwnerContext, opt => opt.MapFrom(src => src.DialogServiceOwnerContext))
             .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId));
 
-        CreateMap<Domain.ServiceOwnerContexts.Entities.ServiceOwnerContext, ServiceOwnerContext>();
-        CreateMap<ServiceOwnerLabel, ServiceOwnerLabelDto>();
+        CreateMap<DialogServiceOwnerContext, ServiceOwnerContext>();
+        CreateMap<DialogServiceOwnerLabel, ServiceOwnerLabelDto>();
 
         CreateMap<DialogSeenLogSeenByActor, ActorDto>();
         CreateMap<DialogSeenLog, DialogSeenLogDto>()

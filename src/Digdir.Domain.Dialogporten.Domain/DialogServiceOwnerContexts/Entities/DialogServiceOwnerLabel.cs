@@ -1,8 +1,8 @@
 using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
-namespace Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
+namespace Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 
-public sealed class ServiceOwnerLabel : IImmutableEntity
+public sealed class DialogServiceOwnerLabel : IImmutableEntity
 {
     public const int MaxNumberOfLabels = 20;
 
@@ -17,6 +17,6 @@ public sealed class ServiceOwnerLabel : IImmutableEntity
 
     public DateTimeOffset CreatedAt { get; set; }
 
-    public Guid ServiceOwnerContextId { get; set; }
-    public ServiceOwnerContext ServiceOwnerContext { get; set; } = null!;
+    public Guid DialogServiceOwnerContextId { get; set; }
+    public DialogServiceOwnerContext DialogServiceOwnerContext { get; set; } = null!;
 }

@@ -11,8 +11,8 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using Digdir.Domain.Dialogporten.Domain.ServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -88,7 +88,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         CreateDialogEndUserContext(request, dialog);
-        CreateServiceOwnerContext(request, dialog);
+        CreateDialogServiceOwnerContext(request, dialog);
 
         var activityTypes = dialog.Activities
             .Select(x => x.TypeId)
@@ -156,13 +156,13 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             ActorType.Values.ServiceOwner);
     }
 
-    private void CreateServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)
+    private void CreateDialogServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)
     {
-        dialog.ServiceOwnerContext = new();
+        dialog.DialogServiceOwnerContext = new();
         if (request.Dto.ServiceOwnerContext?.ServiceOwnerLabels.Count > 0)
         {
-            dialog.ServiceOwnerContext.ServiceOwnerLabels =
-                _mapper.Map<List<ServiceOwnerLabel>>(request.Dto.ServiceOwnerContext.ServiceOwnerLabels);
+            dialog.DialogServiceOwnerContext.ServiceOwnerLabels =
+                _mapper.Map<List<DialogServiceOwnerLabel>>(request.Dto.ServiceOwnerContext.ServiceOwnerLabels);
         }
     }
 }

@@ -1861,6 +1861,11 @@
             "example": "Organization",
             "type": "string"
           },
+          "partyUuid": {
+            "description": "The UUID for the party.",
+            "format": "guid",
+            "type": "string"
+          },
           "subParties": {
             "description": "The sub parties of this party, if any. The sub party uses the same data model.",
             "items": {

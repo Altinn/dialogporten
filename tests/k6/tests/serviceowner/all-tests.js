@@ -13,6 +13,7 @@ import { default as dialogCreateUpdatePatchDeleteCorrespondenceResource } from '
 import { default as dialogDetails } from './dialogDetails.js';
 import { default as dialogRestore } from './dialogRestore.js';
 import { default as dialogSearch } from './dialogSearch.js';
+import { default as dialogServiceOwnerLabels } from './dialogServiceOwnerLabels.js';
 import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
 
 export default function() {
@@ -30,5 +31,6 @@ export default function() {
   dialogDetails();
   dialogRestore();
   dialogSearch();
+  dialogServiceOwnerLabels();
   dialogUpdateActivity();
 }

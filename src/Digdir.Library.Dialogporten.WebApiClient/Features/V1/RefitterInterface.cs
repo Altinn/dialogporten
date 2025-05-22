@@ -326,14 +326,59 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Forbidden</description>
         /// </item>
         /// <item>
+        /// <term>404</term>
+        /// <description>Not Found</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Put("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels")]
+        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsSetSetDialogSystemLabel(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>No Content</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Bad Request</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>A server side error occurred.</description>
         /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
-        [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkupdate")]
-        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsBulkUpdateBulkUpdateDialogSystemLabels([Query] string enduserid, [Body, AliasAs("BulkUpdateDialogSystemLabelsRequest")] V1ServiceOwnerDialogSystemLabelsBulkUpdate_BulkUpdateDialogSystemLabelsRequest bulkUpdateDialogSystemLabelsRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
+        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsBulkSetBulkSetDialogSystemLabels([Query] string enduserId, [Body, AliasAs("BulkSetDialogSystemLabelsRequest")] V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest bulkSetDialogSystemLabelsRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -1571,11 +1616,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogSystemLabelsBulkUpdate_BulkUpdateDialogSystemLabelsRequest
+    public partial class V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest
     {
-
-        [JsonPropertyName("dialogIds")]
-        public ICollection<System.Guid> DialogIds { get; set; }
 
         [JsonPropertyName("systemLabels")]
 
@@ -1596,6 +1638,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
         Archive = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest
+    {
+
+        [JsonPropertyName("dialogIds")]
+        public ICollection<System.Guid> DialogIds { get; set; }
+
+        [JsonPropertyName("systemLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
 
     }
 

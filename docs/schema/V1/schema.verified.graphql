@@ -343,7 +343,7 @@ input SearchDialogSortTypeInput {
 
 input SetSystemLabelInput {
   dialogId: UUID!
-  label: SystemLabel!
+  systemLabels: [SystemLabel!]!
 }
 
 enum ActivityType {

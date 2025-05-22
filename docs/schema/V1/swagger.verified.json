@@ -1482,11 +1482,36 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogIds": {
+            "items": {
+              "format": "guid",
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabelRequest": {
         "additionalProperties": false,
         "properties": {
-          "label": {
-            "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -4467,6 +4492,40 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogIds": {
+            "items": {
+              "format": "guid",
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogTransmissionsCreate_TransmissionRequest": {
         "additionalProperties": false,
         "properties": {
@@ -5820,6 +5879,76 @@
         ]
       }
     },
+    "/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset": {
+      "post": {
+        "operationId": "V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabels",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest"
+              }
+            }
+          },
+          "description": "",
+          "required": true,
+          "x-name": "BulkSetDialogSystemLabelsRequest",
+          "x-position": 1
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
     "/api/v1/enduser/parties": {
       "get": {
         "description": "Gets the list of authorized parties for the end user.",
@@ -7074,6 +7203,116 @@
         ]
       }
     },
+    "/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels": {
+      "put": {
+        "operationId": "V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enduserId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest"
+              }
+            }
+          },
+          "description": "",
+          "required": true,
+          "x-name": "SetDialogSystemLabelRequest",
+          "x-position": 1
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "410": {
+            "description": ""
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": ""
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog": {
       "get": {
         "description": "Gets all seen log records for a dialog.",
@@ -7451,6 +7690,84 @@
           }
         ],
         "summary": "Gets a single dialog transmission",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset": {
+      "post": {
+        "operationId": "V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabels",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "enduserId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest"
+              }
+            }
+          },
+          "description": "",
+          "required": true,
+          "x-name": "BulkSetDialogSystemLabelsRequest",
+          "x-position": 1
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
         "tags": [
           "Serviceowner"
         ]

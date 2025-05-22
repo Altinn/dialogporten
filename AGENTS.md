@@ -1,6 +1,6 @@
 # Repository Guidelines for AI coding agents
 
-This file describes how AI agents should interact with the repository.
+This file describes how AI coding agents should interact with the repository.
 
 ## Build & Test Commands
 - **Build**: `dotnet build Digdir.Domain.Dialogporten.sln`

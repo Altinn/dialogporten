@@ -34,7 +34,7 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetD
         var command = new SetSystemLabelCommand
         {
             DialogId = req.DialogId,
-            Label = req.Label,
+            Labels = req.SystemLabels,
             IfMatchEnduserContextRevision = req.IfMatchEnduserContextRevision
         };
 
@@ -60,5 +60,5 @@ public sealed class SetDialogSystemLabelRequest
 
     public Guid DialogId { get; set; }
 
-    public SystemLabel.Values Label { get; set; }
+    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = [];
 }

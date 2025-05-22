@@ -7,6 +7,7 @@ internal static class Constants
     internal const string Authorization = "Authorization";
     internal const string CurrentTokenIssuer = "CurrentIssuer";
     internal const int MaxRequestBodySize = 200_000;
+    internal const int MaxDialogIdsPerRequest = 100;
 
     internal static class SwaggerSummary
     {

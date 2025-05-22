@@ -11,7 +11,7 @@ public sealed class SetSystemLabelPayload
 public sealed class SetSystemLabelInput
 {
     public Guid DialogId { get; set; }
-    public SystemLabel Label { get; set; }
+    public List<SystemLabel> SystemLabels { get; set; } = [];
 }
 
 [InterfaceType("SetSystemLabelError")]

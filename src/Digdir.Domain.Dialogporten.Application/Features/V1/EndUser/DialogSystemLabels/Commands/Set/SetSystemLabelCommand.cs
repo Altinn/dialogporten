@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
+using System.Linq;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
 
@@ -14,7 +15,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchEnduserContextRevision { get; set; }
-    public SystemLabel.Values Label { get; set; }
+    public IReadOnlyCollection<SystemLabel.Values> Labels { get; set; } = Array.Empty<SystemLabel.Values>();
 }
 
 public sealed record SetSystemLabelSuccess(Guid Revision);
@@ -63,7 +64,14 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
 
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        dialog.DialogEndUserContext.UpdateLabel(request.Label, currentUserInformation.UserId.ExternalIdWithPrefix);
+        var newLabel = request.Labels.Count switch
+        {
+            0 => SystemLabel.Values.Default,
+            1 => request.Labels.First(),
+            _ => throw new InvalidOperationException("Only one system label can be set")
+        };
+
+        dialog.DialogEndUserContext.UpdateLabel(newLabel, currentUserInformation.UserId.ExternalIdWithPrefix);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.DialogEndUserContext, request.IfMatchEnduserContextRevision)

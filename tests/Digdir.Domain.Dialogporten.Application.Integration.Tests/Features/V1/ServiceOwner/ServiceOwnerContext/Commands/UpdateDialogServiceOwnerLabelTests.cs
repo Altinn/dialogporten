@@ -15,7 +15,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public UpdateDialogServiceOwnerLabelTests(DialogApplication application) : base(application) { }
 
     [Fact]
-    public async Task Cannot_Call_SetServiceOwnerLabels_Without_DialogId_Or_Dto()
+    public async Task Cannot_Call_Update_ServiceOwnerLabels_Without_DialogId_Or_Dto()
     {
         // Arrange
         var setServiceOwnerLabelsCommand = new UpdateDialogServiceOwnerContextCommand();
@@ -54,6 +54,31 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         response.TryPickT2(out var notFoundError, out _).Should().BeTrue();
         notFoundError.Should().NotBeNull();
         notFoundError.Message.Should().Contain(dialogId.ToString());
+    }
+
+    [Fact]
+    public async Task Can_Remove_ServiceOwnerLabels()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = "Scadrial" }];
+        await Application.Send(createDialogCommand);
+
+        var updateLabelsCommand = new UpdateDialogServiceOwnerContextCommand
+        {
+            DialogId = dialogId,
+            Dto = new()
+        };
+
+        // Act
+        var response = await Application.Send(updateLabelsCommand);
+
+        // Assert
+        response.TryPickT0(out var success, out _).Should().BeTrue();
+        success.Revision.Should().NotBe(Guid.Empty);
+
+        await Application.AssertEntityCountAsync<DialogServiceOwnerLabel>(count: 0);
     }
 
     [Fact]

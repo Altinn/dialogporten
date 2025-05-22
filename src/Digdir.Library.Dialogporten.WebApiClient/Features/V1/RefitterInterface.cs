@@ -179,9 +179,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
+    /// <summary>Retrieve service owner labels for a dialog</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.5.5.0")]
     public partial interface IServiceownerApi
     {
+        /// <summary>Retrieve service owner labels for a dialog</summary>
+        /// <remarks>Fetches all labels associated with the service owner context of a specific dialog.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -195,7 +198,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Unauthorized</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -203,7 +206,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>Not Found</description>
+        /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// </list>
         /// </returns>

@@ -7144,6 +7144,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/context/labels": {
       "get": {
+        "description": "Fetches all labels associated with the service owner context of a specific dialog.",
         "operationId": "V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsGet_ServiceOwnerLabel",
         "parameters": [
           {
@@ -7158,10 +7159,19 @@
         ],
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "No Content",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the ServiceOwner Context",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -7174,7 +7184,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
           }
         },
         "security": [
@@ -7184,6 +7194,95 @@
             ]
           }
         ],
+        "summary": "Retrieve service owner labels for a dialog",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/context/labels{label}": {
+      "post": {
+        "description": "Add a label to the service owner context.\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "operationId": "V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_ServiceOwnerLabel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "label",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "204": {
+            "description": "The dialog DialogServiceOwnerLabel was updated successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the ServiceOwner Context",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Add a service owner label to a dialog",
         "tags": [
           "Serviceowner"
         ]

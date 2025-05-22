@@ -79,6 +79,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var labels = new List<ServiceOwnerLabelDto>
         {
+            new() { Value = null! },
             new() { Value = new string('a', Constants.MinSearchStringLength - 1) },
             new() { Value = new string('a', Constants.DefaultMaxStringLength + 1) }
         };
@@ -90,6 +91,12 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
 
         // Assert
         response.TryPickT2(out var validationError, out _).Should().BeTrue();
+
+        validationError.Errors
+            .Should()
+            .ContainSingle(x => x.ErrorMessage
+                .Contains("not be empty"));
+
         validationError.Errors
             .Should()
             .ContainSingle(x => x.ErrorMessage

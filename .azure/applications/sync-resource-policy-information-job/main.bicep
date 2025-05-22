@@ -89,12 +89,12 @@ var secrets = [
   {
     name: 'dbconnectionstring'
     keyVaultUrl: '${keyVaultBaseUrl}/dialogportenAdoConnectionString'
-    identity: 'System'
+    identity: managedIdentity.id
   }
   {
     name: 'redisconnectionstring'
     keyVaultUrl: '${keyVaultBaseUrl}/dialogportenRedisConnectionString'
-    identity: 'System'
+    identity: managedIdentity.id
   }
 ]
 

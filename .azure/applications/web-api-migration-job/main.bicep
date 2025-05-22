@@ -64,7 +64,7 @@ var secrets = [
   {
     name: 'dbconnectionstring'
     keyVaultUrl: keyVaultUrl
-    identity: 'System'
+    identity: managedIdentity.id
   }
 ]
 

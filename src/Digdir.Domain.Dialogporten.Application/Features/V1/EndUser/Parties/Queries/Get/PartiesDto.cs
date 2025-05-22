@@ -14,6 +14,11 @@ public sealed class AuthorizedPartyDto
     public string Party { get; init; } = null!;
 
     /// <summary>
+    /// The UUID for the party.
+    /// </summary>
+    public Guid PartyUuid { get; init; }
+
+    /// <summary>
     /// The name of the party (verbatim from CCR, usually in all caps)
     /// </summary>
     /// <example>CONTOSO REAL ESTATE AS</example>

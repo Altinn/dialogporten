@@ -153,11 +153,6 @@ public sealed class DialogDto
     /// </summary>
     public List<SearchTagDto>? SearchTags { get; set; }
 
-    // /// <summary>
-    // /// A list of labels, not visible in end-user APIs.
-    // /// </summary>
-    // public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
-
     /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).
     /// </summary>

@@ -4924,7 +4924,7 @@
   "paths": {
     "/api/v1/.well-known/jwks.json": {
       "get": {
-        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issues by Dialogporten.",
+        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.",
         "operationId": "V1WellKnownJwksGet_Jwks",
         "responses": {
           "200": {
@@ -4946,7 +4946,7 @@
     },
     "/api/v1/.well-known/oauth-authorization-server": {
       "get": {
-        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issues by Dialogporten.",
+        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.",
         "operationId": "V1WellKnownOauthAuthorizationServerGet_OauthAuthorizationServer",
         "responses": {
           "200": {

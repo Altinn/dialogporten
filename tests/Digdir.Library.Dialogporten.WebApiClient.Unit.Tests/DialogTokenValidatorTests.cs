@@ -126,6 +126,20 @@ public class DialogTokenValidatorTests
     }
 
     [Fact]
+    public void ShouldBeValid_WhenNbfIsMissing()
+    {
+        // Arrange
+        var sut = GetSut(ValidTimeStamp, ValidPublicKeyPairs);
+        var token = RemoveTokenPayloadProperty(DialogToken, "nbf");
+
+        // Act
+        var result = sut.Validate(token);
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
     public void ShouldReturnError_GivenEmptyToken()
     {
         // Arrange
@@ -336,6 +350,16 @@ public class DialogTokenValidatorTests
     {
         var tokenParts = token.Split('.');
         tokenParts[0] = UpdateTokenParts(tokenParts[0], property, value);
+        return string.Join(".", tokenParts);
+    }
+
+    private static string RemoveTokenPayloadProperty(string token, string property)
+    {
+        var tokenParts = token.Split('.');
+        var decoded = Base64Url.DecodeFromChars(tokenParts[1]);
+        var json = JsonSerializer.Deserialize<Dictionary<string, object>>(decoded)!;
+        json.Remove(property);
+        tokenParts[1] = Encoding.UTF8.GetString(Base64Url.EncodeToUtf8Bytes(JsonSerializer.SerializeToUtf8Bytes(json)));
         return string.Join(".", tokenParts);
     }
 }

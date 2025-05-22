@@ -53,7 +53,7 @@ internal static class ClaimsPrincipalExtensions
         var nbf = claimsPrincipal.TryGetClaimValue(notValidBeforeClaimName, out var nbfs)
             && long.TryParse(nbfs, out var nbfl)
                 ? DateTimeOffset.FromUnixTimeSeconds(nbfl).Add(-clockSkew)
-                : DateTimeOffset.MaxValue;
+                : DateTimeOffset.MinValue;
         return nbf <= clock.UtcNow;
     }
 

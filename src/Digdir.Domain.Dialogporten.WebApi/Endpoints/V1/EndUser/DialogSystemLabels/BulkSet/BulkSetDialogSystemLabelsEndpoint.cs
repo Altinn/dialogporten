@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkUpdate;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
@@ -7,17 +7,17 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using FastEndpoints;
 using MediatR;
 
-namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.DialogSystemLabels.BulkUpdate;
+namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.DialogSystemLabels.BulkSet;
 
-public sealed class BulkUpdateDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkUpdateDialogSystemLabelsRequest>
+public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkSetDialogSystemLabelsRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
     public override void Configure()
     {
-        Post("dialogs/endusercontext/systemlabels/actions/bulkupdate");
-        Policies(AuthorizationPolicy.ServiceProvider);
-        Group<ServiceOwnerGroup>();
+        Post("dialogs/context/systemlabels/actions/bulkset");
+        Policies(AuthorizationPolicy.EndUser);
+        Group<EndUserGroup>();
 
         Description(b => b.ProducesOneOf(
             StatusCodes.Status204NoContent,
@@ -26,12 +26,12 @@ public sealed class BulkUpdateDialogSystemLabelsEndpoint(ISender sender) : Endpo
             StatusCodes.Status412PreconditionFailed));
     }
 
-    public override async Task HandleAsync(BulkUpdateDialogSystemLabelsRequest req, CancellationToken ct)
+    public override async Task HandleAsync(BulkSetDialogSystemLabelsRequest req, CancellationToken ct)
     {
-        var command = new BulkUpdateSystemLabelCommand
+        var command = new BulkSetSystemLabelCommand
         {
             DialogIds = req.DialogIds,
-            Labels = req.SystemLabels,
+            SystemLabels = req.SystemLabels,
             IfMatchEnduserContextRevision = req.IfMatchEnduserContextRevision
         };
 
@@ -39,20 +39,16 @@ public sealed class BulkUpdateDialogSystemLabelsEndpoint(ISender sender) : Endpo
         await result.Match(
             _ => SendNoContentAsync(ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
-            validationError => this.BadRequestAsync(validationError, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
+            validationError => this.BadRequestAsync(validationError, ct),
             concurrencyError => this.PreconditionFailed(ct));
     }
 }
 
-public sealed class BulkUpdateDialogSystemLabelsRequest
+public sealed class BulkSetDialogSystemLabelsRequest
 {
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchEnduserContextRevision { get; init; }
-
-    [QueryParam]
-    public string? Enduserid { get; init; }
-
 
     public IReadOnlyCollection<Guid> DialogIds { get; init; } = [];
 

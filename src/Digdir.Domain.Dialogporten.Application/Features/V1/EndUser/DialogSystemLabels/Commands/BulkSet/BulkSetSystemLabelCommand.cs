@@ -1,37 +1,36 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkUpdate;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
 
-public sealed class BulkUpdateSystemLabelCommand : IRequest<BulkUpdateSystemLabelResult>
+public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>
 {
     public IReadOnlyCollection<Guid> DialogIds { get; init; } = Array.Empty<Guid>();
-    public IReadOnlyCollection<SystemLabel.Values> Labels { get; init; } = Array.Empty<SystemLabel.Values>();
+    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; init; } = Array.Empty<SystemLabel.Values>();
     public Guid? IfMatchEnduserContextRevision { get; init; }
 }
 
-public sealed record BulkUpdateSystemLabelSuccess();
+public sealed record BulkSetSystemLabelSuccess;
 
 [GenerateOneOf]
-public sealed partial class BulkUpdateSystemLabelResult : OneOfBase<BulkUpdateSystemLabelSuccess, Forbidden, ValidationError, DomainError, ConcurrencyError>;
+public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, Forbidden, DomainError, ValidationError, ConcurrencyError>;
 
-internal sealed class BulkUpdateSystemLabelCommandHandler : IRequestHandler<BulkUpdateSystemLabelCommand, BulkUpdateSystemLabelResult>
+internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSetSystemLabelCommand, BulkSetSystemLabelResult>
 {
     private readonly IDialogDbContext _db;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
-    public BulkUpdateSystemLabelCommandHandler(
+    public BulkSetSystemLabelCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
         IUserRegistry userRegistry,
@@ -43,7 +42,7 @@ internal sealed class BulkUpdateSystemLabelCommandHandler : IRequestHandler<Bulk
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<BulkUpdateSystemLabelResult> Handle(BulkUpdateSystemLabelCommand request, CancellationToken cancellationToken)
+    public async Task<BulkSetSystemLabelResult> Handle(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
     {
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch([], [], cancellationToken);
 
@@ -61,16 +60,17 @@ internal sealed class BulkUpdateSystemLabelCommandHandler : IRequestHandler<Bulk
         }
 
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        var newLabel = request.Labels.Count switch
+        var newLabel = request.SystemLabels.Count switch // The domain model currently only supports one system label
         {
             0 => SystemLabel.Values.Default,
-            1 => request.Labels.First(),
-            _ => throw new InvalidOperationException("Only one system label is supported")
+            1 => request.SystemLabels.First(),
+            _ => throw new UnreachableException() // Should be caught in validator
         };
 
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
         foreach (var dialog in dialogs)
         {
-            dialog.DialogEndUserContext.UpdateLabel(newLabel, userInfo.UserId.ExternalIdWithPrefix, ActorType.Values.ServiceOwner);
+            dialog.DialogEndUserContext.UpdateLabel(newLabel, userInfo.UserId.ExternalIdWithPrefix);
             if (request.IfMatchEnduserContextRevision.HasValue)
             {
                 _unitOfWork.EnableConcurrencyCheck(dialog.DialogEndUserContext, request.IfMatchEnduserContextRevision);
@@ -78,8 +78,8 @@ internal sealed class BulkUpdateSystemLabelCommandHandler : IRequestHandler<Bulk
         }
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return saveResult.Match<BulkUpdateSystemLabelResult>(
-            _ => new BulkUpdateSystemLabelSuccess(),
+        return saveResult.Match<BulkSetSystemLabelResult>(
+            _ => new BulkSetSystemLabelSuccess(),
             domainError => domainError,
             concurrencyError => concurrencyError);
     }

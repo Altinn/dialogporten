@@ -302,6 +302,39 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
         Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>No Content</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Bad Request</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkupdate")]
+        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsBulkUpdateBulkUpdateDialogSystemLabels([Query] string enduserid, [Body, AliasAs("BulkUpdateDialogSystemLabelsRequest")] V1ServiceOwnerDialogSystemLabelsBulkUpdate_BulkUpdateDialogSystemLabelsRequest bulkUpdateDialogSystemLabelsRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
         /// <returns>
@@ -1538,6 +1571,35 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogSystemLabelsBulkUpdate_BulkUpdateDialogSystemLabelsRequest
+    {
+
+        [JsonPropertyName("dialogIds")]
+        public ICollection<System.Guid> DialogIds { get; set; }
+
+        [JsonPropertyName("systemLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogEndUserContextsEntities_SystemLabel
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Default")]
+        Default = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Bin")]
+        Bin = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
+        Archive = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog
     {
 
@@ -2497,21 +2559,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesSearch_Content Content { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogEndUserContextsEntities_SystemLabel
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Default")]
-        Default = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Bin")]
-        Bin = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
-        Archive = 2,
 
     }
 

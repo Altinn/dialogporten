@@ -1856,14 +1856,14 @@
             "example": "urn:altinn:organization:identifier-no:912345678",
             "type": "string"
           },
-          "partyUuid": {
-            "description": "The UUID for the party",
-            "type": "string",
-            "format": "uuid"
-          },
           "partyType": {
             "description": "The type of the party, either \u0022Organization\u0022 or \u0022Person\u0022.",
             "example": "Organization",
+            "type": "string"
+          },
+          "partyUuid": {
+            "description": "The UUID for the party.",
+            "format": "guid",
             "type": "string"
           },
           "subParties": {

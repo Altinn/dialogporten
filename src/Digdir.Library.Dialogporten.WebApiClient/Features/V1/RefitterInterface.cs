@@ -214,37 +214,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
         Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsGetServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
 
-        /// <summary>Delete a service owner label for a dialog</summary>
-        /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>204</term>
-        /// <description>Successfully deleted the service owner label.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Unauthorized</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Forbidden</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/problem+json")]
-        [Delete("/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}")]
-        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsDeleteServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
-
         /// <summary>Add a service owner label to a dialog</summary>
         /// <remarks>
         /// Add a label to the service owner context.
@@ -283,9 +252,40 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels{label}")]
-        Task<IApiResponse<string>> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreateServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
+        Task<IApiResponse<string>> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreateServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Delete a service owner label for a dialog</summary>
+        /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>Successfully deleted the service owner label.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json")]
+        [Delete("/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}")]
+        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsDeleteServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
@@ -1003,6 +1003,60 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ProblemDetails
+    {
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1";
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; } = "One or more validation errors occurred.";
+
+        [JsonPropertyName("status")]
+        public int Status { get; set; } = 400;
+
+        [JsonPropertyName("instance")]
+        public string Instance { get; set; } = "/api/route";
+
+        [JsonPropertyName("traceId")]
+        public string TraceId { get; set; } = "0HMPNHL0JHL76:00000001";
+
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+
+        [JsonPropertyName("errors")]
+        public ICollection<ProblemDetails_Error> Errors { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ProblemDetails_Error
+    {
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = "Error or field name";
+
+        [JsonPropertyName("reason")]
+        public string Reason { get; set; } = "Error reason";
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("severity")]
+        public string Severity { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_Label
+    {
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogTransmissionsQueriesSearch_Transmission
     {
         /// <summary>
@@ -1075,51 +1129,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogTransmissionsQueriesSearch_Attachment> Attachments { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ProblemDetails
-    {
-
-        [JsonPropertyName("type")]
-        public string Type { get; set; } = "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1";
-
-        [JsonPropertyName("title")]
-        public string Title { get; set; } = "One or more validation errors occurred.";
-
-        [JsonPropertyName("status")]
-        public int Status { get; set; } = 400;
-
-        [JsonPropertyName("instance")]
-        public string Instance { get; set; } = "/api/route";
-
-        [JsonPropertyName("traceId")]
-        public string TraceId { get; set; } = "0HMPNHL0JHL76:00000001";
-
-        [JsonPropertyName("detail")]
-        public string Detail { get; set; }
-
-        [JsonPropertyName("errors")]
-        public ICollection<ProblemDetails_Error> Errors { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ProblemDetails_Error
-    {
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = "Error or field name";
-
-        [JsonPropertyName("reason")]
-        public string Reason { get; set; } = "Error reason";
-
-        [JsonPropertyName("code")]
-        public string Code { get; set; }
-
-        [JsonPropertyName("severity")]
-        public string Severity { get; set; }
 
     }
 

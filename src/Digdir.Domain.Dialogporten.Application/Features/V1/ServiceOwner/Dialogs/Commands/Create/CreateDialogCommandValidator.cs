@@ -393,6 +393,7 @@ internal sealed class CreateDialogServiceOwnerLabelDtoValidator : AbstractValida
     public CreateDialogServiceOwnerLabelDtoValidator()
     {
         RuleFor(x => x.Value)
+            .NotEmpty()
             .MinimumLength(Constants.MinSearchStringLength)
             .MaximumLength(Constants.DefaultMaxStringLength);
     }

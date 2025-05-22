@@ -23,8 +23,9 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
 
     public override void Configure()
     {
-        Post("dialogs/{dialogId}/context/labels{label}");
+        Post("dialogs/{dialogId}/context/labels");
         Policies(AuthorizationPolicy.ServiceProvider);
+
         Group<ServiceOwnerGroup>();
 
         Description(b => b.ProducesOneOf(
@@ -50,13 +51,14 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
         var command = new UpdateDialogServiceOwnerContextCommand
         {
             IfMatchServiceOwnerContextRevision = req.IfMatchServiceOwnerContextRevision,
+            DialogId = req.DialogId,
             Dto = new UpdateServiceOwnerContextDto
             {
                 ServiceOwnerLabels =
                 [
                     ..serviceOwnerLabelsResult.Labels
                         .Select(x => new ServiceOwnerLabelDto { Value = x.Value }),
-                    new ServiceOwnerLabelDto { Value = req.Label }
+                    new ServiceOwnerLabelDto { Value = req.Dto.Value }
                 ]
             }
         };
@@ -72,7 +74,6 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
             notFound => this.NotFoundAsync(notFound, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             concurrencyError => this.PreconditionFailed(ct));
-
     }
 }
 
@@ -80,8 +81,14 @@ public sealed class CreateServiceOwnerLabelRequest
 {
     public Guid DialogId { get; set; }
 
-    public string Label { get; set; } = null!;
+    [FromBody]
+    public LabelDto Dto { get; set; } = null!;
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchServiceOwnerContextRevision { get; set; }
+}
+
+public sealed class LabelDto
+{
+    public string Value { get; set; } = null!;
 }

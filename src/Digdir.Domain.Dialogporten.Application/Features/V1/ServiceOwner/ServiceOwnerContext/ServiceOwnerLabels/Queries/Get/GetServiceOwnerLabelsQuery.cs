@@ -39,6 +39,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetServiceOwnerLab
 
         var serviceOwnerContext = await _db
             .DialogServiceOwnerContexts
+            .Include(x => x.ServiceOwnerLabels)
             .Where(x => x.Dialog.Id == request.DialogId)
             .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);

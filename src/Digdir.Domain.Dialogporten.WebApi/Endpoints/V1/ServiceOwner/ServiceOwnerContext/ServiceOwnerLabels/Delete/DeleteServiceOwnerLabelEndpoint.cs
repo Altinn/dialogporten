@@ -59,6 +59,7 @@ public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwne
 
         var command = new UpdateDialogServiceOwnerContextCommand
         {
+            DialogId = req.DialogId,
             IfMatchServiceOwnerContextRevision = req.IfMatchServiceOwnerContextRevision,
             Dto = new UpdateServiceOwnerContextDto
             {

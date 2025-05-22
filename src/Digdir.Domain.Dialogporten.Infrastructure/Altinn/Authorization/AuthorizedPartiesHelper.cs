@@ -40,6 +40,7 @@ internal static class AuthorizedPartiesHelper
         return new AuthorizedParty
         {
             Party = party,
+            PartyUuid = dto.PartyUuid,
             Name = dto.Name,
             PartyType = dto.Type switch
             {

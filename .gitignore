@@ -389,3 +389,6 @@ FodyWeavers.xsd
 
 # Cursor IDE related files
 .cursor
+
+# Claude Code configuration file
+CLAUDE.md

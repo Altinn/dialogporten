@@ -24,7 +24,7 @@ brew install docker-compose
 
 4. Finish setup in Podman Desktop
 
-5. Check that `Docker Compatility mode` is enabled, see the bottom left corner
+5. Check that `Docker Compatibility mode` is enabled, see the bottom left corner
 
 6. Enable privileged [testcontainers-dotnet](https://github.com/testcontainers/testcontainers-dotnet/issues/876#issuecomment-1930397928)  
 `echo "ryuk.container.privileged = true" >> $HOME/.testcontainers.properties`

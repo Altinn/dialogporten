@@ -1,8 +1,8 @@
-using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
+using Digdir.Domain.Dialogporten.GraphQL.Common;
+using Digdir.Domain.Dialogporten.GraphQL.Common.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace Digdir.Domain.Dialogporten.WebApi.Unit.Tests;
+namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests;
 
 public class TokenIssuerCacheTests
 {
@@ -10,7 +10,7 @@ public class TokenIssuerCacheTests
     public async Task EnsureInitializedAsync_Should_Not_Deadlock_When_Called_Concurrently()
     {
         // Arrange
-        var settings = new WebApiSettings
+        var settings = new GraphQlSettings
         {
             Authentication = new AuthenticationOptions
             {

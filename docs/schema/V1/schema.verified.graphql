@@ -4,6 +4,10 @@
   subscription: Subscriptions
 }
 
+interface BulkSetSystemLabelError {
+  message: String!
+}
+
 interface DialogByIdError {
   message: String!
 }
@@ -90,6 +94,27 @@ type AuthorizedSubParty {
   isCurrentEndUser: Boolean!
   isMainAdministrator: Boolean!
   isAccessManager: Boolean!
+}
+
+type BulkSetSystemLabelConcurrencyError implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelDomainError implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelForbidden implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelPayload {
+  success: Boolean!
+  errors: [BulkSetSystemLabelError!]!
+}
+
+type BulkSetSystemLabelValidationError implements BulkSetSystemLabelError {
+  message: String!
 }
 
 type Content {
@@ -183,6 +208,7 @@ type Localization {
 
 type Mutations {
   setSystemLabel(input: SetSystemLabelInput!): SetSystemLabelPayload!
+  bulkSetSystemLabels(input: BulkSetSystemLabelInput!): BulkSetSystemLabelPayload!
 }
 
 type Queries @authorize(policy: "enduser") {
@@ -291,6 +317,16 @@ type TransmissionContent {
   title: ContentValue!
   summary: ContentValue!
   contentReference: ContentValue
+}
+
+input BulkSetSystemLabelInput {
+  dialogs: [DialogRevisionInput!]!
+  systemLabels: [SystemLabel!]!
+}
+
+input DialogRevisionInput {
+  dialogId: UUID!
+  enduserContextRevision: UUID
 }
 
 input SearchDialogInput {

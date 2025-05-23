@@ -2493,6 +2493,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Revision { get; set; }
 
         /// <summary>
+        /// The unique identifier for the end user context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("enduserContextRevision")]
+        public System.Guid EnduserContextRevision { get; set; }
+
+        /// <summary>
         /// The service identifier for the service that the dialog is related to in URN-format.
         /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
         /// </summary>

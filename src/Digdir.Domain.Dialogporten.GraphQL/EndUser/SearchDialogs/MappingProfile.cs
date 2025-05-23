@@ -19,6 +19,7 @@ public sealed class MappingProfile : Profile
 
         CreateMap<ContentDto, SearchContent>();
 
-        CreateMap<DialogDto, SearchDialog>();
+        CreateMap<DialogDto, SearchDialog>()
+            .ForMember(dest => dest.EnduserContextRevision, opt => opt.MapFrom(src => src.EnduserContextRevision));
     }
 }

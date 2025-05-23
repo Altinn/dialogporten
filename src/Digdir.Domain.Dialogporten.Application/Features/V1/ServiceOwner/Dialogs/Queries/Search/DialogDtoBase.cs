@@ -27,6 +27,11 @@ public class DialogDtoBase
     public Guid Revision { get; set; }
 
     /// <summary>
+    /// The unique identifier for the end user context revision in UUIDv4 format.
+    /// </summary>
+    public Guid EnduserContextRevision { get; set; }
+
+    /// <summary>
     /// The service identifier for the service that the dialog is related to in URN-format.
     /// This corresponds to a service resource in the Altinn Resource Registry.
     /// </summary>

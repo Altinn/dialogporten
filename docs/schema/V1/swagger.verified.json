@@ -1332,6 +1332,11 @@
             "nullable": true,
             "type": "string"
           },
+          "enduserContextRevision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "extendedStatus": {
             "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n            \nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
             "nullable": true,
@@ -4307,6 +4312,11 @@
             "example": "2022-12-31T23:59:59Z",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "enduserContextRevision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "format": "guid",
             "type": "string"
           },
           "extendedStatus": {

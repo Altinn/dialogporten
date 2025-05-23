@@ -1,5 +1,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 
@@ -9,5 +11,12 @@ public sealed class MappingProfile : Profile
     {
         CreateMap<SetSystemLabelInput, SetSystemLabelCommand>()
             .ForMember(dest => dest.SystemLabels, opt => opt.MapFrom(src => src.SystemLabels));
+
+        CreateMap<DialogRevisionInput, DialogRevisionDto>();
+
+        CreateMap<BulkSetSystemLabelInput, BulkSetSystemLabelDto>();
+
+        CreateMap<BulkSetSystemLabelInput, BulkSetSystemLabelCommand>()
+            .ForMember(dest => dest.Dto, opt => opt.MapFrom(src => src));
     }
 }

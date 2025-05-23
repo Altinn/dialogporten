@@ -10,7 +10,7 @@ public sealed class BulkSetDialogSystemLabelsEndpointSummary : Summary<BulkSetDi
     {
         Summary = "Sets system labels for multiple dialogs";
         Description = """
-                      Sets the system label for a list of dialogs.
+                      Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.
                       """;
 
         Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Updated.FormatInvariant("system labels");

@@ -93,7 +93,7 @@ public class BulkSetDialogSystemLabelTests(DialogApplication application) : Appl
     }
 
     [Fact]
-    public async Task BulkSet_Succeeds_On_Revision_Match()
+    public async Task BulkSet_Updates_System_Labels_With_Revisions()
     {
         var cmd1 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var cmd2 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();

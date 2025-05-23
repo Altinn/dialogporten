@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.Set;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
@@ -7,17 +7,17 @@ using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 
-namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.DialogSystemLabels.Set;
+namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.DialogSystemLabels.Set;
 
-public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetDialogSystemLabelRequest>
+public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<SetDialogSystemLabelRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
     public override void Configure()
     {
-        Put("dialogs/{dialogId}/endusercontext/systemlabels");
-        Policies(AuthorizationPolicy.ServiceProvider);
-        Group<ServiceOwnerGroup>();
+        Put("dialogs/{dialogId}/context/systemlabels");
+        Policies(AuthorizationPolicy.EndUser);
+        Group<EndUserGroup>();
 
         Description(b => b.ProducesOneOf(
             StatusCodes.Status204NoContent,
@@ -34,7 +34,6 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetD
         var command = new SetSystemLabelCommand
         {
             DialogId = req.DialogId,
-            EnduserId = req.EnduserId,
             SystemLabels = req.SystemLabels,
             IfMatchEnduserContextRevision = req.IfMatchEnduserContextRevision
         };
@@ -58,9 +57,6 @@ public sealed class SetDialogSystemLabelRequest
 {
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchEnduserContextRevision { get; set; }
-
-    [QueryParam]
-    public string EnduserId { get; init; } = string.Empty;
 
     public Guid DialogId { get; set; }
 

@@ -5550,7 +5550,8 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/context/systemlabels": {
       "put": {
-        "operationId": "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabel",
+        "description": "Sets the system labels of the dialog.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.",
+        "operationId": "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabels",
         "parameters": [
           {
             "in": "path",
@@ -5586,7 +5587,16 @@
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "The dialog system label was updated successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the dialog",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "content": {
@@ -5596,13 +5606,13 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "404": {
             "content": {
@@ -5612,10 +5622,10 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
           },
           "410": {
-            "description": ""
+            "description": "Entity with the given key(s) is removed."
           },
           "412": {
             "content": {
@@ -5625,7 +5635,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "422": {
             "content": {
@@ -5635,7 +5645,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [
@@ -5645,6 +5655,7 @@
             ]
           }
         ],
+        "summary": "Sets the system labels of a dialog",
         "tags": [
           "Enduser"
         ]
@@ -5906,6 +5917,7 @@
     },
     "/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset": {
       "post": {
+        "description": "Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.",
         "operationId": "V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabels",
         "requestBody": {
           "content": {
@@ -5920,7 +5932,7 @@
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "The dialog system labels was updated successfully."
           },
           "400": {
             "content": {
@@ -5930,13 +5942,13 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "412": {
             "content": {
@@ -5946,7 +5958,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           }
         },
         "security": [
@@ -5956,6 +5968,7 @@
             ]
           }
         ],
+        "summary": "Sets system labels for multiple dialogs",
         "tags": [
           "Enduser"
         ]
@@ -7217,7 +7230,8 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels": {
       "put": {
-        "operationId": "V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabel",
+        "description": "Sets the system labels of the dialog.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.",
+        "operationId": "V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabels",
         "parameters": [
           {
             "in": "path",
@@ -7261,7 +7275,16 @@
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "The dialog system label was updated successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the dialog",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "content": {
@@ -7271,13 +7294,13 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "404": {
             "content": {
@@ -7287,10 +7310,10 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
           },
           "410": {
-            "description": ""
+            "description": "Entity with the given key(s) is removed."
           },
           "412": {
             "content": {
@@ -7300,7 +7323,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "422": {
             "content": {
@@ -7310,7 +7333,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [
@@ -7320,6 +7343,7 @@
             ]
           }
         ],
+        "summary": "Sets the system labels of a dialog",
         "tags": [
           "Serviceowner"
         ]
@@ -7709,6 +7733,7 @@
     },
     "/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset": {
       "post": {
+        "description": "Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.",
         "operationId": "V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabels",
         "parameters": [
           {
@@ -7733,7 +7758,7 @@
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "The dialog system labels was updated successfully."
           },
           "400": {
             "content": {
@@ -7743,13 +7768,13 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "412": {
             "content": {
@@ -7759,7 +7784,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           }
         },
         "security": [
@@ -7769,6 +7794,7 @@
             ]
           }
         ],
+        "summary": "Sets system labels for multiple dialogs",
         "tags": [
           "Serviceowner"
         ]

@@ -302,6 +302,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
         Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
+        /// <summary>Sets the system labels of a dialog</summary>
+        /// <remarks>
+        /// Sets the system labels of the dialog.
+        /// 
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.
+        /// </remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -311,42 +317,44 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </listheader>
         /// <item>
         /// <term>204</term>
-        /// <description>No Content</description>
+        /// <description>The dialog system label was updated successfully.</description>
         /// </item>
         /// <item>
         /// <term>400</term>
-        /// <description>Bad Request</description>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Unauthorized</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
-        /// <description>Forbidden</description>
+        /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>Not Found</description>
+        /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
         /// <term>410</term>
-        /// <description>A server side error occurred.</description>
+        /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
         /// <item>
         /// <term>412</term>
-        /// <description>A server side error occurred.</description>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
         /// <item>
         /// <term>422</term>
-        /// <description>A server side error occurred.</description>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels")]
-        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsSetSetDialogSystemLabel(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsSetSetDialogSystemLabels(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
+        /// <summary>Sets system labels for multiple dialogs</summary>
+        /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -356,23 +364,23 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </listheader>
         /// <item>
         /// <term>204</term>
-        /// <description>No Content</description>
+        /// <description>The dialog system labels was updated successfully.</description>
         /// </item>
         /// <item>
         /// <term>400</term>
-        /// <description>Bad Request</description>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Unauthorized</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
-        /// <description>Forbidden</description>
+        /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
         /// </item>
         /// <item>
         /// <term>412</term>
-        /// <description>A server side error occurred.</description>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
         /// </list>
         /// </returns>

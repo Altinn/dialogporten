@@ -54,6 +54,7 @@ public sealed class SearchDialog
 {
     public Guid Id { get; set; }
     public string Org { get; set; } = null!;
+    public Guid EnduserContextRevision { get; set; }
     public string ServiceResource { get; set; } = null!;
     public string ServiceResourceType { get; set; } = null!;
     public string Party { get; set; } = null!;

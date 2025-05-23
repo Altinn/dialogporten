@@ -227,6 +227,7 @@ type SearchContent {
 type SearchDialog {
   id: UUID!
   org: String!
+  enduserContextRevision: UUID!
   serviceResource: String!
   serviceResourceType: String!
   party: String!

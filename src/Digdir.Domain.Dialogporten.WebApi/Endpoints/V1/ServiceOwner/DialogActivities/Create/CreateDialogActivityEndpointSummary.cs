@@ -10,7 +10,7 @@ public sealed class CreateDialogActivityEndpointSummary : Summary<CreateDialogAc
 {
     public CreateDialogActivityEndpointSummary()
     {
-        Summary = "Adds a activity to a dialogs activity history";
+        Summary = "Adds an activity to a dialog's activity history";
         Description = $"""
                        The activity is created with the given configuration.
 

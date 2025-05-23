@@ -688,6 +688,11 @@
             "nullable": true,
             "type": "string"
           },
+          "enduserContextRevision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "expiresAt": {
             "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n            \nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed by the service\nowner after the dialog has been created.",
             "example": "2022-12-31T23:59:59Z",
@@ -3612,6 +3617,11 @@
             "example": "2022-12-31T23:59:59Z",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "enduserContextRevision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "format": "guid",
             "type": "string"
           },
           "expiresAt": {

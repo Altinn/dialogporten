@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.66.1](https://github.com/Altinn/dialogporten/compare/v1.66.0...v1.66.1) (2025-05-23)
+
+
+### Bug Fixes
+
+* Fix TokenIssuerCache initialization semaphore ([#2325](https://github.com/Altinn/dialogporten/issues/2325)) ([36829be](https://github.com/Altinn/dialogporten/commit/36829be7618b69dd75962b408b38c39c0de917b7))
+
 ## [1.66.0](https://github.com/Altinn/dialogporten/compare/v1.65.1...v1.66.0) (2025-05-23)
 
 

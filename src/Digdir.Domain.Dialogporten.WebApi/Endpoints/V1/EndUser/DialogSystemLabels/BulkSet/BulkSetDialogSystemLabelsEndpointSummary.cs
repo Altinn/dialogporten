@@ -1,0 +1,23 @@
+using Digdir.Domain.Dialogporten.WebApi.Common;
+using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using FastEndpoints;
+
+namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.DialogSystemLabels.BulkSet;
+
+public sealed class BulkSetDialogSystemLabelsEndpointSummary : Summary<BulkSetDialogSystemLabelsEndpoint>
+{
+    public BulkSetDialogSystemLabelsEndpointSummary()
+    {
+        Summary = "Sets system labels for multiple dialogs";
+        Description = """
+                      Sets the system label for a list of dialogs.
+                      """;
+
+        Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Updated.FormatInvariant("system labels");
+        Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
+        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
+        Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("update");
+        Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
+        Responses[StatusCodes.Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
+    }
+}

@@ -1,4 +1,5 @@
 using FluentValidation;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
 
@@ -15,7 +16,8 @@ public sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkS
         RuleFor(x => x.Dto.Dialogs)
             .NotNull()
             .Must(x => x.Count is > 0 and <= MaxDialogsPerRequest)
-            .WithMessage($"Must supply between 1 and {MaxDialogsPerRequest} dialogs to update");
+            .WithMessage($"Must supply between 1 and {MaxDialogsPerRequest} dialogs to update")
+            .UniqueBy(x => x.DialogId);
 
         RuleFor(x => x.Dto.SystemLabels)
             .NotNull()

@@ -6,6 +6,7 @@ internal sealed class AuthorizedPartiesResultDto
     public required string OrganizationNumber { get; set; }
     public string? PersonId { get; set; }
     public required int PartyId { get; set; }
+    public required Guid PartyUuid { get; set; }
     public required string Type { get; set; }
     public required bool IsDeleted { get; set; }
     public required bool OnlyHierarchyElementWithNoAccess { get; set; }

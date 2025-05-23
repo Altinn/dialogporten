@@ -57,12 +57,14 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
             {
                 Name = "Local Party",
                 Party = authenticatedParty.FullId,
+                PartyUuid = Guid.NewGuid(),
                 IsCurrentEndUser = true,
                 SubParties = [
                     new()
                     {
                         Name = "Local Sub Party",
                         Party = NorwegianOrganizationIdentifier.PrefixWithSeparator + "123456789",
+                        PartyUuid = Guid.NewGuid(),
                         IsCurrentEndUser = true
                     }
                 ]

@@ -73,41 +73,54 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
     }
 
     [Fact]
-    public async Task Can_Filter_On_Label_Prefix()
+    public async Task Can_Filter_On_Multiple_Labels_With_Prefix()
     {
         // Arrange
-        const int numberOfDialogs = 30;
-        for (var i = 0; i < numberOfDialogs; i++)
-        {
-            var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-            await Application.Send(createDialogCommand);
-        }
-
         const string label1 = "ScadrialOne";
         const string label2 = "ScadrialTwo";
+        const string label3 = "RosharOne";
+        const string label4 = "RosharTwo";
+        const string label5 = "Adonalsium";
 
-        var singleLabeledDialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogWithOneLabel = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: singleLabeledDialogId);
-        createDialogWithOneLabel.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label1 }];
-        await Application.Send(createDialogWithOneLabel);
+        var dialog1Id = IdentifiableExtensions.CreateVersion7();
+        var createDialog1 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialog1Id);
+        createDialog1.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label1 }];
+        await Application.Send(createDialog1);
 
-        var dualLabeledDialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogWithTwoLabels = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dualLabeledDialogId);
-        createDialogWithTwoLabels.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label2 }];
-        await Application.Send(createDialogWithTwoLabels);
+        var dialog2Id = IdentifiableExtensions.CreateVersion7();
+        var createDialog2 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialog2Id);
+        createDialog2.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label2 }];
+        await Application.Send(createDialog2);
 
-        var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label1[..4] + "*"] };
+        var dialog3Id = IdentifiableExtensions.CreateVersion7();
+        var createDialog3 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialog3Id);
+        createDialog3.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [
+            new() { Value = label3 },
+            new() { Value = label1 }];
+        await Application.Send(createDialog3);
+
+        var dialog4Id = IdentifiableExtensions.CreateVersion7();
+        var createDialog4 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialog4Id);
+        createDialog4.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [
+            new() { Value = label4 },
+            new() { Value = label2 },
+            new() { Value = label5 }];
+        await Application.Send(createDialog4);
+
+        var searchServiceOwnerLabelQuery = new SearchDialogQuery
+        {
+            ServiceOwnerLabels = ["Scadrial*", "RosharTwo", "Adon*"]
+        };
 
         // Act
         var response = await Application.Send(searchServiceOwnerLabelQuery);
 
         // Assert
         response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Items.Should().HaveCount(2);
-        result.Items.Should().ContainSingle(x => x.Id == singleLabeledDialogId);
-        result.Items.Should().ContainSingle(x => x.Id == dualLabeledDialogId);
+        result.Items.Should().HaveCount(1);
+        result.Items.Should().ContainSingle(x => x.Id == dialog4Id);
 
-        await Application.AssertEntityCountAsync<DialogEntity>(count: numberOfDialogs + 2);
+        await Application.AssertEntityCountAsync<DialogEntity>(count: 4);
     }
 
     [Fact]

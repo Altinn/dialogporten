@@ -690,6 +690,7 @@
           },
           "enduserContextRevision": {
             "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
             "format": "guid",
             "type": "string"
           },
@@ -3621,6 +3622,7 @@
           },
           "enduserContextRevision": {
             "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
             "format": "guid",
             "type": "string"
           },

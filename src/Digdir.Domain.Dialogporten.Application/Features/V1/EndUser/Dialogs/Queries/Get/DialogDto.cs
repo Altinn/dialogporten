@@ -28,6 +28,7 @@ public sealed class DialogDto
     /// <summary>
     /// The unique identifier for the end user context revision in UUIDv4 format.
     /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
     public Guid EnduserContextRevision { get; set; }
 
     /// <summary>

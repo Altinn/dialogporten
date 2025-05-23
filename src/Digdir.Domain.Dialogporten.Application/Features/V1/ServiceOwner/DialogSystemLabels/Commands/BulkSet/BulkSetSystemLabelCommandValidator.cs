@@ -4,7 +4,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 public sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkSetSystemLabelCommand>
 {
-    private const int MaxDialogIdsPerRequest = 100;
+    private const int MaxDialogsPerRequest = 200;
 
     public BulkSetSystemLabelCommandValidator()
     {
@@ -12,14 +12,14 @@ public sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkS
             .NotEmpty()
             .WithMessage("EnduserId is required");
 
-        RuleFor(x => x.DialogIds)
+        RuleFor(x => x.Dto.Dialogs)
             .NotNull()
-            .Must(x => x.Count is > 0 and <= MaxDialogIdsPerRequest)
-            .WithMessage($"DialogIds must be between 1 and {MaxDialogIdsPerRequest}");
+            .Must(x => x.Count is > 0 and <= MaxDialogsPerRequest)
+            .WithMessage($"Must supply between 1 and {MaxDialogsPerRequest} dialogs to update");
 
-        RuleFor(x => x.SystemLabels)
+        RuleFor(x => x.Dto.SystemLabels)
             .NotNull()
             .Must(x => x.Count <= 1)
-            .WithMessage("Only one system label is supported");
+            .WithMessage("Only one system label is currently supported");
     }
 }

@@ -378,7 +378,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
-        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsBulkSetBulkSetDialogSystemLabels([Query] string enduserId, [Body, AliasAs("BulkSetDialogSystemLabelsRequest")] V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest bulkSetDialogSystemLabelsRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsBulkSetBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1CommonSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -1642,16 +1642,42 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest
+    public partial class V1CommonSystemLabels_BulkSetSystemLabel
     {
+        /// <summary>
+        /// List of target dialog ids with optional revision ids
+        /// </summary>
 
-        [JsonPropertyName("dialogIds")]
-        public ICollection<System.Guid> DialogIds { get; set; }
+        [JsonPropertyName("dialogs")]
+        public ICollection<V1CommonSystemLabels_DialogRevision> Dialogs { get; set; }
+
+        /// <summary>
+        /// List of system labels to set on target dialogs
+        /// </summary>
 
         [JsonPropertyName("systemLabels")]
 
         // TODO(system.text.json): Add string enum item converter
         public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonSystemLabels_DialogRevision
+    {
+        /// <summary>
+        /// Target dialog id for system labels
+        /// </summary>
+
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; }
+
+        /// <summary>
+        /// Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.
+        /// </summary>
+
+        [JsonPropertyName("enduserContextRevision")]
+        public System.Guid? EnduserContextRevision { get; set; }
 
     }
 

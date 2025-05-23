@@ -378,6 +378,45 @@
         },
         "type": "object"
       },
+      "V1CommonSystemLabels_BulkSetSystemLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogs": {
+            "description": "List of target dialog ids with optional revision ids",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonSystemLabels_DialogRevision"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonSystemLabels_DialogRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogId": {
+            "description": "Target dialog id for system labels",
+            "format": "guid",
+            "type": "string"
+          },
+          "enduserContextRevision": {
+            "description": "Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserCommonActors_Actor": {
         "additionalProperties": false,
         "properties": {
@@ -1485,20 +1524,8 @@
       "V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest": {
         "additionalProperties": false,
         "properties": {
-          "dialogIds": {
-            "items": {
-              "format": "guid",
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "systemLabels": {
-            "items": {
-              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
-            },
-            "nullable": true,
-            "type": "array"
+          "dto": {
+            "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
           }
         },
         "type": "object"
@@ -4495,20 +4522,8 @@
       "V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest": {
         "additionalProperties": false,
         "properties": {
-          "dialogIds": {
-            "items": {
-              "format": "guid",
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "systemLabels": {
-            "items": {
-              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
-            },
-            "nullable": true,
-            "type": "array"
+          "dto": {
+            "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
           }
         },
         "type": "object"
@@ -5882,29 +5897,16 @@
     "/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset": {
       "post": {
         "operationId": "V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabels",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "if-Match",
-            "schema": {
-              "format": "guid",
-              "nullable": true,
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest"
+                "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
               }
             }
           },
-          "description": "",
           "required": true,
-          "x-name": "BulkSetDialogSystemLabelsRequest",
-          "x-position": 1
+          "x-name": "dto"
         },
         "responses": {
           "204": {
@@ -7706,29 +7708,18 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "if-Match",
-            "schema": {
-              "format": "guid",
-              "nullable": true,
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest"
+                "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
               }
             }
           },
-          "description": "",
           "required": true,
-          "x-name": "BulkSetDialogSystemLabelsRequest",
-          "x-position": 1
+          "x-name": "dto"
         },
         "responses": {
           "204": {

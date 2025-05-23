@@ -253,6 +253,14 @@ public class DialogApplication : IAsyncLifetime
 
     public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
 
+    public async Task AssertEntityCountAsync<T>(int count) where T : class
+    {
+        using var scope = _rootProvider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        var entityCount = await db.Set<T>().CountAsync();
+        entityCount.Should().Be(count);
+    }
+
     public async Task<List<T>> GetDbEntities<T>() where T : class
     {
         using var scope = _rootProvider.CreateScope();

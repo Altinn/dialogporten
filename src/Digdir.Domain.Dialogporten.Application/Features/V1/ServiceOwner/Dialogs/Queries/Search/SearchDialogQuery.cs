@@ -188,6 +188,12 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             dialogQuery = _db.Dialogs.PrefilterAuthorizedDialogs(authorizedResources);
         }
 
+        var formattedServiceOwnerLabels = request.ServiceOwnerLabels?
+            .Select(label => label.EndsWith("*", StringComparison.OrdinalIgnoreCase)
+                ? label.TrimEnd('*').ToLower(CultureInfo.InvariantCulture) + "%"
+                : label.ToLower(CultureInfo.InvariantCulture))
+            .ToList();
+
         var paginatedList = await dialogQuery
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
@@ -217,12 +223,11 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             )
             .WhereIf(request.Deleted == DeletedFilter.Exclude, x => !x.Deleted)
             .WhereIf(request.Deleted == DeletedFilter.Only, x => x.Deleted)
-            .WhereIf(request.ServiceOwnerLabels is not null && request.ServiceOwnerLabels.Count != 0, x =>
-                request.ServiceOwnerLabels!
-                    .Select(x => x.ToLower(CultureInfo.InvariantCulture))
-                    .All(label =>
+            .WhereIf(formattedServiceOwnerLabels is not null && formattedServiceOwnerLabels.Count != 0, x =>
+                formattedServiceOwnerLabels!
+                    .All(formattedLabel =>
                         x.DialogServiceOwnerContext.ServiceOwnerLabels
-                            .Any(l => EF.Functions.ILike(l.Value, label + "%"))))
+                            .Any(l => EF.Functions.ILike(l.Value, formattedLabel))))
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()

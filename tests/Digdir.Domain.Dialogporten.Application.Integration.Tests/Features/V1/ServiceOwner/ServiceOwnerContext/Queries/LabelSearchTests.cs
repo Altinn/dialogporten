@@ -96,7 +96,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         createDialogWithTwoLabels.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label2 }];
         await Application.Send(createDialogWithTwoLabels);
 
-        var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label1[..4]] };
+        var searchServiceOwnerLabelQuery = new SearchDialogQuery { ServiceOwnerLabels = [label1[..4] + "*"] };
 
         // Act
         var response = await Application.Send(searchServiceOwnerLabelQuery);

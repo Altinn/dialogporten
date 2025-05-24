@@ -1,4 +1,4 @@
-﻿@baseAdress = https://localhost:7214
+﻿@baseAddress = https://localhost:7214
 @dialogId = C1167463-730A-464A-87DD-50BB1D475F47
 @orgPartyPrefix = urn:altinn:organization:identifier-no::
 
@@ -6,26 +6,26 @@
 ################### Enduser ###################
 ###############################################
 
-GET {{baseAdress}}/api/v1/enduser/dialogs?Party={{orgPartyPrefix}}991825827&search=Hello&cultureCode=en_us
+GET {{baseAddress}}/api/v1/enduser/dialogs?Party={{orgPartyPrefix}}991825827&search=Hello&cultureCode=en_us
 
 ###
 
-GET {{baseAdress}}/api/v1/enduser/dialogs/{{dialogId}}
+GET {{baseAddress}}/api/v1/enduser/dialogs/{{dialogId}}
 
 
 ###############################################
 ################ Serviceowner #################
 ###############################################
 
-GET {{baseAdress}}/api/v1/serviceowner/dialogs?search=TAG1
+GET {{baseAddress}}/api/v1/serviceowner/dialogs?search=TAG1
 
 ###
 
-GET {{baseAdress}}/api/v1/serviceowner/dialogs/{{dialogId}}
+GET {{baseAddress}}/api/v1/serviceowner/dialogs/{{dialogId}}
 
 ###
 
-POST {{baseAdress}}/api/v1/serviceowner/dialogs
+POST {{baseAddress}}/api/v1/serviceowner/dialogs
 Content-Type: application/json
 
 {
@@ -37,13 +37,13 @@ Content-Type: application/json
       { "Type": "Title", "Value": [ { "LanguageCode": "en-us", "Value": "Hello world!" } ]},
       { "Type": "Summary", "Value": [ { "LanguageCode": "NB_NO", "Value": "Dette er en oppsummering." } ]},
       { "Type": "SenderName", "Value": [ { "LanguageCode": "NB_NO", "Value": "Jeg er meg og jeg har sendt" } ]},
-      { "Type": "AdditionalInfo", "Value": [ { "LanguageCode": "NB_NO", "Value": "Dette er en paragref <p/>" } ]}
+      { "Type": "AdditionalInfo", "Value": [ { "LanguageCode": "NB_NO", "Value": "Dette er en paragraf <p/>" } ]}
   ]
 }
 
 ###
 
-PUT {{baseAdress}}/api/v1/serviceowner/dialogs/{{dialogId}}
+PUT {{baseAddress}}/api/v1/serviceowner/dialogs/{{dialogId}}
 Content-Type: application/json
 
 {
@@ -65,7 +65,7 @@ Content-Type: application/json
 
 ###
 
-PATCH {{baseAdress}}/api/v1/serviceowner/dialogs/{{dialogId}}
+PATCH {{baseAddress}}/api/v1/serviceowner/dialogs/{{dialogId}}
 Content-Type: application/json
 
 [
@@ -86,4 +86,4 @@ Content-Type: application/json
 
 ###
 
-DELETE {{baseAdress}}/api/v1/serviceowner/dialogs/{{dialogId}}
+DELETE {{baseAddress}}/api/v1/serviceowner/dialogs/{{dialogId}}

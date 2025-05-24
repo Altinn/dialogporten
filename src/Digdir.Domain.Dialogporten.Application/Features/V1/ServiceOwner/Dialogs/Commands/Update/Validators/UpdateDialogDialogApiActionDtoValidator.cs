@@ -12,12 +12,16 @@ internal sealed class UpdateDialogDialogApiActionDtoValidator : AbstractValidato
         RuleFor(x => x.Action)
             .NotEmpty()
             .MaximumLength(Constants.DefaultMaxStringLength);
+
         RuleFor(x => x.AuthorizationAttribute)
             .MaximumLength(Constants.DefaultMaxStringLength);
+
         RuleFor(x => x.Name)
             .MaximumLength(Constants.DefaultMaxStringLength);
+
         RuleFor(x => x.Endpoints)
             .UniqueBy(x => x.Id);
+
         RuleFor(x => x.Endpoints)
             .NotEmpty()
             .ForEach(x => x.SetValidator(apiActionEndpointValidator));

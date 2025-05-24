@@ -69,11 +69,13 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .GreaterThanOrEqualTo(x => x.VisibleFrom)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
             .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
+
         RuleFor(x => x.DueAt)
             .IsInFuture()
             .GreaterThanOrEqualTo(x => x.VisibleFrom)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
             .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
+
         RuleFor(x => x.VisibleFrom)
             .IsInFuture();
 
@@ -108,6 +110,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
         RuleFor(x => x.Attachments)
             .UniqueBy(x => x.Id);
+
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
 
@@ -135,6 +138,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
 
         RuleFor(x => x.Activities)
             .UniqueBy(x => x.Id);
+
         RuleForEach(x => x.Activities)
             .IsIn(x => x.Transmissions,
                 dependentKeySelector: activity => activity.TransmissionId,

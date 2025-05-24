@@ -16,6 +16,7 @@ internal sealed class UpdateDialogTransmissionAttachmentDtoValidator : AbstractV
 
         RuleFor(x => x.DisplayName)
             .SetValidator(localizationsValidator);
+
         RuleFor(x => x.Urls)
             .NotEmpty()
             .ForEach(x => x.SetValidator(urlValidator));

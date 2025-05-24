@@ -12,6 +12,7 @@ internal sealed class CreateDialogDialogAttachmentUrlDtoValidator : AbstractVali
             .NotNull()
             .IsValidHttpsUrl()
             .MaximumLength(Constants.DefaultMaxUriLength);
+
         RuleFor(x => x.ConsumerType)
             .IsInEnum();
     }

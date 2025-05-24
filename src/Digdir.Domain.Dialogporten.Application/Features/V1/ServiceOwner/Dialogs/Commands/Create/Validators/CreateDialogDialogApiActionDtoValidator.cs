@@ -12,13 +12,17 @@ internal sealed class CreateDialogDialogApiActionDtoValidator : AbstractValidato
         RuleFor(x => x.Id)
             .IsValidUuidV7()
             .UuidV7TimestampIsInPast();
+
         RuleFor(x => x.Action)
             .NotEmpty()
             .MaximumLength(Constants.DefaultMaxStringLength);
+
         RuleFor(x => x.AuthorizationAttribute)
             .MaximumLength(Constants.DefaultMaxStringLength);
+
         RuleFor(x => x.Name)
             .MaximumLength(Constants.DefaultMaxStringLength);
+
         RuleFor(x => x.Endpoints)
             .NotEmpty()
             .ForEach(x => x.SetValidator(apiActionEndpointValidator));

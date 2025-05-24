@@ -33,6 +33,7 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .GreaterThanOrEqualTo(x => x.VisibleFrom)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
             .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
+
         RuleFor(x => x.DueAt)
             .GreaterThanOrEqualTo(x => x.VisibleFrom)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
@@ -80,16 +81,19 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
 
         RuleFor(x => x.ApiActions)
             .UniqueBy(x => x.Id);
+
         RuleForEach(x => x.ApiActions)
             .SetValidator(apiActionValidator);
 
         RuleFor(x => x.Attachments)
             .UniqueBy(x => x.Id);
+
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
 
         RuleFor(x => x.Activities)
             .UniqueBy(x => x.Id);
+
         RuleForEach(x => x.Activities)
             .SetValidator(activityValidator);
 

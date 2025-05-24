@@ -10,21 +10,27 @@ internal sealed class CreateDialogDialogApiActionEndpointDtoValidator : Abstract
     {
         RuleFor(x => x.Version)
             .MaximumLength(Constants.DefaultMaxStringLength);
+
         RuleFor(x => x.Url)
             .NotNull()
             .IsValidHttpsUrl()
             .MaximumLength(Constants.DefaultMaxUriLength);
+
         RuleFor(x => x.HttpMethod)
             .IsInEnum();
+
         RuleFor(x => x.DocumentationUrl)
             .IsValidUri()
             .MaximumLength(Constants.DefaultMaxUriLength);
+
         RuleFor(x => x.RequestSchema)
             .IsValidUri()
             .MaximumLength(Constants.DefaultMaxUriLength);
+
         RuleFor(x => x.ResponseSchema)
             .IsValidUri()
             .MaximumLength(Constants.DefaultMaxUriLength);
+
         RuleFor(x => x.Deprecated)
             .Equal(true)
             .WithMessage($"'{{PropertyName}}' must be equal to 'True' when {nameof(ApiActionEndpointDto.SunsetAt)} is set.")

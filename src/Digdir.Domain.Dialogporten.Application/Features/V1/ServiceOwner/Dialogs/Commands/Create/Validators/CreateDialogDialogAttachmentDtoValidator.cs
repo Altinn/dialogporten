@@ -13,8 +13,10 @@ internal sealed class CreateDialogDialogAttachmentDtoValidator : AbstractValidat
         RuleFor(x => x.Id)
             .IsValidUuidV7()
             .UuidV7TimestampIsInPast();
+
         RuleFor(x => x.DisplayName)
             .SetValidator(localizationsValidator);
+
         RuleFor(x => x.Urls)
             .NotEmpty()
             .ForEach(x => x.SetValidator(urlValidator));

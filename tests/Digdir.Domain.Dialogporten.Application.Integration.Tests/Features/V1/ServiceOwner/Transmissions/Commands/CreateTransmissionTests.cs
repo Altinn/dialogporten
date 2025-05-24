@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -167,5 +168,31 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         // Assert
         createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
         success.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Can_Create_Transmission_With_ExternalReference()
+    {
+        // Arrange
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+
+        var transmissionWithKey = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+        transmissionWithKey.ExternalReference = "unique-key";
+
+        var otherTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+        otherTransmission.ExternalReference = "other-key";
+
+        createCommand.Dto.Transmissions = [transmissionWithKey, otherTransmission];
+
+        // Act
+        await Application.Send(createCommand);
+
+        // Assert
+        var getDialogResponse = await Application.Send(new GetDialogQuery { DialogId = dialogId });
+        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
+        dialog.Transmissions.Should().HaveCount(2);
+        dialog.Transmissions.Should().ContainSingle(t => t.ExternalReference == transmissionWithKey.ExternalReference);
+        dialog.Transmissions.Should().ContainSingle(t => t.ExternalReference == otherTransmission.ExternalReference);
     }
 }

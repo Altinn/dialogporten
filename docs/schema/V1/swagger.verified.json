@@ -2621,6 +2621,11 @@
             "nullable": true,
             "type": "string"
           },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent creation of transmissions. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -3255,6 +3260,11 @@
           "extendedType": {
             "description": "Arbitrary URI/URN describing a service-specific transmission type.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -4039,6 +4049,11 @@
             "nullable": true,
             "type": "string"
           },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
@@ -4501,6 +4516,11 @@
           "extendedType": {
             "description": "Arbitrary URI/URN describing a service-specific transmission type.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -7215,6 +7235,15 @@
             "required": true,
             "schema": {
               "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by external reference",
+            "in": "query",
+            "name": "externalReference",
+            "schema": {
+              "nullable": true,
               "type": "string"
             }
           }

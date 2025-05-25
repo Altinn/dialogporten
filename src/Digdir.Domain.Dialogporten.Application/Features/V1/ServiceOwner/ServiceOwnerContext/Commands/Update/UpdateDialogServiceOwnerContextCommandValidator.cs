@@ -31,9 +31,9 @@ public sealed class UpdateServiceOwnerContextDtoValidator : AbstractValidator<Up
     }
 }
 
-internal sealed class CreateDialogServiceOwnerLabelDtoValidator : AbstractValidator<ServiceOwnerLabelDto>
+internal sealed class UpdateDialogServiceOwnerLabelDtoValidator : AbstractValidator<ServiceOwnerLabelDto>
 {
-    public CreateDialogServiceOwnerLabelDtoValidator()
+    public UpdateDialogServiceOwnerLabelDtoValidator()
     {
         RuleFor(x => x.Value)
             .NotEmpty()

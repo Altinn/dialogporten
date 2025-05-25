@@ -30,7 +30,8 @@ public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwne
 
         Description(b => b.ProducesOneOf(
             StatusCodes.Status204NoContent,
-            StatusCodes.Status404NotFound));
+            StatusCodes.Status404NotFound,
+            StatusCodes.Status412PreconditionFailed));
     }
 
     public override async Task HandleAsync(DeleteServiceOwnerLabelRequest req, CancellationToken ct)

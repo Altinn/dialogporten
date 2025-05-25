@@ -7369,6 +7369,16 @@
               }
             },
             "description": "The given dialog or service owner label was not found."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": ""
           }
         },
         "security": [

@@ -277,6 +277,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>404</term>
         /// <description>The given dialog or service owner label was not found.</description>
         /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json")]

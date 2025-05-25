@@ -7371,7 +7371,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found."
+            "description": "The given dialog or service owner label was not found."
           }
         },
         "security": [

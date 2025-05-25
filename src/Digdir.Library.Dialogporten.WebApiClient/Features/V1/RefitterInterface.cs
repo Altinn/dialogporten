@@ -279,7 +279,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
+        /// <description>The given dialog or service owner label was not found.</description>
         /// </item>
         /// </list>
         /// </returns>

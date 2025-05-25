@@ -193,8 +193,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Description</description>
         /// </listheader>
         /// <item>
-        /// <term>204</term>
-        /// <description>No Content</description>
+        /// <term>200</term>
+        /// <description>Successfully retrieved the service owner labels.</description>
         /// </item>
         /// <item>
         /// <term>401</term>

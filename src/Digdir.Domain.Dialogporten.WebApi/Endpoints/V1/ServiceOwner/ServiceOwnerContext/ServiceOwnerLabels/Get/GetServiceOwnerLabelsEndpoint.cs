@@ -19,7 +19,7 @@ public sealed class GetServiceOwnerLabelEndpoint(ISender sender) : Endpoint<GetS
         Group<ServiceOwnerGroup>();
 
         Description(b => b.ProducesOneOf(
-            StatusCodes.Status204NoContent,
+            StatusCodes.Status200OK,
             StatusCodes.Status404NotFound));
     }
 

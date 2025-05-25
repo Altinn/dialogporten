@@ -7181,17 +7181,8 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "No Content",
-            "headers": {
-              "Etag": {
-                "description": "The new UUID ETag of the ServiceOwner Context",
-                "example": "123e4567-e89b-12d3-a456-426614174000",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "200": {
+            "description": "Successfully retrieved the service owner labels."
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."

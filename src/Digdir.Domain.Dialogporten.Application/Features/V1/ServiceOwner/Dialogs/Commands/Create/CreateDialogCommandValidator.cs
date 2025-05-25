@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using FluentValidation;
 
@@ -42,6 +43,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
+        IValidator<ServiceOwnerLabelDto> serviceOwnerLabelValidator,
         IValidator<ContentDto?> contentValidator)
     {
         RuleFor(x => x.Id)
@@ -110,6 +112,13 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
             .ForEach(x => x.SetValidator(searchTagValidator));
+
+        RuleFor(x => x.ServiceOwnerContext!.ServiceOwnerLabels)
+            .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)
+            .Must(x => x.Count() <= DialogServiceOwnerLabel.MaxNumberOfLabels)
+                .WithMessage($"Maximum {DialogServiceOwnerLabel.MaxNumberOfLabels} service owner labels are allowed.")
+            .ForEach(x => x.SetValidator(serviceOwnerLabelValidator))
+            .When(x => x.ServiceOwnerContext?.ServiceOwnerLabels is not null);
 
         RuleFor(x => x.GuiActions)
             .Must(x => x
@@ -374,8 +383,19 @@ internal sealed class CreateDialogSearchTagDtoValidator : AbstractValidator<Sear
     public CreateDialogSearchTagDtoValidator()
     {
         RuleFor(x => x.Value)
-            .MinimumLength(3)
+            .MinimumLength(Constants.MinSearchStringLength)
             .MaximumLength(Constants.MaxSearchTagLength);
+    }
+}
+
+internal sealed class CreateDialogServiceOwnerLabelDtoValidator : AbstractValidator<ServiceOwnerLabelDto>
+{
+    public CreateDialogServiceOwnerLabelDtoValidator()
+    {
+        RuleFor(x => x.Value)
+            .NotEmpty()
+            .MinimumLength(Constants.MinSearchStringLength)
+            .MaximumLength(Constants.DefaultMaxStringLength);
     }
 }
 

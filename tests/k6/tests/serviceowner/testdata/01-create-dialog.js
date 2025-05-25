@@ -12,6 +12,9 @@ export default function (endUser = getDefaultEnduserSsn()) {
         "expiresAt": "2053-11-25T06:37:54.2920190Z", // must be UTC
         "visibleFrom": "2032-11-25T06:37:54.2920190Z", // must be UTC
         "process": "urn:test:process:1",
+        "serviceOwnerContext": {
+            "serviceOwnerLabels": []
+        },
         "searchTags": [
             { "value": "something searchable" },
             { "value": "something else searchable" },

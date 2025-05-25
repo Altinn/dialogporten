@@ -123,7 +123,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public string? Search { get; init; }
 
     /// <summary>
-    /// Filter by one or more labels.
+    /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
     /// </summary>
     public List<string>? ServiceOwnerLabels { get; set; }
 

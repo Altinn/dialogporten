@@ -131,7 +131,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string Search { get; set; }
 
         /// <summary>
-        /// Filter by one or more labels.
+        /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
         /// </summary>
         [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> ServiceOwnerLabels { get; set; }

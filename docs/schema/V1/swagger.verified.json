@@ -6149,7 +6149,7 @@
             }
           },
           {
-            "description": "Filter by one or more labels.",
+            "description": "Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with \u0027*\u0027 at the end of the label. For example, \u0027label*\u0027 will match \u0027label\u0027, \u0027label1\u0027, \u0027label2\u0027, etc.",
             "explode": true,
             "in": "query",
             "name": "serviceOwnerLabels",

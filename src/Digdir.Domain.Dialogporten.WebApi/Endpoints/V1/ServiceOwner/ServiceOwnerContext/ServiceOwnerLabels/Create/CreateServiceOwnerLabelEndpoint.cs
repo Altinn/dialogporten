@@ -29,9 +29,9 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
         Group<ServiceOwnerGroup>();
 
         Description(b => b.ProducesOneOf(
-            StatusCodes.Status201Created,
+            StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
-            StatusCodes.Status409Conflict));
+            StatusCodes.Status412PreconditionFailed));
     }
 
     public override async Task HandleAsync(CreateServiceOwnerLabelRequest req, CancellationToken ct)

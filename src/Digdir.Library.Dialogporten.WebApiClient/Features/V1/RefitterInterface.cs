@@ -227,10 +227,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Description</description>
         /// </listheader>
         /// <item>
-        /// <term>201</term>
-        /// <description>Created</description>
-        /// </item>
-        /// <item>
         /// <term>204</term>
         /// <description>The dialog DialogServiceOwnerLabel was updated successfully.</description>
         /// </item>
@@ -247,14 +243,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Forbidden</description>
         /// </item>
         /// <item>
-        /// <term>409</term>
-        /// <description>A server side error occurred.</description>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
-        Task<IApiResponse<string>> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreateServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreateServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Delete a service owner label for a dialog</summary>
         /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>

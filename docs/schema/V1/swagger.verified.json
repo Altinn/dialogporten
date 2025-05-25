@@ -7257,16 +7257,6 @@
           "x-name": "dto"
         },
         "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": "Created"
-          },
           "204": {
             "description": "The dialog DialogServiceOwnerLabel was updated successfully.",
             "headers": {
@@ -7295,8 +7285,15 @@
           "403": {
             "description": "Forbidden"
           },
-          "409": {
-            "description": ""
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           }
         },
         "security": [

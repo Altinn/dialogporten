@@ -16,7 +16,7 @@ export default function () {
     describe('Can create a dialog with labels', () => {
         let dialogToCreate = dialogToInsert();
         let label = "some-label";
-        dialogToCreate.serviceOwnerContext.ServiceOwnerLabels = [{value: label}]
+        dialogToCreate.serviceOwnerContext.serviceOwnerLabels = [{value: label}]
 
         let createResponse = postSO('dialogs', dialogToCreate);
 
@@ -37,7 +37,7 @@ export default function () {
     describe('Cannot create a dialog with duplicate labels', () => {
         let dialogToCreate = dialogToInsert();
         let label = "LABEL";
-        dialogToCreate.serviceOwnerContext.ServiceOwnerLabels = [
+        dialogToCreate.serviceOwnerContext.serviceOwnerLabels = [
             { value: label },
             { value: label.toLowerCase() }
         ];
@@ -57,7 +57,7 @@ export default function () {
             {value: 'a'},
             {value: new Array(300).fill('a').join('')}
         ]
-        dialogToCreate.serviceOwnerContext.ServiceOwnerLabels = labels;
+        dialogToCreate.serviceOwnerContext.serviceOwnerLabels = labels;
 
         let createResponse = postSO('dialogs', dialogToCreate);
         expectStatusFor(createResponse).to.equal(400);
@@ -76,7 +76,7 @@ export default function () {
         for (let i = 0; i < maximumLabels + 1; i++) {
             labels.push({ value: `label${i}` });
         }
-        dialogToCreate.serviceOwnerContext.ServiceOwnerLabels = labels;
+        dialogToCreate.serviceOwnerContext.serviceOwnerLabels = labels;
 
         let createResponse = postSO('dialogs', dialogToCreate);
         expectStatusFor(createResponse).to.equal(400);

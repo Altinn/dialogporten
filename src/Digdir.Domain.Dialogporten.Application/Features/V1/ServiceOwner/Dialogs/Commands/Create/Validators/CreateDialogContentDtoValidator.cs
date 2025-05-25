@@ -20,12 +20,11 @@ internal sealed class CreateDialogContentDtoValidator : AbstractValidator<Conten
 
     public CreateDialogContentDtoValidator(IUser? user)
     {
-        foreach (var (propertyName, propMetadata) in SourcePropertyMetaDataByName)
+        foreach (var (propertyName, (propertySelector, nullabilityInfo)) in SourcePropertyMetaDataByName)
         {
             var contentType = DialogContentType.Parse(propertyName);
-            var propertySelector = propMetadata.Property;
 
-            switch (propMetadata.NullabilityInfo.WriteState)
+            switch (nullabilityInfo.WriteState)
             {
                 case NullabilityState.NotNull:
                     RuleFor(x => propertySelector.GetValue(x) as ContentValueDto)
@@ -34,12 +33,11 @@ internal sealed class CreateDialogContentDtoValidator : AbstractValidator<Conten
                         .SetValidator(new ContentValueDtoValidator(contentType, user)!);
                     break;
                 case NullabilityState.Nullable:
-                    RuleFor(x => propMetadata.Property.GetValue(x) as ContentValueDto)
+                    RuleFor(x => propertySelector.GetValue(x) as ContentValueDto)
                         .SetValidator(new ContentValueDtoValidator(contentType, user)!)
-                        .When(x => propMetadata.Property.GetValue(x) is not null);
+                        .When(x => propertySelector.GetValue(x) is not null);
                     break;
                 case NullabilityState.Unknown:
-                    break;
                 default:
                     break;
             }

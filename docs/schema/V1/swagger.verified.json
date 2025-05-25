@@ -4391,6 +4391,9 @@
             "nullable": true,
             "type": "array"
           },
+          "serviceOwnerContext": {
+            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext"
+          },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
             "example": "urn:altinn:resource:some-service-identifier",
@@ -4513,6 +4516,30 @@
                 "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext": {
+        "additionalProperties": false,
+        "properties": {
+          "serviceOwnerLabels": {
+            "description": "A list of labels, not visible in end-user APIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_ServiceOwnerLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsQueriesSearch_ServiceOwnerLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "description": "A label value.",
+            "type": "string"
           }
         },
         "type": "object"

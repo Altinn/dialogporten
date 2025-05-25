@@ -37,6 +37,12 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         result.Items.Should().HaveCount(1);
         result.Items[0].Id.Should().Be(labeledDialogId);
 
+        result.Items[0]
+            .ServiceOwnerContext
+            .ServiceOwnerLabels
+            .Should()
+            .ContainSingle(x => x.Value.Equals(label, StringComparison.OrdinalIgnoreCase));
+
         await Application.AssertEntityCountAsync<DialogEntity>(count: 2);
     }
 

@@ -17,13 +17,13 @@ public sealed class GetServiceOwnerLabelsQuery : IRequest<GetServiceOwnerLabelsR
 [GenerateOneOf]
 public sealed partial class GetServiceOwnerLabelsResult : OneOfBase<ServiceOwnerLabelResultDto, EntityNotFound>;
 
-internal sealed class GetDialogQueryHandler : IRequestHandler<GetServiceOwnerLabelsQuery, GetServiceOwnerLabelsResult>
+internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetServiceOwnerLabelsQuery, GetServiceOwnerLabelsResult>
 {
     private readonly IDialogDbContext _db;
     private readonly IMapper _mapper;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
-    public GetDialogQueryHandler(
+    public GetServiceOwnerLabelsQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IUserResourceRegistry userResourceRegistry)

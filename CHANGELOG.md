@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.66.2](https://github.com/Altinn/dialogporten/compare/v1.66.1...v1.66.2) (2025-05-26)
+
+
+### Miscellaneous Chores
+
+* **ci:** force a release ([3426629](https://github.com/Altinn/dialogporten/commit/3426629af63b14b69c24236ea293c5e8cd9f1501))
+* **deps:** update dependency altinn.apiclients.maskinporten to 9.2.1 ([#2314](https://github.com/Altinn/dialogporten/issues/2314)) ([41a665e](https://github.com/Altinn/dialogporten/commit/41a665e16227b1dce01f632154912c38275bc5d2))
+* **deps:** update dependency scrutor to 5.1.2 ([#2315](https://github.com/Altinn/dialogporten/issues/2315)) ([6157841](https://github.com/Altinn/dialogporten/commit/615784107570600916e5ceb8ac9e8284874cefaa))
+
 ## [1.66.1](https://github.com/Altinn/dialogporten/compare/v1.66.0...v1.66.1) (2025-05-26)
 
 

@@ -744,7 +744,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogActivitiesQueriesSearch_Activity>>> V1ServiceOwnerDialogActivitiesSearchDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
 
-        /// <summary>Adds a activity to a dialogs activity history</summary>
+        /// <summary>Adds an activity to a dialog's activity history</summary>
         /// <remarks>
         /// The activity is created with the given configuration.
         /// 

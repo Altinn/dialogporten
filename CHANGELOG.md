@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.66.3](https://github.com/Altinn/dialogporten/compare/v1.66.2...v1.66.3) (2025-05-26)
+
+
+### Bug Fixes
+
+* **infra:** increase disk size to match new autogrow size ([#2361](https://github.com/Altinn/dialogporten/issues/2361)) ([9c1f688](https://github.com/Altinn/dialogporten/commit/9c1f68840f7e00c44fba41d194ea148b195fb683))
+
+## [1.66.2](https://github.com/Altinn/dialogporten/compare/v1.66.1...v1.66.2) (2025-05-26)
+
+
+### Miscellaneous Chores
+
+* **ci:** force a release ([3426629](https://github.com/Altinn/dialogporten/commit/3426629af63b14b69c24236ea293c5e8cd9f1501))
+* **deps:** update dependency altinn.apiclients.maskinporten to 9.2.1 ([#2314](https://github.com/Altinn/dialogporten/issues/2314)) ([41a665e](https://github.com/Altinn/dialogporten/commit/41a665e16227b1dce01f632154912c38275bc5d2))
+* **deps:** update dependency scrutor to 5.1.2 ([#2315](https://github.com/Altinn/dialogporten/issues/2315)) ([6157841](https://github.com/Altinn/dialogporten/commit/615784107570600916e5ceb8ac9e8284874cefaa))
+
+## [1.66.1](https://github.com/Altinn/dialogporten/compare/v1.66.0...v1.66.1) (2025-05-26)
+
+
+### Bug Fixes
+
+* Fix TokenIssuerCache initialization semaphore ([#2325](https://github.com/Altinn/dialogporten/issues/2325)) ([36829be](https://github.com/Altinn/dialogporten/commit/36829be7618b69dd75962b408b38c39c0de917b7))
+
+
+### Miscellaneous Chores
+
+* **ci:** Update Azure CLI to 2.73.0 ([#2336](https://github.com/Altinn/dialogporten/issues/2336)) ([6348085](https://github.com/Altinn/dialogporten/commit/634808551786cc815862d337909b7fc33cb7b8a6))
+* **deps:** update azure/bicep-deploy action to v2.2.0 ([#2354](https://github.com/Altinn/dialogporten/issues/2354)) ([fe74bd0](https://github.com/Altinn/dialogporten/commit/fe74bd0452aa0d10360c715bf865f68d4c077025))
+* **deps:** update dependency bouncycastle.cryptography to 2.6.0 ([#2355](https://github.com/Altinn/dialogporten/issues/2355)) ([8c33668](https://github.com/Altinn/dialogporten/commit/8c33668465759afa5bb8579398dd0de4f751394f))
+* **deps:** update dotnet monorepo ([#2352](https://github.com/Altinn/dialogporten/issues/2352)) ([e0a0937](https://github.com/Altinn/dialogporten/commit/e0a09373b035a529caeb3b7c6621066aebe411b8))
+* **deps:** update hotchocolate monorepo to 15.1.4 ([#2353](https://github.com/Altinn/dialogporten/issues/2353)) ([893410c](https://github.com/Altinn/dialogporten/commit/893410c44f6202b335cb4acaa8ca6c7a349bfef6))
+* fix grammar in create activity endpoint summary ([#2346](https://github.com/Altinn/dialogporten/issues/2346)) ([d9a6086](https://github.com/Altinn/dialogporten/commit/d9a6086c41094f7b62da2bf69696d8923ea76b89))
+
 ## [1.66.0](https://github.com/Altinn/dialogporten/compare/v1.65.1...v1.66.0) (2025-05-23)
 
 

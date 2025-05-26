@@ -22,7 +22,8 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
             StatusCodes.Status403Forbidden,
-            StatusCodes.Status412PreconditionFailed));
+            StatusCodes.Status412PreconditionFailed,
+            StatusCodes.Status422UnprocessableEntity));
     }
 
     public override async Task HandleAsync(BulkSetDialogSystemLabelsRequest req, CancellationToken ct)

@@ -134,6 +134,7 @@ type ContentValue {
 type Dialog {
   id: UUID!
   revision: UUID!
+  enduserContextRevision: UUID!
   org: String!
   serviceResource: String!
   serviceResourceType: String!

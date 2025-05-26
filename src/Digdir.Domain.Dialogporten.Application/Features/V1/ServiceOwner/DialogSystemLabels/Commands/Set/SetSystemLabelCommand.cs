@@ -14,7 +14,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
 {
     public Guid DialogId { get; set; }
-    public string EnduserId { get; set; } = null!;
+    public string EnduserId { get; set; } = null!; // // See ServiceOwnerOnBehalfOfPersonMiddleware
     public Guid? IfMatchEnduserContextRevision { get; set; }
     public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = Array.Empty<SystemLabel.Values>();
 }

@@ -1,17 +1,16 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
-using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.DialogSystemLabels;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.SystemLabels.Commands;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class BulkSetDialogSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
+public class BulkSetSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
     public async Task BulkSet_Updates_System_Labels()

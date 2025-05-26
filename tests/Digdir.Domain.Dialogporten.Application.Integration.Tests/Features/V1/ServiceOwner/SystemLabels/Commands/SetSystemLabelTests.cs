@@ -1,16 +1,15 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
-using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.Set;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.DialogSystemLabels;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.SystemLabels.Commands;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class SetDialogSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
+public class SetSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
     public async Task Set_Updates_System_Label()
@@ -21,6 +20,7 @@ public class SetDialogSystemLabelTests(DialogApplication application) : Applicat
         var command = new SetSystemLabelCommand
         {
             DialogId = create.AsT0.DialogId,
+            EnduserId = createCommand.Dto.Party,
             SystemLabels = new[] { SystemLabel.Values.Bin }
         };
 
@@ -40,6 +40,7 @@ public class SetDialogSystemLabelTests(DialogApplication application) : Applicat
         var command = new SetSystemLabelCommand
         {
             DialogId = create.AsT0.DialogId,
+            EnduserId = createCommand.Dto.Party,
             IfMatchEnduserContextRevision = Guid.NewGuid(),
             SystemLabels = new[] { SystemLabel.Values.Bin }
         };
@@ -54,21 +55,23 @@ public class SetDialogSystemLabelTests(DialogApplication application) : Applicat
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var create = await Application.Send(createCommand);
 
-        var contexts = await Application.GetDbEntities<DialogEndUserContext>();
-        var ctx = contexts.Single(x => x.DialogId == create.AsT0.DialogId);
-        var oldRevision = ctx.Revision;
+        var search = await Application.Send(new SearchDialogQuery
+        {
+            Party = [createCommand.Dto.Party]
+        });
+        search.TryPickT0(out var result, out _).Should().BeTrue();
+        var revision = result.Items.Single(x => x.Id == create.AsT0.DialogId).EnduserContextRevision;
 
         var command = new SetSystemLabelCommand
         {
             DialogId = create.AsT0.DialogId,
-            IfMatchEnduserContextRevision = oldRevision,
+            EnduserId = createCommand.Dto.Party,
+            IfMatchEnduserContextRevision = revision,
             SystemLabels = new[] { SystemLabel.Values.Bin }
         };
 
-        var result = await Application.Send(command);
-        result.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Revision.Should().NotBeEmpty();
-        success.Revision.Should().NotBe(oldRevision);
+        var set = await Application.Send(command);
+        set.TryPickT0(out _, out _).Should().BeTrue();
 
         var get = await Application.Send(new GetDialogQuery { DialogId = create.AsT0.DialogId });
         get.AsT0.SystemLabel.Should().Be(SystemLabel.Values.Bin);

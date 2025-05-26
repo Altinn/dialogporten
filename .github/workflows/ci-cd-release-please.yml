@@ -1,9 +1,9 @@
 # This workflow runs on every push to main and:
 # 1. Checks if a new release should be created (via release-please)
 # 2. If a release is created:
-# 2.1. Checks for backend changes since previous release
-# 2.2. If backend changes exist, builds and publishes Docker images with the new version
-# 2.3. Triggers staging and yt01 deployment via repository dispatch
+# 2.a) Checks for backend changes since previous release
+# 2.b) If backend changes exist, builds and publishes Docker images with the new version
+# 2.c) Triggers staging and yt01 deployment via repository dispatch
 
 name: CI/CD Release Please
 on:

@@ -48,13 +48,13 @@ public sealed class TokenIssuerCache : ITokenIssuerCache, IDisposable
 
         await _initializationSemaphore.WaitAsync();
 
-        if (_initialized)
-        {
-            return;
-        }
-
         try
         {
+            if (_initialized)
+            {
+                return;
+            }
+
             foreach (var schema in _jwtTokenSchemas)
             {
                 var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(

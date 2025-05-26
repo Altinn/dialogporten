@@ -20,12 +20,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         // Arrange
         var dialogId = IdentifiableExtensions.CreateVersion7();
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        var labels = new List<ServiceOwnerLabelDto>
-        {
-            new() { Value = "Scadrial" },
-            new() { Value = "Roshar" },
-            new() { Value = "Sel" }
-        };
+        var labels = CreateLabels("Scadrial", "Roshar", "Sel");
 
         createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = labels;
 
@@ -53,11 +48,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         const string label = "SCADRIAL";
 
-        List<ServiceOwnerLabelDto> labels =
-        [
-            new() { Value = label },
-            new() { Value = label.ToLowerInvariant() }
-        ];
+        var labels = CreateLabels(label, label.ToLowerInvariant());
 
         createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = labels;
 
@@ -77,12 +68,12 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     {
         // Arrange
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var labels = new List<ServiceOwnerLabelDto>
-        {
-            new() { Value = null! },
-            new() { Value = new string('a', Constants.MinSearchStringLength - 1) },
-            new() { Value = new string('a', Constants.DefaultMaxStringLength + 1) }
-        };
+
+        var labels = CreateLabels(
+            null!,
+            new string('a', Constants.MinSearchStringLength - 1),
+            new string('a', Constants.DefaultMaxStringLength + 1)
+        );
 
         createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = labels;
 
@@ -133,4 +124,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 .Contains("Maximum") && x.ErrorMessage
                 .Contains($"{DialogServiceOwnerLabel.MaxNumberOfLabels}"));
     }
+
+    private static List<ServiceOwnerLabelDto> CreateLabels(params string[] values) =>
+        values.Select(value => new ServiceOwnerLabelDto { Value = value }).ToList();
 }

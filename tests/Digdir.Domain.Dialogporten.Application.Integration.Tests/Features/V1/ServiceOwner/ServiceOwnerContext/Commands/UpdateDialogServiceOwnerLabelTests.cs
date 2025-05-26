@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update.ServiceOwnerLabelDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.ServiceOwnerContext.Commands;
 
@@ -94,12 +95,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             DialogId = dialogId,
             Dto = new()
             {
-                ServiceOwnerLabels =
-                [
-                    new() { Value = "Scadrial" },
-                    new() { Value = "Roshar" },
-                    new() { Value = "Sel" }
-                ]
+                ServiceOwnerLabels = CreateLabels("Scadrial", "Roshar", "Sel")
             }
         };
 
@@ -132,11 +128,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             DialogId = dialogId,
             Dto = new()
             {
-                ServiceOwnerLabels =
-                [
-                    new() { Value = label },
-                    new() { Value = label.ToLowerInvariant() }
-                ]
+                ServiceOwnerLabels = CreateLabels(label, label.ToLowerInvariant())
             }
         };
 
@@ -164,12 +156,10 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             DialogId = dialogId,
             Dto = new()
             {
-                ServiceOwnerLabels =
-                [
-                    new() { Value = null! },
-                    new() { Value = new string('a', Constants.MinSearchStringLength - 1) },
-                    new() { Value = new string('a', Constants.DefaultMaxStringLength + 1) }
-                ]
+                ServiceOwnerLabels = CreateLabels(
+                        null,
+                        new string('a', Constants.MinSearchStringLength - 1),
+                        new string('a', Constants.DefaultMaxStringLength + 1))
             }
         };
 
@@ -212,10 +202,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             DialogId = dialogId,
             Dto = new()
             {
-                ServiceOwnerLabels =
-                [
-                    new() { Value = "Scadrial" }
-                ]
+                ServiceOwnerLabels = CreateLabels("Scadrial")
             }
         };
 
@@ -258,4 +245,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 .Contains("Maximum") && x.ErrorMessage
                 .Contains($"{DialogServiceOwnerLabel.MaxNumberOfLabels}"));
     }
+
+    private static List<ServiceOwnerLabelDto> CreateLabels(params string?[] values) =>
+        values.Select(value => new ServiceOwnerLabelDto { Value = value! }).ToList();
 }

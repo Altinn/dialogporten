@@ -15,7 +15,7 @@ public class SetSystemLabelCommandValidatorTests
             SystemLabels = new[] { SystemLabel.Values.Bin, SystemLabel.Values.Archive }
         };
 
-        var validator = new SetDialogSystemLabelCommandValidator();
+        var validator = new SetSystemLabelCommandValidator();
         var result = validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
@@ -31,7 +31,7 @@ public class SetSystemLabelCommandValidatorTests
             SystemLabels = new[] { SystemLabel.Values.Bin }
         };
 
-        var validator = new SetDialogSystemLabelCommandValidator();
+        var validator = new SetSystemLabelCommandValidator();
         var result = validator.Validate(command);
 
         result.IsValid.Should().BeTrue();

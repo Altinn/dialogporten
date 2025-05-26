@@ -11,7 +11,5 @@ internal sealed class DialogTransmissionConfiguration : IEntityTypeConfiguration
         builder.HasOne(x => x.RelatedTransmission)
             .WithMany(x => x.RelatedTransmissions)
             .OnDelete(DeleteBehavior.SetNull);
-
-        builder.HasIndex(x => x.ExternalReference);
     }
 }

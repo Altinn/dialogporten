@@ -13,11 +13,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 public sealed class SearchTransmissionQuery : IRequest<SearchTransmissionResult>
 {
     public Guid DialogId { get; set; }
-
-    /// <summary>
-    /// Filter by external reference
-    /// </summary>
-    public string? ExternalReference { get; init; }
 }
 
 [GenerateOneOf]
@@ -56,8 +51,6 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
             .IgnoreQueryFilters()
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
                 x => resourceIds.Contains(x.ServiceResource))
-            .WhereIf(!string.IsNullOrWhiteSpace(request.ExternalReference),
-                x => x.Transmissions.Any(t => request.ExternalReference == t.ExternalReference))
             .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                 cancellationToken: cancellationToken);
 

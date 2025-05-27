@@ -1,13 +1,13 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Library.Entity.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
+using Digdir.Library.Entity.Abstractions.Features.Creatable;
+using Digdir.Library.Entity.Abstractions.Features.Updatable;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 
 namespace Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 
-public sealed class DialogServiceOwnerContext : IEntity, IVersionableEntity
+public sealed class DialogServiceOwnerContext : IVersionableEntity, ICreatableEntity, IUpdateableEntity
 {
-    public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public Guid Revision { get; set; }

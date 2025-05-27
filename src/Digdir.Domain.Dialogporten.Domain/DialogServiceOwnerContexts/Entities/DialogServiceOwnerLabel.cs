@@ -1,13 +1,13 @@
+using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 
-public sealed class DialogServiceOwnerLabel : IImmutableEntity
+public sealed class DialogServiceOwnerLabel : IImmutableEntity, ICreatableEntity
 {
     public const int MaxNumberOfLabels = 20;
 
     private string _value = null!;
-    public Guid Id { get; set; }
 
     public string Value
     {

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.66.3](https://github.com/Altinn/dialogporten/compare/v1.66.2...v1.66.3) (2025-05-26)
+
+
+### Bug Fixes
+
+* **infra:** increase disk size to match new autogrow size ([#2361](https://github.com/Altinn/dialogporten/issues/2361)) ([9c1f688](https://github.com/Altinn/dialogporten/commit/9c1f68840f7e00c44fba41d194ea148b195fb683))
+
 ## [1.66.2](https://github.com/Altinn/dialogporten/compare/v1.66.1...v1.66.2) (2025-05-26)
 
 

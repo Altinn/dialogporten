@@ -9,16 +9,23 @@ import {
     uuidv4
 } from '../../common/testimports.js'
 import { default as dialogToInsert } from './testdata/01-create-dialog.js'
-import { getDefaultEnduserSsn } from '../../common/token.js'
+import { getDefaultEnduserSsn, getDefaultServiceOwnerOrgNo } from '../../common/token.js'
 
 export default function () {
     let dialogId = null;
+    let dialogIdNotAuthorized = null;
     const enduserId = 'urn:altinn:person:identifier-no:' + getDefaultEnduserSsn();
 
-    describe('Create dialog', () => {
+    describe('Create dialogs', () => {
         let r = postSO('dialogs', dialogToInsert());
         expectStatusFor(r).to.equal(201);
         dialogId = r.json();
+
+        let d2 = dialogToInsert();
+        d2.party = 'urn:altinn:organization:identifier-no:' + getDefaultServiceOwnerOrgNo();
+        r = postSO('dialogs', d2);
+        expectStatusFor(r).to.equal(201);
+        dialogIdNotAuthorized = r.json();
     });
 
     describe('Update label as service owner', () => {
@@ -56,7 +63,20 @@ export default function () {
         expectStatusFor(r).to.equal(412);
     });
 
+    describe('Reject unauthorized dialog update', () => {
+        let body = {
+            'systemLabels': ['Archive']
+        };
+        let r = putSO(`dialogs/${dialogIdNotAuthorized}/endusercontext/systemlabels?enduserId=${enduserId}`, body);
+        expectStatusFor(r).to.equal(404);
+    });
+
     describe('Cleanup', () => {
+        for (let id in [dialogId, dialogIdNotAuthorized]) {
+            if (id) {
+                purgeDialog(id);
+            }
+        }
         let r = purgeSO('dialogs/' + dialogId);
         expectStatusFor(r).to.equal(204);
     });

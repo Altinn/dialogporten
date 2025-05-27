@@ -19,7 +19,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         var command = new SetSystemLabelCommand
         {
             DialogId = create.AsT0.DialogId,
-            SystemLabels = new[] { SystemLabel.Values.Bin }
+            SystemLabels = [SystemLabel.Values.Bin]
         };
 
         var result = await Application.Send(command);
@@ -39,7 +39,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         {
             DialogId = create.AsT0.DialogId,
             IfMatchEnduserContextRevision = Guid.NewGuid(),
-            SystemLabels = new[] { SystemLabel.Values.Bin }
+            SystemLabels = [SystemLabel.Values.Bin]
         };
 
         var result = await Application.Send(command);

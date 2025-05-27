@@ -21,7 +21,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         {
             DialogId = create.AsT0.DialogId,
             EnduserId = createCommand.Dto.Party,
-            SystemLabels = new[] { SystemLabel.Values.Bin }
+            SystemLabels = [SystemLabel.Values.Bin]
         };
 
         var result = await Application.Send(command);
@@ -42,7 +42,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             DialogId = create.AsT0.DialogId,
             EnduserId = createCommand.Dto.Party,
             IfMatchEnduserContextRevision = Guid.NewGuid(),
-            SystemLabels = new[] { SystemLabel.Values.Bin }
+            SystemLabels = [SystemLabel.Values.Bin]
         };
 
         var result = await Application.Send(command);
@@ -67,7 +67,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             DialogId = create.AsT0.DialogId,
             EnduserId = createCommand.Dto.Party,
             IfMatchEnduserContextRevision = revision,
-            SystemLabels = new[] { SystemLabel.Values.Bin }
+            SystemLabels = [SystemLabel.Values.Bin]
         };
 
         var set = await Application.Send(command);

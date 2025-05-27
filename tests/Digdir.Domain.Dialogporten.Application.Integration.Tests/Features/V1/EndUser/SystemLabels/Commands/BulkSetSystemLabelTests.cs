@@ -23,12 +23,12 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         {
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[]
-                {
+                Dialogs =
+                [
                     new DialogRevisionDto { DialogId = res1.AsT0.DialogId },
                     new DialogRevisionDto { DialogId = res2.AsT0.DialogId }
-                },
-                SystemLabels = new[] { SystemLabel.Values.Bin }
+                ],
+                SystemLabels = [SystemLabel.Values.Bin]
             }
         };
 
@@ -57,12 +57,12 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         {
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[]
-                {
+                Dialogs =
+                [
                     new DialogRevisionDto { DialogId = res1.AsT0.DialogId, EnduserContextRevision = ctx1.Revision },
                     new DialogRevisionDto { DialogId = res2.AsT0.DialogId, EnduserContextRevision = ctx2.Revision }
-                },
-                SystemLabels = new[] { SystemLabel.Values.Bin }
+                ],
+                SystemLabels = [SystemLabel.Values.Bin]
             }
         };
 
@@ -85,12 +85,12 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         {
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[]
-                {
+                Dialogs =
+                [
                     new DialogRevisionDto { DialogId = res.AsT0.DialogId },
                     new DialogRevisionDto { DialogId = Guid.NewGuid() }
-                },
-                SystemLabels = new[] { SystemLabel.Values.Bin }
+                ],
+                SystemLabels = [SystemLabel.Values.Bin]
             }
         };
 
@@ -109,11 +109,11 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         {
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[]
-                {
+                Dialogs =
+                [
                     new DialogRevisionDto { DialogId = res.AsT0.DialogId, EnduserContextRevision = Guid.NewGuid() }
-                },
-                SystemLabels = new[] { SystemLabel.Values.Bin }
+                ],
+                SystemLabels = [SystemLabel.Values.Bin]
             }
         };
 

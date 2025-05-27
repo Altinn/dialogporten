@@ -382,6 +382,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]

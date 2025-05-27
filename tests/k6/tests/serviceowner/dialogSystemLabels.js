@@ -72,12 +72,9 @@ export default function () {
     });
 
     describe('Cleanup', () => {
-        for (let id in [dialogId, dialogIdNotAuthorized]) {
-            if (id) {
-                purgeDialog(id);
-            }
+        for (let id of [dialogId, dialogIdNotAuthorized]) {
+            let r = purgeSO('dialogs/' + id);
+            expectStatusFor(r).to.equal(204);
         }
-        let r = purgeSO('dialogs/' + dialogId);
-        expectStatusFor(r).to.equal(204);
     });
 }

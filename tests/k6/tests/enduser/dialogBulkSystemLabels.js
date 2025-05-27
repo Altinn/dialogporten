@@ -1,4 +1,4 @@
-import { describe, expect, expectStatusFor, postSO, postEU, getEU, purgeSO, setParty } from '../../common/testimports.js'
+import { describe, expect, expectStatusFor, postSO, postEU, getEU, purgeSO, setParty, setVisibleFrom } from '../../common/testimports.js'
 import { default as dialogToInsert } from '../serviceowner/testdata/01-create-dialog.js'
 import { defaultServiceOwnerOrgNo } from '../../common/config.js'
 
@@ -8,12 +8,15 @@ export default function () {
 
     describe('Create dialogs to bulk update', () => {
         for (let i = 0; i < 2; i++) {
-            const r = postSO('dialogs', dialogToInsert());
+            let d = dialogToInsert();
+            setVisibleFrom(d, null);
+            const r = postSO('dialogs', d, null);
             expectStatusFor(r).to.equal(201);
             accessibleDialogs.push(r.json());
         }
         const d = dialogToInsert();
         setParty(d, 'urn:altinn:organization:identifier-no:' + defaultServiceOwnerOrgNo);
+        setVisibleFrom(d, null);
         const r = postSO('dialogs', d);
         expectStatusFor(r).to.equal(201);
         forbiddenDialog = r.json();

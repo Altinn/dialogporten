@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+﻿using System.Reflection;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -280,29 +281,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ContainSingle(e => e
                 .ErrorMessage
                 .Contains(nameof(UpdateDialogDto.Content.Title)));
-
-        // // Arrange
-        // var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        // createDialogCommand.Dto.IsApiOnly = true;
-        // var createCommandResponse = await Application.Send(createDialogCommand);
-        //
-        // var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        // var getDialogDto = await Application.Send(getDialogQuery);
-        //
-        // var mapper = Application.GetMapper();
-        // var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        // updateDialogDto.Content!.Title = null!; // Content is supplied, but title is not (only summary)
-        //
-        // // Act
-        // var updateResponse = await Application.Send(new UpdateDialogCommand
-        // {
-        //     Id = createCommandResponse.AsT0.DialogId,
-        //     Dto = updateDialogDto
-        // });
-        //
-        // // Assert
-        // updateResponse.TryPickT3(out var validationError, out _).Should().BeTrue();
-        // validationError.Should().NotBeNull();
     }
 
     [Fact]
@@ -359,38 +337,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         updatedDialog!.ApiActions
             .Should()
             .ContainSingle(x => x.Id == apiActionId!.Value);
-        // // Arrange
-        // var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        // var createCommandResponse = await Application.Send(createDialogCommand);
-        //
-        // var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        // var getDialogDto = await Application.Send(getDialogQuery);
-        //
-        // var mapper = Application.GetMapper();
-        // var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        //
-        // var apiAction = new ApiActionDto
-        // {
-        //     Id = Guid.CreateVersion7(),
-        //     Action = "Test action",
-        //     Name = "Test action",
-        //     Endpoints = [new() { Url = new("https://example.com"), HttpMethod = HttpVerb.Values.GET }]
-        // };
-        // updateDialogDto.ApiActions.Add(apiAction);
-        //
-        // // Act
-        // var updateResponse = await Application.Send(new UpdateDialogCommand
-        // {
-        //     Id = createCommandResponse.AsT0.DialogId,
-        //     Dto = updateDialogDto
-        // });
-        // var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
-        //
-        // // Assert
-        // updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        // success.Should().NotBeNull();
-        // getDialogDtoAfterUpdate.TryPickT0(out var currentDialog, out _).Should().BeTrue();
-        // currentDialog.ApiActions.Should().Contain(x => x.Id == apiAction.Id);
     }
 
     [Fact]
@@ -399,85 +345,27 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         // Arrange
         var guiActionId = IdentifiableExtensions.CreateVersion7();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        var lala = await FlowBuilder.For(Application)
-            .SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId))
-            .SendCommand(new GetDialogQuery { DialogId = dialogId })
-            .Select(x => Application.GetMapper().Map<UpdateDialogDto>(x.AsT0))
-            .Modify(x => x.GuiActions.Add(new GuiActionDto
+
+        var updatedDialog = await FlowBuilder.For(Application)
+            .CreateSimpleDialog(dialogId)
+            .UpdateDialog(dialogId, x =>
             {
-                Id = guiActionId,
-                Action = "Test action",
-                Title = [new() { LanguageCode = "nb", Value = "Test action" }],
-                Priority = DialogGuiActionPriority.Values.Tertiary,
-                Url = new Uri("https://example.com"),
-            }))
-            .SendCommand(x => new UpdateDialogCommand { Id = dialogId, Dto = x })
-            .SendCommand(new GetDialogQuery { DialogId = dialogId })
-            .ExecuteAsync();
-
-        var applicationFlow = await new FlowBuilder()
-            .CreateDialog(DialogGenerator.GenerateSimpleFakeCreateDialogCommand())
-            // .GetDialog(x => x.AsT0.DialogId)
-            // .Select(x => Application.GetMapper().Map<UpdateDialogDto>(x.AsT0))
-            // .Select(x =>
-            // {
-            //     x.GuiActions.Add(new GuiActionDto
-            //     {
-            //         Id = guiActionId,
-            //         Action = "Test action",
-            //         Title = [new() { LanguageCode = "nb", Value = "Test action" }],
-            //         Priority = DialogGuiActionPriority.Values.Tertiary,
-            //         Url = new Uri("https://example.com"),
-            //     });
-            //     return x;
-            // })
-            // .SendCommand(x => new UpdateDialogCommand { Id = x.Id, Dto = x })
-            .UpdateDialog(x => x.GuiActions.Add(new GuiActionDto
-            {
-                Id = guiActionId,
-                Action = "Test action",
-                Title = [new() { LanguageCode = "nb", Value = "Test action" }],
-                Priority = DialogGuiActionPriority.Values.Tertiary,
-                Url = new Uri("https://example.com"),
-            }))
-            .SendCommand(x => new GetDialogQuery { DialogId = x.AsT0.DialogId })
-            .ExecuteAsync();
-
-        var result = await applicationFlow.ExecuteAsync();
-
-
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var createCommandResponse = await Application.Send(createDialogCommand);
-
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        var guiAction = new GuiActionDto
-        {
-            Id = Guid.CreateVersion7(),
-            Action = "Test action",
-            Title = [new() { LanguageCode = "nb", Value = "Test action" }],
-            Priority = DialogGuiActionPriority.Values.Tertiary,
-            Url = new Uri("https://example.com"),
-        };
-        updateDialogDto.GuiActions.Add(guiAction);
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+                x.GuiActions.Add(new GuiActionDto
+                {
+                    Id = guiActionId,
+                    Action = "Test action",
+                    Title = [new() { LanguageCode = "nb", Value = "Test action" }],
+                    Priority = DialogGuiActionPriority.Values.Tertiary,
+                    Url = new Uri("https://example.com"),
+                });
+            })
+            .GetDialog(dialogId)
+            .AssertSuccess();
 
         // Assert
-        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        getDialogDtoAfterUpdate.TryPickT0(out var currentDialog, out _).Should().BeTrue();
-        currentDialog.GuiActions.Should().Contain(x => x.Id == guiAction.Id);
+        updatedDialog.GuiActions
+            .Should()
+            .ContainSingle(x => x.Id == guiActionId);
     }
 
     private async Task<(CreateDialogCommand, CreateDialogResult)> GenerateDialogWithActivity()
@@ -554,6 +442,62 @@ public static class ApplicationExtensions
 
     internal static async Task<DialogDto> GetDialog(this DialogApplication application, Guid dialogId)
         => (await application.Send(new GetDialogQuery { DialogId = dialogId })).AsT0;
+}
+
+
+
+
+
+
+
+
+public static class FlowStepExtensions
+{
+    public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Guid dialogId)
+        => step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
+
+    public static IFlowStep<GetDialogResult> GetDialog(this IFlowStep step, Guid dialogId)
+        => step.SendCommand(new GetDialogQuery { DialogId = dialogId });
+
+    public static IFlowStep<UpdateDialogResult> UpdateDialog(
+        this IFlowStep<CreateDialogResult> step,
+        Guid dialogId,
+        Action<UpdateDialogDto> modify)
+    {
+        return step
+            .SendCommand(new GetDialogQuery { DialogId = dialogId })
+            .Select((getResult, context) =>
+            {
+                var dialog = getResult.AsT0;
+                return context.Application.GetMapper().Map<UpdateDialogDto>(dialog);
+            })
+            .Modify(modify)
+            .SendCommand(updateDto => new UpdateDialogCommand { Id = dialogId, Dto = updateDto });
+    }
+
+    public static async Task<DialogDto> AssertSuccess(this IFlowStep<GetDialogResult> step)
+    {
+        var result = await step.ExecuteAsync();
+        result.TryPickT0(out var success, out _).Should().BeTrue("Expected dialog query to return success");
+        success.Should().NotBeNull();
+        return success!;
+    }
+
+    // Overload to access Application inside Select
+    private static IFlowStep<TOut> Select<TIn, TOut>(
+        this IFlowStep<TIn> step,
+        Func<TIn, FlowContext, TOut> selector)
+    {
+        var context = step.Context();
+        return step.Select(input => selector(input, context));
+    }
+
+    // Use reflection to get FlowContext (can be replaced with a cleaner design later)
+    public static FlowContext Context<T>(this IFlowStep<T> step)
+    {
+        var contextField = typeof(FlowStep<T>).GetField("_context", BindingFlags.NonPublic | BindingFlags.Instance);
+        return (FlowContext)contextField!.GetValue(step)!;
+    }
 }
 
 public static class FlowBuilder
@@ -635,5 +579,3 @@ public interface IFlowStep<TIn> : IFlowStep
     IFlowStep<TIn> Modify(Action<TIn> selector);
     Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default);
 }
-
-

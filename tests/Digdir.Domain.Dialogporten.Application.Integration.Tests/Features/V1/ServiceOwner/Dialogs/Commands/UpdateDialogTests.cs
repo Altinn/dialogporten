@@ -15,6 +15,7 @@ using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using FluentAssertions.Primitives;
 using MediatR;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto =
@@ -233,48 +234,27 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public async Task Can_Update_Content_To_Null_If_IsApiOnlyTrue_Dialog()
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.IsApiOnly = true;
-        var createCommandResponse = await Application.Send(createDialogCommand);
-
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.Content = null!;
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
+        // Arrange, Act, and Assert
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .UpdateDialog(x => x.Content = null!)
+            .AssertSuccess();
     }
 
     [Fact]
     public async Task Should_Validate_Supplied_Content_If_IsApiOnlyTrue_Dialog()
     {
         // Arrange and Act
-        var (validationError, _) = await ArrangeAndAct(
-            initialState: dialog => { dialog.Dto.IsApiOnly = true; },
-            updateState: x =>
+        var validationError = await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .UpdateDialog(x =>
             {
-                x.Dto.Content!.Title = null!; // Content is supplied, but title is not (only summary)
-            },
-            resultSelector: AssumeBadRequest);
+                x.Content!.Title = null!;
+            })
+            .AssertBadRequest();
 
         // Assert
-        validationError.Errors
-            .Should()
-            .ContainSingle(e => e
-                .ErrorMessage
-                .Contains(nameof(UpdateDialogDto.Content.Title)));
+        validationError.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content.Title));
     }
 
     [Fact]
@@ -452,6 +432,16 @@ public static class FlowStepExtensions
     // public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Guid dialogId)
     //     => step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
 
+    public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Action<CreateDialogCommand> initialState)
+    {
+        var context = step.GetContext();
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        context.Stuff[DialogIdKey] = dialogId;
+        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+        initialState(createCommand);
+        return step.SendCommand(createCommand);
+    }
+
     public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step)
     {
         var context = step.GetContext();
@@ -499,7 +489,32 @@ public static class FlowStepExtensions
     public static async Task<DialogDto> AssertSuccess(this IFlowStep<GetDialogResult> step)
     {
         var result = await step.ExecuteAsync();
-        result.TryPickT0(out var success, out _).Should().BeTrue("Expected dialog query to return success");
+        result.TryPickT0(out var success, out _)
+            .Should()
+            .BeTrue("Expected dialog query to return success");
+
+        success.Should().NotBeNull();
+        return success!;
+    }
+
+    public static async Task<ValidationError> AssertBadRequest(this IFlowStep<UpdateDialogResult> step)
+    {
+        var result = await step.ExecuteAsync();
+        result.TryPickT3(out var validationError, out _)
+            .Should()
+            .BeTrue("Expected dialog update to return validation error");
+        validationError.Should().NotBeNull();
+
+        return validationError!;
+    }
+
+    public static async Task<UpdateDialogSuccess> AssertSuccess(this IFlowStep<UpdateDialogResult> step)
+    {
+        var result = await step.ExecuteAsync();
+        result.TryPickT0(out var success, out _)
+            .Should()
+            .BeTrue("Expected dialog update to return success");
+
         success.Should().NotBeNull();
         return success!;
     }
@@ -637,4 +652,13 @@ public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
         );
 
     public FlowContext GetContext() => _context;
+}
+
+public static class ValidationErrorAssertionsExtensions
+{
+    public static void ShouldHaveErrorWithText(this ValidationError validationError, string expectedText)
+    {
+        validationError.Errors.Should().ContainSingle(e => e.ErrorMessage.Contains(expectedText),
+            $"Expected exactly one error containing text '{expectedText}'");
+    }
 }

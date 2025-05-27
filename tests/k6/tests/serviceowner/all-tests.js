@@ -14,6 +14,7 @@ import { default as dialogDetails } from './dialogDetails.js';
 import { default as dialogRestore } from './dialogRestore.js';
 import { default as dialogSearch } from './dialogSearch.js';
 import { default as dialogSystemLabels } from './dialogSystemLabels.js';
+import { default as dialogBulkSystemLabels } from './dialogBulkSystemLabels.js';
 import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
 
 export default function() {
@@ -32,5 +33,6 @@ export default function() {
   dialogRestore();
   dialogSearch();
   dialogSystemLabels();
+  dialogBulkSystemLabels();
   dialogUpdateActivity();
 }

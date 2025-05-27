@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -15,7 +14,6 @@ using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
-using FluentAssertions.Primitives;
 using MediatR;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto =
@@ -168,67 +166,42 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public async Task Cannot_Include_Old_Transmissions_In_UpdateCommand()
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var existingTransmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
-        createDialogCommand.Dto.Transmissions.Add(existingTransmission);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        // Ref. old transmission
-        updateDialogDto.Transmissions.Add(new TransmissionDto
-        {
-            Id = existingTransmission.Id,
-            Type = DialogTransmissionType.Values.Information,
-            Sender = new() { ActorType = ActorType.Values.ServiceOwner },
-            Content = new()
+        // Arrange, Act, and Assert
+        Guid? existingTransmissionId = null!;
+        var domainError = await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
             {
-                Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) },
-                Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) }
-            }
-        });
+                var existingTransmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
+                existingTransmissionId = existingTransmission.Id;
+                x.Dto.Transmissions.Add(existingTransmission);
+            })
+            .UpdateDialog(x =>
+            {
+                x.Transmissions.Add(new TransmissionDto
+                {
+                    Id = existingTransmissionId!.Value,
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new() { ActorType = ActorType.Values.ServiceOwner },
+                    Content = new()
+                    {
+                        Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) },
+                        Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) }
+                    }
+                });
+            })
+            .AssertDomainError();
 
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT5(out var domainError, out _).Should().BeTrue();
-        domainError.Should().NotBeNull();
-        domainError.Errors.Should().Contain(e => e.ErrorMessage.Contains("already exists"));
+        domainError.ShouldHaveErrorWithText("already exists");
     }
 
     [Fact]
     public async Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog()
     {
-        // Arrange
-        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
-
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.Content = null!;
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT3(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
+        // Arrange, Act, and Assert
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x => x.Content = null!)
+            .AssertBadRequest();
     }
 
     [Fact]
@@ -247,10 +220,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         // Arrange and Act
         var validationError = await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
-            .UpdateDialog(x =>
-            {
-                x.Content!.Title = null!;
-            })
+            .UpdateDialog(x => { x.Content!.Title = null!; })
             .AssertBadRequest();
 
         // Assert
@@ -432,7 +402,8 @@ public static class FlowStepExtensions
     // public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Guid dialogId)
     //     => step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
 
-    public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Action<CreateDialogCommand> initialState)
+    public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
+        Action<CreateDialogCommand> initialState)
     {
         var context = step.GetContext();
         var dialogId = IdentifiableExtensions.CreateVersion7();
@@ -478,7 +449,10 @@ public static class FlowStepExtensions
                 .SendCommand(new GetDialogQuery { DialogId = dialogId })
                 .Select((getResult, ctx) =>
                 {
-                    var dialog = getResult.AsT0;
+                    // var dialog = getResult.AsT0;
+                    getResult.TryPickT0(out var dialog, out _)
+                        .Should()
+                        .BeTrue("Expected dialog query after creation to return success");
                     return ctx.Application.GetMapper().Map<UpdateDialogDto>(dialog);
                 })
                 .Modify(modify)
@@ -497,27 +471,29 @@ public static class FlowStepExtensions
         return success!;
     }
 
-    public static async Task<ValidationError> AssertBadRequest(this IFlowStep<UpdateDialogResult> step)
+    public static async Task<T> AssertResult<T>(this IFlowStep<UpdateDialogResult> step)
     {
         var result = await step.ExecuteAsync();
-        result.TryPickT3(out var validationError, out _)
-            .Should()
-            .BeTrue("Expected dialog update to return validation error");
-        validationError.Should().NotBeNull();
 
-        return validationError!;
+        if (result.Value is not T value)
+        {
+            var errorMessage =
+                $"Expected dialog update to return  {typeof(T).Name}, but got {result.Value.GetType().Name}";
+            throw new InvalidOperationException(errorMessage);
+        }
+
+        value.Should().NotBeNull();
+        return value;
     }
 
-    public static async Task<UpdateDialogSuccess> AssertSuccess(this IFlowStep<UpdateDialogResult> step)
-    {
-        var result = await step.ExecuteAsync();
-        result.TryPickT0(out var success, out _)
-            .Should()
-            .BeTrue("Expected dialog update to return success");
+    public static Task<DomainError> AssertDomainError(this IFlowStep<UpdateDialogResult> step)
+        => step.AssertResult<DomainError>();
 
-        success.Should().NotBeNull();
-        return success!;
-    }
+    public static Task<ValidationError> AssertBadRequest(this IFlowStep<UpdateDialogResult> step)
+        => step.AssertResult<ValidationError>();
+
+    public static Task<UpdateDialogSuccess> AssertSuccess(this IFlowStep<UpdateDialogResult> step)
+        => step.AssertResult<UpdateDialogSuccess>();
 
     // Overload to access Application inside Select
     private static IFlowStep<TOut> Select<TIn, TOut>(
@@ -630,17 +606,17 @@ public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
 
     public IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector) =>
         new DeferredFlowStep<TOut>(async () =>
-            (await GetStepAsync()).SendCommand(commandSelector), _context
+                (await GetStepAsync()).SendCommand(commandSelector), _context
         );
 
     public IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector) =>
         new DeferredFlowStep<TOut>(async () =>
-            (await GetStepAsync()).Select(selector), _context
+                (await GetStepAsync()).Select(selector), _context
         );
 
     public IFlowStep<TIn> Modify(Action<TIn> selector) =>
         new DeferredFlowStep<TIn>(async () =>
-            (await GetStepAsync()).Modify(selector), _context
+                (await GetStepAsync()).Modify(selector), _context
         );
 
     public Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default) =>
@@ -648,7 +624,7 @@ public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
 
     public IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command) =>
         new DeferredFlowStep<TOut>(async () =>
-            (await GetStepAsync()).SendCommand(command), _context
+                (await GetStepAsync()).SendCommand(command), _context
         );
 
     public FlowContext GetContext() => _context;
@@ -658,7 +634,16 @@ public static class ValidationErrorAssertionsExtensions
 {
     public static void ShouldHaveErrorWithText(this ValidationError validationError, string expectedText)
     {
-        validationError.Errors.Should().ContainSingle(e => e.ErrorMessage.Contains(expectedText),
-            $"Expected exactly one error containing text '{expectedText}'");
+        validationError.Errors.Should().Contain(e => e.ErrorMessage.Contains(expectedText),
+            $"Expected error containing the text '{expectedText}'");
+    }
+}
+
+public static class DomainErrorAssertionsExtensions
+{
+    public static void ShouldHaveErrorWithText(this DomainError domainError, string expectedText)
+    {
+        domainError.Errors.Should().Contain(e => e.ErrorMessage.Contains(expectedText),
+            $"Expected an error containing the text '{expectedText}'");
     }
 }

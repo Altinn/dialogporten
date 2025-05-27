@@ -399,27 +399,23 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         // Arrange
         var guiActionId = IdentifiableExtensions.CreateVersion7();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        var applicationFlow = await new ApplicationFlowBuilder(Application)
+        var lala = await FlowBuilder.For(Application)
             .SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId))
-            .SendCommand(x => new GetDialogQuery { DialogId = dialogId })
+            .SendCommand(new GetDialogQuery { DialogId = dialogId })
             .Select(x => Application.GetMapper().Map<UpdateDialogDto>(x.AsT0))
-            .Select(x =>
+            .Modify(x => x.GuiActions.Add(new GuiActionDto
             {
-                x.GuiActions.Add(new GuiActionDto
-                {
-                    Id = guiActionId,
-                    Action = "Test action",
-                    Title = [new() { LanguageCode = "nb", Value = "Test action" }],
-                    Priority = DialogGuiActionPriority.Values.Tertiary,
-                    Url = new Uri("https://example.com"),
-                });
-                return x;
-            })
+                Id = guiActionId,
+                Action = "Test action",
+                Title = [new() { LanguageCode = "nb", Value = "Test action" }],
+                Priority = DialogGuiActionPriority.Values.Tertiary,
+                Url = new Uri("https://example.com"),
+            }))
             .SendCommand(x => new UpdateDialogCommand { Id = dialogId, Dto = x })
-            .SendCommand(x => new GetDialogQuery { DialogId = dialogId })
+            .SendCommand(new GetDialogQuery { DialogId = dialogId })
             .ExecuteAsync();
 
-        var applicationFlow = await new ApplicationFlowBuilder()
+        var applicationFlow = await new FlowBuilder()
             .CreateDialog(DialogGenerator.GenerateSimpleFakeCreateDialogCommand())
             // .GetDialog(x => x.AsT0.DialogId)
             // .Select(x => Application.GetMapper().Map<UpdateDialogDto>(x.AsT0))
@@ -560,42 +556,84 @@ public static class ApplicationExtensions
         => (await application.Send(new GetDialogQuery { DialogId = dialogId })).AsT0;
 }
 
-public class ApplicationFlowBuilder : IApplicationFlowStep
+public static class FlowBuilder
 {
-    private readonly DialogApplication _application;
-    private readonly List<Step> _commands = [];
+    public static IFlowStep For(DialogApplication application) =>
+        new FlowStep<object?>(new FlowContext(application, []));
+}
 
-    public ApplicationFlowBuilder(DialogApplication application)
+public record FlowContext(
+    DialogApplication Application,
+    List<Func<object?, CancellationToken, Task<object?>>> Commands);
+
+public readonly struct FlowStep<TIn> : IFlowStep<TIn>
+{
+    private readonly FlowContext _context;
+
+    public FlowStep(FlowContext context)
     {
-        _application = application;
+        _context = context;
     }
 
-    public IApplicationFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command)
+    public IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector)
     {
-        throw new NotImplementedException();
-    }
-
-    private sealed class ApplicationFlowStep<TIn> : IApplicationFlowStep<TIn>
-    {
-        public IApplicationFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector) => throw new NotImplementedException();
-
-        public IApplicationFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector) => throw new NotImplementedException();
-
-        public Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default)
+        var context = _context;
+        _context.Commands.Add(async (input, cancellationToken) =>
         {
+            var command = commandSelector((TIn)input!);
+            return await context.Application.Send(command, cancellationToken);
+        });
+        return new FlowStep<TOut>(context);
+    }
 
+    public IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector)
+    {
+        var context = _context;
+        _context.Commands.Add((input, _) => Task.FromResult<object?>(selector((TIn)input!)));
+        return new FlowStep<TOut>(context);
+    }
+
+    public IFlowStep<TIn> Modify(Action<TIn> selector)
+    {
+        _context.Commands.Add((input, _) =>
+        {
+            selector((TIn)input!);
+            return Task.FromResult(input);
+        });
+        return this;
+    }
+
+    public async Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        object? current = null;
+
+        foreach (var command in _context.Commands)
+        {
+            current = await command(current, cancellationToken);
         }
+
+        return (TIn)current!;
+    }
+
+    public IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command)
+    {
+        var context = _context;
+        _context.Commands.Add(async (_, cancellationToken) => await context.Application.Send(command, cancellationToken));
+        return new FlowStep<TOut>(context);
     }
 }
 
-public interface IApplicationFlowStep
+public interface IFlowStep
 {
-    IApplicationFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command);
+    IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command);
 }
 
-public interface IApplicationFlowStep<TIn>
+public interface IFlowStep<TIn> : IFlowStep
 {
-    IApplicationFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector);
-    IApplicationFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector);
+    IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector);
+    IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector);
+    IFlowStep<TIn> Modify(Action<TIn> selector);
     Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default);
 }
+
+

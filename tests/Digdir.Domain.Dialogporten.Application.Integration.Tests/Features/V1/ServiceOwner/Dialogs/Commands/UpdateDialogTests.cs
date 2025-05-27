@@ -1,5 +1,4 @@
-﻿using System.Net.Mime;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -59,7 +58,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             initialState: x =>
             {
                 x.Dto.SystemLabel = SystemLabel.Values.Bin;
-                return x;
             },
             updateState: x =>
             {
@@ -267,7 +265,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             initialState: dialog =>
             {
                 dialog.Dto.IsApiOnly = true;
-                return dialog;
             },
             updateState: x =>
             {
@@ -457,7 +454,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         return success;
     }
 
-    private static CreateDialogCommand SimpleDialog(CreateDialogCommand x) => x;
+    private static void SimpleDialog(CreateDialogCommand x) { }
 
     private static CreateDialogCommand ComplexDialog(CreateDialogCommand _) =>
         DialogGenerator.GenerateFakeCreateDialogCommand();

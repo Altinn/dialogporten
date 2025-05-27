@@ -358,7 +358,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                     Url = new Uri("https://example.com"),
                 });
             })
-            .GetDialog(Guid.Empty)
+            .GetDialog()
             .AssertSuccess();
 
         // Assert
@@ -493,7 +493,7 @@ public static class FlowStepExtensions
                 })
                 .Modify(modify)
                 .SendCommand(updateDto => new UpdateDialogCommand { Id = dialogId, Dto = updateDto });
-        });
+        }, step.GetContext());
     }
 
 
@@ -619,11 +619,14 @@ public readonly struct FlowStep<TIn> : IFlowStep<TIn>
             await context.Application.Send(command, cancellationToken));
         return new FlowStep<TOut>(context);
     }
+
+    public FlowContext GetContext() => _context;
 }
 
 public interface IFlowStep
 {
     IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command);
+    FlowContext GetContext();
 }
 
 public interface IFlowStep<TIn> : IFlowStep
@@ -637,10 +640,12 @@ public interface IFlowStep<TIn> : IFlowStep
 public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
 {
     private readonly Func<Task<IFlowStep<TIn>>> _stepFactory;
+    private readonly FlowContext _context;
 
-    public DeferredFlowStep(Func<Task<IFlowStep<TIn>>> stepFactory)
+    public DeferredFlowStep(Func<Task<IFlowStep<TIn>>> stepFactory, FlowContext context)
     {
         _stepFactory = stepFactory;
+        _context = context;
     }
 
     private async Task<IFlowStep<TIn>> GetStepAsync() => await _stepFactory();
@@ -648,17 +653,17 @@ public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
 
     public IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector) =>
         new DeferredFlowStep<TOut>(async () =>
-            (await GetStepAsync()).SendCommand(commandSelector)
+            (await GetStepAsync()).SendCommand(commandSelector), _context
         );
 
     public IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector) =>
         new DeferredFlowStep<TOut>(async () =>
-            (await GetStepAsync()).Select(selector)
+            (await GetStepAsync()).Select(selector), _context
         );
 
     public IFlowStep<TIn> Modify(Action<TIn> selector) =>
         new DeferredFlowStep<TIn>(async () =>
-            (await GetStepAsync()).Modify(selector)
+            (await GetStepAsync()).Modify(selector), _context
         );
 
     public Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default) =>
@@ -666,6 +671,8 @@ public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
 
     public IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command) =>
         new DeferredFlowStep<TOut>(async () =>
-            (await GetStepAsync()).SendCommand(command)
+            (await GetStepAsync()).SendCommand(command), _context
         );
+
+    public FlowContext GetContext() => _context;
 }

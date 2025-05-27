@@ -406,8 +406,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         Action<UpdateDialogCommand> updateState,
         Func<UpdateDialogResult, T> resultSelector)
     {
-        // resultSelector ??= DefaultResultSelector;
-
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         initialState(createDialogCommand);
 
@@ -449,14 +447,16 @@ public static class ApplicationExtensions
 
 public static class FlowStepExtensions
 {
+    private const string DialogIdKey = "dialogId";
+
     // public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Guid dialogId)
     //     => step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
 
     public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step)
     {
-        var context = step.Context();
+        var context = step.GetContext();
         var dialogId = IdentifiableExtensions.CreateVersion7();
-        context.Stuff["dialogId"] = dialogId;
+        context.Stuff[DialogIdKey] = dialogId;
         return step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
     }
 
@@ -465,8 +465,8 @@ public static class FlowStepExtensions
 
     public static IFlowStep<GetDialogResult> GetDialog(this IFlowStep step)
     {
-        var context = step.Context();
-        var dialogId = (Guid)context.Stuff["dialogId"]!;
+        var context = step.GetContext();
+        var dialogId = (Guid)context.Stuff[DialogIdKey]!;
         return step.SendCommand(new GetDialogQuery { DialogId = dialogId });
     }
 
@@ -481,7 +481,7 @@ public static class FlowStepExtensions
             createSuccess.Should().NotBeNull();
             var dialogId = createSuccess.DialogId;
 
-            var context = step.Context();
+            var context = step.GetContext();
             var newContext = context with { Commands = [] };
 
             return new FlowStep<UpdateDialogResult>(newContext)
@@ -496,30 +496,6 @@ public static class FlowStepExtensions
         }, step.GetContext());
     }
 
-
-    // public static async Task<IFlowStep<UpdateDialogResult>> UpdateDialog(
-    //     this IFlowStep<CreateDialogResult> step,
-    //     Action<UpdateDialogDto> modify)
-    // {
-    //     var createResult = await step.ExecuteAsync();
-    //     createResult.TryPickT0(out var createSuccess, out _).Should().BeTrue("Expected dialog creation to succeed");
-    //     createSuccess.Should().NotBeNull();
-    //     var dialogId = createSuccess.DialogId;
-    //
-    //     var context = step.Context();
-    //     var newContext = context with { Commands = [] };
-    //     return new FlowStep<UpdateDialogResult>(newContext)
-    //         .SendCommand(new GetDialogQuery { DialogId = dialogId })
-    //         .Select((getResult, ctx) =>
-    //         {
-    //             var dialog = getResult.AsT0;
-    //             return ctx.Application.GetMapper().Map<UpdateDialogDto>(dialog);
-    //         })
-    //         .Modify(modify)
-    //         .SendCommand(updateDto => new UpdateDialogCommand { Id = dialogId, Dto = updateDto });
-    // }
-
-
     public static async Task<DialogDto> AssertSuccess(this IFlowStep<GetDialogResult> step)
     {
         var result = await step.ExecuteAsync();
@@ -533,22 +509,8 @@ public static class FlowStepExtensions
         this IFlowStep<TIn> step,
         Func<TIn, FlowContext, TOut> selector)
     {
-        var context = step.Context();
+        var context = step.GetContext();
         return step.Select(input => selector(input, context));
-    }
-
-    // Use reflection to get FlowContext (can be replaced with a cleaner design later)
-    public static FlowContext Context<T>(this IFlowStep<T> step)
-    {
-        var contextField = typeof(FlowStep<T>).GetField("_context", BindingFlags.NonPublic | BindingFlags.Instance);
-        return (FlowContext)contextField!.GetValue(step)!;
-    }
-
-    public static FlowContext Context(this IFlowStep step)
-    {
-        // Reuse the generic version through reflection
-        var field = step.GetType().GetField("_context", BindingFlags.NonPublic | BindingFlags.Instance);
-        return (FlowContext)field!.GetValue(step)!;
     }
 }
 

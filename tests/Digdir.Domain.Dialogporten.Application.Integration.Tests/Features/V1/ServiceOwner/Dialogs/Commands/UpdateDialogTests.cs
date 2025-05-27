@@ -11,8 +11,10 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using MediatR;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
@@ -395,6 +397,59 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public async Task Should_Allow_User_Defined_Id_For_GuiAction()
     {
         // Arrange
+        var guiActionId = IdentifiableExtensions.CreateVersion7();
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var applicationFlow = await new ApplicationFlowBuilder(Application)
+            .SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId))
+            .SendCommand(x => new GetDialogQuery { DialogId = dialogId })
+            .Select(x => Application.GetMapper().Map<UpdateDialogDto>(x.AsT0))
+            .Select(x =>
+            {
+                x.GuiActions.Add(new GuiActionDto
+                {
+                    Id = guiActionId,
+                    Action = "Test action",
+                    Title = [new() { LanguageCode = "nb", Value = "Test action" }],
+                    Priority = DialogGuiActionPriority.Values.Tertiary,
+                    Url = new Uri("https://example.com"),
+                });
+                return x;
+            })
+            .SendCommand(x => new UpdateDialogCommand { Id = dialogId, Dto = x })
+            .SendCommand(x => new GetDialogQuery { DialogId = dialogId })
+            .ExecuteAsync();
+
+        var applicationFlow = await new ApplicationFlowBuilder()
+            .CreateDialog(DialogGenerator.GenerateSimpleFakeCreateDialogCommand())
+            // .GetDialog(x => x.AsT0.DialogId)
+            // .Select(x => Application.GetMapper().Map<UpdateDialogDto>(x.AsT0))
+            // .Select(x =>
+            // {
+            //     x.GuiActions.Add(new GuiActionDto
+            //     {
+            //         Id = guiActionId,
+            //         Action = "Test action",
+            //         Title = [new() { LanguageCode = "nb", Value = "Test action" }],
+            //         Priority = DialogGuiActionPriority.Values.Tertiary,
+            //         Url = new Uri("https://example.com"),
+            //     });
+            //     return x;
+            // })
+            // .SendCommand(x => new UpdateDialogCommand { Id = x.Id, Dto = x })
+            .UpdateDialog(x => x.GuiActions.Add(new GuiActionDto
+            {
+                Id = guiActionId,
+                Action = "Test action",
+                Title = [new() { LanguageCode = "nb", Value = "Test action" }],
+                Priority = DialogGuiActionPriority.Values.Tertiary,
+                Url = new Uri("https://example.com"),
+            }))
+            .SendCommand(x => new GetDialogQuery { DialogId = x.AsT0.DialogId })
+            .ExecuteAsync();
+
+        var result = await applicationFlow.ExecuteAsync();
+
+
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var createCommandResponse = await Application.Send(createDialogCommand);
 
@@ -503,4 +558,44 @@ public static class ApplicationExtensions
 
     internal static async Task<DialogDto> GetDialog(this DialogApplication application, Guid dialogId)
         => (await application.Send(new GetDialogQuery { DialogId = dialogId })).AsT0;
+}
+
+public class ApplicationFlowBuilder : IApplicationFlowStep
+{
+    private readonly DialogApplication _application;
+    private readonly List<Step> _commands = [];
+
+    public ApplicationFlowBuilder(DialogApplication application)
+    {
+        _application = application;
+    }
+
+    public IApplicationFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command)
+    {
+        throw new NotImplementedException();
+    }
+
+    private sealed class ApplicationFlowStep<TIn> : IApplicationFlowStep<TIn>
+    {
+        public IApplicationFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector) => throw new NotImplementedException();
+
+        public IApplicationFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector) => throw new NotImplementedException();
+
+        public Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default)
+        {
+
+        }
+    }
+}
+
+public interface IApplicationFlowStep
+{
+    IApplicationFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command);
+}
+
+public interface IApplicationFlowStep<TIn>
+{
+    IApplicationFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector);
+    IApplicationFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector);
+    Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default);
 }

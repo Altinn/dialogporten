@@ -58,10 +58,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     {
         // Arrange and Act
         var (_, updatedDialog) = await ArrangeAndAct(
-            initialState: x =>
-            {
-                x.Dto.SystemLabel = SystemLabel.Values.Bin;
-            },
+            initialState: x => { x.Dto.SystemLabel = SystemLabel.Values.Bin; },
             updateState: x =>
             {
                 x.IsSilentUpdate = true;
@@ -265,10 +262,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     {
         // Arrange and Act
         var (validationError, _) = await ArrangeAndAct(
-            initialState: dialog =>
-            {
-                dialog.Dto.IsApiOnly = true;
-            },
+            initialState: dialog => { dialog.Dto.IsApiOnly = true; },
             updateState: x =>
             {
                 x.Dto.Content!.Title = null!; // Content is supplied, but title is not (only summary)
@@ -299,7 +293,13 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 {
                     Id = attachmentId.Value,
                     DisplayName = [new() { LanguageCode = "nb", Value = "Test attachment" }],
-                    Urls = [new() { Url = new Uri("https://example.com"), ConsumerType = AttachmentUrlConsumerType.Values.Gui }]
+                    Urls =
+                    [
+                        new()
+                        {
+                            Url = new Uri("https://example.com"), ConsumerType = AttachmentUrlConsumerType.Values.Gui
+                        }
+                    ]
                 };
                 x.Dto.Attachments.Add(attachment);
             },
@@ -344,10 +344,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     {
         // Arrange
         var guiActionId = NewUuidV7();
-        var dialogId = NewUuidV7();
 
         var updatedDialog = await FlowBuilder.For(Application)
-            .CreateSimpleDialog(dialogId)
+            .CreateSimpleDialog()
             .UpdateDialog(x =>
             {
                 x.GuiActions.Add(new GuiActionDto
@@ -359,7 +358,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                     Url = new Uri("https://example.com"),
                 });
             })
-            .GetDialog(dialogId)
+            .GetDialog(Guid.Empty)
             .AssertSuccess();
 
         // Assert
@@ -393,7 +392,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         return success;
     }
 
-    private static void SimpleDialog(CreateDialogCommand x) { }
+    private static void SimpleDialog(CreateDialogCommand x)
+    {
+    }
 
     private static CreateDialogCommand ComplexDialog(CreateDialogCommand _) =>
         DialogGenerator.GenerateFakeCreateDialogCommand();
@@ -434,7 +435,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         return (result, updatedDialog);
     }
 
-    private Guid NewUuidV7() => IdentifiableExtensions.CreateVersion7();
+    private static Guid NewUuidV7() => IdentifiableExtensions.CreateVersion7();
 }
 
 public static class ApplicationExtensions
@@ -446,20 +447,28 @@ public static class ApplicationExtensions
         => (await application.Send(new GetDialogQuery { DialogId = dialogId })).AsT0;
 }
 
-
-
-
-
-
-
-
 public static class FlowStepExtensions
 {
-    public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Guid dialogId)
-        => step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
+    // public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Guid dialogId)
+    //     => step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
+
+    public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step)
+    {
+        var context = step.Context();
+        var dialogId = IdentifiableExtensions.CreateVersion7();
+        context.Stuff["dialogId"] = dialogId;
+        return step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
+    }
 
     public static IFlowStep<GetDialogResult> GetDialog(this IFlowStep step, Guid dialogId)
         => step.SendCommand(new GetDialogQuery { DialogId = dialogId });
+
+    public static IFlowStep<GetDialogResult> GetDialog(this IFlowStep step)
+    {
+        var context = step.Context();
+        var dialogId = (Guid)context.Stuff["dialogId"]!;
+        return step.SendCommand(new GetDialogQuery { DialogId = dialogId });
+    }
 
     public static IFlowStep<UpdateDialogResult> UpdateDialog(
         this IFlowStep<CreateDialogResult> step,
@@ -534,17 +543,25 @@ public static class FlowStepExtensions
         var contextField = typeof(FlowStep<T>).GetField("_context", BindingFlags.NonPublic | BindingFlags.Instance);
         return (FlowContext)contextField!.GetValue(step)!;
     }
+
+    public static FlowContext Context(this IFlowStep step)
+    {
+        // Reuse the generic version through reflection
+        var field = step.GetType().GetField("_context", BindingFlags.NonPublic | BindingFlags.Instance);
+        return (FlowContext)field!.GetValue(step)!;
+    }
 }
 
 public static class FlowBuilder
 {
     public static IFlowStep For(DialogApplication application) =>
-        new FlowStep<object?>(new FlowContext(application, []));
+        new FlowStep<object?>(new FlowContext(application, [], []));
 }
 
 public record FlowContext(
     DialogApplication Application,
-    List<Func<object?, CancellationToken, Task<object?>>> Commands);
+    List<Func<object?, CancellationToken, Task<object?>>> Commands,
+    Dictionary<string, object?> Stuff);
 
 public readonly struct FlowStep<TIn> : IFlowStep<TIn>
 {
@@ -598,7 +615,8 @@ public readonly struct FlowStep<TIn> : IFlowStep<TIn>
     public IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command)
     {
         var context = _context;
-        _context.Commands.Add(async (_, cancellationToken) => await context.Application.Send(command, cancellationToken));
+        _context.Commands.Add(async (_, cancellationToken) =>
+            await context.Application.Send(command, cancellationToken));
         return new FlowStep<TOut>(context);
     }
 }
@@ -616,7 +634,6 @@ public interface IFlowStep<TIn> : IFlowStep
     Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default);
 }
 
-
 public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
 {
     private readonly Func<Task<IFlowStep<TIn>>> _stepFactory;
@@ -627,6 +644,7 @@ public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
     }
 
     private async Task<IFlowStep<TIn>> GetStepAsync() => await _stepFactory();
+
 
     public IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector) =>
         new DeferredFlowStep<TOut>(async () =>

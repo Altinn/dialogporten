@@ -343,12 +343,12 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public async Task Should_Allow_User_Defined_Id_For_GuiAction()
     {
         // Arrange
-        var guiActionId = IdentifiableExtensions.CreateVersion7();
-        var dialogId = IdentifiableExtensions.CreateVersion7();
+        var guiActionId = NewUuidV7();
+        var dialogId = NewUuidV7();
 
         var updatedDialog = await FlowBuilder.For(Application)
             .CreateSimpleDialog(dialogId)
-            .UpdateDialog(dialogId, x =>
+            .UpdateDialog(x =>
             {
                 x.GuiActions.Add(new GuiActionDto
                 {
@@ -433,6 +433,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
         return (result, updatedDialog);
     }
+
+    private Guid NewUuidV7() => IdentifiableExtensions.CreateVersion7();
 }
 
 public static class ApplicationExtensions
@@ -461,19 +463,53 @@ public static class FlowStepExtensions
 
     public static IFlowStep<UpdateDialogResult> UpdateDialog(
         this IFlowStep<CreateDialogResult> step,
-        Guid dialogId,
         Action<UpdateDialogDto> modify)
     {
-        return step
-            .SendCommand(new GetDialogQuery { DialogId = dialogId })
-            .Select((getResult, context) =>
-            {
-                var dialog = getResult.AsT0;
-                return context.Application.GetMapper().Map<UpdateDialogDto>(dialog);
-            })
-            .Modify(modify)
-            .SendCommand(updateDto => new UpdateDialogCommand { Id = dialogId, Dto = updateDto });
+        return new DeferredFlowStep<UpdateDialogResult>(async () =>
+        {
+            var createResult = await step.ExecuteAsync();
+            createResult.TryPickT0(out var createSuccess, out _).Should().BeTrue("Expected dialog creation to succeed");
+            createSuccess.Should().NotBeNull();
+            var dialogId = createSuccess.DialogId;
+
+            var context = step.Context();
+            var newContext = context with { Commands = [] };
+
+            return new FlowStep<UpdateDialogResult>(newContext)
+                .SendCommand(new GetDialogQuery { DialogId = dialogId })
+                .Select((getResult, ctx) =>
+                {
+                    var dialog = getResult.AsT0;
+                    return ctx.Application.GetMapper().Map<UpdateDialogDto>(dialog);
+                })
+                .Modify(modify)
+                .SendCommand(updateDto => new UpdateDialogCommand { Id = dialogId, Dto = updateDto });
+        });
     }
+
+
+    // public static async Task<IFlowStep<UpdateDialogResult>> UpdateDialog(
+    //     this IFlowStep<CreateDialogResult> step,
+    //     Action<UpdateDialogDto> modify)
+    // {
+    //     var createResult = await step.ExecuteAsync();
+    //     createResult.TryPickT0(out var createSuccess, out _).Should().BeTrue("Expected dialog creation to succeed");
+    //     createSuccess.Should().NotBeNull();
+    //     var dialogId = createSuccess.DialogId;
+    //
+    //     var context = step.Context();
+    //     var newContext = context with { Commands = [] };
+    //     return new FlowStep<UpdateDialogResult>(newContext)
+    //         .SendCommand(new GetDialogQuery { DialogId = dialogId })
+    //         .Select((getResult, ctx) =>
+    //         {
+    //             var dialog = getResult.AsT0;
+    //             return ctx.Application.GetMapper().Map<UpdateDialogDto>(dialog);
+    //         })
+    //         .Modify(modify)
+    //         .SendCommand(updateDto => new UpdateDialogCommand { Id = dialogId, Dto = updateDto });
+    // }
+
 
     public static async Task<DialogDto> AssertSuccess(this IFlowStep<GetDialogResult> step)
     {
@@ -578,4 +614,40 @@ public interface IFlowStep<TIn> : IFlowStep
     IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector);
     IFlowStep<TIn> Modify(Action<TIn> selector);
     Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default);
+}
+
+
+public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
+{
+    private readonly Func<Task<IFlowStep<TIn>>> _stepFactory;
+
+    public DeferredFlowStep(Func<Task<IFlowStep<TIn>>> stepFactory)
+    {
+        _stepFactory = stepFactory;
+    }
+
+    private async Task<IFlowStep<TIn>> GetStepAsync() => await _stepFactory();
+
+    public IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector) =>
+        new DeferredFlowStep<TOut>(async () =>
+            (await GetStepAsync()).SendCommand(commandSelector)
+        );
+
+    public IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector) =>
+        new DeferredFlowStep<TOut>(async () =>
+            (await GetStepAsync()).Select(selector)
+        );
+
+    public IFlowStep<TIn> Modify(Action<TIn> selector) =>
+        new DeferredFlowStep<TIn>(async () =>
+            (await GetStepAsync()).Modify(selector)
+        );
+
+    public Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default) =>
+        _stepFactory().Result.ExecuteAsync(cancellationToken);
+
+    public IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command) =>
+        new DeferredFlowStep<TOut>(async () =>
+            (await GetStepAsync()).SendCommand(command)
+        );
 }

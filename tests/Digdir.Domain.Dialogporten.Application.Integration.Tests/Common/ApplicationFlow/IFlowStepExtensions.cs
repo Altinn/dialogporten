@@ -61,14 +61,15 @@ public static class IFlowStepExtensions
             return @in;
         });
 
-    public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step)
-        => step.AssertResult<T>().ExecuteAsync();
+    public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null)
+        => step.AssertResult(assert).ExecuteAsync();
 
-    public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step) =>
+    public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>
         step.Select(result =>
         {
             var typedResult = result.Value.Should().BeOfType<T>().Subject;
             typedResult.Should().NotBeNull();
+            assert?.Invoke(typedResult);
             return typedResult;
         });
 

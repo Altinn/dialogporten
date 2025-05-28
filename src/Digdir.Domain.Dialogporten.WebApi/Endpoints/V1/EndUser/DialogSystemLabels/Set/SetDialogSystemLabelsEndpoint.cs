@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.DialogSystemLabels.Set;
 
-public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetDialogSystemLabelRequest>
+public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<SetDialogSystemLabelRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
@@ -34,7 +34,7 @@ public sealed class SetDialogSystemLabelEndpoint(ISender sender) : Endpoint<SetD
         var command = new SetSystemLabelCommand
         {
             DialogId = req.DialogId,
-            Label = req.Label,
+            SystemLabels = req.SystemLabels,
             IfMatchEnduserContextRevision = req.IfMatchEnduserContextRevision
         };
 
@@ -60,5 +60,5 @@ public sealed class SetDialogSystemLabelRequest
 
     public Guid DialogId { get; set; }
 
-    public SystemLabel.Values Label { get; set; }
+    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = [];
 }

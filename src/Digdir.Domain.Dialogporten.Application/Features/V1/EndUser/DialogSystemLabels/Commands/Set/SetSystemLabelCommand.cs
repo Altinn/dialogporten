@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -14,7 +15,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchEnduserContextRevision { get; set; }
-    public SystemLabel.Values Label { get; set; }
+    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = Array.Empty<SystemLabel.Values>();
 }
 
 public sealed record SetSystemLabelSuccess(Guid Revision);
@@ -63,14 +64,21 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
 
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        dialog.DialogEndUserContext.UpdateLabel(request.Label, currentUserInformation.UserId.ExternalIdWithPrefix);
+        var newLabel = request.SystemLabels.Count switch // The domain model currently only supports one system label
+        {
+            0 => SystemLabel.Values.Default,
+            1 => request.SystemLabels.First(),
+            _ => throw new UnreachableException() // Should be caught in validator
+        };
+
+        dialog.DialogEndUserContext.UpdateLabel(newLabel, currentUserInformation.UserId.ExternalIdWithPrefix);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.DialogEndUserContext, request.IfMatchEnduserContextRevision)
                                .SaveChangesAsync(cancellationToken);
 
         return saveResult.Match<SetSystemLabelResult>(
-            success => new SetSystemLabelSuccess(dialog.DialogEndUserContext.Revision),
+            _ => new SetSystemLabelSuccess(dialog.DialogEndUserContext.Revision),
             domainError => domainError,
             concurrencyError => concurrencyError);
     }

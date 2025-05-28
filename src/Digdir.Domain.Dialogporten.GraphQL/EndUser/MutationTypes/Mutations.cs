@@ -1,5 +1,6 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using MediatR;
 
@@ -45,5 +46,36 @@ public sealed class Mutations
                     .Cast<ISetSystemLabelError>().ToList()
             },
             concurrencyError => new SetSystemLabelPayload { Errors = [] });
+    }
+
+    public async Task<BulkSetSystemLabelPayload> BulkSetSystemLabels(
+        [Service] ISender mediator,
+        [Service] IMapper mapper,
+        BulkSetSystemLabelInput input)
+    {
+        var command = mapper.Map<BulkSetSystemLabelCommand>(input);
+        var result = await mediator.Send(command);
+
+        return result.Match(
+            _ => new BulkSetSystemLabelPayload { Success = true },
+            forbidden => new BulkSetSystemLabelPayload
+            {
+                Errors = [new BulkSetSystemLabelForbidden { Message = string.Join("; ", forbidden.Reasons) }]
+            },
+            domainError => new BulkSetSystemLabelPayload
+            {
+                Errors = domainError.Errors
+                    .Select(x => new BulkSetSystemLabelDomainError { Message = x.ErrorMessage })
+                    .Cast<IBulkSetSystemLabelError>()
+                    .ToList()
+            },
+            validationError => new BulkSetSystemLabelPayload
+            {
+                Errors = validationError.Errors
+                    .Select(x => new BulkSetSystemLabelValidationError { Message = x.ErrorMessage })
+                    .Cast<IBulkSetSystemLabelError>()
+                    .ToList()
+            },
+            concurrencyError => new BulkSetSystemLabelPayload { Errors = [] });
     }
 }

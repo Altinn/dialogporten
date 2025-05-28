@@ -11,9 +11,10 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
@@ -282,7 +283,4 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .Should()
             .ContainSingle(x => x.Id == userDefinedGuiActionId);
     }
-
-    // TODO: Static import for test project
-    private static Guid NewUuidV7() => IdentifiableExtensions.CreateVersion7();
 }

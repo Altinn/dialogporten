@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -31,6 +32,9 @@ internal static class Common
 
     // Any party will do, required for EndUser search validation
     internal static string Party => NorwegianPersonIdentifier.PrefixWithSeparator + "03886595947";
+
+    internal static Guid NewUuidV7() => IdentifiableExtensions.CreateVersion7();
+
 }
 
 internal static class ApplicationExtensions

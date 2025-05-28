@@ -14,7 +14,6 @@ using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
-using MediatR;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
@@ -171,9 +170,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var domainError = await FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
             {
-                var existingTransmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
-                existingTransmissionId = existingTransmission.Id;
-                x.Dto.Transmissions.Add(existingTransmission);
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
+                existingTransmissionId = transmission.Id;
+                x.Dto.Transmissions.Add(transmission);
             })
             .UpdateDialog(x =>
             {
@@ -189,7 +188,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                     }
                 });
             })
-            .AssertDomainError();
+            .ExecuteAndAssert<DomainError>();
 
         domainError.ShouldHaveErrorWithText("already exists");
     }
@@ -199,9 +198,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     {
         // Arrange, Act, and Assert
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog()
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
             .UpdateDialog(x => x.Content = null!)
-            .AssertBadRequest();
+            .ExecuteAndAssert<ValidationError>();
     }
 
     [Fact]
@@ -211,7 +210,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
             .UpdateDialog(x => x.Content = null!)
-            .AssertSuccess();
+            .ExecuteAndAssert<UpdateDialogSuccess>();
     }
 
     [Fact]
@@ -221,7 +220,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var validationError = await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
             .UpdateDialog(x => { x.Content!.Title = null!; })
-            .AssertBadRequest();
+            .ExecuteAndAssert<ValidationError>();
 
         // Assert
         validationError.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content.Title));
@@ -296,7 +295,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var guiActionId = NewUuidV7();
 
         var updatedDialog = await FlowBuilder.For(Application)
-            .CreateSimpleDialog()
+            .CreateDialog(DialogGenerator.GenerateSimpleFakeCreateDialogCommand())
             .UpdateDialog(x =>
             {
                 x.GuiActions.Add(new GuiActionDto
@@ -308,8 +307,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                     Url = new Uri("https://example.com"),
                 });
             })
-            .GetDialog()
-            .AssertSuccess();
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>();
 
         // Assert
         updatedDialog.GuiActions
@@ -328,306 +327,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         return (createDialogCommand, createCommandResponse);
     }
 
-    private static ValidationError AssumeBadRequest(UpdateDialogResult updateDialogResult)
-    {
-        updateDialogResult.TryPickT3(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        return validationError;
-    }
-
-    private static UpdateDialogSuccess AssumeSuccess(UpdateDialogResult updateDialogResult)
-    {
-        updateDialogResult.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        return success;
-    }
-
-    private static void SimpleDialog(CreateDialogCommand x)
-    {
-    }
-
-    private static CreateDialogCommand ComplexDialog(CreateDialogCommand _) =>
-        DialogGenerator.GenerateFakeCreateDialogCommand();
-
-    private static UpdateDialogResult? DefaultResultSelector(UpdateDialogResult? x) => x;
-
-    private async Task<(T Result, DialogDto? UpdatedDialog)> ArrangeAndAct<T>(
-        Action<CreateDialogCommand> initialState,
-        Action<UpdateDialogCommand> updateState,
-        Func<UpdateDialogResult, T> resultSelector)
-    {
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        initialState(createDialogCommand);
-
-        var dialogId = await Application.CreateDialog(createDialogCommand);
-        var dialog = await Application.GetDialog(dialogId);
-
-        var updateDialogCommand = new UpdateDialogCommand
-        {
-            Id = dialogId,
-            Dto = Application.GetMapper().Map<UpdateDialogDto>(dialog),
-            IfMatchDialogRevision = dialog.Revision
-        };
-
-        updateState(updateDialogCommand);
-
-        var updateDialogResponse = await Application.Send(updateDialogCommand);
-        var result = resultSelector(updateDialogResponse);
-
-        DialogDto? updatedDialog = null;
-        if (updateDialogResponse.IsT0)
-        {
-            updatedDialog = await Application.GetDialog(dialogId);
-        }
-
-        return (result, updatedDialog);
-    }
-
+    // TODO: Static import for test project
     private static Guid NewUuidV7() => IdentifiableExtensions.CreateVersion7();
-}
-
-public static class ApplicationExtensions
-{
-    internal static async Task<Guid> CreateDialog(this DialogApplication application, CreateDialogCommand command)
-        => (await application.Send(command)).AsT0.DialogId;
-
-    internal static async Task<DialogDto> GetDialog(this DialogApplication application, Guid dialogId)
-        => (await application.Send(new GetDialogQuery { DialogId = dialogId })).AsT0;
-}
-
-public static class FlowStepExtensions
-{
-    private const string DialogIdKey = "dialogId";
-
-    // public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step, Guid dialogId)
-    //     => step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
-
-    public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
-        Action<CreateDialogCommand> initialState)
-    {
-        var context = step.GetContext();
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        context.Stuff[DialogIdKey] = dialogId;
-        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        initialState(createCommand);
-        return step.SendCommand(createCommand);
-    }
-
-    public static IFlowStep<CreateDialogResult> CreateSimpleDialog(this IFlowStep step)
-    {
-        var context = step.GetContext();
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        context.Stuff[DialogIdKey] = dialogId;
-        return step.SendCommand(DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId));
-    }
-
-    public static IFlowStep<GetDialogResult> GetDialog(this IFlowStep step, Guid dialogId)
-        => step.SendCommand(new GetDialogQuery { DialogId = dialogId });
-
-    public static IFlowStep<GetDialogResult> GetDialog(this IFlowStep step)
-    {
-        var context = step.GetContext();
-        var dialogId = (Guid)context.Stuff[DialogIdKey]!;
-        return step.SendCommand(new GetDialogQuery { DialogId = dialogId });
-    }
-
-    public static IFlowStep<UpdateDialogResult> UpdateDialog(
-        this IFlowStep<CreateDialogResult> step,
-        Action<UpdateDialogDto> modify)
-    {
-        return new DeferredFlowStep<UpdateDialogResult>(async () =>
-        {
-            var createResult = await step.ExecuteAsync();
-            createResult.TryPickT0(out var createSuccess, out _).Should().BeTrue("Expected dialog creation to succeed");
-            createSuccess.Should().NotBeNull();
-            var dialogId = createSuccess.DialogId;
-
-            var context = step.GetContext();
-            var newContext = context with { Commands = [] };
-
-            return new FlowStep<UpdateDialogResult>(newContext)
-                .SendCommand(new GetDialogQuery { DialogId = dialogId })
-                .Select((getResult, ctx) =>
-                {
-                    // var dialog = getResult.AsT0;
-                    getResult.TryPickT0(out var dialog, out _)
-                        .Should()
-                        .BeTrue("Expected dialog query after creation to return success");
-                    return ctx.Application.GetMapper().Map<UpdateDialogDto>(dialog);
-                })
-                .Modify(modify)
-                .SendCommand(updateDto => new UpdateDialogCommand { Id = dialogId, Dto = updateDto });
-        }, step.GetContext());
-    }
-
-    public static async Task<DialogDto> AssertSuccess(this IFlowStep<GetDialogResult> step)
-    {
-        var result = await step.ExecuteAsync();
-        result.TryPickT0(out var success, out _)
-            .Should()
-            .BeTrue("Expected dialog query to return success");
-
-        success.Should().NotBeNull();
-        return success!;
-    }
-
-    public static async Task<T> AssertResult<T>(this IFlowStep<UpdateDialogResult> step)
-    {
-        var result = await step.ExecuteAsync();
-
-        if (result.Value is not T value)
-        {
-            var errorMessage =
-                $"Expected dialog update to return  {typeof(T).Name}, but got {result.Value.GetType().Name}";
-            throw new InvalidOperationException(errorMessage);
-        }
-
-        value.Should().NotBeNull();
-        return value;
-    }
-
-    public static Task<DomainError> AssertDomainError(this IFlowStep<UpdateDialogResult> step)
-        => step.AssertResult<DomainError>();
-
-    public static Task<ValidationError> AssertBadRequest(this IFlowStep<UpdateDialogResult> step)
-        => step.AssertResult<ValidationError>();
-
-    public static Task<UpdateDialogSuccess> AssertSuccess(this IFlowStep<UpdateDialogResult> step)
-        => step.AssertResult<UpdateDialogSuccess>();
-
-    // Overload to access Application inside Select
-    private static IFlowStep<TOut> Select<TIn, TOut>(
-        this IFlowStep<TIn> step,
-        Func<TIn, FlowContext, TOut> selector)
-    {
-        var context = step.GetContext();
-        return step.Select(input => selector(input, context));
-    }
-}
-
-public static class FlowBuilder
-{
-    public static IFlowStep For(DialogApplication application) =>
-        new FlowStep<object?>(new FlowContext(application, [], []));
-}
-
-public record FlowContext(
-    DialogApplication Application,
-    List<Func<object?, CancellationToken, Task<object?>>> Commands,
-    Dictionary<string, object?> Stuff);
-
-public readonly struct FlowStep<TIn> : IFlowStep<TIn>
-{
-    private readonly FlowContext _context;
-
-    public FlowStep(FlowContext context)
-    {
-        _context = context;
-    }
-
-    public IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector)
-    {
-        var context = _context;
-        _context.Commands.Add(async (input, cancellationToken) =>
-        {
-            var command = commandSelector((TIn)input!);
-            return await context.Application.Send(command, cancellationToken);
-        });
-        return new FlowStep<TOut>(context);
-    }
-
-    public IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector)
-    {
-        var context = _context;
-        _context.Commands.Add((input, _) => Task.FromResult<object?>(selector((TIn)input!)));
-        return new FlowStep<TOut>(context);
-    }
-
-    public IFlowStep<TIn> Modify(Action<TIn> selector)
-    {
-        _context.Commands.Add((input, _) =>
-        {
-            selector((TIn)input!);
-            return Task.FromResult(input);
-        });
-        return this;
-    }
-
-    public async Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default)
-    {
-        object? current = null;
-
-        foreach (var command in _context.Commands)
-        {
-            current = await command(current, cancellationToken);
-        }
-
-        return (TIn)current!;
-    }
-
-    public IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command)
-    {
-        var context = _context;
-        _context.Commands.Add(async (_, cancellationToken) =>
-            await context.Application.Send(command, cancellationToken));
-        return new FlowStep<TOut>(context);
-    }
-
-    public FlowContext GetContext() => _context;
-}
-
-public interface IFlowStep
-{
-    IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command);
-    FlowContext GetContext();
-}
-
-public interface IFlowStep<TIn> : IFlowStep
-{
-    IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector);
-    IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector);
-    IFlowStep<TIn> Modify(Action<TIn> selector);
-    Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default);
-}
-
-public sealed class DeferredFlowStep<TIn> : IFlowStep<TIn>
-{
-    private readonly Func<Task<IFlowStep<TIn>>> _stepFactory;
-    private readonly FlowContext _context;
-
-    public DeferredFlowStep(Func<Task<IFlowStep<TIn>>> stepFactory, FlowContext context)
-    {
-        _stepFactory = stepFactory;
-        _context = context;
-    }
-
-    private async Task<IFlowStep<TIn>> GetStepAsync() => await _stepFactory();
-
-
-    public IFlowStep<TOut> SendCommand<TOut>(Func<TIn, IRequest<TOut>> commandSelector) =>
-        new DeferredFlowStep<TOut>(async () =>
-                (await GetStepAsync()).SendCommand(commandSelector), _context
-        );
-
-    public IFlowStep<TOut> Select<TOut>(Func<TIn, TOut> selector) =>
-        new DeferredFlowStep<TOut>(async () =>
-                (await GetStepAsync()).Select(selector), _context
-        );
-
-    public IFlowStep<TIn> Modify(Action<TIn> selector) =>
-        new DeferredFlowStep<TIn>(async () =>
-                (await GetStepAsync()).Modify(selector), _context
-        );
-
-    public Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default) =>
-        _stepFactory().Result.ExecuteAsync(cancellationToken);
-
-    public IFlowStep<TOut> SendCommand<TOut>(IRequest<TOut> command) =>
-        new DeferredFlowStep<TOut>(async () =>
-                (await GetStepAsync()).SendCommand(command), _context
-        );
-
-    public FlowContext GetContext() => _context;
 }
 
 public static class ValidationErrorAssertionsExtensions

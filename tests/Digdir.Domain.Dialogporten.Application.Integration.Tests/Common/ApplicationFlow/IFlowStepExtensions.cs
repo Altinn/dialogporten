@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -34,6 +35,24 @@ public static class IFlowStepExtensions
         initialState?.Invoke(command);
         return step.CreateDialog(command);
     }
+
+    public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<PurgeDialogResult> step) =>
+        step.SendCommand((_, ctx) => new PurgeDialogCommand { DialogId = ctx.GetDialogId() });
+
+    public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<CreateDialogResult> step,
+        Action<PurgeDialogCommand>? modify = null) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .Select(x =>
+            {
+                var command = new PurgeDialogCommand
+                {
+                    DialogId = x.DialogId,
+                    IfMatchDialogRevision = x.Revision
+                };
+                modify?.Invoke(command);
+                return command;
+            })
+            .SendCommand(x => x);
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogSuccess> step) =>
         step.Select(x => new DeleteDialogCommand { Id = x.DialogId })

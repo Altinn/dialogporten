@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -100,7 +99,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(ValidUpdatedAtTestData))]
-    public async Task Can_Create_Dialog_With_UpdatedAt_And_CreatedAt_Supplied(string _, DateTimeOffset? createdAt, DateTimeOffset updatedAt)
+    public async Task Can_Create_Dialog_With_UpdatedAt_And_CreatedAt_Supplied(string _, DateTimeOffset? createdAt,
+        DateTimeOffset updatedAt)
     {
         var dialog = await FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
@@ -168,7 +168,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 });
 
             Add("Can't create transmission with empty content values",
-                new TransmissionContentDto()
+                new TransmissionContentDto
                 {
                     Summary = new() { Value = [new() { Value = "", LanguageCode = "nb" }] },
                     Title = new() { Value = [new() { Value = "", LanguageCode = "nb" }] }
@@ -188,137 +188,71 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("empty"));
 
-    private const string LegacyHtmlMediaType = MediaTypes.LegacyHtml;
+    private static IntegrationTestUser CreateUserWithScope(string scope) => new([new("scope", scope)]);
 
-    private static ContentValueDto CreateHtmlContentValueDto() => new()
+    private static Action<IServiceCollection> ConfigureUserWithScope(string scope) => services =>
     {
-        MediaType = LegacyHtmlMediaType,
+        var user = CreateUserWithScope(scope);
+        services.RemoveAll<IUser>();
+        services.AddSingleton<IUser>(user);
+    };
+
+    private static ContentValueDto CreateHtmlContentValueDto(string mediaType) => new()
+    {
+        MediaType = mediaType,
         Value = [new() { LanguageCode = "nb", Value = "<p>Some HTML content</p>" }]
     };
 
-    [Fact]
-    public async Task Cannot_Create_AdditionalInfo_Content_With_Html_MediaType_Without_Correct_Scope()
+
+    private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto();
+        public HtmlContentTestData()
+        {
+            Add("Cannot create dialog with HTML content without valid html scope",
+                _ => { }, // No change in user scopes
+                x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
 
-        // Act
-        var response = await Application.Send(createDialogCommand);
+            Add("Can create dialog with HTML content with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(CreateDialogSuccess));
 
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(LegacyHtmlMediaType))
-            .Should()
-            .Be(1);
+            Add("Cannot create title content with HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
+
+            Add("Cannot create summary content with HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
+
+            Add("Cannot create title content with embeddable HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                typeof(ValidationError));
+
+            Add("Can create mainContentRef content with embeddable HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.MainContentReference = new()
+                {
+                    MediaType = MediaTypes.LegacyEmbeddableHtml,
+                    Value = [new() { LanguageCode = "nb", Value = "https://external.html" }]
+                },
+                typeof(CreateDialogSuccess));
+        }
     }
 
-    [Fact]
-    public async Task Can_Create_AdditionalInfo_Content_With_Html_MediaType_With_Correct_Scope()
+    [Theory, ClassData(typeof(HtmlContentTestData))]
+    public async Task Html_Content_Tests(string _, Action<IServiceCollection> appConfig,
+        Action<CreateDialogCommand> createDialog, Type expectedType)
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto();
+        Application.ConfigureServices(appConfig);
 
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-    }
-
-    [Fact]
-    public async Task Cannot_Create_Title_Content_With_Html_MediaType_With_Correct_Scope()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content!.Title = CreateHtmlContentValueDto();
-
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(LegacyHtmlMediaType))
-            .Should()
-            .Be(1);
-    }
-
-    [Fact]
-    public async Task Cannot_Create_Title_Content_With_Embeddable_Html_MediaType_With_Correct_Scope()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content!.Title = new ContentValueDto
-        {
-            MediaType = MediaTypes.LegacyEmbeddableHtml,
-            Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
-        };
-
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(MediaTypes.LegacyEmbeddableHtml))
-            .Should()
-            .Be(1);
-    }
-
-    [Fact]
-    public async Task Can_Create_MainContentRef_Content_With_Embeddable_Html_MediaType_With_Correct_Scope()
-    {
-        // Arrange
-        var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
-        createDialogCommand.Dto.Content!.MainContentReference = new ContentValueDto
-        {
-            MediaType = MediaTypes.LegacyEmbeddableHtml,
-            Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
-        };
-
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        success.DialogId.Should().Be(expectedDialogId);
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(createDialog)
+            .ExecuteAndAssert(expectedType);
     }
 
     [Fact]

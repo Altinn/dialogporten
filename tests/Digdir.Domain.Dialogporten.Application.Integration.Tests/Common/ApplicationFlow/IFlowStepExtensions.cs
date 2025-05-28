@@ -18,6 +18,14 @@ public static class IFlowStepExtensions
         return step.SendCommand(command);
     }
 
+    public static IFlowExecutor<CreateDialogResult> CreateComplexDialog(this IFlowStep step,
+        Action<CreateDialogCommand>? initialState = null)
+    {
+        var command = DialogGenerator.GenerateFakeCreateDialogCommand();
+        initialState?.Invoke(command);
+        return step.CreateDialog(command);
+    }
+
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
         Action<CreateDialogCommand>? initialState = null)
     {
@@ -65,6 +73,14 @@ public static class IFlowStepExtensions
             selector(@in, context);
             return @in;
         });
+
+    public static Task<object> ExecuteAndAssert(this IFlowStep<IOneOf> step, Type type)
+        => step.Select(result =>
+            {
+                result.Value.Should().BeOfType(type).And.NotBeNull();
+                return result.Value;
+            })
+            .ExecuteAsync();
 
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null)
         => step.AssertResult(assert).ExecuteAsync();

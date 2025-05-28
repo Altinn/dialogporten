@@ -177,7 +177,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             })
             .UpdateDialog(x =>
             {
-                x.Transmissions.Add(new TransmissionDto
+                x.Dto.Transmissions.Add(new TransmissionDto
                 {
                     Id = existingTransmissionId!.Value,
                     Type = DialogTransmissionType.Values.Information,
@@ -200,7 +200,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         // Arrange, Act, and Assert
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
-            .UpdateDialog(x => x.Content = null!)
+            .UpdateDialog(x => x.Dto.Content = null!)
             .ExecuteAndAssert<ValidationError>();
     }
 
@@ -210,7 +210,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         // Arrange, Act, and Assert
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
-            .UpdateDialog(x => x.Content = null!)
+            .UpdateDialog(x => x.Dto.Content = null!)
             .ExecuteAndAssert<UpdateDialogSuccess>();
     }
 
@@ -220,7 +220,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         // Arrange and Act
         var validationError = await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
-            .UpdateDialog(x => { x.Content!.Title = null!; })
+            .UpdateDialog(x => { x.Dto.Content!.Title = null!; })
             .ExecuteAndAssert<ValidationError>();
 
         // Assert

@@ -26,17 +26,18 @@ public static class IFlowStepExtensions
         return step.CreateDialog(command);
     }
 
-    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step, Action<UpdateDialogDto> modify) =>
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step, Action<UpdateDialogCommand> modify) =>
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand(x => new GetDialogQuery { DialogId = x.DialogId })
             .AssertResult<DialogDto>()
             .Select((x, ctx) =>
             {
                 var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(x);
-                modify(updateDto);
-                return updateDto;
+                var command = new UpdateDialogCommand { Id = ctx.GetDialogId(), Dto = updateDto };
+                modify(command);
+                return command;
             })
-            .SendCommand((x, ctx) => new UpdateDialogCommand { Id = ctx.GetDialogId(), Dto = x });
+            .SendCommand(x => x);
 
     public static IFlowExecutor<GetDialogResult> GetServiceOwnerDialog(this IFlowStep<UpdateDialogResult> step) =>
         step.AssertResult<UpdateDialogSuccess>()

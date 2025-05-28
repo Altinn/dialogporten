@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;

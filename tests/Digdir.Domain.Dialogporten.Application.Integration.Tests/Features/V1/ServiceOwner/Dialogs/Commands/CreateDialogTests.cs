@@ -112,7 +112,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<DialogDto>();
 
         var createdAtHasValue = createdAt.HasValue && createdAt != default(DateTimeOffset);
-        dialog.CreatedAt.Should().BeCloseTo(createdAtHasValue ? DateTimeOffset.UtcNow : createdAt!.Value,
+        dialog.CreatedAt.Should().BeCloseTo(createdAtHasValue ? createdAt!.Value : DateTimeOffset.UtcNow,
             precision: TimeSpan.FromSeconds(1));
 
         dialog.UpdatedAt.Should().BeCloseTo(updatedAt == default ? DateTimeOffset.UtcNow : updatedAt,
@@ -154,7 +154,6 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.ShouldHaveErrorWithText(nameof(updatedAt));
             });
 
-
     private sealed class InvalidTransmissionContentTestData : TheoryData<string, TransmissionContentDto?>
     {
         public InvalidTransmissionContentTestData()
@@ -176,7 +175,6 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 });
         }
     }
-
 
     [Theory, ClassData(typeof(InvalidTransmissionContentTestData))]
     public Task Invalid_Transmission_Content(string _, TransmissionContentDto? content) =>

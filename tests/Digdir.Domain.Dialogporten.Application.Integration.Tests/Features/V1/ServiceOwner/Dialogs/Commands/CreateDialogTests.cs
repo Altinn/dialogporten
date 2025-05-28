@@ -245,15 +245,11 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(HtmlContentTestData))]
-    public async Task Html_Content_Tests(string _, Action<IServiceCollection> appConfig,
-        Action<CreateDialogCommand> createDialog, Type expectedType)
-    {
-        Application.ConfigureServices(appConfig);
-
-        await FlowBuilder.For(Application)
+    public Task Html_Content_Tests(string _, Action<IServiceCollection> appConfig,
+        Action<CreateDialogCommand> createDialog, Type expectedType) =>
+        FlowBuilder.For(Application, appConfig)
             .CreateSimpleDialog(createDialog)
             .ExecuteAndAssert(expectedType);
-    }
 
     [Fact]
     public Task CreateDialogCommand_Should_Return_Revision() =>

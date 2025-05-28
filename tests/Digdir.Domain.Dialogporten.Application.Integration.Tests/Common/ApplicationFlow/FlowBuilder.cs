@@ -1,11 +1,18 @@
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
 public static class FlowBuilder
 {
-    public static IFlowStep For(DialogApplication application) =>
-        new FlowStep<object?>(new FlowContext(application, [], []));
+    public static IFlowStep For(DialogApplication application, Action<IServiceCollection>? appConfig = null)
+    {
+        if (appConfig is not null)
+        {
+            application.ConfigureServices(appConfig);
+        }
+        return new FlowStep<object?>(new FlowContext(application, [], []));
+    }
 }
 
 public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>

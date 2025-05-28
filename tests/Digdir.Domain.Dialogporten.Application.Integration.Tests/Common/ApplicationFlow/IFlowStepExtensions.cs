@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -34,19 +35,29 @@ public static class IFlowStepExtensions
         return step.CreateDialog(command);
     }
 
+    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogSuccess> step) =>
+        step.Select(x => new DeleteDialogCommand { Id = x.DialogId })
+            .SendCommand(x => x);
+
+    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .Select(x => new DeleteDialogCommand { Id = x.DialogId })
+            .SendCommand(x => x);
+
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DeleteDialogResult> step) =>
+        step.AssertResult<DeleteDialogSuccess>()
+            .SendCommand((_, ctx) => CreateGetDialogQuery(ctx.GetDialogId()))
+            .AssertResult<DialogDto>()
+            .Select(CreateUpdateDialogCommand)
+            .SendCommand(x => x);
+
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step, Action<UpdateDialogCommand> modify) =>
         step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x => new GetDialogQuery { DialogId = x.DialogId })
+            .SendCommand(x => CreateGetDialogQuery(x.DialogId))
             .AssertResult<DialogDto>()
             .Select((x, ctx) =>
             {
-                var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(x);
-                var command = new UpdateDialogCommand
-                {
-                    IfMatchDialogRevision = x.Revision,
-                    Id = ctx.GetDialogId(),
-                    Dto = updateDto
-                };
+                var command = CreateUpdateDialogCommand(x, ctx);
                 modify(command);
                 return command;
             })
@@ -54,11 +65,14 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<GetDialogResult> GetServiceOwnerDialog(this IFlowStep<UpdateDialogResult> step) =>
         step.AssertResult<UpdateDialogSuccess>()
-            .SendCommand((_, ctx) => new GetDialogQuery { DialogId = ctx.GetDialogId() });
+            .SendCommand((_, ctx) => CreateGetDialogQuery(ctx.GetDialogId()));
 
     public static IFlowExecutor<GetDialogResult> GetServiceOwnerDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
-            .SendCommand((_, ctx) => new GetDialogQuery { DialogId = ctx.GetDialogId() });
+            .SendCommand((_, ctx) => CreateGetDialogQuery(ctx.GetDialogId()));
+
+    public static IFlowExecutor<GetDialogResult> GetServiceOwnerDialog(this IFlowStep<DeleteDialogResult> step) =>
+        step.SendCommand((_, ctx) => CreateGetDialogQuery(ctx.GetDialogId()));
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,
@@ -99,4 +113,17 @@ public static class IFlowStepExtensions
         ctx.Bag.TryGetValue(DialogIdKey, out var value).Should().BeTrue();
         return value.Should().BeOfType<Guid>().Subject;
     }
+
+    private static UpdateDialogCommand CreateUpdateDialogCommand(DialogDto dto, FlowContext ctx)
+    {
+        var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(dto);
+        return new UpdateDialogCommand
+        {
+            IfMatchDialogRevision = dto.Revision,
+            Id = ctx.GetDialogId(),
+            Dto = updateDto
+        };
+    }
+
+    private static GetDialogQuery CreateGetDialogQuery(Guid id) => new() { DialogId = id };
 }

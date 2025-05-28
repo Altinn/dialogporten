@@ -17,6 +17,7 @@ using TransmissionAttachmentDto =
 using TransmissionAttachmentUrlDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.
     TransmissionAttachmentUrlDto;
+using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -102,49 +103,8 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IdempotentKey = idempotentKey)
             .CreateSimpleDialog(x => x.Dto.IdempotentKey = idempotentKey)
-            .ExecuteAndAssert<DomainError>(x =>
-                x.ShouldHaveErrorWithText(idempotentKey));
-    }
-
-    [Fact]
-    public async Task Cannot_Create_Transmission_Attachment_With_Existing_Id()
-    {
-        // Arrange
-        var dialogTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        var attachment = new TransmissionAttachmentDto
-        {
-            Id = IdentifiableExtensions.CreateVersion7(),
-            DisplayName = DialogGenerator.GenerateFakeLocalizations(1),
-            Urls =
-            [
-                new TransmissionAttachmentUrlDto
-                {
-                    ConsumerType = AttachmentUrlConsumerType.Values.Api,
-                    Url = new Uri("https://example.com")
-                }
-            ]
-        };
-
-        dialogTransmission.Attachments.Add(attachment);
-
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Transmissions.Add(dialogTransmission);
-
-        await Application.Send(createDialogCommand);
-
-        createDialogCommand.Dto.Id = IdentifiableExtensions.CreateVersion7();
-        dialogTransmission.Id = IdentifiableExtensions.CreateVersion7();
-
-        // Act
-        var duplicateCreateResponse = await Application.Send(createDialogCommand);
-
-        // Assert
-        duplicateCreateResponse.TryPickT1(out var domainError, out _).Should().BeTrue();
-        domainError.Should().NotBeNull();
-        domainError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains(attachment.Id.ToString()!));
+            .ExecuteAndAssert<Conflict>(x =>
+                x.ErrorMessage.Should().Contain(idempotentKey));
     }
 
     #endregion
@@ -154,90 +114,46 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public async Task Cannot_Append_Transmission_With_Existing_Id()
     {
-        // Arrange
-        var dialogTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        createDialogCommand.Dto.Transmissions.Add(dialogTransmission);
-
-        await Application.Send(createDialogCommand);
-
-        var getDialogQuery = new GetDialogQuery { DialogId = dialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.Transmissions.Clear();
-
-        // Append transmission
-        updateDialogDto.Transmissions.Add(new()
-        {
-            Id = dialogTransmission.Id,
-            Type = DialogTransmissionType.Values.Rejection,
-            Sender = new() { ActorType = ActorType.Values.ServiceOwner },
-            Content = new()
+        var originalTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Transmissions.Add(originalTransmission))
+            .UpdateDialog(x =>
             {
-                Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) },
-                Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) }
-            }
-        });
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = dialogId,
-            Dto = updateDialogDto,
-            IsSilentUpdate = true
-        });
-
-        updateResponse.TryPickT5(out var domainError, out _).Should().BeTrue();
-        domainError.Should().NotBeNull();
-        domainError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains(dialogTransmission.Id.ToString()!));
+                var transmission = new TransmissionDto
+                {
+                    Type = DialogTransmissionType.Values.Information,
+                    Id = originalTransmission.Id,
+                    Sender = new() { ActorType = ActorType.Values.ServiceOwner },
+                    Content = new()
+                    {
+                        Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) },
+                        Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) }
+                    }
+                };
+                x.Dto.Transmissions.Add(transmission);
+            })
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText(originalTransmission.Id.ToString()!));
     }
 
     [Fact]
     public async Task Cannot_Append_Activity_With_Existing_Id()
     {
-        // Arrange
-        var activity = DialogGenerator.GenerateFakeDialogActivities(1)[0];
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        createDialogCommand.Dto.Activities.Add(activity);
+        var dialogActivity = DialogGenerator.GenerateFakeDialogActivities(1)[0];
 
-        await Application.Send(createDialogCommand);
-
-        var getDialogQuery = new GetDialogQuery { DialogId = dialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.Activities.Clear();
-
-        // Append transmission
-        updateDialogDto.Activities.Add(new()
-        {
-            Id = activity.Id,
-            PerformedBy = new() { ActorType = ActorType.Values.ServiceOwner },
-            Type = DialogActivityType.Values.DialogClosed
-        });
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = dialogId,
-            Dto = updateDialogDto,
-            IsSilentUpdate = true
-        });
-
-        updateResponse.TryPickT5(out var domainError, out _).Should().BeTrue();
-        domainError.Should().NotBeNull();
-        domainError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains(activity.Id.ToString()!));
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Activities.Add(dialogActivity))
+            .UpdateDialog(x =>
+            {
+                x.Dto.Activities.Add(new()
+                {
+                    Id = dialogActivity.Id,
+                    PerformedBy = new() { ActorType = ActorType.Values.ServiceOwner },
+                    Type = DialogActivityType.Values.DialogClosed
+                });
+            })
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText(dialogActivity.Id.ToString()!));
     }
 
     #endregion

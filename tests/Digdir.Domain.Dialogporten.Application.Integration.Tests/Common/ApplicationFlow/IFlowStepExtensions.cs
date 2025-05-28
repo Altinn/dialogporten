@@ -33,7 +33,12 @@ public static class IFlowStepExtensions
             .Select((x, ctx) =>
             {
                 var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(x);
-                var command = new UpdateDialogCommand { Id = ctx.GetDialogId(), Dto = updateDto };
+                var command = new UpdateDialogCommand
+                {
+                    IfMatchDialogRevision = x.Revision,
+                    Id = ctx.GetDialogId(),
+                    Dto = updateDto
+                };
                 modify(command);
                 return command;
             })

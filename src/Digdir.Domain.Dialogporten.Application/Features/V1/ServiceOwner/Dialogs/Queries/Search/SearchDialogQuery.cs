@@ -30,12 +30,12 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by one or more owning parties
     /// </summary>
-    public List<string>? Party { get; init; }
+    public List<string>? Party { get; set; }
 
     /// <summary>
     /// Filter by end user id
     /// </summary>
-    public string? EndUserId { get; init; }
+    public string? EndUserId { get; set; }
 
     /// <summary>
     /// Filter by one or more extended statuses
@@ -84,12 +84,12 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
-    public DateTimeOffset? DueAfter { get; init; }
+    public DateTimeOffset? DueAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs with due date before this date
     /// </summary>
-    public DateTimeOffset? DueBefore { get; init; }
+    public DateTimeOffset? DueBefore { get; set; }
 
     /// <summary>
     /// Only return dialogs with visible-from date after this date
@@ -119,7 +119,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
     /// </summary>
-    public string? Search { get; init; }
+    public string? Search { get; set; }
 
     /// <summary>
     /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes

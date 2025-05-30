@@ -35,6 +35,23 @@ public static class IFlowStepExtensions
         return step.SendCommand(command);
     }
 
+    public static IFlowExecutor<CreateDialogResult> CreateDialogs(this IFlowStep step, List<CreateDialogCommand> commands)
+    {
+        if (commands.Count == 0)
+        {
+            throw new ArgumentException("At least one command is required to create dialogs.", nameof(commands));
+        }
+
+        for (var i = 0; i < commands.Count - 1; i++)
+        {
+            step = step
+                .SendCommand(commands[i])
+                .AssertResult<CreateDialogSuccess>();
+        }
+
+        return step.SendCommand(commands[^1]);
+    }
+
     public static IFlowExecutor<CreateDialogResult> CreateComplexDialog(this IFlowStep step,
         Action<CreateDialogCommand>? initialState = null)
     {

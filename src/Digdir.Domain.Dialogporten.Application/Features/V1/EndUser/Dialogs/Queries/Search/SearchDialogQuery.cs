@@ -34,7 +34,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by one or more owning parties
     /// </summary>
-    public List<string>? Party { get; init; }
+    public List<string>? Party { get; set; }
 
     /// <summary>
     /// Filter by one or more extended statuses
@@ -54,32 +54,32 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Only return dialogs created after this date
     /// </summary>
-    public DateTimeOffset? CreatedAfter { get; init; }
+    public DateTimeOffset? CreatedAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs created before this date
     /// </summary>
-    public DateTimeOffset? CreatedBefore { get; init; }
+    public DateTimeOffset? CreatedBefore { get; set; }
 
     /// <summary>
     /// Only return dialogs updated after this date
     /// </summary>
-    public DateTimeOffset? UpdatedAfter { get; init; }
+    public DateTimeOffset? UpdatedAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs updated before this date
     /// </summary>
-    public DateTimeOffset? UpdatedBefore { get; init; }
+    public DateTimeOffset? UpdatedBefore { get; set; }
 
     /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
-    public DateTimeOffset? DueAfter { get; init; }
+    public DateTimeOffset? DueAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs with due date before this date
     /// </summary>
-    public DateTimeOffset? DueBefore { get; init; }
+    public DateTimeOffset? DueBefore { get; set; }
 
     /// <summary>
     /// Filter by process

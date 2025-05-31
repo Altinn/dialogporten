@@ -1,5 +1,8 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 
@@ -11,38 +14,19 @@ public class SearchDialogTests : ApplicationCollectionFixture
     public SearchDialogTests(DialogApplication application) : base(application) { }
 
     [Fact]
-    public async Task SearchWithFreetextRequiresEndUserId_OK()
-    {
-        // Arrange
-        var searchDialogQuery = new SearchDialogQuery
-        {
-            Search = "foobar",
-            Party = [DialogGenerator.GenerateRandomParty()],
-            EndUserId = DialogGenerator.GenerateRandomParty(forcePerson: true)
-        };
-
-        // Act
-        var response = await Application.Send(searchDialogQuery);
-
-        // Assert
-        response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-    }
+    public Task Freetext_Search_With_Valid_SearchTerm_Returns_Success()
+        => FlowBuilder.For(Application)
+            .SearchServiceOwnerDialogs(x =>
+            {
+                x.Search = "foobar";
+                x.Party = [DialogGenerator.GenerateRandomParty()];
+                x.EndUserId = DialogGenerator.GenerateRandomParty(forcePerson: true);
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>();
 
     [Fact]
-    public async Task SearchWithFreetextRequiresEndUserId_MissingShouldFail()
-    {
-        // Arrange
-        var searchDialogQuery = new SearchDialogQuery
-        {
-            Search = "foobar"
-        };
-
-        // Act
-        var response = await Application.Send(searchDialogQuery);
-
-        // Assert
-        response.TryPickT1(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-    }
+    public Task Freetext_Search_Without_EndUserId_Results_In_ValidationError() =>
+        FlowBuilder.For(Application)
+            .SearchServiceOwnerDialogs(x => x.Search = "foobar")
+            .ExecuteAndAssert<ValidationError>();
 }

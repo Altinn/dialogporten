@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.67.0](https://github.com/Altinn/dialogporten/compare/v1.66.3...v1.67.0) (2025-05-31)
+
+
+### Features
+
+* **app:** Add ExternalReference to Transmission ([#2348](https://github.com/Altinn/dialogporten/issues/2348)) ([3be9afa](https://github.com/Altinn/dialogporten/commit/3be9afa8a2835c5a2e7b1c218013baef9f101acc))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency microsoft.net.test.sdk to 17.14.0 ([#2366](https://github.com/Altinn/dialogporten/issues/2366)) ([b9fbf73](https://github.com/Altinn/dialogporten/commit/b9fbf734067ee89e10c265abd173097582ba7d5e))
+* **deps:** update docker/build-push-action action to v6.17.0 ([#2367](https://github.com/Altinn/dialogporten/issues/2367)) ([00b5415](https://github.com/Altinn/dialogporten/commit/00b541541749eb13f9489deb2f0336e275ab5ff4))
+* **deps:** update hotchocolate monorepo to 15.1.5 ([#2365](https://github.com/Altinn/dialogporten/issues/2365)) ([1c8ef53](https://github.com/Altinn/dialogporten/commit/1c8ef5310d3fb49dd061369edd7208b9cf46799b))
+
 ## [1.66.3](https://github.com/Altinn/dialogporten/compare/v1.66.2...v1.66.3) (2025-05-26)
 
 

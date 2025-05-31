@@ -126,6 +126,10 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<DeleteDialogResult> step) =>
         step.SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
+    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => CreateGetEndUserDialogQuery(ctx.GetDialogId()));
+
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<DeleteDialogResult> step) =>
         step.SendCommand((_, ctx) => CreateGetEndUserDialogQuery(ctx.GetDialogId()));
 
@@ -200,7 +204,7 @@ public static class IFlowStepExtensions
             return typedResult;
         });
 
-    private static Guid GetDialogId(this FlowContext ctx)
+    public static Guid GetDialogId(this FlowContext ctx)
     {
         ctx.Bag.TryGetValue(DialogIdKey, out var value).Should().BeTrue();
         return value.Should().BeOfType<Guid>().Subject;

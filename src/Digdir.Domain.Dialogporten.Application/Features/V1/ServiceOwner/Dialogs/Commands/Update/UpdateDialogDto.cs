@@ -145,6 +145,11 @@ public class TransmissionDto
     public Uri? ExtendedType { get; set; }
 
     /// <summary>
+    /// Arbitrary string with a service-specific reference to an external system or service.
+    /// </summary>
+    public string? ExternalReference { get; set; }
+
+    /// <summary>
     /// Reference to any other transmission that this transmission is related to.
     /// </summary>
     public Guid? RelatedTransmissionId { get; set; }

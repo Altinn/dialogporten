@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogActivities.Queries.Get;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogActivities.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -8,7 +7,6 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogActivities.Queries.Get.ActivityDto;
-using SearchActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogActivities.Queries.Search.ActivityDto;
 using ActivityDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ActivityDto;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
@@ -25,7 +23,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
         var unhashedActorId = activity.PerformedBy.ActorId;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Activities.Add(CreateActivity()))
+            .CreateSimpleDialog(x => x.Dto.Activities.Add(activity))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {

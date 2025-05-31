@@ -127,7 +127,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 destinationKeySelector: x => x.Value,
                 sourceKeySelector: x => x.Value,
                 create: _mapper.Map<List<DialogSearchTag>>,
-                delete: DeleteDelegate.NoOp,
+                delete: DeleteDelegate.Default,
                 comparer: StringComparer.InvariantCultureIgnoreCase);
 
         dialog.Attachments
@@ -136,7 +136,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 sourceKeySelector: x => x.Id,
                 create: CreateAttachments,
                 update: UpdateAttachments,
-                delete: DeleteDelegate.NoOp);
+                delete: DeleteDelegate.Default);
 
         dialog.GuiActions
             .Merge(request.Dto.GuiActions,
@@ -144,7 +144,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 sourceKeySelector: x => x.Id,
                 create: CreateGuiActions,
                 update: _mapper.Update,
-                delete: DeleteDelegate.NoOp);
+                delete: DeleteDelegate.Default);
 
         dialog.ApiActions
             .Merge(request.Dto.ApiActions,
@@ -152,7 +152,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 sourceKeySelector: x => x.Id,
                 create: CreateApiActions,
                 update: UpdateApiActions,
-                delete: DeleteDelegate.NoOp);
+                delete: DeleteDelegate.Default);
 
         var serviceResourceAuthorizationResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
         if (serviceResourceAuthorizationResult.Value is Forbidden forbiddenResult)
@@ -317,7 +317,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                     sourceKeySelector: x => x.Id,
                     create: _mapper.Map<List<DialogApiActionEndpoint>>,
                     update: _mapper.Update,
-                    delete: DeleteDelegate.NoOp);
+                    delete: DeleteDelegate.Default);
         }
     }
 
@@ -343,7 +343,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                     sourceKeySelector: x => x.Id,
                     create: _mapper.Map<List<AttachmentUrl>>,
                     update: _mapper.Update,
-                    delete: DeleteDelegate.NoOp);
+                    delete: DeleteDelegate.Default);
         }
     }
 }

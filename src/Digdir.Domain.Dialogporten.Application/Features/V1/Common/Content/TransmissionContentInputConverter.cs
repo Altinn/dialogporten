@@ -66,7 +66,7 @@ internal sealed class TransmissionContentInputConverter<TTransmissionContent> :
                 sourceKeySelector: x => x.TypeId,
                 create: context.Mapper.Map<List<DialogTransmissionContent>>,
                 update: context.Mapper.Update,
-                delete: DeleteDelegate.NoOp);
+                delete: DeleteDelegate.Default);
 
         return destinations;
     }

@@ -1,12 +1,14 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using OneOf;
+using OneOf.Types;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
 using GetDialogResultEU =
     Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
@@ -86,6 +88,21 @@ public static class IFlowStepExtensions
             })
             .SendCommand(x => x);
 
+
+    public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<RestoreDialogResult> step,
+        Action<PurgeDialogCommand>? modify = null) =>
+        step.AssertResult<RestoreDialogSuccess>()
+            .Select((_, ctx) =>
+            {
+                var command = new PurgeDialogCommand
+                {
+                    DialogId = ctx.GetDialogId(),
+                };
+                modify?.Invoke(command);
+                return command;
+            })
+            .SendCommand(x => x);
+
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogSuccess> step) =>
         step.Select(x => new DeleteDialogCommand { Id = x.DialogId })
             .SendCommand(x => x);
@@ -93,6 +110,26 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
             .Select(x => new DeleteDialogCommand { Id = x.DialogId })
+            .SendCommand(x => x);
+
+    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<UpdateDialogResult> step, Action<DeleteDialogCommand>? modify = null) =>
+        step.AssertResult<UpdateDialogSuccess>()
+            .Select((_, ctx) =>
+            {
+                var command = new DeleteDialogCommand { Id = ctx.GetDialogId() };
+                modify?.Invoke(command);
+                return command;
+            })
+            .SendCommand(x => x);
+
+    public static IFlowExecutor<RestoreDialogResult> RestoreDialog(this IFlowStep<DeleteDialogResult> step, Action<RestoreDialogCommand>? modify = null) =>
+        step.AssertResult<DeleteDialogSuccess>()
+            .Select((_, ctx) =>
+            {
+                var command = new RestoreDialogCommand { DialogId = ctx.GetDialogId() };
+                modify?.Invoke(command);
+                return command;
+            })
             .SendCommand(x => x);
 
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DeleteDialogResult> step) =>

@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
@@ -11,6 +12,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using OneOf;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
+using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
 using GetDialogResultEU =
     Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
@@ -35,10 +37,12 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applic
 public static class IFlowStepExtensions
 {
     private const string DialogIdKey = "DialogId";
+    private const string ServiceResource = "ServiceResource";
 
     public static IFlowExecutor<CreateDialogResult> CreateDialog(this IFlowStep step, CreateDialogCommand command)
     {
         step.Context.Bag[DialogIdKey] = command.Dto.Id = command.Dto.Id.CreateVersion7IfDefault();
+        step.Context.Bag[ServiceResource] = command.Dto.ServiceResource;
         return step.SendCommand(command);
     }
 
@@ -186,6 +190,20 @@ public static class IFlowStepExtensions
             })
             .SendCommand(x => x);
 
+    public static IFlowExecutor<GetActivityResult> GetServiceOwnerActivityEntry(this IFlowStep<GetDialogResultSO> step,
+        Action<GetActivityQuery, DialogDtoSO>? modify = null) =>
+        step.AssertResult<DialogDtoSO>()
+            .Select(x =>
+            {
+                var query = new GetActivityQuery
+                {
+                    DialogId = x.Id
+                };
+                modify?.Invoke(query, x);
+                return query;
+            })
+            .SendCommand(x => x);
+
     public static IFlowExecutor<SearchSeenLogResult> GetEndUserSeenLog(this IFlowStep<GetDialogResultEU> step) =>
         step.AssertResult<DialogDtoEU>()
             .Select(x => new SearchSeenLogQueryEU { DialogId = x.Id })
@@ -208,6 +226,17 @@ public static class IFlowStepExtensions
             {
                 var query = new SearchDialogQuerySO();
                 modify(query);
+                return query;
+            })
+            .SendCommand(x => x);
+
+    public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep<CreateDialogResult> step,
+        Action<SearchDialogQuerySO, FlowContext> modify) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .Select(_ =>
+            {
+                var query = new SearchDialogQuerySO();
+                modify(query, step.Context);
                 return query;
             })
             .SendCommand(x => x);
@@ -269,6 +298,12 @@ public static class IFlowStepExtensions
     {
         ctx.Bag.TryGetValue(DialogIdKey, out var value).Should().BeTrue();
         return value.Should().BeOfType<Guid>().Subject;
+    }
+
+    public static string GetServiceResource(this FlowContext ctx)
+    {
+        ctx.Bag.TryGetValue(ServiceResource, out var value).Should().BeTrue();
+        return value.Should().BeOfType<string>().Subject;
     }
 
     private static UpdateDialogCommand CreateUpdateDialogCommand(DialogDto dto, FlowContext ctx)

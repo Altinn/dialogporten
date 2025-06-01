@@ -94,12 +94,12 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Only return dialogs with visible-from date after this date
     /// </summary>
-    public DateTimeOffset? VisibleAfter { get; init; }
+    public DateTimeOffset? VisibleAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs with visible-from date before this date
     /// </summary>
-    public DateTimeOffset? VisibleBefore { get; init; }
+    public DateTimeOffset? VisibleBefore { get; set; }
 
     /// <summary>
     /// Filter by process

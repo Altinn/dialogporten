@@ -1,3 +1,5 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
@@ -8,7 +10,7 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using OneOf;
-using OneOf.Types;
+using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
 using GetDialogResultEU =
     Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
@@ -24,6 +26,9 @@ using SearchDialogResultSO =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
 using SearchDialogQuerySO =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+
+using GetSeenLogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get.GetSeenLogQuery;
+using SearchSeenLogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search.SearchSeenLogQuery;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -166,6 +171,25 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetEndUserDialogQuery(ctx.GetDialogId()));
+
+    public static IFlowExecutor<GetSeenLogResult> GetEndUserSeenLogEntry(this IFlowStep<GetDialogResultEU> step,
+        Action<GetSeenLogQueryEU, DialogDtoEU>? modify = null) =>
+        step.AssertResult<DialogDtoEU>()
+            .Select(x =>
+            {
+                var query = new GetSeenLogQueryEU
+                {
+                    DialogId = x.Id
+                };
+                modify?.Invoke(query, x);
+                return query;
+            })
+            .SendCommand(x => x);
+
+    public static IFlowExecutor<SearchSeenLogResult> GetEndUserSeenLog(this IFlowStep<GetDialogResultEU> step) =>
+        step.AssertResult<DialogDtoEU>()
+            .Select(x => new SearchSeenLogQueryEU { DialogId = x.Id })
+            .SendCommand(x => x);
 
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<DeleteDialogResult> step) =>
         step.SendCommand((_, ctx) => CreateGetEndUserDialogQuery(ctx.GetDialogId()));

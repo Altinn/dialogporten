@@ -29,7 +29,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by one or more service resources
     /// </summary>
-    public List<string>? ServiceResource { get; init; }
+    public List<string>? ServiceResource { get; set; }
 
     /// <summary>
     /// Filter by one or more owning parties

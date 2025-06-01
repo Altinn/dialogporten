@@ -14,8 +14,8 @@ public class SearchDialogTests : ApplicationCollectionFixture
     public SearchDialogTests(DialogApplication application) : base(application) { }
 
     [Fact]
-    public Task Freetext_Search_With_Valid_SearchTerm_Returns_Success()
-        => FlowBuilder.For(Application)
+    public Task Freetext_Search_With_Valid_SearchTerm_Returns_Success() =>
+        FlowBuilder.For(Application)
             .SearchServiceOwnerDialogs(x =>
             {
                 x.Search = "foobar";

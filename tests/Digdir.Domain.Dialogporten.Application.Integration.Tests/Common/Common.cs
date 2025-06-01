@@ -1,13 +1,9 @@
-using System.ComponentModel.DataAnnotations;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
-using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
-public sealed class DynamicDateFilterTestData : TheoryData<int?, int?, int, int[]>
+public sealed class DynamicDateFilterTestData : TheoryData<int?, int?, int[]>
 {
     // The numbers added to "currentYear" here represent future years relative to the current year.
     // This is done to create test data for dialogs that are due or visible "soon" (1 to 4 years ahead).
@@ -17,9 +13,9 @@ public sealed class DynamicDateFilterTestData : TheoryData<int?, int?, int, int[
         var currentYear = DateTimeOffset.UtcNow.Year;
 
         // AfterYear, BeforeYear, ExpectedCount, ExpectedYears
-        Add(currentYear + 3, null, 2, [currentYear + 3, currentYear + 4]);
-        Add(null, currentYear + 2, 2, [currentYear + 1, currentYear + 2]);
-        Add(currentYear + 1, currentYear + 2, 2, [currentYear + 1, currentYear + 2]);
+        Add(currentYear + 3, null, [currentYear + 3, currentYear + 4]);
+        Add(null, currentYear + 2, [currentYear + 1, currentYear + 2]);
+        Add(currentYear + 1, currentYear + 2, [currentYear + 1, currentYear + 2]);
     }
 }
 

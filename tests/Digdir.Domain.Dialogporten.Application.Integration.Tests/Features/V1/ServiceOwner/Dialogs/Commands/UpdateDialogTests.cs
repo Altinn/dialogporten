@@ -171,33 +171,26 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
-    public async Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog()
-    {
-        await FlowBuilder.For(Application)
+    public Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog() =>
+        FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
             .UpdateDialog(x => x.Dto.Content = null!)
             .ExecuteAndAssert<ValidationError>();
-    }
 
     [Fact]
-    public async Task Can_Update_Content_To_Null_If_IsApiOnlyTrue_Dialog()
-    {
-        await FlowBuilder.For(Application)
+    public Task Can_Update_Content_To_Null_If_IsApiOnlyTrue_Dialog() =>
+        FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
             .UpdateDialog(x => x.Dto.Content = null!)
             .ExecuteAndAssert<UpdateDialogSuccess>();
-    }
 
     [Fact]
-    public async Task Should_Validate_Supplied_Content_If_IsApiOnlyTrue_Dialog()
-    {
-        var validationError = await FlowBuilder.For(Application)
+    public Task Should_Validate_Supplied_Content_If_IsApiOnlyTrue_Dialog() =>
+        FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
             .UpdateDialog(x => { x.Dto.Content!.Title = null!; })
-            .ExecuteAndAssert<ValidationError>();
-
-        validationError.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content.Title));
-    }
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content.Title)));
 
     [Fact]
     public async Task Should_Allow_User_Defined_Id_For_Attachment()

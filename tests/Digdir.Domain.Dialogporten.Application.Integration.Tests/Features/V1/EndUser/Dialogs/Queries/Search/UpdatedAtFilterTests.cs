@@ -16,21 +16,29 @@ public class UpdatedAtFilterTests : ApplicationCollectionFixture
     public UpdatedAtFilterTests(DialogApplication application) : base(application) { }
 
     [Theory]
-    [InlineData(2022, null, 2, new[] { 2022, 2023 })]
-    [InlineData(null, 2021, 2, new[] { 2020, 2021 })]
-    [InlineData(2021, 2022, 2, new[] { 2021, 2022 })]
-    public async Task Should_Filter_On_Updated_Date(int? updatedAfterYear, int? updatedBeforeYear, int expectedCount, int[] expectedYears)
+    [InlineData(2022, null, new[] { 2022, 2023 })]
+    [InlineData(null, 2021, new[] { 2020, 2021 })]
+    [InlineData(2021, 2022, new[] { 2021, 2022 })]
+    public async Task Should_Filter_On_Updated_Date(int? updatedAfterYear, int? updatedBeforeYear, int[] expectedYears)
     {
-        var dialogId2020 = NewUuidV7();
-        var dialogId2021 = NewUuidV7();
-        var dialogId2022 = NewUuidV7();
-        var dialogId2023 = NewUuidV7();
+        var expectedDialogIds = new List<Guid>();
+
+        var createDialogCommands = Enumerable
+            .Range(2020, 4)
+            .Select(year =>
+            {
+                var dialogId = NewUuidV7();
+
+                if (expectedYears.Contains(year))
+                {
+                    expectedDialogIds.Add(dialogId);
+                }
+
+                return CreateDialogCommand(year, dialogId);
+            }).ToList();
 
         await FlowBuilder.For(Application)
-            .CreateDialog(WithUpdatedAtInYear(2020, dialogId2020))
-            .CreateDialog(WithUpdatedAtInYear(2021, dialogId2021))
-            .CreateDialog(WithUpdatedAtInYear(2022, dialogId2022))
-            .CreateDialog(WithUpdatedAtInYear(2023, dialogId2023))
+            .CreateDialogs(createDialogCommands)
             .SearchEndUserDialogs(x =>
             {
                 x.Party = [Party];
@@ -39,25 +47,14 @@ public class UpdatedAtFilterTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
             {
-                result.Items.Should().HaveCount(expectedCount);
-
-                foreach (var year in expectedYears)
-                {
-                    var dialogId = year switch
-                    {
-                        2020 => dialogId2020,
-                        2021 => dialogId2021,
-                        2022 => dialogId2022,
-                        2023 => dialogId2023,
-                        _ => throw new ArgumentOutOfRangeException()
-                    };
-
-                    result.Items.Should().ContainSingle(x => x.Id == dialogId);
-                }
+                result.Items
+                    .Select(x => x.Id)
+                    .Should()
+                    .BeEquivalentTo(expectedDialogIds);
             });
     }
 
-    private static CreateDialogCommand WithUpdatedAtInYear(int year, Guid dialogId) =>
+    private static CreateDialogCommand CreateDialogCommand(int year, Guid dialogId) =>
         DialogGenerator.GenerateFakeCreateDialogCommand(
             id: dialogId,
             party: Party,

@@ -74,12 +74,12 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Only return dialogs updated after this date
     /// </summary>
-    public DateTimeOffset? UpdatedAfter { get; init; }
+    public DateTimeOffset? UpdatedAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs updated before this date
     /// </summary>
-    public DateTimeOffset? UpdatedBefore { get; init; }
+    public DateTimeOffset? UpdatedBefore { get; set; }
 
     /// <summary>
     /// Only return dialogs with due date after this date

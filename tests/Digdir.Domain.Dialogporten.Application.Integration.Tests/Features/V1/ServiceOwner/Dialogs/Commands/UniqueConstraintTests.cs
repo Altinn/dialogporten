@@ -1,22 +1,15 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-using TransmissionAttachmentDto =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionAttachmentDto;
-using TransmissionAttachmentUrlDto =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.
-    TransmissionAttachmentUrlDto;
+using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionAttachmentDto;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;

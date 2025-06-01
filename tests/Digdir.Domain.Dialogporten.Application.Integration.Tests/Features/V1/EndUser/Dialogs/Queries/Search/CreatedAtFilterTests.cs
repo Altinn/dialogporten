@@ -51,14 +51,8 @@ public class CreatedAtFilterTests : ApplicationCollectionFixture
             });
     }
 
-    private static CreateDialogCommand CreateDialogCommand(int year, Guid dialogId)
-    {
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Party = Party;
-        createDialogCommand.Dto.CreatedAt = CreateDateFromYear(year);
-        createDialogCommand.Dto.Id = dialogId;
-        return createDialogCommand;
-    }
+    private static CreateDialogCommand CreateDialogCommand(int year, Guid dialogId) => DialogGenerator
+        .GenerateFakeCreateDialogCommand(id: dialogId, party: Party, createdAt: CreateDateFromYear(year));
 
     [Fact]
     public Task Cannot_Filter_On_Created_After_With_Value_Greater_Than_Created_Before() =>

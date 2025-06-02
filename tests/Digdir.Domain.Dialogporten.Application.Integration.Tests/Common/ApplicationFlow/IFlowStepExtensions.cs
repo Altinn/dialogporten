@@ -1,12 +1,12 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.NotificationCondition;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -28,14 +28,22 @@ using SearchDialogResultSO =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
 using SearchDialogQuerySO =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
-using GetSeenLogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get.GetSeenLogQuery;
-using GetSeenLogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get.GetSeenLogResult;
-using GetSeenLogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Get.GetSeenLogQuery;
-using GetSeenLogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Get.GetSeenLogResult;
-using SearchSeenLogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search.SearchSeenLogQuery;
-using SearchSeenLogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Search.SearchSeenLogQuery;
-using SearchSeenLogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search.SearchSeenLogResult;
-using SearchSeenLogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Search.SearchSeenLogResult;
+using GetSeenLogQueryEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get.GetSeenLogQuery;
+using GetSeenLogResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get.GetSeenLogResult;
+using GetSeenLogQuerySO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Get.GetSeenLogQuery;
+using GetSeenLogResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Get.GetSeenLogResult;
+using SearchSeenLogQueryEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search.SearchSeenLogQuery;
+using SearchSeenLogQuerySO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Search.SearchSeenLogQuery;
+using SearchSeenLogResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search.SearchSeenLogResult;
+using SearchSeenLogResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Search.SearchSeenLogResult;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -51,7 +59,8 @@ public static class IFlowStepExtensions
         return step.SendCommand(command);
     }
 
-    public static IFlowExecutor<CreateDialogResult> CreateDialogs(this IFlowStep step, List<CreateDialogCommand> commands)
+    public static IFlowExecutor<CreateDialogResult> CreateDialogs(this IFlowStep step,
+        List<CreateDialogCommand> commands)
     {
         if (commands.Count == 0)
         {
@@ -83,6 +92,38 @@ public static class IFlowStepExtensions
         initialState?.Invoke(command);
         return step.CreateDialog(command);
     }
+
+    public static IFlowExecutor<NotificationConditionResult> SendNotificationConditionQuery(this IFlowStep step) =>
+        step.SendCommand(new NotificationConditionQuery
+        {
+            DialogId = Guid.NewGuid(),
+            ActivityType = DialogActivityType.Values.Information,
+            ConditionType = NotificationConditionType.Exists
+        });
+
+
+    public static IFlowExecutor<NotificationConditionResult> SendNotificationConditionQuery(
+        this IFlowStep<CreateDialogResult> step,
+        DialogActivityType.Values activityType = DialogActivityType.Values.Information,
+        NotificationConditionType conditionType = NotificationConditionType.Exists,
+        Guid? transmissionId = null) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .Select((_, ctx) =>
+            {
+                var query = new NotificationConditionQuery
+                {
+                    DialogId = ctx.GetDialogId(),
+                    ActivityType = activityType,
+                    ConditionType = conditionType
+                };
+                if (transmissionId.HasValue)
+                {
+                    query.TransmissionId = transmissionId.Value;
+                }
+
+                return query;
+            })
+            .SendCommand(x => x);
 
     public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<PurgeDialogResult> step) =>
         step.SendCommand((_, ctx) => new PurgeDialogCommand { DialogId = ctx.GetDialogId() });
@@ -126,7 +167,8 @@ public static class IFlowStepExtensions
             .Select(x => new DeleteDialogCommand { Id = x.DialogId })
             .SendCommand(x => x);
 
-    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<UpdateDialogResult> step, Action<DeleteDialogCommand>? modify = null) =>
+    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<UpdateDialogResult> step,
+        Action<DeleteDialogCommand>? modify = null) =>
         step.AssertResult<UpdateDialogSuccess>()
             .Select((_, ctx) =>
             {
@@ -136,7 +178,8 @@ public static class IFlowStepExtensions
             })
             .SendCommand(x => x);
 
-    public static IFlowExecutor<RestoreDialogResult> RestoreDialog(this IFlowStep<DeleteDialogResult> step, Action<RestoreDialogCommand>? modify = null) =>
+    public static IFlowExecutor<RestoreDialogResult> RestoreDialog(this IFlowStep<DeleteDialogResult> step,
+        Action<RestoreDialogCommand>? modify = null) =>
         step.AssertResult<DeleteDialogSuccess>()
             .Select((_, ctx) =>
             {
@@ -149,7 +192,7 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DeleteDialogResult> step) =>
         step.AssertResult<DeleteDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
-            .AssertResult<DialogDto>()
+            .AssertResult<DialogDtoSO>()
             .Select(CreateUpdateDialogCommand)
             .SendCommand(x => x);
 
@@ -157,14 +200,13 @@ public static class IFlowStepExtensions
         Action<UpdateDialogCommand> modify) =>
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.DialogId))
-            .AssertResult<DialogDto>()
-            .Select((x, ctx) =>
+            .AssertResult<DialogDtoSO>()
+            .SendCommand((x, ctx) =>
             {
                 var command = CreateUpdateDialogCommand(x, ctx);
                 modify(command);
                 return command;
-            })
-            .SendCommand(x => x);
+            });
 
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateDialogResult> step) =>
         step.AssertResult<UpdateDialogSuccess>()
@@ -246,6 +288,7 @@ public static class IFlowStepExtensions
         modify(query);
         return step.SendCommand(query);
     }
+
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep<CreateDialogResult> step,
         Action<SearchDialogQuerySO> modify) =>
         step.AssertResult<CreateDialogSuccess>()

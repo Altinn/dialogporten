@@ -57,7 +57,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert(assertType);
 
     [Fact]
-    public async Task Create_CreatesDialog_WhenDialogIsSimple()
+    public async Task Creates_Dialog_When_Dialog_Is_Simple()
     {
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
@@ -68,14 +68,15 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Fact]
-    public async Task Create_CreateDialog_WhenDialogIsComplex()
+    public async Task Create_Dialog_When_Dialog_Is_Complex()
     {
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
         await FlowBuilder.For(Application)
             .CreateComplexDialog(x => x.Dto.Id = expectedDialogId)
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.Id.Should().Be(expectedDialogId));
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Id.Should().Be(expectedDialogId));
     }
 
     private sealed class ValidUpdatedAtTestData : TheoryData<string, DateTimeOffset?, DateTimeOffset>

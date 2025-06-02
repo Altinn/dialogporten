@@ -68,6 +68,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public async Task UpdateDialogCommand_Should_Not_Set_UpdatedAt_If_IsSilentUpdate_Is_Set()
     {
         var initialUpdatedAt = DateTimeOffset.UtcNow;
+        initialUpdatedAt = initialUpdatedAt.AddTicks(-(initialUpdatedAt.Ticks % TimeSpan.TicksPerMicrosecond));
 
         var updatedDialog = await FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>

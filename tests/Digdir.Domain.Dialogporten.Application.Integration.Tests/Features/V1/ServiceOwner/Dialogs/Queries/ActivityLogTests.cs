@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -49,10 +50,11 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
         FlowBuilder.For(Application)
             .CreateDialog(DialogWithActivity())
             .GetServiceOwnerDialog()
-            .GetServiceOwnerActivityEntry((x, dialog) =>
+            .AssertResult<DialogDto>()
+            .SendCommand(x => new GetActivityQuery
             {
-                x.DialogId = dialog.Id;
-                x.ActivityId = dialog.Activities.First().Id;
+                DialogId = x.Id,
+                ActivityId = x.Activities.First().Id
             })
             .ExecuteAndAssert<ActivityDto>(x =>
                 x.PerformedBy

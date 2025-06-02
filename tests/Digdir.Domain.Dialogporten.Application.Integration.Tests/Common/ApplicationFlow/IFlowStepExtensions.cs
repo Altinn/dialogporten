@@ -1,48 +1,21 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.Get;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.NotificationCondition;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using OneOf;
-using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
-using GetDialogResultEU =
-    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
-using SearchDialogResultEU =
-    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
-using SearchDialogQueryEU =
-    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
-using GetDialogQuerySO =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogQuery;
-using GetDialogResultSO =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
-using SearchDialogResultSO =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
-using SearchDialogQuerySO =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
-using GetSeenLogQueryEU =
-    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get.GetSeenLogQuery;
-using GetSeenLogResultEU =
-    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get.GetSeenLogResult;
-using GetSeenLogQuerySO =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Get.GetSeenLogQuery;
-using GetSeenLogResultSO =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Get.GetSeenLogResult;
-using SearchSeenLogQueryEU =
-    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search.SearchSeenLogQuery;
-using SearchSeenLogQuerySO =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Search.SearchSeenLogQuery;
-using SearchSeenLogResultEU =
-    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search.SearchSeenLogResult;
-using SearchSeenLogResultSO =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Search.SearchSeenLogResult;
+using GetDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
+using SearchDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
+using SearchDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
+using GetDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogQuery;
+using GetDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
+using SearchDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
+using SearchDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -123,13 +96,6 @@ public static class IFlowStepExtensions
             })
             .SendCommand(x => x);
 
-    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DeleteDialogResult> step) =>
-        step.AssertResult<DeleteDialogSuccess>()
-            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
-            .AssertResult<DialogDtoSO>()
-            .Select(CreateUpdateDialogCommand)
-            .SendCommand(x => x);
-
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step,
         Action<UpdateDialogCommand> modify) =>
         step.AssertResult<CreateDialogSuccess>()
@@ -152,49 +118,7 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
-            .SendCommand((_, ctx) => CreateGetEndUserDialogQuery(ctx.GetDialogId()));
-
-    public static IFlowExecutor<GetSeenLogResultEU> GetEndUserSeenLogEntry(this IFlowStep<GetDialogResultEU> step,
-        Action<GetSeenLogQueryEU, DialogDtoEU>? modify = null) =>
-        step.AssertResult<DialogDtoEU>()
-            .Select(x =>
-            {
-                var query = new GetSeenLogQueryEU
-                {
-                    DialogId = x.Id
-                };
-                modify?.Invoke(query, x);
-                return query;
-            })
-            .SendCommand(x => x);
-
-    public static IFlowExecutor<GetSeenLogResultSO> GetServiceOwnerSeenLogEntry(this IFlowStep<GetDialogResultEU> step,
-        Action<GetSeenLogQuerySO, DialogDtoEU>? modify = null) =>
-        step.AssertResult<DialogDtoEU>()
-            .Select(x =>
-            {
-                var query = new GetSeenLogQuerySO
-                {
-                    DialogId = x.Id
-                };
-                modify?.Invoke(query, x);
-                return query;
-            })
-            .SendCommand(x => x);
-
-    public static IFlowExecutor<GetActivityResult> GetServiceOwnerActivityEntry(this IFlowStep<GetDialogResultSO> step,
-        Action<GetActivityQuery, DialogDtoSO>? modify = null) =>
-        step.AssertResult<DialogDtoSO>()
-            .Select(x =>
-            {
-                var query = new GetActivityQuery
-                {
-                    DialogId = x.Id
-                };
-                modify?.Invoke(query, x);
-                return query;
-            })
-            .SendCommand(x => x);
+            .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
         Action<SearchDialogQuerySO> modify)
@@ -292,5 +216,4 @@ public static class IFlowStepExtensions
     }
 
     private static GetDialogQuerySO CreateGetServiceOwnerDialogQuery(Guid id) => new() { DialogId = id };
-    private static GetDialogQueryEU CreateGetEndUserDialogQuery(Guid id) => new() { DialogId = id };
 }

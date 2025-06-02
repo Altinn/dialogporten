@@ -29,7 +29,9 @@ public class DeleteDialogTests(DialogApplication application) : ApplicationColle
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .DeleteDialog()
-            .UpdateDialog()
+            .SendCommand((_, ctx) => new GetDialogQuery { DialogId = ctx.GetDialogId() })
+            .AssertResult<DialogDto>()
+            .SendCommand(IFlowStepExtensions.CreateUpdateDialogCommand)
             .ExecuteAndAssert<EntityDeleted<DialogEntity>>();
 
     [Fact]

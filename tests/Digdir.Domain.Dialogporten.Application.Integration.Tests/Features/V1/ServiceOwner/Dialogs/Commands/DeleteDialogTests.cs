@@ -40,7 +40,7 @@ public class DeleteDialogTests(DialogApplication application) : ApplicationColle
                 x.Revision.Should().NotBeEmpty();
                 originalRevision = x.Revision;
             })
-            .DeleteDialog()
+            .SendCommand(x => new DeleteDialogCommand { Id = x.DialogId })
             .ExecuteAndAssert<DeleteDialogSuccess>(x =>
             {
                 x.Revision.Should().NotBeEmpty();

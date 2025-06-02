@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -41,6 +42,6 @@ public class PurgeDialogTests(DialogApplication application) : ApplicationCollec
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .PurgeDialog()
-            .PurgeDialog()
+            .SendCommand((_, ctx) => new PurgeDialogCommand { DialogId = ctx.GetDialogId() })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
 }

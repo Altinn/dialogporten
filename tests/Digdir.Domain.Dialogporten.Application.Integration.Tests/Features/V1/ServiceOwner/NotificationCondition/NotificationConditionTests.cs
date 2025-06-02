@@ -48,19 +48,33 @@ public class NotificationConditionTests(DialogApplication application) : Applica
                         AddActivityRequirements(x, activityType);
                         break;
                 }
+
                 if (activityType is DialogActivityType.Values.TransmissionOpened)
                 {
                     transmissionId = x.Dto.Transmissions.FirstOrDefault()?.Id ?? Guid.NewGuid();
                 }
             })
-            .SendNotificationConditionQuery(activityType, conditionType, transmissionId)
-            .ExecuteAndAssert<NotificationConditionDto>(x => x.SendNotification.Should().Be(expectedSendNotificationValue));
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => new NotificationConditionQuery
+            {
+                DialogId = ctx.GetDialogId(),
+                ActivityType = activityType,
+                ConditionType = conditionType,
+                TransmissionId = transmissionId
+            })
+            .ExecuteAndAssert<NotificationConditionDto>(x =>
+                x.SendNotification.Should().Be(expectedSendNotificationValue));
     }
 
     [Fact]
     public Task NotFound_Should_Be_Returned_When_Dialog_Does_Not_Exist() =>
         FlowBuilder.For(Application)
-            .SendNotificationConditionQuery()
+            .SendCommand(new NotificationConditionQuery
+            {
+                DialogId = Guid.NewGuid(),
+                ActivityType = DialogActivityType.Values.Information,
+                ConditionType = NotificationConditionType.Exists
+            })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
 
     [Fact]
@@ -86,7 +100,8 @@ public class NotificationConditionTests(DialogApplication application) : Applica
 
         if (activityType is not DialogActivityType.Values.TransmissionOpened) return;
 
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(type: DialogTransmissionType.Values.Information)[0];
+        var transmission =
+            DialogGenerator.GenerateFakeDialogTransmissions(type: DialogTransmissionType.Values.Information)[0];
         createDialogCommand.Dto.Transmissions.Add(transmission);
         createDialogCommand.Dto.Activities[0].TransmissionId = createDialogCommand.Dto.Transmissions[0].Id;
     }

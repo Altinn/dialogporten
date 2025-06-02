@@ -92,41 +92,6 @@ public static class IFlowStepExtensions
         return step.CreateDialog(command);
     }
 
-    public static IFlowExecutor<NotificationConditionResult> SendNotificationConditionQuery(this IFlowStep step) =>
-        step.SendCommand(new NotificationConditionQuery
-        {
-            DialogId = Guid.NewGuid(),
-            ActivityType = DialogActivityType.Values.Information,
-            ConditionType = NotificationConditionType.Exists
-        });
-
-
-    public static IFlowExecutor<NotificationConditionResult> SendNotificationConditionQuery(
-        this IFlowStep<CreateDialogResult> step,
-        DialogActivityType.Values activityType = DialogActivityType.Values.Information,
-        NotificationConditionType conditionType = NotificationConditionType.Exists,
-        Guid? transmissionId = null) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .Select((_, ctx) =>
-            {
-                var query = new NotificationConditionQuery
-                {
-                    DialogId = ctx.GetDialogId(),
-                    ActivityType = activityType,
-                    ConditionType = conditionType
-                };
-                if (transmissionId.HasValue)
-                {
-                    query.TransmissionId = transmissionId.Value;
-                }
-
-                return query;
-            })
-            .SendCommand(x => x);
-
-    public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<PurgeDialogResult> step) =>
-        step.SendCommand((_, ctx) => new PurgeDialogCommand { DialogId = ctx.GetDialogId() });
-
     public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<CreateDialogResult> step,
         Action<PurgeDialogCommand>? modify = null) =>
         step.AssertResult<CreateDialogSuccess>()
@@ -142,39 +107,9 @@ public static class IFlowStepExtensions
             })
             .SendCommand(x => x);
 
-
-    public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<RestoreDialogResult> step,
-        Action<PurgeDialogCommand>? modify = null) =>
-        step.AssertResult<RestoreDialogSuccess>()
-            .Select((_, ctx) =>
-            {
-                var command = new PurgeDialogCommand
-                {
-                    DialogId = ctx.GetDialogId(),
-                };
-                modify?.Invoke(command);
-                return command;
-            })
-            .SendCommand(x => x);
-
-    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogSuccess> step) =>
-        step.Select(x => new DeleteDialogCommand { Id = x.DialogId })
-            .SendCommand(x => x);
-
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
             .Select(x => new DeleteDialogCommand { Id = x.DialogId })
-            .SendCommand(x => x);
-
-    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<UpdateDialogResult> step,
-        Action<DeleteDialogCommand>? modify = null) =>
-        step.AssertResult<UpdateDialogSuccess>()
-            .Select((_, ctx) =>
-            {
-                var command = new DeleteDialogCommand { Id = ctx.GetDialogId() };
-                modify?.Invoke(command);
-                return command;
-            })
             .SendCommand(x => x);
 
     public static IFlowExecutor<RestoreDialogResult> RestoreDialog(this IFlowStep<DeleteDialogResult> step,
@@ -302,17 +237,6 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep<CreateDialogResult> step,
         Action<SearchDialogQuerySO, FlowContext> modify) =>
         step.AssertResult<CreateDialogSuccess>()
-            .Select(_ =>
-            {
-                var query = new SearchDialogQuerySO();
-                modify(query, step.Context);
-                return query;
-            })
-            .SendCommand(x => x);
-
-    public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep<GetDialogResultEU> step,
-        Action<SearchDialogQuerySO, FlowContext> modify) =>
-        step.AssertResult<DialogDtoEU>()
             .Select(_ =>
             {
                 var query = new SearchDialogQuerySO();

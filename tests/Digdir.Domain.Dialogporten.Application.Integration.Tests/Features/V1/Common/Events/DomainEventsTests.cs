@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using FluentAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Actors;
@@ -246,9 +247,18 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
                 x.IsSilentUpdate = true;
                 x.Dto.ExtendedStatus = "Updated status";
             })
-            .DeleteDialog(x => x.IsSilentUpdate = true)
+            .AssertResult<UpdateDialogSuccess>()
+            .SendCommand((_, ctx) => new DeleteDialogCommand
+            {
+                Id = ctx.GetDialogId(),
+                IsSilentUpdate = true
+            })
             .RestoreDialog(x => x.IsSilentUpdate = true)
-            .PurgeDialog(x => x.IsSilentUpdate = true)
+            .SendCommand((_, ctx) => new PurgeDialogCommand
+            {
+                IsSilentUpdate = true,
+                DialogId = ctx.GetDialogId()
+            })
             .ExecuteAndAssert<Success>(_ =>
             {
                 var publishedEvents = Application.GetPublishedEvents();

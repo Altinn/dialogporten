@@ -1,9 +1,11 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using FluentAssertions;
-using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
+using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
+using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using SeenLogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Get.SeenLogDto;
 using SearchSeenLogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Search.SeenLogDto;
@@ -19,7 +21,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .CreateSimpleDialog()
             .GetEndUserDialog()
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(dialog =>
+            .ExecuteAndAssert<DialogDtoSO>(dialog =>
                 dialog.SeenSinceLastUpdate
                     .Single()
                     .SeenBy.ActorId
@@ -31,7 +33,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
-            .SearchServiceOwnerDialogs((x, ctx) => x.ServiceResource = [ctx.GetServiceResource()])
+            .AssertResult<DialogDtoEU>()
+            .SendCommand((_, ctx) => new SearchDialogQuery { ServiceResource = [ctx.GetServiceResource()] })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
                 result.Items
                     .Single()

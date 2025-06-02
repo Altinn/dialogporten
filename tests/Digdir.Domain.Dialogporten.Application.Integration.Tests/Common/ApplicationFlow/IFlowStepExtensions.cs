@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -387,7 +386,7 @@ public static class IFlowStepExtensions
         return value.Should().BeOfType<string>().Subject;
     }
 
-    private static UpdateDialogCommand CreateUpdateDialogCommand(DialogDto dto, FlowContext ctx)
+    public static UpdateDialogCommand CreateUpdateDialogCommand(DialogDtoSO dto, FlowContext ctx)
     {
         var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(dto);
         return new UpdateDialogCommand

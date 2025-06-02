@@ -1,5 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -67,27 +68,17 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public async Task UpdateDialogCommand_Should_Not_Set_UpdatedAt_If_IsSilentUpdate_Is_Set()
     {
-        var initialUpdatedAt = DateTimeOffset.UtcNow;
-        initialUpdatedAt = initialUpdatedAt.AddTicks(-(initialUpdatedAt.Ticks % TimeSpan.TicksPerMicrosecond));
+        DateTimeOffset? initialUpdatedAt = null;
 
-        var updatedDialog = await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-            {
-                x.Dto.UpdatedAt = initialUpdatedAt;
-                // CreatedAt must be set when UpdatedAt is set
-                x.Dto.CreatedAt = initialUpdatedAt;
-            })
-            .UpdateDialog(x =>
-            {
-                x.IsSilentUpdate = true;
-                x.Dto.Progress = (x.Dto.Progress % 100) + 1;
-            })
+        await FlowBuilder.For(Application)
+            // CreateAt must be set when UpdatedAt is set
+            .CreateSimpleDialog(x => x.Dto.UpdatedAt = x.Dto.CreatedAt = initialUpdatedAt)
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => new GetDialogQuery { DialogId = ctx.GetDialogId() })
+            .AssertResult<DialogDto>(x => initialUpdatedAt = x.UpdatedAt)
+            .SendCommand(IFlowStepExtensions.CreateUpdateDialogCommand)
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>();
-
-        updatedDialog.UpdatedAt
-            .Should()
-            .Be(initialUpdatedAt);
+            .ExecuteAndAssert<DialogDto>(x => x.UpdatedAt.Should().Be(initialUpdatedAt));
     }
 
     [Fact]

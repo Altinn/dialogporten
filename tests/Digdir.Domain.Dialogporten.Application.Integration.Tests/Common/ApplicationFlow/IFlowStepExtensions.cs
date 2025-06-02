@@ -196,11 +196,6 @@ public static class IFlowStepExtensions
             })
             .SendCommand(x => x);
 
-    public static IFlowExecutor<SearchSeenLogResultEU> GetEndUserSeenLog(this IFlowStep<GetDialogResultEU> step) =>
-        step.AssertResult<DialogDtoEU>()
-            .Select(x => new SearchSeenLogQueryEU { DialogId = x.Id })
-            .SendCommand(x => x);
-
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
         Action<SearchDialogQuerySO> modify)
     {

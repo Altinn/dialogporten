@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Parties;
@@ -64,7 +65,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
-            .GetEndUserSeenLog()
+            .AssertResult<DialogDto>()
+            .SendCommand(x => new SearchSeenLogQuery { DialogId = x.Id })
             .ExecuteAndAssert<List<SearchSeenLogDto>>(result => result.Single()
                 .SeenBy
                 .ActorId

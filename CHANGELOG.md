@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.67.0](https://github.com/Altinn/dialogporten/compare/v1.66.3...v1.67.0) (2025-06-02)
+
+
+### Features
+
+* **app:** Add ExternalReference to Transmission ([#2348](https://github.com/Altinn/dialogporten/issues/2348)) ([3be9afa](https://github.com/Altinn/dialogporten/commit/3be9afa8a2835c5a2e7b1c218013baef9f101acc))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency benchmarkdotnet to 0.15.0 ([#2374](https://github.com/Altinn/dialogporten/issues/2374)) ([2fea3e1](https://github.com/Altinn/dialogporten/commit/2fea3e184d3949b6214ff1a9fa44c31ff9a7a5d5))
+* **deps:** update dependency bouncycastle.cryptography to 2.6.1 ([#2372](https://github.com/Altinn/dialogporten/issues/2372)) ([8751724](https://github.com/Altinn/dialogporten/commit/8751724524d77a7d0b2922a072c0a25816fc8fa6))
+* **deps:** update dependency microsoft.net.test.sdk to 17.14.0 ([#2366](https://github.com/Altinn/dialogporten/issues/2366)) ([b9fbf73](https://github.com/Altinn/dialogporten/commit/b9fbf734067ee89e10c265abd173097582ba7d5e))
+* **deps:** update docker/build-push-action action to v6.17.0 ([#2367](https://github.com/Altinn/dialogporten/issues/2367)) ([00b5415](https://github.com/Altinn/dialogporten/commit/00b541541749eb13f9489deb2f0336e275ab5ff4))
+* **deps:** update grafana/grafana docker tag to v11.6.2 ([#2375](https://github.com/Altinn/dialogporten/issues/2375)) ([2006009](https://github.com/Altinn/dialogporten/commit/200600901d28142d9b62a8cb62101e9d32eb2f3f))
+* **deps:** update grafana/loki docker tag to v3.5.1 ([#2373](https://github.com/Altinn/dialogporten/issues/2373)) ([cd32c5f](https://github.com/Altinn/dialogporten/commit/cd32c5faa4a537bb874287a91e44b9dd74bab0d0))
+* **deps:** update hotchocolate monorepo to 15.1.5 ([#2365](https://github.com/Altinn/dialogporten/issues/2365)) ([1c8ef53](https://github.com/Altinn/dialogporten/commit/1c8ef5310d3fb49dd061369edd7208b9cf46799b))
+
 ## [1.66.3](https://github.com/Altinn/dialogporten/compare/v1.66.2...v1.66.3) (2025-05-26)
 
 

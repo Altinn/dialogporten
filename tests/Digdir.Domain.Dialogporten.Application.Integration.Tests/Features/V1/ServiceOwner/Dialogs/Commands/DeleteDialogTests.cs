@@ -17,7 +17,10 @@ public class DeleteDialogTests(DialogApplication application) : ApplicationColle
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .DeleteDialog()
-            .GetServiceOwnerDialog()
+            .SendCommand((_, ctx) => new GetDialogQuery
+            {
+                DialogId = ctx.GetDialogId()
+            })
             .ExecuteAndAssert<DialogDto>(x =>
                 x.DeletedAt.ShouldBeCloseToNow());
 

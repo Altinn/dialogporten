@@ -1,5 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSeenLogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Parties;
@@ -20,7 +22,10 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         => FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
-            .GetServiceOwnerDialog()
+            .SendCommand((_, ctx) => new GetDialogQuery
+            {
+                DialogId = ctx.GetDialogId()
+            })
             .ExecuteAndAssert<DialogDtoSO>(dialog =>
                 dialog.SeenSinceLastUpdate
                     .Single()
@@ -65,7 +70,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
-            .GetServiceOwnerSeenLog()
+            .AssertResult<DialogDtoEU>()
+            .SendCommand(x => new SearchSeenLogQuery { DialogId = x.Id })
             .ExecuteAndAssert<List<SearchSeenLogDto>>(result =>
                 result.Single()
                     .SeenBy

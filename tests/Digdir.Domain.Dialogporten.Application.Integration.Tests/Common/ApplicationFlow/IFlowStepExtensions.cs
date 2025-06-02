@@ -150,12 +150,6 @@ public static class IFlowStepExtensions
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<DeleteDialogResult> step) =>
-        step.SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
-
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<GetDialogResultEU> step) =>
-        step.SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
-
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetEndUserDialogQuery(ctx.GetDialogId()));
@@ -207,14 +201,6 @@ public static class IFlowStepExtensions
             .Select(x => new SearchSeenLogQueryEU { DialogId = x.Id })
             .SendCommand(x => x);
 
-    public static IFlowExecutor<SearchSeenLogResultSO> GetServiceOwnerSeenLog(this IFlowStep<GetDialogResultEU> step) =>
-        step.AssertResult<DialogDtoEU>()
-            .Select(x => new SearchSeenLogQuerySO { DialogId = x.Id })
-            .SendCommand(x => x);
-
-    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<DeleteDialogResult> step) =>
-        step.SendCommand((_, ctx) => CreateGetEndUserDialogQuery(ctx.GetDialogId()));
-
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
         Action<SearchDialogQuerySO> modify)
     {
@@ -230,17 +216,6 @@ public static class IFlowStepExtensions
             {
                 var query = new SearchDialogQuerySO();
                 modify(query);
-                return query;
-            })
-            .SendCommand(x => x);
-
-    public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep<CreateDialogResult> step,
-        Action<SearchDialogQuerySO, FlowContext> modify) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .Select(_ =>
-            {
-                var query = new SearchDialogQuerySO();
-                modify(query, step.Context);
                 return query;
             })
             .SendCommand(x => x);

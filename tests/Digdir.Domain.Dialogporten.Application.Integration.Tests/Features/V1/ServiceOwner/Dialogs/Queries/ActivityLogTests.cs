@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -31,9 +32,9 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
     public Task Search_Dialog_LatestActivity_Should_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
             .CreateDialog(DialogWithActivity())
-            .SearchServiceOwnerDialogs((x, ctx) =>
+            .SendCommand((_, ctx) => new SearchDialogQuery
             {
-                x.ServiceResource = [ctx.GetServiceResource()];
+                ServiceResource = [ctx.GetServiceResource()]
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
                 x.Items.Single()

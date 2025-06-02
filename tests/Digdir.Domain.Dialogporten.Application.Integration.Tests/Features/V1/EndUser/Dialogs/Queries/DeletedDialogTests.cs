@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -14,7 +15,10 @@ public class DeletedDialogTests(DialogApplication application) : ApplicationColl
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .DeleteDialog()
-            .GetEndUserDialog()
+            .SendCommand((_, ctx) => new GetDialogQuery
+            {
+                DialogId = ctx.GetDialogId()
+            })
             .ExecuteAndAssert<EntityDeleted<DialogEntity>>(entityDeleted =>
                 entityDeleted.Message.Should().Contain("is removed"));
 }

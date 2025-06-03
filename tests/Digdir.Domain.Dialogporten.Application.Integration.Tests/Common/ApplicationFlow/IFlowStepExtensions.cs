@@ -125,16 +125,6 @@ public static class IFlowStepExtensions
         return step.SendCommand(query);
     }
 
-    public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep<CreateDialogResult> step,
-        Action<SearchDialogQuerySO> modify) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(_ =>
-            {
-                var query = new SearchDialogQuerySO();
-                modify(query);
-                return query;
-            });
-
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
         Action<SearchDialogQueryEU> modify)
     {
@@ -142,16 +132,6 @@ public static class IFlowStepExtensions
         modify(query);
         return step.SendCommand(query);
     }
-
-    public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep<CreateDialogResult> step,
-        Action<SearchDialogQueryEU> modify) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(_ =>
-            {
-                var query = new SearchDialogQueryEU();
-                modify(query);
-                return query;
-            });
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,

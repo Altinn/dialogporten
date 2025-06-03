@@ -63,5 +63,5 @@ public class CreatedAtFilterTests : ApplicationCollectionFixture
                 x.CreatedAfter = CreateDateFromYear(2022);
                 x.CreatedBefore = CreateDateFromYear(2021);
             })
-            .ExecuteAndAssert<ValidationError>(result => result.Should().NotBeNull());
+            .ExecuteAndAssert<ValidationError>();
 }

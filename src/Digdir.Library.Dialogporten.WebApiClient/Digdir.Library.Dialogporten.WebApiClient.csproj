@@ -12,6 +12,7 @@
         <RootNamespace>Altinn.ApiClients.Dialogporten</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591,1573</NoWarn>
+        <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>

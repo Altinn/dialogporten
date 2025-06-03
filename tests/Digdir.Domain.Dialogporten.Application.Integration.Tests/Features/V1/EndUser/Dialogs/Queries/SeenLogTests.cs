@@ -15,20 +15,6 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class SeenLogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    [Fact]
-    public Task Get_Dialog_SeenLog_Should_Not_Return_User_Ids_Unhashed() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog()
-            .GetEndUserDialog()
-            .ExecuteAndAssert<DialogDto>(result =>
-            {
-                result.SeenSinceLastUpdate
-                    .Single()
-                    .SeenBy.ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
-            });
-
     private const string DummyService = "urn:altinn:resource:test-service";
 
     [Fact]
@@ -36,6 +22,14 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
+            .AssertResult<DialogDto>(result =>
+            {
+                result.SeenSinceLastUpdate
+                    .Single()
+                    .SeenBy.ActorId
+                    .Should()
+                    .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
+            })
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
                 x.Items.Single().SeenSinceLastUpdate

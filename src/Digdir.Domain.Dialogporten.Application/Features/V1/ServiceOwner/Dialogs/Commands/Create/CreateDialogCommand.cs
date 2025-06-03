@@ -21,7 +21,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater
 {
-    public bool IsSilentUpdate { get; init; }
+    public bool IsSilentUpdate { get; set; }
     public CreateDialogDto Dto { get; set; } = null!;
 }
 

@@ -18,13 +18,3 @@ public static class DomainErrorAssertionsExtensions
             e => e.ErrorMessage.Contains(expectedText, StringComparison.OrdinalIgnoreCase),
             $"Expected an error containing the text '{expectedText}'");
 }
-
-public static class DateTimeAssertionExtensions
-{
-    public static void ShouldBeCloseToNow(this DateTimeOffset? dateTime, TimeSpan? precision = null)
-    {
-        precision ??= TimeSpan.FromSeconds(1);
-        dateTime.Should().HaveValue();
-        dateTime!.Value.Should().BeCloseTo(DateTimeOffset.UtcNow, (TimeSpan)precision);
-    }
-}

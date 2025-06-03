@@ -22,7 +22,7 @@ public class DeleteDialogTests(DialogApplication application) : ApplicationColle
                 DialogId = ctx.GetDialogId()
             })
             .ExecuteAndAssert<DialogDto>(x =>
-                x.DeletedAt.ShouldBeCloseToNow());
+                x.DeletedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(1)));
 
     [Fact]
     public Task Updating_Deleted_Dialog_Should_Return_EntityDeleted() =>

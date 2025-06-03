@@ -32,14 +32,14 @@ public static class IFlowStepExtensions
     }
 
     public static IFlowExecutor<CreateDialogResult> CreateDialogs(this IFlowStep step,
-        List<CreateDialogCommand> commands)
+        params CreateDialogCommand[] commands)
     {
-        if (commands.Count == 0)
+        if (commands.Length == 0)
         {
             throw new ArgumentException("At least one command is required to create dialogs.", nameof(commands));
         }
 
-        for (var i = 0; i < commands.Count - 1; i++)
+        for (var i = 0; i < commands.Length - 1; i++)
         {
             step = step
                 .SendCommand(commands[i])

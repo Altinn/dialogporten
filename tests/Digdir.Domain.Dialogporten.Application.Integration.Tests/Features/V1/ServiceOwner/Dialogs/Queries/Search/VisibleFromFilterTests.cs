@@ -45,7 +45,7 @@ public class VisibleFromFilterTests : ApplicationCollectionFixture
             }
 
             return CreateDialogCommand(year, dialogId);
-        }).ToList();
+        }).ToArray();
 
         await FlowBuilder.For(Application)
             .CreateDialogs(createDialogCommands)

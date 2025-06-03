@@ -32,7 +32,7 @@ public class DueAtFilterTests : ApplicationCollectionFixture
                 }
 
                 return CreateDialog(CreateDateFromYear(year), dialogId);
-            }).ToList();
+            }).ToArray();
 
         await FlowBuilder.For(Application)
             .CreateDialogs(createDialogCommands)

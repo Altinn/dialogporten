@@ -68,7 +68,7 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<CreateDialogResult> step,
         Action<PurgeDialogCommand>? modify = null) =>
         step.AssertResult<CreateDialogSuccess>()
-            .Select(x =>
+            .SendCommand(x =>
             {
                 var command = new PurgeDialogCommand
                 {
@@ -77,24 +77,21 @@ public static class IFlowStepExtensions
                 };
                 modify?.Invoke(command);
                 return command;
-            })
-            .SendCommand(x => x);
+            });
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
-            .Select(x => new DeleteDialogCommand { Id = x.DialogId })
-            .SendCommand(x => x);
+            .SendCommand(x => new DeleteDialogCommand { Id = x.DialogId });
 
     public static IFlowExecutor<RestoreDialogResult> RestoreDialog(this IFlowStep<DeleteDialogResult> step,
         Action<RestoreDialogCommand>? modify = null) =>
         step.AssertResult<DeleteDialogSuccess>()
-            .Select((_, ctx) =>
+            .SendCommand((_, ctx) =>
             {
                 var command = new RestoreDialogCommand { DialogId = ctx.GetDialogId() };
                 modify?.Invoke(command);
                 return command;
-            })
-            .SendCommand(x => x);
+            });
 
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step,
         Action<UpdateDialogCommand> modify) =>
@@ -131,13 +128,12 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep<CreateDialogResult> step,
         Action<SearchDialogQuerySO> modify) =>
         step.AssertResult<CreateDialogSuccess>()
-            .Select(_ =>
+            .SendCommand(_ =>
             {
                 var query = new SearchDialogQuerySO();
                 modify(query);
                 return query;
-            })
-            .SendCommand(x => x);
+            });
 
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
         Action<SearchDialogQueryEU> modify)
@@ -150,13 +146,12 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep<CreateDialogResult> step,
         Action<SearchDialogQueryEU> modify) =>
         step.AssertResult<CreateDialogSuccess>()
-            .Select(_ =>
+            .SendCommand(_ =>
             {
                 var query = new SearchDialogQueryEU();
                 modify(query);
                 return query;
-            })
-            .SendCommand(x => x);
+            });
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,

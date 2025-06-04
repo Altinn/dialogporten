@@ -120,7 +120,7 @@ public sealed class CreateDialogDto
     /// </summary>
     public SystemLabel.Values? SystemLabel { get; set; }
 
-    public DialogServiceOwnerContextDto? ServiceOwnerContext { get; set; } = new();
+    public DialogServiceOwnerContextDto? ServiceOwnerContext { get; set; }
 
     /// <summary>
     /// The dialog unstructured text content.

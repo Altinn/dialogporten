@@ -4,6 +4,10 @@
   subscription: Subscriptions
 }
 
+interface BulkSetSystemLabelError {
+  message: String!
+}
+
 interface DialogByIdError {
   message: String!
 }
@@ -92,6 +96,27 @@ type AuthorizedSubParty {
   isAccessManager: Boolean!
 }
 
+type BulkSetSystemLabelConcurrencyError implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelDomainError implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelForbidden implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelPayload {
+  success: Boolean!
+  errors: [BulkSetSystemLabelError!]!
+}
+
+type BulkSetSystemLabelValidationError implements BulkSetSystemLabelError {
+  message: String!
+}
+
 type Content {
   title: ContentValue!
   summary: ContentValue!
@@ -109,6 +134,7 @@ type ContentValue {
 type Dialog {
   id: UUID!
   revision: UUID!
+  enduserContextRevision: UUID!
   org: String!
   serviceResource: String!
   serviceResourceType: String!
@@ -183,6 +209,7 @@ type Localization {
 
 type Mutations {
   setSystemLabel(input: SetSystemLabelInput!): SetSystemLabelPayload!
+  bulkSetSystemLabels(input: BulkSetSystemLabelInput!): BulkSetSystemLabelPayload!
 }
 
 type Queries @authorize(policy: "enduser") {
@@ -201,6 +228,7 @@ type SearchContent {
 type SearchDialog {
   id: UUID!
   org: String!
+  enduserContextRevision: UUID!
   serviceResource: String!
   serviceResourceType: String!
   party: String!
@@ -293,6 +321,16 @@ type TransmissionContent {
   contentReference: ContentValue
 }
 
+input BulkSetSystemLabelInput {
+  dialogs: [DialogRevisionInput!]!
+  systemLabels: [SystemLabel!]!
+}
+
+input DialogRevisionInput {
+  dialogId: UUID!
+  enduserContextRevision: UUID
+}
+
 input SearchDialogInput {
   "Filter by one or more service owner codes"
   org: [String!]
@@ -343,7 +381,7 @@ input SearchDialogSortTypeInput {
 
 input SetSystemLabelInput {
   dialogId: UUID!
-  label: SystemLabel!
+  systemLabels: [SystemLabel!]!
 }
 
 enum ActivityType {

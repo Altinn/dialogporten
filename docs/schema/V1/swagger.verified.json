@@ -378,6 +378,45 @@
         },
         "type": "object"
       },
+      "V1CommonSystemLabels_BulkSetSystemLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogs": {
+            "description": "List of target dialog ids with optional revision ids",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonSystemLabels_DialogRevision"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonSystemLabels_DialogRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogId": {
+            "description": "Target dialog id for system labels",
+            "format": "guid",
+            "type": "string"
+          },
+          "enduserContextRevision": {
+            "description": "Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserCommonActors_Actor": {
         "additionalProperties": false,
         "properties": {
@@ -647,6 +686,12 @@
             "example": "2022-12-31T23:59:59Z",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "enduserContextRevision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
             "type": "string"
           },
           "expiresAt": {
@@ -1293,6 +1338,11 @@
             "nullable": true,
             "type": "string"
           },
+          "enduserContextRevision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "extendedStatus": {
             "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n            \nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
             "nullable": true,
@@ -1482,11 +1532,24 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabelRequest": {
         "additionalProperties": false,
         "properties": {
-          "label": {
-            "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -3567,6 +3630,12 @@
             "nullable": true,
             "type": "string"
           },
+          "enduserContextRevision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
           "expiresAt": {
             "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n            \nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed by the service\nowner after the dialog has been created.",
             "example": "2022-12-31T23:59:59Z",
@@ -4272,6 +4341,11 @@
             "nullable": true,
             "type": "string"
           },
+          "enduserContextRevision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "extendedStatus": {
             "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n            \nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
             "nullable": true,
@@ -4478,6 +4552,28 @@
         "properties": {
           "dto": {
             "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_Dialog"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -5491,7 +5587,8 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/context/systemlabels": {
       "put": {
-        "operationId": "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabel",
+        "description": "Sets the system labels of the dialog.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.",
+        "operationId": "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabels",
         "parameters": [
           {
             "in": "path",
@@ -5527,7 +5624,16 @@
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "The dialog system label was updated successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the dialog",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "content": {
@@ -5537,13 +5643,13 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "404": {
             "content": {
@@ -5553,10 +5659,10 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
           },
           "410": {
-            "description": ""
+            "description": "Entity with the given key(s) is removed."
           },
           "412": {
             "content": {
@@ -5566,7 +5672,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "422": {
             "content": {
@@ -5576,7 +5682,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "Domain error occurred. See problem details for a list of errors."
           }
         },
         "security": [
@@ -5586,6 +5692,7 @@
             ]
           }
         ],
+        "summary": "Sets the system labels of a dialog",
         "tags": [
           "Enduser"
         ]
@@ -5840,6 +5947,75 @@
           }
         ],
         "summary": "Gets a single dialog transmission",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset": {
+      "post": {
+        "description": "Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.",
+        "operationId": "V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
+              }
+            }
+          },
+          "required": true,
+          "x-name": "dto"
+        },
+        "responses": {
+          "204": {
+            "description": "The dialog system labels was updated successfully."
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Sets system labels for multiple dialogs",
         "tags": [
           "Enduser"
         ]
@@ -7099,6 +7275,127 @@
         ]
       }
     },
+    "/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels": {
+      "put": {
+        "description": "Sets the system labels of the dialog.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.",
+        "operationId": "V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabels",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enduserId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest"
+              }
+            }
+          },
+          "description": "",
+          "required": true,
+          "x-name": "SetDialogSystemLabelRequest",
+          "x-position": 1
+        },
+        "responses": {
+          "204": {
+            "description": "The dialog system label was updated successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the dialog",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Sets the system labels of a dialog",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog": {
       "get": {
         "description": "Gets all seen log records for a dialog.",
@@ -7476,6 +7773,85 @@
           }
         ],
         "summary": "Gets a single dialog transmission",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset": {
+      "post": {
+        "description": "Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.",
+        "operationId": "V1ServiceOwnerDialogSystemLabelsBulkSet_BulkSetDialogSystemLabels",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "enduserId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
+              }
+            }
+          },
+          "required": true,
+          "x-name": "dto"
+        },
+        "responses": {
+          "204": {
+            "description": "The dialog system labels was updated successfully."
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Sets system labels for multiple dialogs",
         "tags": [
           "Serviceowner"
         ]

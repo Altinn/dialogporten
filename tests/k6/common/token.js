@@ -85,3 +85,7 @@ export function getDefaultEnduserOrgNo() {
 export function getDefaultEnduserSsn() {
   return defaultTokenOptions.ssn;
 }
+
+export function getDefaultServiceOwnerOrgNo() {
+    return defaultServiceOwnerOrgNo;
+}

@@ -1,11 +1,16 @@
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.ServiceOwnerLabels.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update.ServiceOwnerLabelDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.ServiceOwnerContext.Commands;
@@ -16,235 +21,134 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public UpdateDialogServiceOwnerLabelTests(DialogApplication application) : base(application) { }
 
     [Fact]
-    public async Task Cannot_Call_Update_ServiceOwnerLabels_Without_DialogId_Or_Dto()
-    {
-        // Arrange
-        var setServiceOwnerLabelsCommand = new UpdateDialogServiceOwnerContextCommand();
-
-        // Act
-        var response = await Application.Send(setServiceOwnerLabelsCommand);
-
-        // Assert
-        response.TryPickT1(out var validationError, out _).Should().BeTrue();
-        validationError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains(nameof(UpdateDialogServiceOwnerContextCommand.DialogId)));
-
-        validationError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains(nameof(UpdateDialogServiceOwnerContextCommand.Dto)));
-    }
+    public Task Cannot_Call_Update_ServiceOwnerLabels_Without_DialogId_Or_Dto() =>
+        FlowBuilder.For(Application)
+            .SendCommand(new UpdateDialogServiceOwnerContextCommand())
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                x.ShouldHaveErrorWithText(nameof(UpdateDialogServiceOwnerContextCommand.DialogId));
+                x.ShouldHaveErrorWithText(nameof(UpdateDialogServiceOwnerContextCommand.Dto));
+            });
 
     [Fact]
     public async Task Calling_UpdateDialogServiceOwnerContext_With_Invalid_DialogId_Returns_NotFound()
     {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var setServiceOwnerLabelsCommand = new UpdateDialogServiceOwnerContextCommand
-        {
-            DialogId = dialogId,
-            Dto = new()
-        };
-
-        // Act
-        var response = await Application.Send(setServiceOwnerLabelsCommand);
-
-        // Assert
-        response.TryPickT2(out var notFoundError, out _).Should().BeTrue();
-        notFoundError.Should().NotBeNull();
-        notFoundError.Message.Should().Contain(dialogId.ToString());
-    }
-
-    [Fact]
-    public async Task Can_Remove_ServiceOwnerLabels()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        createDialogCommand.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = "Scadrial" }];
-        await Application.Send(createDialogCommand);
-
-        var updateLabelsCommand = new UpdateDialogServiceOwnerContextCommand
-        {
-            DialogId = dialogId,
-            Dto = new()
-        };
-
-        // Act
-        var response = await Application.Send(updateLabelsCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Revision.Should().NotBe(Guid.Empty);
-
-        await Application.AssertEntityCountAsync<DialogServiceOwnerLabel>(count: 0);
-    }
-
-    [Fact]
-    public async Task Can_Add_ServiceOwnerLabel_To_Existing_Dialog()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        await Application.Send(createDialogCommand);
-
-        var updateLabelsCommand = new UpdateDialogServiceOwnerContextCommand
-        {
-            DialogId = dialogId,
-            Dto = new()
+        var invalidDialogId = NewUuidV7();
+        await FlowBuilder.For(Application)
+            .SendCommand(new UpdateDialogServiceOwnerContextCommand
             {
-                ServiceOwnerLabels = CreateLabels("Scadrial", "Roshar", "Sel")
-            }
-        };
-
-        // Act
-        var response = await Application.Send(updateLabelsCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Revision.Should().NotBe(Guid.Empty);
-
-        var dialogResponse = await Application.Send(new GetDialogQuery() { DialogId = dialogId });
-        dialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
-        dialog.Should().NotBeNull();
-
-        await Application.AssertEntityCountAsync<DialogServiceOwnerLabel>(count: 3);
+                DialogId = invalidDialogId,
+                Dto = new()
+            })
+            .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x =>
+                x.Message.Should().Contain(invalidDialogId.ToString()));
     }
 
     [Fact]
-    public async Task Cannot_Update_ServiceOwnerLabels_With_Duplicates()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        await Application.Send(createDialogCommand);
-
-        const string label = "SCADRIAL";
-
-        var setServiceOwnerLabelsCommand = new UpdateDialogServiceOwnerContextCommand
-        {
-            DialogId = dialogId,
-            Dto = new()
-            {
-                ServiceOwnerLabels = CreateLabels(label, label.ToLowerInvariant())
-            }
-        };
-
-        // Act
-        var response = await Application.Send(setServiceOwnerLabelsCommand);
-
-        // Assert
-        response.TryPickT1(out var validationError, out _).Should().BeTrue();
-        validationError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains("duplicate"));
-    }
+    public Task Can_Remove_ServiceOwnerLabels() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = "Scadrial" }])
+            .UpdateServiceOwnerContext(x => x.Dto = new())
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ServiceOwnerContext
+                    .ServiceOwnerLabels
+                    .Count
+                    .Should()
+                    .Be(0));
 
     [Fact]
-    public async Task Cannot_Update_ServiceOwnerLabels_With_Invalid_Length()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        await Application.Send(createDialogCommand);
-
-        var setServiceOwnerLabelsCommand = new UpdateDialogServiceOwnerContextCommand
-        {
-            DialogId = dialogId,
-            Dto = new()
+    public Task Can_Add_ServiceOwnerLabel_To_Existing_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateServiceOwnerContext(x => x.Dto = new()
             {
-                ServiceOwnerLabels = CreateLabels(
+                ServiceOwnerLabels = CreateLabels("Scadrial", "Roshar")
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ServiceOwnerContext
+                    .ServiceOwnerLabels
+                    .Count
+                    .Should()
+                    .Be(2));
+
+    [Fact]
+    public Task Cannot_Update_ServiceOwnerLabels_With_Duplicates() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateServiceOwnerContext(x =>
+            {
+                const string label = "SCADRIAL";
+                x.Dto = new()
+                {
+                    ServiceOwnerLabels = CreateLabels(label, label.ToLowerInvariant())
+                };
+            })
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText("duplicate"));
+
+    [Fact]
+    public Task Cannot_Update_ServiceOwnerLabels_With_Invalid_Length() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateServiceOwnerContext(x =>
+            {
+                x.Dto = new()
+                {
+                    ServiceOwnerLabels = CreateLabels(
                         null,
                         new string('a', Constants.MinSearchStringLength - 1),
                         new string('a', Constants.DefaultMaxStringLength + 1))
-            }
-        };
-
-        // Act
-        var response = await Application.Send(setServiceOwnerLabelsCommand);
-
-        // Assert
-        response.TryPickT1(out var validationError, out _).Should().BeTrue();
-
-        validationError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains("not be empty"));
-
-        validationError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains("at least"));
-
-        validationError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains("or fewer"));
-    }
+                };
+            })
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                x.ShouldHaveErrorWithText("not be empty");
+                x.ShouldHaveErrorWithText("at least");
+                x.ShouldHaveErrorWithText("or fewer");
+            });
 
     [Fact]
     public async Task Update_ServiceOwnerLabels_Should_Update_ServiceOwnerContext_Revision()
     {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        await Application.Send(createDialogCommand);
-
-        var originalServiceOwnerContextRevision =
-            (await Application.GetDbEntities<DialogServiceOwnerContext>())
-            .Single(x => x.DialogId == dialogId).Revision;
-
-        var setServiceOwnerLabelsCommand = new UpdateDialogServiceOwnerContextCommand
-        {
-            DialogId = dialogId,
-            Dto = new()
+        Guid? originalRevision = null;
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SendCommand((_, ctx) => new GetServiceOwnerLabelsQuery { DialogId = ctx.GetDialogId() })
+            .AssertResult<ServiceOwnerLabelResultDto>(x => originalRevision = x.Revision)
+            .SendCommand((_, ctx) => new UpdateDialogServiceOwnerContextCommand
             {
-                ServiceOwnerLabels = CreateLabels("Scadrial")
-            }
-        };
-
-        // Act
-        var response = await Application.Send(setServiceOwnerLabelsCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-
-        originalServiceOwnerContextRevision.Should().NotBe(Guid.Empty);
-        success.Revision.Should().NotBe(originalServiceOwnerContextRevision);
+                DialogId = ctx.GetDialogId(),
+                Dto = new()
+                {
+                    ServiceOwnerLabels = [new() { Value = "scadrial" }]
+                }
+            })
+            .SendCommand((_, ctx) => new GetServiceOwnerLabelsQuery { DialogId = ctx.GetDialogId() })
+            .ExecuteAndAssert<ServiceOwnerLabelResultDto>(x =>
+                x.Revision.Should().NotBe(originalRevision!.Value));
     }
 
     [Fact]
-    public async Task Cannot_Update_With_More_Than_Max_Allowed_ServiceOwner_Labels()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        await Application.Send(createDialogCommand);
-
-        var setServiceOwnerLabelsCommand = new UpdateDialogServiceOwnerContextCommand
-        {
-            DialogId = dialogId,
-            Dto = new()
-        };
-
-        Enumerable.Range(0, DialogServiceOwnerLabel.MaxNumberOfLabels + 1).ToList()
-            .ForEach(i => setServiceOwnerLabelsCommand
-                .Dto.ServiceOwnerLabels.Add(new() { Value = $"label{i}" }));
-
-        // Act
-        var response = await Application.Send(setServiceOwnerLabelsCommand);
-
-        // Assert
-        response.TryPickT1(out var validationError, out _).Should().BeTrue();
-        validationError.Errors
-            .Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains("Maximum") && x.ErrorMessage
-                .Contains($"{DialogServiceOwnerLabel.MaxNumberOfLabels}"));
-    }
+    public Task Cannot_Update_With_More_Than_Max_Allowed_ServiceOwner_Labels() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateServiceOwnerContext(x =>
+            {
+                x.Dto = new()
+                {
+                    ServiceOwnerLabels = Enumerable.Range(0, DialogServiceOwnerLabel.MaxNumberOfLabels + 1)
+                        .Select(i => new ServiceOwnerLabelDto { Value = $"label{i}" })
+                        .ToList()
+                };
+            })
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                x.ShouldHaveErrorWithText("Maximum");
+                x.ShouldHaveErrorWithText($"{DialogServiceOwnerLabel.MaxNumberOfLabels}");
+            });
 
     private static List<ServiceOwnerLabelDto> CreateLabels(params string?[] values) =>
         values.Select(value => new ServiceOwnerLabelDto { Value = value! }).ToList();

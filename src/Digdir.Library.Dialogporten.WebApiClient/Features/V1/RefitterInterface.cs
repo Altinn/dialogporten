@@ -3720,12 +3720,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("serviceOwnerLabels")]
-        public ICollection<V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel> ServiceOwnerLabels { get; set; }
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel
+    public partial class V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel
     {
         /// <summary>
         /// A label value.

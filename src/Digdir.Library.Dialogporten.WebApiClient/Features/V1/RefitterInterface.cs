@@ -853,7 +853,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogActivitiesQueriesSearch_Activity>>> V1ServiceOwnerDialogActivitiesSearchDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
 
-        /// <summary>Adds a activity to a dialogs activity history</summary>
+        /// <summary>Adds an activity to a dialog's activity history</summary>
         /// <remarks>
         /// The activity is created with the given configuration.
         /// 
@@ -1086,6 +1086,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// The unique identifier for the related transmission, if any.
@@ -1538,6 +1545,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
@@ -2014,6 +2028,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
@@ -3259,6 +3280,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Uri ExtendedType { get; set; }
 
         /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
+
+        /// <summary>
         /// Reference to any other transmission that this transmission is related to.
         /// </summary>
 
@@ -4090,6 +4118,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.

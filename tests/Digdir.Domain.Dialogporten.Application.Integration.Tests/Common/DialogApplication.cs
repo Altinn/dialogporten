@@ -208,11 +208,11 @@ public class DialogApplication : IAsyncLifetime
         await _dbContainer.DisposeAsync();
     }
 
-    public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request)
+    public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
         using var scope = _rootProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
-        return await mediator.Send(request);
+        return await mediator.Send(request, cancellationToken);
     }
 
     public async Task ResetState()

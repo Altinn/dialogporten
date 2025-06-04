@@ -1234,6 +1234,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(1023)
                         .HasColumnType("character varying(1023)");
 
+                    b.Property<string>("ExternalReference")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<Guid?>("RelatedTransmissionId")
                         .HasColumnType("uuid");
 

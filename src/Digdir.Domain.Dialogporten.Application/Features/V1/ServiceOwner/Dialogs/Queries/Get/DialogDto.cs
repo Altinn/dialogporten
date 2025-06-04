@@ -191,7 +191,7 @@ public sealed class DialogServiceOwnerContextDto
     /// <summary>
     /// A list of labels, not visible in end-user APIs.
     /// </summary>
-    public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
+    public List<DialogServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
 }
 
 public sealed class DialogTransmissionDto
@@ -366,7 +366,7 @@ public sealed class SearchTagDto
     public string Value { get; set; } = null!;
 }
 
-public sealed class ServiceOwnerLabelDto
+public sealed class DialogServiceOwnerLabelDto
 {
     /// <summary>
     /// A label value.

@@ -48,6 +48,12 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
             return;
         }
 
+        if (serviceOwnerLabelsResult.Revision != req.IfMatchServiceOwnerContextRevision)
+        {
+            await this.PreconditionFailed(ct);
+            return;
+        }
+
         var command = new UpdateDialogServiceOwnerContextCommand
         {
             IfMatchServiceOwnerContextRevision = req.IfMatchServiceOwnerContextRevision,

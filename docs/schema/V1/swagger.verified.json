@@ -4054,10 +4054,20 @@
           "serviceOwnerLabels": {
             "description": "A list of labels, not visible in end-user APIs.",
             "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel"
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel"
             },
             "nullable": true,
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "description": "A label value.",
+            "type": "string"
           }
         },
         "type": "object"
@@ -4218,16 +4228,6 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsQueriesGet_ServiceOwnerLabel": {
-        "additionalProperties": false,
-        "properties": {
-          "value": {
-            "description": "A label value.",
-            "type": "string"
           }
         },
         "type": "object"

@@ -54,7 +54,7 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
                 destinationKeySelector: x => x.Value,
                 sourceKeySelector: x => x.Value,
                 create: _mapper.Map<List<DialogServiceOwnerLabel>>,
-                delete: DeleteDelegate.NoOp,
+                delete: DeleteDelegate.Default,
                 comparer: StringComparer.InvariantCultureIgnoreCase);
 
         var saveResult = await _unitOfWork

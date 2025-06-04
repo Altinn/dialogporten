@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddDialogServiceOwnerContext : Migration
+    public partial class AddServiceOwnerContextOnDialog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,15 +15,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 name: "DialogServiceOwnerContext",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    DialogId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp at time zone 'utc'"),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp at time zone 'utc'"),
-                    Revision = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    DialogId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Revision = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DialogServiceOwnerContext", x => x.Id);
+                    table.PrimaryKey("PK_DialogServiceOwnerContext", x => x.DialogId);
                     table.ForeignKey(
                         name: "FK_DialogServiceOwnerContext_Dialog_DialogId",
                         column: x => x.DialogId,
@@ -36,32 +35,20 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 name: "DialogServiceOwnerLabel",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Value = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    DialogServiceOwnerContextId = table.Column<Guid>(type: "uuid", nullable: false)
+                    DialogServiceOwnerContextId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp at time zone 'utc'")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DialogServiceOwnerLabel", x => x.Id);
+                    table.PrimaryKey("PK_DialogServiceOwnerLabel", x => new { x.DialogServiceOwnerContextId, x.Value });
                     table.ForeignKey(
                         name: "FK_DialogServiceOwnerLabel_DialogServiceOwnerContext_DialogSer~",
                         column: x => x.DialogServiceOwnerContextId,
                         principalTable: "DialogServiceOwnerContext",
-                        principalColumn: "Id",
+                        principalColumn: "DialogId",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DialogServiceOwnerContext_DialogId",
-                table: "DialogServiceOwnerContext",
-                column: "DialogId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DialogServiceOwnerLabel_DialogServiceOwnerContextId",
-                table: "DialogServiceOwnerLabel",
-                column: "DialogServiceOwnerContextId");
         }
 
         /// <inheritdoc />

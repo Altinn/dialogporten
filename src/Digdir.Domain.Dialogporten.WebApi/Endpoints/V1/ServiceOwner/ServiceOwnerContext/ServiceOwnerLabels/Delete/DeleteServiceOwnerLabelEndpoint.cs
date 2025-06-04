@@ -49,7 +49,7 @@ public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwne
             .Select(x => new ServiceOwnerLabelDto { Value = x.Value })
             .ToList();
 
-        var labelToRemove = existingLabels.FirstOrDefault(x => x.Value == req.Label);
+        var labelToRemove = existingLabels.FirstOrDefault(x => x.Value.Equals(req.Label, StringComparison.OrdinalIgnoreCase));
         if (labelToRemove == null)
         {
             await this.NotFoundAsync(new EntityNotFound(nameof(DeleteServiceOwnerLabelRequest.Label), [req.Label]), ct);

@@ -197,7 +197,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         var paginatedList = await dialogQuery
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.DialogServiceOwnerContext)
+            .Include(x => x.ServiceOwnerContext)
                 .ThenInclude(x => x.ServiceOwnerLabels)
             .WhereIf(!request.ServiceResource.IsNullOrEmpty(),
                 x => request.ServiceResource!.Contains(x.ServiceResource))
@@ -226,7 +226,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(formattedServiceOwnerLabels is not null && formattedServiceOwnerLabels.Count != 0, x =>
                 formattedServiceOwnerLabels!
                     .All(formattedLabel =>
-                        x.DialogServiceOwnerContext.ServiceOwnerLabels
+                        x.ServiceOwnerContext.ServiceOwnerLabels
                             .Any(l => EF.Functions.ILike(l.Value, formattedLabel))))
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => resourceIds.Contains(x.ServiceResource))

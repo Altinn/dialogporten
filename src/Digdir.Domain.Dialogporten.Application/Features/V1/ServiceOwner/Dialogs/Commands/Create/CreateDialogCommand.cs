@@ -158,10 +158,10 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
     private void CreateDialogServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)
     {
-        dialog.DialogServiceOwnerContext = new();
+        dialog.ServiceOwnerContext = new();
         if (request.Dto.ServiceOwnerContext?.ServiceOwnerLabels.Count > 0)
         {
-            dialog.DialogServiceOwnerContext.ServiceOwnerLabels =
+            dialog.ServiceOwnerContext.ServiceOwnerLabels =
                 _mapper.Map<List<DialogServiceOwnerLabel>>(request.Dto.ServiceOwnerContext.ServiceOwnerLabels);
         }
     }

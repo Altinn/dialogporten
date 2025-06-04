@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250520132719_AddDialogServiceOwnerContext")]
-    partial class AddDialogServiceOwnerContext
+    [Migration("20250604090557_AddServiceOwnerContextOnDialog")]
+    partial class AddServiceOwnerContextOnDialog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -328,18 +328,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities.DialogServiceOwnerContext", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                    b.Property<Guid>("DialogId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("current_timestamp at time zone 'utc'");
-
-                    b.Property<Guid>("DialogId")
-                        .HasColumnType("uuid");
 
                     b.Property<Guid>("Revision")
                         .IsConcurrencyToken()
@@ -352,34 +347,26 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("current_timestamp at time zone 'utc'");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("DialogId")
-                        .IsUnique();
+                    b.HasKey("DialogId");
 
                     b.ToTable("DialogServiceOwnerContext");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities.DialogServiceOwnerLabel", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<Guid>("DialogServiceOwnerContextId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Value")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.HasKey("Id");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
 
-                    b.HasIndex("DialogServiceOwnerContextId");
+                    b.HasKey("DialogServiceOwnerContextId", "Value");
 
                     b.ToTable("DialogServiceOwnerLabel");
                 });
@@ -1237,6 +1224,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(1023)
                         .HasColumnType("character varying(1023)");
 
+                    b.Property<string>("ExternalReference")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<Guid?>("RelatedTransmissionId")
                         .HasColumnType("uuid");
 
@@ -1903,7 +1894,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities.DialogServiceOwnerContext", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity", "Dialog")
-                        .WithOne("DialogServiceOwnerContext")
+                        .WithOne("ServiceOwnerContext")
                         .HasForeignKey("Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities.DialogServiceOwnerContext", "DialogId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2332,14 +2323,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Navigation("DialogEndUserContext")
                         .IsRequired();
 
-                    b.Navigation("DialogServiceOwnerContext")
-                        .IsRequired();
-
                     b.Navigation("GuiActions");
 
                     b.Navigation("SearchTags");
 
                     b.Navigation("SeenLog");
+
+                    b.Navigation("ServiceOwnerContext")
+                        .IsRequired();
 
                     b.Navigation("Transmissions");
                 });

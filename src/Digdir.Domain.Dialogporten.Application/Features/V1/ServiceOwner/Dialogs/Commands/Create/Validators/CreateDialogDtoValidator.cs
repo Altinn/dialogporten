@@ -3,19 +3,20 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using FluentValidation;
+using FluentValidation.Validators;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.Validators;
 
 internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogDto>
 {
-    public CreateDialogDtoValidator(
-        IValidator<TransmissionDto> transmissionValidator,
+    public CreateDialogDtoValidator(IValidator<TransmissionDto> transmissionValidator,
         IValidator<AttachmentDto> attachmentValidator,
         IValidator<GuiActionDto> guiActionValidator,
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
-        IValidator<ContentDto?> contentValidator)
+        IValidator<ContentDto?> contentValidator,
+        IValidator<DialogServiceOwnerContextDto?> serviceOwnerContextValidator)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
@@ -159,5 +160,9 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .IsValidUri()
             .MaximumLength(Constants.DefaultMaxUriLength)
             .When(x => x.PrecedingProcess is not null);
+
+        RuleFor(x => x.ServiceOwnerContext)
+            .SetValidator(serviceOwnerContextValidator)
+            .When(x => x.ServiceOwnerContext is not null);
     }
 }

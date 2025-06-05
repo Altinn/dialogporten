@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -105,8 +106,25 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+    public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(this IFlowStep<CreateDialogResult> step,
+        Action<UpdateDialogServiceOwnerContextCommand> modify) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) =>
+            {
+                var command = new UpdateDialogServiceOwnerContextCommand
+                {
+                    DialogId = ctx.GetDialogId()
+                };
+                modify(command);
+                return command;
+            });
+
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateDialogResult> step) =>
         step.AssertResult<UpdateDialogSuccess>()
+            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
+
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateDialogServiceOwnerContextResult> step) =>
+        step.AssertResult<UpdateServiceOwnerContextSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<CreateDialogResult> step) =>

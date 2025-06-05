@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.67.1](https://github.com/Altinn/dialogporten/compare/v1.67.0...v1.67.1) (2025-06-04)
+
+
+### Miscellaneous Chores
+
+* **deps:** update Azure CLI to 1.74.0 ([#2380](https://github.com/Altinn/dialogporten/issues/2380)) ([05d0e33](https://github.com/Altinn/dialogporten/commit/05d0e333e10a3f5c301dadf60ee5396957be95ef))
+* **deps:** update docker/build-push-action action to v6.18.0 ([#2381](https://github.com/Altinn/dialogporten/issues/2381)) ([c880fec](https://github.com/Altinn/dialogporten/commit/c880fec6a86cedc5dcdb30ca780d96ebfcaa2869))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.20.0 ([#2382](https://github.com/Altinn/dialogporten/issues/2382)) ([973bbce](https://github.com/Altinn/dialogporten/commit/973bbce5d39f010f232ab43b52303dffbcf045d1))
+
 ## [1.67.0](https://github.com/Altinn/dialogporten/compare/v1.66.3...v1.67.0) (2025-06-02)
 
 

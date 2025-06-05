@@ -49,7 +49,10 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
                 x.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = "Scadrial" }])
-            .UpdateServiceOwnerContext(x => x.Dto = new())
+            .UpdateServiceOwnerContext(x => x.Dto = new()
+            {
+                ServiceOwnerLabels = []
+            })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.ServiceOwnerContext

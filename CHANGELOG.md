@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.68.0](https://github.com/Altinn/dialogporten/compare/v1.67.1...v1.68.0) (2025-06-06)
+
+
+### Features
+
+* **app:** ServiceOwner Labels ([#2283](https://github.com/Altinn/dialogporten/issues/2283)) ([d20317e](https://github.com/Altinn/dialogporten/commit/d20317efb9824cc5951e4b4233b7ba97d7598412))
+
+
+### Bug Fixes
+
+* **webapi:** Only compare revision when If-Match has value ([#2386](https://github.com/Altinn/dialogporten/issues/2386)) ([9c950eb](https://github.com/Altinn/dialogporten/commit/9c950eb98a47d00404443f29d83ca3c2765d4ba4))
+
 ## [1.67.1](https://github.com/Altinn/dialogporten/compare/v1.67.0...v1.67.1) (2025-06-04)
 
 

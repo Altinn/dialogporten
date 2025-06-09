@@ -22,7 +22,7 @@ internal sealed class LocalizationSetConverter<TLocalizationSet> : ITypeConverte
             sourceKeySelector: x => x.LanguageCode,
             create: context.Mapper.Map<List<Localization>>,
             update: context.Mapper.Update,
-            delete: DeleteDelegate.NoOp,
+            delete: DeleteDelegate.Default,
             comparer: StringComparer.InvariantCultureIgnoreCase);
         return set;
     }

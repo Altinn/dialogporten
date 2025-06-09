@@ -24,6 +24,9 @@ internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValid
             .MaximumLength(Constants.DefaultMaxUriLength)
             .When(x => x.ExtendedType is not null);
 
+        RuleFor(x => x.ExternalReference)
+            .MaximumLength(Constants.DefaultMaxStringLength);
+
         RuleFor(x => x.Type)
             .IsInEnum();
 

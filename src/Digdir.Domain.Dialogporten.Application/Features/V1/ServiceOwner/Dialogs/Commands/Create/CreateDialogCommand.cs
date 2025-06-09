@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
@@ -21,7 +22,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater
 {
-    public bool IsSilentUpdate { get; init; }
+    public bool IsSilentUpdate { get; set; }
     public CreateDialogDto Dto { get; set; } = null!;
 }
 
@@ -87,6 +88,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         CreateDialogEndUserContext(request, dialog);
+        CreateDialogServiceOwnerContext(request, dialog);
 
         var activityTypes = dialog.Activities
             .Select(x => x.TypeId)
@@ -152,5 +154,15 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             request.Dto.SystemLabel.Value,
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);
+    }
+
+    private void CreateDialogServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)
+    {
+        dialog.ServiceOwnerContext = new();
+        if (request.Dto.ServiceOwnerContext?.ServiceOwnerLabels.Count > 0)
+        {
+            dialog.ServiceOwnerContext.ServiceOwnerLabels =
+                _mapper.Map<List<DialogServiceOwnerLabel>>(request.Dto.ServiceOwnerContext.ServiceOwnerLabels);
+        }
     }
 }

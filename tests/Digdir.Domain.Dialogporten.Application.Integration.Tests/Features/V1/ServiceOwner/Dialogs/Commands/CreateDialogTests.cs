@@ -1,10 +1,12 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -12,537 +14,286 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Xunit.Abstractions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class CreateDialogTests : ApplicationCollectionFixture
 {
-    public CreateDialogTests(DialogApplication application) : base(application) { }
+    private readonly ITestOutputHelper _testOutputHelper;
 
-    [Fact]
-    public async Task Cant_Create_Dialog_With_UUIDv4_format()
+    public CreateDialogTests(DialogApplication application, ITestOutputHelper testOutputHelper) : base(application)
     {
-        // Arrange
-        var invalidDialogId = Guid.NewGuid();
-
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: invalidDialogId);
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
+        _testOutputHelper = testOutputHelper;
     }
 
-    [Fact]
-    public async Task Cant_Create_Dialog_With_UUIDv7_In_Little_Endian_Format()
+    private sealed class CreateDialogWithSpecifiedDialogIdTestData : TheoryData<string, Guid, Type>
     {
-        // Arrange
-        // Guid created with Medo, Uuid7.NewUuid7().ToGuid(bigEndian: true)
-        var invalidDialogId = Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655");
-
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: invalidDialogId);
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-    }
-
-    [Fact]
-    public async Task Cant_Create_Dialog_With_ID_With_Timestamp_In_The_Future()
-    {
-        // Arrange
-        var timestamp = DateTimeOffset.UtcNow.AddSeconds(1);
-        var invalidDialogId = IdentifiableExtensions.CreateVersion7(timestamp);
-
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: invalidDialogId);
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-    }
-
-    [Fact]
-    public async Task Create_Dialog_With_ID_With_Timestamp_In_The_Past()
-    {
-        // Arrange
-        var timestamp = DateTimeOffset.UtcNow.AddSeconds(-1);
-        var validDialogId = IdentifiableExtensions.CreateVersion7(timestamp);
-
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: validDialogId);
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        success.DialogId.Should().Be(validDialogId);
-    }
-
-    [Fact]
-    public async Task Create_CreatesDialog_WhenDialogIsSimple()
-    {
-        // Arrange
-        var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
-
-        // Act
-        var response = await Application.Send(createCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.DialogId.Should().Be(expectedDialogId);
-    }
-
-    [Fact]
-    public async Task Create_CreateDialog_WhenDialogIsComplex()
-    {
-        // Arrange
-        var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(id: expectedDialogId);
-
-        // Act
-        var result = await Application.Send(createDialogCommand);
-
-        // Assert
-        result.TryPickT0(out var success, out _).Should().BeTrue();
-        success.DialogId.Should().Be(expectedDialogId);
-    }
-
-    [Fact]
-    public async Task Can_Create_Dialog_With_UpdatedAt_Supplied()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createdAt = DateTimeOffset.UtcNow.AddYears(-20);
-        var updatedAt = DateTimeOffset.UtcNow.AddYears(-15);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(id: dialogId, updatedAt: updatedAt, createdAt: createdAt);
-
-        // Act
-        var createDialogResult = await Application.Send(createDialogCommand);
-        var getDialogQuery = new GetDialogQuery
+        public CreateDialogWithSpecifiedDialogIdTestData()
         {
-            DialogId = dialogId
-        };
+            Add("Validations for UUIDv4 format",
+                Guid.NewGuid(),
+                typeof(ValidationError));
 
-        var getDialogResponse = await Application.Send(getDialogQuery);
+            Add("Validations for UUIDv7 format, big endian",
+                Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
+                typeof(ValidationError));
 
-        // Assert
-        createDialogResult.TryPickT0(out var dialogCreatedSuccess, out _).Should().BeTrue();
-        dialogCreatedSuccess.DialogId.Should().Be(dialogId);
+            Add("Validations for UUIDv7 with timestamp in the future",
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(1)),
+                typeof(ValidationError));
 
-        getDialogQuery.Should().NotBeNull();
-        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
-        dialog.Should().NotBeNull();
-        dialog.CreatedAt.Should().BeCloseTo(createdAt, precision: TimeSpan.FromMicroseconds(10));
-        dialog.UpdatedAt.Should().BeCloseTo(updatedAt, precision: TimeSpan.FromMicroseconds(10));
+            Add("Can create a dialog with a valid UUIDv7 format",
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(-1)),
+                typeof(CreateDialogSuccess));
+        }
+    }
+
+    [Theory, ClassData(typeof(CreateDialogWithSpecifiedDialogIdTestData))]
+    public Task Create_Dialog_With_Specified_DialogId_Tests(string _, Guid guidInput, Type assertType) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Id = guidInput)
+            .ExecuteAndAssert(assertType);
+
+    [Fact]
+    public async Task Creates_Dialog_When_Dialog_Is_Simple()
+    {
+        var expectedDialogId = IdentifiableExtensions.CreateVersion7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Id = expectedDialogId)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Id.Should().Be(expectedDialogId));
     }
 
     [Fact]
-    public async Task Cant_Create_Dialog_With_UpdatedAt_Supplied_Without_CreatedAt_Supplied()
+    public async Task Create_Dialog_When_Dialog_Is_Complex()
     {
-        // Arrange
-        var updatedAt = DateTimeOffset.UtcNow.AddYears(-15);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(updatedAt: updatedAt);
+        var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors.Should().Contain(e => e.ErrorMessage.Contains(nameof(createDialogCommand.Dto.UpdatedAt)));
+        await FlowBuilder.For(Application)
+            .CreateComplexDialog(x => x.Dto.Id = expectedDialogId)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Id.Should().Be(expectedDialogId));
     }
 
-    [Fact]
-    public async Task Cant_Create_Dialog_With_UpdatedAt_Date_Earlier_Than_CreatedAt_Date()
+    private sealed class ValidUpdatedAtTestData : TheoryData<string, DateTimeOffset?, DateTimeOffset>
     {
-        // Arrange
-        var createdAt = DateTimeOffset.UtcNow.AddYears(-10);
-        var updatedAt = DateTimeOffset.UtcNow.AddYears(-15);
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(updatedAt: updatedAt, createdAt: createdAt);
+        public ValidUpdatedAtTestData()
+        {
+            var someTimeInThePast = DateTimeOffset.UtcNow.AddYears(-15);
+            Add("Can create dialog with the same UpdatedAt and CreatedAt",
+                someTimeInThePast, // CreatedAt
+                someTimeInThePast); // UpdatedAt
 
-        // Act
-        var response = await Application.Send(createDialogCommand);
 
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors.Should().Contain(e => e.ErrorMessage.Contains(nameof(createDialogCommand.Dto.CreatedAt)));
+            Add("Can create dialog with default UpdatedAt and no CreatedAt",
+                null, // CreatedAt
+                default); // UpdatedAt
+
+            Add("Can create dialog with default UpdatedAt and CreatedAt",
+                default(DateTimeOffset), // CreatedAt
+                default); // UpdatedAt
+        }
     }
 
-    [Fact]
-    public async Task Cant_Create_Dialog_With_UpdatedAt_Or_CreatedAt_In_The_Future()
+    [Theory, ClassData(typeof(ValidUpdatedAtTestData))]
+    public async Task Can_Create_Dialog_With_UpdatedAt_And_CreatedAt_Supplied(string _, DateTimeOffset? createdAt,
+        DateTimeOffset updatedAt)
     {
-        // Arrange
-        var aYearFromNow = DateTimeOffset.UtcNow.AddYears(1);
-        var createDialogCommand = DialogGenerator
-            .GenerateFakeCreateDialogCommand(updatedAt: aYearFromNow, createdAt: aYearFromNow);
+        var dialog = await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.UpdatedAt = updatedAt;
+                x.Dto.CreatedAt = createdAt;
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>();
 
-        // Act
-        var response = await Application.Send(createDialogCommand);
+        var createdAtHasValue = createdAt.HasValue && createdAt != default(DateTimeOffset);
+        dialog.CreatedAt.Should().BeCloseTo(createdAtHasValue ? createdAt!.Value : DateTimeOffset.UtcNow,
+            precision: TimeSpan.FromSeconds(1));
 
-        //
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors.Should().Contain(e => e.ErrorMessage.Contains("in the past"));
+        dialog.UpdatedAt.Should().BeCloseTo(updatedAt == default ? DateTimeOffset.UtcNow : updatedAt,
+            precision: TimeSpan.FromSeconds(1));
     }
 
-    [Fact]
-    public async Task Can_Create_Dialog_With_UpdatedAt_And_CreatedAt_Being_Equal()
+    private sealed class InvalidUpdatedAtTestData : TheoryData<string, DateTimeOffset?, DateTimeOffset>
     {
-        // Arrange
-        var aYearAgo = DateTimeOffset.UtcNow.AddYears(-1);
-        var createDialogCommand = DialogGenerator
-            .GenerateFakeCreateDialogCommand(updatedAt: aYearAgo, createdAt: aYearAgo);
+        public InvalidUpdatedAtTestData()
+        {
+            // CreatedAt must not be empty when 'UpdatedAt is set.
+            Add("Can't create dialog with UpdatedAt without CreatedAt",
+                null, // CreatedAt
+                DateTimeOffset.UtcNow.AddYears(-15)); // UpdatedAt
 
-        // Act
-        var response = await Application.Send(createDialogCommand);
+            // UpdatedAt before CreatedAt
+            Add("Can't create dialog with UpdatedAt before CreatedAt",
+                DateTimeOffset.UtcNow.AddYears(-10), // CreatedAt
+                DateTimeOffset.UtcNow.AddYears(-15)); // UpdatedAt
 
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
+            // Can't create dialog with CreatedAt or UpdatedAt in the future
+            Add("Can't create dialog with CreatedAt or UpdatedAt in the future",
+                DateTimeOffset.UtcNow.AddYears(1), // CreatedAt
+                DateTimeOffset.UtcNow.AddYears(1)); // UpdatedAt
+        }
     }
 
-    [Fact]
-    public async Task Cannot_Create_Transmission_Without_Content()
+    [Theory, ClassData(typeof(InvalidUpdatedAtTestData))]
+    public Task Invalid_UpdatedAt_Tests(string _, DateTimeOffset? createdAt, DateTimeOffset updatedAt) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.CreatedAt = createdAt;
+                x.Dto.UpdatedAt = updatedAt;
+            })
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                _testOutputHelper.WriteLine(string.Join(Environment.NewLine, x.Errors.Select(e => e.ErrorMessage)));
+                x.ShouldHaveErrorWithText(nameof(updatedAt));
+            });
+
+    private sealed class InvalidTransmissionContentTestData : TheoryData<string, TransmissionContentDto?>
     {
-        // Arrange
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        transmission.Content = null!;
+        public InvalidTransmissionContentTestData()
+        {
+            Add("Can't create transmission with null content", null);
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Transmissions = [transmission];
+            Add("Can't create transmission with empty content",
+                new TransmissionContentDto
+                {
+                    Summary = new(),
+                    Title = new()
+                });
 
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors.Should().HaveCount(1);
-        // The error message might be localized, so we just check for the property name
-        validationError.Errors.First().ErrorMessage.Should().Contain("'Content'");
+            Add("Can't create transmission with empty content values",
+                new TransmissionContentDto
+                {
+                    Summary = new() { Value = [new() { Value = "", LanguageCode = "nb" }] },
+                    Title = new() { Value = [new() { Value = "", LanguageCode = "nb" }] }
+                });
+        }
     }
 
-    [Fact]
-    public async Task Cannot_Create_Transmission_Without_Content_Value()
+    [Theory, ClassData(typeof(InvalidTransmissionContentTestData))]
+    public Task Invalid_Transmission_Content(string _, TransmissionContentDto? content) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+                transmission.Content = content;
+                x.Dto.Transmissions = [transmission];
+            })
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText("empty"));
+
+    private static IntegrationTestUser CreateUserWithScope(string scope) => new([new("scope", scope)]);
+
+    private static Action<IServiceCollection> ConfigureUserWithScope(string scope) => services =>
     {
-        // Arrange
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        transmission.Content!.Summary.Value = [];
-        transmission.Content.Title.Value = [];
+        var user = CreateUserWithScope(scope);
+        services.RemoveAll<IUser>();
+        services.AddSingleton<IUser>(user);
+    };
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Transmissions = [transmission];
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors
-            .Count(e => e.PropertyName.Contains(nameof(createDialogCommand.Dto.Content)))
-            .Should()
-            .Be(2);
-    }
-
-    [Fact]
-    public async Task Cannot_Create_Transmission_With_Empty_Content_Localization_Values()
+    private static ContentValueDto CreateHtmlContentValueDto(string mediaType) => new()
     {
-        // Arrange
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        transmission.Content!.Summary.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
-        transmission.Content.Title.Value = [new LocalizationDto { LanguageCode = "nb", Value = "" }];
-
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Transmissions = [transmission];
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors
-            .Count(e => e.PropertyName.Contains(nameof(createDialogCommand.Dto.Content)))
-            .Should()
-            .Be(2);
-    }
-
-    private const string LegacyHtmlMediaType = MediaTypes.LegacyHtml;
-
-    private static ContentValueDto CreateHtmlContentValueDto() => new()
-    {
-        MediaType = LegacyHtmlMediaType,
+        MediaType = mediaType,
         Value = [new() { LanguageCode = "nb", Value = "<p>Some HTML content</p>" }]
     };
 
-    [Fact]
-    public async Task Cannot_Create_AdditionalInfo_Content_With_Html_MediaType_Without_Correct_Scope()
+
+    private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto();
+        public HtmlContentTestData()
+        {
+            Add("Cannot create dialog with HTML content without valid html scope",
+                _ => { }, // No change in user scopes
+                x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
 
-        // Act
-        var response = await Application.Send(createDialogCommand);
+            Add("Can create dialog with HTML content with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(CreateDialogSuccess));
 
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(LegacyHtmlMediaType))
-            .Should()
-            .Be(1);
+            Add("Cannot create title content with HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
+
+            Add("Cannot create summary content with HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
+
+            Add("Cannot create title content with embeddable HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                typeof(ValidationError));
+
+            Add("Can create mainContentRef content with embeddable HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.MainContentReference = new()
+                {
+                    MediaType = MediaTypes.LegacyEmbeddableHtml,
+                    Value = [new() { LanguageCode = "nb", Value = "https://external.html" }]
+                },
+                typeof(CreateDialogSuccess));
+        }
     }
 
-    [Fact]
-    public async Task Can_Create_AdditionalInfo_Content_With_Html_MediaType_With_Correct_Scope()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto();
-
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-    }
+    [Theory, ClassData(typeof(HtmlContentTestData))]
+    public Task Html_Content_Tests(string _, Action<IServiceCollection> appConfig,
+        Action<CreateDialogCommand> createDialog, Type expectedType) =>
+        FlowBuilder.For(Application, appConfig)
+            .CreateSimpleDialog(createDialog)
+            .ExecuteAndAssert(expectedType);
 
     [Fact]
-    public async Task Cannot_Create_Title_Content_With_Html_MediaType_With_Correct_Scope()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content!.Title = CreateHtmlContentValueDto();
-
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(LegacyHtmlMediaType))
-            .Should()
-            .Be(1);
-    }
-
-    [Fact]
-    public async Task Cannot_Create_Title_Content_With_Embeddable_Html_MediaType_With_Correct_Scope()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.Content!.Title = new ContentValueDto
-        {
-            MediaType = MediaTypes.LegacyEmbeddableHtml,
-            Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
-        };
-
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors
-            .Count(e => e.AttemptedValue.Equals(MediaTypes.LegacyEmbeddableHtml))
-            .Should()
-            .Be(1);
-    }
-
-    [Fact]
-    public async Task Can_Create_MainContentRef_Content_With_Embeddable_Html_MediaType_With_Correct_Scope()
-    {
-        // Arrange
-        var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: expectedDialogId);
-        createDialogCommand.Dto.Content!.MainContentReference = new ContentValueDto
-        {
-            MediaType = MediaTypes.LegacyEmbeddableHtml,
-            Value = [new LocalizationDto { LanguageCode = "en", Value = "https://external.html" }]
-        };
-
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.LegacyHtmlScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        success.DialogId.Should().Be(expectedDialogId);
-    }
-
-    [Fact]
-    public async Task CreateDialogCommand_Should_Return_Revision()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Revision.Should().NotBeEmpty();
-    }
+    public Task CreateDialogCommand_Should_Return_Revision() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ExecuteAndAssert<CreateDialogSuccess>(x =>
+                x.Revision.Should().NotBeEmpty());
 
     [Fact]
     public async Task Can_Create_Actors_With_Same_Name_Without_ActorId()
     {
-        // Arrange
-        var transmissions = DialogGenerator.GenerateFakeDialogTransmissions(2);
-        transmissions[0].Sender = new ActorDto
-        {
-            ActorType = ActorType.Values.PartyRepresentative,
-            ActorName = "Fredrik",
-            ActorId = null
-        };
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.Transmissions = DialogGenerator.GenerateFakeDialogTransmissions(2);
+                x.Dto.Transmissions[0].Sender = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = "Fredrik",
+                    ActorId = null
+                };
+                x.Dto.Transmissions[1].Sender = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = "Fredrik",
+                    ActorId = null
+                };
+            })
+            .ExecuteAndAssert<CreateDialogSuccess>();
 
-        transmissions[1].Sender = new ActorDto
-        {
-            ActorType = ActorType.Values.PartyRepresentative,
-            ActorName = "Fredrik",
-            ActorId = null
-        };
-        var createDialogCommand = DialogGenerator.GenerateFakeCreateDialogCommand(transmissions: transmissions);
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
+        var actorNames = await Application.GetDbEntities<ActorName>();
+        actorNames.Should().HaveCount(1);
     }
 
-    [Fact]
-    public async Task Can_Create_Dialog_With_Default_DateTimeOffset_For_UpdatedAt_Without_Setting_CreatedAt()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        createDialogCommand.Dto.UpdatedAt = default(DateTimeOffset);
-
-        // Act
-        var createDialogResponse = await Application.Send(createDialogCommand);
-        var getDialogResponse = await Application.Send(new GetDialogQuery
-        {
-            DialogId = dialogId
-        });
-
-        // Assert
-        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-
-        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
-        dialog.Should().NotBeNull();
-        dialog.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
-        dialog.UpdatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
-    }
-
-    [Fact]
-    public async Task Can_Create_Dialog_With_Default_DateTimeOffset_For_UpdatedAt_And_CreatedAt_Set()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-        createDialogCommand.Dto.UpdatedAt = default(DateTimeOffset);
-        createDialogCommand.Dto.CreatedAt = DateTimeOffset.UtcNow;
-
-        // Act
-        var createDialogResponse = await Application.Send(createDialogCommand);
-        var getDialogResponse = await Application.Send(new GetDialogQuery
-        {
-            DialogId = dialogId
-        });
-
-        // Assert
-        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-
-        getDialogResponse.TryPickT0(out var dialog, out _).Should().BeTrue();
-        dialog.Should().NotBeNull();
-        dialog.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
-        dialog.UpdatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, precision: TimeSpan.FromSeconds(1));
-    }
-
-
-    [Fact]
-    public async Task Cannot_Create_Dialog_With_Empty_Content()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-
-        // Omitting the property the payload to the WebAPI will set this to null
-        createDialogCommand.Dto.Content = null!;
-
-        // Act
-        var response = await Application.Send(createDialogCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-        validationError.Errors.Should()
-            .ContainSingle(x => x.ErrorMessage
-                .Contains(nameof(createDialogCommand.Dto.Content)));
-    }
-
-    [Fact]
-    public async Task Can_Create_Dialog_With_Empty_Content_If_IsApiOnly()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-
-        // Omitting the property the payload to the WebAPI will set this to null
-        createDialogCommand.Dto.Content = null!;
-        createDialogCommand.Dto.IsApiOnly = true;
-
-        // Act
-        var createDialogResponse = await Application.Send(createDialogCommand);
-
-        // Assert
-        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-
-    }
+    [Theory]
+    [InlineData(true, typeof(CreateDialogSuccess))]
+    [InlineData(false, typeof(ValidationError))]
+    public Task Dialog_With_Empty_Content_Tests(bool isApiOnly, Type expectedType) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.IsApiOnly = isApiOnly;
+                x.Dto.Content = null;
+            })
+            .ExecuteAndAssert(expectedType);
 }

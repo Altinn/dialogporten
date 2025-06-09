@@ -14,8 +14,8 @@ internal static class DeleteDelegate
 {
 #pragma warning disable IDE0060
     // ReSharper disable once MethodOverloadWithOptionalParameter
-    public static Task NoOp<TDestination>(IEnumerable<TDestination> deletables, CancellationToken cancellationToken = default) => Task.CompletedTask;
-    public static void NoOp<TDestination>(IEnumerable<TDestination> deletables) { /* No operation by design */ }
+    public static Task Default<TDestination>(IEnumerable<TDestination> deletables, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public static void Default<TDestination>(IEnumerable<TDestination> deletables) { /* No operation by design */ }
 #pragma warning restore IDE0060
 
 }

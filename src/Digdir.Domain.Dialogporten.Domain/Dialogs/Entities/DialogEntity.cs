@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
 using Digdir.Library.Entity.Abstractions.Features.SoftDeletable;
@@ -81,6 +82,7 @@ public sealed class DialogEntity :
     public List<DialogSeenLog> SeenLog { get; set; } = [];
 
     public DialogEndUserContext DialogEndUserContext { get; set; } = null!;
+    public DialogServiceOwnerContext ServiceOwnerContext { get; set; } = null!;
 
     public void OnCreate(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));

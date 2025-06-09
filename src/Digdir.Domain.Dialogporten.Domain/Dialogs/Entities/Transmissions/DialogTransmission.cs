@@ -22,6 +22,7 @@ public sealed class DialogTransmission :
     public DateTimeOffset CreatedAt { get; set; }
     public string? AuthorizationAttribute { get; set; }
     public Uri? ExtendedType { get; set; }
+    public string? ExternalReference { get; set; }
 
     // === Principal relationships ===
     [AggregateChild]

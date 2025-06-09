@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Globalization;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -25,17 +26,17 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by one or more service resources
     /// </summary>
-    public List<string>? ServiceResource { get; init; }
+    public List<string>? ServiceResource { get; set; }
 
     /// <summary>
     /// Filter by one or more owning parties
     /// </summary>
-    public List<string>? Party { get; init; }
+    public List<string>? Party { get; set; }
 
     /// <summary>
     /// Filter by end user id
     /// </summary>
-    public string? EndUserId { get; init; }
+    public string? EndUserId { get; set; }
 
     /// <summary>
     /// Filter by one or more extended statuses
@@ -65,41 +66,41 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Only return dialogs created after this date
     /// </summary>
-    public DateTimeOffset? CreatedAfter { get; init; }
+    public DateTimeOffset? CreatedAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs created before this date
     /// </summary>
-    public DateTimeOffset? CreatedBefore { get; init; }
+    public DateTimeOffset? CreatedBefore { get; set; }
     /// <summary>
     /// Only return dialogs updated after this date
     /// </summary>
-    public DateTimeOffset? UpdatedAfter { get; init; }
+    public DateTimeOffset? UpdatedAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs updated before this date
     /// </summary>
-    public DateTimeOffset? UpdatedBefore { get; init; }
+    public DateTimeOffset? UpdatedBefore { get; set; }
 
     /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
-    public DateTimeOffset? DueAfter { get; init; }
+    public DateTimeOffset? DueAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs with due date before this date
     /// </summary>
-    public DateTimeOffset? DueBefore { get; init; }
+    public DateTimeOffset? DueBefore { get; set; }
 
     /// <summary>
     /// Only return dialogs with visible-from date after this date
     /// </summary>
-    public DateTimeOffset? VisibleAfter { get; init; }
+    public DateTimeOffset? VisibleAfter { get; set; }
 
     /// <summary>
     /// Only return dialogs with visible-from date before this date
     /// </summary>
-    public DateTimeOffset? VisibleBefore { get; init; }
+    public DateTimeOffset? VisibleBefore { get; set; }
 
     /// <summary>
     /// Filter by process
@@ -119,7 +120,12 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
     /// </summary>
-    public string? Search { get; init; }
+    public string? Search { get; set; }
+
+    /// <summary>
+    /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
+    /// </summary>
+    public List<string>? ServiceOwnerLabels { get; set; }
 
     /// <summary>
     /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
@@ -182,9 +188,17 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             dialogQuery = _db.Dialogs.PrefilterAuthorizedDialogs(authorizedResources);
         }
 
+        var formattedServiceOwnerLabels = request.ServiceOwnerLabels?
+            .Select(label => label.EndsWith("*", StringComparison.OrdinalIgnoreCase)
+                ? label.TrimEnd('*').ToLower(CultureInfo.InvariantCulture) + "%"
+                : label.ToLower(CultureInfo.InvariantCulture))
+            .ToList();
+
         var paginatedList = await dialogQuery
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
+            .Include(x => x.ServiceOwnerContext)
+                .ThenInclude(x => x.ServiceOwnerLabels)
             .WhereIf(!request.ServiceResource.IsNullOrEmpty(),
                 x => request.ServiceResource!.Contains(x.ServiceResource))
             .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
@@ -209,6 +223,11 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             )
             .WhereIf(request.Deleted == DeletedFilter.Exclude, x => !x.Deleted)
             .WhereIf(request.Deleted == DeletedFilter.Only, x => x.Deleted)
+            .WhereIf(formattedServiceOwnerLabels is not null && formattedServiceOwnerLabels.Count != 0, x =>
+                formattedServiceOwnerLabels!
+                    .All(formattedLabel =>
+                        x.ServiceOwnerContext.ServiceOwnerLabels
+                            .Any(l => EF.Functions.ILike(l.Value, formattedLabel))))
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()

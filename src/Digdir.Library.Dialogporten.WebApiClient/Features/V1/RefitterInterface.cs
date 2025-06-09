@@ -131,6 +131,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string Search { get; set; }
 
         /// <summary>
+        /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
+        /// </summary>
+        [Query(CollectionFormat.Multi)] 
+        public IEnumerable<string> ServiceOwnerLabels { get; set; }
+
+        /// <summary>
         /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
         /// </summary>
         [Query] 
@@ -173,10 +179,114 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    /// <summary>Gets a list of dialog transmissions</summary>
+    /// <summary>Retrieve service owner labels for a dialog</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.5.5.0")]
     public partial interface IServiceownerApi
     {
+        /// <summary>Retrieve service owner labels for a dialog</summary>
+        /// <remarks>Fetches all labels associated with the service owner context of a specific dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully retrieved the service owner labels.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
+        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsGetServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
+
+        /// <summary>Add a service owner label to a dialog</summary>
+        /// <remarks>
+        /// Add a label to the service owner context.
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog DialogServiceOwnerLabel was updated successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
+        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreateServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Delete a service owner label for a dialog</summary>
+        /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>Successfully deleted the service owner label.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog or service owner label was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json")]
+        [Delete("/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}")]
+        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsDeleteServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
         /// <returns>
@@ -983,6 +1093,60 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ProblemDetails
+    {
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1";
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; } = "One or more validation errors occurred.";
+
+        [JsonPropertyName("status")]
+        public int Status { get; set; } = 400;
+
+        [JsonPropertyName("instance")]
+        public string Instance { get; set; } = "/api/route";
+
+        [JsonPropertyName("traceId")]
+        public string TraceId { get; set; } = "0HMPNHL0JHL76:00000001";
+
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+
+        [JsonPropertyName("errors")]
+        public ICollection<ProblemDetails_Error> Errors { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ProblemDetails_Error
+    {
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = "Error or field name";
+
+        [JsonPropertyName("reason")]
+        public string Reason { get; set; } = "Error reason";
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("severity")]
+        public string Severity { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_Label
+    {
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogTransmissionsQueriesSearch_Transmission
     {
         /// <summary>
@@ -1012,6 +1176,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// The unique identifier for the related transmission, if any.
@@ -1341,51 +1512,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ProblemDetails
-    {
-
-        [JsonPropertyName("type")]
-        public string Type { get; set; } = "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1";
-
-        [JsonPropertyName("title")]
-        public string Title { get; set; } = "One or more validation errors occurred.";
-
-        [JsonPropertyName("status")]
-        public int Status { get; set; } = 400;
-
-        [JsonPropertyName("instance")]
-        public string Instance { get; set; } = "/api/route";
-
-        [JsonPropertyName("traceId")]
-        public string TraceId { get; set; } = "0HMPNHL0JHL76:00000001";
-
-        [JsonPropertyName("detail")]
-        public string Detail { get; set; }
-
-        [JsonPropertyName("errors")]
-        public ICollection<ProblemDetails_Error> Errors { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ProblemDetails_Error
-    {
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = "Error or field name";
-
-        [JsonPropertyName("reason")]
-        public string Reason { get; set; } = "Error reason";
-
-        [JsonPropertyName("code")]
-        public string Code { get; set; }
-
-        [JsonPropertyName("severity")]
-        public string Severity { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogTransmissionsQueriesGet_Content
     {
         /// <summary>
@@ -1509,6 +1635,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
@@ -2051,6 +2184,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
@@ -2654,6 +2794,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastUpdate { get; set; }
 
+        [JsonPropertyName("serviceOwnerContext")]
+        public V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
+
         /// <summary>
         /// The content of the dialog in search results.
         /// </summary>
@@ -2759,6 +2902,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("isCurrentEndUser")]
         public bool IsCurrentEndUser { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext
+    {
+        /// <summary>
+        /// A list of labels, not visible in end-user APIs.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearch_ServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearch_ServiceOwnerLabel
+    {
+        /// <summary>
+        /// A label value.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
 
     }
 
@@ -3039,6 +3206,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastUpdate { get; set; }
 
+        [JsonPropertyName("serviceOwnerContext")]
+        public V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3263,6 +3433,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
@@ -3691,6 +3868,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext
+    {
+        /// <summary>
+        /// A list of labels, not visible in end-user APIs.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel
+    {
+        /// <summary>
+        /// A label value.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Dialog
     {
         /// <summary>
@@ -3825,6 +4026,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public DialogEndUserContextsEntities_SystemLabel? SystemLabel { get; set; }
 
+        [JsonPropertyName("serviceOwnerContext")]
+        public V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
+
         /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
@@ -3873,6 +4077,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("activities")]
         public ICollection<V1ServiceOwnerDialogsCommandsCreate_Activity> Activities { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
+    {
+        /// <summary>
+        /// A list of labels, not visible in end-user APIs.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel
+    {
+        /// <summary>
+        /// A label value.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
 
     }
 
@@ -4045,6 +4273,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.

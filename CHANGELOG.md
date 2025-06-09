@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.68.0](https://github.com/Altinn/dialogporten/compare/v1.67.1...v1.68.0) (2025-06-06)
+
+
+### Features
+
+* **app:** ServiceOwner Labels ([#2283](https://github.com/Altinn/dialogporten/issues/2283)) ([d20317e](https://github.com/Altinn/dialogporten/commit/d20317efb9824cc5951e4b4233b7ba97d7598412))
+
+
+### Bug Fixes
+
+* **webapi:** Only compare revision when If-Match has value ([#2386](https://github.com/Altinn/dialogporten/issues/2386)) ([9c950eb](https://github.com/Altinn/dialogporten/commit/9c950eb98a47d00404443f29d83ca3c2765d4ba4))
+
+## [1.67.1](https://github.com/Altinn/dialogporten/compare/v1.67.0...v1.67.1) (2025-06-04)
+
+
+### Miscellaneous Chores
+
+* **deps:** update Azure CLI to 1.74.0 ([#2380](https://github.com/Altinn/dialogporten/issues/2380)) ([05d0e33](https://github.com/Altinn/dialogporten/commit/05d0e333e10a3f5c301dadf60ee5396957be95ef))
+* **deps:** update docker/build-push-action action to v6.18.0 ([#2381](https://github.com/Altinn/dialogporten/issues/2381)) ([c880fec](https://github.com/Altinn/dialogporten/commit/c880fec6a86cedc5dcdb30ca780d96ebfcaa2869))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.20.0 ([#2382](https://github.com/Altinn/dialogporten/issues/2382)) ([973bbce](https://github.com/Altinn/dialogporten/commit/973bbce5d39f010f232ab43b52303dffbcf045d1))
+
+## [1.67.0](https://github.com/Altinn/dialogporten/compare/v1.66.3...v1.67.0) (2025-06-02)
+
+
+### Features
+
+* **app:** Add ExternalReference to Transmission ([#2348](https://github.com/Altinn/dialogporten/issues/2348)) ([3be9afa](https://github.com/Altinn/dialogporten/commit/3be9afa8a2835c5a2e7b1c218013baef9f101acc))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency benchmarkdotnet to 0.15.0 ([#2374](https://github.com/Altinn/dialogporten/issues/2374)) ([2fea3e1](https://github.com/Altinn/dialogporten/commit/2fea3e184d3949b6214ff1a9fa44c31ff9a7a5d5))
+* **deps:** update dependency bouncycastle.cryptography to 2.6.1 ([#2372](https://github.com/Altinn/dialogporten/issues/2372)) ([8751724](https://github.com/Altinn/dialogporten/commit/8751724524d77a7d0b2922a072c0a25816fc8fa6))
+* **deps:** update dependency microsoft.net.test.sdk to 17.14.0 ([#2366](https://github.com/Altinn/dialogporten/issues/2366)) ([b9fbf73](https://github.com/Altinn/dialogporten/commit/b9fbf734067ee89e10c265abd173097582ba7d5e))
+* **deps:** update docker/build-push-action action to v6.17.0 ([#2367](https://github.com/Altinn/dialogporten/issues/2367)) ([00b5415](https://github.com/Altinn/dialogporten/commit/00b541541749eb13f9489deb2f0336e275ab5ff4))
+* **deps:** update grafana/grafana docker tag to v11.6.2 ([#2375](https://github.com/Altinn/dialogporten/issues/2375)) ([2006009](https://github.com/Altinn/dialogporten/commit/200600901d28142d9b62a8cb62101e9d32eb2f3f))
+* **deps:** update grafana/loki docker tag to v3.5.1 ([#2373](https://github.com/Altinn/dialogporten/issues/2373)) ([cd32c5f](https://github.com/Altinn/dialogporten/commit/cd32c5faa4a537bb874287a91e44b9dd74bab0d0))
+* **deps:** update hotchocolate monorepo to 15.1.5 ([#2365](https://github.com/Altinn/dialogporten/issues/2365)) ([1c8ef53](https://github.com/Altinn/dialogporten/commit/1c8ef5310d3fb49dd061369edd7208b9cf46799b))
+
 ## [1.66.3](https://github.com/Altinn/dialogporten/compare/v1.66.2...v1.66.3) (2025-05-26)
 
 

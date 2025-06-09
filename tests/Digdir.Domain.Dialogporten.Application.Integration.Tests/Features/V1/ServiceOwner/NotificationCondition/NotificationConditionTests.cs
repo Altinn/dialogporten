@@ -1,9 +1,12 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.NotificationCondition;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -30,42 +33,63 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         NotificationConditionType conditionType,
         bool expectedSendNotificationValue)
     {
-        // Arrange
-        var userWithLegacyScope = new IntegrationTestUser([new("scope", AuthorizationScope.CorrespondenceScope)]);
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IUser>();
-            services.AddSingleton<IUser>(userWithLegacyScope);
-        });
+        Guid? transmissionId = null;
+        await FlowBuilder.For(Application, x =>
+            {
+                x.RemoveAll<IUser>();
+                x.AddSingleton<IUser>(new IntegrationTestUser([new("scope", AuthorizationScope.CorrespondenceScope)]));
+            })
+            .CreateSimpleDialog(x =>
+            {
+                switch (conditionType)
+                {
+                    case NotificationConditionType.Exists when expectedSendNotificationValue:
+                    case NotificationConditionType.NotExists when !expectedSendNotificationValue:
+                        AddActivityRequirements(x, activityType);
+                        break;
+                }
 
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        switch (conditionType)
-        {
-            case NotificationConditionType.Exists when expectedSendNotificationValue:
-            case NotificationConditionType.NotExists when !expectedSendNotificationValue:
-                AddActivityRequirements(createDialogCommand, activityType);
-                break;
-        }
-
-        var response = await Application.Send(createDialogCommand);
-        response.TryPickT0(out var dialogId, out _);
-
-        var notificationConditionQuery = CreateNotificationConditionQuery(dialogId.DialogId, activityType, conditionType);
-
-        if (activityType is DialogActivityType.Values.TransmissionOpened)
-        {
-            var transmissionId = createDialogCommand.Dto.Transmissions.FirstOrDefault()?.Id ?? Guid.NewGuid();
-            notificationConditionQuery.TransmissionId = transmissionId;
-        }
-
-        // Act
-        var queryResult = await Application.Send(notificationConditionQuery);
-
-        // Assert
-        queryResult.TryPickT0(out var notificationConditionResult, out _);
-        queryResult.IsT0.Should().BeTrue();
-        notificationConditionResult.SendNotification.Should().Be(expectedSendNotificationValue);
+                if (activityType is DialogActivityType.Values.TransmissionOpened)
+                {
+                    transmissionId = x.Dto.Transmissions.FirstOrDefault()?.Id ?? Guid.NewGuid();
+                }
+            })
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => new NotificationConditionQuery
+            {
+                DialogId = ctx.GetDialogId(),
+                ActivityType = activityType,
+                ConditionType = conditionType,
+                TransmissionId = transmissionId
+            })
+            .ExecuteAndAssert<NotificationConditionDto>(x =>
+                x.SendNotification.Should().Be(expectedSendNotificationValue));
     }
+
+    [Fact]
+    public Task NotFound_Should_Be_Returned_When_Dialog_Does_Not_Exist() =>
+        FlowBuilder.For(Application)
+            .SendCommand(new NotificationConditionQuery
+            {
+                DialogId = Guid.NewGuid(),
+                ActivityType = DialogActivityType.Values.Information,
+                ConditionType = NotificationConditionType.Exists
+            })
+            .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
+
+    [Fact]
+    public Task Gone_Should_Be_Returned_When_Dialog_Is_Deleted() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .DeleteDialog()
+            .AssertResult<DeleteDialogSuccess>()
+            .SendCommand((_, ctx) => new NotificationConditionQuery
+            {
+                DialogId = ctx.GetDialogId(),
+                ActivityType = DialogActivityType.Values.Information,
+                ConditionType = NotificationConditionType.Exists
+            })
+            .ExecuteAndAssert<EntityDeleted<DialogEntity>>();
 
     private static void AddActivityRequirements(
         CreateDialogCommand createDialogCommand,
@@ -76,56 +100,9 @@ public class NotificationConditionTests(DialogApplication application) : Applica
 
         if (activityType is not DialogActivityType.Values.TransmissionOpened) return;
 
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(type: DialogTransmissionType.Values.Information)[0];
+        var transmission =
+            DialogGenerator.GenerateFakeDialogTransmissions(type: DialogTransmissionType.Values.Information)[0];
         createDialogCommand.Dto.Transmissions.Add(transmission);
         createDialogCommand.Dto.Activities[0].TransmissionId = createDialogCommand.Dto.Transmissions[0].Id;
     }
-
-    [Fact]
-    public async Task NotFound_Should_Be_Returned_When_Dialog_Does_Not_Exist()
-    {
-        // Arrange
-        var notificationConditionQuery = CreateNotificationConditionQuery(Guid.NewGuid());
-
-        // Act
-        var queryResult = await Application.Send(notificationConditionQuery);
-
-        // Assert
-        queryResult.TryPickT2(out var notFound, out _);
-        queryResult.IsT2.Should().BeTrue();
-        notFound.Should().NotBeNull();
-    }
-
-    [Fact]
-    public async Task Gone_Should_Be_Returned_When_Dialog_Is_Deleted()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-
-        var response = await Application.Send(createDialogCommand);
-        response.TryPickT0(out var success, out _);
-
-        await Application.Send(new DeleteDialogCommand { Id = success.DialogId });
-
-        var notificationConditionQuery = CreateNotificationConditionQuery(success.DialogId);
-
-        // Act
-        var queryResult = await Application.Send(notificationConditionQuery);
-
-        // Assert
-        queryResult.TryPickT3(out var deleted, out _);
-        queryResult.IsT3.Should().BeTrue();
-        deleted.Should().NotBeNull();
-        deleted.Message.Should().Contain(success.DialogId.ToString());
-    }
-
-    private static NotificationConditionQuery CreateNotificationConditionQuery(Guid dialogId,
-        DialogActivityType.Values activityType = DialogActivityType.Values.Information,
-        NotificationConditionType conditionType = NotificationConditionType.Exists)
-        => new()
-        {
-            DialogId = dialogId,
-            ActivityType = activityType,
-            ConditionType = conditionType,
-        };
 }

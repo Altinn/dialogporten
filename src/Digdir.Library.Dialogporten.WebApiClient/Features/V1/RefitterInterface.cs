@@ -1772,6 +1772,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
         /// <summary>
+        /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
+        /// <br/>When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
+        /// </summary>
+
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; }
+
+        /// <summary>
         /// The aggregated status of the dialog.
         /// </summary>
 

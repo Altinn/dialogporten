@@ -4483,6 +4483,11 @@
           "serviceOwnerContext": {
             "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext"
           },
+          "serviceOwnerContextRevision": {
+            "description": "The unique identifier for the service owner context revision in UUIDv4 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
             "example": "urn:altinn:resource:some-service-identifier",

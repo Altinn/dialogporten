@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -183,6 +184,55 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .UpdateDialog(x => { x.Dto.Content!.Title = null!; })
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content.Title)));
+
+    [Fact]
+    public Task Can_Update_IsApiOnly_From_False_To_True() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
+            .UpdateDialog(x => x.Dto.IsApiOnly = true)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.IsApiOnly.Should().BeTrue());
+
+    [Fact]
+    public Task Can_Update_IsApiOnly_From_True_To_False() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .UpdateDialog(x => x.Dto.IsApiOnly = false)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.IsApiOnly.Should().BeFalse());
+
+    [Fact]
+    public Task Cannot_Update_IsApiOnly_To_False_If_Dialog_Content_Is_Null() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.IsApiOnly = true;
+                x.Dto.Content = null;
+            })
+            .UpdateDialog(x => x.Dto.IsApiOnly = false)
+            .ExecuteAndAssert<ValidationError>(x => x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content)));
+
+    [Fact]
+    public Task Cannot_Update_IsApiOnly_To_False_If_Transmission_Content_Is_Null() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddTransmission(x => x.Content = null);
+                x.Dto.IsApiOnly = true;
+            })
+            .UpdateDialog(x => x.Dto.IsApiOnly = false)
+            .ExecuteAndAssert<ValidationError>(x => x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Transmissions)));
+
+    [Fact]
+    public Task Can_Update_IsApiOnly_To_False_If_Transmission_Content_Is_Not_Null() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddTransmission();
+                x.Dto.IsApiOnly = true;
+            })
+            .UpdateDialog(x => x.Dto.IsApiOnly = false)
+            .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Fact]
     public async Task Should_Allow_User_Defined_Id_For_Attachment()

@@ -37,6 +37,7 @@ internal sealed class UpdateDialogDataLoader : TypedDataLoader<UpdateDialogComma
             .Include(x => x.ApiActions)
                 .ThenInclude(x => x.Endpoints)
             .Include(x => x.Transmissions)
+                .ThenInclude(x => x.Content)
             .Include(x => x.DialogEndUserContext)
             .IgnoreQueryFilters()
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))

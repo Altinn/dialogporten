@@ -241,6 +241,7 @@ public static class DialogGenerator
         {
             var dialog = dialogs[i];
 
+            dialog.ServiceOwnerContext = new();
             if (id.HasValue) dialog.Id = id.Value;
             dialog.ServiceResource = serviceResourceGenerator?.Invoke() ?? serviceResource ?? dialog.ServiceResource;
             dialog.Party = partyGenerator?.Invoke() ?? party ?? dialog.Party;

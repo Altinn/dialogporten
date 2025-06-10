@@ -182,6 +182,16 @@ public sealed class DialogDto
     /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
+
+    public DialogServiceOwnerContextDto ServiceOwnerContext { get; set; } = null!;
+}
+
+public sealed class DialogServiceOwnerContextDto
+{
+    /// <summary>
+    /// A list of labels, not visible in end-user APIs.
+    /// </summary>
+    public List<DialogServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
 }
 
 public sealed class DialogTransmissionDto
@@ -352,6 +362,14 @@ public sealed class SearchTagDto
 {
     /// <summary>
     /// A search tag value.
+    /// </summary>
+    public string Value { get; set; } = null!;
+}
+
+public sealed class DialogServiceOwnerLabelDto
+{
+    /// <summary>
+    /// A label value.
     /// </summary>
     public string Value { get; set; } = null!;
 }

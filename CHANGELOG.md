@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.68.1](https://github.com/Altinn/dialogporten/compare/v1.68.0...v1.68.1) (2025-06-10)
+
+
+### Miscellaneous Chores
+
+* **app:** Disable FluentValidation language manager ([#2395](https://github.com/Altinn/dialogporten/issues/2395)) ([3424409](https://github.com/Altinn/dialogporten/commit/3424409d5be8ab27f4a03b330269c49de1259752))
+* **deps:** update dependency scrutor to v6 ([#2390](https://github.com/Altinn/dialogporten/issues/2390)) ([ec62f26](https://github.com/Altinn/dialogporten/commit/ec62f269446feeb494667b441a5527820d351f76))
+* **deps:** update dependency serilog.sinks.opentelemetry to 4.2.0 ([#2387](https://github.com/Altinn/dialogporten/issues/2387)) ([de017f6](https://github.com/Altinn/dialogporten/commit/de017f617d1f7f1c54ed38361b0d2f81caa0ecb4))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.127.0 ([#2388](https://github.com/Altinn/dialogporten/issues/2388)) ([3897525](https://github.com/Altinn/dialogporten/commit/38975254f944e3c19fa730619d662f04f3c7de41))
+* **deps:** update prom/prometheus docker tag to v3.4.1 ([#2389](https://github.com/Altinn/dialogporten/issues/2389)) ([24fc6bb](https://github.com/Altinn/dialogporten/commit/24fc6bb8aed227ba1bde057dc8f68f34e21008d0))
+
 ## [1.68.0](https://github.com/Altinn/dialogporten/compare/v1.67.1...v1.68.0) (2025-06-06)
 
 

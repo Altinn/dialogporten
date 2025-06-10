@@ -29,7 +29,8 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
             .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId))
-            .ForMember(dest => dest.EnduserContextRevision, opt => opt.MapFrom(src => src.DialogEndUserContext.Revision));
+            .ForMember(dest => dest.EnduserContextRevision, opt => opt.MapFrom(src => src.DialogEndUserContext.Revision))
+            .ForMember(dest => dest.ServiceOwnerContextRevision, opt => opt.MapFrom(src => src.ServiceOwnerContext.Revision));
 
         CreateMap<DialogServiceOwnerContext, DialogServiceOwnerContextDto>();
         CreateMap<DialogServiceOwnerLabel, ServiceOwnerLabelDto>();

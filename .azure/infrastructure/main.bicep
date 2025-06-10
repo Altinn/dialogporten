@@ -56,6 +56,18 @@ param workloadProfiles array = [
   }
 ]
 
+@description('The Object ID of the Azure AD group for PostgreSQL users (manually created)')
+param postgresqlAzureAdGroupObjectId string
+
+@description('The name of the Azure AD group for PostgreSQL users (manually created)')
+param postgresqlAzureAdGroupName string
+
+@description('The Object ID of the Azure AD administrator for PostgreSQL (user or group)')
+param postgresqlAzureAdAdministratorObjectId string
+
+@description('The name/email of the Azure AD administrator for PostgreSQL')
+param postgresqlAzureAdAdministratorName string
+
 import { Sku as KeyVaultSku } from '../modules/keyvault/create.bicep'
 param keyVaultSku KeyVaultSku
 
@@ -232,6 +244,10 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     highAvailability: postgresConfiguration.?highAvailability
     backupRetentionDays: postgresConfiguration.backupRetentionDays
     availabilityZone: postgresConfiguration.availabilityZone
+    azureAdGroupObjectId: postgresqlAzureAdGroupObjectId
+    azureAdGroupName: postgresqlAzureAdGroupName
+    azureAdAdministratorObjectId: postgresqlAzureAdAdministratorObjectId
+    azureAdAdministratorName: postgresqlAzureAdAdministratorName
     tags: tags
   }
 }
@@ -248,6 +264,22 @@ module redis '../modules/redis/main.bicep' = {
     subnetId: vnet.outputs.redisSubnetId
     vnetId: vnet.outputs.virtualNetworkId
     tags: tags
+  }
+}
+
+module postgresqlManagedIdentitySetup '../modules/postgreSql/setupManagedIdentityAuth.bicep' = {
+  scope: resourceGroup
+  name: 'postgresqlManagedIdentitySetup'
+  params: {
+    location: location
+    tags: tags
+    postgresServerName: postgresql.outputs.serverName
+    postgresServerFqdn: postgresql.outputs.serverFqdn
+    databaseName: 'dialogporten'
+    azureAdGroupName: postgresqlAzureAdGroupName
+    azureAdGroupObjectId: postgresqlAzureAdGroupObjectId
+    azureAdAdministratorObjectId: postgresqlAzureAdAdministratorObjectId
+    environmentKeyVaultName: environmentKeyVault.outputs.name
   }
 }
 
@@ -326,6 +358,18 @@ module redisConnectionStringAppConfig '../modules/appConfiguration/upsertKeyValu
     configStoreName: appConfiguration.outputs.name
     key: 'Infrastructure:Redis:ConnectionString'
     value: redis.outputs.connectionStringSecretUri
+    keyValueType: 'keyVaultReference'
+    tags: tags
+  }
+}
+
+module postgresManagedIdentityConnectionStringAppConfig '../modules/appConfiguration/upsertKeyValue.bicep' = {
+  scope: resourceGroup
+  name: 'AppConfig_Add_PostgresManagedIdentity_ConnectionString'
+  params: {
+    configStoreName: appConfiguration.outputs.name
+    key: 'Infrastructure:DialogDbManagedIdentityConnectionString'
+    value: postgresqlManagedIdentitySetup.outputs.managedIdentityConnectionStringSecretUri
     keyValueType: 'keyVaultReference'
     tags: tags
   }

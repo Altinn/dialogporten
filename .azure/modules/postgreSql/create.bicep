@@ -22,6 +22,18 @@ param vnetId string
 @description('Tags to apply to resources')
 param tags object
 
+@description('The Object ID of the Azure AD group for PostgreSQL users')
+param azureAdGroupObjectId string
+
+@description('The name of the Azure AD group for PostgreSQL users')
+param azureAdGroupName string
+
+@description('The Object ID of the Azure AD administrator (user or group)')
+param azureAdAdministratorObjectId string
+
+@description('The name/email of the Azure AD administrator')
+param azureAdAdministratorName string
+
 @export()
 type Sku = {
   name: 'Standard_B1ms' | 'Standard_B2s' | 'Standard_B4ms' | 'Standard_B8ms' | 'Standard_B12ms' | 'Standard_B16ms' | 'Standard_B20ms' | 'Standard_D4ads_v5' | 'Standard_D8ads_v5'
@@ -129,6 +141,10 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
     }
     availabilityZone: availabilityZone
     highAvailability: highAvailability
+    authConfig: {
+      activeDirectoryAuth: 'Enabled'
+      passwordAuth: 'Enabled'
+    }
   }
   sku: sku
   resource database 'databases' = {
@@ -263,3 +279,17 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = {
 
 output adoConnectionStringSecretUri string = adoConnectionString.outputs.secretUri
 output psqlConnectionStringSecretUri string = psqlConnectionString.outputs.secretUri
+output serverName string = postgres.name
+output serverFqdn string = postgres.properties.fullyQualifiedDomainName
+output azureAdGroupObjectId string = azureAdGroupObjectId
+output azureAdGroupName string = azureAdGroupName
+
+resource azureAdAdministrator 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2024-08-01' = {
+  parent: postgres
+  name: azureAdAdministratorObjectId
+  properties: {
+    principalType: 'Group'
+    principalName: azureAdAdministratorName
+    tenantId: subscription().tenantId
+  }
+}

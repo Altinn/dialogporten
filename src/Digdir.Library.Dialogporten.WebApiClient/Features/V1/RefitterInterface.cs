@@ -3018,11 +3018,11 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid EnduserContextRevision { get; set; }
 
         /// <summary>
-        /// The unique identifier for the end user context revision in UUIDv4 format.
+        /// The unique identifier for the service owner context revision in UUIDv4 format.
         /// </summary>
 
-        [JsonPropertyName("sericeOwnerContextRevision")]
-        public System.Guid SericeOwnerContextRevision { get; set; }
+        [JsonPropertyName("serviceOwnerContextRevision")]
+        public System.Guid ServiceOwnerContextRevision { get; set; }
 
         /// <summary>
         /// The service owner code representing the organization (service owner) related to this dialog.

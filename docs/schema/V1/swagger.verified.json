@@ -3756,14 +3756,14 @@
             "nullable": true,
             "type": "array"
           },
-          "sericeOwnerContextRevision": {
-            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+          "serviceOwnerContext": {
+            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext"
+          },
+          "serviceOwnerContextRevision": {
+            "description": "The unique identifier for the service owner context revision in UUIDv4 format.",
             "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
             "format": "guid",
             "type": "string"
-          },
-          "serviceOwnerContext": {
-            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext"
           },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",

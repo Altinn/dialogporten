@@ -12,6 +12,9 @@
         <RootNamespace>Altinn.ApiClients.Dialogporten</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591,1573</NoWarn>
+        <TargetFramework>net8.0</TargetFramework>
+        <Configurations>Debug;Release;DebugNet8</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,7 +27,7 @@
 
     <ItemGroup>
         <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.1"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.5" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.5"/>
         <PackageReference Include="NSec.Cryptography" Version="24.4.0"/>
         <PackageReference Include="Refit" Version="8.0.0"/>
         <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0"/>

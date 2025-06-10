@@ -2652,6 +2652,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid EnduserContextRevision { get; set; }
 
         /// <summary>
+        /// The unique identifier for the service owner context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerContextRevision")]
+        public System.Guid ServiceOwnerContextRevision { get; set; }
+
+        /// <summary>
         /// The service identifier for the service that the dialog is related to in URN-format.
         /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
         /// </summary>
@@ -3009,6 +3016,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("enduserContextRevision")]
         public System.Guid EnduserContextRevision { get; set; }
+
+        /// <summary>
+        /// The unique identifier for the end user context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("sericeOwnerContextRevision")]
+        public System.Guid SericeOwnerContextRevision { get; set; }
 
         /// <summary>
         /// The service owner code representing the organization (service owner) related to this dialog.

@@ -246,7 +246,7 @@ module adoConnectionString '../keyvault/upsertSecret.bicep' = {
   params: {
     destKeyVaultName: environmentKeyVaultName
     secretName: 'dialogportenAdoConnectionString'
-    secretValue: 'Server=${postgres.properties.fullyQualifiedDomainName};Database=${databaseName};Port=5432;User Id=${administratorLogin};Password=${administratorLoginPassword};Ssl Mode=Require;Trust Server Certificate=true;'
+    secretValue: 'Server=${postgres.properties.fullyQualifiedDomainName};Database=${databaseName};Port=5432;User Id=${administratorLogin};Password=${administratorLoginPassword};Ssl Mode=Require;Trust Server Certificate=true;Include Error Detail=True;'
     tags: tags
   }
 }

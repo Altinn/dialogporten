@@ -37,6 +37,12 @@ public sealed class DialogDto
     public Guid EnduserContextRevision { get; set; }
 
     /// <summary>
+    /// The unique identifier for the end user context revision in UUIDv4 format.
+    /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
+    public Guid SericeOwnerContextRevision { get; set; }
+
+    /// <summary>
     /// The service owner code representing the organization (service owner) related to this dialog.
     /// </summary>
     /// <example>ske</example>

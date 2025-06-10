@@ -32,6 +32,10 @@ public static class ApplicationExtensions
         // display names without an added space.
         // 'CreatedAt', not 'Created At'.
         ValidatorOptions.Global.DisplayNameResolver = (_, member, _) => member?.Name;
+
+        // Disable FluentValidation localization
+        ValidatorOptions.Global.LanguageManager.Enabled = false;
+
         services
             // Framework
             .AddAutoMapper(thisAssembly)

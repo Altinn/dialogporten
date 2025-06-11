@@ -72,7 +72,7 @@ static void BuildAndRun(string[] args)
         .Enrich.WithEnvironmentName()
         .Enrich.FromLogContext()
         .Filter.ByExcluding(e => e.Exception is DbUpdateException &&
-                                 e.Exception.InnerException is NpgsqlException { SqlState: "23505" })
+            e.Exception.InnerException is NpgsqlException { SqlState: "23505" })
         .WriteTo.OpenTelemetryOrConsole(context));
 
     builder.Services

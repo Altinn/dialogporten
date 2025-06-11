@@ -28,6 +28,7 @@ public sealed class DialogEntity :
     public string? IdempotentKey { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset ContentUpdatedAt { get; set; }
     public bool Deleted { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
     public string Org { get; set; } = null!;
@@ -85,10 +86,36 @@ public sealed class DialogEntity :
     public DialogServiceOwnerContext ServiceOwnerContext { get; set; } = null!;
 
     public void OnCreate(AggregateNode self, DateTimeOffset utcNow)
-        => _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+    {
+        _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+        ContentUpdatedAt = utcNow;
+    }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow)
-        => _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+    {
+        _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+
+        if (ContentHasChanged(self))
+        {
+            ContentUpdatedAt = utcNow;
+        }
+    }
+
+    private static bool ContentHasChanged(AggregateNode self)
+    {
+        var childrenChanged = self.Children.Any(x =>
+            x.Entity is
+                DialogTransmission or
+                DialogContent or
+                DialogAttachment or
+                DialogGuiAction or
+                DialogApiAction);
+
+        var propertiesChanged = self.ModifiedProperties.Any(x =>
+            x.PropertyName is nameof(ExtendedStatus) or nameof(Status));
+
+        return childrenChanged || propertiesChanged;
+    }
 
     public void OnDelete(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogDeletedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
@@ -127,6 +154,7 @@ public sealed class DialogEntity :
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];
+
     public IEnumerable<IDomainEvent> PopDomainEvents()
     {
         var events = _domainEvents.ToList();

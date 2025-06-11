@@ -296,4 +296,13 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Dto.Content = null;
             })
             .ExecuteAndAssert(expectedType);
+
+    [Fact]
+    public Task Creating_Dialog_Should_Set_ContentUpdatedAt() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ContentUpdatedAt.Should()
+                    .BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(1)));
 }

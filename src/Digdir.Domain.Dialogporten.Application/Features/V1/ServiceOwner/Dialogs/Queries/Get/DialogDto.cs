@@ -129,6 +129,12 @@ public sealed class DialogDto
     public DateTimeOffset UpdatedAt { get; set; }
 
     /// <summary>
+    /// The date and time when the dialog content was last updated.
+    /// </summary>
+    /// <example>2022-12-31T23:59:59Z</example>
+    public DateTimeOffset ContentUpdatedAt { get; set; }
+
+    /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
     public DialogStatus.Values Status { get; set; }

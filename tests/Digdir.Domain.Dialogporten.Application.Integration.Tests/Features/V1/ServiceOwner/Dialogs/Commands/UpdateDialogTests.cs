@@ -318,4 +318,28 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .Should()
             .ContainSingle(x => x.Id == userDefinedGuiActionId);
     }
+
+    private sealed class ContentUpdatedAtTestData : TheoryData<string, Action<CreateDialogCommand>>
+    {
+        public ContentUpdatedAtTestData()
+        {
+            Add("", x =>
+            {
+
+            });
+        }
+    }
+
+    [Theory, ClassData(typeof(ContentUpdatedAtTestData))]
+    public Task ContentUpdatedAt_Should_Change_When_Content_Updates(string _,
+        Action<UpdateDialogCommand> updateDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(updateDialog)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.ContentUpdatedAt.Should().NotBeNull();
+                x.ContentUpdatedAt!.Value.Should().BeAfter(x.UpdatedAt);
+            });
 }

@@ -72,6 +72,7 @@ static void BuildAndRun(string[] args)
         .Enrich.WithEnvironmentName()
         .Enrich.FromLogContext()
         .Filter.ByExcluding(e => e.Exception is DbUpdateException &&
+            // Filter out duplicate key exceptions (PostgreSQL error code 23505)
             e.Exception.InnerException is NpgsqlException { SqlState: "23505" })
         .WriteTo.OpenTelemetryOrConsole(context));
 

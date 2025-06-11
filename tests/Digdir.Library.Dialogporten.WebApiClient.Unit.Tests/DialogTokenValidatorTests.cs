@@ -8,7 +8,6 @@ using Altinn.ApiClients.Dialogporten.Common;
 using Altinn.ApiClients.Dialogporten.Services;
 using NSec.Cryptography;
 using NSubstitute;
-using Base64Url = System.Buffers.Text.Base64Url;
 
 namespace Digdir.Library.Dialogporten.WebApiClient.Unit.Tests;
 

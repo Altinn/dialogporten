@@ -85,10 +85,10 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         return decodedTokenParts.Header.IsValidJson() &&
             decodedTokenParts.Body.TryGetClaimsPrincipal(out claimsPrincipal);
     }
-#if NET8_0
 
     private static bool TryGetTokenParts(ReadOnlySpan<char> token, out JwksTokenParts<char> tokenParts)
     {
+#if NET8_0
         tokenParts = default;
         var start = 0;
         var end = token.IndexOf('.');
@@ -107,10 +107,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         tokenParts = new JwksTokenParts<char>(token, header, body, signature);
         return true;
-    }
 #else
-    private static bool TryGetTokenParts(ReadOnlySpan<char> token, out JwksTokenParts<char> tokenParts)
-    {
         tokenParts = default;
         var enumerator = token.Split('.');
         // Header
@@ -127,8 +124,9 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         tokenParts = new JwksTokenParts<char>(token, header, body, signature);
         return !enumerator.MoveNext();
-    }
+
 #endif
+    }
 
     private static bool TryDecodeParts(
         Span<byte> buffer,
@@ -203,10 +201,8 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     private static bool TryDecodeFromChars(ReadOnlySpan<char> source, Span<byte> destination, out int bytesWritten)
     {
 #if NET8_0
-
         try
         {
-
             var decoded = Base64Url.DecodeFromChars(source.ToString());
             bytesWritten = decoded.Length;
             decoded.CopyTo(destination);
@@ -288,7 +284,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     }
 }
 #if NET8_0
-public static class Base64Url
+internal static class Base64Url
 {
     public static int GetMaxDecodedLength(int length) => (length + 2) / 3 * 4;
 

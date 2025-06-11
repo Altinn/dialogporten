@@ -12,7 +12,7 @@
         <RootNamespace>Altinn.ApiClients.Dialogporten</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591,1573</NoWarn>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <Configurations>Debug;Release;DebugNet8</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
@@ -22,6 +22,7 @@
         <None Include="../../LICENSE" Pack="true" PackagePath="/"/>
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
                           ReferenceOutputAssembly="false"
+                          PrivateAssets="All"
                           Condition="$(Configuration)=='Release'"/>
     </ItemGroup>
 

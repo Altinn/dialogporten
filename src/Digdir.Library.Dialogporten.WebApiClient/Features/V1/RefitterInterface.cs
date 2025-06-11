@@ -412,76 +412,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
         Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
-        /// <summary>Gets all seen log records for a dialog</summary>
-        /// <remarks>Gets all seen log records for a dialog.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog seen log records.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Unauthorized</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Forbidden</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog>>> V1ServiceOwnerDialogSeenLogsSearchDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a single dialog seen log record</summary>
-        /// <remarks>Gets a single dialog seen log record.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog seen log record.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Unauthorized</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Forbidden</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog>> V1ServiceOwnerDialogSeenLogsGetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
-
         /// <summary>Replaces a dialog</summary>
         /// <remarks>
         /// Replaces a given dialog with the supplied model.
@@ -821,6 +751,76 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Headers("Accept: application/problem+json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/purge")]
         Task<IApiResponse> V1ServiceOwnerDialogsPurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets all seen log records for a dialog</summary>
+        /// <remarks>Gets all seen log records for a dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog seen log records.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog>>> V1ServiceOwnerDialogSeenLogsSearchDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a single dialog seen log record</summary>
+        /// <remarks>Gets a single dialog seen log record.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog seen log record.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
+        Task<IApiResponse<V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog>> V1ServiceOwnerDialogSeenLogsGetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -1671,42 +1671,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog
-    {
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        [JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
-
-        [JsonPropertyName("seenBy")]
-        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
-
-        [JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog
-    {
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        [JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
-
-        [JsonPropertyName("seenBy")]
-        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
-
-        [JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Dialog
     {
         /// <summary>
@@ -1774,6 +1738,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
         /// <br/>When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
+        /// <br/>If any Transmissions were created without Content while this property was true, the flag cannot be reverted to false.
         /// </summary>
 
         [JsonPropertyName("isApiOnly")]
@@ -4492,6 +4457,42 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("description")]
         public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog
+    {
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; }
+
+        [JsonPropertyName("seenBy")]
+        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
+
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog
+    {
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; }
+
+        [JsonPropertyName("seenBy")]
+        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
+
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; }
 
     }
 

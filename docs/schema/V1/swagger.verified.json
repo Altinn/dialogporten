@@ -3133,7 +3133,7 @@
             "type": "array"
           },
           "isApiOnly": {
-            "description": "Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.\nWhen true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.",
+            "description": "Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.\nWhen true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.\nIf any Transmissions were created without Content while this property was true, the flag cannot be reverted to false.",
             "type": "boolean"
           },
           "precedingProcess": {

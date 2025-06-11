@@ -1,3 +1,4 @@
+using System.Buffers.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Altinn.ApiClients.Dialogporten;
@@ -5,7 +6,6 @@ using Altinn.ApiClients.Dialogporten.Common;
 using Altinn.ApiClients.Dialogporten.Services;
 using BenchmarkDotNet.Attributes;
 using NSec.Cryptography;
-using Base64Url = System.Buffers.Text.Base64Url;
 
 namespace Digdir.Tool.Dialogporten.Benchmarks;
 

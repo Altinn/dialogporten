@@ -83,6 +83,17 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public Task Empty_Update_Should_Not_Set_UpdatedAt() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.UpdatedAt = x.Dto.CreatedAt =
+                    DateTimeOffset.UtcNow.AddYears(-5))
+            .UpdateDialog(_ => { })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(
+                x => x.UpdatedAt.Year.Should().NotBe(DateTimeOffset.UtcNow.Year));
+
+    [Fact]
     public async Task UpdateDialogCommand_Should_Return_New_Revision()
     {
         Guid? initialRevision = null!;

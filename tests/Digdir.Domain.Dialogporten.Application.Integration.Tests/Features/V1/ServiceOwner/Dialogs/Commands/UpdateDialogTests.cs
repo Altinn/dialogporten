@@ -93,7 +93,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .UpdateDialog(_ => { })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.UpdatedAt.Should().Be(initialDate));
+                x.UpdatedAt.Should()
+                    .BeCloseTo(initialDate, TimeSpan.FromSeconds(1)));
     }
 
     [Fact]

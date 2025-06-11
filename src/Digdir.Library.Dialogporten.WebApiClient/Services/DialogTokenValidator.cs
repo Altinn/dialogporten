@@ -285,7 +285,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 #if NET8_0
 internal static class Base64Url
 {
-    public static int GetMaxDecodedLength(int length) => (length + 2) / 3 * 4;
+    public static int GetMaxDecodedLength(int length) => length * 3 / 4;
 
     public static void Encode(ReadOnlySpan<byte> data, Span<byte> destination, out int written)
     {

@@ -4,9 +4,14 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 internal sealed class UpdateDialogCommandValidator : AbstractValidator<UpdateDialogCommand>
 {
+    private const string IsApiOnlyKey = "IsApiOnly";
+
     public UpdateDialogCommandValidator(
         IValidator<UpdateDialogDto> updateDialogDtoValidator)
     {
+        RuleFor(x => x)
+            .Custom((x, ctx) => ctx.RootContextData[IsApiOnlyKey] = x.Dto.IsApiOnly);
+
         RuleFor(x => x.Id)
             .NotEmpty();
 
@@ -17,7 +22,7 @@ internal sealed class UpdateDialogCommandValidator : AbstractValidator<UpdateDia
     }
 
     public static bool IsApiOnly<T>(T _, IValidationContext context)
-        => UpdateDialogDataLoader.GetPreloadedData(context)?.IsApiOnly ?? false;
+        => context.RootContextData.TryGetValue(IsApiOnlyKey, out var isApiOnly) && (bool)isApiOnly;
 
     private static bool DialogIsPreloaded<T>(T _, IValidationContext context)
         => context.RootContextData.TryGetValue(UpdateDialogDataLoader.Key, out var dialog) &&

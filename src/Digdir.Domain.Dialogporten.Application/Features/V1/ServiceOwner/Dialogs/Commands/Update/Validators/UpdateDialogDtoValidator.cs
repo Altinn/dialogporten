@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using FluentValidation;
@@ -52,9 +53,19 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
                     .SetValidator(contentValidator)
                     .When(x => x.Content is not null))
             .Otherwise(() =>
+            {
                 RuleFor(x => x.Content)
                     .NotEmpty()
-                    .SetValidator(contentValidator));
+                    .SetValidator(contentValidator);
+
+                RuleFor(x => x.Transmissions)
+                    .Must((_, _, ctx) => UpdateDialogDataLoader
+                        .GetPreloadedData(ctx)!.Transmissions
+                        .All(x => x.Content.Count != 0))
+                    .WithMessage(
+                        $"This dialog is locked to {nameof(DialogDto.IsApiOnly)}=true, as one or " +
+                        $"more of the existing immutable transmissions do not have content.");
+            });
 
         RuleForEach(x => x.Transmissions)
             .SetValidator(transmissionValidator);

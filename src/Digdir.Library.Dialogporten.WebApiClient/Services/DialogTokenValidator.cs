@@ -102,7 +102,6 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         start = start + end + 1;
         end = token.Length;
-        if (end == -1) return false;
         var signature = token[start..end];
 
         tokenParts = new JwksTokenParts<char>(token, header, body, signature);

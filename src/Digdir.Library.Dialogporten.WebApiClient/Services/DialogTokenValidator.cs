@@ -93,17 +93,17 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         var start = 0;
         var end = token.IndexOf('.');
         if (end == -1) return false;
-        var header = token[start..(start + end - 1)];
+        var header = token[start..end];
 
-        start = end - 1;
+        start = end + 1;
         end = token[start..].IndexOf('.');
         if (end == -1) return false;
-        var body = token[start..(start + end - 1)];
+        var body = token[start..(start + end)];
 
-        start = end - 1;
-        end = token[start..].IndexOf('.');
+        start = start + end + 1;
+        end = token.Length;
         if (end == -1) return false;
-        var signature = token[start..(start + end - 1)];
+        var signature = token[start..end];
 
         tokenParts = new JwksTokenParts<char>(token, header, body, signature);
         return true;
@@ -204,10 +204,19 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     {
 #if NET8_0
 
-        var decoded = Base64Url.DecodeFromChars(source.ToString());
-        bytesWritten = decoded.Length;
-        decoded.CopyTo(destination);
-        return true;
+        try
+        {
+
+            var decoded = Base64Url.DecodeFromChars(source.ToString());
+            bytesWritten = decoded.Length;
+            decoded.CopyTo(destination);
+            return true;
+        }
+        catch (FormatException)
+        {
+            bytesWritten = 0;
+            return false;
+        }
 #else
         var result = Base64Url.DecodeFromChars(source, destination, out _, out bytesWritten);
         return result is OperationStatus.Done;

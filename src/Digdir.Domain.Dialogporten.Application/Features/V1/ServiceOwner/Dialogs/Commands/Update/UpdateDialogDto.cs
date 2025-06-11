@@ -64,6 +64,7 @@ public sealed class UpdateDialogDto
     /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
     /// When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
+    /// If any Transmissions were created without Content while this property was true, the flag cannot be reverted to false.
     /// </summary>
     public bool IsApiOnly { get; set; }
 

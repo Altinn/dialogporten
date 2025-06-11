@@ -303,6 +303,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.ContentUpdatedAt.Should()
-                    .BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(1)));
+                x.ContentUpdatedAt
+                    .Should()
+                    .Be(x.CreatedAt));
 }

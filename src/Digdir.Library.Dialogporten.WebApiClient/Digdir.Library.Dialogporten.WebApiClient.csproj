@@ -13,7 +13,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591,1573</NoWarn>
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <Configurations>Debug;Release;DebugNet8</Configurations>
+        <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
@@ -23,7 +23,9 @@
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
                           ReferenceOutputAssembly="false"
                           PrivateAssets="All"
-                          Condition="$(Configuration)=='Release'"/>
+                          Condition="$(Configuration)=='Release'"
+                          SkipGetTargetFrameworkProperties="true"/>
+
     </ItemGroup>
 
     <ItemGroup>

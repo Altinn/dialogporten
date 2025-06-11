@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -319,14 +320,19 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ContainSingle(x => x.Id == userDefinedGuiActionId);
     }
 
-    private sealed class ContentUpdatedAtTestData : TheoryData<string, Action<CreateDialogCommand>>
+    private sealed class ContentUpdatedAtTestData : TheoryData<string, Action<UpdateDialogCommand>>
     {
         public ContentUpdatedAtTestData()
         {
-            Add("", x =>
-            {
+            const string baseDesc = "ContentUpdatedAt should update when";
 
-            });
+            Add($"{baseDesc} dialog content is updated", x => x.ChangeTitle());
+            Add($"{baseDesc} attachments are added", x => x.AddAttachment());
+            Add($"{baseDesc} transmissions are added", x => x.AddTransmission());
+            Add($"{baseDesc} GUI actions are added", x => x.AddGuiAction());
+            Add($"{baseDesc} API actions are added", x => x.AddApiAction());
+            Add($"{baseDesc} status changes", x => x.Dto.Status = DialogStatus.Values.InProgress);
+            Add($"{baseDesc} extended status changes", x => x.Dto.ExtendedStatus = "new extended status");
         }
     }
 
@@ -338,8 +344,33 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .UpdateDialog(updateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-            {
-                x.ContentUpdatedAt.Should().NotBeNull();
-                x.ContentUpdatedAt!.Value.Should().BeAfter(x.UpdatedAt);
-            });
+                x.ContentUpdatedAt.Should().NotBe(x.CreatedAt));
+
+    private sealed class ContentNotUpdatedAtTestData : TheoryData<string, Action<UpdateDialogCommand>>
+    {
+        public ContentNotUpdatedAtTestData()
+        {
+            const string baseDesc = "ContentUpdatedAt should not update when";
+
+            Add($"{baseDesc} external referenced is updated", x => x.Dto.ExternalReference = "ext ref");
+            Add($"{baseDesc} search tags are added", x => x.Dto.SearchTags.Add(new() { Value = "new tag" }));
+            Add($"{baseDesc} process changes", x => x.Dto.Process = "some:process");
+            Add($"{baseDesc} dueAt changes", x => x.Dto.DueAt = DateTimeOffset.UtcNow.AddYears(10));
+            Add($"{baseDesc} expiresAt changes", x => x.Dto.ExpiresAt = DateTimeOffset.UtcNow.AddYears(10));
+            Add($"{baseDesc} visibleFrom changes", x => x.Dto.VisibleFrom = x.Dto.DueAt!.Value.AddDays(-2));
+            Add($"{baseDesc} progress changes", x => x.Dto.Progress = (x.Dto.Progress % 100) + 1);
+            Add($"{baseDesc} isApiOnly changes", x => x.Dto.IsApiOnly = !x.Dto.IsApiOnly);
+            Add($"{baseDesc} activities are added", x => x.AddActivity());
+        }
+    }
+
+    [Theory, ClassData(typeof(ContentNotUpdatedAtTestData))]
+    public Task ContentUpdatedAt_Should_Not_Change_When_Content_Not_Updated(string _,
+        Action<UpdateDialogCommand> updateDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(updateDialog)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ContentUpdatedAt.Should().Be(x.CreatedAt));
 }

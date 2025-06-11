@@ -112,7 +112,7 @@ public sealed class DialogEntity :
                 DialogApiAction);
 
         var propertiesChanged = self.ModifiedProperties.Any(x =>
-            x.PropertyName is nameof(ExtendedStatus) or nameof(Status));
+            x.PropertyName is nameof(ExtendedStatus) or nameof(StatusId));
 
         return childrenChanged || propertiesChanged;
     }

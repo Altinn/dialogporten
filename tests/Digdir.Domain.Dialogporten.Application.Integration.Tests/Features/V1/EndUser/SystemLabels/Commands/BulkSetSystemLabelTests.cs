@@ -1,9 +1,12 @@
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+
 using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
@@ -14,110 +17,97 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     [Fact]
     public async Task BulkSet_Updates_System_Labels()
     {
-        var cmd1 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var cmd2 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var res1 = await Application.Send(cmd1);
-        var res2 = await Application.Send(cmd2);
+        Guid? dialogId1 = NewUuidV7();
+        Guid? dialogId2 = NewUuidV7();
 
-        var command = new BulkSetSystemLabelCommand
-        {
-            Dto = new BulkSetSystemLabelDto
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog(x => x.Dto.Id = dialogId2)
+            .BulkSetSystemLabelEndUser((x, _) => x.Dto = new()
             {
                 Dialogs =
                 [
-                    new DialogRevisionDto { DialogId = res1.AsT0.DialogId },
-                    new DialogRevisionDto { DialogId = res2.AsT0.DialogId }
+                    new() { DialogId = dialogId1.Value },
+                    new() { DialogId = dialogId2.Value }
                 ],
                 SystemLabels = [SystemLabel.Values.Bin]
-            }
-        };
-
-        var result = await Application.Send(command);
-        result.TryPickT0(out _, out _).Should().BeTrue();
-
-        var get1 = await Application.Send(new GetDialogQuery { DialogId = res1.AsT0.DialogId });
-        get1.AsT0.SystemLabel.Should().Be(SystemLabel.Values.Bin);
-        var get2 = await Application.Send(new GetDialogQuery { DialogId = res2.AsT0.DialogId });
-        get2.AsT0.SystemLabel.Should().Be(SystemLabel.Values.Bin);
+            })
+            .SendCommand(GetDialog(dialogId1))
+            .AssertResult<DialogDto>(x => x.SystemLabel.Should().Be(SystemLabel.Values.Bin))
+            .SendCommand(GetDialog(dialogId2))
+            .ExecuteAndAssert<DialogDto>(x => x.SystemLabel.Should().Be(SystemLabel.Values.Bin));
     }
 
     [Fact]
     public async Task BulkSet_Updates_System_Labels_With_Revisions()
     {
-        var cmd1 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var cmd2 = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var res1 = await Application.Send(cmd1);
-        var res2 = await Application.Send(cmd2);
+        Guid? dialogId1 = NewUuidV7();
+        Guid? revision1 = null;
 
-        var contexts = await Application.GetDbEntities<DialogEndUserContext>();
-        var ctx1 = contexts.Single(x => x.DialogId == res1.AsT0.DialogId);
-        var ctx2 = contexts.Single(x => x.DialogId == res2.AsT0.DialogId);
+        Guid? dialogId2 = NewUuidV7();
+        Guid? revision2 = null;
 
-        var command = new BulkSetSystemLabelCommand
-        {
-            Dto = new BulkSetSystemLabelDto
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog(x => x.Dto.Id = dialogId2)
+            .SendCommand(GetDialog(dialogId1))
+            .AssertResult<DialogDto>(x => revision1 = x.EnduserContextRevision)
+            .SendCommand(GetDialog(dialogId2))
+            .ExecuteAndAssert<DialogDto>(x => revision2 = x.EnduserContextRevision);
+
+        await FlowBuilder.For(Application)
+            .SendCommand(new BulkSetSystemLabelCommand
             {
-                Dialogs =
-                [
-                    new DialogRevisionDto { DialogId = res1.AsT0.DialogId, EnduserContextRevision = ctx1.Revision },
-                    new DialogRevisionDto { DialogId = res2.AsT0.DialogId, EnduserContextRevision = ctx2.Revision }
-                ],
-                SystemLabels = [SystemLabel.Values.Bin]
-            }
-        };
-
-        var result = await Application.Send(command);
-        result.TryPickT0(out _, out _).Should().BeTrue();
-
-        var get1 = await Application.Send(new GetDialogQuery { DialogId = res1.AsT0.DialogId });
-        get1.AsT0.SystemLabel.Should().Be(SystemLabel.Values.Bin);
-        var get2 = await Application.Send(new GetDialogQuery { DialogId = res2.AsT0.DialogId });
-        get2.AsT0.SystemLabel.Should().Be(SystemLabel.Values.Bin);
+                Dto = new BulkSetSystemLabelDto
+                {
+                    Dialogs =
+                    [
+                        new DialogRevisionDto { DialogId = dialogId1.Value, EnduserContextRevision = revision1!.Value },
+                        new DialogRevisionDto { DialogId = dialogId2.Value, EnduserContextRevision = revision2!.Value }
+                    ],
+                    SystemLabels = [SystemLabel.Values.Bin]
+                }
+            })
+            .AssertResult<BulkSetSystemLabelSuccess>()
+            .SendCommand(GetDialog(dialogId1))
+            .AssertResult<DialogDto>(x => x.SystemLabel.Should().Be(SystemLabel.Values.Bin))
+            .SendCommand(GetDialog(dialogId2))
+            .ExecuteAndAssert<DialogDto>(x => x.SystemLabel.Should().Be(SystemLabel.Values.Bin));
     }
 
     [Fact]
-    public async Task BulkSet_Returns_Forbidden_For_Invalid_Id()
-    {
-        var cmd = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var res = await Application.Send(cmd);
-
-        var command = new BulkSetSystemLabelCommand
-        {
-            Dto = new BulkSetSystemLabelDto
+    public Task BulkSet_Returns_Forbidden_For_Invalid_Id() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .BulkSetSystemLabelEndUser((x, ctx) => x.Dto = new()
             {
                 Dialogs =
                 [
-                    new DialogRevisionDto { DialogId = res.AsT0.DialogId },
-                    new DialogRevisionDto { DialogId = Guid.NewGuid() }
+                    new() { DialogId = ctx.GetDialogId() },
+                    new() { DialogId = NewUuidV7() }
                 ],
                 SystemLabels = [SystemLabel.Values.Bin]
-            }
-        };
-
-        var result = await Application.Send(command);
-        result.TryPickT1(out var forbidden, out _).Should().BeTrue();
-        forbidden.Reasons.Should().NotBeEmpty();
-    }
+            })
+            .ExecuteAndAssert<Forbidden>(x =>
+                x.Reasons.Should().NotBeEmpty());
 
     [Fact]
-    public async Task BulkSet_Returns_ConcurrencyError_On_Revision_Mismatch()
-    {
-        var cmd = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var res = await Application.Send(cmd);
-
-        var command = new BulkSetSystemLabelCommand
-        {
-            Dto = new BulkSetSystemLabelDto
+    public Task BulkSet_Returns_ConcurrencyError_On_Revision_Mismatch() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .BulkSetSystemLabelEndUser((x, ctx) => x.Dto = new()
             {
                 Dialogs =
                 [
-                    new DialogRevisionDto { DialogId = res.AsT0.DialogId, EnduserContextRevision = Guid.NewGuid() }
+                    new DialogRevisionDto
+                    {
+                        DialogId = ctx.GetDialogId(),
+                        EnduserContextRevision = Guid.NewGuid()
+                    }
                 ],
                 SystemLabels = [SystemLabel.Values.Bin]
-            }
-        };
+            })
+            .ExecuteAndAssert<ConcurrencyError>();
 
-        var result = await Application.Send(command);
-        result.TryPickT4(out _, out _).Should().BeTrue();
-    }
+    private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

@@ -17,6 +17,11 @@ using GetDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.Serv
 using GetDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
 using SearchDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
 using SearchDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet.BulkSetSystemLabelResult;
+using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet.BulkSetSystemLabelCommand;
+using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet.BulkSetSystemLabelResult;
+using BulkSetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet.BulkSetSystemLabelCommand;
+using BulkSetSystemLabelSuccessEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet.BulkSetSystemLabelSuccess;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -149,6 +154,14 @@ public static class IFlowStepExtensions
         var query = new SearchDialogQueryEU();
         modify(query);
         return step.SendCommand(query);
+    }
+
+    public static IFlowExecutor<BulkSetSystemLabelResultEU> BulkSetSystemLabelEndUser(
+        this IFlowStep<CreateDialogResult> step, Action<BulkSetSystemLabelCommandEU, FlowContext> modify)
+    {
+        var command = new BulkSetSystemLabelCommandEU { Dto = new() };
+        modify(command, step.Context);
+        return step.SendCommand(command);
     }
 
     public static IFlowExecutor<TIn> Modify<TIn>(

@@ -14,7 +14,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSyste
 
 public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>
 {
-    public BulkSetSystemLabelDto Dto { get; init; } = new();
+    public BulkSetSystemLabelDto Dto { get; set; } = new();
 }
 
 public sealed record BulkSetSystemLabelSuccess;

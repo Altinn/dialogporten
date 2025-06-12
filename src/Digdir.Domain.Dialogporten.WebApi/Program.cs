@@ -21,9 +21,7 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Npgsql;
 using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -71,9 +69,6 @@ static void BuildAndRun(string[] args)
         .ReadFrom.Services(services)
         .Enrich.WithEnvironmentName()
         .Enrich.FromLogContext()
-        .Filter.ByExcluding(e => e.Exception is DbUpdateException &&
-            // Filter out duplicate key exceptions (PostgreSQL error code 23505)
-            e.Exception.InnerException is NpgsqlException { SqlState: "23505" })
         .WriteTo.OpenTelemetryOrConsole(context));
 
     builder.Services

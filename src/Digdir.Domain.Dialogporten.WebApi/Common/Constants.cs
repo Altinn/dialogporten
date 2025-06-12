@@ -30,6 +30,7 @@ internal static class Constants
         internal const string AccessDeniedToDialogForChildEntity = "Unauthorized to {0} child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy).";
         internal const string DialogCreationNotAllowed = "Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy).";
         internal const string OptimisticConcurrencyNote = "Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.";
+        internal const string OptimisticConcurrencyNoteEnduserContext = "Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.";
         internal const string IdempotentKeyConflict = "Dialog with IdempotentKey {0} has already been created.";
     }
 }

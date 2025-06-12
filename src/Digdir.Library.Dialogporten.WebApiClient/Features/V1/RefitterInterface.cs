@@ -412,6 +412,166 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
         Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
+        /// <summary>Sets the system labels of a dialog</summary>
+        /// <remarks>
+        /// Sets the system labels of the dialog.
+        /// 
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog system label was updated successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Put("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels")]
+        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsSetSetDialogSystemLabels(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Sets system labels for multiple dialogs</summary>
+        /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog system labels was updated successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
+        Task<IApiResponse> V1ServiceOwnerDialogSystemLabelsBulkSetBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1CommonSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets all seen log records for a dialog</summary>
+        /// <remarks>Gets all seen log records for a dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog seen log records.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog>>> V1ServiceOwnerDialogSeenLogsSearchDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a single dialog seen log record</summary>
+        /// <remarks>Gets a single dialog seen log record.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog seen log record.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
+        Task<IApiResponse<V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog>> V1ServiceOwnerDialogSeenLogsGetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
+
         /// <summary>Replaces a dialog</summary>
         /// <remarks>
         /// Replaces a given dialog with the supplied model.
@@ -751,76 +911,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Headers("Accept: application/problem+json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/purge")]
         Task<IApiResponse> V1ServiceOwnerDialogsPurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets all seen log records for a dialog</summary>
-        /// <remarks>Gets all seen log records for a dialog.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog seen log records.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Unauthorized</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Forbidden</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog>>> V1ServiceOwnerDialogSeenLogsSearchDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a single dialog seen log record</summary>
-        /// <remarks>Gets a single dialog seen log record.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog seen log record.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Unauthorized</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Forbidden</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog>> V1ServiceOwnerDialogSeenLogsGetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -1671,6 +1761,108 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogSystemLabelsSet_SetDialogSystemLabelRequest
+    {
+
+        [JsonPropertyName("systemLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogEndUserContextsEntities_SystemLabel
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Default")]
+        Default = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Bin")]
+        Bin = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
+        Archive = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonSystemLabels_BulkSetSystemLabel
+    {
+        /// <summary>
+        /// List of target dialog ids with optional revision ids
+        /// </summary>
+
+        [JsonPropertyName("dialogs")]
+        public ICollection<V1CommonSystemLabels_DialogRevision> Dialogs { get; set; }
+
+        /// <summary>
+        /// List of system labels to set on target dialogs
+        /// </summary>
+
+        [JsonPropertyName("systemLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonSystemLabels_DialogRevision
+    {
+        /// <summary>
+        /// Target dialog id for system labels
+        /// </summary>
+
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; }
+
+        /// <summary>
+        /// Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.
+        /// </summary>
+
+        [JsonPropertyName("enduserContextRevision")]
+        public System.Guid? EnduserContextRevision { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog
+    {
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; }
+
+        [JsonPropertyName("seenBy")]
+        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
+
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog
+    {
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; }
+
+        [JsonPropertyName("seenBy")]
+        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
+
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Dialog
     {
         /// <summary>
@@ -2462,6 +2654,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Revision { get; set; }
 
         /// <summary>
+        /// The unique identifier for the end user context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("enduserContextRevision")]
+        public System.Guid EnduserContextRevision { get; set; }
+
+        /// <summary>
+        /// The unique identifier for the service owner context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerContextRevision")]
+        public System.Guid ServiceOwnerContextRevision { get; set; }
+
+        /// <summary>
         /// The service identifier for the service that the dialog is related to in URN-format.
         /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
         /// </summary>
@@ -2613,21 +2819,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesSearch_Content Content { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogEndUserContextsEntities_SystemLabel
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Default")]
-        Default = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Bin")]
-        Bin = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
-        Archive = 2,
 
     }
 
@@ -2827,6 +3018,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("revision")]
         public System.Guid Revision { get; set; }
+
+        /// <summary>
+        /// The unique identifier for the end user context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("enduserContextRevision")]
+        public System.Guid EnduserContextRevision { get; set; }
+
+        /// <summary>
+        /// The unique identifier for the service owner context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("serviceOwnerContextRevision")]
+        public System.Guid ServiceOwnerContextRevision { get; set; }
 
         /// <summary>
         /// The service owner code representing the organization (service owner) related to this dialog.
@@ -4457,42 +4662,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("description")]
         public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog
-    {
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        [JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
-
-        [JsonPropertyName("seenBy")]
-        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
-
-        [JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog
-    {
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        [JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
-
-        [JsonPropertyName("seenBy")]
-        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
-
-        [JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
 
     }
 

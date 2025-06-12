@@ -53,6 +53,7 @@ var dialogportenSettings = builder.Configuration
     .Get<DialogportenSettings>()!;
 builder.Services.AddDialogportenClient(dialogportenSettings);
 ```
+
 In this case, the configuration should look like this:
 ```json5
 {

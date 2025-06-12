@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddContentUpdatedAtToDialog : Migration
+    public partial class AddDialogContentUpdatedAt : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,11 +17,20 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 type: "timestamp with time zone",
                 nullable: false,
                 defaultValueSql: "current_timestamp at time zone 'utc'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Dialog_ContentUpdatedAt",
+                table: "Dialog",
+                column: "ContentUpdatedAt");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_Dialog_ContentUpdatedAt",
+                table: "Dialog");
+
             migrationBuilder.DropColumn(
                 name: "ContentUpdatedAt",
                 table: "Dialog");

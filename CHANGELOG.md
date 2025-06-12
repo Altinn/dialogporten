@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.68.2](https://github.com/Altinn/dialogporten/compare/v1.68.1...v1.68.2) (2025-06-10)
+
+
+### Bug Fixes
+
+* **app:** Enable error details in ado connection string ([#2415](https://github.com/Altinn/dialogporten/issues/2415)) ([6cc4198](https://github.com/Altinn/dialogporten/commit/6cc4198354938f4dfb1d416ae30e62425782534e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update microsoft dependencies ([#2417](https://github.com/Altinn/dialogporten/issues/2417)) ([2b174f8](https://github.com/Altinn/dialogporten/commit/2b174f87afa4c0a07e140f12e2d8bb29736e6cda))
+
 ## [1.68.1](https://github.com/Altinn/dialogporten/compare/v1.68.0...v1.68.1) (2025-06-10)
 
 

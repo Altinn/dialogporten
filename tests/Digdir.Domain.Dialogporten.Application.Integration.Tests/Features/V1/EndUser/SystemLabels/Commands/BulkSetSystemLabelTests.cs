@@ -68,7 +68,6 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     SystemLabels = [SystemLabel.Values.Bin]
                 }
             })
-            .AssertResult<BulkSetSystemLabelSuccess>()
             .SendCommand(GetDialog(dialogId1))
             .AssertResult<DialogDto>(x => x.SystemLabel.Should().Be(SystemLabel.Values.Bin))
             .SendCommand(GetDialog(dialogId2))

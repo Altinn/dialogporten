@@ -14,8 +14,8 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>
 {
-    public string EnduserId { get; init; } = null!; // See ServiceOwnerOnBehalfOfPersonMiddleware
-    public BulkSetSystemLabelDto Dto { get; init; } = new();
+    public string EnduserId { get; set; } = null!; // See ServiceOwnerOnBehalfOfPersonMiddleware
+    public BulkSetSystemLabelDto Dto { get; set; } = new();
 }
 
 public sealed record BulkSetSystemLabelSuccess;

@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
@@ -10,6 +9,9 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -231,7 +233,80 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()
-            .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
+            .SelectMany(dialog => dialog.Activities
+                    .OrderByDescending(a => a.CreatedAt)
+                    .ThenByDescending(a => a.Id)
+                    .Take(1)
+                    .DefaultIfEmpty(),
+                (dialog, latestActivity) => new IntermediateDialogDto
+                {
+                    Id = dialog.Id,
+                    Revision = dialog.Revision,
+                    Org = dialog.Org,
+                    ServiceResource = dialog.ServiceResource,
+                    ServiceResourceType = dialog.ServiceResourceType,
+                    Party = dialog.Party,
+                    Progress = dialog.Progress,
+                    Process = dialog.Process,
+                    PrecedingProcess = dialog.PrecedingProcess,
+                    GuiAttachmentCount = dialog.Attachments
+                        .Count(x => x.Urls.Any(url =>
+                            url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui)),
+                    ExtendedStatus = dialog.ExtendedStatus,
+                    ExternalReference = dialog.ExternalReference,
+                    CreatedAt = dialog.CreatedAt,
+                    UpdatedAt = dialog.UpdatedAt,
+                    DueAt = dialog.DueAt,
+                    DeletedAt = dialog.DeletedAt,
+                    VisibleFrom = dialog.VisibleFrom,
+                    Status = dialog.StatusId,
+                    SystemLabel = dialog.DialogEndUserContext.SystemLabelId,
+                    IsApiOnly = dialog.IsApiOnly,
+                    Content = dialog.Content.Where(x => x.Type.OutputInList).ToList(),
+                    ServiceOwnerContext = new DialogServiceOwnerContextDto
+                    {
+                        ServiceOwnerLabels = dialog.ServiceOwnerContext.ServiceOwnerLabels
+                            .Select(l => new ServiceOwnerLabelDto { Value = l.Value })
+                            .ToList()
+                    },
+                    SeenSinceLastUpdate = dialog.SeenLog
+                        .Where(x => x.CreatedAt >= x.Dialog.UpdatedAt)
+                        .OrderByDescending(x => x.CreatedAt)
+                        .Select(x => new DialogSeenLogDto
+                        {
+                            Id = x.Id,
+                            SeenAt = x.CreatedAt,
+                            SeenBy = new ActorDto
+                            {
+                                ActorType = x.SeenBy.ActorTypeId,
+                                ActorName = x.SeenBy.ActorNameEntity != null ? x.SeenBy.ActorNameEntity.Name : null,
+                                ActorId = x.SeenBy.ActorNameEntity != null ? x.SeenBy.ActorNameEntity.ActorId : null
+                            },
+                            IsViaServiceOwner = x.IsViaServiceOwner
+                        }).ToList(),
+                    LatestActivity = latestActivity == null ? null : new DialogActivityDto
+                    {
+                        Id = latestActivity.Id,
+                        CreatedAt = latestActivity.CreatedAt,
+                        ExtendedType = latestActivity.ExtendedType,
+                        Type = latestActivity.TypeId,
+                        TransmissionId = latestActivity.TransmissionId,
+                        PerformedBy = new ActorDto
+                        {
+                            ActorType = latestActivity.PerformedBy.ActorTypeId,
+                            ActorName = latestActivity.PerformedBy.ActorNameEntity != null ? latestActivity.PerformedBy.ActorNameEntity.Name : null,
+                            ActorId = latestActivity.PerformedBy.ActorNameEntity != null ? latestActivity.PerformedBy.ActorNameEntity.ActorId : null
+                        },
+                        Description = latestActivity.Description == null
+                            ? new List<LocalizationDto>()
+                            : latestActivity.Description.Localizations
+                                .Select(l => new LocalizationDto
+                                {
+                                    LanguageCode = l.LanguageCode,
+                                    Value = l.Value
+                                }).ToList()
+                    }
+                })
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
         if (request.EndUserId is not null)

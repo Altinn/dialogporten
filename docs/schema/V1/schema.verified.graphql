@@ -123,6 +123,7 @@ type Dialog {
   expiresAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
+  contentUpdatedAt: DateTime!
   dialogToken: String
   systemLabel: SystemLabel!
   status: DialogStatus!

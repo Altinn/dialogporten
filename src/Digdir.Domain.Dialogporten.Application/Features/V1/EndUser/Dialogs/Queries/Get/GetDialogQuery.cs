@@ -151,15 +151,15 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 
-        dialogDto.SeenSinceLastUpdate = dialog.SeenLog
-            .Select(log =>
-            {
-                var actorId = log.SeenBy.ActorNameEntity != null ? log.SeenBy.ActorNameEntity.ActorId : log.SeenBy.ActorNameEntity?.ActorId;
-                var logDto = _mapper.Map<DialogSeenLogDto>(log);
-                logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == actorId;
-                return logDto;
-            })
-            .ToList();
+        dialogDto.SeenSinceLastUpdate = GetSeenLogs(
+            dialog.SeenLog,
+            dialog.UpdatedAt,
+            currentUserInformation);
+
+        dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
+            dialog.SeenLog,
+            dialog.ContentUpdatedAt,
+            currentUserInformation);
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,
@@ -172,6 +172,20 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         return dialogDto;
     }
+
+    private List<DialogSeenLogDto> GetSeenLogs(
+        IEnumerable<DialogSeenLog> seenLogs,
+        DateTimeOffset filterDate,
+        UserInformation currentUserInformation) =>
+        seenLogs
+            .Where(log => log.CreatedAt >= filterDate)
+            .Select(log =>
+            {
+                var actorId = log.SeenBy.ActorNameEntity?.ActorId;
+                var logDto = _mapper.Map<DialogSeenLogDto>(log);
+                logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == actorId;
+                return logDto;
+            }).ToList();
 
     private static void DecorateWithAuthorization(DialogDto dto,
         DialogDetailsAuthorizationResult authorizationResult)

@@ -2583,6 +2583,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset UpdatedAt { get; set; }
 
         /// <summary>
+        /// The date and time when the dialog content was last updated.
+        /// </summary>
+
+        [JsonPropertyName("contentUpdatedAt")]
+        public System.DateTimeOffset ContentUpdatedAt { get; set; }
+
+        /// <summary>
         /// The due date for the dialog. This is the last date when the dialog is expected to be completed.
         /// </summary>
 
@@ -2980,6 +2987,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("updatedAt")]
         public System.DateTimeOffset UpdatedAt { get; set; }
+
+        /// <summary>
+        /// The date and time when the dialog content was last updated.
+        /// </summary>
+
+        [JsonPropertyName("contentUpdatedAt")]
+        public System.DateTimeOffset ContentUpdatedAt { get; set; }
 
         /// <summary>
         /// The aggregated status of the dialog.

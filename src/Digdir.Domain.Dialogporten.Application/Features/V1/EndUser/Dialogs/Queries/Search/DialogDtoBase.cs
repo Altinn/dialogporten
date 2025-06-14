@@ -127,6 +127,11 @@ public class DialogDtoBase
     /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
+
+    /// <summary>
+    /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+    /// </summary>
+    public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
 }
 
 public sealed class DialogSeenLogDto

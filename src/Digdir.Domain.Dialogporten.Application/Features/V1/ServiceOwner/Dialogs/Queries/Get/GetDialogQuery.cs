@@ -139,17 +139,41 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             DecorateWithAuthorization(dialogDto, authorizationResult);
         }
 
-        dialogDto.SeenSinceLastUpdate = dialog.SeenLog
-            .Select(log =>
-            {
-                var logDto = _mapper.Map<DialogSeenLogDto>(log);
-                logDto.IsViaServiceOwner = true;
-                return logDto;
-            })
-            .ToList();
+        dialogDto.SeenSinceLastUpdate = GetSeenLogs(
+            dialog.SeenLog,
+            dialog.UpdatedAt,
+            request.EndUserId);
+
+        dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
+            dialog.SeenLog,
+            dialog.ContentUpdatedAt,
+            request.EndUserId);
+
+        // dialogDto.SeenSinceLastUpdate = dialog.SeenLog
+        //     .Select(log =>
+        //     {
+        //         var logDto = _mapper.Map<DialogSeenLogDto>(log);
+        //         logDto.IsViaServiceOwner = true;
+        //         return logDto;
+        //     })
+        //     .ToList();
 
         return dialogDto;
     }
+
+    private List<DialogSeenLogDto> GetSeenLogs(
+        IEnumerable<DialogSeenLog> seenLogs,
+        DateTimeOffset filterDate,
+        string? endUserId) =>
+        seenLogs
+            .Where(log => log.CreatedAt >= filterDate)
+            .Select(log =>
+            {
+                var actorId = log.SeenBy.ActorNameEntity?.ActorId;
+                var logDto = _mapper.Map<DialogSeenLogDto>(log);
+                logDto.IsCurrentEndUser = endUserId == actorId;
+                return logDto;
+            }).ToList();
 
     private static void DecorateWithAuthorization(DialogDto dto,
         DialogDetailsAuthorizationResult authorizationResult)

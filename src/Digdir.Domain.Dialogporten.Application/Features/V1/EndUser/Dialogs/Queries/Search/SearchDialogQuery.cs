@@ -13,6 +13,8 @@ using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
+using AutoMapper.QueryableExtensions;
+using System.Linq;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -188,71 +190,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
             .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
-            .SelectMany(dialog => dialog.Activities
-                    .OrderByDescending(a => a.CreatedAt)
-                    .ThenByDescending(a => a.Id)
-                    .Take(1)
-                    .DefaultIfEmpty(),
-                (dialog, latestActivity) => new IntermediateDialogDto
-                {
-                    Id = dialog.Id,
-                    Org = dialog.Org,
-                    ServiceResource = dialog.ServiceResource,
-                    ServiceResourceType = dialog.ServiceResourceType,
-                    Party = dialog.Party,
-                    Progress = dialog.Progress,
-                    Process = dialog.Process,
-                    PrecedingProcess = dialog.PrecedingProcess,
-                    GuiAttachmentCount = dialog.Attachments
-                        .Count(x => x.Urls.Any(url =>
-                            url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui)),
-                    ExtendedStatus = dialog.ExtendedStatus,
-                    ExternalReference = dialog.ExternalReference,
-                    CreatedAt = dialog.CreatedAt,
-                    UpdatedAt = dialog.UpdatedAt,
-                    DueAt = dialog.DueAt,
-                    Status = dialog.StatusId,
-                    SystemLabel = dialog.DialogEndUserContext.SystemLabelId,
-                    IsApiOnly = dialog.IsApiOnly,
-                    Content = dialog.Content.Where(x => x.Type.OutputInList).ToList(),
-                    SeenSinceLastUpdate = dialog.SeenLog
-                        .Where(x => x.CreatedAt >= x.Dialog.UpdatedAt)
-                        .OrderByDescending(x => x.CreatedAt)
-                        .Select(x => new DialogSeenLogDto
-                        {
-                            Id = x.Id,
-                            SeenAt = x.CreatedAt,
-                            SeenBy = new ActorDto
-                            {
-                                ActorType = x.SeenBy.ActorTypeId,
-                                ActorName = x.SeenBy.ActorNameEntity != null ? x.SeenBy.ActorNameEntity.Name : null,
-                                ActorId = x.SeenBy.ActorNameEntity != null ? x.SeenBy.ActorNameEntity.ActorId : null
-                            },
-                            IsViaServiceOwner = x.IsViaServiceOwner
-                        }).ToList(),
-                    LatestActivity = latestActivity == null ? null : new DialogActivityDto
-                    {
-                        Id = latestActivity.Id,
-                        CreatedAt = latestActivity.CreatedAt,
-                        ExtendedType = latestActivity.ExtendedType,
-                        Type = latestActivity.TypeId,
-                        TransmissionId = latestActivity.TransmissionId,
-                        PerformedBy = new ActorDto
-                        {
-                            ActorType = latestActivity.PerformedBy.ActorTypeId,
-                            ActorName = latestActivity.PerformedBy.ActorNameEntity != null ? latestActivity.PerformedBy.ActorNameEntity.Name : null,
-                            ActorId = latestActivity.PerformedBy.ActorNameEntity != null ? latestActivity.PerformedBy.ActorNameEntity.ActorId : null
-                        },
-                        Description = latestActivity.Description == null
-                            ? new List<LocalizationDto>()
-                            : latestActivity.Description.Localizations
-                                .Select(l => new LocalizationDto
-                                {
-                                    LanguageCode = l.LanguageCode,
-                                    Value = l.Value
-                                }).ToList()
-                    }
-                })
+            .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
         foreach (var seenLog in paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))

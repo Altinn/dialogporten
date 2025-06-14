@@ -631,6 +631,12 @@
               }
             ]
           },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
@@ -715,6 +721,14 @@
             "example": "a312cb9c-7632-43c2-aa38-69b06aed56ca",
             "format": "guid",
             "type": "string"
+          },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "seenSinceLastUpdate": {
             "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
@@ -1280,6 +1294,12 @@
               }
             ]
           },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
@@ -1353,6 +1373,14 @@
             "format": "int32",
             "nullable": true,
             "type": "integer"
+          },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "seenSinceLastUpdate": {
             "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
@@ -3584,6 +3612,12 @@
               }
             ]
           },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
@@ -3679,6 +3713,14 @@
             "description": "The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.",
             "items": {
               "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_Tag"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogSeenLog"
             },
             "nullable": true,
             "type": "array"
@@ -4316,6 +4358,12 @@
               }
             ]
           },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
@@ -4401,6 +4449,14 @@
             "example": "a312cb9c-7632-43c2-aa38-69b06aed56ca",
             "format": "guid",
             "type": "string"
+          },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "seenSinceLastUpdate": {
             "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
@@ -5217,6 +5273,26 @@
             "description": "Only return dialogs updated before this date",
             "in": "query",
             "name": "updatedBefore",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated after this date",
+            "in": "query",
+            "name": "contentUpdatedAfter",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated before this date",
+            "in": "query",
+            "name": "contentUpdatedBefore",
             "schema": {
               "format": "date-time",
               "nullable": true,
@@ -6117,6 +6193,26 @@
             "description": "Only return dialogs updated before this date",
             "in": "query",
             "name": "updatedBefore",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated after this date",
+            "in": "query",
+            "name": "contentUpdatedAfter",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated before this date",
+            "in": "query",
+            "name": "contentUpdatedBefore",
             "schema": {
               "format": "date-time",
               "nullable": true,

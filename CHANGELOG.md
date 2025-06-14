@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.69.0](https://github.com/Altinn/dialogporten/compare/v1.68.2...v1.69.0) (2025-06-13)
+
+
+### Features
+
+* **application:** Add support for updating Dialog.IsApiOnly ([#2414](https://github.com/Altinn/dialogporten/issues/2414)) ([6a533fe](https://github.com/Altinn/dialogporten/commit/6a533fe189379f2e918a2079ab67c9e725247b98))
+* dotnet8 support for WebApi SDK ([#2423](https://github.com/Altinn/dialogporten/issues/2423)) ([448c908](https://github.com/Altinn/dialogporten/commit/448c90868b96744d82446141287f29fb313f4e96))
+
+
+### Bug Fixes
+
+* **ci:** Restore dependencies before 'dotnet pack' ([#2426](https://github.com/Altinn/dialogporten/issues/2426)) ([74503cb](https://github.com/Altinn/dialogporten/commit/74503cb9d474c53ba11c82036e82331ff165a255))
+* **webapi:** Prevent unique constraint violations from triggering Slack alerts ([#2418](https://github.com/Altinn/dialogporten/issues/2418)) ([1dfd5ee](https://github.com/Altinn/dialogporten/commit/1dfd5ee5183aa0c37ffc9f7fa44b8b0b70c1daac))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency scrutor to 6.1.0 ([#2420](https://github.com/Altinn/dialogporten/issues/2420)) ([02a863b](https://github.com/Altinn/dialogporten/commit/02a863bef3c0372a0814e3c784dc054dd0ee2ad7))
+* **deps:** update dotnet monorepo ([#2419](https://github.com/Altinn/dialogporten/issues/2419)) ([f6f98ac](https://github.com/Altinn/dialogporten/commit/f6f98acffbe70c782a2cf6cc354d89882bbd8dc4))
+
 ## [1.68.2](https://github.com/Altinn/dialogporten/compare/v1.68.1...v1.68.2) (2025-06-10)
 
 

@@ -72,6 +72,16 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public DateTimeOffset? UpdatedBefore { get; set; }
 
     /// <summary>
+    /// Only return dialogs with content updated after this date
+    /// </summary>
+    public DateTimeOffset? ContentUpdatedAfter { get; set; }
+
+    /// <summary>
+    /// Only return dialogs with content updated before this date
+    /// </summary>
+    public DateTimeOffset? ContentUpdatedBefore { get; set; }
+
+    /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
     public DateTimeOffset? DueAfter { get; set; }
@@ -117,6 +127,7 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<Intermed
         options.AddId(x => x.Id)
             .AddDefault("createdAt", x => x.CreatedAt)
             .AddOption("updatedAt", x => x.UpdatedAt)
+            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
             .AddOption("dueAt", x => x.DueAt)
             .Build();
 }
@@ -175,6 +186,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
             .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
             .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
+            .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
+            .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
             .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
             .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
             .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))

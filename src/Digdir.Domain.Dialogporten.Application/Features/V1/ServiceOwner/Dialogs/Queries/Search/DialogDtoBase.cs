@@ -3,6 +3,8 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Act
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
@@ -224,4 +226,29 @@ public sealed class DialogActivityDto
     /// Unstructured text describing the activity. Only set if the activity type is "Information".
     /// </summary>
     public List<LocalizationDto> Description { get; set; } = [];
+
+    public static Expression<Func<DialogActivity, DialogActivityDto>> LatestActivityProjection =>
+        activity => new DialogActivityDto
+        {
+            Id = activity.Id,
+            CreatedAt = activity.CreatedAt,
+            ExtendedType = activity.ExtendedType,
+            Type = activity.TypeId,
+            TransmissionId = activity.TransmissionId,
+            PerformedBy = new ActorDto
+            {
+                ActorType = activity.PerformedBy.ActorTypeId,
+                ActorName = activity.PerformedBy.ActorNameEntity != null ? activity.PerformedBy.ActorNameEntity.Name : null,
+                ActorId = activity.PerformedBy.ActorNameEntity != null ? activity.PerformedBy.ActorNameEntity.ActorId : null
+            },
+            Description = activity.Description == null
+                ? new List<LocalizationDto>()
+                : activity.Description.Localizations
+                    .Select(l => new LocalizationDto
+                    {
+                        LanguageCode = l.LanguageCode,
+                        Value = l.Value
+                    })
+                    .ToList()
+        };
 }

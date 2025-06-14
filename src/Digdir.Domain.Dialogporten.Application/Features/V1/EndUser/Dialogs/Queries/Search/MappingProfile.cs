@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using System.Linq;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
@@ -23,7 +24,13 @@ internal sealed class MappingProfile : Profile
                     .Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
-            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId));
+            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId))
+            .ForMember(dest => dest.LatestActivity, opt => opt.MapFrom(src => src.Activities
+                .AsQueryable()
+                .OrderByDescending(a => a.CreatedAt)
+                .ThenByDescending(a => a.Id)
+                .Select(DialogActivityDto.LatestActivityProjection)
+                .FirstOrDefault()));
 
         CreateMap<DialogSeenLog, DialogSeenLogDto>()
             .ForMember(dest => dest.SeenAt, opt => opt.MapFrom(src => src.CreatedAt));

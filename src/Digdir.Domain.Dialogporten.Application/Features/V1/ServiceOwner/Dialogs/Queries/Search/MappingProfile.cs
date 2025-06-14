@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
+using System.Linq;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
@@ -15,10 +16,6 @@ internal sealed class MappingProfile : Profile
         // See IntermediateSearchDialogDto
         CreateMap<IntermediateDialogDto, DialogDto>();
         CreateMap<DialogEntity, IntermediateDialogDto>()
-            .ForMember(dest => dest.LatestActivity, opt => opt.MapFrom(src => src.Activities
-                .OrderByDescending(activity => activity.CreatedAt).ThenByDescending(activity => activity.Id)
-                .FirstOrDefault()
-            ))
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.MapFrom(src => src.SeenLog
                 .Where(x => x.CreatedAt >= x.Dialog.UpdatedAt)
                 .OrderByDescending(x => x.CreatedAt)
@@ -28,7 +25,13 @@ internal sealed class MappingProfile : Profile
                     .Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
-            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId));
+            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId))
+            .ForMember(dest => dest.LatestActivity, opt => opt.MapFrom(src => src.Activities
+                .AsQueryable()
+                .OrderByDescending(a => a.CreatedAt)
+                .ThenByDescending(a => a.Id)
+                .Select(DialogActivityDto.LatestActivityProjection)
+                .FirstOrDefault()));
 
         CreateMap<DialogServiceOwnerContext, DialogServiceOwnerContextDto>();
         CreateMap<DialogServiceOwnerLabel, ServiceOwnerLabelDto>();

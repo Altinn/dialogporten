@@ -59,3 +59,8 @@ public sealed class IntermediateDialogDto : DialogDtoBase
 {
     public List<DialogContent> Content { get; set; } = [];
 }
+
+public sealed class DialogIds
+{
+    public List<Guid> Ids { get; set; } = [];
+}

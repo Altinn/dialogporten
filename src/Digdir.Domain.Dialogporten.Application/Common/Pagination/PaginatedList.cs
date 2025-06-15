@@ -64,4 +64,9 @@ public sealed class PaginatedList<T>
             hasNextPage: false,
             @continue: parameter.ContinuationToken?.Raw,
             orderBy: parameter.OrderBy.DefaultIfNull().GetOrderString());
+
+    public bool Contains(T item)
+    {
+        return Items.Contains(item);
+    }
 }

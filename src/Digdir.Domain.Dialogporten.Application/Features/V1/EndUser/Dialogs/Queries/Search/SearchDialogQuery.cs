@@ -8,6 +8,8 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -121,6 +123,18 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<Intermed
             .Build();
 }
 
+public sealed class SearchDialogQueryOrderDefinitionForIds : IOrderDefinition<DialogIds>
+{
+    public static IOrderOptions<IntermediateDialogDto> Configure(IOrderOptionsBuilder<IntermediateDialogDto> options) =>
+        options.AddId(x => x.Id)
+            .AddDefault("createdAt", x => x.CreatedAt)
+            .AddOption("updatedAt", x => x.UpdatedAt)
+            .AddOption("dueAt", x => x.DueAt)
+            .Build();
+
+    public static IOrderOptions<DialogIds> Configure(IOrderOptionsBuilder<DialogIds> options) => throw new NotImplementedException();
+}
+
 [GenerateOneOf]
 public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogDto>, ValidationError, Forbidden>;
 
@@ -160,7 +174,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         }
 
         var paginatedList = await _db.Dialogs
-            .PrefilterAuthorizedDialogs(authorizedResources)
+            .PrefilterAuthorizedDialogs(authorizedResources, DeletedFilter.Exclude)
             .AsNoTracking()
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)

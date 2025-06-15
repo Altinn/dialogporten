@@ -59,6 +59,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // This is to ensure that the get is consistent, and that PATCH in the API presentation
         // layer behaviours in an expected manner. Therefore we need to be a bit more verbose about it.
         var dialog = await _db.Dialogs
+            .AsNoTracking()
             .Include(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
                 .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.SearchTags.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))

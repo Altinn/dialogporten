@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -180,7 +181,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 : label.ToLower(CultureInfo.InvariantCulture))
             .ToList();
 
-        var dialogIdsQuery = _db.Dialogs.AsQueryable();
+        var dialogIdsQuery = _db.Dialogs
+            .AsQueryable()
+            .AsNoTracking()
+            .IgnoreQueryFilters();
 
         // If the service owner impersonates an end user, we need to filter the dialogs
         // based on the end user's authorization, not the service owner's (which is
@@ -189,9 +193,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         {
             var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
                 request.Party ?? [],
-                request.ServiceResource ?? [],
+                request.ServiceResource ?? [], // TODO! Use an intersection of resourceIds and request.ServiceResource
                 cancellationToken);
-            dialogIdsQuery = _db.Dialogs.PrefilterAuthorizedDialogs(authorizedResources, request.Deleted);
+            dialogIdsQuery = _db.Dialogs
+                .PrefilterAuthorizedDialogs(authorizedResources, request.Deleted);
         }
 
         // Apply all original filtering criteria to the ID query.
@@ -213,7 +218,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
             .WhereIf(request.VisibleAfter.HasValue, x => request.VisibleAfter <= x.VisibleFrom)
             .WhereIf(request.VisibleBefore.HasValue, x => x.VisibleFrom <= request.VisibleBefore)
-            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x => request.SystemLabel!.Contains(x.DialogEndUserContext.SystemLabelId))
+            .WhereIf(!request.SystemLabel.IsNullOrEmpty(),
+                x => request.SystemLabel!.Contains(x.DialogEndUserContext.SystemLabelId))
             .WhereIf(request.Search is not null, x =>
                 x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
                 x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
@@ -228,24 +234,32 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                             .Any(l => EF.Functions.ILike(l.Value, formattedLabel))))
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             // TODO! If we have a supplied ServiceResource filter, we should only check if the resourcesIds contains the supplied ServiceResources
-            .Where(x => resourceIds.Contains(x.ServiceResource)) // Final mandatory filter
-            .IgnoreQueryFilters();
+            .Where(x => resourceIds.Contains(x.ServiceResource));
 
         // Now, apply ordering and pagination to the ID query and execute it.
-        var dialogIds = await dialogIdsQuery
-            .Select(x => x.Id) // Select only the primary key
-            .Take(request.Limit ?? 100)
-            .ToListAsync(cancellationToken);
-        //.ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
-        //.ToPaginatedListAsync(request, cancellationToken: cancellationToken);
+        var dialogIdsPaginated = await dialogIdsQuery
+            .Select(x => new PaginatedDialogIds
+            {
+                Id = x.Id,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                DueAt = x.DueAt
+            })
+            //.ApplyOrder(???)
+            //.ApplyCondition(???)
+            .Take(1 + (request.Limit.HasValue ? int.Max(request.Limit.Value, PaginationConstants.MaxLimit) : PaginationConstants.DefaultLimit))
+            .ToListAsync(cancellationToken: cancellationToken);
+
+        var dialogIds = dialogIdsPaginated.Select(x => x.Id);
 
         var paginatedList = await _db.Dialogs
+            .AsNoTracking()
+            .IgnoreQueryFilters()
             .Where(x => dialogIds.Contains(x.Id))
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
             .Include(x => x.ServiceOwnerContext)
                 .ThenInclude(x => x.ServiceOwnerLabels)
-            .IgnoreQueryFilters()
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 

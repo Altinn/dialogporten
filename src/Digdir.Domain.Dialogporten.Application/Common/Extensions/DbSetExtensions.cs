@@ -17,14 +17,14 @@ public static class DbSetExtensions
         var deletedFilterCondition = deletedFilter switch
         {
             DeletedFilter.Include => "",
-            DeletedFilter.Exclude => "NOT \"Deleted\" AND ",
+            DeletedFilter.Exclude => "NOT \"Deleted\" AND",
             DeletedFilter.Only => "\"Deleted\" AND",
             _ => throw new ArgumentOutOfRangeException(nameof(deletedFilter), deletedFilter, null)
         };
 
         var sb = new StringBuilder()
             .AppendLine(CultureInfo.InvariantCulture, $"""
-                SELECT "Id", "ServiceResource"
+                SELECT "Id", "Deleted", "Party", "ServiceResource", "CreatedAt", "UpdatedAt", "DueAt"
                 FROM "Dialog"
                 WHERE {deletedFilterCondition} ("Id" = ANY(@p{parameters.Count})
                 """);
@@ -61,7 +61,7 @@ public static class DbSetExtensions
         DeletedFilter? deletedFilter)
     {
         var (sql, parameters) = GeneratePrefilterAuthorizedDialogsSql(authorizedResources, deletedFilter ?? DeletedFilter.Exclude);
-        return dialogs.FromSqlRaw(sql, parameters);
+        return dialogs.FromSqlRaw(sql, parameters).IgnoreQueryFilters();
     }
 }
 

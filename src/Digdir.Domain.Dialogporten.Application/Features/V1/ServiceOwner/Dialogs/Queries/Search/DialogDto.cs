@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
@@ -58,9 +60,15 @@ public sealed class ContentDto
 public sealed class IntermediateDialogDto : DialogDtoBase
 {
     public List<DialogContent> Content { get; set; } = [];
+    public List<DialogActivity> Activities { get; set; } = [];
+    public List<DialogAttachment> Attachments { get; set; } = [];
 }
 
-public sealed class DialogIds
+
+public sealed class PaginatedDialogIds
 {
-    public List<Guid> Ids { get; set; } = [];
+    public Guid Id { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DueAt { get; set; }
 }

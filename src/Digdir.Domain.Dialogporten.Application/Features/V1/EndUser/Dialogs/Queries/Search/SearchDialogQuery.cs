@@ -122,7 +122,7 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<Intermed
             .AddOption("dueAt", x => x.DueAt)
             .Build();
 }
-
+/*
 public sealed class SearchDialogQueryOrderDefinitionForIds : IOrderDefinition<DialogIds>
 {
     public static IOrderOptions<IntermediateDialogDto> Configure(IOrderOptionsBuilder<IntermediateDialogDto> options) =>
@@ -133,8 +133,7 @@ public sealed class SearchDialogQueryOrderDefinitionForIds : IOrderDefinition<Di
             .Build();
 
     public static IOrderOptions<DialogIds> Configure(IOrderOptionsBuilder<DialogIds> options) => throw new NotImplementedException();
-}
-
+}*/
 [GenerateOneOf]
 public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogDto>, ValidationError, Forbidden>;
 

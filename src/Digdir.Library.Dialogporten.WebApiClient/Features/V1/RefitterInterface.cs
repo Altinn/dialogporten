@@ -83,6 +83,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset? UpdatedBefore { get; set; }
 
         /// <summary>
+        /// Only return dialogs with content updated after this date
+        /// </summary>
+        [Query] 
+        public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
+
+        /// <summary>
+        /// Only return dialogs with content updated before this date
+        /// </summary>
+        [Query] 
+        public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
+
+        /// <summary>
         /// Only return dialogs with due date after this date
         /// </summary>
         [Query] 
@@ -2647,6 +2659,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastUpdate { get; set; }
 
+        /// <summary>
+        /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+        /// </summary>
+
+        [JsonPropertyName("seenSinceLastContentUpdate")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
+
         [JsonPropertyName("serviceOwnerContext")]
         public V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
 
@@ -3073,6 +3092,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastUpdate { get; set; }
+
+        /// <summary>
+        /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+        /// </summary>
+
+        [JsonPropertyName("seenSinceLastContentUpdate")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         [JsonPropertyName("serviceOwnerContext")]
         public V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext ServiceOwnerContext { get; set; }

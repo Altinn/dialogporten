@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser;
@@ -50,7 +51,7 @@ public partial class Queries
     {
         var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
 
-        if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(
+        if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(
                 input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)
         {
             return new SearchDialogsPayload

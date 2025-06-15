@@ -27,7 +27,7 @@
     <ItemGroup>
         <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.1"/>
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.6"/>
-        <PackageReference Include="NSec.Cryptography" Version="24.4.0"/>
+        <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="Refit" Version="8.0.0"/>
         <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0"/>
         <PackageReference Include="Refitter.SourceGenerator" Version="1.5.5" Condition="$(Configuration)=='Release'">

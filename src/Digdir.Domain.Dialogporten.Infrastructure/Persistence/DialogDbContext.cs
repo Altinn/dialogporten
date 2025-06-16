@@ -2,6 +2,7 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Documents;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.ValueConverters;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
@@ -53,6 +54,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<ResourcePolicyInformation> ResourcePolicyInformation => Set<ResourcePolicyInformation>();
     public DbSet<ActorName> ActorName => Set<ActorName>();
     public DbSet<DialogAttachment> DialogAttachments => Set<DialogAttachment>();
+    public DbSet<DialogDocument> DialogDocuments => Set<DialogDocument>();
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

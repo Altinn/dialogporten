@@ -89,6 +89,7 @@ public static class InfrastructureExtensions
             // Transient
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
+            .AddTransient<IDialogDocumentRepository, DialogDocumentRepository>()
             .AddTransient<Lazy<IPublishEndpoint>>(x =>
                 new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
             .AddTransient<Lazy<ITopicEventSender>>(x =>

@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Documents;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals;
 
@@ -50,6 +51,7 @@ public interface IDialogDbContext
 
     DbSet<ActorName> ActorName { get; }
     DbSet<DialogAttachment> DialogAttachments { get; }
+    DbSet<DialogDocument> DialogDocuments { get; }
 
     /// <summary>
     /// Validate a property on the <typeparamref name="TEntity"/> using a lambda

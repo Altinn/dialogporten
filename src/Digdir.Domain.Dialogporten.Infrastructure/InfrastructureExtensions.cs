@@ -1,4 +1,5 @@
-﻿using Altinn.ApiClients.Maskinporten.Extensions;
+﻿using System.Data;
+using Altinn.ApiClients.Maskinporten.Extensions;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -194,12 +195,13 @@ public static class InfrastructureExtensions
             x.AddEntityFrameworkOutbox<DialogDbContext>(o =>
             {
                 o.UsePostgres();
-                o.UseBusOutbox(x =>
-                {
-                    x.MessageDeliveryLimit = 100;
-                });
+                o.UseBusOutbox();
 
-                o.QueryMessageLimit = 500;
+                // This lowers the isolation level from Serializable to ReadCommitted. This avoids contention issues
+                // and provides sufficient guarantees for the outbox bus using polling with FOR UPDATE SKIP LOCKED,
+                // where MassTransit only perform message forwarding to Azure Service Bus and isn't performing any
+                // mutation of the outbox besides deleting rows after successful passing to ASB.
+                o.IsolationLevel = IsolationLevel.ReadCommitted;
             });
 
             foreach (var customConfiguration in customConfigurations)

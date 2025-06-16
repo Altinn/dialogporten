@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+      - uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
         with:
           egress-policy: audit
 
@@ -34,6 +34,9 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
         with:
           global-json-file: ./global.json
+
+      - name: Restore dependencies
+        run: dotnet restore
 
       - name: Pack with debug symbols
         run: dotnet pack --configuration Release -p:Version="${{ inputs.version }}" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg --output . "${{ inputs.path }}"

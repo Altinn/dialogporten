@@ -7,5 +7,9 @@ export function runAllTests() {
     enduserTests();
 
     // Run sentinel check last, which will warn about and purge any leftover dialogs
-    sentinelCheck();
+
+    // This check requires a Search=sentinelValue, which in turn requires enduserId and serviceResource/party
+    // Temp disabled until service owner labels are implemented
+    // https://github.com/Altinn/dialogporten/issues/2298
+    // sentinelCheck();
 };

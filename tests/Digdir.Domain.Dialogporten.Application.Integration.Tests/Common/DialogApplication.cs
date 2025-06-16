@@ -39,7 +39,7 @@ public class DialogApplication : IAsyncLifetime
     private readonly List<object> _publishedEvents = [];
 
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16.3")
+        .WithImage("postgres:16.8")
         .Build();
 
     public async Task InitializeAsync()
@@ -208,11 +208,11 @@ public class DialogApplication : IAsyncLifetime
         await _dbContainer.DisposeAsync();
     }
 
-    public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request)
+    public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
         using var scope = _rootProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
-        return await mediator.Send(request);
+        return await mediator.Send(request, cancellationToken);
     }
 
     public async Task ResetState()

@@ -1,10 +1,13 @@
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 
@@ -16,156 +19,120 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public CreateTransmissionTests(DialogApplication application) : base(application) { }
 
     [Fact]
-    public async Task Can_Create_Simple_Transmission()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
+    public Task Can_Create_Transmission_With_Embeddable_Content() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+                transmission.Content!.ContentReference = new ContentValueDto
+                {
+                    MediaType = MediaTypes.EmbeddableMarkdown,
+                    Value = [new LocalizationDto
+                    {
+                        LanguageCode = "nb",
+                        Value = "https://example.com/transmission"
+                    }]
+                };
 
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-        createCommand.Dto.Transmissions = [transmission];
-
-        // Act
-        var response = await Application.Send(createCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.DialogId.Should().Be(dialogId);
-        var transmissionEntities = await Application.GetDbEntities<DialogTransmission>();
-        transmissionEntities.Should().HaveCount(1);
-        transmissionEntities.First().DialogId.Should().Be(dialogId);
-        transmissionEntities.First().Id.Should().Be(transmission.Id!.Value);
-    }
-
-    [Fact]
-    public async Task Can_Create_Transmission_With_Embeddable_Content()
-    {
-        // Arrange
-        var dialogId = IdentifiableExtensions.CreateVersion7();
-        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(id: dialogId);
-
-        var transmissionId = IdentifiableExtensions.CreateVersion7();
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-
-        const string contentUrl = "https://example.com/transmission";
-        transmission.Id = transmissionId;
-        transmission.Content!.ContentReference = new ContentValueDto
-        {
-            MediaType = MediaTypes.EmbeddableMarkdown,
-            Value = [new LocalizationDto { LanguageCode = "nb", Value = contentUrl }]
-        };
-
-        createCommand.Dto.Transmissions = [transmission];
-
-        // Act
-        var response = await Application.Send(createCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.DialogId.Should().Be(dialogId);
-
-        var transmissionEntities = await Application.GetDbEntities<DialogTransmission>();
-        transmissionEntities.Should().HaveCount(1);
-
-        var transmissionEntity = transmissionEntities.First();
-        transmissionEntity.DialogId.Should().Be(dialogId);
-        transmissionEntity.Id.Should().Be(transmissionId);
-
-        var contentEntities = await Application.GetDbEntities<DialogTransmissionContent>();
-        contentEntities.First(x => x.MediaType == MediaTypes.EmbeddableMarkdown).TransmissionId.Should().Be(transmissionId);
-    }
+                x.Dto.Transmissions = [transmission];
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(result =>
+            {
+                var transmission = result.Transmissions.Single();
+                transmission.Content.ContentReference!.MediaType.Should().Be(MediaTypes.EmbeddableMarkdown);
+                transmission.Content.ContentReference!.Value.Should().HaveCount(1);
+                transmission.Content.ContentReference!.Value.First().Value.Should().StartWith("https://");
+            });
 
     [Fact]
-    public async Task Cannot_Create_Transmission_Embeddable_Content_With_Http_Url()
-    {
-        // Arrange
-        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+    public Task Cannot_Create_Transmission_Embeddable_Content_With_Http_Url() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+                transmission.Content!.ContentReference = new ContentValueDto
+                {
+                    MediaType = MediaTypes.EmbeddableMarkdown,
+                    Value = [new LocalizationDto
+                    {
+                        LanguageCode = "nb",
+                        Value = "http://example.com/transmission"
+                    }]
+                };
 
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-
-        transmission.Content!.ContentReference = new ContentValueDto
-        {
-            MediaType = MediaTypes.EmbeddableMarkdown,
-            Value = [new LocalizationDto { LanguageCode = "nb", Value = "http://example.com/transmission" }]
-        };
-
-        createCommand.Dto.Transmissions = [transmission];
-
-        // Act
-        var response = await Application.Send(createCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Errors.Should().HaveCount(1);
-        validationError.Errors.First().ErrorMessage.Should().Contain("HTTPS");
-
-    }
+                x.Dto.Transmissions = [transmission];
+            })
+            .ExecuteAndAssert<ValidationError>(result => result.ShouldHaveErrorWithText("https"));
 
     [Fact]
-    public async Task Can_Create_Related_Transmission_With_Null_Id()
-    {
-        // Arrange
-        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var transmissions = DialogGenerator.GenerateFakeDialogTransmissions(2);
+    public Task Can_Create_Related_Transmission_With_Null_Id() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                var transmissions = DialogGenerator.GenerateFakeDialogTransmissions(2);
 
-        transmissions[0].RelatedTransmissionId = transmissions[1].Id;
+                // Set the first transmission to be related to the second one
+                transmissions[0].RelatedTransmissionId = transmissions[1].Id;
 
-        // This test assures that the Create-handler will use CreateVersion7IfDefault
-        // on all transmissions before validating the hierarchy.
-        transmissions[0].Id = null;
+                // This test assures that the Create-handler will use CreateVersion7IfDefault
+                // on all transmissions before validating the hierarchy.
+                transmissions[0].Id = null;
 
-        createCommand.Dto.Transmissions = transmissions;
-
-        // Act
-        var response = await Application.Send(createCommand);
-
-        // Assert
-        response.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-    }
+                x.Dto.Transmissions = transmissions;
+            })
+            .ExecuteAndAssert<CreateDialogSuccess>();
 
     [Fact]
-    public async Task Cannot_Create_Transmission_With_Empty_Content()
-    {
-        // Arrange
-        var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-
-        // Omitting the property the payload to the WebAPI will set this to null
-        transmission.Content = null!;
-
-        createCommand.Dto.Transmissions = [transmission];
-
-        // Act
-        var response = await Application.Send(createCommand);
-
-        // Assert
-        response.TryPickT2(out var validationError, out _).Should().BeTrue();
-        validationError.Errors.Should().HaveCount(1);
-        validationError.Errors.Should()
-            .ContainSingle(e => e.ErrorMessage
-                .Contains(nameof(transmission.Content)));
-    }
+    public Task Cannot_Create_Transmission_With_Empty_Content() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+                transmission.Content = null!;
+                x.Dto.Transmissions = [transmission];
+            })
+            .ExecuteAndAssert<ValidationError>(result =>
+                result.ShouldHaveErrorWithText(nameof(DialogTransmission.Content)));
 
     [Fact]
-    public async Task Can_Create_Dialog_With_Empty_Transmission_Content_If_IsApiOnly()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+    public Task Can_Create_Dialog_With_Empty_Transmission_Content_If_IsApiOnly() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+                transmission.Content = null!;
+                x.Dto.Transmissions = [transmission];
+                x.Dto.IsApiOnly = true;
+            })
+            .ExecuteAndAssert<CreateDialogSuccess>();
 
-        // Omitting the property the payload to the WebAPI will set this to null
-        transmission.Content = null!;
+    [Fact]
+    public Task Can_Create_Transmission_With_ExternalReference() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+                transmission.ExternalReference = "unique-key";
+                x.Dto.Transmissions = [transmission];
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(result =>
+                result.Transmissions
+                    .Single()
+                    .ExternalReference
+                    .Should()
+                    .Be("unique-key"));
 
-        createDialogCommand.Dto.Transmissions = [transmission];
-        createDialogCommand.Dto.IsApiOnly = true;
-
-        // Act
-        var createDialogResponse = await Application.Send(createDialogCommand);
-
-        // Assert
-        createDialogResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-    }
+    [Fact]
+    public Task Cannot_Create_Transmission_With_ExternalReference_Over_Max_Length() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+                transmission.ExternalReference = new string('a', Constants.DefaultMaxStringLength + 1);
+                x.Dto.Transmissions = [transmission];
+            })
+            .ExecuteAndAssert<ValidationError>(result => result
+                .ShouldHaveErrorWithText(nameof(DialogTransmission.ExternalReference)));
 }

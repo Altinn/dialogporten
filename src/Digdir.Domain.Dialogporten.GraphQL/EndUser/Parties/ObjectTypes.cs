@@ -3,6 +3,7 @@ namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.Parties;
 public class AuthorizedPartyBase
 {
     public string Party { get; init; } = null!;
+    public Guid PartyUuid { get; init; }
     public string Name { get; init; } = null!;
     public string PartyType { get; init; } = null!;
     public bool IsDeleted { get; init; }

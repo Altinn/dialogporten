@@ -1,5 +1,10 @@
+using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -11,62 +16,58 @@ public class DueAtFilterTests : ApplicationCollectionFixture
     public DueAtFilterTests(DialogApplication application) : base(application) { }
 
     [Theory, ClassData(typeof(DynamicDateFilterTestData))]
-    public async Task Should_Filter_On_Due_Date(int? afterYear, int? beforeYear, int expectedCount, int[] expectedYears)
+    public async Task Should_Filter_On_Due_Date(int? afterYear, int? beforeYear, int[] expectedYears)
     {
-        // Arrange
-        var currentYear = DateTimeOffset.UtcNow.Year;
+        var expectedDialogIds = new List<Guid>();
 
-        var oneYearInTheFuture = currentYear + 1;
-        var twoYearsInTheFuture = currentYear + 2;
-        var threeYearsInTheFuture = currentYear + 3;
-        var fourYearsInTheFuture = currentYear + 4;
-
-        var dialogOneYearInTheFuture = await Application.CreateDialogWithDateInYear(oneYearInTheFuture, DueAt);
-        var dialogTwoYearsInTheFuture = await Application.CreateDialogWithDateInYear(twoYearsInTheFuture, DueAt);
-        var dialogThreeYearsInTheFuture = await Application.CreateDialogWithDateInYear(threeYearsInTheFuture, DueAt);
-        var dialogFourYearsInTheFuture = await Application.CreateDialogWithDateInYear(fourYearsInTheFuture, DueAt);
-
-        // Act
-        var response = await Application.Send(new SearchDialogQuery
-        {
-            Party = [Party],
-            DueAfter = afterYear.HasValue ? CreateDateFromYear(afterYear.Value) : null,
-            DueBefore = beforeYear.HasValue ? CreateDateFromYear(beforeYear.Value) : null
-        });
-
-        // Assert
-        response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-
-        result.Items.Should().HaveCount(expectedCount);
-        foreach (var year in expectedYears)
-        {
-            var dialogId = year switch
+        var createDialogCommands = Enumerable
+            // DueAt has to be in the future, so we start from next year
+            .Range(DateTimeOffset.UtcNow.Year + 1, 4)
+            .Select(year =>
             {
-                _ when year == oneYearInTheFuture => dialogOneYearInTheFuture,
-                _ when year == twoYearsInTheFuture => dialogTwoYearsInTheFuture,
-                _ when year == threeYearsInTheFuture => dialogThreeYearsInTheFuture,
-                _ when year == fourYearsInTheFuture => dialogFourYearsInTheFuture,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                var dialogId = NewUuidV7();
+                if (expectedYears.Contains(year))
+                {
+                    expectedDialogIds.Add(dialogId);
+                }
 
-            result.Items.Should().ContainSingle(x => x.Id == dialogId);
-        }
+                return CreateDialogCommand(year, dialogId);
+            }).ToArray();
+
+        await FlowBuilder.For(Application)
+            .CreateDialogs(createDialogCommands)
+            .SearchEndUserDialogs(x =>
+            {
+                x.Party = [Party];
+                x.DueAfter = afterYear.HasValue ? CreateDateFromYear(afterYear.Value) : null;
+                x.DueBefore = beforeYear.HasValue ? CreateDateFromYear(beforeYear.Value) : null;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
+            {
+                result.Items
+                    .Select(x => x.Id)
+                    .Should()
+                    .BeEquivalentTo(expectedDialogIds);
+            });
+    }
+
+    private static CreateDialogCommand CreateDialogCommand(int year, Guid dialogId)
+    {
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        createDialogCommand.Dto.Party = Party;
+        createDialogCommand.Dto.DueAt = CreateDateFromYear(year);
+        createDialogCommand.Dto.Id = dialogId;
+        return createDialogCommand;
     }
 
     [Fact]
-    public async Task Cannot_Filter_On_DueAfter_With_Value_Greater_Than_DueBefore()
-    {
-        // Act
-        var response = await Application.Send(new SearchDialogQuery
-        {
-            Party = [Party],
-            DueAfter = CreateDateFromYear(2022),
-            DueBefore = CreateDateFromYear(2021)
-        });
-
-        // Assert
-        response.TryPickT1(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-    }
+    public Task Cannot_Filter_On_DueAfter_With_Value_Greater_Than_DueBefore() =>
+        FlowBuilder.For(Application)
+            .SearchEndUserDialogs(x =>
+            {
+                x.Party = [Party];
+                x.DueAfter = CreateDateFromYear(2022);
+                x.DueBefore = CreateDateFromYear(2021);
+            })
+            .ExecuteAndAssert<ValidationError>(v => v.ShouldHaveErrorWithText("DueAfter"));
 }

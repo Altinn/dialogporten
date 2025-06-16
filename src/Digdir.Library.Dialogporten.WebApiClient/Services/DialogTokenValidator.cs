@@ -83,11 +83,30 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         // Validate that the header and body are valid JSON
         return decodedTokenParts.Header.IsValidJson() &&
-               decodedTokenParts.Body.TryGetClaimsPrincipal(out claimsPrincipal);
+            decodedTokenParts.Body.TryGetClaimsPrincipal(out claimsPrincipal);
     }
 
     private static bool TryGetTokenParts(ReadOnlySpan<char> token, out JwksTokenParts<char> tokenParts)
     {
+#if NET8_0
+        tokenParts = default;
+        var start = 0;
+        var end = token.IndexOf('.');
+        if (end == -1) return false;
+        var header = token[start..end];
+
+        start = end + 1;
+        end = token[start..].IndexOf('.');
+        if (end == -1) return false;
+        var body = token[start..(start + end)];
+
+        start = start + end + 1;
+        end = token.Length;
+        var signature = token[start..end];
+
+        tokenParts = new JwksTokenParts<char>(token, header, body, signature);
+        return token[start..].IndexOf('.') != -1;
+#else
         tokenParts = default;
         var enumerator = token.Split('.');
         // Header
@@ -104,6 +123,8 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
         tokenParts = new JwksTokenParts<char>(token, header, body, signature);
         return !enumerator.MoveNext();
+
+#endif
     }
 
     private static bool TryDecodeParts(
@@ -161,7 +182,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         var signedPart = signedPartBuffer[..signedPartLength];
 
         return TryGetPublicKey(publicKeys, decodedTokenParts.Header, out var publicKey)
-               && SignatureAlgorithm.Ed25519.Verify(publicKey, signedPart, decodedTokenParts.Signature);
+         && SignatureAlgorithm.Ed25519.Verify(publicKey, signedPart, decodedTokenParts.Signature);
     }
 
     private static bool TryDecodePart(ReadOnlySpan<char> tokenPart, Span<byte> buffer, out ReadOnlySpan<byte> span, out int length)
@@ -178,8 +199,23 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
 
     private static bool TryDecodeFromChars(ReadOnlySpan<char> source, Span<byte> destination, out int bytesWritten)
     {
+#if NET8_0
+        try
+        {
+            var decoded = Base64Url.DecodeFromChars(source.ToString());
+            bytesWritten = decoded.Length;
+            decoded.CopyTo(destination);
+            return true;
+        }
+        catch (FormatException)
+        {
+            bytesWritten = 0;
+            return false;
+        }
+#else
         var result = Base64Url.DecodeFromChars(source, destination, out _, out bytesWritten);
         return result is OperationStatus.Done;
+#endif
     }
 
     private static bool TryGetPublicKey(ReadOnlyCollection<PublicKeyPair> keyPairs, ReadOnlySpan<byte> header, [NotNullWhen(true)] out PublicKey? publicKey)
@@ -246,3 +282,39 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         }
     }
 }
+#if NET8_0
+internal static class Base64Url
+{
+    public static int GetMaxDecodedLength(int length) => (length * 3 / 4) + 2;
+
+    public static void Encode(ReadOnlySpan<byte> data, Span<byte> destination, out int written)
+    {
+        Base64.EncodeToUtf8(data, destination, out _, out written);
+        for (var i = 0; i < written; i++)
+        {
+            destination[i] = destination[i] switch
+            {
+                (byte)'+' => (byte)'-',
+                (byte)'/' => (byte)'_',
+                _ => destination[i]
+            };
+        }
+        while (written > 0 && destination[written - 1] == '=') written--;
+    }
+
+    public static byte[] DecodeFromChars(string input)
+    {
+        var output = input;
+        output = output.Replace('-', '+').Replace('_', '/');
+        switch (output.Length % 4)
+        {
+            case 0: break;
+            case 2: output += "=="; break;
+            case 3: output += "="; break;
+            default: throw new ArgumentException("Illegal base64url string", nameof(input));
+        }
+
+        return Convert.FromBase64String(output);
+    }
+}
+#endif

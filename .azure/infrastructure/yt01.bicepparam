@@ -34,7 +34,7 @@ param postgresConfiguration = {
     tier: 'GeneralPurpose'
   }
   storage: {
-    storageSizeGB: 2048
+    storageSizeGB: 4096
     autoGrow: 'Enabled'
     type: 'Premium_LRS'
   }
@@ -59,3 +59,17 @@ param serviceBusSku = {
 param sshJumperAdminLoginGroupObjectId = 'c12e51e3-5cbd-4229-8a31-5394c423fb5f'
 
 param apimUrl = 'https://platform.yt01.altinn.cloud/dialogporten'
+
+// Workload profiles configuration
+param workloadProfiles = [
+  {
+    name: 'Consumption'
+    workloadProfileType: 'Consumption'
+  }
+  {
+    name: 'Dedicated-D8'
+    workloadProfileType: 'D8'
+    minimumCount: 3
+    maximumCount: 10
+  }
+]

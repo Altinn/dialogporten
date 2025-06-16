@@ -348,6 +348,14 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
             id: containerAppEnvironmentNSG.id
           }
           privateLinkServiceNetworkPolicies: 'Disabled'
+          delegations: [
+            {
+              name: 'containerAppEnvironment'
+              properties: {
+                serviceName: 'Microsoft.App/environments'
+              }
+            }
+          ]
         }
       }
       {

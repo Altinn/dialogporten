@@ -34,6 +34,9 @@ param appInsightConnectionString string
 @description('The replica timeout for the job in seconds')
 param replicaTimeOutInSeconds int
 
+@description('The workload profile name to use, defaults to "Consumption"')
+param workloadProfileName string = 'Consumption'
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 var tags = {
@@ -86,12 +89,12 @@ var secrets = [
   {
     name: 'dbconnectionstring'
     keyVaultUrl: '${keyVaultBaseUrl}/dialogportenAdoConnectionString'
-    identity: 'System'
+    identity: managedIdentity.id
   }
   {
     name: 'redisconnectionstring'
     keyVaultUrl: '${keyVaultBaseUrl}/dialogportenRedisConnectionString'
-    identity: 'System'
+    identity: managedIdentity.id
   }
 ]
 
@@ -109,6 +112,7 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     args: 'sync-subject-resource-mappings'
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
+    workloadProfileName: workloadProfileName
   }
 }
 

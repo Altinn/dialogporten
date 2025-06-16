@@ -16,7 +16,8 @@ public class DialogTransmissionTests
             nameof(DialogTransmission.Activities),
             nameof(DialogTransmission.Dialog),
             nameof(DialogTransmission.DialogId),
-            nameof(DialogTransmission.TypeId)
+            nameof(DialogTransmission.TypeId),
+            nameof(DialogTransmission.ExternalReference)
         };
 
         var domainTransmissionProperties = typeof(DialogTransmission)

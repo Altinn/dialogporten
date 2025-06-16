@@ -56,16 +56,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // This is to ensure that the get is consistent, and that PATCH in the API presentation
         // layer behaviours in an expected manner. Therefore, we need to be a bit more verbose about it.
         var dialog = await _db.Dialogs
-            .Include(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
-                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.CreatedAt).ThenBy(x => x.LanguageCode))
+            .Include(x => x.Content)
+                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.CreatedAt).ThenBy(x => x.LanguageCode))
+                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                 .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
             .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.CreatedAt).ThenBy(x => x.LanguageCode))
+                .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x!.Prompt!.Localizations.OrderBy(x => x.CreatedAt).ThenBy(x => x.LanguageCode))
+                .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                 .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
             .Include(x => x.Transmissions)

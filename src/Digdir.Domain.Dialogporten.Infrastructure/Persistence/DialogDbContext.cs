@@ -14,6 +14,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
@@ -45,6 +46,8 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<DialogContentType> DialogContentTypes => Set<DialogContentType>();
     public DbSet<SubjectResource> SubjectResources => Set<SubjectResource>();
     public DbSet<DialogEndUserContext> DialogEndUserContexts => Set<DialogEndUserContext>();
+
+    public DbSet<DialogServiceOwnerContext> DialogServiceOwnerContexts => Set<DialogServiceOwnerContext>();
     public DbSet<LabelAssignmentLog> LabelAssignmentLogs => Set<LabelAssignmentLog>();
     public DbSet<NotificationAcknowledgement> NotificationAcknowledgements => Set<NotificationAcknowledgement>();
     public DbSet<ResourcePolicyInformation> ResourcePolicyInformation => Set<ResourcePolicyInformation>();

@@ -14,7 +14,7 @@ param containerAppEnvId string
 param environmentVariables { name: string, value: string?, secretRef: string? }[] = []
 
 @description('The secrets to be used in the job')
-param secrets { name: string, keyVaultUrl: string, identity: 'System' }[] = []
+param secrets { name: string, keyVaultUrl: string, identity: string }[] = []
 
 @description('The tags to be applied to the job')
 param tags object
@@ -31,6 +31,9 @@ param userAssignedIdentityId string
 
 @description('The replica timeout for the job in seconds')
 param replicaTimeOutInSeconds int
+
+@description('The workload profile to use for the job')
+param workloadProfileName string = 'Consumption'
 
 var isScheduled = !empty(cronExpression)
 
@@ -72,6 +75,7 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
       isScheduled ? scheduledJobProperties : manualJobProperties
     )
     environmentId: containerAppEnvId
+    workloadProfileName: workloadProfileName
     template: {
       containers: [
         {

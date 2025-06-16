@@ -9,6 +9,9 @@ param location string
 @description('Tags to apply to resources')
 param tags object
 
+@description('The name of the Log Analytics workspace')
+param logAnalyticsWorkspaceName string
+
 @export()
 type Sku = {
   name: 'standard'
@@ -35,6 +38,28 @@ resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-05-01' =
     }
   }
   tags: tags
+}
+
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+  name: logAnalyticsWorkspaceName
+}
+
+resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: '${appConfigName}-diagnostics'
+  scope: appConfig
+  properties: {
+    logs: [
+      {
+        category: 'Audit'
+        enabled: true
+        retentionPolicy: {
+          days: 30
+          enabled: true
+        }
+      }
+    ]
+    workspaceId: logAnalyticsWorkspace.id
+  }
 }
 
 output endpoint string = appConfig.properties.endpoint

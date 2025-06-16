@@ -128,6 +128,7 @@ module appConfiguration '../modules/appConfiguration/create.bicep' = {
     location: location
     sku: appConfigurationSku
     tags: tags
+    logAnalyticsWorkspaceName: appInsights.outputs.appInsightsWorkspaceName
   }
 }
 

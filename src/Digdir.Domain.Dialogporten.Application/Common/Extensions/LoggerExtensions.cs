@@ -13,13 +13,13 @@ public static class LoggerExtensions
     // Define log message templates as constants to avoid string allocations
     private static readonly Action<ILogger, string, Exception?> OperationStarted =
         LoggerMessage.Define<string>(
-            LogLevel.Information,
+            LogLevel.Debug,
             new EventId(1337, nameof(TimeOperation)),
             "[TimeOperation] Operation '{OperationName}' started.");
 
     private static readonly Action<ILogger, string, double, Exception?> OperationCompleted =
         LoggerMessage.Define<string, double>(
-            LogLevel.Information,
+            LogLevel.Debug,
             new EventId(1338, nameof(TimeOperation)),
             "[TimeOperation] Operation '{OperationName}' completed in {ElapsedMilliseconds}ms.");
 

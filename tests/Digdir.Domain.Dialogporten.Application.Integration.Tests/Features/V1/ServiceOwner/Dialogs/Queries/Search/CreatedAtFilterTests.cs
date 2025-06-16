@@ -1,5 +1,10 @@
+using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -11,56 +16,53 @@ public class CreatedAtFilterTests : ApplicationCollectionFixture
     public CreatedAtFilterTests(DialogApplication application) : base(application) { }
 
     [Theory]
-    [InlineData(2022, null, 2, new[] { 2022, 2023 })]
-    [InlineData(null, 2021, 2, new[] { 2020, 2021 })]
-    [InlineData(2021, 2022, 2, new[] { 2021, 2022 })]
-    public async Task Should_Filter_On_Created_Date(int? createdAfterYear, int? createdBeforeYear, int expectedCount, int[] expectedYears)
+    [InlineData(2022, null, new[] { 2022, 2023 })]
+    [InlineData(null, 2021, new[] { 2020, 2021 })]
+    [InlineData(2021, 2022, new[] { 2021, 2022 })]
+    public async Task Should_Filter_On_Created_Date(int? createdAfterYear, int? createdBeforeYear, int[] expectedYears)
     {
-        // Arrange
-        var dialogIn2020 = await Application.CreateDialogWithDateInYear(2020, CreatedAt);
-        var dialogIn2021 = await Application.CreateDialogWithDateInYear(2021, CreatedAt);
-        var dialogIn2022 = await Application.CreateDialogWithDateInYear(2022, CreatedAt);
-        var dialogIn2023 = await Application.CreateDialogWithDateInYear(2023, CreatedAt);
+        var expectedDialogIds = new List<Guid>();
 
-        // Act
-        var response = await Application.Send(new SearchDialogQuery
+        // Starting in the year 2020
+        var createDialogCommands = Enumerable.Range(2020, 4).Select(year =>
         {
-            CreatedAfter = createdAfterYear.HasValue ? CreateDateFromYear(createdAfterYear.Value) : null,
-            CreatedBefore = createdBeforeYear.HasValue ? CreateDateFromYear(createdBeforeYear.Value) : null
-        });
-
-        // Assert
-        response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-
-        result.Items.Should().HaveCount(expectedCount);
-        foreach (var year in expectedYears)
-        {
-            var dialogId = year switch
+            var dialogId = NewUuidV7();
+            if (expectedYears.Contains(year))
             {
-                2020 => dialogIn2020,
-                2021 => dialogIn2021,
-                2022 => dialogIn2022,
-                2023 => dialogIn2023,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                expectedDialogIds.Add(dialogId);
+            }
 
-            result.Items.Should().ContainSingle(x => x.Id == dialogId);
-        }
+            return CreateDialogCommand(year, dialogId);
+        }).ToArray();
+
+        await FlowBuilder.For(Application)
+            .CreateDialogs(createDialogCommands)
+            .SearchServiceOwnerDialogs(x =>
+            {
+                x.Party = [Party];
+                x.CreatedAfter = createdAfterYear.HasValue ? CreateDateFromYear(createdAfterYear.Value) : null;
+                x.CreatedBefore = createdBeforeYear.HasValue ? CreateDateFromYear(createdBeforeYear.Value) : null;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
+            {
+                result.Items
+                    .Select(x => x.Id)
+                    .Should()
+                    .BeEquivalentTo(expectedDialogIds);
+            });
     }
+
+    private static CreateDialogCommand CreateDialogCommand(int year, Guid dialogId) => DialogGenerator
+        .GenerateFakeCreateDialogCommand(id: dialogId, party: Party, createdAt: CreateDateFromYear(year));
 
     [Fact]
-    public async Task Cannot_Filter_On_Created_After_With_Value_Greater_Than_Created_Before()
-    {
-        // Act
-        var response = await Application.Send(new SearchDialogQuery
-        {
-            CreatedAfter = CreateDateFromYear(2022),
-            CreatedBefore = CreateDateFromYear(2021)
-        });
-
-        // Assert
-        response.TryPickT1(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-    }
+    public Task Cannot_Filter_On_Created_After_With_Value_Greater_Than_Created_Before() =>
+        FlowBuilder.For(Application)
+            .SearchServiceOwnerDialogs(x =>
+            {
+                x.Party = [Party];
+                x.CreatedAfter = CreateDateFromYear(2022);
+                x.CreatedBefore = CreateDateFromYear(2021);
+            })
+            .ExecuteAndAssert<ValidationError>(result => result.Should().NotBeNull());
 }

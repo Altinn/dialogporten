@@ -120,6 +120,8 @@ public sealed class CreateDialogDto
     /// </summary>
     public SystemLabel.Values? SystemLabel { get; set; }
 
+    public DialogServiceOwnerContextDto? ServiceOwnerContext { get; set; }
+
     /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
@@ -154,6 +156,14 @@ public sealed class CreateDialogDto
     /// An immutable list of activities associated with the dialog.
     /// </summary>
     public List<ActivityDto> Activities { get; set; } = [];
+}
+
+public sealed class DialogServiceOwnerContextDto
+{
+    /// <summary>
+    /// A list of labels, not visible in end-user APIs.
+    /// </summary>
+    public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
 }
 
 public sealed class TransmissionDto
@@ -192,6 +202,11 @@ public sealed class TransmissionDto
     /// Refer to the service-specific documentation provided by the service owner for details (if in use).
     /// </summary>
     public Uri? ExtendedType { get; set; }
+
+    /// <summary>
+    /// Arbitrary string with a service-specific reference to an external system or service.
+    /// </summary>
+    public string? ExternalReference { get; set; }
 
     /// <summary>
     /// Reference to any other transmission that this transmission is related to.
@@ -291,6 +306,14 @@ public sealed class SearchTagDto
 {
     /// <summary>
     /// A search tag value.
+    /// </summary>
+    public string Value { get; set; } = null!;
+}
+
+public sealed class ServiceOwnerLabelDto
+{
+    /// <summary>
+    /// A label value.
     /// </summary>
     public string Value { get; set; } = null!;
 }

@@ -1,12 +1,16 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
+using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
+using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.Get.ActivityDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries;
 
@@ -14,87 +18,57 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class ActivityLogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
-    public async Task Get_Dialog_ActivityLog_Should_Return_User_Ids_Unhashed()
-    {
-        // Arrange
-        var (_, createCommandResponse) = await GenerateDialogWithActivity();
-
-        // Act
-        var response = await Application.Send(new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId });
-
-        // Assert
-        response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-
-        result.Activities
-            .Single()
-            .PerformedBy.ActorId
-            .Should()
-            .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator);
-
-    }
+    public Task Get_Dialog_ActivityLog_Should_Return_User_Ids_Unhashed() =>
+        FlowBuilder.For(Application)
+            .CreateDialog(DialogWithActivity())
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Activities.Single()
+                    .PerformedBy
+                    .ActorId
+                    .Should()
+                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
 
     [Fact]
-    public async Task Search_Dialog_LatestActivity_Should_Return_User_Ids_Unhashed()
-    {
-        // Arrange
-        var (createDialogCommand, _) = await GenerateDialogWithActivity();
-
-        // Act
-        var response = await Application.Send(new SearchDialogQuery
-        {
-            ServiceResource = [createDialogCommand.Dto.ServiceResource]
-        });
-
-        // Assert
-        response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-
-        result.Items
-            .Single()
-            .LatestActivity!
-            .PerformedBy.ActorId
-            .Should()
-            .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator);
-    }
+    public Task Search_Dialog_LatestActivity_Should_Return_User_Ids_Unhashed() =>
+        FlowBuilder.For(Application)
+            .CreateDialog(DialogWithActivity())
+            .SendCommand((_, ctx) => new SearchDialogQuery
+            {
+                ServiceResource = [ctx.GetServiceResource()]
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
+                x.Items.Single()
+                    .LatestActivity!
+                    .PerformedBy
+                    .ActorId
+                    .Should()
+                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
 
     [Fact]
-    public async Task Get_ActivityLog_Should_Return_User_Ids_Unhashed()
-    {
-        // Arrange
-        var (_, createCommandResponse) = await GenerateDialogWithActivity();
+    public Task Get_ActivityLog_Should_Return_User_Ids_Unhashed() =>
+        FlowBuilder.For(Application)
+            .CreateDialog(DialogWithActivity())
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>()
+            .SendCommand(x => new GetActivityQuery
+            {
+                DialogId = x.Id,
+                ActivityId = x.Activities.First().Id
+            })
+            .ExecuteAndAssert<ActivityDto>(x =>
+                x.PerformedBy
+                    .ActorId
+                    .Should()
+                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
 
-        var getDialogResult = await Application.Send(new GetDialogQuery
-        {
-            DialogId = createCommandResponse.AsT0.DialogId
-        });
-
-        var activityId = getDialogResult.AsT0.Activities.First().Id;
-
-        // Act
-        var response = await Application.Send(new GetActivityQuery
-        {
-            DialogId = createCommandResponse.AsT0.DialogId,
-            ActivityId = activityId
-        });
-
-        // Assert
-        response.TryPickT0(out var result, out _).Should().BeTrue();
-        result.Should().NotBeNull();
-
-        result.PerformedBy.ActorId
-            .Should()
-            .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator);
-    }
-
-    private async Task<(CreateDialogCommand, CreateDialogResult)> GenerateDialogWithActivity()
+    private static CreateDialogCommand DialogWithActivity()
     {
         var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var activity = DialogGenerator.GenerateFakeDialogActivity(type: DialogActivityType.Values.Information);
         activity.PerformedBy.ActorId = DialogGenerator.GenerateRandomParty(forcePerson: true);
         activity.PerformedBy.ActorName = null;
         createDialogCommand.Dto.Activities.Add(activity);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-        return (createDialogCommand, createCommandResponse);
+        return createDialogCommand;
     }
 }

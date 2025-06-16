@@ -31,6 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 		docker-compose.yml = docker-compose.yml
 		README.md = README.md
+		AGENTS.md = AGENTS.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Digdir.Domain.Dialogporten.Service", "src\Digdir.Domain.Dialogporten.Service\Digdir.Domain.Dialogporten.Service.csproj", "{45A63837-99BC-469C-A2DE-FEE6975516C3}"

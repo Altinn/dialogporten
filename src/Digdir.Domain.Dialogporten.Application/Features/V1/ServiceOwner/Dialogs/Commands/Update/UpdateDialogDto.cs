@@ -62,6 +62,13 @@ public sealed class UpdateDialogDto
     public DateTimeOffset? ExpiresAt { get; set; }
 
     /// <summary>
+    /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
+    /// When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
+    /// If any Transmissions were created without Content while this property was true, the flag cannot be reverted to false.
+    /// </summary>
+    public bool IsApiOnly { get; set; }
+
+    /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
     public DialogStatus.Values Status { get; set; }
@@ -143,6 +150,11 @@ public class TransmissionDto
     /// Refer to the service-specific documentation provided by the service owner for details (if in use).
     /// </summary>
     public Uri? ExtendedType { get; set; }
+
+    /// <summary>
+    /// Arbitrary string with a service-specific reference to an external system or service.
+    /// </summary>
+    public string? ExternalReference { get; set; }
 
     /// <summary>
     /// Reference to any other transmission that this transmission is related to.

@@ -1,8 +1,11 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
+﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -12,6 +15,8 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
@@ -26,399 +31,306 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public async Task UpdateDialogCommand_Should_Set_New_Revision_If_IsSilentUpdate_Is_Set()
     {
-        // Arrange
-        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+        Guid? revision = null!;
 
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-        var oldRevision = getDialogDto.AsT0.Revision;
+        var updateSuccess = await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+            {
+                revision = x.IfMatchDialogRevision!.Value;
+                x.IsSilentUpdate = true;
+                x.Dto.Progress = (x.Dto.Progress % 100) + 1;
+            })
+            .ExecuteAndAssert<UpdateDialogSuccess>();
 
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        // Update progress
-        updateDialogDto.Progress = (updateDialogDto.Progress % 100) + 1;
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto,
-            IsSilentUpdate = true
-        });
-
-        // Assert
-        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        success.Revision.Should().NotBeEmpty();
-        success.Revision.Should().NotBe(oldRevision);
+        updateSuccess.Revision.Should().NotBeEmpty();
+        updateSuccess.Revision.Should().NotBe(revision!.Value);
     }
 
 
     [Fact]
     public async Task UpdateDialogCommand_Should_Not_Set_SystemLabel_If_IsSilentUpdate_Is_Set()
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.SystemLabel = SystemLabel.Values.Bin;
-        var createCommandResponse = await Application.Send(createDialogCommand);
+        var expectedSystemLabel = SystemLabel.Values.Bin;
 
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
+        var updatedDialog = await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => { x.Dto.SystemLabel = expectedSystemLabel; })
+            .UpdateDialog(x =>
+            {
+                x.IsSilentUpdate = true;
+                x.Dto.SearchTags.Add(new() { Value = "crouching tiger, hidden update" });
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>();
 
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.SearchTags.Add(new() { Value = "crouching tiger, hidden update" });
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto,
-            IsSilentUpdate = true
-        });
-
-        updateResponse.TryPickT0(out _, out _).Should().BeTrue();
-
-        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
-
-        // Assert
-        getDialogDtoAfterUpdate.AsT0.SystemLabel.Should().Be(getDialogDto.AsT0.SystemLabel);
+        updatedDialog.SystemLabel.Should().Be(expectedSystemLabel);
     }
 
     [Fact]
     public async Task UpdateDialogCommand_Should_Not_Set_UpdatedAt_If_IsSilentUpdate_Is_Set()
     {
-        // Arrange
-        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+        DateTimeOffset? initialUpdatedAt = null;
 
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
+        await FlowBuilder.For(Application)
+            // CreateAt must be set when UpdatedAt is set
+            .CreateSimpleDialog(x => x.Dto.UpdatedAt = x.Dto.CreatedAt = initialUpdatedAt)
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => new GetDialogQuery { DialogId = ctx.GetDialogId() })
+            .AssertResult<DialogDto>(x => initialUpdatedAt = x.UpdatedAt)
+            .SendCommand(IFlowStepExtensions.CreateUpdateDialogCommand)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.UpdatedAt.Should().Be(initialUpdatedAt));
+    }
 
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.Process = "updated:process";
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto,
-            IsSilentUpdate = true
-        });
-
-        updateResponse.TryPickT0(out _, out _).Should().BeTrue();
-
-        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
-
-        // Assert
-        getDialogDtoAfterUpdate.AsT0.UpdatedAt.Should().Be(getDialogDto.AsT0.UpdatedAt);
+    [Fact]
+    public async Task Empty_Update_Should_Not_Set_UpdatedAt()
+    {
+        var initialDate = DateTimeOffset.UtcNow.AddYears(-1);
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.UpdatedAt = x.Dto.CreatedAt =
+                    initialDate)
+            .UpdateDialog(_ => { })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.UpdatedAt.Should()
+                    .BeCloseTo(initialDate, TimeSpan.FromSeconds(1)));
     }
 
     [Fact]
     public async Task UpdateDialogCommand_Should_Return_New_Revision()
     {
-        // Arrange
-        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+        Guid? initialRevision = null!;
 
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-        var oldRevision = getDialogDto.AsT0.Revision;
+        var updateSuccess = await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+            {
+                initialRevision = x.IfMatchDialogRevision!.Value;
+                x.Dto.Progress = (x.Dto.Progress % 100) + 1;
+            })
+            .ExecuteAndAssert<UpdateDialogSuccess>();
 
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        // Update progress
-        updateDialogDto.Progress = (updateDialogDto.Progress % 100) + 1;
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        success.Revision.Should().NotBeEmpty();
-        success.Revision.Should().NotBe(oldRevision);
+        updateSuccess.Revision.Should().NotBeEmpty();
+        updateSuccess.Revision.Should().NotBe(initialRevision!.Value);
     }
 
     [Fact]
     public async Task Cannot_Include_Old_Activities_To_UpdateCommand()
     {
-        // Arrange
-        var (_, createCommandResponse) = await GenerateDialogWithActivity();
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
+        var existingActivityId = NewUuidV7();
 
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        // Ref. old activity
-        updateDialogDto.Activities.Add(new ActivityDto
-        {
-            Id = getDialogDto.AsT0.Activities.First().Id,
-            Type = DialogActivityType.Values.DialogCreated,
-            PerformedBy = new ActorDto
+        var domainError = await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
             {
-                ActorType = ActorType.Values.ServiceOwner
-            }
-        });
+                var activity =
+                    DialogGenerator.GenerateFakeDialogActivity(type: DialogActivityType.Values.DialogCreated);
+                activity.Id = existingActivityId;
+                x.Dto.Activities.Add(activity);
+            })
+            .UpdateDialog(x =>
+            {
+                x.Dto.Activities.Add(new ActivityDto
+                {
+                    Id = existingActivityId,
+                    Type = DialogActivityType.Values.DialogCreated,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    }
+                });
+            })
+            .ExecuteAndAssert<DomainError>();
 
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT5(out var domainError, out _).Should().BeTrue();
-        domainError.Should().NotBeNull();
-        domainError.Errors.Should().Contain(e => e.ErrorMessage.Contains("already exists"));
+        domainError.Errors
+            .Should()
+            .Contain(e => e.ErrorMessage.Contains("already exists"));
     }
 
     [Fact]
     public async Task Cannot_Include_Old_Transmissions_In_UpdateCommand()
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var existingTransmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
-        createDialogCommand.Dto.Transmissions.Add(existingTransmission);
-        var createCommandResponse = await Application.Send(createDialogCommand);
+        var existingTransmissionId = NewUuidV7();
 
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        // Ref. old transmission
-        updateDialogDto.Transmissions.Add(new TransmissionDto
-        {
-            Id = existingTransmission.Id,
-            Type = DialogTransmissionType.Values.Information,
-            Sender = new() { ActorType = ActorType.Values.ServiceOwner },
-            Content = new()
+        var domainError = await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
             {
-                Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) },
-                Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) }
-            }
-        });
+                var transmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
+                transmission.Id = existingTransmissionId;
+                x.Dto.Transmissions.Add(transmission);
+            })
+            .UpdateDialog(x =>
+            {
+                x.Dto.Transmissions.Add(new TransmissionDto
+                {
+                    Id = existingTransmissionId,
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new() { ActorType = ActorType.Values.ServiceOwner },
+                    Content = new()
+                    {
+                        Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) },
+                        Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) }
+                    }
+                });
+            })
+            .ExecuteAndAssert<DomainError>();
 
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT5(out var domainError, out _).Should().BeTrue();
-        domainError.Should().NotBeNull();
-        domainError.Errors.Should().Contain(e => e.ErrorMessage.Contains("already exists"));
+        domainError.ShouldHaveErrorWithText("already exists");
     }
 
     [Fact]
-    public async Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog()
-    {
-        // Arrange
-        var createCommandResponse = await Application.Send(DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
-
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.Content = null!;
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT3(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-    }
+    public Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
+            .UpdateDialog(x => x.Dto.Content = null!)
+            .ExecuteAndAssert<ValidationError>();
 
     [Fact]
-    public async Task Can_Update_Content_To_Null_If_IsApiOnlyTrue_Dialog()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.IsApiOnly = true;
-        var createCommandResponse = await Application.Send(createDialogCommand);
-
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.Content = null!;
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-    }
+    public Task Can_Update_Content_To_Null_If_IsApiOnlyTrue_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .UpdateDialog(x => x.Dto.Content = null!)
+            .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Fact]
-    public async Task Should_Validate_Supplied_Content_If_IsApiOnlyTrue_Dialog()
-    {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        createDialogCommand.Dto.IsApiOnly = true;
-        var createCommandResponse = await Application.Send(createDialogCommand);
-
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-        updateDialogDto.Content!.Title = null!; // Content is supplied, but title is not (only summary)
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-
-        // Assert
-        updateResponse.TryPickT3(out var validationError, out _).Should().BeTrue();
-        validationError.Should().NotBeNull();
-    }
+    public Task Should_Validate_Supplied_Content_If_IsApiOnlyTrue_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .UpdateDialog(x => { x.Dto.Content!.Title = null!; })
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content.Title)));
 
     [Fact]
-    public async Task Should_Allow_User_Defined_Id_For_Attachement()
+    public Task Can_Update_IsApiOnly_From_False_To_True() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
+            .UpdateDialog(x => x.Dto.IsApiOnly = true)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.IsApiOnly.Should().BeTrue());
+
+    [Fact]
+    public Task Can_Update_IsApiOnly_From_True_To_False() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .UpdateDialog(x => x.Dto.IsApiOnly = false)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.IsApiOnly.Should().BeFalse());
+
+    [Fact]
+    public Task Cannot_Update_IsApiOnly_To_False_If_Dialog_Content_Is_Null() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.IsApiOnly = true;
+                x.Dto.Content = null;
+            })
+            .UpdateDialog(x => x.Dto.IsApiOnly = false)
+            .ExecuteAndAssert<ValidationError>(x => x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content)));
+
+    [Fact]
+    public Task Cannot_Update_IsApiOnly_To_False_If_Transmission_Content_Is_Null() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddTransmission(x => x.Content = null);
+                x.Dto.IsApiOnly = true;
+            })
+            .UpdateDialog(x => x.Dto.IsApiOnly = false)
+            .ExecuteAndAssert<ValidationError>(x => x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Transmissions)));
+
+    [Fact]
+    public Task Can_Update_IsApiOnly_To_False_If_Transmission_Content_Is_Not_Null() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddTransmission();
+                x.Dto.IsApiOnly = true;
+            })
+            .UpdateDialog(x => x.Dto.IsApiOnly = false)
+            .ExecuteAndAssert<UpdateDialogSuccess>();
+
+    [Fact]
+    public async Task Should_Allow_User_Defined_Id_For_Attachment()
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var createCommandResponse = await Application.Send(createDialogCommand);
+        var userDefinedAttachmentId = NewUuidV7();
 
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        var attachment = new AttachmentDto
-        {
-            Id = Guid.CreateVersion7(),
-            DisplayName = [new() { LanguageCode = "nb", Value = "Test attachment" }],
-            Urls = [new() { Url = new Uri("https://example.com"), ConsumerType = AttachmentUrlConsumerType.Values.Gui }]
-        };
-        updateDialogDto.Attachments.Add(attachment);
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+        var updatedDialog = await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+            {
+                x.Dto.Attachments.Add(new AttachmentDto
+                {
+                    Id = userDefinedAttachmentId,
+                    DisplayName = [new() { LanguageCode = "nb", Value = "Test attachment" }],
+                    Urls =
+                    [
+                        new()
+                        {
+                            Url = new Uri("https://example.com"), ConsumerType = AttachmentUrlConsumerType.Values.Gui
+                        }
+                    ]
+                });
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>();
 
         // Assert
-        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        getDialogDtoAfterUpdate.TryPickT0(out var currentDialog, out _).Should().BeTrue();
-        currentDialog.Attachments.Should().ContainSingle(x => x.Id == attachment.Id);
+        updatedDialog!.Attachments
+            .Should()
+            .ContainSingle(x => x.Id == userDefinedAttachmentId);
     }
 
     [Fact]
     public async Task Should_Allow_User_Defined_Id_For_ApiAction()
     {
-        // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var createCommandResponse = await Application.Send(createDialogCommand);
+        var userDefinedApiActionId = NewUuidV7();
 
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        var apiAction = new ApiActionDto
-        {
-            Id = Guid.CreateVersion7(),
-            Action = "Test action",
-            Name = "Test action",
-            Endpoints = [new() { Url = new("https://example.com"), HttpMethod = HttpVerb.Values.GET }]
-        };
-        updateDialogDto.ApiActions.Add(apiAction);
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+        var updatedDialog = await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+            {
+                x.Dto.ApiActions.Add(new ApiActionDto
+                {
+                    Id = userDefinedApiActionId,
+                    Action = "Test action",
+                    Name = "Test action",
+                    Endpoints = [new() { Url = new Uri("https://example.com"), HttpMethod = HttpVerb.Values.GET }]
+                });
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>();
 
         // Assert
-        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        getDialogDtoAfterUpdate.TryPickT0(out var currentDialog, out _).Should().BeTrue();
-        currentDialog.ApiActions.Should().Contain(x => x.Id == apiAction.Id);
+        updatedDialog!.ApiActions
+            .Should()
+            .ContainSingle(x => x.Id == userDefinedApiActionId);
     }
 
     [Fact]
     public async Task Should_Allow_User_Defined_Id_For_GuiAction()
     {
         // Arrange
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var createCommandResponse = await Application.Send(createDialogCommand);
+        var userDefinedGuiActionId = NewUuidV7();
 
-        var getDialogQuery = new GetDialogQuery { DialogId = createCommandResponse.AsT0.DialogId };
-        var getDialogDto = await Application.Send(getDialogQuery);
-
-        var mapper = Application.GetMapper();
-        var updateDialogDto = mapper.Map<UpdateDialogDto>(getDialogDto.AsT0);
-
-        var guiAction = new GuiActionDto
-        {
-            Id = Guid.CreateVersion7(),
-            Action = "Test action",
-            Title = [new() { LanguageCode = "nb", Value = "Test action" }],
-            Priority = DialogGuiActionPriority.Values.Tertiary,
-            Url = new Uri("https://example.com"),
-        };
-        updateDialogDto.GuiActions.Add(guiAction);
-
-        // Act
-        var updateResponse = await Application.Send(new UpdateDialogCommand
-        {
-            Id = createCommandResponse.AsT0.DialogId,
-            Dto = updateDialogDto
-        });
-        var getDialogDtoAfterUpdate = await Application.Send(getDialogQuery);
+        var updatedDialog = await FlowBuilder.For(Application)
+            .CreateDialog(DialogGenerator.GenerateSimpleFakeCreateDialogCommand())
+            .UpdateDialog(x =>
+            {
+                x.Dto.GuiActions.Add(new GuiActionDto
+                {
+                    Id = userDefinedGuiActionId,
+                    Action = "Test action",
+                    Title = [new() { LanguageCode = "nb", Value = "Test action" }],
+                    Priority = DialogGuiActionPriority.Values.Tertiary,
+                    Url = new Uri("https://example.com"),
+                });
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>();
 
         // Assert
-        updateResponse.TryPickT0(out var success, out _).Should().BeTrue();
-        success.Should().NotBeNull();
-        getDialogDtoAfterUpdate.TryPickT0(out var currentDialog, out _).Should().BeTrue();
-        currentDialog.GuiActions.Should().Contain(x => x.Id == guiAction.Id);
-    }
-
-    private async Task<(CreateDialogCommand, CreateDialogResult)> GenerateDialogWithActivity()
-    {
-        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var activity = DialogGenerator.GenerateFakeDialogActivity(type: DialogActivityType.Values.Information);
-        activity.PerformedBy.ActorId = DialogGenerator.GenerateRandomParty(forcePerson: true);
-        activity.PerformedBy.ActorName = null;
-        createDialogCommand.Dto.Activities.Add(activity);
-        var createCommandResponse = await Application.Send(createDialogCommand);
-        return (createDialogCommand, createCommandResponse);
+        updatedDialog.GuiActions
+            .Should()
+            .ContainSingle(x => x.Id == userDefinedGuiActionId);
     }
 }

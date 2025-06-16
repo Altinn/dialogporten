@@ -63,7 +63,7 @@ internal sealed class DialogContentInputConverter<TDialogContent> :
                 sourceKeySelector: x => x.TypeId,
                 create: context.Mapper.Map<List<DialogContent>>,
                 update: context.Mapper.Update,
-                delete: DeleteDelegate.NoOp);
+                delete: DeleteDelegate.Default);
 
         return destinations;
     }

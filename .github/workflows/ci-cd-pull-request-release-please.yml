@@ -75,11 +75,85 @@ jobs:
         with:
           egress-policy: audit
 
+      - name: Calculate max pull request body length
+        id: calculate-max-length
+        run: |
+          # Build the payload template using actual values where available
+          # Channel ID is typically around 11 characters (C1234567890)
+          ESTIMATED_CHANNEL_ID="C1234567890"
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY}/pull/${{ github.event.pull_request.number }}"
+          
+          PAYLOAD_TEMPLATE=$(cat <<EOF
+          {
+            "channel": "${ESTIMATED_CHANNEL_ID}",
+            "blocks": [
+              {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "PLACEHOLDER_CONTENT"
+                  }
+                },
+                { "type": "divider" },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Open release PR"
+                      },
+                      "url": "${REPO_URL}"
+                    }
+                  ]
+                }
+              ]
+          }
+          EOF
+          )
+          
+          # Calculate template length (without the placeholder content)
+          PLACEHOLDER="PLACEHOLDER_CONTENT"
+          TEMPLATE_LENGTH=$((${#PAYLOAD_TEMPLATE} - ${#PLACEHOLDER}))
+          
+          # Slack payload limit with safety margin
+          SLACK_PAYLOAD_LIMIT=3000
+          SAFETY_MARGIN=100
+          
+          # Calculate maximum allowable length for PR content
+          MAX_BODY_LENGTH=$((SLACK_PAYLOAD_LIMIT - TEMPLATE_LENGTH - SAFETY_MARGIN))
+          
+          echo "Template length: $TEMPLATE_LENGTH"
+          echo "Max content length: $MAX_BODY_LENGTH"
+          echo "MAX_BODY_LENGTH=$MAX_BODY_LENGTH" >> $GITHUB_ENV
+
       - name: Slackify markdown in pull request body
         id: slackify
         uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1
         with:
           text: ${{ github.event.pull_request.body }}
+
+      - name: Trim slackified content if necessary
+        id: trim-slackified
+        run: |
+          SLACKIFIED_CONTENT="${{ steps.slackify.outputs.text }}"
+          MAX_LENGTH=${{ env.MAX_BODY_LENGTH }}
+          
+          if [ ${#SLACKIFIED_CONTENT} -gt $MAX_LENGTH ]; then
+            # Account for the trimming message length to ensure we stay under limit
+            TRIM_MESSAGE="... (content trimmed due to length)"
+            AVAILABLE_LENGTH=$((MAX_LENGTH - ${#TRIM_MESSAGE}))
+            TRIMMED_CONTENT="${SLACKIFIED_CONTENT:0:$AVAILABLE_LENGTH}$TRIM_MESSAGE"
+            echo "FINAL_CONTENT<<EOF" >> $GITHUB_ENV
+            echo "$TRIMMED_CONTENT" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            echo "FINAL_CONTENT<<EOF" >> $GITHUB_ENV
+            echo "$SLACKIFIED_CONTENT" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+
       - name: Send GitHub slack message
         id: slack
         uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
@@ -95,7 +169,7 @@ jobs:
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": ${{ toJson(steps.slackify.outputs.text) }}
+                      "text": ${{ toJson(env.FINAL_CONTENT) }}
                     }
                   },
                   { "type": "divider" },

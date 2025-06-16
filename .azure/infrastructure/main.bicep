@@ -175,7 +175,6 @@ module vnet '../modules/vnet/main.bicep' = {
     namePrefix: namePrefix
     location: location
     tags: tags
-    environment: environment
   }
 }
 

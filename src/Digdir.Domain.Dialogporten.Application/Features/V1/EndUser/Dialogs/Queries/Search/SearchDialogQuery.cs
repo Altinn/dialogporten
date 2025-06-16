@@ -202,9 +202,28 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
-        foreach (var seenLog in paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
+        foreach (var dialog in paginatedList.Items)
         {
-            seenLog.IsCurrentEndUser = IdentifierMasker.GetMaybeMaskedIdentifier(_userRegistry.GetCurrentUserId().ExternalIdWithPrefix) == seenLog.SeenBy.ActorId;
+            // This filtering cannot be done in AutoMapper using ProjectTo
+            dialog.SeenSinceLastContentUpdate = dialog.SeenSinceLastContentUpdate
+                .GroupBy(log => log.SeenBy.ActorId)
+                .Select(group => group
+                    .OrderByDescending(log => log.SeenAt)
+                    .First())
+                .ToList();
+        }
+
+        var seenLogs = paginatedList.Items
+            .SelectMany(x => x.SeenSinceLastContentUpdate)
+            .Concat(paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
+            .ToList();
+
+        foreach (var seenLog in seenLogs)
+        {
+            seenLog.IsCurrentEndUser = IdentifierMasker
+                .GetMaybeMaskedIdentifier(_userRegistry
+                    .GetCurrentUserId()
+                    .ExternalIdWithPrefix) == seenLog.SeenBy.ActorId;
         }
 
         var serviceResources = paginatedList.Items

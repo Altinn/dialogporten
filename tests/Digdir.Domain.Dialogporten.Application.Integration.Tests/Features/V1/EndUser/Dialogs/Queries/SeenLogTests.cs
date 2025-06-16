@@ -17,6 +17,7 @@ using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUs
 using SeenLogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Get.SeenLogDto;
 using SearchSeenLogDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSeenLogs.Queries.Search.SeenLogDto;
+using SearchDialogSeenLogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogSeenLogDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries;
 
@@ -31,20 +32,12 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .CreateSimpleDialog(x => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
             .AssertResult<DialogDto>(result =>
-            {
-                result.SeenSinceLastUpdate
-                    .Single()
-                    .SeenBy.ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
-            })
+                result.SeenSinceLastUpdate.AssertSingleActorIdHashed())
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
-            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
-                x.Items.Single().SeenSinceLastUpdate
-                    .Single()
-                    .SeenBy.ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator));
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x => x.Items
+                .Single()
+                .SeenSinceLastUpdate
+                .AssertSingleActorIdHashed());
 
     [Fact]
     public Task Get_SeenLog_Should_Not_Return_User_Ids_Unhashed() =>
@@ -85,11 +78,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.Id = dialogId)
             .GetEndUserDialog() // Default integration test user
-            .AssertResult<DialogDto>(x =>
-            {
-                x.SeenSinceLastContentUpdate.Count.Should().Be(1);
-                x.SeenSinceLastUpdate.Count.Should().Be(1);
-            })
+            .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .ExecuteAndAssert<UpdateDialogSuccess>();
@@ -106,7 +95,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.SeenSinceLastContentUpdate.Count.Should().Be(2);
 
                 // Only the new user should be in SeenSinceLastUpdate
-                x.SeenSinceLastUpdate.Count.Should().Be(1);
+                x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
             });
     }
 
@@ -115,18 +104,72 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
-            .AssertResult<DialogDto>(BothSeenLogsContainsOneEntry)
+            .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .GetEndUserDialog()
-            .AssertResult<DialogDto>(BothSeenLogsContainsOneEntry)
+            .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             .UpdateDialog(x => x.Dto.ExternalReference = "bar:baz")
             .GetEndUserDialog()
-            .ExecuteAndAssert<DialogDto>(BothSeenLogsContainsOneEntry);
+            .ExecuteAndAssert<DialogDto>(BothSeenLogsContainsOneHashedEntry);
 
-    private static void BothSeenLogsContainsOneEntry(DialogDto x)
+    [Fact]
+    public async Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_Different_Users_On_Dialog_Search()
     {
-        x.SeenSinceLastContentUpdate.Count.Should().Be(1);
-        x.SeenSinceLastUpdate.Count.Should().Be(1);
+        var dialogId = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.Id = dialogId;
+            })
+            .GetEndUserDialog() // Default integration test user
+            .AssertResult<DialogDto>(x =>
+            {
+                x.SeenSinceLastContentUpdate.AssertSingleActorIdHashed();
+                x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
+            })
+            // Non-content update
+            .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
+            .ExecuteAndAssert<UpdateDialogSuccess>();
+
+        Application.ConfigureServices(x =>
+            ChangeUserPid(x, "13213312833"));
+
+        await FlowBuilder.For(Application)
+            // Fetch as new EndUser
+            .SendCommand(new GetDialogQuery { DialogId = dialogId })
+            .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
+            {
+                var dialog = result.Items.Single();
+                dialog.SeenSinceLastContentUpdate.Count.Should().Be(2);
+                dialog.SeenSinceLastUpdate.Count.Should().Be(1);
+            });
+    }
+
+    [Fact]
+    public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastUpdate_On_Dialog_Search() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.ServiceResource = DummyService)
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>()
+            .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>()
+            .UpdateDialog(x => x.Dto.ExternalReference = "bar:baz")
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>()
+            .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x => x.Items
+                .Single()
+                .SeenSinceLastContentUpdate
+                .AssertSingleActorIdHashed());
+
+    private static void BothSeenLogsContainsOneHashedEntry(DialogDto x)
+    {
+        x.SeenSinceLastContentUpdate.AssertSingleActorIdHashed();
+        x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
     }
 
     private static void ChangeUserPid(IServiceCollection x, string pid)
@@ -143,4 +186,23 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
 
         x.AddSingleton<IUser>(newUser);
     }
+}
+
+public static class SeenLogExtensions
+{
+    public static void AssertSingleActorIdHashed(this List<DialogSeenLogDto> seenLogs) =>
+        seenLogs
+            .Single()
+            .SeenBy
+            .ActorId
+            .Should()
+            .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
+
+    public static void AssertSingleActorIdHashed(this List<SearchDialogSeenLogDto> seenLogs) =>
+        seenLogs
+            .Single()
+            .SeenBy
+            .ActorId
+            .Should()
+            .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
 }

@@ -17,7 +17,9 @@ public class CreateDialogTests
     public async Task CreateDialogCommand_Should_Return_Forbidden_When_Scope_Is_Missing()
     {
         // Arrange
+
         var dialogDbContextSub = Substitute.For<IDialogDbContext>();
+        var documentRepositorySub = Substitute.For<IDialogDocumentRepository>();
 
         var mapper = new MapperConfiguration(cfg =>
         {
@@ -41,7 +43,7 @@ public class CreateDialogTests
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
         var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
-            mapper, unitOfWorkSub, domainContextSub,
+            documentRepositorySub, mapper, unitOfWorkSub, domainContextSub,
             resourceRegistrySub, serviceAuthorizationSub);
 
         // Act
@@ -56,6 +58,7 @@ public class CreateDialogTests
     {
         // Arrange
         var dialogDbContextSub = Substitute.For<IDialogDbContext>();
+        var documentRepositorySub = Substitute.For<IDialogDocumentRepository>();
 
         var mapper = new MapperConfiguration(cfg =>
         {
@@ -78,7 +81,7 @@ public class CreateDialogTests
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
         var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
-            mapper, unitOfWorkSub, domainContextSub,
+            documentRepositorySub, mapper, unitOfWorkSub, domainContextSub,
             resourceRegistrySub, serviceAuthorizationSub);
 
         // Act

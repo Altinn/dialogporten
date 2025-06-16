@@ -70,6 +70,7 @@ public sealed class Dialog
     public List<ApiAction> ApiActions { get; set; } = [];
     public List<Activity> Activities { get; set; } = [];
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
+    public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
     public List<Transmission> Transmissions { get; set; } = [];
 }
 

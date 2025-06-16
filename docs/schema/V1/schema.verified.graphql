@@ -135,6 +135,7 @@ type Dialog {
   apiActions: [ApiAction!]!
   activities: [Activity!]!
   seenSinceLastUpdate: [SeenLog!]!
+  seenSinceLastContentUpdate: [SeenLog!]!
   transmissions: [Transmission!]!
 }
 
@@ -220,6 +221,7 @@ type SearchDialog {
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!
+  seenSinceLastContentUpdate: [SeenLog!]!
 }
 
 type SearchDialogContinuationTokenParsingError implements SearchDialogError {

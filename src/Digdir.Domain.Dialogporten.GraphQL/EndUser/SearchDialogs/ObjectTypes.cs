@@ -77,6 +77,7 @@ public sealed class SearchDialog
 
     public SearchContent Content { get; set; } = null!;
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
+    public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
 }
 
 public sealed class SearchContent

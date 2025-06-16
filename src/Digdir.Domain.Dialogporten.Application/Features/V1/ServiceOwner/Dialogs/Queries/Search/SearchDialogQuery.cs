@@ -253,6 +253,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         var dialogIds = dialogIdsPaginated.Select(x => x.Id);
 
         var paginatedList = await _db.Dialogs
+            //.AsSingleQuery()
             .AsNoTracking()
             .IgnoreQueryFilters()
             .Where(x => dialogIds.Contains(x.Id))

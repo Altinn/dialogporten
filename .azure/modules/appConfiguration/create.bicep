@@ -12,6 +12,12 @@ param tags object
 @description('The name of the Log Analytics workspace')
 param logAnalyticsWorkspaceName string
 
+@description('The ID of the subnet where the App Configuration private endpoint will be deployed')
+param subnetId string
+
+@description('The ID of the virtual network for the private DNS zone')
+param vnetId string
+
 @export()
 type Sku = {
   name: 'standard'
@@ -30,6 +36,7 @@ resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-05-01' =
   properties: {
     // TODO: Remove
     enablePurgeProtection: false
+    publicNetworkAccess: 'Disabled'
   }
   resource configStoreKeyValue 'keyValues' = {
     name: 'Sentinel'
@@ -38,6 +45,52 @@ resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-05-01' =
     }
   }
   tags: tags
+}
+
+// private endpoint name max characters is 80
+var appConfigPrivateEndpointName = uniqueResourceName('${namePrefix}-app-config-pe', 80)
+
+resource appConfigPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = {
+  name: appConfigPrivateEndpointName
+  location: location
+  properties: {
+    privateLinkServiceConnections: [
+      {
+        name: appConfigPrivateEndpointName
+        properties: {
+          privateLinkServiceId: appConfig.id
+          groupIds: [
+            'configurationStores'
+          ]
+        }
+      }
+    ]
+    customNetworkInterfaceName: uniqueResourceName('${namePrefix}-app-config-pe-nic', 80)
+    subnet: {
+      id: subnetId
+    }
+  }
+  tags: tags
+}
+
+module privateDnsZone '../privateDnsZone/main.bicep' = {
+  name: '${namePrefix}-app-config-pdz'
+  params: {
+    namePrefix: namePrefix
+    defaultDomain: 'privatelink.azconfig.io'
+    vnetId: vnetId
+    tags: tags
+  }
+}
+
+module privateDnsZoneGroup '../privateDnsZoneGroup/main.bicep' = {
+  name: '${namePrefix}-app-config-privateDnsZoneGroup'
+  params: {
+    name: 'default'
+    dnsZoneGroupName: 'privatelink-azconfig-io'
+    dnsZoneId: privateDnsZone.outputs.id
+    privateEndpointName: appConfigPrivateEndpoint.name
+  }
 }
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {

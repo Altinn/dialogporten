@@ -129,6 +129,8 @@ module appConfiguration '../modules/appConfiguration/create.bicep' = {
     sku: appConfigurationSku
     tags: tags
     logAnalyticsWorkspaceName: appInsights.outputs.appInsightsWorkspaceName
+    subnetId: vnet.outputs.appConfigSubnetId
+    vnetId: vnet.outputs.virtualNetworkId
   }
 }
 

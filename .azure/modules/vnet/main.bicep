@@ -17,6 +17,7 @@ var containerAppEnvSubnetPrefix = '10.0.2.0/23'  // required size for the contai
 var serviceBusSubnetPrefix = '10.0.4.0/24'
 var redisSubnetPrefix = '10.0.5.0/24'
 var sshJumperSubnetPrefix = '10.0.6.0/24'
+var appConfigSubnetPrefix = '10.0.7.0/24'
 
 resource defaultNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: '${namePrefix}-default-nsg'
@@ -298,6 +299,44 @@ resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   tags: tags
 }
 
+resource appConfigNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+  name: '${namePrefix}-app-config-nsg'
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowAnyCustomAnyInbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 100
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowAnyCustomAnyOutbound'
+        type: 'Microsoft.Network/networkSecurityGroups/securityRules'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 100
+          direction: 'Outbound'
+        }
+      }
+    ]
+  }
+  tags: tags
+}
+
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   name: '${namePrefix}-vnet'
   location: location
@@ -385,6 +424,15 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
           }
         }
       }
+      {
+        name: 'appConfigSubnet'
+        properties: {
+          addressPrefix: appConfigSubnetPrefix
+          networkSecurityGroup: {
+            id: appConfigNSG.id
+          }
+        }
+      }
     ]
   }
   tags: tags
@@ -414,3 +462,4 @@ output redisSubnetId string = resourceId(
   'redisSubnet'
   )
 output sshJumperSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'sshJumperSubnet')
+output appConfigSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'appConfigSubnet')

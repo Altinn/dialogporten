@@ -139,6 +139,11 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
+
+    /// <summary>
     /// Current display state.
     /// </summary>
     public SystemLabel.Values SystemLabel { get; set; }
@@ -258,6 +263,11 @@ public sealed class DialogTransmissionDto
     /// The transmission unstructured text content.
     /// </summary>
     public DialogTransmissionContentDto Content { get; set; } = null!;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool? IsOpened { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

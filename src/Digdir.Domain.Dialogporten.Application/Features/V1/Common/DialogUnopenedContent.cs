@@ -10,14 +10,12 @@ public static class DialogUnopenedContent
 {
     public static bool HasUnopenedContent(DialogEntity dialog, ServiceResourceInformation? serviceResourceInformation)
     {
-
         // Checks if transmissions of all types except Correction or Submission have any activities with TransmissionOpened
-        var hasUnopenedContent = dialog.Transmissions
-                                       .Where(transmission => transmission.TypeId is not
-                                           (DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission))
-                                       .SelectMany(transmission => transmission.Activities)
-                                       .Any(activity => activity.TypeId != DialogActivityType.Values.TransmissionOpened);
+        var transmissions = dialog.Transmissions
+            .Where(transmission => transmission.TypeId is not (DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission));
 
+        var hasUnopenedContent = transmissions
+            .Any(transmission => transmission.Activities.Count == 0 || transmission.Activities.Any(x => x.TypeId != DialogActivityType.Values.TransmissionOpened));
 
         if (serviceResourceInformation?.ResourceType == Constants.CorrespondenceService)
         {
@@ -26,4 +24,9 @@ public static class DialogUnopenedContent
 
         return hasUnopenedContent;
     }
+
+    public static bool? IsOpened(DialogTransmission transmission) =>
+        transmission.TypeId is DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission
+            ? null
+            : transmission.Activities.Any(x => x.TypeId == DialogActivityType.Values.TransmissionOpened);
 }

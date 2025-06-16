@@ -102,6 +102,11 @@ public class DialogDtoBase
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
+
+    /// <summary>
     /// Current display state.
     /// </summary>
     public SystemLabel.Values SystemLabel { get; set; }

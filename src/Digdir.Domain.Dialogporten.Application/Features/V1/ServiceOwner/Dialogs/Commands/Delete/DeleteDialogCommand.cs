@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Documents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.EntityFrameworkCore.Features.SoftDeletable;
 using MediatR;
@@ -27,15 +28,18 @@ public sealed record DeleteDialogSuccess(Guid Revision);
 internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogCommand, DeleteDialogResult>
 {
     private readonly IDialogDbContext _db;
+    private readonly IDialogDocumentRepository _documents;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
     public DeleteDialogCommandHandler(
         IDialogDbContext db,
+        IDialogDocumentRepository documents,
         IUnitOfWork unitOfWork,
         IUserResourceRegistry userResourceRegistry)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
+        _documents = documents ?? throw new ArgumentNullException(nameof(documents));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
@@ -68,6 +72,13 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
         }
 
         _db.Dialogs.SoftRemove(dialog);
+        var document = await _documents.Get(dialog.Id, cancellationToken);
+        if (document is not null)
+        {
+            document.Deleted = true;
+            document.UpdatedAt = dialog.UpdatedAt;
+            await _documents.Update(document, cancellationToken);
+        }
         var saveResult = await _unitOfWork
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)
             .SaveChangesAsync(cancellationToken);

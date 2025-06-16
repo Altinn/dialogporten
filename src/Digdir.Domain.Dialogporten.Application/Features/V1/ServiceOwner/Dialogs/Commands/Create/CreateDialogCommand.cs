@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Documents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -34,6 +35,7 @@ public sealed partial class CreateDialogResult : OneOfBase<CreateDialogSuccess, 
 internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogCommand, CreateDialogResult>
 {
     private readonly IDialogDbContext _db;
+    private readonly IDialogDocumentRepository _documents;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
@@ -44,6 +46,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     public CreateDialogCommandHandler(
         IUser user,
         IDialogDbContext db,
+        IDialogDocumentRepository documents,
         IMapper mapper,
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
@@ -52,6 +55,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
+        _documents = documents ?? throw new ArgumentNullException(nameof(documents));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
@@ -113,6 +117,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             maxWidth: 20));
 
         _db.Dialogs.Add(dialog);
+        await _documents.Add(_mapper.Map<DialogDocument>(dialog), cancellationToken);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
         return saveResult.Match<CreateDialogResult>(

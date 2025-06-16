@@ -17,6 +17,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Documents;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
@@ -41,6 +42,7 @@ public sealed record UpdateDialogSuccess(Guid Revision);
 internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogCommand, UpdateDialogResult>
 {
     private readonly IDialogDbContext _db;
+    private readonly IDialogDocumentRepository _documents;
     private readonly IUser _user;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
@@ -51,6 +53,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     public UpdateDialogCommandHandler(
         IDialogDbContext db,
+        IDialogDocumentRepository documents,
         IUser user,
         IMapper mapper,
         IUnitOfWork unitOfWork,
@@ -61,6 +64,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
+        _documents = documents ?? throw new ArgumentNullException(nameof(documents));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
@@ -165,6 +169,13 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         if (!request.IsSilentUpdate)
         {
             UpdateLabel(dialog);
+        }
+
+        var document = await _documents.Get(dialog.Id, cancellationToken);
+        if (document is not null)
+        {
+            _mapper.Map(dialog, document);
+            await _documents.Update(document, cancellationToken);
         }
 
         var saveResult = await _unitOfWork

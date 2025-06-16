@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Documents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.ValueConverters;
 using static Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs;
@@ -35,11 +36,8 @@ internal sealed class DialogDocumentConfiguration : IEntityTypeConfiguration<Dia
         builder.HasIndex(x => x.Process);
         builder.HasIndex(x => x.IsApiOnly);
 
-        builder.OwnsOne(x => x.DialogData, owned =>
-        {
-            owned.ToJson();
-            owned.HasColumnType("jsonb");
-        });
-        builder.Navigation(x => x.DialogData).IsRequired();
+        builder.Property(x => x.DialogData)
+            .HasConversion<DialogEntityJsonConverter>()
+            .HasColumnType("jsonb");
     }
 }

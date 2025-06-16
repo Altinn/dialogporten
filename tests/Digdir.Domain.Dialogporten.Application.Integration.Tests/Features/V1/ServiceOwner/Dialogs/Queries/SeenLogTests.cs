@@ -18,6 +18,18 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class SeenLogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
+
+    [Fact]
+    public Task Dialog_Not_Fetched_By_EndUser_Should_Have_Empty_SeenLogs() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDtoSO>(x =>
+            {
+                x.SeenSinceLastContentUpdate.Should().BeEmpty();
+                x.SeenSinceLastUpdate.Should().BeEmpty();
+            });
+
     [Fact]
     public Task Get_Dialog_SeenLog_Should_Return_User_Ids_Unhashed()
         => FlowBuilder.For(Application)

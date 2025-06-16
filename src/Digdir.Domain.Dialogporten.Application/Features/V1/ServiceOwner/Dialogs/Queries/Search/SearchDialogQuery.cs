@@ -248,9 +248,25 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
+        foreach (var dialog in paginatedList.Items)
+        {
+            // This filtering cannot be done in AutoMapper using ProjectTo
+            dialog.SeenSinceLastContentUpdate = dialog.SeenSinceLastContentUpdate
+                .GroupBy(log => log.SeenBy.ActorId)
+                .Select(group => group
+                    .OrderByDescending(log => log.SeenAt)
+                    .First())
+                .ToList();
+        }
+
         if (request.EndUserId is not null)
         {
-            foreach (var seenRecord in paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
+            var seenRecords = paginatedList.Items
+                .SelectMany(x => x.SeenSinceLastContentUpdate)
+                .Concat(paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
+                .ToList();
+
+            foreach (var seenRecord in seenRecords)
             {
                 seenRecord.IsCurrentEndUser = seenRecord.SeenBy.ActorId == request.EndUserId;
             }

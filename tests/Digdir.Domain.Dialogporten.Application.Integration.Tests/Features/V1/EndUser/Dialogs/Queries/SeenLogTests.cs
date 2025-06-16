@@ -124,11 +124,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.Id = dialogId;
             })
             .GetEndUserDialog() // Default integration test user
-            .AssertResult<DialogDto>(x =>
-            {
-                x.SeenSinceLastContentUpdate.AssertSingleActorIdHashed();
-                x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
-            })
+            .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .ExecuteAndAssert<UpdateDialogSuccess>();
@@ -144,7 +140,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             {
                 var dialog = result.Items.Single();
                 dialog.SeenSinceLastContentUpdate.Count.Should().Be(2);
-                dialog.SeenSinceLastUpdate.Count.Should().Be(1);
+                dialog.SeenSinceLastUpdate.AssertSingleActorIdHashed();
             });
     }
 

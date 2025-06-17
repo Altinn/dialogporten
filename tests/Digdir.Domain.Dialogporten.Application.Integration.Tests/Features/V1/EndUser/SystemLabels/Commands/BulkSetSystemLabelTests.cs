@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 using FluentAssertions;
@@ -74,7 +75,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     }
 
     [Fact]
-    public Task BulkSet_Returns_Forbidden_For_Invalid_Id() =>
+    public Task BulkSet_Returns_NotFound_For_Invalid_Id() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .BulkSetSystemLabelEndUser((x, ctx) => x.Dto = new()
@@ -86,8 +87,8 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                 ],
                 SystemLabels = [SystemLabel.Values.Bin]
             })
-            .ExecuteAndAssert<Forbidden>(x =>
-                x.Reasons.Should().NotBeEmpty());
+            .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x =>
+                x.Message.Should().NotBeEmpty());
 
     [Fact]
     public Task BulkSet_Returns_ConcurrencyError_On_Revision_Mismatch() =>

@@ -1,5 +1,45 @@
 # Changelog
 
+## [1.70.0](https://github.com/Altinn/dialogporten/compare/v1.69.1...v1.70.0) (2025-06-17)
+
+
+### Features
+
+* **infra:** managed identity admin user for postgresql ([#2449](https://github.com/Altinn/dialogporten/issues/2449)) ([d5177a3](https://github.com/Altinn/dialogporten/commit/d5177a3018021e1a4001fe60008c5a7538d89b64))
+
+## [1.69.1](https://github.com/Altinn/dialogporten/compare/v1.69.0...v1.69.1) (2025-06-17)
+
+
+### Bug Fixes
+
+* **infra:** ensure diagnostic setting is set correctly for app config ([#2447](https://github.com/Altinn/dialogporten/issues/2447)) ([fa9a660](https://github.com/Altinn/dialogporten/commit/fa9a66069084f86c1c391a47e6623549c7d86f99))
+
+## [1.69.0](https://github.com/Altinn/dialogporten/compare/v1.68.2...v1.69.0) (2025-06-17)
+
+
+### Features
+
+* **application:** Add support for updating Dialog.IsApiOnly ([#2414](https://github.com/Altinn/dialogporten/issues/2414)) ([6a533fe](https://github.com/Altinn/dialogporten/commit/6a533fe189379f2e918a2079ab67c9e725247b98))
+* dotnet8 support for WebApi SDK ([#2423](https://github.com/Altinn/dialogporten/issues/2423)) ([448c908](https://github.com/Altinn/dialogporten/commit/448c90868b96744d82446141287f29fb313f4e96))
+
+
+### Bug Fixes
+
+* **ci:** Restore dependencies before 'dotnet pack' ([#2426](https://github.com/Altinn/dialogporten/issues/2426)) ([74503cb](https://github.com/Altinn/dialogporten/commit/74503cb9d474c53ba11c82036e82331ff165a255))
+* **webapi:** Prevent unique constraint violations from triggering Slack alerts ([#2418](https://github.com/Altinn/dialogporten/issues/2418)) ([1dfd5ee](https://github.com/Altinn/dialogporten/commit/1dfd5ee5183aa0c37ffc9f7fa44b8b0b70c1daac))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency nsec.cryptography to v25 ([#2434](https://github.com/Altinn/dialogporten/issues/2434)) ([91b64c3](https://github.com/Altinn/dialogporten/commit/91b64c385e3a6d4300269cec7dddcd8d05ff7d5b))
+* **deps:** update dependency refitter.sourcegenerator to 1.5.6 ([#2431](https://github.com/Altinn/dialogporten/issues/2431)) ([5a5d63c](https://github.com/Altinn/dialogporten/commit/5a5d63c9bbc2478ae9b28b1ba28d1d4745daca66))
+* **deps:** update dependency scrutor to 6.1.0 ([#2420](https://github.com/Altinn/dialogporten/issues/2420)) ([02a863b](https://github.com/Altinn/dialogporten/commit/02a863bef3c0372a0814e3c784dc054dd0ee2ad7))
+* **deps:** update dependency testcontainers.postgresql to 4.5.0 ([#2433](https://github.com/Altinn/dialogporten/issues/2433)) ([872787f](https://github.com/Altinn/dialogporten/commit/872787f190a2657a6455679a82a51e128c84c6a0))
+* **deps:** update dependency xunit.runner.visualstudio to 3.1.1 ([#2432](https://github.com/Altinn/dialogporten/issues/2432)) ([071dae0](https://github.com/Altinn/dialogporten/commit/071dae09b90529a584db1d03fce7833f6a2abaa9))
+* **deps:** update dotnet monorepo ([#2419](https://github.com/Altinn/dialogporten/issues/2419)) ([f6f98ac](https://github.com/Altinn/dialogporten/commit/f6f98acffbe70c782a2cf6cc354d89882bbd8dc4))
+* **deps:** Upgrade testcontainers to 4.6.0 ([#2446](https://github.com/Altinn/dialogporten/issues/2446)) ([b482c32](https://github.com/Altinn/dialogporten/commit/b482c322709356bdbda8e025c959ebbbfcf1a66d))
+* **infra:** enable log analytics for app configuration ([#2440](https://github.com/Altinn/dialogporten/issues/2440)) ([a41ed89](https://github.com/Altinn/dialogporten/commit/a41ed89bf7e7db1113bb3209dc1de8cbd1028075))
+
 ## [1.68.2](https://github.com/Altinn/dialogporten/compare/v1.68.1...v1.68.2) (2025-06-10)
 
 

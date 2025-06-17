@@ -103,9 +103,21 @@ module privateDnsZone '../privateDnsZone/main.bicep' = {
   }
 }
 
+resource postgresAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-postgres-admin-identity'
+  location: location
+  tags: tags
+}
+
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: postgresServerName
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${postgresAdminIdentity.id}': {}
+    }
+  }
   properties: {
     version: '16'
     administratorLogin: administratorLogin

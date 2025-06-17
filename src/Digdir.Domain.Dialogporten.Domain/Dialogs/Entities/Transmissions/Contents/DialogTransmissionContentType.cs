@@ -28,7 +28,7 @@ public sealed class DialogTransmissionContentType : AbstractLookupEntity<DialogT
         },
         Values.Summary => new(id)
         {
-            Required = true,
+            Required = false,
             MaxLength = Constants.DefaultMaxStringLength,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },

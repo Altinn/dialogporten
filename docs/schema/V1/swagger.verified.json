@@ -579,6 +579,7 @@
           },
           "summary": {
             "description": "A short summary of the dialog and its current state.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -1212,6 +1213,7 @@
           },
           "summary": {
             "description": "The transmission summary.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -1252,6 +1254,7 @@
           },
           "summary": {
             "description": "A short summary of the dialog and its current state.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -1563,6 +1566,7 @@
           },
           "summary": {
             "description": "The summary of the content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -1727,6 +1731,7 @@
           },
           "summary": {
             "description": "The summary of the content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -2324,6 +2329,7 @@
           },
           "summary": {
             "description": "A short summary of the dialog and its current state.\nSupported media types: text/plain",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -2758,6 +2764,7 @@
           },
           "summary": {
             "description": "The transmission summary.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -3047,6 +3054,7 @@
           },
           "summary": {
             "description": "A short summary of the dialog and its current state. Must be text/plain.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -3404,6 +3412,7 @@
           },
           "summary": {
             "description": "The transmission summary.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -3531,6 +3540,7 @@
           },
           "summary": {
             "description": "A short summary of the dialog and its current state.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -4219,6 +4229,7 @@
           },
           "summary": {
             "description": "The transmission summary.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -4287,6 +4298,7 @@
           },
           "summary": {
             "description": "A short summary of the dialog and its current state.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -4718,6 +4730,7 @@
           },
           "summary": {
             "description": "The summary of the content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
@@ -4878,6 +4891,7 @@
           },
           "summary": {
             "description": "The summary of the content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"

@@ -75,7 +75,7 @@ public sealed class ContentDto
     /// <summary>
     /// The summary of the content.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.

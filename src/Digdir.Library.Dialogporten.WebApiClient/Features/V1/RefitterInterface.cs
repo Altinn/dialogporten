@@ -180,7 +180,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Retrieve service owner labels for a dialog</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.5.5.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.5.6.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Retrieve service owner labels for a dialog</summary>

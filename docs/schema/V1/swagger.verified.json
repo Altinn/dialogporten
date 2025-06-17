@@ -675,6 +675,7 @@
             "type": "array"
           },
           "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean"
           },
           "id": {
@@ -1124,6 +1125,7 @@
             "type": "boolean"
           },
           "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
             "nullable": true,
             "type": "boolean"
           },
@@ -1317,6 +1319,7 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean"
           },
           "id": {
@@ -3639,6 +3642,7 @@
             "type": "array"
           },
           "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean"
           },
           "id": {
@@ -4141,6 +4145,7 @@
             "type": "boolean"
           },
           "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
             "nullable": true,
             "type": "boolean"
           },

@@ -102,7 +102,7 @@ public class DialogDtoBase
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
-    /// 
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
     public bool HasUnopenedContent { get; set; }
 

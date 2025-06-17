@@ -334,7 +334,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
-    public async Task Dialog_Has_Opened_Content()
+    public async Task Dialog_Opened_Content()
     {
         var guid = Guid.CreateVersion7();
         await FlowBuilder.For(Application)

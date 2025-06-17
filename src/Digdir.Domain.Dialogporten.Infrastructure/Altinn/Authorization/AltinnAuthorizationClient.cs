@@ -157,7 +157,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 Party = party.Party,
                 ParentParty = null,
                 AuthorizedRoles = party.AuthorizedRoles.Count > 0
-                    ? [..party.AuthorizedRoles]
+                    ? [.. party.AuthorizedRoles]
                     : (List<string>)EmptyRolesList,
                 SubParties = (List<AuthorizedParty>)EmptySubPartiesList
             });
@@ -172,7 +172,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                     Party = subParty.Party,
                     ParentParty = party.Party,
                     AuthorizedRoles = subParty.AuthorizedRoles.Count > 0
-                        ? [..subParty.AuthorizedRoles]
+                        ? [.. subParty.AuthorizedRoles]
                         : (List<string>)EmptyRolesList,
                     SubParties = (List<AuthorizedParty>)EmptySubPartiesList
                 });

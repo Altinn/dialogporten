@@ -44,15 +44,8 @@ public class DialogEntityTests
     public void DialogStatus_Object_Type_Should_Match_Property_Names_On_DialogStatusValues()
     {
         // Arrange
-        var dialogStatusValues = typeof(DialogStatus)
-            .GetProperties()
-            .Select(p => p.Name)
-            .ToList();
-
-        var domainDialogStatusValues = typeof(DialogStatusValues)
-            .GetProperties()
-            .Select(p => p.Name)
-            .ToList();
+        var dialogStatusValues = Enum.GetNames(typeof(DialogStatus)).ToList();
+        var domainDialogStatusValues = Enum.GetNames(typeof(DialogStatusValues)).ToList();
 
         var missingProperties = domainDialogStatusValues.Except(dialogStatusValues, StringComparer.OrdinalIgnoreCase).ToList();
 

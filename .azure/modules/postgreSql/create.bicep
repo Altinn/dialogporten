@@ -275,4 +275,3 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = {
 
 output adoConnectionStringSecretUri string = adoConnectionString.outputs.secretUri
 output psqlConnectionStringSecretUri string = psqlConnectionString.outputs.secretUri
-output adminClientId string = postgresAdminIdentity.properties.clientId

@@ -103,7 +103,6 @@ module privateDnsZone '../privateDnsZone/main.bicep' = {
   }
 }
 
-// create user assigned identity (admin user for postgresql)
 resource postgresAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: '${namePrefix}-postgres-admin-identity'
   location: location

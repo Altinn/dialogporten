@@ -26,9 +26,21 @@ public static class DbSetExtensions
             .AppendLine(CultureInfo.InvariantCulture, $"""
                 SELECT "Id", "Deleted", "Party", "ServiceResource", "CreatedAt", "UpdatedAt", "DueAt"
                 FROM "Dialog"
-                WHERE {deletedFilterCondition} ("Id" = ANY(@p{parameters.Count})
+                WHERE {deletedFilterCondition} (
                 """);
-        parameters.Add(authorizedResources.DialogIds);
+
+        if (authorizedResources.DialogIds.Count > 0)
+        {
+            sb.AppendLine(CultureInfo.InvariantCulture, $"\"Id\" = ANY(@p{parameters.Count})");
+            parameters.Add(authorizedResources.DialogIds);
+        }
+        else
+        {
+            // Sending FALSE instead of an empty array to avoid forcing a Bitmap scan and lets
+            // PG optimize it away and use an index-only scan when getting dialog ids and only
+            // filtering by a single party, which is usually the case in Arbeidsflate.
+            sb.AppendLine("FALSE");
+        }
 
         // Group parties that have the same resources
         var groupedResult = authorizedResources.ResourcesByParties

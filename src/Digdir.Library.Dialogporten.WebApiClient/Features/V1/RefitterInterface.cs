@@ -2626,6 +2626,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("isApiOnly")]
         public bool IsApiOnly { get; set; }
 
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
+
         /// <summary>
         /// The latest entry in the dialog's activity log.
         /// </summary>
@@ -2996,6 +2999,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("isApiOnly")]
         public bool IsApiOnly { get; set; }
 
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
+
         /// <summary>
         /// Current display state.
         /// </summary>
@@ -3323,6 +3329,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent Content { get; set; }
+
+        [JsonPropertyName("isOpened")]
+        public bool? IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.

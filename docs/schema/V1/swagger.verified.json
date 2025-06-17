@@ -674,6 +674,9 @@
             "nullable": true,
             "type": "array"
           },
+          "hasUnopenedContent": {
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -1120,6 +1123,10 @@
             "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
             "type": "boolean"
           },
+          "isOpened": {
+            "nullable": true,
+            "type": "boolean"
+          },
           "relatedTransmissionId": {
             "description": "Reference to any other transmission that this transmission is related to.",
             "format": "guid",
@@ -1308,6 +1315,9 @@
             "format": "int32",
             "nullable": true,
             "type": "integer"
+          },
+          "hasUnopenedContent": {
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -3628,6 +3638,9 @@
             "nullable": true,
             "type": "array"
           },
+          "hasUnopenedContent": {
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -4127,6 +4140,10 @@
             "nullable": true,
             "type": "boolean"
           },
+          "isOpened": {
+            "nullable": true,
+            "type": "boolean"
+          },
           "relatedTransmissionId": {
             "description": "Reference to any other transmission that this transmission is related to.",
             "format": "guid",
@@ -4350,6 +4367,9 @@
             "format": "int32",
             "nullable": true,
             "type": "integer"
+          },
+          "hasUnopenedContent": {
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",

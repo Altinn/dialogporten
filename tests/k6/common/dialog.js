@@ -56,7 +56,7 @@ export function setSenderName(dialog, senderName, language = "nb") {
 }
 
 export function setStatus(dialog, status) {
-    const validStatuses = ["unspecified", "inprogress", "new", "draft", "sent", "requiresAttention", "append"];
+    const validStatuses = ["notApplicable", "inProgress", "draft", "awaiting", "requiresAttention", "completed"];
 
     if (!validStatuses.includes(status)) {
         throw new Error("Invalid status provided.");

@@ -104,7 +104,7 @@ type BulkSetSystemLabelDomainError implements BulkSetSystemLabelError {
   message: String!
 }
 
-dtype BulkSetSystemLabelForbidden implements BulkSetSystemLabelError {
+type BulkSetSystemLabelNotFound implements BulkSetSystemLabelError {
   message: String!
 }
 
@@ -134,7 +134,6 @@ type ContentValue {
 type Dialog {
   id: UUID!
   revision: UUID!
-  enduserContextRevision: UUID!
   org: String!
   serviceResource: String!
   serviceResourceType: String!
@@ -150,7 +149,6 @@ type Dialog {
   createdAt: DateTime!
   updatedAt: DateTime!
   dialogToken: String
-  systemLabel: SystemLabel!
   status: DialogStatus!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
@@ -161,6 +159,7 @@ type Dialog {
   activities: [Activity!]!
   seenSinceLastUpdate: [SeenLog!]!
   transmissions: [Transmission!]!
+  endUserContext: EndUserContext!
 }
 
 type DialogByIdDeleted implements DialogByIdError {
@@ -187,6 +186,11 @@ type DialogByIdPayload {
 type DialogEventPayload {
   id: UUID!
   type: DialogEventType!
+}
+
+type EndUserContext {
+  revision: UUID!
+  systemLabels: [SystemLabel!]!
 }
 
 type GuiAction {
@@ -228,7 +232,6 @@ type SearchContent {
 type SearchDialog {
   id: UUID!
   org: String!
-  enduserContextRevision: UUID!
   serviceResource: String!
   serviceResourceType: String!
   party: String!
@@ -241,12 +244,12 @@ type SearchDialog {
   updatedAt: DateTime!
   dueAt: DateTime
   status: DialogStatus!
-  systemLabel: SystemLabel!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!
+  endUserContext: EndUserContext!
 }
 
 type SearchDialogContinuationTokenParsingError implements SearchDialogError {

@@ -331,6 +331,77 @@
         },
         "type": "object"
       },
+      "V1AccessManagementPartiesQueriesGet_AuthorizedParty": {
+        "additionalProperties": false,
+        "properties": {
+          "hasKeyRole": {
+            "description": "Whether the authenticated user has a key role in the party.\n            \nRead more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#n\u00F8kkelroller",
+            "type": "boolean"
+          },
+          "hasOnlyAccessToSubParties": {
+            "description": "If the authenticated user has only access to sub parties of this party, and not this party itself.",
+            "type": "boolean"
+          },
+          "isAccessManager": {
+            "description": "Whether the authenticated user is an access manager of the party.\n            \nRead more about access managers (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#tilgangsstrying",
+            "type": "boolean"
+          },
+          "isCurrentEndUser": {
+            "description": "Whether this party represents the authenticated user.",
+            "type": "boolean"
+          },
+          "isDeleted": {
+            "description": "Whether the party is deleted or not",
+            "type": "boolean"
+          },
+          "isMainAdministrator": {
+            "description": "Whether the authenticated user is the main administrator of the party\n            \nRead more about main administrator (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#hovedadministrator",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "The name of the party (verbatim from CCR, usually in all caps)",
+            "example": "CONTOSO REAL ESTATE AS",
+            "type": "string"
+          },
+          "party": {
+            "description": "The party identifier in URN format",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "type": "string"
+          },
+          "partyType": {
+            "description": "The type of the party, either \u0022Organization\u0022 or \u0022Person\u0022.",
+            "example": "Organization",
+            "type": "string"
+          },
+          "partyUuid": {
+            "description": "The UUID for the party.",
+            "format": "guid",
+            "type": "string"
+          },
+          "subParties": {
+            "description": "The sub parties of this party, if any. The sub party uses the same data model.",
+            "items": {
+              "$ref": "#/components/schemas/V1AccessManagementPartiesQueriesGet_AuthorizedParty"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1AccessManagementPartiesQueriesGet_Parties": {
+        "additionalProperties": false,
+        "properties": {
+          "authorizedParties": {
+            "items": {
+              "$ref": "#/components/schemas/V1AccessManagementPartiesQueriesGet_AuthorizedParty"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1Common_DeletedFilter": {
         "description": "",
         "enum": [
@@ -378,45 +449,6 @@
         },
         "type": "object"
       },
-      "V1CommonSystemLabels_BulkSetSystemLabel": {
-        "additionalProperties": false,
-        "properties": {
-          "dialogs": {
-            "description": "List of target dialog ids with optional revision ids",
-            "items": {
-              "$ref": "#/components/schemas/V1CommonSystemLabels_DialogRevision"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "systemLabels": {
-            "description": "List of system labels to set on target dialogs",
-            "items": {
-              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "V1CommonSystemLabels_DialogRevision": {
-        "additionalProperties": false,
-        "properties": {
-          "dialogId": {
-            "description": "Target dialog id for system labels",
-            "format": "guid",
-            "type": "string"
-          },
-          "enduserContextRevision": {
-            "description": "Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.",
-            "format": "guid",
-            "nullable": true,
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "V1EndUserCommonActors_Actor": {
         "additionalProperties": false,
         "properties": {
@@ -443,7 +475,7 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogActivitiesQueriesGet_Activity": {
+      "V1EndUserDialogsDialogActivitiesQueriesGet_Activity": {
         "additionalProperties": false,
         "properties": {
           "createdAt": {
@@ -481,7 +513,7 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogActivitiesQueriesSearch_Activity": {
+      "V1EndUserDialogsDialogActivitiesQueriesSearch_Activity": {
         "additionalProperties": false,
         "properties": {
           "createdAt": {
@@ -512,67 +544,376 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogLabelAssignmentLogQueriesSearch_LabelAssignmentLog": {
+      "V1EndUserDialogsDialogSeenLogsQueriesGet_SeenLog": {
         "additionalProperties": false,
         "properties": {
-          "action": {
+          "id": {
+            "format": "guid",
             "type": "string"
+          },
+          "isCurrentEndUser": {
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "type": "boolean"
+          },
+          "seenAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsDialogSeenLogsQueriesSearch_SeenLog": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "guid",
+            "type": "string"
+          },
+          "isCurrentEndUser": {
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "type": "boolean"
+          },
+          "seenAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsDialogTransmissionsQueriesGet_Attachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsDialogTransmissionsQueriesGet_AttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsDialogTransmissionsQueriesGet_AttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsDialogTransmissionsQueriesGet_Content": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "The summary of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The title of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsDialogTransmissionsQueriesGet_Transmission": {
+        "additionalProperties": false,
+        "properties": {
+          "attachments": {
+            "description": "The attachments associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsDialogTransmissionsQueriesGet_Attachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "The authorization attribute associated with the transmission.",
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "description": "The content of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsDialogTransmissionsQueriesGet_Content"
+              }
+            ]
           },
           "createdAt": {
+            "description": "The date and time when the transmission was created.",
             "format": "date-time",
             "type": "string"
           },
-          "name": {
+          "deletedAt": {
+            "description": "The date and time when the transmission was deleted, if applicable.",
+            "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
-          "performedBy": {
-            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          "extendedType": {
+            "description": "The extended type URI for the transmission.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
+            "type": "boolean"
+          },
+          "relatedTransmissionId": {
+            "description": "The unique identifier for the related transmission, if any.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "description": "The sender actor information for the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          },
+          "type": {
+            "description": "The type of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
           }
         },
         "type": "object"
       },
-      "V1EndUserDialogSeenLogsQueriesGet_SeenLog": {
+      "V1EndUserDialogsDialogTransmissionsQueriesSearch_Attachment": {
         "additionalProperties": false,
         "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
           },
-          "isCurrentEndUser": {
-            "type": "boolean"
-          },
-          "isViaServiceOwner": {
-            "type": "boolean"
-          },
-          "seenAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "seenBy": {
-            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsDialogTransmissionsQueriesSearch_AttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
       },
-      "V1EndUserDialogSeenLogsQueriesSearch_SeenLog": {
+      "V1EndUserDialogsDialogTransmissionsQueriesSearch_AttachmentUrl": {
         "additionalProperties": false,
         "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
           "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
             "format": "guid",
             "type": "string"
           },
-          "isCurrentEndUser": {
-            "type": "boolean"
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
           },
-          "isViaServiceOwner": {
-            "type": "boolean"
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsDialogTransmissionsQueriesSearch_Content": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
           },
-          "seenAt": {
+          "summary": {
+            "description": "The summary of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The title of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsDialogTransmissionsQueriesSearch_Transmission": {
+        "additionalProperties": false,
+        "properties": {
+          "attachments": {
+            "description": "The attachments associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsDialogTransmissionsQueriesSearch_Attachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "The authorization attribute associated with the transmission.",
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "description": "The content of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsDialogTransmissionsQueriesSearch_Content"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "The date and time when the transmission was created.",
             "format": "date-time",
             "type": "string"
           },
-          "seenBy": {
-            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          "deletedAt": {
+            "description": "The date and time when the transmission was deleted, if applicable.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "The extended type URI for the transmission.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
+            "type": "boolean"
+          },
+          "relatedTransmissionId": {
+            "description": "The unique identifier for the related transmission, if any.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "description": "The sender actor information for the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          },
+          "type": {
+            "description": "The type of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
           }
         },
         "type": "object"
@@ -688,11 +1029,13 @@
             "nullable": true,
             "type": "string"
           },
-          "enduserContextRevision": {
-            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
-            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
-            "format": "guid",
-            "type": "string"
+          "endUserContext": {
+            "description": "Metadata about the dialog owned by end-users.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogEndUserContext"
+              }
+            ]
           },
           "expiresAt": {
             "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n            \nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed by the service\nowner after the dialog has been created.",
@@ -783,14 +1126,6 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
-              }
-            ]
-          },
-          "systemLabel": {
-            "description": "Current display state.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ]
           },
@@ -1016,6 +1351,26 @@
             "example": "https://someendpoint.com/someattachment.pdf",
             "format": "uri",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogEndUserContext": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "description": "System defined labels used to categorize dialogs.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -1338,10 +1693,13 @@
             "nullable": true,
             "type": "string"
           },
-          "enduserContextRevision": {
-            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
-            "format": "guid",
-            "type": "string"
+          "endUserContext": {
+            "description": "Metadata about the dialog owned by end-users.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogEndUserContext"
+              }
+            ]
           },
           "extendedStatus": {
             "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n            \nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
@@ -1429,14 +1787,6 @@
               }
             ]
           },
-          "systemLabel": {
-            "description": "Current display state.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
-              }
-            ]
-          },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",
             "example": "2022-12-31T23:59:59Z",
@@ -1499,6 +1849,26 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogsQueriesSearch_DialogEndUserContext": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "description": "System defined labels used to categorize dialogs.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogsQueriesSearch_DialogSeenLog": {
         "additionalProperties": false,
         "properties": {
@@ -1532,15 +1902,6 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogSystemLabelsBulkSet_BulkSetDialogSystemLabelsRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "dto": {
-            "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
-          }
-        },
-        "type": "object"
-      },
       "V1EndUserDialogSystemLabelsSet_SetDialogSystemLabelRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1554,385 +1915,40 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogTransmissionsQueriesGet_Attachment": {
+      "V1EndUserEndUserContextDialogLabelAssignmentLogQueriesSearch_LabelAssignmentLog": {
         "additionalProperties": false,
         "properties": {
-          "displayName": {
-            "description": "The display name of the attachment that should be used in GUIs.",
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "id": {
-            "description": "The unique identifier for the attachment in UUIDv7 format.",
-            "format": "guid",
+          "action": {
             "type": "string"
-          },
-          "urls": {
-            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
-            "items": {
-              "$ref": "#/components/schemas/V1EndUserDialogTransmissionsQueriesGet_AttachmentUrl"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserDialogTransmissionsQueriesGet_AttachmentUrl": {
-        "additionalProperties": false,
-        "properties": {
-          "consumerType": {
-            "description": "The type of consumer the URL is intended for.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
-              }
-            ]
-          },
-          "id": {
-            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "mediaType": {
-            "description": "The media type of the attachment.",
-            "example": "application/pdf\napplication/zip",
-            "nullable": true,
-            "type": "string"
-          },
-          "url": {
-            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
-            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserDialogTransmissionsQueriesGet_Content": {
-        "additionalProperties": false,
-        "properties": {
-          "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          },
-          "summary": {
-            "description": "The summary of the content.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          },
-          "title": {
-            "description": "The title of the content.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserDialogTransmissionsQueriesGet_Transmission": {
-        "additionalProperties": false,
-        "properties": {
-          "attachments": {
-            "description": "The attachments associated with the transmission.",
-            "items": {
-              "$ref": "#/components/schemas/V1EndUserDialogTransmissionsQueriesGet_Attachment"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "authorizationAttribute": {
-            "description": "The authorization attribute associated with the transmission.",
-            "nullable": true,
-            "type": "string"
-          },
-          "content": {
-            "description": "The content of the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1EndUserDialogTransmissionsQueriesGet_Content"
-              }
-            ]
           },
           "createdAt": {
-            "description": "The date and time when the transmission was created.",
             "format": "date-time",
             "type": "string"
-          },
-          "deletedAt": {
-            "description": "The date and time when the transmission was deleted, if applicable.",
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
-          "extendedType": {
-            "description": "The extended type URI for the transmission.",
-            "format": "uri",
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "description": "The unique identifier for the transmission in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "isAuthorized": {
-            "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
-            "type": "boolean"
-          },
-          "relatedTransmissionId": {
-            "description": "The unique identifier for the related transmission, if any.",
-            "format": "guid",
-            "nullable": true,
-            "type": "string"
-          },
-          "sender": {
-            "description": "The sender actor information for the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
-              }
-            ]
-          },
-          "type": {
-            "description": "The type of the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserDialogTransmissionsQueriesSearch_Attachment": {
-        "additionalProperties": false,
-        "properties": {
-          "displayName": {
-            "description": "The display name of the attachment that should be used in GUIs.",
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "id": {
-            "description": "The unique identifier for the attachment in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "urls": {
-            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
-            "items": {
-              "$ref": "#/components/schemas/V1EndUserDialogTransmissionsQueriesSearch_AttachmentUrl"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserDialogTransmissionsQueriesSearch_AttachmentUrl": {
-        "additionalProperties": false,
-        "properties": {
-          "consumerType": {
-            "description": "The type of consumer the URL is intended for.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
-              }
-            ]
-          },
-          "id": {
-            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "mediaType": {
-            "description": "The media type of the attachment.",
-            "example": "application/pdf\napplication/zip",
-            "nullable": true,
-            "type": "string"
-          },
-          "url": {
-            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
-            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserDialogTransmissionsQueriesSearch_Content": {
-        "additionalProperties": false,
-        "properties": {
-          "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          },
-          "summary": {
-            "description": "The summary of the content.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          },
-          "title": {
-            "description": "The title of the content.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserDialogTransmissionsQueriesSearch_Transmission": {
-        "additionalProperties": false,
-        "properties": {
-          "attachments": {
-            "description": "The attachments associated with the transmission.",
-            "items": {
-              "$ref": "#/components/schemas/V1EndUserDialogTransmissionsQueriesSearch_Attachment"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "authorizationAttribute": {
-            "description": "The authorization attribute associated with the transmission.",
-            "nullable": true,
-            "type": "string"
-          },
-          "content": {
-            "description": "The content of the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1EndUserDialogTransmissionsQueriesSearch_Content"
-              }
-            ]
-          },
-          "createdAt": {
-            "description": "The date and time when the transmission was created.",
-            "format": "date-time",
-            "type": "string"
-          },
-          "deletedAt": {
-            "description": "The date and time when the transmission was deleted, if applicable.",
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
-          "extendedType": {
-            "description": "The extended type URI for the transmission.",
-            "format": "uri",
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "description": "The unique identifier for the transmission in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "isAuthorized": {
-            "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
-            "type": "boolean"
-          },
-          "relatedTransmissionId": {
-            "description": "The unique identifier for the related transmission, if any.",
-            "format": "guid",
-            "nullable": true,
-            "type": "string"
-          },
-          "sender": {
-            "description": "The sender actor information for the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
-              }
-            ]
-          },
-          "type": {
-            "description": "The type of the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserPartiesQueriesGet_AuthorizedParty": {
-        "additionalProperties": false,
-        "properties": {
-          "hasKeyRole": {
-            "description": "Whether the authenticated user has a key role in the party.\n            \nRead more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#n\u00F8kkelroller",
-            "type": "boolean"
-          },
-          "hasOnlyAccessToSubParties": {
-            "description": "If the authenticated user has only access to sub parties of this party, and not this party itself.",
-            "type": "boolean"
-          },
-          "isAccessManager": {
-            "description": "Whether the authenticated user is an access manager of the party.\n            \nRead more about access managers (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#tilgangsstrying",
-            "type": "boolean"
-          },
-          "isCurrentEndUser": {
-            "description": "Whether this party represents the authenticated user.",
-            "type": "boolean"
-          },
-          "isDeleted": {
-            "description": "Whether the party is deleted or not",
-            "type": "boolean"
-          },
-          "isMainAdministrator": {
-            "description": "Whether the authenticated user is the main administrator of the party\n            \nRead more about main administrator (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#hovedadministrator",
-            "type": "boolean"
           },
           "name": {
-            "description": "The name of the party (verbatim from CCR, usually in all caps)",
-            "example": "CONTOSO REAL ESTATE AS",
             "type": "string"
           },
-          "party": {
-            "description": "The party identifier in URN format",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "type": "string"
-          },
-          "partyType": {
-            "description": "The type of the party, either \u0022Organization\u0022 or \u0022Person\u0022.",
-            "example": "Organization",
-            "type": "string"
-          },
-          "partyUuid": {
-            "description": "The UUID for the party.",
-            "format": "guid",
-            "type": "string"
-          },
-          "subParties": {
-            "description": "The sub parties of this party, if any. The sub party uses the same data model.",
+          "performedBy": {
+            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserEndUserContextDialogSystemLabelsCommandsBulkSet_BulkSetSystemLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogs": {
+            "description": "List of target dialog ids with optional revision ids",
             "items": {
-              "$ref": "#/components/schemas/V1EndUserPartiesQueriesGet_AuthorizedParty"
+              "$ref": "#/components/schemas/V1EndUserEndUserContextDialogSystemLabelsCommandsBulkSet_DialogRevision"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
             },
             "nullable": true,
             "type": "array"
@@ -1940,15 +1956,28 @@
         },
         "type": "object"
       },
-      "V1EndUserPartiesQueriesGet_Parties": {
+      "V1EndUserEndUserContextDialogSystemLabelsCommandsBulkSet_BulkSetSystemLabelCommand": {
         "additionalProperties": false,
         "properties": {
-          "authorizedParties": {
-            "items": {
-              "$ref": "#/components/schemas/V1EndUserPartiesQueriesGet_AuthorizedParty"
-            },
+          "dto": {
+            "$ref": "#/components/schemas/V1EndUserEndUserContextDialogSystemLabelsCommandsBulkSet_BulkSetSystemLabel"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserEndUserContextDialogSystemLabelsCommandsBulkSet_DialogRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogId": {
+            "description": "Target dialog id for system labels",
+            "format": "guid",
+            "type": "string"
+          },
+          "endUserContextRevision": {
+            "description": "Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.",
+            "format": "guid",
             "nullable": true,
-            "type": "array"
+            "type": "string"
           }
         },
         "type": "object"
@@ -2030,102 +2059,6 @@
                 "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
               }
             ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogActivitiesQueriesGet_Activity": {
-        "additionalProperties": false,
-        "properties": {
-          "createdAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
-          "deletedAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
-          "description": {
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "extendedType": {
-            "format": "uri",
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "format": "guid",
-            "type": "string"
-          },
-          "performedBy": {
-            "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
-          },
-          "transmissionId": {
-            "format": "guid",
-            "nullable": true,
-            "type": "string"
-          },
-          "type": {
-            "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationCondition": {
-        "additionalProperties": false,
-        "properties": {
-          "sendNotification": {
-            "type": "boolean"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationConditionType": {
-        "description": "",
-        "enum": [
-          "NotExists",
-          "Exists"
-        ],
-        "type": "string",
-        "x-enumNames": [
-          "NotExists",
-          "Exists"
-        ]
-      },
-      "V1ServiceOwnerDialogActivitiesQueriesSearch_Activity": {
-        "additionalProperties": false,
-        "properties": {
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "deletedAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
-          "extendedType": {
-            "format": "uri",
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "format": "guid",
-            "type": "string"
-          },
-          "transmissionId": {
-            "format": "guid",
-            "nullable": true,
-            "type": "string"
-          },
-          "type": {
-            "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
           }
         },
         "type": "object"
@@ -2525,6 +2458,7 @@
             "type": "array"
           },
           "serviceOwnerContext": {
+            "description": "Metadata about the dialog owned by the service owner.",
             "nullable": true,
             "oneOf": [
               {
@@ -3493,7 +3427,103 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog": {
+      "V1ServiceOwnerDialogsDialogActivitiesQueriesGet_Activity": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deletedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "extendedType": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "guid",
+            "type": "string"
+          },
+          "performedBy": {
+            "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+          },
+          "transmissionId": {
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogActivitiesQueriesNotificationCondition_NotificationCondition": {
+        "additionalProperties": false,
+        "properties": {
+          "sendNotification": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogActivitiesQueriesNotificationCondition_NotificationConditionType": {
+        "description": "",
+        "enum": [
+          "NotExists",
+          "Exists"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "NotExists",
+          "Exists"
+        ]
+      },
+      "V1ServiceOwnerDialogsDialogActivitiesQueriesSearch_Activity": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "extendedType": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "guid",
+            "type": "string"
+          },
+          "transmissionId": {
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogSeenLogsQueriesGet_SeenLog": {
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -3514,7 +3544,7 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog": {
+      "V1ServiceOwnerDialogsDialogSeenLogsQueriesSearch_SeenLog": {
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -3531,6 +3561,331 @@
           },
           "seenBy": {
             "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogTransmissionsQueriesGet_Attachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogTransmissionsQueriesGet_AttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogTransmissionsQueriesGet_AttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogTransmissionsQueriesGet_Content": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "The summary of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The title of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogTransmissionsQueriesGet_Transmission": {
+        "additionalProperties": false,
+        "properties": {
+          "attachments": {
+            "description": "The attachments associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogTransmissionsQueriesGet_Attachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "The authorization attribute associated with the transmission.",
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "description": "The content of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogTransmissionsQueriesGet_Content"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "The date and time when the transmission was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "The date and time when the transmission was deleted, if applicable.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "The extended type URI for the transmission.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "relatedTransmissionId": {
+            "description": "The unique identifier for the related transmission, if any.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "description": "The sender actor information for the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
+          },
+          "type": {
+            "description": "The type of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogTransmissionsQueriesSearch_Attachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogTransmissionsQueriesSearch_AttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogTransmissionsQueriesSearch_AttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogTransmissionsQueriesSearch_Content": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "The summary of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The title of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsDialogTransmissionsQueriesSearch_Transmission": {
+        "additionalProperties": false,
+        "properties": {
+          "attachments": {
+            "description": "The attachments associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogTransmissionsQueriesSearch_Attachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "The authorization attribute associated with the transmission.",
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "description": "The content of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogTransmissionsQueriesSearch_Content"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "The date and time when the transmission was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "The date and time when the transmission was deleted, if applicable.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "The extended type URI for the transmission.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "relatedTransmissionId": {
+            "description": "The unique identifier for the related transmission, if any.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "description": "The sender actor information for the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
+          },
+          "type": {
+            "description": "The type of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
           }
         },
         "type": "object"
@@ -3666,11 +4021,13 @@
             "nullable": true,
             "type": "string"
           },
-          "enduserContextRevision": {
-            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
-            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
-            "format": "guid",
-            "type": "string"
+          "endUserContext": {
+            "description": "Metadata about the dialog owned by end-users.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogEndUserContext"
+              }
+            ]
           },
           "expiresAt": {
             "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n            \nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed by the service\nowner after the dialog has been created.",
@@ -3761,13 +4118,12 @@
             "type": "array"
           },
           "serviceOwnerContext": {
-            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext"
-          },
-          "serviceOwnerContextRevision": {
-            "description": "The unique identifier for the service owner context revision in UUIDv4 format.",
-            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
-            "format": "guid",
-            "type": "string"
+            "description": "Metadata about the dialog owned by the service owner.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext"
+              }
+            ]
           },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
@@ -3783,14 +4139,6 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
-              }
-            ]
-          },
-          "systemLabel": {
-            "description": "Current display state.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ]
           },
@@ -4027,6 +4375,26 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsQueriesGet_DialogEndUserContext": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "description": "System defined labels used to categorize dialogs.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsQueriesGet_DialogGuiAction": {
         "additionalProperties": false,
         "properties": {
@@ -4130,6 +4498,12 @@
       "V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext": {
         "additionalProperties": false,
         "properties": {
+          "revision": {
+            "description": "The unique identifier for the service owner context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
           "serviceOwnerLabels": {
             "description": "A list of labels, not visible in end-user APIs.",
             "items": {
@@ -4410,10 +4784,13 @@
             "nullable": true,
             "type": "string"
           },
-          "enduserContextRevision": {
-            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
-            "format": "guid",
-            "type": "string"
+          "endUserContext": {
+            "description": "Metadata about the dialog owned by end-users.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogEndUserContext"
+              }
+            ]
           },
           "extendedStatus": {
             "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n            \nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
@@ -4491,12 +4868,12 @@
             "type": "array"
           },
           "serviceOwnerContext": {
-            "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext"
-          },
-          "serviceOwnerContextRevision": {
-            "description": "The unique identifier for the service owner context revision in UUIDv4 format.",
-            "format": "guid",
-            "type": "string"
+            "description": "Metadata about the dialog owned by the service owner.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext"
+              }
+            ]
           },
           "serviceResource": {
             "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
@@ -4512,14 +4889,6 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
-              }
-            ]
-          },
-          "systemLabel": {
-            "description": "Current display state.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ]
           },
@@ -4591,6 +4960,26 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsQueriesSearch_DialogEndUserContext": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "description": "System defined labels used to categorize dialogs.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog": {
         "additionalProperties": false,
         "properties": {
@@ -4627,6 +5016,12 @@
       "V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext": {
         "additionalProperties": false,
         "properties": {
+          "revision": {
+            "description": "The unique identifier for the service owner context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
           "serviceOwnerLabels": {
             "description": "A list of labels, not visible in end-user APIs.",
             "items": {
@@ -4661,7 +5056,7 @@
         "additionalProperties": false,
         "properties": {
           "dto": {
-            "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
+            "$ref": "#/components/schemas/V1ServiceOwnerEndUserContextDialogSystemLabelsCommandsBulkSet_BulkSetSystemLabel"
           }
         },
         "type": "object"
@@ -4753,26 +5148,21 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogTransmissionsQueriesGet_Attachment": {
+      "V1ServiceOwnerEndUserContextDialogSystemLabelsCommandsBulkSet_BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
-          "displayName": {
-            "description": "The display name of the attachment that should be used in GUIs.",
+          "dialogs": {
+            "description": "List of target dialog ids with optional revision ids",
             "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+              "$ref": "#/components/schemas/V1ServiceOwnerEndUserContextDialogSystemLabelsCommandsBulkSet_DialogRevision"
             },
             "nullable": true,
             "type": "array"
           },
-          "id": {
-            "description": "The unique identifier for the attachment in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "urls": {
-            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+          "systemLabels": {
+            "description": "List of system labels to set on target dialogs",
             "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogTransmissionsQueriesGet_AttachmentUrl"
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
             },
             "nullable": true,
             "type": "array"
@@ -4780,300 +5170,19 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogTransmissionsQueriesGet_AttachmentUrl": {
+      "V1ServiceOwnerEndUserContextDialogSystemLabelsCommandsBulkSet_DialogRevision": {
         "additionalProperties": false,
         "properties": {
-          "consumerType": {
-            "description": "The type of consumer the URL is intended for.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
-              }
-            ]
-          },
-          "id": {
-            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+          "dialogId": {
+            "description": "Target dialog id for system labels",
             "format": "guid",
             "type": "string"
           },
-          "mediaType": {
-            "description": "The media type of the attachment.",
-            "example": "application/pdf\napplication/zip",
-            "nullable": true,
-            "type": "string"
-          },
-          "url": {
-            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
-            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogTransmissionsQueriesGet_Content": {
-        "additionalProperties": false,
-        "properties": {
-          "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          },
-          "summary": {
-            "description": "The summary of the content.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          },
-          "title": {
-            "description": "The title of the content.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission": {
-        "additionalProperties": false,
-        "properties": {
-          "attachments": {
-            "description": "The attachments associated with the transmission.",
-            "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogTransmissionsQueriesGet_Attachment"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "authorizationAttribute": {
-            "description": "The authorization attribute associated with the transmission.",
-            "nullable": true,
-            "type": "string"
-          },
-          "content": {
-            "description": "The content of the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogTransmissionsQueriesGet_Content"
-              }
-            ]
-          },
-          "createdAt": {
-            "description": "The date and time when the transmission was created.",
-            "format": "date-time",
-            "type": "string"
-          },
-          "deletedAt": {
-            "description": "The date and time when the transmission was deleted, if applicable.",
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
-          "extendedType": {
-            "description": "The extended type URI for the transmission.",
-            "format": "uri",
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "description": "The unique identifier for the transmission in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "relatedTransmissionId": {
-            "description": "The unique identifier for the related transmission, if any.",
+          "endUserContextRevision": {
+            "description": "Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.",
             "format": "guid",
             "nullable": true,
             "type": "string"
-          },
-          "sender": {
-            "description": "The sender actor information for the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
-              }
-            ]
-          },
-          "type": {
-            "description": "The type of the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogTransmissionsQueriesSearch_Attachment": {
-        "additionalProperties": false,
-        "properties": {
-          "displayName": {
-            "description": "The display name of the attachment that should be used in GUIs.",
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "id": {
-            "description": "The unique identifier for the attachment in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "urls": {
-            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
-            "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogTransmissionsQueriesSearch_AttachmentUrl"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogTransmissionsQueriesSearch_AttachmentUrl": {
-        "additionalProperties": false,
-        "properties": {
-          "consumerType": {
-            "description": "The type of consumer the URL is intended for.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
-              }
-            ]
-          },
-          "id": {
-            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "mediaType": {
-            "description": "The media type of the attachment.",
-            "example": "application/pdf\napplication/zip",
-            "nullable": true,
-            "type": "string"
-          },
-          "url": {
-            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
-            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogTransmissionsQueriesSearch_Content": {
-        "additionalProperties": false,
-        "properties": {
-          "contentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          },
-          "summary": {
-            "description": "The summary of the content.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          },
-          "title": {
-            "description": "The title of the content.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogTransmissionsQueriesSearch_Transmission": {
-        "additionalProperties": false,
-        "properties": {
-          "attachments": {
-            "description": "The attachments associated with the transmission.",
-            "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogTransmissionsQueriesSearch_Attachment"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "authorizationAttribute": {
-            "description": "The authorization attribute associated with the transmission.",
-            "nullable": true,
-            "type": "string"
-          },
-          "content": {
-            "description": "The content of the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogTransmissionsQueriesSearch_Content"
-              }
-            ]
-          },
-          "createdAt": {
-            "description": "The date and time when the transmission was created.",
-            "format": "date-time",
-            "type": "string"
-          },
-          "deletedAt": {
-            "description": "The date and time when the transmission was deleted, if applicable.",
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
-          "extendedType": {
-            "description": "The extended type URI for the transmission.",
-            "format": "uri",
-            "nullable": true,
-            "type": "string"
-          },
-          "externalReference": {
-            "description": "Arbitrary string with a service-specific reference to an external system or service.",
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "description": "The unique identifier for the transmission in UUIDv7 format.",
-            "format": "guid",
-            "type": "string"
-          },
-          "relatedTransmissionId": {
-            "description": "The unique identifier for the related transmission, if any.",
-            "format": "guid",
-            "nullable": true,
-            "type": "string"
-          },
-          "sender": {
-            "description": "The sender actor information for the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
-              }
-            ]
-          },
-          "type": {
-            "description": "The type of the transmission.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
-              }
-            ]
           }
         },
         "type": "object"
@@ -5541,7 +5650,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/V1EndUserDialogActivitiesQueriesSearch_Activity"
+                    "$ref": "#/components/schemas/V1EndUserDialogsDialogActivitiesQueriesSearch_Activity"
                   },
                   "type": "array"
                 }
@@ -5608,7 +5717,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1EndUserDialogActivitiesQueriesGet_Activity"
+                  "$ref": "#/components/schemas/V1EndUserDialogsDialogActivitiesQueriesGet_Activity"
                 }
               }
             },
@@ -5664,7 +5773,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/V1EndUserDialogLabelAssignmentLogQueriesSearch_LabelAssignmentLog"
+                    "$ref": "#/components/schemas/V1EndUserEndUserContextDialogLabelAssignmentLogQueriesSearch_LabelAssignmentLog"
                   },
                   "type": "array"
                 }
@@ -5838,7 +5947,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/V1EndUserDialogSeenLogsQueriesSearch_SeenLog"
+                    "$ref": "#/components/schemas/V1EndUserDialogsDialogSeenLogsQueriesSearch_SeenLog"
                   },
                   "type": "array"
                 }
@@ -5905,7 +6014,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1EndUserDialogSeenLogsQueriesGet_SeenLog"
+                  "$ref": "#/components/schemas/V1EndUserDialogsDialogSeenLogsQueriesGet_SeenLog"
                 }
               }
             },
@@ -5962,7 +6071,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/V1EndUserDialogTransmissionsQueriesSearch_Transmission"
+                    "$ref": "#/components/schemas/V1EndUserDialogsDialogTransmissionsQueriesSearch_Transmission"
                   },
                   "type": "array"
                 }
@@ -6032,7 +6141,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1EndUserDialogTransmissionsQueriesGet_Transmission"
+                  "$ref": "#/components/schemas/V1EndUserDialogsDialogTransmissionsQueriesGet_Transmission"
                 }
               }
             },
@@ -6079,12 +6188,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
+                "$ref": "#/components/schemas/V1EndUserEndUserContextDialogSystemLabelsCommandsBulkSet_BulkSetSystemLabelCommand"
               }
             }
           },
+          "description": "",
           "required": true,
-          "x-name": "dto"
+          "x-name": "BulkSetSystemLabelCommand",
+          "x-position": 1
         },
         "responses": {
           "204": {
@@ -6150,7 +6261,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/V1EndUserPartiesQueriesGet_Parties"
+                    "$ref": "#/components/schemas/V1AccessManagementPartiesQueriesGet_Parties"
                   },
                   "type": "array"
                 }
@@ -7101,7 +7212,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/components/schemas/V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationConditionType"
+                  "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogActivitiesQueriesNotificationCondition_NotificationConditionType"
                 }
               ]
             }
@@ -7133,7 +7244,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationCondition"
+                  "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogActivitiesQueriesNotificationCondition_NotificationCondition"
                 }
               }
             },
@@ -7180,7 +7291,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/V1ServiceOwnerDialogActivitiesQueriesSearch_Activity"
+                    "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogActivitiesQueriesSearch_Activity"
                   },
                   "type": "array"
                 }
@@ -7369,7 +7480,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1ServiceOwnerDialogActivitiesQueriesGet_Activity"
+                  "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogActivitiesQueriesGet_Activity"
                 }
               }
             },
@@ -7770,7 +7881,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog"
+                    "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogSeenLogsQueriesSearch_SeenLog"
                   },
                   "type": "array"
                 }
@@ -7840,7 +7951,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog"
+                  "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogSeenLogsQueriesGet_SeenLog"
                 }
               }
             },
@@ -7900,7 +8011,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/V1ServiceOwnerDialogTransmissionsQueriesSearch_Transmission"
+                    "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogTransmissionsQueriesSearch_Transmission"
                   },
                   "type": "array"
                 }
@@ -8092,7 +8203,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission"
+                  "$ref": "#/components/schemas/V1ServiceOwnerDialogsDialogTransmissionsQueriesGet_Transmission"
                 }
               }
             },
@@ -8149,7 +8260,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/V1CommonSystemLabels_BulkSetSystemLabel"
+                "$ref": "#/components/schemas/V1ServiceOwnerEndUserContextDialogSystemLabelsCommandsBulkSet_BulkSetSystemLabel"
               }
             }
           },

@@ -125,5 +125,4 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     }
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
-
 }

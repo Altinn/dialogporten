@@ -2626,6 +2626,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("isApiOnly")]
         public bool IsApiOnly { get; set; }
 
+        /// <summary>
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// </summary>
+
         [JsonPropertyName("hasUnopenedContent")]
         public bool HasUnopenedContent { get; set; }
 

@@ -128,7 +128,7 @@ public class DialogDtoBase
     public bool IsApiOnly { get; set; }
 
     /// <summary>
-    /// 
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
     public bool HasUnopenedContent { get; set; }
 

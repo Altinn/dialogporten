@@ -4374,6 +4374,7 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean"
           },
           "id": {

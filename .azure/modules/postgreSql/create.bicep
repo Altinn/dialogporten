@@ -103,9 +103,22 @@ module privateDnsZone '../privateDnsZone/main.bicep' = {
   }
 }
 
+// create user assigned identity (admin user for postgresql)
+resource postgresAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-postgres-admin-identity'
+  location: location
+  tags: tags
+}
+
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: postgresServerName
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${postgresAdminIdentity.id}': {}
+    }
+  }
   properties: {
     version: '16'
     administratorLogin: administratorLogin
@@ -263,3 +276,4 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = {
 
 output adoConnectionStringSecretUri string = adoConnectionString.outputs.secretUri
 output psqlConnectionStringSecretUri string = psqlConnectionString.outputs.secretUri
+output adminClientId string = postgresAdminIdentity.properties.clientId

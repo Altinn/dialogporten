@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogActivities.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.DialogActivities.Queries.Search;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;

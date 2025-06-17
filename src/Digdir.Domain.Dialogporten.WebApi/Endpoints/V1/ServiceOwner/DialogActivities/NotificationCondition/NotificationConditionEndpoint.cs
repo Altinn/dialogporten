@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.NotificationCondition;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.DialogActivities.Queries.NotificationCondition;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;

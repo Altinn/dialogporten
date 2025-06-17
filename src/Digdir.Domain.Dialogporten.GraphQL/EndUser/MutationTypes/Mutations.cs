@@ -1,6 +1,6 @@
 using AutoMapper;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.DialogSystemLabels.Commands.BulkSet;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.DialogSystemLabels.Commands.Set;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using MediatR;
 
@@ -58,9 +58,9 @@ public sealed class Mutations
 
         return result.Match(
             _ => new BulkSetSystemLabelPayload { Success = true },
-            forbidden => new BulkSetSystemLabelPayload
+            notFound => new BulkSetSystemLabelPayload
             {
-                Errors = [new BulkSetSystemLabelForbidden { Message = string.Join("; ", forbidden.Reasons) }]
+                Errors = [new BulkSetSystemLabelNotFound { Message = notFound.Message }]
             },
             domainError => new BulkSetSystemLabelPayload
             {

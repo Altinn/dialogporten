@@ -18,7 +18,7 @@ public class DialogEntityTests
             nameof(DialogEntity.StatusId),
             nameof(DialogEntity.SearchTags),
             nameof(DialogEntity.SeenLog),
-            nameof(DialogEntity.DialogEndUserContext),
+            nameof(DialogEntity.EndUserContext),
             nameof(DialogEntity.IdempotentKey),
             nameof(DialogEntity.ServiceOwnerContext)
         };

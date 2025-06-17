@@ -1,7 +1,6 @@
 using AutoMapper;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.DialogSystemLabels.Commands.BulkSet;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.DialogSystemLabels.Commands.Set;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 

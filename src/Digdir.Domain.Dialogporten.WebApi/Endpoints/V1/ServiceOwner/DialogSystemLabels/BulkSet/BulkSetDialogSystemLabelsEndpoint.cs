@@ -1,5 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.DialogSystemLabels.Commands.BulkSet;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -30,7 +29,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
     {
         var command = new BulkSetSystemLabelCommand
         {
-            EnduserId = req.EnduserId,
+            EndUserId = req.EnduserId,
             Dto = req.Dto,
         };
 

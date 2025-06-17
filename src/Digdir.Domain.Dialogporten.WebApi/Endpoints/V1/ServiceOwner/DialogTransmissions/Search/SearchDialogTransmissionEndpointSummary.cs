@@ -1,5 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogTransmissions.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.DialogTransmissions.Queries.Search;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;

@@ -1,5 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.DialogSystemLabels.Commands.BulkSet;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -8,7 +7,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.DialogSystemLabels.BulkSet;
 
-public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkSetDialogSystemLabelsRequest>
+public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkSetSystemLabelCommand>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
@@ -26,25 +25,14 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
             StatusCodes.Status422UnprocessableEntity));
     }
 
-    public override async Task HandleAsync(BulkSetDialogSystemLabelsRequest req, CancellationToken ct)
+    public override async Task HandleAsync(BulkSetSystemLabelCommand command, CancellationToken ct)
     {
-        var command = new BulkSetSystemLabelCommand
-        {
-            Dto = req.Dto,
-        };
-
         var result = await _sender.Send(command, ct);
         await result.Match(
             _ => SendNoContentAsync(ct),
-            forbidden => this.ForbiddenAsync(forbidden, ct),
+            notFound => this.NotFoundAsync(notFound, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            _ => this.PreconditionFailed(ct));
     }
-}
-
-public sealed class BulkSetDialogSystemLabelsRequest
-{
-    [FromBody]
-    public BulkSetSystemLabelDto Dto { get; set; } = null!;
 }

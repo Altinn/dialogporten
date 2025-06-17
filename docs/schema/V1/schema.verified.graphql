@@ -104,7 +104,7 @@ type BulkSetSystemLabelDomainError implements BulkSetSystemLabelError {
   message: String!
 }
 
-type BulkSetSystemLabelForbidden implements BulkSetSystemLabelError {
+dtype BulkSetSystemLabelForbidden implements BulkSetSystemLabelError {
   message: String!
 }
 

@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.Set;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.DialogSystemLabels.Commands.Set;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using FluentAssertions;
 
@@ -11,8 +11,8 @@ public class SetSystemLabelCommandValidatorTests
     {
         var command = new SetSystemLabelCommand
         {
-            EnduserId = "urn:altinn:person:identifier-no:01020312345",
-            SystemLabels = new[] { SystemLabel.Values.Bin, SystemLabel.Values.Archive }
+            EndUserId = "urn:altinn:person:identifier-no:01020312345",
+            SystemLabels = [SystemLabel.Values.Bin, SystemLabel.Values.Archive]
         };
 
         var validator = new SetSystemLabelCommandValidator();
@@ -27,8 +27,8 @@ public class SetSystemLabelCommandValidatorTests
     {
         var command = new SetSystemLabelCommand
         {
-            EnduserId = "urn:altinn:person:identifier-no:01020312345",
-            SystemLabels = new[] { SystemLabel.Values.Bin }
+            EndUserId = "urn:altinn:person:identifier-no:01020312345",
+            SystemLabels = [SystemLabel.Values.Bin]
         };
 
         var validator = new SetSystemLabelCommandValidator();

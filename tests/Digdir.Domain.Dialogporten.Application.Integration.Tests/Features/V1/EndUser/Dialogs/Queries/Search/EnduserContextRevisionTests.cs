@@ -18,6 +18,6 @@ public class EnduserContextRevisionTests(DialogApplication application) : Applic
             .SearchEndUserDialogs(x => x.Party = [party!])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle(x =>
-                    x.EnduserContextRevision != Guid.Empty));
+                    x.EndUserContext.Revision != Guid.Empty));
     }
 }

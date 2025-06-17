@@ -1,13 +1,11 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.DialogSystemLabels.Commands.BulkSet;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;
 
 public class BulkSetSystemLabelCommandValidatorTests
 {
-    private readonly BulkSetSystemLabelCommandValidator _validator = new();
+    private readonly BulkSetSystemLabelCommandValidator _validator = new(new BulkSetSystemLabelDtoValidator());
 
     [Fact]
     public void Unique_DialogIds_Should_Be_Valid()
@@ -16,12 +14,12 @@ public class BulkSetSystemLabelCommandValidatorTests
         {
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[]
-                {
+                Dialogs =
+                [
                     new DialogRevisionDto { DialogId = Guid.NewGuid() },
                     new DialogRevisionDto { DialogId = Guid.NewGuid() }
-                },
-                SystemLabels = new[] { SystemLabel.Values.Archive }
+                ],
+                SystemLabels = [SystemLabel.Values.Archive]
             }
         };
 
@@ -38,12 +36,12 @@ public class BulkSetSystemLabelCommandValidatorTests
         {
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[]
-                {
+                Dialogs =
+                [
                     new DialogRevisionDto { DialogId = id },
                     new DialogRevisionDto { DialogId = id }
-                },
-                SystemLabels = new[] { SystemLabel.Values.Archive }
+                ],
+                SystemLabels = [SystemLabel.Values.Archive]
             }
         };
 
@@ -61,8 +59,8 @@ public class BulkSetSystemLabelCommandValidatorTests
         {
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[] { new DialogRevisionDto { DialogId = Guid.NewGuid() } },
-                SystemLabels = new[] { SystemLabel.Values.Bin, SystemLabel.Values.Archive }
+                Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
+                SystemLabels = [SystemLabel.Values.Bin, SystemLabel.Values.Archive]
             }
         };
 

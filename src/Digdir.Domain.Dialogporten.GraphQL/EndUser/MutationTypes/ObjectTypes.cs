@@ -74,7 +74,7 @@ public interface IBulkSetSystemLabelError
     string Message { get; set; }
 }
 
-public sealed class BulkSetSystemLabelForbidden : IBulkSetSystemLabelError
+public sealed class BulkSetSystemLabelNotFound : IBulkSetSystemLabelError
 {
     public string Message { get; set; } = null!;
 }

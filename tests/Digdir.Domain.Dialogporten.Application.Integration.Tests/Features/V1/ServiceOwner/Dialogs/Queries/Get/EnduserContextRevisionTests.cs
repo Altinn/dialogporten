@@ -14,5 +14,5 @@ public class EnduserContextRevisionTests(DialogApplication application) : Applic
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EnduserContextRevision.Should().NotBeEmpty());
+                x.EndUserContext.Revision.Should().NotBeEmpty());
 }

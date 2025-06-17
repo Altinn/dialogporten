@@ -54,7 +54,6 @@ public sealed class SearchDialog
 {
     public Guid Id { get; set; }
     public string Org { get; set; } = null!;
-    public Guid EnduserContextRevision { get; set; }
     public string ServiceResource { get; set; } = null!;
     public string ServiceResourceType { get; set; } = null!;
     public string Party { get; set; } = null!;
@@ -69,8 +68,6 @@ public sealed class SearchDialog
 
     public DialogStatus Status { get; set; }
 
-    public SystemLabel SystemLabel { get; set; }
-
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
     public bool IsApiOnly { get; set; }
 
@@ -78,6 +75,7 @@ public sealed class SearchDialog
 
     public SearchContent Content { get; set; } = null!;
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
+    public EndUserContext EndUserContext { get; set; } = null!;
 }
 
 public sealed class SearchContent

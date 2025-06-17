@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogSystemLabels.Commands.Set;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.DialogSystemLabels.Commands.Set;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
@@ -35,7 +35,7 @@ public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<Set
         {
             DialogId = req.DialogId,
             SystemLabels = req.SystemLabels,
-            IfMatchEnduserContextRevision = req.IfMatchEnduserContextRevision
+            IfMatchEndUserContextRevision = req.IfMatchEnduserContextRevision
         };
 
         var result = await _sender.Send(command, ct);

@@ -1,8 +1,6 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.SystemLabels;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.DialogSystemLabels.Commands.BulkSet;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using FluentAssertions;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
 
@@ -15,7 +13,7 @@ public class BulkSetSystemLabelCommandValidatorTests
     {
         var command = new BulkSetSystemLabelCommand
         {
-            EnduserId = "01017512345",
+            EndUserId = "01017512345",
             Dto = new BulkSetSystemLabelDto
             {
                 Dialogs = new[]
@@ -38,7 +36,7 @@ public class BulkSetSystemLabelCommandValidatorTests
         var id = Guid.NewGuid();
         var command = new BulkSetSystemLabelCommand
         {
-            EnduserId = "01017512345",
+            EndUserId = "01017512345",
             Dto = new BulkSetSystemLabelDto
             {
                 Dialogs = new[]
@@ -62,7 +60,7 @@ public class BulkSetSystemLabelCommandValidatorTests
     {
         var command = new BulkSetSystemLabelCommand
         {
-            EnduserId = "urn:altinn:person:identifier-no:01020312345",
+            EndUserId = "urn:altinn:person:identifier-no:01020312345",
             Dto = new BulkSetSystemLabelDto
             {
                 Dialogs = new[] { new DialogRevisionDto { DialogId = Guid.NewGuid() } },
@@ -81,7 +79,7 @@ public class BulkSetSystemLabelCommandValidatorTests
     {
         var command = new BulkSetSystemLabelCommand
         {
-            EnduserId = "urn:altinn:person:identifier-no:01020312345",
+            EndUserId = "urn:altinn:person:identifier-no:01020312345",
             Dto = new BulkSetSystemLabelDto
             {
                 Dialogs = new[] { new DialogRevisionDto { DialogId = Guid.NewGuid() } },

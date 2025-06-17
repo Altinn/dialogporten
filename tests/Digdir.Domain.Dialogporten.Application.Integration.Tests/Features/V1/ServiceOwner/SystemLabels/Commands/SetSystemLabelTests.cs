@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogSystemLabels.Commands.Set;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.DialogSystemLabels.Commands.Set;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -18,13 +18,13 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .CreateSimpleDialog()
             .SendCommand((_, ctx) => new SetSystemLabelCommand
             {
-                EnduserId = ctx.GetParty(),
+                EndUserId = ctx.GetParty(),
                 DialogId = ctx.GetDialogId(),
                 SystemLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.SystemLabel.Should().Be(SystemLabel.Values.Bin));
+                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
 
     [Fact]
     public Task Set_Returns_ConcurrencyError_On_Revision_Mismatch() =>
@@ -32,9 +32,9 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .CreateSimpleDialog()
             .SendCommand((_, ctx) => new SetSystemLabelCommand
             {
-                EnduserId = ctx.GetParty(),
+                EndUserId = ctx.GetParty(),
                 DialogId = ctx.GetDialogId(),
-                IfMatchEnduserContextRevision = NewUuidV7(),
+                IfMatchEndUserContextRevision = NewUuidV7(),
                 SystemLabels = [SystemLabel.Values.Bin]
             })
             .ExecuteAndAssert<ConcurrencyError>();
@@ -52,20 +52,20 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 party = x.Party;
-                revision = x.EnduserContextRevision;
+                revision = x.EndUserContext.Revision;
             });
 
         await FlowBuilder.For(Application)
             .SendCommand(new SetSystemLabelCommand
             {
-                EnduserId = party!,
+                EndUserId = party!,
                 DialogId = dialogId.Value,
-                IfMatchEnduserContextRevision = revision!.Value,
+                IfMatchEndUserContextRevision = revision!.Value,
                 SystemLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand(GetDialog(dialogId))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.SystemLabel.Should().Be(SystemLabel.Values.Bin));
+                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
     }
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };

@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
             .AddType<SearchDialogValidationError>()
             .AddType<SearchDialogForbidden>()
             .AddType<SetSystemLabelEntityNotFound>()
-            .AddType<BulkSetSystemLabelForbidden>()
+            .AddType<BulkSetSystemLabelNotFound>()
             .AddType<BulkSetSystemLabelDomainError>()
             .AddType<BulkSetSystemLabelValidationError>()
             .AddType<BulkSetSystemLabelConcurrencyError>()

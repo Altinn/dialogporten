@@ -18,6 +18,6 @@ public class ServiceOwnerContextRevisionTests(DialogApplication application) : A
             .SearchServiceOwnerDialogs(x => x.ServiceResource = [serviceResource!])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle(x =>
-                    x.ServiceOwnerContextRevision != Guid.Empty));
+                    x.ServiceOwnerContext.Revision != Guid.Empty));
     }
 }

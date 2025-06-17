@@ -9,8 +9,9 @@ public sealed class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<DialogDto, Dialog>()
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
-            .ForMember(dest => dest.EnduserContextRevision, opt => opt.MapFrom(src => src.EnduserContextRevision));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+
+        CreateMap<DialogEndUserContextDto, EndUserContext>();
 
         CreateMap<DialogAttachmentDto, Attachment>();
         CreateMap<DialogAttachmentUrlDto, AttachmentUrl>()

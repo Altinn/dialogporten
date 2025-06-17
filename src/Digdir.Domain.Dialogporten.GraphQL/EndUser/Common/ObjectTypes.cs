@@ -12,6 +12,12 @@ public sealed class ContentValue
     public string MediaType { get; set; } = null!;
 }
 
+public sealed class EndUserContext
+{
+    public Guid Revision { get; set; }
+    public List<SystemLabel> SystemLabels { get; set; } = [];
+}
+
 public sealed class SeenLog
 {
     public Guid Id { get; set; }

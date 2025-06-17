@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
@@ -27,10 +28,10 @@ internal sealed class MappingProfile : Profile
                 .Count(x => x.Urls
                     .Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
-            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId))
-            .ForMember(dest => dest.EnduserContextRevision, opt => opt.MapFrom(src => src.DialogEndUserContext.Revision))
-            .ForMember(dest => dest.ServiceOwnerContextRevision, opt => opt.MapFrom(src => src.ServiceOwnerContext.Revision));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId));
+
+        CreateMap<DialogEndUserContext, DialogEndUserContextDto>()
+            .ForMember(dest => dest.SystemLabels, opt => opt.MapFrom(src => new List<SystemLabel.Values> { src.SystemLabelId }));
 
         CreateMap<DialogServiceOwnerContext, DialogServiceOwnerContextDto>();
         CreateMap<DialogServiceOwnerLabel, ServiceOwnerLabelDto>();

@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
+using SystemLabel = Digdir.Domain.Dialogporten.GraphQL.EndUser.Common.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 
@@ -39,7 +40,6 @@ public sealed class Dialog
 {
     public Guid Id { get; set; }
     public Guid Revision { get; set; }
-    public Guid EnduserContextRevision { get; set; }
     public string Org { get; set; } = null!;
     public string ServiceResource { get; set; } = null!;
     public string ServiceResourceType { get; set; } = null!;
@@ -57,8 +57,6 @@ public sealed class Dialog
 
     public string? DialogToken { get; set; }
 
-    public SystemLabel SystemLabel { get; set; }
-
     public DialogStatus Status { get; set; }
 
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
@@ -71,6 +69,7 @@ public sealed class Dialog
     public List<Activity> Activities { get; set; } = [];
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
     public List<Transmission> Transmissions { get; set; } = [];
+    public EndUserContext EndUserContext { get; set; } = null!;
 }
 
 public sealed class Transmission

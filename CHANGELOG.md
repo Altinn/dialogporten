@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.69.1](https://github.com/Altinn/dialogporten/compare/v1.69.0...v1.69.1) (2025-06-17)
+
+
+### Bug Fixes
+
+* **infra:** ensure diagnostic setting is set correctly for app config ([#2447](https://github.com/Altinn/dialogporten/issues/2447)) ([fa9a660](https://github.com/Altinn/dialogporten/commit/fa9a66069084f86c1c391a47e6623549c7d86f99))
+
 ## [1.69.0](https://github.com/Altinn/dialogporten/compare/v1.68.2...v1.69.0) (2025-06-17)
 
 

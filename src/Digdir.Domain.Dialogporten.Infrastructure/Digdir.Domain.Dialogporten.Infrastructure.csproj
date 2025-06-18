@@ -18,7 +18,7 @@
             <TreatAsUsed>true</TreatAsUsed>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.6" />
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.5" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.6" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.6" />
         <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="1.1.1"/>
         <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.2.0"/>

@@ -39,7 +39,8 @@ export default function () {
     describe('Verify dialog has updated label', () => {
         let r = getSO(`dialogs/${dialogId}?endUserId=${enduserId}`);
         expectStatusFor(r).to.equal(200);
-        expect(r.json()['systemLabel'], 'system label').to.equal('Bin');
+        expect(r.json().endUserContext.systemLabels).to.be.an('array').that.includes('Bin');
+
     });
 
     describe('Reject multiple system labels', () => {

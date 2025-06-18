@@ -220,7 +220,7 @@ export default function () {
         expectStatusFor(response).to.equal(200);
         expect(response, 'response').to.have.validJsonBody();
         expect(response.json(), 'response json').to.have.property("items").with.lengthOf(1);
-        expect(response.json().items[0], 'system label').to.have.property('systemLabel').that.equals(systemLabelToSearchFor);
+        expect(response.json().items[0].endUserContext.systemLabels).to.be.an('array').that.includes(systemLabelToSearchFor);
     })
 
     describe('List with invalid systemLabel filter', () => {

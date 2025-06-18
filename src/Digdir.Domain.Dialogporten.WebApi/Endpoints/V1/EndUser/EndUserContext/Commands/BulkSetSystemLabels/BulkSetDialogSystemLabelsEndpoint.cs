@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
-public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkSetSystemLabelCommand>
+public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkSetDialogSystemLabelsRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
@@ -25,8 +25,13 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
             StatusCodes.Status422UnprocessableEntity));
     }
 
-    public override async Task HandleAsync(BulkSetSystemLabelCommand command, CancellationToken ct)
+    public override async Task HandleAsync(BulkSetDialogSystemLabelsRequest req, CancellationToken ct)
     {
+        var command = new BulkSetSystemLabelCommand
+        {
+            Dto = req.Dto
+        };
+
         var result = await _sender.Send(command, ct);
         await result.Match(
             _ => SendNoContentAsync(ct),
@@ -35,4 +40,10 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
             validationError => this.BadRequestAsync(validationError, ct),
             _ => this.PreconditionFailed(ct));
     }
+}
+
+public sealed class BulkSetDialogSystemLabelsRequest
+{
+    [FromBody]
+    public BulkSetSystemLabelDto Dto { get; set; } = null!;
 }

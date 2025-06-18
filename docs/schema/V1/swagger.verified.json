@@ -1902,6 +1902,15 @@
         },
         "type": "object"
       },
+      "V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetDialogSystemLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
@@ -1920,15 +1929,6 @@
             },
             "nullable": true,
             "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabelCommand": {
-        "additionalProperties": false,
-        "properties": {
-          "dto": {
-            "$ref": "#/components/schemas/V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
           }
         },
         "type": "object"
@@ -6188,14 +6188,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabelCommand"
+                "$ref": "#/components/schemas/V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
               }
             }
           },
-          "description": "",
           "required": true,
-          "x-name": "BulkSetSystemLabelCommand",
-          "x-position": 1
+          "x-name": "dto"
         },
         "responses": {
           "204": {

@@ -27,7 +27,8 @@ export default function () {
         dialogIds.forEach(id => {
             const r = getSO(`dialogs/${id}?endUserId=${enduserId}`);
             expectStatusFor(r).to.equal(200);
-            expect(r.json()['systemLabel'], 'system label').to.equal('Archive');
+            let result = r.json();
+            expect(result.endUserContext.systemLabels).to.be.an('array').that.includes('Archive');
         });
     });
 

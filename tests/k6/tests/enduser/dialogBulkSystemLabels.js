@@ -29,17 +29,17 @@ export default function () {
         accessibleDialogs.forEach(id => {
             const r2 = getEU('dialogs/' + id);
             expectStatusFor(r2).to.equal(200);
-            expect(r2.json()['systemLabel'], 'system label').to.equal('Bin');
+            expect(r2.json().endUserContext.systemLabels).to.be.an('array').that.includes('Bin');
         });
     });
 
-    describe('Bulk set containing unauthorized dialog returns 403', () => {
+    describe('Bulk set containing unauthorized dialog returns 404', () => {
         const body = {
             dialogs: accessibleDialogs.concat([forbiddenDialog]).map(id => ({ dialogId: id })),
             systemLabels: ['Archive']
         };
         const r = postEU('dialogs/context/systemlabels/actions/bulkset', body);
-        expectStatusFor(r).to.equal(403);
+        expectStatusFor(r).to.equal(404);
     });
 
     describe('Cleanup', () => {

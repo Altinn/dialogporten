@@ -1,7 +1,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Parties.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Queries.GetParties;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Parties;
 using MediatR;
 

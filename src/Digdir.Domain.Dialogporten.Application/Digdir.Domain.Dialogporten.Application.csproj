@@ -34,7 +34,7 @@
     <ItemGroup>
       <Folder Include="Features\V1\AccessManagement\" />
       <Folder Include="Features\V1\EndUser\EndUserContext\" />
-      <Folder Include="Features\V1\ServiceOwner\EndUserContext\" />
+      <Folder Include="Features\V1\ServiceOwner\EndUserContext\Commands\" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.DialogSystemLabels.Commands.BulkSet;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.EndUser.DialogSystemLabels.Commands.BulkSet;

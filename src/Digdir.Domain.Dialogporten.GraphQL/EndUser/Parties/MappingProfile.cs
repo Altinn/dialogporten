@@ -1,5 +1,5 @@
 using AutoMapper;
-using Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Parties.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Queries.GetParties;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.Parties;
 

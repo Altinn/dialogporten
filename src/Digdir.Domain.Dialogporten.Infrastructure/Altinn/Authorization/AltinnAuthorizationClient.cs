@@ -128,8 +128,8 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     }
 
     // Create static empty lists to reuse and avoid allocations
-    private static readonly IReadOnlyList<string> EmptyRolesList = [];
-    private static readonly IReadOnlyList<AuthorizedParty> EmptySubPartiesList = [];
+    private static readonly List<string> EmptyRolesList = [];
+    private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
 
     private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)
     {
@@ -158,8 +158,8 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 ParentParty = null,
                 AuthorizedRoles = party.AuthorizedRoles.Count > 0
                     ? [.. party.AuthorizedRoles]
-                    : (List<string>)EmptyRolesList,
-                SubParties = (List<AuthorizedParty>)EmptySubPartiesList
+                    : EmptyRolesList,
+                SubParties = EmptySubPartiesList
             });
 
             if (!(party.SubParties?.Count > 0)) continue;
@@ -173,8 +173,8 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                     ParentParty = party.Party,
                     AuthorizedRoles = subParty.AuthorizedRoles.Count > 0
                         ? [.. subParty.AuthorizedRoles]
-                        : (List<string>)EmptyRolesList,
-                    SubParties = (List<AuthorizedParty>)EmptySubPartiesList
+                        : EmptyRolesList,
+                    SubParties = EmptySubPartiesList
                 });
             }
         }

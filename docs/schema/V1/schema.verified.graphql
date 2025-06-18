@@ -94,7 +94,7 @@ type AuthorizedSubParty {
 
 type Content {
   title: ContentValue!
-  summary: ContentValue!
+  summary: ContentValue
   senderName: ContentValue
   additionalInfo: ContentValue
   extendedStatus: ContentValue
@@ -193,7 +193,7 @@ type Queries @authorize(policy: "enduser") {
 
 type SearchContent {
   title: ContentValue!
-  summary: ContentValue!
+  summary: ContentValue
   senderName: ContentValue
   extendedStatus: ContentValue
 }
@@ -289,7 +289,7 @@ type Transmission {
 
 type TransmissionContent {
   title: ContentValue!
-  summary: ContentValue!
+  summary: ContentValue
   contentReference: ContentValue
 }
 

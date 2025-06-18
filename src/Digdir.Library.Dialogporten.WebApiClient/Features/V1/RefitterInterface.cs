@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Altinn.ApiClients.Dialogporten.Features.V1
 {
-    public class V1ServiceOwnerDialogsSearchDialogQueryParams
+    public class V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
     {
         
         /// <summary>
@@ -159,9 +159,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    public class V1ServiceOwnerDialogActivitiesNotificationConditionNotificationConditionQueryParams
+    public class V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams
     {
-        public V1ServiceOwnerDialogActivitiesNotificationConditionNotificationConditionQueryParams(V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationConditionType conditionType, DialogsEntitiesActivities_DialogActivityType activityType)
+        public V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams(V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType conditionType, DialogsEntitiesActivities_DialogActivityType activityType)
         {
             
             ConditionType = conditionType;
@@ -169,7 +169,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         }
         
         [Query] 
-        public V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationConditionType ConditionType { get; set; }
+        public V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType ConditionType { get; set; }
 
         [Query] 
         public DialogsEntitiesActivities_DialogActivityType ActivityType { get; set; }
@@ -212,7 +212,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
-        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsGetServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Add a service owner label to a dialog</summary>
         /// <remarks>
@@ -250,7 +250,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
-        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreateServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Delete a service owner label for a dialog</summary>
         /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>
@@ -285,7 +285,97 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json")]
         [Delete("/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}")]
-        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsDeleteServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextCommandsDeleteServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Sets the system labels of a dialog</summary>
+        /// <remarks>
+        /// Sets the system labels of the dialog.
+        /// 
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog system label was updated successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Put("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels")]
+        Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Sets system labels for multiple dialogs</summary>
+        /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog system labels was updated successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
+        Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsBulkSetSystenLabelsBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
@@ -320,7 +410,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogTransmissionsQueriesSearch_Transmission>>> V1ServiceOwnerDialogTransmissionsSearchDialogTransmission(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission>>> V1ServiceOwnerDialogsQueriesSearchTransmissionsDialogTransmission(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Adds a transmission to a dialog</summary>
         /// <remarks>
@@ -375,42 +465,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<string>> V1ServiceOwnerDialogTransmissionsCreateDialogTransmission(System.Guid dialogId, [Body, AliasAs("CreateTransmissionRequest")] V1ServiceOwnerDialogTransmissionsCreate_TransmissionRequest createTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a single dialog transmission</summary>
-        /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog transmission.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The specified dialog ID or transmission ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission>> V1ServiceOwnerDialogTransmissionsGetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(System.Guid dialogId, [Body, AliasAs("CreateTransmissionRequest")] V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest createTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -445,382 +500,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog>>> V1ServiceOwnerDialogSeenLogsSearchDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a single dialog seen log record</summary>
-        /// <remarks>Gets a single dialog seen log record.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog seen log record.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Unauthorized</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Forbidden</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog>> V1ServiceOwnerDialogSeenLogsGetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
-
-        /// <summary>Replaces a dialog</summary>
-        /// <remarks>
-        /// Replaces a given dialog with the supplied model.
-        /// 
-        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
-        /// </remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>204</term>
-        /// <description>The dialog aggregate was updated successfully.</description>
-        /// </item>
-        /// <item>
-        /// <term>400</term>
-        /// <description>Validation error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// <item>
-        /// <term>412</term>
-        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
-        /// </item>
-        /// <item>
-        /// <term>422</term>
-        /// <description>Domain error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
-        [Put("/api/v1/serviceowner/dialogs/{dialogId}")]
-        Task<IApiResponse> V1ServiceOwnerDialogsUpdateDialog(System.Guid dialogId, [Body] V1ServiceOwnerDialogsCommandsUpdate_Dialog dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a single dialog</summary>
-        /// <remarks>
-        /// Gets a single dialog aggregate.
-        /// 
-        /// Note that this operation may return deleted dialogs (see the field `DeletedAt`).
-        /// </remarks>
-        /// <param name="endUserId">Filter by end user id</param>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog aggregate.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> V1ServiceOwnerDialogsGetDialog(System.Guid dialogId, [Query] string endUserId, CancellationToken cancellationToken = default);
-
-        /// <summary>Deletes a dialog</summary>
-        /// <remarks>
-        /// Deletes a given dialog (soft delete).
-        /// 
-        /// Note that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.
-        /// If end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.
-        /// 
-        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
-        /// </remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>204</term>
-        /// <description>The dialog aggregate was deleted successfully.</description>
-        /// </item>
-        /// <item>
-        /// <term>400</term>
-        /// <description>Validation error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to delete the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// <item>
-        /// <term>412</term>
-        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/problem+json")]
-        [Delete("/api/v1/serviceowner/dialogs/{dialogId}")]
-        Task<IApiResponse> V1ServiceOwnerDialogsDeleteDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
-
-        /// <summary>Patch a single dialog</summary>
-        /// <remarks>
-        /// Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.
-        /// See [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.
-        /// 
-        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
-        /// </remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>204</term>
-        /// <description>Patch was successfully applied.</description>
-        /// </item>
-        /// <item>
-        /// <term>400</term>
-        /// <description>Validation error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \\\"digdir:dialogporten.serviceprovider\\\"</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to update a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found or is deleted</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>The dialog with the given key is removed</description>
-        /// </item>
-        /// <item>
-        /// <term>412</term>
-        /// <description>The supplied Revision does not match the current Revision of the dialog</description>
-        /// </item>
-        /// <item>
-        /// <term>422</term>
-        /// <description>Domain error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json", "Content-Type: application/json")]
-        [Patch("/api/v1/serviceowner/dialogs/{dialogId}")]
-        Task<IApiResponse> V1ServiceOwnerDialogsPatchDialog(System.Guid dialogId, [Body] IEnumerable<JsonPatchOperations_Operation> patchDocument, [Header("If-Match")] System.Guid? etag, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a list of dialogs</summary>
-        /// <remarks>
-        /// Performs a search for dialogs, returning a paginated list of dialogs.
-        /// 
-        /// * All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00+01:00
-        /// * See "continuationToken" in the response for how to get the next page of results.
-        /// * hasNextPage will be set to true if there are more items to get.
-        /// </remarks>
-        /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog list.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json")]
-        [Get("/api/v1/serviceowner/dialogs")]
-        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsSearchDialog([Query] V1ServiceOwnerDialogsSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
-
-        /// <summary>Creates a new dialog</summary>
-        /// <remarks>
-        /// The dialog is created with the given configuration.
-        /// 
-        /// For detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)
-        /// </remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>201</term>
-        /// <description>The UUID of the created dialog aggregate. A relative URL to the newly created activity is set in the \"Location\" header.</description>
-        /// </item>
-        /// <item>
-        /// <term>204</term>
-        /// <description>No Content</description>
-        /// </item>
-        /// <item>
-        /// <term>400</term>
-        /// <description>Validation error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>409</term>
-        /// <description>Dialog with IdempotentKey 01941821-ffca-73a1-9335-435a882be014 has already been created.</description>
-        /// </item>
-        /// <item>
-        /// <term>422</term>
-        /// <description>Domain error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
-        [Post("/api/v1/serviceowner/dialogs")]
-        Task<IApiResponse<string>> V1ServiceOwnerDialogsCreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
-
-        /// <summary>Restore a dialog</summary>
-        /// <remarks>Restore a dialog.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>204</term>
-        /// <description>The dialog aggregate was restored successfully.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Unauthorized</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Forbidden</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>412</term>
-        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/problem+json")]
-        [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/restore")]
-        Task<IApiResponse> V1ServiceOwnerDialogsRestoreDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
-
-        /// <summary>Permanently deletes a dialog</summary>
-        /// <remarks>
-        /// Deletes a given dialog (hard delete).
-        /// 
-        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
-        /// </remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>204</term>
-        /// <description>The dialog aggregate was deleted successfully.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to delete the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>412</term>
-        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/problem+json")]
-        [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/purge")]
-        Task<IApiResponse> V1ServiceOwnerDialogsPurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog>>> V1ServiceOwnerDialogsQueriesSearchSeenLogsDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -851,7 +531,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogActivitiesQueriesSearch_Activity>>> V1ServiceOwnerDialogActivitiesSearchDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchActivities_Activity>>> V1ServiceOwnerDialogsQueriesSearchActivitiesDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Adds an activity to a dialog's activity history</summary>
         /// <remarks>
@@ -906,7 +586,84 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<string>> V1ServiceOwnerDialogActivitiesCreateDialogActivity(System.Guid dialogId, [Body, AliasAs("CreateActivityRequest")] V1ServiceOwnerDialogActivitiesCreate_ActivityRequest createActivityRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(System.Guid dialogId, [Body, AliasAs("CreateActivityRequest")] V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest createActivityRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a list of dialogs</summary>
+        /// <remarks>
+        /// Performs a search for dialogs, returning a paginated list of dialogs.
+        /// 
+        /// * All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00+01:00
+        /// * See "continuationToken" in the response for how to get the next page of results.
+        /// * hasNextPage will be set to true if there are more items to get.
+        /// </remarks>
+        /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog list.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json")]
+        [Get("/api/v1/serviceowner/dialogs")]
+        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsQueriesSearchDialog([Query] V1ServiceOwnerDialogsQueriesSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
+
+        /// <summary>Creates a new dialog</summary>
+        /// <remarks>
+        /// The dialog is created with the given configuration.
+        /// 
+        /// For detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>201</term>
+        /// <description>The UUID of the created dialog aggregate. A relative URL to the newly created activity is set in the \"Location\" header.</description>
+        /// </item>
+        /// <item>
+        /// <term>204</term>
+        /// <description>No Content</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Dialog with IdempotentKey 01941821-ffca-73a1-9335-435a882be014 has already been created.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Post("/api/v1/serviceowner/dialogs")]
+        Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
 
         /// <summary>Returns a boolean value based on conditions used to determine if a notification is to be sent</summary>
         /// <remarks>Used by Altinn Notification only. Takes a dialogId and returns a boolean value based on conditions used to determine if a notification is to be sent.</remarks>
@@ -934,7 +691,77 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification")]
-        Task<IApiResponse<V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationCondition>> V1ServiceOwnerDialogActivitiesNotificationConditionNotificationCondition(System.Guid dialogId, [Query] V1ServiceOwnerDialogActivitiesNotificationConditionNotificationConditionQueryParams queryParams, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition>> V1ServiceOwnerDialogsQueriesNotificationConditionNotificationCondition(System.Guid dialogId, [Query] V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams queryParams, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a single dialog transmission</summary>
+        /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog transmission.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The specified dialog ID or transmission ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a single dialog seen log record</summary>
+        /// <remarks>Gets a single dialog seen log record.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog seen log record.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog>> V1ServiceOwnerDialogsQueriesGetSeenLogDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
@@ -969,7 +796,270 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogActivitiesQueriesGet_Activity>> V1ServiceOwnerDialogActivitiesGetDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetActivity_Activity>> V1ServiceOwnerDialogsQueriesGetActivityDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a single dialog</summary>
+        /// <remarks>
+        /// Gets a single dialog aggregate.
+        /// 
+        /// Note that this operation may return deleted dialogs (see the field `DeletedAt`).
+        /// </remarks>
+        /// <param name="endUserId">Filter by end user id</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog aggregate.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}")]
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> V1ServiceOwnerDialogsQueriesGetDialog(System.Guid dialogId, [Query] string endUserId, CancellationToken cancellationToken = default);
+
+        /// <summary>Replaces a dialog</summary>
+        /// <remarks>
+        /// Replaces a given dialog with the supplied model.
+        /// 
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog aggregate was updated successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Put("/api/v1/serviceowner/dialogs/{dialogId}")]
+        Task<IApiResponse> V1ServiceOwnerDialogsCommandsUpdateDialog(System.Guid dialogId, [Body] V1ServiceOwnerDialogsCommandsUpdate_Dialog dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Deletes a dialog</summary>
+        /// <remarks>
+        /// Deletes a given dialog (soft delete).
+        /// 
+        /// Note that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.
+        /// If end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.
+        /// 
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog aggregate was deleted successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to delete the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json")]
+        [Delete("/api/v1/serviceowner/dialogs/{dialogId}")]
+        Task<IApiResponse> V1ServiceOwnerDialogsCommandsDeleteDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Patch a single dialog</summary>
+        /// <remarks>
+        /// Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.
+        /// See [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.
+        /// 
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>Patch was successfully applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \\\"digdir:dialogporten.serviceprovider\\\"</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to update a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found or is deleted</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>The dialog with the given key is removed</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied Revision does not match the current Revision of the dialog</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json", "Content-Type: application/json")]
+        [Patch("/api/v1/serviceowner/dialogs/{dialogId}")]
+        Task<IApiResponse> V1ServiceOwnerDialogsPatchDialog(System.Guid dialogId, [Body] IEnumerable<JsonPatchOperations_Operation> patchDocument, [Header("If-Match")] System.Guid? etag, CancellationToken cancellationToken = default);
+
+        /// <summary>Restore a dialog</summary>
+        /// <remarks>Restore a dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog aggregate was restored successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json")]
+        [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/restore")]
+        Task<IApiResponse> V1ServiceOwnerDialogsCommandsRestoreDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Permanently deletes a dialog</summary>
+        /// <remarks>
+        /// Deletes a given dialog (hard delete).
+        /// 
+        /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>204</term>
+        /// <description>The dialog aggregate was deleted successfully.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to delete the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>412</term>
+        /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/problem+json")]
+        [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/purge")]
+        Task<IApiResponse> V1ServiceOwnerDialogsCommandsPurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
     }
 
 }
@@ -1048,7 +1138,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerServiceOwnerContextServiceOwnerLabelsCreate_Label
+    public partial class V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label
     {
 
         [JsonPropertyName("value")]
@@ -1057,7 +1147,73 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsQueriesSearch_Transmission
+    public partial class V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
+    {
+
+        [JsonPropertyName("systemLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogEndUserContextsEntities_SystemLabel
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Default")]
+        Default = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Bin")]
+        Bin = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
+        Archive = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel
+    {
+        /// <summary>
+        /// List of target dialog ids with optional revision ids
+        /// </summary>
+
+        [JsonPropertyName("dialogs")]
+        public ICollection<V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_DialogRevision> Dialogs { get; set; }
+
+        /// <summary>
+        /// List of system labels to set on target dialogs
+        /// </summary>
+
+        [JsonPropertyName("systemLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_DialogRevision
+    {
+        /// <summary>
+        /// Target dialog id for system labels
+        /// </summary>
+
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; }
+
+        /// <summary>
+        /// Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.
+        /// </summary>
+
+        [JsonPropertyName("endUserContextRevision")]
+        public System.Guid? EndUserContextRevision { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission
     {
         /// <summary>
         /// The unique identifier for the transmission in UUIDv7 format.
@@ -1128,14 +1284,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogTransmissionsQueriesSearch_Content Content { get; set; }
+        public V1ServiceOwnerDialogsQueriesSearchTransmissions_Content Content { get; set; }
 
         /// <summary>
         /// The attachments associated with the transmission.
         /// </summary>
 
         [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogTransmissionsQueriesSearch_Attachment> Attachments { get; set; }
+        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment> Attachments { get; set; }
 
     }
 
@@ -1209,7 +1365,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsQueriesSearch_Content
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Content
     {
         /// <summary>
         /// The title of the content.
@@ -1273,7 +1429,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsQueriesSearch_Attachment
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment
     {
         /// <summary>
         /// The unique identifier for the attachment in UUIDv7 format.
@@ -1294,12 +1450,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("urls")]
-        public ICollection<V1ServiceOwnerDialogTransmissionsQueriesSearch_AttachmentUrl> Urls { get; set; }
+        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl> Urls { get; set; }
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsQueriesSearch_AttachmentUrl
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl
     {
         /// <summary>
         /// The unique identifier for the attachment URL in UUIDv7 format.
@@ -1346,332 +1502,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsQueriesGet_Transmission
-    {
-        /// <summary>
-        /// The unique identifier for the transmission in UUIDv7 format.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The date and time when the transmission was created.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
-
-        /// <summary>
-        /// The authorization attribute associated with the transmission.
-        /// </summary>
-
-        [JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// The extended type URI for the transmission.
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// The unique identifier for the related transmission, if any.
-        /// </summary>
-
-        [JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
-
-        /// <summary>
-        /// The date and time when the transmission was deleted, if applicable.
-        /// </summary>
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        /// <summary>
-        /// The type of the transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
-
-        /// <summary>
-        /// The sender actor information for the transmission.
-        /// </summary>
-
-        [JsonPropertyName("sender")]
-        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
-
-        /// <summary>
-        /// The content of the transmission.
-        /// </summary>
-
-        [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogTransmissionsQueriesGet_Content Content { get; set; }
-
-        /// <summary>
-        /// The attachments associated with the transmission.
-        /// </summary>
-
-        [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogTransmissionsQueriesGet_Attachment> Attachments { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsQueriesGet_Content
-    {
-        /// <summary>
-        /// The title of the content.
-        /// </summary>
-
-        [JsonPropertyName("title")]
-        public V1CommonContent_ContentValue Title { get; set; }
-
-        /// <summary>
-        /// The summary of the content.
-        /// </summary>
-
-        [JsonPropertyName("summary")]
-        public V1CommonContent_ContentValue Summary { get; set; }
-
-        /// <summary>
-        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
-        /// </summary>
-
-        [JsonPropertyName("contentReference")]
-        public V1CommonContent_ContentValue ContentReference { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsQueriesGet_Attachment
-    {
-        /// <summary>
-        /// The unique identifier for the attachment in UUIDv7 format.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The display name of the attachment that should be used in GUIs.
-        /// </summary>
-
-        [JsonPropertyName("displayName")]
-        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
-
-        /// <summary>
-        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("urls")]
-        public ICollection<V1ServiceOwnerDialogTransmissionsQueriesGet_AttachmentUrl> Urls { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsQueriesGet_AttachmentUrl
-    {
-        /// <summary>
-        /// The unique identifier for the attachment URL in UUIDv7 format.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
-        /// <br/>not authorized to access the transmission.
-        /// </summary>
-
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The media type of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
-
-        /// <summary>
-        /// The type of consumer the URL is intended for.
-        /// </summary>
-
-        [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogTransmissionsCreate_TransmissionRequest
-    {
-        /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
-        /// <br/>If not supplied, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
-        /// <br/>If not supplied, the current date /time will be used.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
-
-        /// <summary>
-        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
-        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
-        /// <br/>Can also be used to refer to other service policies.
-        /// </summary>
-
-        [JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
-        /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// Arbitrary string with a service-specific reference to an external system or service.
-        /// </summary>
-
-        [JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
-
-        /// <summary>
-        /// Reference to any other transmission that this transmission is related to.
-        /// </summary>
-
-        [JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
-
-        /// <summary>
-        /// The type of transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
-
-        /// <summary>
-        /// The actor that sent the transmission.
-        /// </summary>
-
-        [JsonPropertyName("sender")]
-        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
-
-        /// <summary>
-        /// The transmission unstructured text content.
-        /// </summary>
-
-        [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
-
-        /// <summary>
-        /// The transmission-level attachments.
-        /// </summary>
-
-        [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent
-    {
-        /// <summary>
-        /// The transmission title. Must be text/plain.
-        /// </summary>
-
-        [JsonPropertyName("title")]
-        public V1CommonContent_ContentValue Title { get; set; }
-
-        /// <summary>
-        /// The transmission summary.
-        /// </summary>
-
-        [JsonPropertyName("summary")]
-        public V1CommonContent_ContentValue Summary { get; set; }
-
-        /// <summary>
-        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-        /// </summary>
-
-        [JsonPropertyName("contentReference")]
-        public V1CommonContent_ContentValue ContentReference { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment
-    {
-        /// <summary>
-        /// A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// The display name of the attachment that should be used in GUIs.
-        /// </summary>
-
-        [JsonPropertyName("displayName")]
-        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
-
-        /// <summary>
-        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("urls")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachmentUrl> Urls { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachmentUrl
-    {
-        /// <summary>
-        /// The fully qualified URL of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The media type of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
-
-        /// <summary>
-        /// The type of consumer the URL is intended for.
-        /// </summary>
-
-        [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogSeenLogsQueriesSearch_SeenLog
+    public partial class V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog
     {
 
         [JsonPropertyName("id")]
@@ -1689,697 +1520,27 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogSeenLogsQueriesGet_SeenLog
+    public partial class V1ServiceOwnerDialogsQueriesSearchActivities_Activity
     {
 
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
 
-        [JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
-
-        [JsonPropertyName("seenBy")]
-        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
-
-        [JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_Dialog
-    {
-        /// <summary>
-        /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
-        /// <br/>to a natural completion (successful or not).
-        /// </summary>
-
-        [JsonPropertyName("progress")]
-        public int? Progress { get; set; }
-
-        /// <summary>
-        /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
-        /// <br/>the dialog to further specify the "status" enum.
-        /// </summary>
-
-        [JsonPropertyName("extendedStatus")]
-        public string ExtendedStatus { get; set; }
-
-        /// <summary>
-        /// Arbitrary string with a service-specific reference to an external system or service.
-        /// </summary>
-
-        [JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
-
-        /// <summary>
-        /// The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be
-        /// <br/>immediately available.
-        /// </summary>
-
-        [JsonPropertyName("visibleFrom")]
-        public System.DateTimeOffset? VisibleFrom { get; set; }
-
-        /// <summary>
-        /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
-        /// </summary>
-
-        [JsonPropertyName("dueAt")]
-        public System.DateTimeOffset? DueAt { get; set; }
-
-        /// <summary>
-        /// Optional process identifier used to indicate a business process this dialog belongs to.
-        /// </summary>
-
-        [JsonPropertyName("process")]
-        public string Process { get; set; }
-
-        /// <summary>
-        /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
-        /// </summary>
-
-        [JsonPropertyName("precedingProcess")]
-        public string PrecedingProcess { get; set; }
-
-        /// <summary>
-        /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
-        /// <br/>            
-        /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
-        /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.
-        /// </summary>
-
-        [JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
-
-        /// <summary>
-        /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
-        /// <br/>When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
-        /// <br/>If any Transmissions were created without Content while this property was true, the flag cannot be reverted to false.
-        /// </summary>
-
-        [JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
-
-        /// <summary>
-        /// The aggregated status of the dialog.
-        /// </summary>
-
-        [JsonPropertyName("status")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntities_DialogStatus Status { get; set; }
-
-        /// <summary>
-        /// The dialog unstructured text content.
-        /// </summary>
-
-        [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsCommandsUpdate_Content Content { get; set; }
-
-        /// <summary>
-        /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
-        /// </summary>
-
-        [JsonPropertyName("searchTags")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Tag> SearchTags { get; set; }
-
-        /// <summary>
-        /// The attachments associated with the dialog (on an aggregate level).
-        /// </summary>
-
-        [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Attachment> Attachments { get; set; }
-
-        /// <summary>
-        /// The immutable list of transmissions associated with the dialog. When updating via PUT, any transmissions
-        /// <br/>added here will be appended to the existing list of transmissions.
-        /// </summary>
-
-        [JsonPropertyName("transmissions")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Transmission> Transmissions { get; set; }
-
-        /// <summary>
-        /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
-        /// </summary>
-
-        [JsonPropertyName("guiActions")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_GuiAction> GuiActions { get; set; }
-
-        /// <summary>
-        /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
-        /// </summary>
-
-        [JsonPropertyName("apiActions")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_ApiAction> ApiActions { get; set; }
-
-        /// <summary>
-        /// An immutable list of activities associated with the dialog. When updating via PUT, any activities added here
-        /// <br/>will be appended to the existing list of activities.
-        /// </summary>
-
-        [JsonPropertyName("activities")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Activity> Activities { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntities_DialogStatus
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
-        NotApplicable = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
-        InProgress = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
-        Draft = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
-        Awaiting = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
-        RequiresAttention = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
-        Completed = 5,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_Content
-    {
-        /// <summary>
-        /// The title of the dialog. Must be text/plain.
-        /// </summary>
-
-        [JsonPropertyName("title")]
-        public V1CommonContent_ContentValue Title { get; set; }
-
-        /// <summary>
-        /// An optional non-sensitive title of the dialog.
-        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
-        /// </summary>
-
-        [JsonPropertyName("nonSensitiveTitle")]
-        public V1CommonContent_ContentValue NonSensitiveTitle { get; set; }
-
-        /// <summary>
-        /// A short summary of the dialog and its current state. Must be text/plain.
-        /// </summary>
-
-        [JsonPropertyName("summary")]
-        public V1CommonContent_ContentValue Summary { get; set; }
-
-        /// <summary>
-        /// An optional non-sensitive summary of the dialog and its current state.
-        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
-        /// </summary>
-
-        [JsonPropertyName("nonSensitiveSummary")]
-        public V1CommonContent_ContentValue NonSensitiveSummary { get; set; }
-
-        /// <summary>
-        /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.
-        /// </summary>
-
-        [JsonPropertyName("senderName")]
-        public V1CommonContent_ContentValue SenderName { get; set; }
-
-        /// <summary>
-        /// Additional information about the dialog, this may contain Markdown.
-        /// </summary>
-
-        [JsonPropertyName("additionalInfo")]
-        public V1CommonContent_ContentValue AdditionalInfo { get; set; }
-
-        /// <summary>
-        /// Used as the human-readable label used to describe the "ExtendedStatus" field. Must be text/plain.
-        /// </summary>
-
-        [JsonPropertyName("extendedStatus")]
-        public V1CommonContent_ContentValue ExtendedStatus { get; set; }
-
-        /// <summary>
-        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-        /// </summary>
-
-        [JsonPropertyName("mainContentReference")]
-        public V1CommonContent_ContentValue MainContentReference { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_Tag
-    {
-        /// <summary>
-        /// A search tag value.
-        /// </summary>
-
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_Attachment
-    {
-        /// <summary>
-        /// A self-defined UUIDv7 may be provided to support idempotent additions of attachments. If not provided, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// The display name of the attachment that should be used in GUIs.
-        /// </summary>
-
-        [JsonPropertyName("displayName")]
-        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
-
-        /// <summary>
-        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("urls")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl> Urls { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl
-    {
-        /// <summary>
-        /// A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The media type of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
-
-        /// <summary>
-        /// The type of consumer the URL is intended for.
-        /// </summary>
-
-        [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_Transmission
-    {
-        /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
-        /// <br/>If not supplied, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
-        /// <br/>If not supplied, the current date /time will be used.
-        /// </summary>
-
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset CreatedAt { get; set; }
 
-        /// <summary>
-        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
-        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
-        /// <br/>Can also be used to refer to other service policies.
-        /// </summary>
-
-        [JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
-        /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
-        /// </summary>
-
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// Arbitrary string with a service-specific reference to an external system or service.
-        /// </summary>
-
-        [JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
-
-        /// <summary>
-        /// Reference to any other transmission that this transmission is related to.
-        /// </summary>
-
-        [JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
-
-        /// <summary>
-        /// The type of transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
-
-        /// <summary>
-        /// The actor that sent the transmission.
-        /// </summary>
-
-        [JsonPropertyName("sender")]
-        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
-
-        /// <summary>
-        /// The transmission unstructured text content.
-        /// </summary>
-
-        [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
-
-        /// <summary>
-        /// The transmission-level attachments.
-        /// </summary>
-
-        [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_GuiAction
-    {
-        /// <summary>
-        /// A self-defined UUIDv7 may be provided to support idempotent additions of Gui Actions. If not provided, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
-        /// </summary>
-
-        [JsonPropertyName("action")]
-        public string Action { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to
-        /// <br/>"urn:dialogporten:unauthorized" if the user is not authorized to perform the action.
-        /// </summary>
-
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
-        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
-        /// <br/>Can also be used to refer to other service policies.
-        /// </summary>
-
-        [JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
-        /// <br/>for delete actions.
-        /// </summary>
-
-        [JsonPropertyName("isDeleteDialogAction")]
-        public bool IsDeleteDialogAction { get; set; }
-
-        /// <summary>
-        /// The HTTP method that the frontend should use when redirecting the user.
-        /// </summary>
-
-        [JsonPropertyName("httpMethod")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Http_HttpVerb? HttpMethod { get; set; }
-
-        /// <summary>
-        /// Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action
-        /// <br/>priority.
-        /// </summary>
-
-        [JsonPropertyName("priority")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesActions_DialogGuiActionPriority Priority { get; set; }
-
-        /// <summary>
-        /// The title of the action, this should be short and in verb form. Must be text/plain.
-        /// </summary>
-
-        [JsonPropertyName("title")]
-        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
-
-        /// <summary>
-        /// If there should be a prompt asking the user for confirmation before the action is executed,
-        /// <br/>this field should contain the prompt text.
-        /// </summary>
-
-        [JsonPropertyName("prompt")]
-        public ICollection<V1CommonLocalizations_Localization> Prompt { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Http_HttpVerb
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"GET")]
-        GET = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"POST")]
-        POST = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PUT")]
-        PUT = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PATCH")]
-        PATCH = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DELETE")]
-        DELETE = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"HEAD")]
-        HEAD = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"OPTIONS")]
-        OPTIONS = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TRACE")]
-        TRACE = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"CONNECT")]
-        CONNECT = 8,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntitiesActions_DialogGuiActionPriority
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Primary")]
-        Primary = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Secondary")]
-        Secondary = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Tertiary")]
-        Tertiary = 2,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_ApiAction
-    {
-        /// <summary>
-        /// A self-defined UUIDv7 may be provided to support idempotent additions of Api Actions. If not provided, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
-        /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// </summary>
-
-        [JsonPropertyName("action")]
-        public string Action { get; set; }
-
-        /// <summary>
-        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
-        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
-        /// <br/>Can also be used to refer to other service policies.
-        /// </summary>
-
-        [JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// The logical name of the operation the API action refers to.
-        /// </summary>
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        /// <summary>
-        /// The endpoints associated with the action.
-        /// </summary>
-
-        [JsonPropertyName("endpoints")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_ApiActionEndpoint> Endpoints { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_ApiActionEndpoint
-    {
-        /// <summary>
-        /// A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// Arbitrary string indicating the version of the endpoint.
-        /// </summary>
-
-        [JsonPropertyName("version")]
-        public string Version { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the API endpoint.
-        /// </summary>
-
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The HTTP method that the endpoint expects for this action.
-        /// </summary>
-
-        [JsonPropertyName("httpMethod")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Http_HttpVerb HttpMethod { get; set; }
-
-        /// <summary>
-        /// Link to documentation for the endpoint, providing documentation for integrators. Should be a URL to a
-        /// <br/>human-readable page.
-        /// </summary>
-
-        [JsonPropertyName("documentationUrl")]
-        public System.Uri DocumentationUrl { get; set; }
-
-        /// <summary>
-        /// Link to the request schema for the endpoint. Used to provide documentation for integrators.
-        /// <br/>Dialogporten will not validate information on this endpoint.
-        /// </summary>
-
-        [JsonPropertyName("requestSchema")]
-        public System.Uri RequestSchema { get; set; }
-
-        /// <summary>
-        /// Link to the response schema for the endpoint. Used to provide documentation for integrators.
-        /// <br/>Dialogporten will not validate information on this endpoint.
-        /// </summary>
-
-        [JsonPropertyName("responseSchema")]
-        public System.Uri ResponseSchema { get; set; }
-
-        /// <summary>
-        /// Boolean indicating if the endpoint is deprecated.
-        /// </summary>
-
-        [JsonPropertyName("deprecated")]
-        public bool Deprecated { get; set; }
-
-        /// <summary>
-        /// Date and time when the endpoint will no longer function. Only set if the endpoint is deprecated. Dialogporten
-        /// <br/>will not enforce this date.
-        /// </summary>
-
-        [JsonPropertyName("sunsetAt")]
-        public System.DateTimeOffset? SunsetAt { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_Activity
-    {
-        /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
-        /// <br/>If not supplied, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
-        /// <br/>If not supplied, the current date /time will be used.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
-
-        /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// The type of transmission.
-        /// </summary>
 
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
 
-        /// <summary>
-        /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
-        /// <br/>Must be present in the request body.
-        /// </summary>
+        [JsonPropertyName("deletedAt")]
+        public System.DateTimeOffset? DeletedAt { get; set; }
 
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }
-
-        /// <summary>
-        /// The actor that performed the activity.
-        /// </summary>
-
-        [JsonPropertyName("performedBy")]
-        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
-
-        /// <summary>
-        /// Unstructured text describing the activity. Only set if the activity type is "Information".
-        /// </summary>
-
-        [JsonPropertyName("description")]
-        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
 
     }
 
@@ -2612,14 +1773,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public DialogsEntities_DialogStatus Status { get; set; }
 
         /// <summary>
-        /// Current display state.
-        /// </summary>
-
-        [JsonPropertyName("systemLabel")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
-
-        /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
 
@@ -2640,8 +1793,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastUpdate { get; set; }
 
+        /// <summary>
+        /// Metadata about the dialog owned by the service owner.
+        /// </summary>
+
         [JsonPropertyName("serviceOwnerContext")]
         public V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
+
+        /// <summary>
+        /// Metadata about the dialog owned by end-users.
+        /// </summary>
+
+        [JsonPropertyName("endUserContext")]
+        public V1ServiceOwnerDialogsQueriesSearch_DialogEndUserContext EndUserContext { get; set; }
 
         /// <summary>
         /// The content of the dialog in search results.
@@ -2653,17 +1817,26 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogEndUserContextsEntities_SystemLabel
+    public enum DialogsEntities_DialogStatus
     {
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Default")]
-        Default = 0,
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 0,
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Bin")]
-        Bin = 1,
+        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
+        InProgress = 1,
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
-        Archive = 2,
+        [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
+        Draft = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
+        RequiresAttention = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
+        Completed = 5,
 
     }
 
@@ -2770,6 +1943,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext
     {
         /// <summary>
+        /// The unique identifier for the service owner context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; }
+
+        /// <summary>
         /// A list of labels, not visible in end-user APIs.
         /// </summary>
 
@@ -2787,6 +1967,27 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("value")]
         public string Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearch_DialogEndUserContext
+    {
+        /// <summary>
+        /// The unique identifier for the end user context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; }
+
+        /// <summary>
+        /// System defined labels used to categorize dialogs.
+        /// </summary>
+
+        [JsonPropertyName("systemLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
 
     }
 
@@ -2836,6 +2037,284 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("extendedStatus")]
         public V1CommonContent_ContentValue ExtendedStatus { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition
+    {
+
+        [JsonPropertyName("sendNotification")]
+        public bool SendNotification { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class OrderSetOfTOrderDefinitionAndTTarget
+    {
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
+    {
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum V1Common_DeletedFilter
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Exclude")]
+        Exclude = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Include")]
+        Include = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Only")]
+        Only = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Transmission
+    {
+        /// <summary>
+        /// The unique identifier for the transmission in UUIDv7 format.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// The date and time when the transmission was created.
+        /// </summary>
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        /// <summary>
+        /// The authorization attribute associated with the transmission.
+        /// </summary>
+
+        [JsonPropertyName("authorizationAttribute")]
+        public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// The extended type URI for the transmission.
+        /// </summary>
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// The unique identifier for the related transmission, if any.
+        /// </summary>
+
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; }
+
+        /// <summary>
+        /// The date and time when the transmission was deleted, if applicable.
+        /// </summary>
+
+        [JsonPropertyName("deletedAt")]
+        public System.DateTimeOffset? DeletedAt { get; set; }
+
+        /// <summary>
+        /// The type of the transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
+
+        /// <summary>
+        /// The sender actor information for the transmission.
+        /// </summary>
+
+        [JsonPropertyName("sender")]
+        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
+
+        /// <summary>
+        /// The content of the transmission.
+        /// </summary>
+
+        [JsonPropertyName("content")]
+        public V1ServiceOwnerDialogsQueriesGetTransmission_Content Content { get; set; }
+
+        /// <summary>
+        /// The attachments associated with the transmission.
+        /// </summary>
+
+        [JsonPropertyName("attachments")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_Attachment> Attachments { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotExists")]
+        NotExists = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Exists")]
+        Exists = 1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Content
+    {
+        /// <summary>
+        /// The title of the content.
+        /// </summary>
+
+        [JsonPropertyName("title")]
+        public V1CommonContent_ContentValue Title { get; set; }
+
+        /// <summary>
+        /// The summary of the content.
+        /// </summary>
+
+        [JsonPropertyName("summary")]
+        public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
+        /// </summary>
+
+        [JsonPropertyName("contentReference")]
+        public V1CommonContent_ContentValue ContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Attachment
+    {
+        /// <summary>
+        /// The unique identifier for the attachment in UUIDv7 format.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// The display name of the attachment that should be used in GUIs.
+        /// </summary>
+
+        [JsonPropertyName("displayName")]
+        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("urls")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl> Urls { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl
+    {
+        /// <summary>
+        /// The unique identifier for the attachment URL in UUIDv7 format.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
+        /// <br/>not authorized to access the transmission.
+        /// </summary>
+
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The media type of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// The type of consumer the URL is intended for.
+        /// </summary>
+
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog
+    {
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; }
+
+        [JsonPropertyName("seenBy")]
+        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
+
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetActivity_Activity
+    {
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; }
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
+
+        [JsonPropertyName("deletedAt")]
+        public System.DateTimeOffset? DeletedAt { get; set; }
+
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; }
+
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
+
+        [JsonPropertyName("description")]
+        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
 
     }
 
@@ -2997,14 +2476,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
-        /// Current display state.
-        /// </summary>
-
-        [JsonPropertyName("systemLabel")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
-
-        /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
 
@@ -3060,53 +2531,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastUpdate { get; set; }
 
+        /// <summary>
+        /// Metadata about the dialog owned by the service owner.
+        /// </summary>
+
         [JsonPropertyName("serviceOwnerContext")]
         public V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
 
-    }
+        /// <summary>
+        /// Metadata about the dialog owned by end-users.
+        /// </summary>
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class OrderSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum V1Common_DeletedFilter
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Exclude")]
-        Exclude = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Include")]
-        Include = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Only")]
-        Only = 2,
+        [JsonPropertyName("endUserContext")]
+        public V1ServiceOwnerDialogsQueriesGet_DialogEndUserContext EndUserContext { get; set; }
 
     }
 
@@ -3497,6 +2934,54 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntitiesActions_DialogGuiActionPriority
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Primary")]
+        Primary = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Secondary")]
+        Secondary = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Tertiary")]
+        Tertiary = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Http_HttpVerb
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"GET")]
+        GET = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"POST")]
+        POST = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PUT")]
+        PUT = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PATCH")]
+        PATCH = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DELETE")]
+        DELETE = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"HEAD")]
+        HEAD = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"OPTIONS")]
+        OPTIONS = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"TRACE")]
+        TRACE = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CONNECT")]
+        CONNECT = 8,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogApiAction
     {
         /// <summary>
@@ -3731,6 +3216,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("serviceOwnerLabels")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel> ServiceOwnerLabels { get; set; }
 
+        /// <summary>
+        /// The unique identifier for the service owner context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3742,6 +3234,852 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("value")]
         public string Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGet_DialogEndUserContext
+    {
+        /// <summary>
+        /// The unique identifier for the end user context revision in UUIDv4 format.
+        /// </summary>
+
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; }
+
+        /// <summary>
+        /// System defined labels used to categorize dialogs.
+        /// </summary>
+
+        [JsonPropertyName("systemLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_Dialog
+    {
+        /// <summary>
+        /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
+        /// <br/>to a natural completion (successful or not).
+        /// </summary>
+
+        [JsonPropertyName("progress")]
+        public int? Progress { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
+        /// <br/>the dialog to further specify the "status" enum.
+        /// </summary>
+
+        [JsonPropertyName("extendedStatus")]
+        public string ExtendedStatus { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
+
+        /// <summary>
+        /// The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be
+        /// <br/>immediately available.
+        /// </summary>
+
+        [JsonPropertyName("visibleFrom")]
+        public System.DateTimeOffset? VisibleFrom { get; set; }
+
+        /// <summary>
+        /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
+        /// </summary>
+
+        [JsonPropertyName("dueAt")]
+        public System.DateTimeOffset? DueAt { get; set; }
+
+        /// <summary>
+        /// Optional process identifier used to indicate a business process this dialog belongs to.
+        /// </summary>
+
+        [JsonPropertyName("process")]
+        public string Process { get; set; }
+
+        /// <summary>
+        /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
+        /// </summary>
+
+        [JsonPropertyName("precedingProcess")]
+        public string PrecedingProcess { get; set; }
+
+        /// <summary>
+        /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
+        /// <br/>            
+        /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
+        /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.
+        /// </summary>
+
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
+
+        /// <summary>
+        /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
+        /// <br/>When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
+        /// <br/>If any Transmissions were created without Content while this property was true, the flag cannot be reverted to false.
+        /// </summary>
+
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; }
+
+        /// <summary>
+        /// The aggregated status of the dialog.
+        /// </summary>
+
+        [JsonPropertyName("status")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntities_DialogStatus Status { get; set; }
+
+        /// <summary>
+        /// The dialog unstructured text content.
+        /// </summary>
+
+        [JsonPropertyName("content")]
+        public V1ServiceOwnerDialogsCommandsUpdate_Content Content { get; set; }
+
+        /// <summary>
+        /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
+        /// </summary>
+
+        [JsonPropertyName("searchTags")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Tag> SearchTags { get; set; }
+
+        /// <summary>
+        /// The attachments associated with the dialog (on an aggregate level).
+        /// </summary>
+
+        [JsonPropertyName("attachments")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Attachment> Attachments { get; set; }
+
+        /// <summary>
+        /// The immutable list of transmissions associated with the dialog. When updating via PUT, any transmissions
+        /// <br/>added here will be appended to the existing list of transmissions.
+        /// </summary>
+
+        [JsonPropertyName("transmissions")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Transmission> Transmissions { get; set; }
+
+        /// <summary>
+        /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
+        /// </summary>
+
+        [JsonPropertyName("guiActions")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_GuiAction> GuiActions { get; set; }
+
+        /// <summary>
+        /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
+        /// </summary>
+
+        [JsonPropertyName("apiActions")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_ApiAction> ApiActions { get; set; }
+
+        /// <summary>
+        /// An immutable list of activities associated with the dialog. When updating via PUT, any activities added here
+        /// <br/>will be appended to the existing list of activities.
+        /// </summary>
+
+        [JsonPropertyName("activities")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Activity> Activities { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_Content
+    {
+        /// <summary>
+        /// The title of the dialog. Must be text/plain.
+        /// </summary>
+
+        [JsonPropertyName("title")]
+        public V1CommonContent_ContentValue Title { get; set; }
+
+        /// <summary>
+        /// An optional non-sensitive title of the dialog.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveTitle")]
+        public V1CommonContent_ContentValue NonSensitiveTitle { get; set; }
+
+        /// <summary>
+        /// A short summary of the dialog and its current state. Must be text/plain.
+        /// </summary>
+
+        [JsonPropertyName("summary")]
+        public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// An optional non-sensitive summary of the dialog and its current state.
+        /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+        /// </summary>
+
+        [JsonPropertyName("nonSensitiveSummary")]
+        public V1CommonContent_ContentValue NonSensitiveSummary { get; set; }
+
+        /// <summary>
+        /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.
+        /// </summary>
+
+        [JsonPropertyName("senderName")]
+        public V1CommonContent_ContentValue SenderName { get; set; }
+
+        /// <summary>
+        /// Additional information about the dialog, this may contain Markdown.
+        /// </summary>
+
+        [JsonPropertyName("additionalInfo")]
+        public V1CommonContent_ContentValue AdditionalInfo { get; set; }
+
+        /// <summary>
+        /// Used as the human-readable label used to describe the "ExtendedStatus" field. Must be text/plain.
+        /// </summary>
+
+        [JsonPropertyName("extendedStatus")]
+        public V1CommonContent_ContentValue ExtendedStatus { get; set; }
+
+        /// <summary>
+        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
+        /// </summary>
+
+        [JsonPropertyName("mainContentReference")]
+        public V1CommonContent_ContentValue MainContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_Tag
+    {
+        /// <summary>
+        /// A search tag value.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_Attachment
+    {
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of attachments. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// The display name of the attachment that should be used in GUIs.
+        /// </summary>
+
+        [JsonPropertyName("displayName")]
+        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("urls")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl> Urls { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl
+    {
+        /// <summary>
+        /// A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The media type of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// The type of consumer the URL is intended for.
+        /// </summary>
+
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_Transmission
+    {
+        /// <summary>
+        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// <br/>If not supplied, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// If supplied, overrides the creating date and time for the transmission.
+        /// <br/>If not supplied, the current date /time will be used.
+        /// </summary>
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        /// <summary>
+        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
+        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+        /// <br/>            
+        /// <br/>Can also be used to refer to other service policies.
+        /// </summary>
+
+        [JsonPropertyName("authorizationAttribute")]
+        public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// <br/>            
+        /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
+        /// </summary>
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
+
+        /// <summary>
+        /// Reference to any other transmission that this transmission is related to.
+        /// </summary>
+
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; }
+
+        /// <summary>
+        /// The type of transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
+
+        /// <summary>
+        /// The actor that sent the transmission.
+        /// </summary>
+
+        [JsonPropertyName("sender")]
+        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
+
+        /// <summary>
+        /// The transmission unstructured text content.
+        /// </summary>
+
+        [JsonPropertyName("content")]
+        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
+
+        /// <summary>
+        /// The transmission-level attachments.
+        /// </summary>
+
+        [JsonPropertyName("attachments")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent
+    {
+        /// <summary>
+        /// The transmission title. Must be text/plain.
+        /// </summary>
+
+        [JsonPropertyName("title")]
+        public V1CommonContent_ContentValue Title { get; set; }
+
+        /// <summary>
+        /// The transmission summary.
+        /// </summary>
+
+        [JsonPropertyName("summary")]
+        public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
+        /// </summary>
+
+        [JsonPropertyName("contentReference")]
+        public V1CommonContent_ContentValue ContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment
+    {
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// The display name of the attachment that should be used in GUIs.
+        /// </summary>
+
+        [JsonPropertyName("displayName")]
+        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("urls")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachmentUrl> Urls { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachmentUrl
+    {
+        /// <summary>
+        /// The fully qualified URL of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The media type of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// The type of consumer the URL is intended for.
+        /// </summary>
+
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_GuiAction
+    {
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of Gui Actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
+        /// </summary>
+
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to
+        /// <br/>"urn:dialogporten:unauthorized" if the user is not authorized to perform the action.
+        /// </summary>
+
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
+        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+        /// <br/>            
+        /// <br/>Can also be used to refer to other service policies.
+        /// </summary>
+
+        [JsonPropertyName("authorizationAttribute")]
+        public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
+        /// <br/>for delete actions.
+        /// </summary>
+
+        [JsonPropertyName("isDeleteDialogAction")]
+        public bool IsDeleteDialogAction { get; set; }
+
+        /// <summary>
+        /// The HTTP method that the frontend should use when redirecting the user.
+        /// </summary>
+
+        [JsonPropertyName("httpMethod")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Http_HttpVerb? HttpMethod { get; set; }
+
+        /// <summary>
+        /// Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action
+        /// <br/>priority.
+        /// </summary>
+
+        [JsonPropertyName("priority")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesActions_DialogGuiActionPriority Priority { get; set; }
+
+        /// <summary>
+        /// The title of the action, this should be short and in verb form. Must be text/plain.
+        /// </summary>
+
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
+        /// <summary>
+        /// If there should be a prompt asking the user for confirmation before the action is executed,
+        /// <br/>this field should contain the prompt text.
+        /// </summary>
+
+        [JsonPropertyName("prompt")]
+        public ICollection<V1CommonLocalizations_Localization> Prompt { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_ApiAction
+    {
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of Api Actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
+        /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+        /// </summary>
+
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+        /// <summary>
+        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
+        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+        /// <br/>            
+        /// <br/>Can also be used to refer to other service policies.
+        /// </summary>
+
+        [JsonPropertyName("authorizationAttribute")]
+        public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// The logical name of the operation the API action refers to.
+        /// </summary>
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// The endpoints associated with the action.
+        /// </summary>
+
+        [JsonPropertyName("endpoints")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_ApiActionEndpoint> Endpoints { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_ApiActionEndpoint
+    {
+        /// <summary>
+        /// A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// Arbitrary string indicating the version of the endpoint.
+        /// </summary>
+
+        [JsonPropertyName("version")]
+        public string Version { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the API endpoint.
+        /// </summary>
+
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The HTTP method that the endpoint expects for this action.
+        /// </summary>
+
+        [JsonPropertyName("httpMethod")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Http_HttpVerb HttpMethod { get; set; }
+
+        /// <summary>
+        /// Link to documentation for the endpoint, providing documentation for integrators. Should be a URL to a
+        /// <br/>human-readable page.
+        /// </summary>
+
+        [JsonPropertyName("documentationUrl")]
+        public System.Uri DocumentationUrl { get; set; }
+
+        /// <summary>
+        /// Link to the request schema for the endpoint. Used to provide documentation for integrators.
+        /// <br/>Dialogporten will not validate information on this endpoint.
+        /// </summary>
+
+        [JsonPropertyName("requestSchema")]
+        public System.Uri RequestSchema { get; set; }
+
+        /// <summary>
+        /// Link to the response schema for the endpoint. Used to provide documentation for integrators.
+        /// <br/>Dialogporten will not validate information on this endpoint.
+        /// </summary>
+
+        [JsonPropertyName("responseSchema")]
+        public System.Uri ResponseSchema { get; set; }
+
+        /// <summary>
+        /// Boolean indicating if the endpoint is deprecated.
+        /// </summary>
+
+        [JsonPropertyName("deprecated")]
+        public bool Deprecated { get; set; }
+
+        /// <summary>
+        /// Date and time when the endpoint will no longer function. Only set if the endpoint is deprecated. Dialogporten
+        /// <br/>will not enforce this date.
+        /// </summary>
+
+        [JsonPropertyName("sunsetAt")]
+        public System.DateTimeOffset? SunsetAt { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_Activity
+    {
+        /// <summary>
+        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// <br/>If not supplied, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// If supplied, overrides the creating date and time for the transmission.
+        /// <br/>If not supplied, the current date /time will be used.
+        /// </summary>
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; }
+
+        /// <summary>
+        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// </summary>
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// The type of transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
+
+        /// <summary>
+        /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
+        /// <br/>Must be present in the request body.
+        /// </summary>
+
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; }
+
+        /// <summary>
+        /// The actor that performed the activity.
+        /// </summary>
+
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
+
+        /// <summary>
+        /// Unstructured text describing the activity. Only set if the activity type is "Information".
+        /// </summary>
+
+        [JsonPropertyName("description")]
+        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest
+    {
+        /// <summary>
+        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// <br/>If not supplied, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// If supplied, overrides the creating date and time for the transmission.
+        /// <br/>If not supplied, the current date /time will be used.
+        /// </summary>
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        /// <summary>
+        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
+        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+        /// <br/>            
+        /// <br/>Can also be used to refer to other service policies.
+        /// </summary>
+
+        [JsonPropertyName("authorizationAttribute")]
+        public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// <br/>            
+        /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
+        /// </summary>
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
+
+        /// <summary>
+        /// Reference to any other transmission that this transmission is related to.
+        /// </summary>
+
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; }
+
+        /// <summary>
+        /// The type of transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
+
+        /// <summary>
+        /// The actor that sent the transmission.
+        /// </summary>
+
+        [JsonPropertyName("sender")]
+        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
+
+        /// <summary>
+        /// The transmission unstructured text content.
+        /// </summary>
+
+        [JsonPropertyName("content")]
+        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
+
+        /// <summary>
+        /// The transmission-level attachments.
+        /// </summary>
+
+        [JsonPropertyName("attachments")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
+    {
+        /// <summary>
+        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// <br/>If not supplied, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// If supplied, overrides the creating date and time for the transmission.
+        /// <br/>If not supplied, the current date /time will be used.
+        /// </summary>
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; }
+
+        /// <summary>
+        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// </summary>
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// The type of transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
+
+        /// <summary>
+        /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
+        /// <br/>Must be present in the request body.
+        /// </summary>
+
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; }
+
+        /// <summary>
+        /// The actor that performed the activity.
+        /// </summary>
+
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
+
+        /// <summary>
+        /// Unstructured text describing the activity. Only set if the activity type is "Information".
+        /// </summary>
+
+        [JsonPropertyName("description")]
+        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
 
     }
 
@@ -3879,6 +4217,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("systemLabel")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public DialogEndUserContextsEntities_SystemLabel? SystemLabel { get; set; }
+
+        /// <summary>
+        /// Metadata about the dialog owned by the service owner.
+        /// </summary>
 
         [JsonPropertyName("serviceOwnerContext")]
         public V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
@@ -4444,141 +4786,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of activities. If not provided, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
-        /// <br/>If not supplied, the current date /time will be used.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
-
-        /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// The type of transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
-
-        /// <summary>
-        /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
-        /// <br/>Must be present in the request body.
-        /// </summary>
-
-        [JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
-
-        /// <summary>
-        /// The actor that performed the activity.
-        /// </summary>
-
-        [JsonPropertyName("performedBy")]
-        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
-
-        /// <summary>
-        /// Unstructured text describing the activity. Only set if the activity type is "Information".
-        /// </summary>
-
-        [JsonPropertyName("description")]
-        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogActivitiesQueriesSearch_Activity
-    {
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        [JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationCondition
-    {
-
-        [JsonPropertyName("sendNotification")]
-        public bool SendNotification { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogActivitiesQueriesGet_Activity
-    {
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        [JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
-
-        [JsonPropertyName("performedBy")]
-        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
-
-        [JsonPropertyName("description")]
-        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum V1ServiceOwnerDialogActivitiesQueriesNotificationCondition_NotificationConditionType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"NotExists")]
-        NotExists = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Exists")]
-        Exists = 1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogActivitiesCreate_ActivityRequest
-    {
-        /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
-        /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
 
         [JsonPropertyName("id")]

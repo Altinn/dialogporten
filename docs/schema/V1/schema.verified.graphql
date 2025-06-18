@@ -4,6 +4,10 @@
   subscription: Subscriptions
 }
 
+interface BulkSetSystemLabelError {
+  message: String!
+}
+
 interface DialogByIdError {
   message: String!
 }
@@ -92,6 +96,27 @@ type AuthorizedSubParty {
   isAccessManager: Boolean!
 }
 
+type BulkSetSystemLabelConcurrencyError implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelDomainError implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelNotFound implements BulkSetSystemLabelError {
+  message: String!
+}
+
+type BulkSetSystemLabelPayload {
+  success: Boolean!
+  errors: [BulkSetSystemLabelError!]!
+}
+
+type BulkSetSystemLabelValidationError implements BulkSetSystemLabelError {
+  message: String!
+}
+
 type Content {
   title: ContentValue!
   summary: ContentValue!
@@ -124,7 +149,6 @@ type Dialog {
   createdAt: DateTime!
   updatedAt: DateTime!
   dialogToken: String
-  systemLabel: SystemLabel!
   status: DialogStatus!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
@@ -135,6 +159,7 @@ type Dialog {
   activities: [Activity!]!
   seenSinceLastUpdate: [SeenLog!]!
   transmissions: [Transmission!]!
+  endUserContext: EndUserContext!
 }
 
 type DialogByIdDeleted implements DialogByIdError {
@@ -163,6 +188,11 @@ type DialogEventPayload {
   type: DialogEventType!
 }
 
+type EndUserContext {
+  revision: UUID!
+  systemLabels: [SystemLabel!]!
+}
+
 type GuiAction {
   id: UUID!
   action: String!
@@ -183,6 +213,7 @@ type Localization {
 
 type Mutations {
   setSystemLabel(input: SetSystemLabelInput!): SetSystemLabelPayload!
+  bulkSetSystemLabels(input: BulkSetSystemLabelInput!): BulkSetSystemLabelPayload!
 }
 
 type Queries @authorize(policy: "enduser") {
@@ -213,12 +244,12 @@ type SearchDialog {
   updatedAt: DateTime!
   dueAt: DateTime
   status: DialogStatus!
-  systemLabel: SystemLabel!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!
+  endUserContext: EndUserContext!
 }
 
 type SearchDialogContinuationTokenParsingError implements SearchDialogError {
@@ -293,6 +324,16 @@ type TransmissionContent {
   contentReference: ContentValue
 }
 
+input BulkSetSystemLabelInput {
+  dialogs: [DialogRevisionInput!]!
+  systemLabels: [SystemLabel!]!
+}
+
+input DialogRevisionInput {
+  dialogId: UUID!
+  enduserContextRevision: UUID
+}
+
 input SearchDialogInput {
   "Filter by one or more service owner codes"
   org: [String!]
@@ -343,7 +384,7 @@ input SearchDialogSortTypeInput {
 
 input SetSystemLabelInput {
   dialogId: UUID!
-  label: SystemLabel!
+  systemLabels: [SystemLabel!]!
 }
 
 enum ActivityType {

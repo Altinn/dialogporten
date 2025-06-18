@@ -120,6 +120,9 @@ public sealed class CreateDialogDto
     /// </summary>
     public SystemLabel.Values? SystemLabel { get; set; }
 
+    /// <summary>
+    /// Metadata about the dialog owned by the service owner.
+    /// </summary>
     public DialogServiceOwnerContextDto? ServiceOwnerContext { get; set; }
 
     /// <summary>

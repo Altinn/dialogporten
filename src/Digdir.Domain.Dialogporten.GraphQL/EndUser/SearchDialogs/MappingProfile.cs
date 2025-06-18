@@ -1,6 +1,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 
@@ -20,5 +21,7 @@ public sealed class MappingProfile : Profile
         CreateMap<ContentDto, SearchContent>();
 
         CreateMap<DialogDto, SearchDialog>();
+
+        CreateMap<DialogEndUserContextDto, EndUserContext>();
     }
 }

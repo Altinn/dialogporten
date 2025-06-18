@@ -129,11 +129,6 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
-    /// Current display state.
-    /// </summary>
-    public SystemLabel.Values SystemLabel { get; set; }
-
-    /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
     public ContentDto Content { get; set; } = null!;
@@ -178,6 +173,25 @@ public sealed class DialogDto
     /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
+
+    /// <summary>
+    /// Metadata about the dialog owned by end-users.
+    /// </summary>
+    public DialogEndUserContextDto EndUserContext { get; set; } = null!;
+}
+
+public sealed class DialogEndUserContextDto
+{
+    /// <summary>
+    /// The unique identifier for the end user context revision in UUIDv4 format.
+    /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
+    public Guid Revision { get; set; }
+
+    /// <summary>
+    /// System defined labels used to categorize dialogs.
+    /// </summary>
+    public List<SystemLabel.Values> SystemLabels { get; set; } = [];
 }
 
 public sealed class DialogTransmissionDto

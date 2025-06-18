@@ -11,6 +11,8 @@ public sealed class MappingProfile : Profile
         CreateMap<DialogDto, Dialog>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
+        CreateMap<DialogEndUserContextDto, EndUserContext>();
+
         CreateMap<DialogAttachmentDto, Attachment>();
         CreateMap<DialogAttachmentUrlDto, AttachmentUrl>()
             .ForMember(dest => dest.ConsumerType, opt => opt.MapFrom(src => src.ConsumerType));

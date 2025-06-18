@@ -1045,7 +1045,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "New"
+                            Name = "NotApplicable"
                         },
                         new
                         {
@@ -1060,7 +1060,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 4,
-                            Name = "Sent"
+                            Name = "Awaiting"
                         },
                         new
                         {

@@ -64,7 +64,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>();
 
-        updatedDialog.SystemLabel.Should().Be(expectedSystemLabel);
+        updatedDialog.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(expectedSystemLabel);
     }
 
     [Fact]

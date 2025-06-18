@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.WebApi;
 using FluentAssertions;
 using NetArchTest.Rules;
 

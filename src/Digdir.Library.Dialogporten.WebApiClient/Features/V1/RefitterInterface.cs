@@ -1845,8 +1845,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public enum DialogsEntities_DialogStatus
     {
 
-        [System.Runtime.Serialization.EnumMember(Value = @"New")]
-        New = 0,
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 0,
 
         [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
         InProgress = 1,
@@ -1854,8 +1854,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
         Draft = 2,
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Sent")]
-        Sent = 3,
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 3,
 
         [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
         RequiresAttention = 4,

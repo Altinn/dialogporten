@@ -409,14 +409,14 @@ enum DialogEventType {
 }
 
 enum DialogStatus {
-  "The dialogue is considered new. Typically used for simple messages that do not require any interaction, or as an initial step for dialogues. This is the default."
-  NEW
+  "No explicit status. This is the default."
+  NOT_APPLICABLE
   "Started. In a serial process, this is used to indicate that, for example, a form filling is ongoing."
   IN_PROGRESS
   "Used to indicate user-initiated dialogs not yet sent."
   DRAFT
-  "Sent by the service owner. In a serial process, this is used after a submission is made."
-  SENT
+  "Awaiting action by the service owner. Indicates that the dialog is in a state where the party representative has no further tasks, and the responsibility lies with the service owner."
+  AWAITING
   "Used to indicate that the dialogue is in progress\/under work, but is in a state where the user must do something - for example, correct an error, or other conditions that hinder further processing."
   REQUIRES_ATTENTION
   "The dialogue was completed. This typically means that the dialogue is moved to a GUI archive or similar."

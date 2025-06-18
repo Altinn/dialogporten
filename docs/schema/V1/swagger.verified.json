@@ -43,19 +43,19 @@
       "DialogsEntities_DialogStatus": {
         "description": "",
         "enum": [
-          "New",
+          "NotApplicable",
           "InProgress",
           "Draft",
-          "Sent",
+          "Awaiting",
           "RequiresAttention",
           "Completed"
         ],
         "type": "string",
         "x-enumNames": [
-          "New",
+          "NotApplicable",
           "InProgress",
           "Draft",
-          "Sent",
+          "Awaiting",
           "RequiresAttention",
           "Completed"
         ]

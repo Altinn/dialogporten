@@ -98,27 +98,17 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         Guid? revision2 = null;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-            {
-                x.Dto.Party = enduserId;
-                x.Dto.Id = dialogId1;
-            })
-            .CreateSimpleDialog(x =>
-            {
-                x.Dto.Party = enduserId;
-                x.Dto.Id = dialogId2;
-            })
+            .CreateSimpleDialog(x => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId1))
+            .CreateSimpleDialog(x => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId2))
             .SearchServiceOwnerDialogs(x => x.Party = [enduserId])
-            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
+            .AssertResult<PaginatedList<SearchDialogDto>>(x =>
             {
                 var dialog1 = x.Items.Single(d => d.Id == dialogId1);
                 var dialog2 = x.Items.Single(d => d.Id == dialogId2);
                 revision1 = dialog1.EndUserContext.Revision;
                 revision2 = dialog2.EndUserContext.Revision;
-            });
-
-        await FlowBuilder.For(Application)
-            .SendCommand(new BulkSetSystemLabelCommand
+            })
+            .SendCommand(_ => new BulkSetSystemLabelCommand
             {
                 EndUserId = enduserId,
                 Dto = new BulkSetSystemLabelDto

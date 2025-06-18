@@ -389,6 +389,13 @@ FodyWeavers.xsd
 
 # Cursor IDE related files
 .cursor
+<<<<<<< Updated upstream
 
 # Claude Code configuration file
 CLAUDE.md
+||||||| Stash base
+=======
+
+# Cursor MCP server
+.cursor/mcp.json
+>>>>>>> Stashed changes

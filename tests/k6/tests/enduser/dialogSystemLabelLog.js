@@ -17,7 +17,7 @@ export default function () {
 
     describe('Update label as enduser', () => {
         let body = {
-            'label': 'Bin'
+            'systemLabels': ['Bin']
         }
         let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body);
         expectStatusFor(response).to.equal(204);
@@ -30,7 +30,7 @@ export default function () {
     describe('Changing labels trigger 2 logs', () => {
 
         let body = {
-            'label': 'archive'
+            'systemLabels': ['archive']
         }
         let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body);
         expectStatusFor(response).to.equal(204);
@@ -40,10 +40,20 @@ export default function () {
         expect(response.json(), 'response body').to.have.lengthOf(3);
     })
 
+    describe('Multiple labels are rejected', () => {
+
+        let body = {
+            'systemLabels': ['Bin', 'Archive']
+        }
+
+        let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body);
+        expectStatusFor(response).to.equal(400);
+    })
+
     describe('Invalid revision if-match header results in 412 Precondition Failed', () => {
 
         let body = {
-            'label': 'bin'
+            'systemLabels': ['bin']
         }
 
         let invalidRevision = uuidv4();

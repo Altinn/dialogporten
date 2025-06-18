@@ -31,4 +31,10 @@
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Application.Unit.Tests"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Features\V1\AccessManagement\" />
+      <Folder Include="Features\V1\EndUser\EndUserContext\" />
+      <Folder Include="Features\V1\ServiceOwner\EndUserContext\Commands\" />
+    </ItemGroup>
+
 </Project>

@@ -118,11 +118,6 @@ public class DialogDtoBase
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
-    /// Current display state.
-    /// </summary>
-    public SystemLabel.Values SystemLabel { get; set; }
-
-    /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
     /// </summary>
     public bool IsApiOnly { get; set; }
@@ -137,11 +132,39 @@ public class DialogDtoBase
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
 
+    /// <summary>
+    /// Metadata about the dialog owned by the service owner.
+    /// </summary>
     public DialogServiceOwnerContextDto ServiceOwnerContext { get; set; } = null!;
+
+    /// <summary>
+    /// Metadata about the dialog owned by end-users.
+    /// </summary>
+    public DialogEndUserContextDto EndUserContext { get; set; } = null!;
+}
+
+public sealed class DialogEndUserContextDto
+{
+    /// <summary>
+    /// The unique identifier for the end user context revision in UUIDv4 format.
+    /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
+    public Guid Revision { get; set; }
+
+    /// <summary>
+    /// System defined labels used to categorize dialogs.
+    /// </summary>
+    public List<SystemLabel.Values> SystemLabels { get; set; } = [];
 }
 
 public sealed class DialogServiceOwnerContextDto
 {
+    /// <summary>
+    /// The unique identifier for the service owner context revision in UUIDv4 format.
+    /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
+    public Guid Revision { get; set; }
+
     /// <summary>
     /// A list of labels, not visible in end-user APIs.
     /// </summary>

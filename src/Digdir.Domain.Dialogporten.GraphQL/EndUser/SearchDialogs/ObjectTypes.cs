@@ -68,8 +68,6 @@ public sealed class SearchDialog
 
     public DialogStatus Status { get; set; }
 
-    public SystemLabel SystemLabel { get; set; }
-
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
     public bool IsApiOnly { get; set; }
 
@@ -77,6 +75,7 @@ public sealed class SearchDialog
 
     public SearchContent Content { get; set; } = null!;
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
+    public EndUserContext EndUserContext { get; set; } = null!;
 }
 
 public sealed class SearchContent

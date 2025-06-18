@@ -15,7 +15,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
-using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Patch;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
 using Digdir.Library.Utils.AspNet;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -245,4 +245,7 @@ static void IgnoreEmptyCollections(JsonTypeInfo typeInfo)
 }
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed partial class Program;
+namespace Digdir.Domain.Dialogporten.WebApi
+{
+    public sealed partial class Program;
+}

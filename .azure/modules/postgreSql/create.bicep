@@ -150,6 +150,14 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       collation: 'en_US.utf8'
     }
   }
+  resource administrators 'administrators' = {
+    name: '${namePrefix}-postgres-admin-identity'
+    properties: {
+      principalName: postgresAdminIdentity.properties.principalId
+      principalType: 'ServicePrincipal'
+      tenantId: subscription().tenantId
+    }
+  }
   tags: tags
 }
 

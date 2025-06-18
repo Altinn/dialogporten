@@ -31,7 +31,7 @@ public static class AspNetUtilitiesExtensions
     public static WebApplication MapAspNetHealthChecks(this WebApplication app) =>
         app.MapHealthCheckEndpoint("/health/startup", check => check.Tags.Contains("dependencies"))
             .MapHealthCheckEndpoint("/health/liveness", check => check.Tags.Contains("self"))
-            .MapHealthCheckEndpoint("/health/readiness", check => check.Tags.Contains("critical"))
+            .MapHealthCheckEndpoint("/health/readiness", check => check.Tags.Contains("critical") || check.Tags.Contains("warmup"))
             .MapHealthCheckEndpoint("/health", check => check.Tags.Contains("dependencies"))
             .MapHealthCheckEndpoint("/health/deep", check => check.Tags.Contains("dependencies") || check.Tags.Contains("external"));
 

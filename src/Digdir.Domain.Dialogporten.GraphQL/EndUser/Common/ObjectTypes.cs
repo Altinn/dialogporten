@@ -112,8 +112,8 @@ public enum ActivityType
 
 public enum DialogStatus
 {
-    [GraphQLDescription("The dialogue is considered new. Typically used for simple messages that do not require any interaction, or as an initial step for dialogues. This is the default.")]
-    New = 1,
+    [GraphQLDescription("No explicit status. This is the default.")]
+    NotApplicable = 1,
 
     [GraphQLDescription("Started. In a serial process, this is used to indicate that, for example, a form filling is ongoing.")]
     InProgress = 2,
@@ -121,8 +121,8 @@ public enum DialogStatus
     [GraphQLDescription("Used to indicate user-initiated dialogs not yet sent.")]
     Draft = 3,
 
-    [GraphQLDescription("Sent by the service owner. In a serial process, this is used after a submission is made.")]
-    Sent = 4,
+    [GraphQLDescription("Awaiting action by the service owner. Indicates that the dialog is in a state where the party representative has no further tasks, and the responsibility lies with the service owner.")]
+    Awaiting = 4,
 
     [GraphQLDescription("Used to indicate that the dialogue is in progress/under work, but is in a state where the user must do something - for example, correct an error, or other conditions that hinder further processing.")]
     RequiresAttention = 5,

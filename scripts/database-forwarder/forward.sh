@@ -23,7 +23,7 @@ export AZURE_CORE_DISABLE_UPGRADE_WARNINGS=yes
 # =========================================================================
 readonly PRODUCT_TAG="Dialogporten"
 readonly DEFAULT_POSTGRES_PORT=5432
-readonly DEFAULT_REDIS_PORT=6379
+readonly DEFAULT_REDIS_PORT=6380
 readonly VALID_ENVIRONMENTS=("test" "yt01" "staging" "prod")
 readonly VALID_DB_TYPES=("postgres" "redis")
 readonly SUBSCRIPTION_PREFIX="Dialogporten"

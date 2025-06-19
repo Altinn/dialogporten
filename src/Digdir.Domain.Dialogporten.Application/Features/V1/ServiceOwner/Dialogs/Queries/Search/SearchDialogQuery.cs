@@ -227,14 +227,21 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             // If we have enduserid, we have already filtered out the deleted dialogs
             .WhereIf(request.EndUserId is null && request.Deleted == DeletedFilter.Exclude, x => !x.Deleted)
             .WhereIf(request.EndUserId is null && request.Deleted == DeletedFilter.Only, x => x.Deleted)
-            .WhereIf(formattedServiceOwnerLabels is not null && formattedServiceOwnerLabels.Count != 0, x =>
-                formattedServiceOwnerLabels!
-                    .All(formattedLabel =>
-                        x.ServiceOwnerContext.ServiceOwnerLabels
-                            .Any(l => EF.Functions.ILike(l.Value, formattedLabel))))
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             // TODO! If we have a supplied ServiceResource filter, we should only check if the resourcesIds contains the supplied ServiceResources
             .Where(x => resourceIds.Contains(x.ServiceResource));
+
+        // Add service owner labels filtering as simple separate Where()s to coerce EF into generating sane SQL
+        if (formattedServiceOwnerLabels?.Count > 0)
+        {
+            foreach (var pattern in formattedServiceOwnerLabels)
+            {
+                var p = pattern; // capture for EF
+                dialogIdsQuery = dialogIdsQuery.Where(x =>
+                    x.ServiceOwnerContext.ServiceOwnerLabels
+                        .Any(l => EF.Functions.ILike(l.Value, p)));
+            }
+        }
 
         // Now, apply ordering and pagination to the ID query and execute it.
         var dialogIdsPaginated = await dialogIdsQuery

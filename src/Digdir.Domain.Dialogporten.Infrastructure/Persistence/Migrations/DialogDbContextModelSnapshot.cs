@@ -782,7 +782,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             MaxLength = 255,
                             Name = "Summary",
                             OutputInList = true,
-                            Required = false
+                            Required = true
                         },
                         new
                         {
@@ -1186,7 +1186,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             AllowedMediaTypes = new[] { "text/plain" },
                             MaxLength = 255,
                             Name = "Summary",
-                            Required = false
+                            Required = true
                         },
                         new
                         {
@@ -1862,7 +1862,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity", "Dialog")
-                        .WithOne("EndUserContext")
+                        .WithOne("DialogEndUserContext")
                         .HasForeignKey("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", "DialogId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -2317,7 +2317,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Content");
 
-                    b.Navigation("EndUserContext")
+                    b.Navigation("DialogEndUserContext")
                         .IsRequired();
 
                     b.Navigation("GuiActions");

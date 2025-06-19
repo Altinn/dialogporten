@@ -58,8 +58,7 @@ export default function () {
         let getResponse = getSO('dialogs/' + dialogId);
         expectStatusFor(getResponse).to.equal(200);
         expect(getResponse, 'get response').to.have.validJsonBody();
-        expect(getResponse.json(), 'get response body').to.have.property('systemLabel');
-        expect(getResponse.json()['systemLabel'], 'get response systemlabel').to.equal(initialSystemLabel);
+        expect(getResponse.json().endUserContext.systemLabels).to.be.an('array').that.includes(initialSystemLabel);
         expect(getResponse.json()['updatedAt'], 'get response updatedAt').to.equal(initialUpdatedAt);
     });
 

@@ -188,7 +188,29 @@ public sealed class DialogDto
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
 
+    /// <summary>
+    /// Metadata about the dialog owned by the service owner.
+    /// </summary>
     public DialogServiceOwnerContextDto ServiceOwnerContext { get; set; } = null!;
+
+    /// <summary>
+    /// Metadata about the dialog owned by end-users.
+    /// </summary>
+    public DialogEndUserContextDto EndUserContext { get; set; } = null!;
+}
+
+public sealed class DialogEndUserContextDto
+{
+    /// <summary>
+    /// The unique identifier for the end user context revision in UUIDv4 format.
+    /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
+    public Guid Revision { get; set; }
+
+    /// <summary>
+    /// System defined labels used to categorize dialogs.
+    /// </summary>
+    public List<SystemLabel.Values> SystemLabels { get; set; } = [];
 }
 
 public sealed class DialogServiceOwnerContextDto
@@ -197,6 +219,12 @@ public sealed class DialogServiceOwnerContextDto
     /// A list of labels, not visible in end-user APIs.
     /// </summary>
     public List<DialogServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
+
+    /// <summary>
+    /// The unique identifier for the service owner context revision in UUIDv4 format.
+    /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
+    public Guid Revision { get; set; }
 }
 
 public sealed class DialogTransmissionDto
@@ -321,7 +349,7 @@ public sealed class ContentDto
     /// <summary>
     /// A short summary of the dialog and its current state.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// An optional non-sensitive summary of the dialog and its current state.
@@ -360,7 +388,7 @@ public sealed class DialogTransmissionContentDto
     /// <summary>
     /// The transmission summary.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.

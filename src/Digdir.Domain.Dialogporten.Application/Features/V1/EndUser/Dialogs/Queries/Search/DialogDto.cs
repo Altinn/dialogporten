@@ -23,7 +23,7 @@ public sealed class ContentDto
     /// <summary>
     /// A short summary of the dialog and its current state.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Overridden sender name. If not supplied, assume "org" as the sender name.

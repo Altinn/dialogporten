@@ -1,7 +1,7 @@
 using HotChocolate.Execution.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Digdir.Domain.Dialogporten.Infrastructure.GraphQl;
+namespace Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 
 /// <summary>
 /// This implementation is a workaround to allow the use of the AddRedisSubscriptions extension method

@@ -62,7 +62,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>();
 
-        updatedDialog.SystemLabel.Should().Be(expectedSystemLabel);
+        updatedDialog.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(expectedSystemLabel);
     }
 
     [Fact]
@@ -178,6 +178,19 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public Task Can_Set_Dialog_Summary_To_Null_On_Update() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Content!.Summary = new()
+            {
+                Value = DialogGenerator.GenerateFakeLocalizations(1)
+            })
+            .UpdateDialog(x =>
+                x.Dto.Content!.Summary = null)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+                dialog.Content!.Summary.Should().BeNull());
+
+    [Fact]
     public Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
@@ -189,6 +202,13 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
             .UpdateDialog(x => x.Dto.Content = null!)
+            .ExecuteAndAssert<UpdateDialogSuccess>();
+
+    [Fact]
+    public Task Can_Update_Content_Summary_To_Null_If_IsApiOnlyTrue_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .UpdateDialog(x => x.Dto.Content!.Summary = null)
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Fact]

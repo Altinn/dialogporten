@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.70.0](https://github.com/Altinn/dialogporten/compare/v1.69.1...v1.70.0) (2025-06-17)
+
+
+### Features
+
+* **infra:** managed identity admin user for postgresql ([#2449](https://github.com/Altinn/dialogporten/issues/2449)) ([d5177a3](https://github.com/Altinn/dialogporten/commit/d5177a3018021e1a4001fe60008c5a7538d89b64))
+
 ## [1.69.1](https://github.com/Altinn/dialogporten/compare/v1.69.0...v1.69.1) (2025-06-17)
 
 

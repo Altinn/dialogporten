@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -17,6 +18,16 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class CreateTransmissionTests : ApplicationCollectionFixture
 {
     public CreateTransmissionTests(DialogApplication application) : base(application) { }
+
+    [Fact]
+    public Task Can_Create_Transmission_Without_Summary() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.Content!.Summary = null))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Transmissions
+                .First().Content.Summary.Should().BeNull());
 
     [Fact]
     public Task Can_Create_Transmission_With_Embeddable_Content() =>

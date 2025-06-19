@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
+using SystemLabel = Digdir.Domain.Dialogporten.GraphQL.EndUser.Common.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 
@@ -56,8 +57,6 @@ public sealed class Dialog
 
     public string? DialogToken { get; set; }
 
-    public SystemLabel SystemLabel { get; set; }
-
     public DialogStatus Status { get; set; }
     public bool HasUnopenedContent { get; set; }
 
@@ -71,6 +70,7 @@ public sealed class Dialog
     public List<Activity> Activities { get; set; } = [];
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
     public List<Transmission> Transmissions { get; set; } = [];
+    public EndUserContext EndUserContext { get; set; } = null!;
 }
 
 public sealed class Transmission
@@ -118,7 +118,7 @@ public enum TransmissionType
 public sealed class Content
 {
     public ContentValue Title { get; set; } = null!;
-    public ContentValue Summary { get; set; } = null!;
+    public ContentValue? Summary { get; set; }
     public ContentValue? SenderName { get; set; }
     public ContentValue? AdditionalInfo { get; set; }
     public ContentValue? ExtendedStatus { get; set; }
@@ -128,7 +128,7 @@ public sealed class Content
 public sealed class TransmissionContent
 {
     public ContentValue Title { get; set; } = null!;
-    public ContentValue Summary { get; set; } = null!;
+    public ContentValue? Summary { get; set; }
     public ContentValue? ContentReference { get; set; }
 }
 

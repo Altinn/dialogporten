@@ -17,18 +17,24 @@ using GetDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.Serv
 using GetDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
 using SearchDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
 using SearchDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
+using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
+using BulkSetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
 public static class IFlowStepExtensions
 {
     private const string DialogIdKey = "DialogId";
+    private const string PartyKey = "Party";
     private const string ServiceResource = "ServiceResource";
 
     public static IFlowExecutor<CreateDialogResult> CreateDialog(this IFlowStep step, CreateDialogCommand command)
     {
         step.Context.Bag[DialogIdKey] = command.Dto.Id = command.Dto.Id.CreateVersion7IfDefault();
         step.Context.Bag[ServiceResource] = command.Dto.ServiceResource;
+        step.Context.Bag[PartyKey] = command.Dto.Party;
         return step.SendCommand(command);
     }
 
@@ -151,6 +157,22 @@ public static class IFlowStepExtensions
         return step.SendCommand(query);
     }
 
+    public static IFlowExecutor<BulkSetSystemLabelResultEU> BulkSetSystemLabelEndUser(
+        this IFlowStep<CreateDialogResult> step, Action<BulkSetSystemLabelCommandEU, FlowContext> modify)
+    {
+        var command = new BulkSetSystemLabelCommandEU { Dto = new() };
+        modify(command, step.Context);
+        return step.SendCommand(command);
+    }
+
+    public static IFlowExecutor<BulkSetSystemLabelResultSO> BulkSetSystemLabelServiceOwner(
+        this IFlowStep<CreateDialogResult> step, Action<BulkSetSystemLabelCommandSO, FlowContext> modify)
+    {
+        var command = new BulkSetSystemLabelCommandSO { Dto = new() };
+        modify(command, step.Context);
+        return step.SendCommand(command);
+    }
+
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,
         Action<TIn> selector) => step.Modify((x, _)
@@ -189,6 +211,12 @@ public static class IFlowStepExtensions
     {
         ctx.Bag.TryGetValue(DialogIdKey, out var value).Should().BeTrue();
         return value.Should().BeOfType<Guid>().Subject;
+    }
+
+    public static string GetParty(this FlowContext ctx)
+    {
+        ctx.Bag.TryGetValue(PartyKey, out var value).Should().BeTrue();
+        return value.Should().BeOfType<string>().Subject;
     }
 
     public static string GetServiceResource(this FlowContext ctx)

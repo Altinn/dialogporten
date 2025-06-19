@@ -10,7 +10,7 @@ internal sealed class DialogEndUserContextConfiguration : IEntityTypeConfigurati
     public void Configure(EntityTypeBuilder<DialogEndUserContext> builder)
     {
         builder.HasOne(d => d.Dialog)
-            .WithOne(d => d.DialogEndUserContext)
+            .WithOne(d => d.EndUserContext)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

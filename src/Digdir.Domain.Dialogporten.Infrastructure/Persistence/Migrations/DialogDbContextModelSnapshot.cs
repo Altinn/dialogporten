@@ -782,7 +782,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             MaxLength = 255,
                             Name = "Summary",
                             OutputInList = true,
-                            Required = true
+                            Required = false
                         },
                         new
                         {
@@ -1041,7 +1041,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "New"
+                            Name = "NotApplicable"
                         },
                         new
                         {
@@ -1056,7 +1056,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 4,
-                            Name = "Sent"
+                            Name = "Awaiting"
                         },
                         new
                         {
@@ -1189,7 +1189,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             AllowedMediaTypes = new[] { "text/plain" },
                             MaxLength = 255,
                             Name = "Summary",
-                            Required = true
+                            Required = false
                         },
                         new
                         {
@@ -1865,7 +1865,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity", "Dialog")
-                        .WithOne("DialogEndUserContext")
+                        .WithOne("EndUserContext")
                         .HasForeignKey("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", "DialogId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -2320,7 +2320,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Content");
 
-                    b.Navigation("DialogEndUserContext")
+                    b.Navigation("EndUserContext")
                         .IsRequired();
 
                     b.Navigation("GuiActions");

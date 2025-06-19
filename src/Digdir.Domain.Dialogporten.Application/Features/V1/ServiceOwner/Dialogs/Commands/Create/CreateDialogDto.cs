@@ -120,6 +120,9 @@ public sealed class CreateDialogDto
     /// </summary>
     public SystemLabel.Values? SystemLabel { get; set; }
 
+    /// <summary>
+    /// Metadata about the dialog owned by the service owner.
+    /// </summary>
     public DialogServiceOwnerContextDto? ServiceOwnerContext { get; set; }
 
     /// <summary>
@@ -252,7 +255,7 @@ public sealed class ContentDto
     /// A short summary of the dialog and its current state.
     /// Supported media types: text/plain
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// An optional non-sensitive summary of the dialog and its current state.
@@ -294,7 +297,7 @@ public sealed class TransmissionContentDto
     /// <summary>
     /// The transmission summary.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.

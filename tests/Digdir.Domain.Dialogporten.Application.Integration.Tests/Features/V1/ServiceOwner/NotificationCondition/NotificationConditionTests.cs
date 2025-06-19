@@ -69,7 +69,7 @@ public class NotificationConditionTests(DialogApplication application) : Applica
     [Fact]
     public Task NotFound_Should_Be_Returned_When_Dialog_Does_Not_Exist() =>
         FlowBuilder.For(Application)
-            .SendCommand(new NotificationConditionQuery
+            .SendCommand(_ => new NotificationConditionQuery
             {
                 DialogId = Guid.NewGuid(),
                 ActivityType = DialogActivityType.Values.Information,

@@ -21,7 +21,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Call_Update_ServiceOwnerLabels_Without_DialogId_Or_Dto() =>
         FlowBuilder.For(Application)
-            .SendCommand(new UpdateDialogServiceOwnerContextCommand())
+            .SendCommand(_ => new UpdateDialogServiceOwnerContextCommand())
             .ExecuteAndAssert<ValidationError>(x =>
             {
                 x.ShouldHaveErrorWithText(nameof(UpdateDialogServiceOwnerContextCommand.DialogId));
@@ -33,7 +33,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     {
         var invalidDialogId = NewUuidV7();
         await FlowBuilder.For(Application)
-            .SendCommand(new UpdateDialogServiceOwnerContextCommand
+            .SendCommand(_ => new UpdateDialogServiceOwnerContextCommand
             {
                 DialogId = invalidDialogId,
                 Dto = new()

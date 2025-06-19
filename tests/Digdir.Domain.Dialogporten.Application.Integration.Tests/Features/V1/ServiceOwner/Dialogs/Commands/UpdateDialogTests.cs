@@ -354,11 +354,30 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
-    public Task Adding_Transmission_Should_Increate_IncomingTransmissionsSO()
+    public Task Adding_Transmission_Should_Increase_IncomingTransmissionsSO()
     {
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.IncomingTransmissions.Should().Be(0))
+            .UpdateDialog(x =>
+                x.Dto.Transmissions.Add(new TransmissionDto
+                {
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner,
+                    },
+                })).GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.IncomingTransmissions.Should().Be(1));
+    }
+
+    [Fact]
+    public Task Adding_Transmission_Should_Increase_IncomingTransmissionsEU()
+    {
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
             .AssertResult<DialogDto>(x => x.IncomingTransmissions.Should().Be(0))
             .UpdateDialog(x =>
                 x.Dto.Transmissions.Add(new TransmissionDto

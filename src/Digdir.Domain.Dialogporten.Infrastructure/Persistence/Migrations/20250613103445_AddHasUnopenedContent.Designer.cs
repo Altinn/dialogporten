@@ -3,6 +3,7 @@ using System;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    partial class DialogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250613103445_AddHasUnopenedContent")]
+    partial class AddHasUnopenedContent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -782,7 +785,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             MaxLength = 255,
                             Name = "Summary",
                             OutputInList = true,
-                            Required = false
+                            Required = true
                         },
                         new
                         {
@@ -1041,7 +1044,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "NotApplicable"
+                            Name = "New"
                         },
                         new
                         {
@@ -1056,7 +1059,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 4,
-                            Name = "Awaiting"
+                            Name = "Sent"
                         },
                         new
                         {
@@ -1189,7 +1192,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             AllowedMediaTypes = new[] { "text/plain" },
                             MaxLength = 255,
                             Name = "Summary",
-                            Required = false
+                            Required = true
                         },
                         new
                         {
@@ -1865,7 +1868,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity", "Dialog")
-                        .WithOne("EndUserContext")
+                        .WithOne("DialogEndUserContext")
                         .HasForeignKey("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", "DialogId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -2320,7 +2323,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Content");
 
-                    b.Navigation("EndUserContext")
+                    b.Navigation("DialogEndUserContext")
                         .IsRequired();
 
                     b.Navigation("GuiActions");

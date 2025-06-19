@@ -102,6 +102,16 @@ public class DialogDtoBase
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
+
+    /// <summary>
+    /// Current display state.
+    /// </summary>
+    public SystemLabel.Values SystemLabel { get; set; }
+
+    /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
     /// When true, human-readable content like title and summary are not required.
     /// </summary>

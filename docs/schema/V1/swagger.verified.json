@@ -620,6 +620,10 @@
             "nullable": true,
             "type": "array"
           },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -684,6 +688,14 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+              }
+            ]
+          },
+          "systemLabel": {
+            "description": "Current display state.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ]
           },
@@ -1076,6 +1088,11 @@
           },
           "isAuthorized": {
             "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
+            "type": "boolean"
+          },
+          "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
+            "nullable": true,
             "type": "boolean"
           },
           "relatedTransmissionId": {
@@ -1503,6 +1520,10 @@
             "nullable": true,
             "type": "integer"
           },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -1570,6 +1591,14 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+              }
+            ]
+          },
+          "systemLabel": {
+            "description": "Current display state.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ]
           },
@@ -3684,6 +3713,10 @@
             "nullable": true,
             "type": "array"
           },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -3769,6 +3802,14 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+              }
+            ]
+          },
+          "systemLabel": {
+            "description": "Current display state.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ]
           },
@@ -4203,6 +4244,11 @@
           },
           "isAuthorized": {
             "description": "Flag indicating if the authenticated user supplied in the query is authorized for this transmission.",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
             "nullable": true,
             "type": "boolean"
           },
@@ -4685,6 +4731,10 @@
             "format": "int32",
             "nullable": true,
             "type": "integer"
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",

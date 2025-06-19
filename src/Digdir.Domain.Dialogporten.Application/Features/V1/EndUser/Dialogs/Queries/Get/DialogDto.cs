@@ -123,6 +123,16 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
+
+    /// <summary>
+    /// Current display state.
+    /// </summary>
+    public SystemLabel.Values SystemLabel { get; set; }
+
+    /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
     public ContentDto Content { get; set; } = null!;
@@ -240,6 +250,11 @@ public sealed class DialogTransmissionDto
     public ActorDto Sender { get; set; } = null!;
 
     /// <summary>
+    /// Indicates whether the dialog transmission has been opened.
+    /// </summary>
+    public bool? IsOpened { get; set; }
+
+    /// <summary>
     /// The transmission unstructured text content.
     /// </summary>
     public DialogTransmissionContentDto Content { get; set; } = null!;
@@ -279,7 +294,6 @@ public sealed class DialogSeenLogDto
     /// </summary>
     public bool IsCurrentEndUser { get; set; }
 }
-
 
 public sealed class ContentDto
 {
@@ -371,7 +385,6 @@ public sealed class DialogActivityDto
     /// </summary>
     public List<LocalizationDto> Description { get; set; } = [];
 }
-
 
 public sealed class DialogApiActionDto
 {

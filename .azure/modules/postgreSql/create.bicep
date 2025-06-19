@@ -175,6 +175,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
       value: 'PG_TRGM'
       source: 'user-override'
     }
+    dependsOn: [postgresAdministrators]
   }
 
 resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {

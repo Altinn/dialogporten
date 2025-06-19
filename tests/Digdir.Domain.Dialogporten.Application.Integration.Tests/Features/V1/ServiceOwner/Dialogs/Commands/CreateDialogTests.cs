@@ -7,8 +7,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -296,4 +298,78 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Dto.Content = null;
             })
             .ExecuteAndAssert(expectedType);
+
+    private sealed class IncomingOutgoingTransmissionsTestData : TheoryData<string, Action<CreateDialogCommand>, ushort, ushort>
+    {
+        public IncomingOutgoingTransmissionsTestData()
+        {
+            Add("2 Outgoing (Submission, Correction), 1 incoming (Alert)",
+                x =>
+                {
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Submission;
+                        x.Sender = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = "Fredrik",
+                        };
+
+                    });
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Correction;
+                        x.Sender = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = "Fredrik",
+                        };
+
+                    });
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Alert;
+                        x.Sender = new ActorDto
+                        {
+                            ActorType = ActorType.Values.ServiceOwner
+                        };
+                    });
+                }, 2, 1
+            );
+
+            Add("1 Incoming (Information)", x =>
+            {
+                x.AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Information;
+                    x.Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner,
+                    };
+                });
+            }, 0, 1);
+
+            Add("1 Outgoing (Correction)", x =>
+            {
+                x.AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Correction;
+                    x.Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.PartyRepresentative,
+                        ActorName = "Fredrik",
+                    };
+                });
+            }, 1, 0);
+        }
+    }
+
+    [Theory, ClassData(typeof(IncomingOutgoingTransmissionsTestData))]
+    public Task Can_Create_Dialog_With_Outgoing_Incoming_Transmissions(string _, Action<CreateDialogCommand> createDialog, ushort outgoing, ushort incoming) =>
+        FlowBuilder.For(Application).CreateSimpleDialog(createDialog).GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.OutgoingTransmissions.Should().Be(outgoing);
+                x.IncomingTransmissions.Should().Be(incoming);
+            });
 }

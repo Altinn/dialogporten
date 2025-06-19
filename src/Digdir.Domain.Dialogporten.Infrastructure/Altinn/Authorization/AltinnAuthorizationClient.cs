@@ -95,10 +95,14 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     {
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(authenticatedParty);
 
-        var authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
-            => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
+        AuthorizedPartiesResult authorizedParties;
+        using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
+        {
+            authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
+                => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
+        }
 
-        return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
+        return !flatten ? authorizedParties : GetFlattenedAuthorizedParties(authorizedParties);
     }
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
@@ -123,33 +127,62 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         return UserHasRequiredAuthLevel(minimumAuthenticationLevel);
     }
 
+    // Create static empty lists to reuse and avoid allocations
+    private static readonly List<string> EmptyRolesList = [];
+    private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
+
     private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)
     {
-        var flattenedAuthorizedParties = new AuthorizedPartiesResult();
+        var topLevelCount = authorizedParties.AuthorizedParties.Count;
 
-        foreach (var authorizedParty in authorizedParties.AuthorizedParties)
+        var totalCapacity = topLevelCount;
+        for (var i = 0; i < topLevelCount; i++)
         {
-            Flatten(authorizedParty);
-        }
-
-        return flattenedAuthorizedParties;
-
-        void Flatten(AuthorizedParty party, AuthorizedParty? parent = null)
-        {
-            if (party.SubParties is not null && party.SubParties.Count != 0)
+            var party = authorizedParties.AuthorizedParties[i];
+            if (party.SubParties != null)
             {
-                foreach (var subParty in party.SubParties)
-                {
-                    Flatten(subParty, party);
-                }
+                totalCapacity += party.SubParties.Count;
             }
-
-            if (parent != null) party.ParentParty = parent.Party;
-
-            party.SubParties = [];
-
-            flattenedAuthorizedParties.AuthorizedParties.Add(party);
         }
+
+        // Preallocate the exact size needed
+        var flattenedList = new List<AuthorizedParty>(totalCapacity);
+
+        for (var i = 0; i < topLevelCount; i++)
+        {
+            var party = authorizedParties.AuthorizedParties[i];
+
+            flattenedList.Add(new AuthorizedParty
+            {
+                Party = party.Party,
+                ParentParty = null,
+                AuthorizedRoles = party.AuthorizedRoles.Count > 0
+                    ? [.. party.AuthorizedRoles]
+                    : EmptyRolesList,
+                SubParties = EmptySubPartiesList
+            });
+
+            if (!(party.SubParties?.Count > 0)) continue;
+            var subCount = party.SubParties.Count;
+            for (var j = 0; j < subCount; j++)
+            {
+                var subParty = party.SubParties[j];
+                flattenedList.Add(new AuthorizedParty
+                {
+                    Party = subParty.Party,
+                    ParentParty = party.Party,
+                    AuthorizedRoles = subParty.AuthorizedRoles.Count > 0
+                        ? [.. subParty.AuthorizedRoles]
+                        : EmptyRolesList,
+                    SubParties = EmptySubPartiesList
+                });
+            }
+        }
+
+        return new AuthorizedPartiesResult
+        {
+            AuthorizedParties = flattenedList
+        };
     }
 
     private async Task<AuthorizedPartiesResult> PerformAuthorizedPartiesRequest(AuthorizedPartiesRequest authorizedPartiesRequest,
@@ -169,34 +202,12 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         var partyIdentifier = request.Claims.GetEndUserPartyIdentifier() ?? throw new UnreachableException();
         var authorizedParties = await GetAuthorizedParties(partyIdentifier, flatten: true, cancellationToken: cancellationToken);
 
-        if (request.ConstraintParties.Count > 0)
-        {
-            authorizedParties.AuthorizedParties = authorizedParties.AuthorizedParties
-                .Where(p => request.ConstraintParties.Contains(p.Party))
-                .ToList();
-        }
-
-        var dialogSearchAuthorizationResult = new DialogSearchAuthorizationResult
-        {
-            ResourcesByParties = authorizedParties.AuthorizedParties
-                .ToDictionary(
-                    p => p.Party,
-                    p => p.AuthorizedResources
-                        .Where(r => request.ConstraintServiceResources.Count == 0 || request.ConstraintServiceResources.Contains(r))
-                        .ToHashSet())
-                // Skip parties with no authorized resources
-                .Where(kv => kv.Value.Count != 0)
-                .ToDictionary(kv => kv.Key, kv => kv.Value),
-        };
-
-        await AuthorizationHelper.CollapseSubjectResources(
-            dialogSearchAuthorizationResult,
+        return await AuthorizationHelper.CollapseSubjectResources(
             authorizedParties,
+            request.ConstraintParties,
             request.ConstraintServiceResources,
             GetAllSubjectResources,
             cancellationToken);
-
-        return dialogSearchAuthorizationResult;
     }
     private async Task<List<SubjectResource>> GetAllSubjectResources(CancellationToken cancellationToken) =>
         await _subjectResourcesCache.GetOrSetAsync(nameof(SubjectResource), async ct =>

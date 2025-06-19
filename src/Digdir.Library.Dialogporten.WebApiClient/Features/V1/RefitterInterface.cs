@@ -1780,6 +1780,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// </summary>
+
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
+
+        /// <summary>
         /// The latest entry in the dialog's activity log.
         /// </summary>
 
@@ -2476,6 +2483,21 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// </summary>
+
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
+
+        /// <summary>
+        /// Current display state.
+        /// </summary>
+
+        [JsonPropertyName("systemLabel")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
+
+        /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
 
@@ -2760,6 +2782,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent Content { get; set; }
+
+        /// <summary>
+        /// Indicates whether the dialog transmission has been opened.
+        /// </summary>
+
+        [JsonPropertyName("isOpened")]
+        public bool? IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.
@@ -3108,356 +3137,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_Activity
-    {
-        /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
-        /// <br/>If not supplied, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
-        /// <br/>If not supplied, the current date /time will be used.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
-
-        /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// The type of transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
-
-        /// <summary>
-        /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
-        /// <br/>Must be present in the request body.
-        /// </summary>
-
-        [JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
-
-        /// <summary>
-        /// The actor that performed the activity.
-        /// </summary>
-
-        [JsonPropertyName("performedBy")]
-        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
-
-        /// <summary>
-        /// Unstructured text describing the activity. Only set if the activity type is "Information".
-        /// </summary>
-
-        [JsonPropertyName("description")]
-        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntitiesActivities_DialogActivityType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogCreated")]
-        DialogCreated = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogClosed")]
-        DialogClosed = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
-        Information = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TransmissionOpened")]
-        TransmissionOpened = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PaymentMade")]
-        PaymentMade = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SignatureProvided")]
-        SignatureProvided = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogOpened")]
-        DialogOpened = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogDeleted")]
-        DialogDeleted = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogRestored")]
-        DialogRestored = 8,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToSigning")]
-        SentToSigning = 9,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToFormFill")]
-        SentToFormFill = 10,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToSendIn")]
-        SentToSendIn = 11,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToPayment")]
-        SentToPayment = 12,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"FormSubmitted")]
-        FormSubmitted = 13,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"FormSaved")]
-        FormSaved = 14,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceOpened")]
-        CorrespondenceOpened = 15,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceConfirmed")]
-        CorrespondenceConfirmed = 16,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog
-    {
-        /// <summary>
-        /// The paginated list of items
-        /// </summary>
-
-        [JsonPropertyName("items")]
-        public ICollection<V1ServiceOwnerDialogsQueriesSearch_Dialog> Items { get; set; }
-
-        /// <summary>
-        /// Whether there are more items available that can be fetched by supplying the continuation token
-        /// </summary>
-
-        [JsonPropertyName("hasNextPage")]
-        public bool HasNextPage { get; set; }
-
-        /// <summary>
-        /// The continuation token to be used to fetch the next page of items
-        /// </summary>
-
-        [JsonPropertyName("continuationToken")]
-        public string ContinuationToken { get; set; }
-
-        /// <summary>
-        /// The current sorting order of the items
-        /// </summary>
-
-        [JsonPropertyName("orderBy")]
-        public string OrderBy { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearch_Dialog
-    {
-        /// <summary>
-        /// The unique identifier for the dialog in UUIDv7 format.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The service owner code representing the organization (service owner) related to this dialog.
-        /// </summary>
-
-        [JsonPropertyName("org")]
-        public string Org { get; set; }
-
-        /// <summary>
-        /// The unique identifier for the revision in UUIDv4 format.
-        /// </summary>
-
-        [JsonPropertyName("revision")]
-        public System.Guid Revision { get; set; }
-
-        /// <summary>
-        /// The service identifier for the service that the dialog is related to in URN-format.
-        /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
-        /// </summary>
-
-        [JsonPropertyName("serviceResource")]
-        public string ServiceResource { get; set; }
-
-        /// <summary>
-        /// The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).
-        /// </summary>
-
-        [JsonPropertyName("serviceResourceType")]
-        public string ServiceResourceType { get; set; }
-
-        /// <summary>
-        /// The party code representing the organization or person that the dialog belongs to in URN format.
-        /// </summary>
-
-        [JsonPropertyName("party")]
-        public string Party { get; set; }
-
-        /// <summary>
-        /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
-        /// <br/>to a natural completion (successful or not).
-        /// </summary>
-
-        [JsonPropertyName("progress")]
-        public int? Progress { get; set; }
-
-        /// <summary>
-        /// Optional process identifier used to indicate a business process this dialog belongs to.
-        /// </summary>
-
-        [JsonPropertyName("process")]
-        public string Process { get; set; }
-
-        /// <summary>
-        /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
-        /// </summary>
-
-        [JsonPropertyName("precedingProcess")]
-        public string PrecedingProcess { get; set; }
-
-        /// <summary>
-        /// The number of attachments in the dialog made available for browser-based frontends.
-        /// </summary>
-
-        [JsonPropertyName("guiAttachmentCount")]
-        public int? GuiAttachmentCount { get; set; }
-
-        /// <summary>
-        /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
-        /// <br/>the dialog to further specify the "status" enum.
-        /// <br/>            
-        /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
-        /// <br/>in use).
-        /// </summary>
-
-        [JsonPropertyName("extendedStatus")]
-        public string ExtendedStatus { get; set; }
-
-        /// <summary>
-        /// Arbitrary string with a service-specific reference to an external system or service.
-        /// <br/>            
-        /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
-        /// </summary>
-
-        [JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
-
-        /// <summary>
-        /// The date and time when the dialog was created.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
-
-        /// <summary>
-        /// The date and time when the dialog was last updated.
-        /// </summary>
-
-        [JsonPropertyName("updatedAt")]
-        public System.DateTimeOffset UpdatedAt { get; set; }
-
-        /// <summary>
-        /// The due date for the dialog. This is the last date when the dialog is expected to be completed.
-        /// </summary>
-
-        [JsonPropertyName("dueAt")]
-        public System.DateTimeOffset? DueAt { get; set; }
-
-        /// <summary>
-        /// If deleted, the date and time when the deletion was performed.
-        /// </summary>
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        /// <summary>
-        /// The timestamp when the dialog will be made visible for authorized end users.
-        /// </summary>
-
-        [JsonPropertyName("visibleFrom")]
-        public System.DateTimeOffset? VisibleFrom { get; set; }
-
-        /// <summary>
-        /// The aggregated status of the dialog.
-        /// </summary>
-
-        [JsonPropertyName("status")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntities_DialogStatus Status { get; set; }
-
-        /// <summary>
-        /// Current display state.
-        /// </summary>
-
-        [JsonPropertyName("systemLabel")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
-
-        /// <summary>
-        /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
-        /// </summary>
-
-        [JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
-
-        /// <summary>
-        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
-        /// </summary>
-
-        [JsonPropertyName("hasUnopenedContent")]
-        public bool HasUnopenedContent { get; set; }
-
-        /// <summary>
-        /// The latest entry in the dialog's activity log.
-        /// </summary>
-
-        [JsonPropertyName("latestActivity")]
-        public V1ServiceOwnerDialogsQueriesSearch_DialogActivity LatestActivity { get; set; }
-
-        /// <summary>
-        /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
-        /// </summary>
-
-        [JsonPropertyName("seenSinceLastUpdate")]
-        public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastUpdate { get; set; }
-
-        [JsonPropertyName("serviceOwnerContext")]
-        public V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext ServiceOwnerContext { get; set; }
-
-        /// <summary>
-        /// The content of the dialog in search results.
-        /// </summary>
-
-        [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsQueriesSearch_Content Content { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogEndUserContextsEntities_SystemLabel
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Default")]
-        Default = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Bin")]
-        Bin = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
-        Archive = 2,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearch_DialogActivity
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogActivity
     {
         /// <summary>
@@ -3689,28 +3368,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public DialogsEntities_DialogStatus Status { get; set; }
-
-        /// <summary>
-        /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
-        /// </summary>
-
-        [JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
-
-        /// <summary>
-        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
-        /// </summary>
-
-        [JsonPropertyName("hasUnopenedContent")]
-        public bool HasUnopenedContent { get; set; }
-
-        /// <summary>
-        /// Current display state.
-        /// </summary>
-
-        [JsonPropertyName("systemLabel")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
         /// <summary>
         /// The dialog unstructured text content.
@@ -3973,13 +3630,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
-
-        /// <summary>
-        /// Indicates whether the dialog transmission has been opened.
-        /// </summary>
-
-        [JsonPropertyName("isOpened")]
-        public bool? IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.

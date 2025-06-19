@@ -691,6 +691,14 @@
               }
             ]
           },
+          "systemLabel": {
+            "description": "Current display state.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ]
+          },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
             "items": {
@@ -1583,6 +1591,14 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+              }
+            ]
+          },
+          "systemLabel": {
+            "description": "Current display state.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ]
           },
@@ -3786,6 +3802,14 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+              }
+            ]
+          },
+          "systemLabel": {
+            "description": "Current display state.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ]
           },

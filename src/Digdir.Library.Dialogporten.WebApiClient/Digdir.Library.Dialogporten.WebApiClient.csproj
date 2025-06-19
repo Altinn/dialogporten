@@ -42,6 +42,10 @@
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Features\V1\" />
+    </ItemGroup>
+
 
     <Target Name="BuildWebApi" BeforeTargets="BeforeBuild" Condition="$(Configuration)=='Release'">
         <MSBuild Projects="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"

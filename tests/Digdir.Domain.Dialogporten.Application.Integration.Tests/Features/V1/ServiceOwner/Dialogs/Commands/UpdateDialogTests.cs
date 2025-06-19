@@ -15,7 +15,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
-using Microsoft.Azure.Amqp.Framing;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
@@ -355,13 +354,12 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
-    public Task Test()
+    public Task Adding_Transmission_Should_Increate_IncomingTransmissionsSO()
     {
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>(x => x.IncomingTransmissions.Should().Be(0))
-            // assert her ples, tyvm
             .UpdateDialog(x =>
                 x.Dto.Transmissions.Add(new TransmissionDto
                 {
@@ -372,20 +370,5 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                     },
                 })).GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x => x.IncomingTransmissions.Should().Be(1));
-
-        // FlowBuilder.For(Application)
-        //     .CreateSimpleDialog()
-        //     .GetServiceOwnerDialog()
-        //     .ExecuteAndAssert<DialogDto>(x => x.IncomingTransmissions.Should().Be(0)) // Assert result?
-        //     .UpdateDialog(x =>
-        //         x.Dto.Transmissions.Add(new TransmissionDto
-        //         {
-        //             Type = DialogTransmissionType.Values.Information,
-        //             Sender = new ActorDto
-        //             {
-        //                 ActorType = ActorType.Values.ServiceOwner,
-        //             },
-        //         })).GetServiceOwnerDialog()
-        //     .ExecuteAndAssert<DialogDto>(x => x.IncomingTransmissions.Should().Be(1));
     }
 }

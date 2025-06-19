@@ -374,7 +374,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
     [Theory, ClassData(typeof(IncomingOutgoingTransmissionsTestData))]
     public Task Can_Create_Dialog_With_Outgoing_Incoming_Transmissions(string _, Action<CreateDialogCommand> createDialog, ushort outgoing, ushort incoming) =>
-        FlowBuilder.For(Application).CreateSimpleDialog(createDialog).GetServiceOwnerDialog()
+        FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
+            .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.OutgoingTransmissions.Should().Be(outgoing);

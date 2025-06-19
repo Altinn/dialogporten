@@ -20,7 +20,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
     [Fact]
     public Task Get_Dialog_ActivityLog_Should_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
-            .CreateDialog(DialogWithActivity())
+            .CreateDialog(_ => DialogWithActivity())
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Activities.Single()
@@ -32,7 +32,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
     [Fact]
     public Task Search_Dialog_LatestActivity_Should_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
-            .CreateDialog(DialogWithActivity())
+            .CreateDialog(_ => DialogWithActivity())
             .SendCommand((_, ctx) => new SearchDialogQuery
             {
                 ServiceResource = [ctx.GetServiceResource()]
@@ -48,7 +48,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
     [Fact]
     public Task Get_ActivityLog_Should_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
-            .CreateDialog(DialogWithActivity())
+            .CreateDialog(_ => DialogWithActivity())
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>()
             .SendCommand(x => new GetActivityQuery

@@ -49,21 +49,19 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.Id = dialogId)
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x =>
+            .AssertResult<DialogDto>(x =>
             {
                 party = x.Party;
                 revision = x.EndUserContext.Revision;
-            });
-
-        await FlowBuilder.For(Application)
-            .SendCommand(new SetSystemLabelCommand
+            })
+            .SendCommand(_ => new SetSystemLabelCommand
             {
                 EndUserId = party!,
                 DialogId = dialogId.Value,
                 IfMatchEndUserContextRevision = revision!.Value,
                 SystemLabels = [SystemLabel.Values.Bin]
             })
-            .SendCommand(GetDialog(dialogId))
+            .SendCommand(_ => GetDialog(dialogId))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
     }

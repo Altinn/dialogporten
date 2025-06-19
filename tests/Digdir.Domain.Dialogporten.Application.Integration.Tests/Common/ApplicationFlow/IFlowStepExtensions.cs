@@ -111,7 +111,16 @@ public static class IFlowStepExtensions
                 modify(command);
                 return command;
             });
-
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
+        Action<UpdateDialogCommand> modify) => step
+        .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
+        .AssertResult<DialogDtoSO>()
+        .SendCommand((x, ctx) =>
+        {
+            var command = CreateUpdateDialogCommand(x, ctx);
+            modify(command);
+            return command;
+        });
     public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(this IFlowStep<CreateDialogResult> step,
         Action<UpdateDialogServiceOwnerContextCommand> modify) =>
         step.AssertResult<CreateDialogSuccess>()

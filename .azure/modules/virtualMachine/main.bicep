@@ -20,6 +20,7 @@ type SecurityProfile = {
     vTpmEnabled: bool
   }
   securityType: string
+  encryptionAtHost: bool
 }
 @description('Specifies the security profile for the virtual machine')
 param securityProfile SecurityProfile

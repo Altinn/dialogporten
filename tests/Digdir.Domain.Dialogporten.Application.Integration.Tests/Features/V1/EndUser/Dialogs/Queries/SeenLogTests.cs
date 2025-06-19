@@ -87,7 +87,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
 
         await FlowBuilder.For(Application)
             // Fetch as new EndUser
-            .SendCommand(new GetDialogQuery { DialogId = dialogId })
+            .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 // Both users should be in SeenSinceLastContentUpdate
@@ -133,7 +133,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
 
         await FlowBuilder.For(Application)
             // Fetch as new EndUser
-            .SendCommand(new GetDialogQuery { DialogId = dialogId })
+            .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
             {

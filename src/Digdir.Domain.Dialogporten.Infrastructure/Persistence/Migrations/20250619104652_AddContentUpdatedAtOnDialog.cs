@@ -18,8 +18,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 nullable: false,
                 defaultValueSql: "current_timestamp at time zone 'utc'");
 
-            // migrationBuilder.Sql("UPDATE \"Dialog\" SET \"ContentUpdatedAt\" = \"UpdatedAt\"");
-
             migrationBuilder.Sql(
                 """
                 UPDATE "Dialog" d

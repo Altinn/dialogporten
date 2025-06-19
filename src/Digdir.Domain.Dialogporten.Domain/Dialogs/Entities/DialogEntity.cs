@@ -50,6 +50,15 @@ public sealed class DialogEntity :
     /// </summary>
     public bool IsApiOnly { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public ushort IncomingTransmissions { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public ushort OutgoingTransmissions { get; set; }
 
     // === Dependent relationships ===
     public DialogStatus.Values StatusId { get; set; }
@@ -99,10 +108,10 @@ public sealed class DialogEntity :
     public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, string? endUserName)
     {
         var lastSeenAt = SeenLog
-                             .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
-                             .MaxBy(x => x.CreatedAt)
-                             ?.CreatedAt
-                         ?? DateTimeOffset.MinValue;
+                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
+                .MaxBy(x => x.CreatedAt)
+                ?.CreatedAt
+         ?? DateTimeOffset.MinValue;
 
         if (lastSeenAt >= UpdatedAt)
         {

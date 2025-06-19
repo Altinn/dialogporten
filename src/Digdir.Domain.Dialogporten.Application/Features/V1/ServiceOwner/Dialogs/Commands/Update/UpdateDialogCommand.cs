@@ -176,6 +176,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             domainError => domainError,
             concurrencyError => concurrencyError);
     }
+    private static void UpdateIncomingOutgoing(DialogEntity dialog)
+    {
+        dialog.OutgoingTransmissions = (ushort)dialog.Transmissions.Count(x => x.TypeId is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
+        dialog.IncomingTransmissions = (ushort)dialog.Transmissions.Count(x => x.TypeId is not (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
+    }
 
     private void UpdateLabel(DialogEntity dialog)
     {
@@ -281,6 +286,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingIds));
             return;
         }
+
+        dialog.OutgoingTransmissions += (ushort)newDialogTransmissions.Count(x => x.TypeId is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
+        dialog.IncomingTransmissions += (ushort)newDialogTransmissions.Count(x => x.TypeId is not (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
         dialog.Transmissions.AddRange(newDialogTransmissions);
         // Tell ef explicitly to add transmissions as new to the database.

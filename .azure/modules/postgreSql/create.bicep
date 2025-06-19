@@ -151,7 +151,7 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
     }
   }
   resource administrators 'administrators' = {
-    name: '${namePrefix}-postgres-admin-identity'
+    name: guid(subscription().subscriptionId, postgresAdminIdentity.id)
     properties: {
       principalName: postgresAdminIdentity.properties.principalId
       principalType: 'ServicePrincipal'

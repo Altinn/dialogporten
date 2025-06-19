@@ -150,15 +150,18 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       collation: 'en_US.utf8'
     }
   }
-  resource administrators 'administrators' = {
-    name: guid(subscription().subscriptionId, postgresAdminIdentity.id)
-    properties: {
-      principalName: postgresAdminIdentity.properties.principalId
-      principalType: 'ServicePrincipal'
-      tenantId: subscription().tenantId
-    }
-  }
+
   tags: tags
+}
+
+resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2024-08-01' = {
+  name: deployer().objectId
+  parent: postgres
+  properties: {
+    principalName: deployer().userPrincipalName
+    principalType: 'ServicePrincipal'
+    tenantId: deployer().tenantId
+  }
 }
 
 resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {

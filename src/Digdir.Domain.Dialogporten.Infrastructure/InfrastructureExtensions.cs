@@ -161,7 +161,7 @@ public static class InfrastructureExtensions
             FactorySoftTimeout = TimeSpan.FromSeconds(2),
             // Timeout for the cache to wait for the factory to complete, which when reached without fail-safe data
             // will cause an exception to be thrown
-            FactoryHardTimeout = TimeSpan.FromSeconds(10)
+            FactoryHardTimeout = TimeSpan.FromSeconds(15)
         })
         .ConfigureFusionCache(nameof(SubjectResource), new()
         {
@@ -359,8 +359,6 @@ public static class InfrastructureExtensions
                 // the cache entry was not found. This avoids crashes which otherwise would happen if entities that
                 // are cached are changed in a way that makes them incompatible with the cached version.
                 ReThrowSerializationExceptions = false,
-
-                EnableAutoClone = true
             })
             .WithRegisteredSerializer()
             // If Redis is disabled (eg. in local development or non-web runtimes), we must instruct FusionCache to

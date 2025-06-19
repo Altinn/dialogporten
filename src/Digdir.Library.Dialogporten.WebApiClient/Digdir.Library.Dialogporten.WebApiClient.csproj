@@ -12,7 +12,7 @@
         <RootNamespace>Altinn.ApiClients.Dialogporten</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591,1573</NoWarn>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
         <BuildInParallel>false</BuildInParallel>
         <ImplicitUsings>true</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -21,7 +21,11 @@
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="/"/>
         <None Include="../../LICENSE" Pack="true" PackagePath="/"/>
+    </ItemGroup>
 
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0' and '$(Configuration)' == 'Release'">
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
+                          ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
@@ -41,12 +45,5 @@
         <InternalsVisibleTo Include="Digdir.Tool.Dialogporten.Benchmarks"/>
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
-
-
-    <Target Name="BuildWebApi" BeforeTargets="BeforeBuild" Condition="$(Configuration)=='Release'">
-        <MSBuild Projects="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
-                 Properties="Configuration=$(Configuration);TargetFramework=net9.0"/>
-    </Target>
-
 
 </Project>

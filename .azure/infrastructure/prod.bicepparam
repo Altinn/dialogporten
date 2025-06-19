@@ -60,6 +60,8 @@ param postgresConfiguration = {
   availabilityZone: '3'
 }
 
+param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
+
 param redisSku = {
   name: 'Basic'
   family: 'C'

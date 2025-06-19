@@ -37,10 +37,10 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     SystemLabels = [SystemLabel.Values.Bin]
                 };
             })
-            .SendCommand(GetDialog(dialogId1))
+            .SendCommand(_ => GetDialog(dialogId1))
             .AssertResult<DialogDto>(x =>
                 AssertOneLabelWithValue(x, SystemLabel.Values.Bin))
-            .SendCommand(GetDialog(dialogId2))
+            .SendCommand(_ => GetDialog(dialogId2))
             .ExecuteAndAssert<DialogDto>(x =>
                 AssertOneLabelWithValue(x, SystemLabel.Values.Bin));
     }
@@ -122,9 +122,9 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                 }
             })
             .AssertResult<BulkSetSystemLabelSuccess>()
-            .SendCommand(GetDialog(dialogId1))
+            .SendCommand(_ => GetDialog(dialogId1))
             .AssertResult<DialogDto>(x => AssertOneLabelWithValue(x, SystemLabel.Values.Bin))
-            .SendCommand(GetDialog(dialogId2))
+            .SendCommand(_ => GetDialog(dialogId2))
             .ExecuteAndAssert<DialogDto>(x => AssertOneLabelWithValue(x, SystemLabel.Values.Bin));
     }
 

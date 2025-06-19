@@ -68,6 +68,14 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Fact]
+    public Task Can_Create_Dialog_With_Empty_Content_Summary() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Content!.Summary = null)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Content!.Summary.Should().BeNull());
+
+    [Fact]
     public async Task Create_Dialog_When_Dialog_Is_Complex()
     {
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();

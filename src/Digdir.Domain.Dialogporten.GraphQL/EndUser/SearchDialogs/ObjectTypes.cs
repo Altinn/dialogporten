@@ -82,7 +82,7 @@ public sealed class SearchDialog
 public sealed class SearchContent
 {
     public ContentValue Title { get; set; } = null!;
-    public ContentValue Summary { get; set; } = null!;
+    public ContentValue? Summary { get; set; }
     public ContentValue? SenderName { get; set; }
     public ContentValue? ExtendedStatus { get; set; }
 }

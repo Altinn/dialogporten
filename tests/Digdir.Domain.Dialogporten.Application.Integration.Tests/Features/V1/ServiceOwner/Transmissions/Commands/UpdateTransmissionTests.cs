@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -48,6 +49,18 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
                 dialog.Transmissions.Count.Should().Be(2));
+
+    [Fact]
+    public Task Can_Add_Transmission_Without_Summary_On_Update() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+                x.AddTransmission(x =>
+                    x.Content!.Summary = null))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+                dialog.Transmissions
+                    .First().Content.Summary.Should().BeNull());
 
     [Fact]
     public async Task Cannot_Include_Old_Transmissions_In_UpdateCommand()

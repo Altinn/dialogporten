@@ -30,10 +30,12 @@ public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
     public IFlowExecutor<TOut> SendCommand<TOut>(Func<TIn, FlowContext, IRequest<TOut>> commandSelector)
     {
         var context = Context;
-        Context.Commands.Add(async (input, cancellationToken) =>
+        context.Commands.Add((input, cancellationToken) =>
         {
             var command = commandSelector((TIn)input!, context);
-            return await context.Application.Send(command, cancellationToken);
+            return context.Application
+                .Send(command, cancellationToken)
+                .ContinueWith(t => (object?)t.Result, cancellationToken);
         });
         return new FlowStep<TOut>(context);
     }
@@ -44,7 +46,7 @@ public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
     public IFlowExecutor<TOut> Select<TOut>(Func<TIn, FlowContext, TOut> selector)
     {
         var context = Context;
-        Context.Commands.Add((input, _) => Task.FromResult<object?>(selector((TIn)input!, context)));
+        context.Commands.Add((input, _) => Task.FromResult<object?>(selector((TIn)input!, context)));
         return new FlowStep<TOut>(context);
     }
 
@@ -60,11 +62,11 @@ public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
         return (TIn)current!;
     }
 
-    public IFlowExecutor<TOut> SendCommand<TOut>(IRequest<TOut> command)
+    public IFlowExecutor<TOut> SendCommand<TOut>(Func<FlowContext, IRequest<TOut>> commandSelector)
     {
         var context = Context;
-        Context.Commands.Add(async (_, cancellationToken) =>
-            await context.Application.Send(command, cancellationToken));
+        context.Commands.Add(async (_, cancellationToken) =>
+            await context.Application.Send(commandSelector(context), cancellationToken));
         return new FlowStep<TOut>(context);
     }
 }

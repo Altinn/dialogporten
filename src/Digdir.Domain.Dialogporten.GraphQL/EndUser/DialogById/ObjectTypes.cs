@@ -120,7 +120,7 @@ public enum TransmissionType
 public sealed class Content
 {
     public ContentValue Title { get; set; } = null!;
-    public ContentValue Summary { get; set; } = null!;
+    public ContentValue? Summary { get; set; }
     public ContentValue? SenderName { get; set; }
     public ContentValue? AdditionalInfo { get; set; }
     public ContentValue? ExtendedStatus { get; set; }
@@ -130,7 +130,7 @@ public sealed class Content
 public sealed class TransmissionContent
 {
     public ContentValue Title { get; set; } = null!;
-    public ContentValue Summary { get; set; } = null!;
+    public ContentValue? Summary { get; set; }
     public ContentValue? ContentReference { get; set; }
 }
 

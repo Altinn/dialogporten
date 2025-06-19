@@ -77,7 +77,8 @@ param srcKeyVault object
 @secure()
 param administratorLoginPassword string
 
-@description('The name of the deployer principal')
+@description('The name of the deployer principal used as the PostgreSQL administrator')
+@minLength(3)
 param deployerPrincipalName string
 
 var administratorLogin = 'dialogportenPgAdmin'

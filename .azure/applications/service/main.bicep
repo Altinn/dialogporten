@@ -53,6 +53,9 @@ param workloadProfileName string = 'Consumption'
 @minValue(1)
 param minReplicas int = 1
 
+@description('The Object ID of the Azure AD group for PostgreSQL users (optional)')
+param postgresqlAzureAdGroupObjectId string = ''
+
 @description('The scaling configuration for the container app')
 param scale Scale = {
   minReplicas: minReplicas
@@ -169,6 +172,17 @@ module serviceBusOwnerAccessPolicy '../../modules/serviceBus/addDataOwnerRoles.b
   }
 }
 
+module postgresqlAdGroupMembership '../../modules/azureAd/addIdentityToGroup.bicep' = if (!empty(postgresqlAzureAdGroupObjectId)) {
+  name: 'postgresqlAdGroupMembership-${containerAppName}'
+  params: {
+    location: location
+    tags: tags
+    groupObjectId: postgresqlAzureAdGroupObjectId
+    identityObjectId: managedIdentity.properties.principalId
+    deploymentScriptName: '${containerAppName}-postgres-group-membership'
+  }
+}
+
 module containerApp '../../modules/containerApp/main.bicep' = {
   name: containerAppName
   params: {
@@ -189,6 +203,7 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     keyVaultReaderAccessPolicy
     appConfigReaderAccessPolicy
     serviceBusOwnerAccessPolicy
+    postgresqlAdGroupMembership
   ]
 }
 

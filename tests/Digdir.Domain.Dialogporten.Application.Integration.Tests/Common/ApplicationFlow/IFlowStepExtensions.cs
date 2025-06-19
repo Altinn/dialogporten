@@ -54,25 +54,6 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    //
-    // public static IFlowExecutor<CreateDialogResult> CreateComplexDialog<TIn>(this IFlowStep<TIn> step,
-    //     Action<CreateDialogCommand>? initialState = null) =>
-    //     step.SendCommand((_, context) =>
-    //     {
-    //         var command = DialogGenerator.GenerateFakeCreateDialogCommand();
-    //         context.NewMethod(command, initialState);
-    //         return command;
-    //     });
-    //
-    // public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog<TIn>(this IFlowStep<TIn> step,
-    //     Action<CreateDialogCommand>? initialState = null) =>
-    //     step.SendCommand((_, context) =>
-    //     {
-    //         var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-    //         context.NewMethod(command, initialState);
-    //         return command;
-    //     });
-
     public static IFlowExecutor<CreateDialogResult> CreateComplexDialog(this IFlowStep step,
         Action<CreateDialogCommand>? initialState = null) =>
         step.CreateDialog(_ =>

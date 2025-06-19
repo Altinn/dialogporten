@@ -782,7 +782,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             MaxLength = 255,
                             Name = "Summary",
                             OutputInList = true,
-                            Required = false
+                            Required = true
                         },
                         new
                         {
@@ -1186,7 +1186,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             AllowedMediaTypes = new[] { "text/plain" },
                             MaxLength = 255,
                             Name = "Summary",
-                            Required = false
+                            Required = true
                         },
                         new
                         {

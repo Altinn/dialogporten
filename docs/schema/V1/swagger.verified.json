@@ -625,6 +625,10 @@
             "format": "guid",
             "type": "string"
           },
+          "incomingTransmissions": {
+            "description": "Indicates how many transmissions are of type Submission or Correction",
+            "type": "integer"
+          },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
             "type": "boolean"
@@ -633,6 +637,10 @@
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
             "type": "string"
+          },
+          "outgoingTransmissions": {
+            "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "type": "integer"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
@@ -1505,6 +1513,10 @@
             "format": "guid",
             "type": "string"
           },
+          "incomingTransmissions": {
+            "description": "Indicates how many transmissions are of type Submission or Correction",
+            "type": "integer"
+          },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
             "type": "boolean"
@@ -1522,6 +1534,10 @@
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
             "type": "string"
+          },
+          "outgoingTransmissions": {
+            "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "type": "integer"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
@@ -3685,6 +3701,10 @@
             "nullable": true,
             "type": "string"
           },
+          "incomingTransmissions": {
+            "description": "Indicates how many transmissions are of type Submission or Correction",
+            "type": "integer"
+          },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
             "type": "boolean"
@@ -3693,6 +3713,10 @@
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
             "type": "string"
+          },
+          "outgoingTransmissions": {
+            "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "type": "integer"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
@@ -4679,6 +4703,10 @@
             "format": "guid",
             "type": "string"
           },
+          "incomingTransmissions": {
+            "description": "Indicates how many transmissions are of type Submission or Correction",
+            "type": "integer"
+          },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
             "type": "boolean"
@@ -4696,6 +4724,10 @@
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
             "type": "string"
+          },
+          "outgoingTransmissions": {
+            "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "type": "integer"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",

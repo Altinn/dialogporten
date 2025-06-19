@@ -1780,6 +1780,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
+        /// Indicates how many transmissions are of type Submission or Correction
+        /// </summary>
+
+        [JsonPropertyName("incomingTransmissions")]
+        public int IncomingTransmissions { get; set; }
+
+        /// <summary>
+        /// Indicates how many transmissions are not of type Submission or Correction
+        /// </summary>
+
+        [JsonPropertyName("outgoingTransmissions")]
+        public int OutgoingTransmissions { get; set; }
+
+        /// <summary>
         /// The latest entry in the dialog's activity log.
         /// </summary>
 
@@ -2481,6 +2495,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_Content Content { get; set; }
+
+        /// <summary>
+        /// Indicates how many transmissions are of type Submission or Correction
+        /// </summary>
+
+        [JsonPropertyName("incomingTransmissions")]
+        public int IncomingTransmissions { get; set; }
+
+        /// <summary>
+        /// Indicates how many transmissions are not of type Submission or Correction
+        /// </summary>
+
+        [JsonPropertyName("outgoingTransmissions")]
+        public int OutgoingTransmissions { get; set; }
 
         /// <summary>
         /// The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.

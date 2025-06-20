@@ -338,3 +338,5 @@ module redisConnectionStringAppConfig '../modules/appConfiguration/upsertKeyValu
 output resourceGroupName string = resourceGroup.name
 output containerAppEnvId string = containerAppEnv.outputs.containerAppEnvId
 output environmentKeyVaultName string = environmentKeyVault.outputs.name
+output postgresServerName string = postgresql.outputs.postgresServerName
+output virtualNetworkName string = vnet.outputs.virtualNetworkName

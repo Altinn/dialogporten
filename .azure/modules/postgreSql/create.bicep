@@ -113,6 +113,12 @@ resource postgresAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
   tags: tags
 }
 
+resource deploymentScriptIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-postgres-deployment-script-identity'
+  location: location
+  tags: tags
+}
+
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: postgresServerName
   location: location
@@ -289,5 +295,14 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = {
   }
 }
 
+module deploymentScriptKeyVaultAccess '../keyvault/addReaderRoles.bicep' = {
+  name: 'deploymentScriptKeyVaultAccess'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalIds: [deploymentScriptIdentity.properties.principalId]
+  }
+}
+
 output adoConnectionStringSecretUri string = adoConnectionString.outputs.secretUri
 output psqlConnectionStringSecretUri string = psqlConnectionString.outputs.secretUri
+output postgresServerName string = postgres.name

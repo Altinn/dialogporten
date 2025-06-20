@@ -13,3 +13,5 @@ param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_V
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')
 param appInsightConnectionString = readEnvironmentVariable('AZURE_APP_INSIGHTS_CONNECTION_STRING')
 param appConfigurationName = readEnvironmentVariable('AZURE_APP_CONFIGURATION_NAME')
+param postgresServerName = readEnvironmentVariable('AZURE_POSTGRES_SERVER_NAME')
+param virtualNetworkName = readEnvironmentVariable('AZURE_VIRTUAL_NETWORK_NAME')

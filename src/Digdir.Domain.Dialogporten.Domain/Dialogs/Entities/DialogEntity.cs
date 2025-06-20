@@ -81,8 +81,8 @@ public sealed class DialogEntity :
     [AggregateChild]
     public List<DialogSeenLog> SeenLog { get; set; } = [];
 
-    public DialogEndUserContext EndUserContext { get; set; } = null!;
-    public DialogServiceOwnerContext ServiceOwnerContext { get; set; } = null!;
+    public DialogEndUserContext? EndUserContext { get; set; } = null!;
+    public DialogServiceOwnerContext? ServiceOwnerContext { get; set; } = null!;
 
     public void OnCreate(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));

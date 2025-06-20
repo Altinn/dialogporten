@@ -13,7 +13,7 @@ using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.Servi
 using SeenLogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetSeenLog.SeenLogDto;
 using SearchSeenLogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchSeenLogs.SeenLogDto;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class SeenLogTests(DialogApplication application) : ApplicationCollectionFixture(application)

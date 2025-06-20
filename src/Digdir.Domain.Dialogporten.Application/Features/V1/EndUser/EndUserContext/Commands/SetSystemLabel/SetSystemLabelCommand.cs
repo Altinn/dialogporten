@@ -15,7 +15,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchEndUserContextRevision { get; set; }
-    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = Array.Empty<SystemLabel.Values>();
+    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = [];
 }
 
 public sealed record SetSystemLabelSuccess(Guid Revision);

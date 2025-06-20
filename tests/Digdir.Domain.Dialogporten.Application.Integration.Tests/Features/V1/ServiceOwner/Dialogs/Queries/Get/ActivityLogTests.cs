@@ -12,7 +12,7 @@ using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwne
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.ActivityDto;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class ActivityLogTests(DialogApplication application) : ApplicationCollectionFixture(application)

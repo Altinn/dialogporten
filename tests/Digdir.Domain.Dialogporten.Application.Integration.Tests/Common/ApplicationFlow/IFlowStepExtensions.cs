@@ -152,6 +152,17 @@ public static class IFlowStepExtensions
         });
     }
 
+    public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
+        Action<SearchDialogQuerySO, FlowContext> modify)
+    {
+        return step.SendCommand(ctx =>
+        {
+            var query = new SearchDialogQuerySO();
+            modify(query, ctx);
+            return query;
+        });
+    }
+
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
         Action<SearchDialogQueryEU> modify)
     {
@@ -159,6 +170,17 @@ public static class IFlowStepExtensions
         {
             var query = new SearchDialogQueryEU();
             modify(query);
+            return query;
+        });
+    }
+
+    public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
+        Action<SearchDialogQueryEU, FlowContext> modify)
+    {
+        return step.SendCommand(ctx =>
+        {
+            var query = new SearchDialogQueryEU();
+            modify(query, ctx);
             return query;
         });
     }

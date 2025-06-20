@@ -95,8 +95,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .ThenInclude(x => x.SeenBy)
                 .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.EndUserContext)
-            .Include(x => x.ServiceOwnerContext)
-                .ThenInclude(x => x.ServiceOwnerLabels.OrderBy(x => x.Value))
+            .Include(x => x.ServiceOwnerContext!.ServiceOwnerLabels.OrderBy(x => x.Value))
             .IgnoreQueryFilters()
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);

@@ -48,6 +48,7 @@ public sealed class SearchDialogSortType
     public OrderDirection? CreatedAt { get; set; }
     public OrderDirection? UpdatedAt { get; set; }
     public OrderDirection? DueAt { get; set; }
+    public OrderDirection? ContentUpdatedAt { get; set; }
 }
 
 public sealed class SearchDialog

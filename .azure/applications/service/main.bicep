@@ -49,6 +49,16 @@ param otelTraceSamplerRatio string
 @description('The workload profile name to use, defaults to "Consumption"')
 param workloadProfileName string = 'Consumption'
 
+@description('The name of the PostgreSQL server')
+@minLength(3)
+@secure()
+param postgresServerName string
+
+@description('The name of the virtual network')
+@minLength(3)
+@secure()
+param virtualNetworkName string
+
 @description('Minimum number of replicas')
 @minValue(1)
 param minReplicas int = 1
@@ -190,6 +200,19 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     appConfigReaderAccessPolicy
     serviceBusOwnerAccessPolicy
   ]
+}
+
+module addPostgresUser '../../modules/postgreSql/addDatabaseUser.bicep' = {
+  name: 'addPostgresUser-${containerAppName}'
+  params: {
+    postgresServerName: postgresServerName
+    managedIdentityName: managedIdentity.name
+    managedIdentityObjectId: managedIdentity.properties.principalId
+    location: location
+    tags: tags
+    virtualNetworkName: virtualNetworkName
+  }
+  dependsOn: [containerApp, keyVaultReaderAccessPolicy]
 }
 
 output name string = containerApp.outputs.name

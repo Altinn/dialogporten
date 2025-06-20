@@ -8,6 +8,8 @@ param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_V
 param appConfigurationName = readEnvironmentVariable('AZURE_APP_CONFIGURATION_NAME')
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')
 param serviceBusNamespaceName = readEnvironmentVariable('AZURE_SERVICE_BUS_NAMESPACE_NAME')
+param postgresServerName = readEnvironmentVariable('AZURE_POSTGRES_SERVER_NAME')
+param virtualNetworkName = readEnvironmentVariable('AZURE_VIRTUAL_NETWORK_NAME')
 
 param otelTraceSamplerRatio = '1'
 

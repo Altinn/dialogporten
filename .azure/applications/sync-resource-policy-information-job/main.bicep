@@ -37,6 +37,16 @@ param replicaTimeOutInSeconds int
 @description('The workload profile name to use, defaults to "Consumption"')
 param workloadProfileName string = 'Consumption'
 
+@description('The name of the PostgreSQL server')
+@minLength(3)
+@secure()
+param postgresServerName string
+
+@description('The name of the virtual network')
+@minLength(3)
+@secure()
+param virtualNetworkName string
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 var tags = {
@@ -116,6 +126,7 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
   }
 }
 
+<<<<<<< Updated upstream
 module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
   name: 'keyVaultReaderAccessPolicy-${name}'
   params: {
@@ -125,4 +136,22 @@ module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' 
 }
 
 output identityPrincipalId string = migrationJob.outputs.identityPrincipalId
+||||||| Stash base
+output identityPrincipalId string = managedIdentity.properties.principalId
+=======
+module addPostgresUser '../../modules/postgreSql/addDatabaseUser.bicep' = {
+  name: 'addPostgresUser-${name}'
+  params: {
+    postgresServerName: postgresServerName
+    managedIdentityName: managedIdentity.name
+    managedIdentityObjectId: managedIdentity.properties.principalId
+    location: location
+    tags: tags
+    virtualNetworkName: virtualNetworkName
+  }
+  dependsOn: [migrationJob, keyVaultReaderAccessPolicy]
+}
+
+output identityPrincipalId string = managedIdentity.properties.principalId
+>>>>>>> Stashed changes
 output name string = migrationJob.outputs.name

@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Library.Entity.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
 using Digdir.Library.Entity.Abstractions.Features.SoftDeletable;
+using Digdir.Library.Entity.Abstractions.Features.Updatable;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -132,6 +133,15 @@ public sealed class DialogEntity :
         var events = _domainEvents.ToList();
         _domainEvents.Clear();
         return events;
+    }
+
+    public void UpdateSystemLabel(string userId,
+        SystemLabel.Values? newLabel,
+        ActorType.Values actorType = ActorType.Values.PartyRepresentative)
+    {
+        var context = EndUserContext ?? new();
+        context.UpdateSystemLabel(userId, newLabel, actorType);
+        EndUserContext = context.IsDefault() ? null : context;
     }
 }
 

@@ -24,8 +24,15 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
     [AggregateChild]
     public IReadOnlyCollection<LabelAssignmentLog> LabelAssignmentLogs => _labelAssignmentLogs.AsReadOnly();
 
-    public void UpdateLabel(SystemLabel.Values newLabel, string userId, ActorType.Values actorType = ActorType.Values.PartyRepresentative)
+    public void UpdateSystemLabel(string userId,
+        SystemLabel.Values? newLabel,
+        ActorType.Values actorType = ActorType.Values.PartyRepresentative)
     {
+        if (!newLabel.HasValue)
+        {
+            return;
+        }
+
         var currentLabel = SystemLabelId;
         if (newLabel == currentLabel)
         {
@@ -58,7 +65,7 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
         {
             _labelAssignmentLogs.Add(new()
             {
-                Name = newLabel.ToNamespacedName(),
+                Name = newLabel.Value.ToNamespacedName(),
                 Action = "set",
                 PerformedBy = new()
                 {
@@ -68,6 +75,12 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
             });
         }
 
-        SystemLabelId = newLabel;
+        SystemLabelId = newLabel.Value;
+    }
+
+    public bool IsDefault()
+    {
+        return SystemLabelId is SystemLabel.Values.Default
+            && LabelAssignmentLogs.Count == 0;
     }
 }

@@ -65,21 +65,16 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
 
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        var newLabel = request.SystemLabels.Count switch // The domain model currently only supports one system label
-        {
-            0 => SystemLabel.Values.Default,
-            1 => request.SystemLabels.First(),
-            _ => throw new UnreachableException() // Should be caught in validator
-        };
+        var newLabel = request.SystemLabels.SingleOrDefault(SystemLabel.Values.Default);
 
-        dialog.EndUserContext.UpdateLabel(newLabel, currentUserInformation.UserId.ExternalIdWithPrefix);
+        dialog.UpdateSystemLabel(currentUserInformation.UserId.ExternalIdWithPrefix, newLabel);
 
         var saveResult = await _unitOfWork
-                               .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)
-                               .SaveChangesAsync(cancellationToken);
+           .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)
+           .SaveChangesAsync(cancellationToken);
 
         return saveResult.Match<SetSystemLabelResult>(
-            _ => new SetSystemLabelSuccess(dialog.EndUserContext.Revision),
+            _ => new SetSystemLabelSuccess(dialog.EndUserContext?.Revision ?? dialog.Id),
             domainError => domainError,
             concurrencyError => concurrencyError);
     }

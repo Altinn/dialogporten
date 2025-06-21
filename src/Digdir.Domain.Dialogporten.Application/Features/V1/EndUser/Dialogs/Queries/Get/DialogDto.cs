@@ -134,6 +134,16 @@ public sealed class DialogDto
     public string? DialogToken { get; set; }
 
     /// <summary>
+    /// Indicates how many transmissions are of type Submission or Correction
+    /// </summary>
+    public ushort IncomingTransmissions { get; set; }
+
+    /// <summary>
+    /// Indicates how many transmissions are not of type Submission or Correction
+    /// </summary>
+    public ushort OutgoingTransmissions { get; set; }
+
+    /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).
     /// </summary>
     public List<DialogAttachmentDto> Attachments { get; set; } = [];
@@ -280,7 +290,6 @@ public sealed class DialogSeenLogDto
     public bool IsCurrentEndUser { get; set; }
 }
 
-
 public sealed class ContentDto
 {
     /// <summary>
@@ -371,7 +380,6 @@ public sealed class DialogActivityDto
     /// </summary>
     public List<LocalizationDto> Description { get; set; } = [];
 }
-
 
 public sealed class DialogApiActionDto
 {

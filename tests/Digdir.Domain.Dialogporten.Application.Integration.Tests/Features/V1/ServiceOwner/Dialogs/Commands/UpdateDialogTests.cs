@@ -16,7 +16,6 @@ using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
@@ -352,5 +351,43 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         updatedDialog.GuiActions
             .Should()
             .ContainSingle(x => x.Id == userDefinedGuiActionId);
+    }
+
+    [Fact]
+    public Task Adding_Transmission_Should_Increase_IncomingTransmissionsSO()
+    {
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.IncomingTransmissions.Should().Be(0))
+            .UpdateDialog(x =>
+                x.Dto.Transmissions.Add(new TransmissionDto
+                {
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner,
+                    },
+                })).GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.IncomingTransmissions.Should().Be(1));
+    }
+
+    [Fact]
+    public Task Adding_Transmission_Should_Increase_IncomingTransmissionsEU()
+    {
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>(x => x.IncomingTransmissions.Should().Be(0))
+            .UpdateDialog(x =>
+                x.Dto.Transmissions.Add(new TransmissionDto
+                {
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner,
+                    },
+                })).GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.IncomingTransmissions.Should().Be(1));
     }
 }

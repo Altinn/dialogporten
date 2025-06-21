@@ -183,7 +183,6 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     userAssignedIdentityId: managedIdentity.id
     scale: scale
     workloadProfileName: workloadProfileName
-    // TODO: Once all container apps use user-assigned identities, remove this comment and ensure userAssignedIdentityId is always provided
   }
   dependsOn: [
     keyVaultReaderAccessPolicy

@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.71.0](https://github.com/Altinn/dialogporten/compare/v1.70.0...v1.71.0) (2025-06-21)
+
+
+### Features
+
+* **breaking:** Bulk system label support ([#2462](https://github.com/Altinn/dialogporten/issues/2462)) ([deec550](https://github.com/Altinn/dialogporten/commit/deec550fb425e828f25bfe60b139a8a75b519c1d))
+* **breaking:** Remove summary requirement on Dialog and Transmission ([#2466](https://github.com/Altinn/dialogporten/issues/2466)) ([29be76e](https://github.com/Altinn/dialogporten/commit/29be76e76ecb998c3b2f5cd0047d1d47f5021f5d))
+* **breaking:** Rename DialogStatus values ([#2445](https://github.com/Altinn/dialogporten/issues/2445)) ([517290a](https://github.com/Altinn/dialogporten/commit/517290a7df1b2601095d68a4dd6f8d7479d247eb))
+* **infra:** add encryption at host for virtual machines ([#2467](https://github.com/Altinn/dialogporten/issues/2467)) ([afafa81](https://github.com/Altinn/dialogporten/commit/afafa810c3030adc63b2605c483c4810f138e2d9))
+* **infra:** add entra admin user to postgresql ([#2465](https://github.com/Altinn/dialogporten/issues/2465)) ([bf4358f](https://github.com/Altinn/dialogporten/commit/bf4358fb1eec945c42a67b4c4cc9dec1e2028748))
+
+
+### Bug Fixes
+
+* **infra:** ensure every configuration of postgresql is serial ([6641121](https://github.com/Altinn/dialogporten/commit/66411216695df6e39c122c29b44c25b25a99bc23))
+* **infra:** ensure that admin user is correctly set up ([#2472](https://github.com/Altinn/dialogporten/issues/2472)) ([582cc45](https://github.com/Altinn/dialogporten/commit/582cc45ceaa65a63595ad47e60ca2bb8ec7631f3))
+* **infra:** supply principal name as param for postgresql ([#2474](https://github.com/Altinn/dialogporten/issues/2474)) ([5bc1b2d](https://github.com/Altinn/dialogporten/commit/5bc1b2d10dbbdc8e56e34baec6600dc367dcc7fc))
+* **infra:** use the current deployment user as admin ([#2473](https://github.com/Altinn/dialogporten/issues/2473)) ([5ebcfe9](https://github.com/Altinn/dialogporten/commit/5ebcfe9b1759896e2986f42884bf573d109896bf))
+
+
+### Miscellaneous Chores
+
+* **apps:** ensure role assignments are created before capp ([#2475](https://github.com/Altinn/dialogporten/issues/2475)) ([5eb2416](https://github.com/Altinn/dialogporten/commit/5eb2416142f5b73f4f0d15f74f1427f4dcc98d7b))
+* **deps:** update dependency benchmarkdotnet to 0.15.1 ([#2457](https://github.com/Altinn/dialogporten/issues/2457)) ([ac44153](https://github.com/Altinn/dialogporten/commit/ac441539e7e79523985743237d39f2657b4064f4))
+* **deps:** update jaegertracing/all-in-one docker tag to v1.70.0 ([#2460](https://github.com/Altinn/dialogporten/issues/2460)) ([c09fb5f](https://github.com/Altinn/dialogporten/commit/c09fb5f617d572828c7a8cd59d0ca5dcf67454a8))
+* **deps:** update microsoft dependencies to 9.0.6 ([#2458](https://github.com/Altinn/dialogporten/issues/2458)) ([37c1ecc](https://github.com/Altinn/dialogporten/commit/37c1ecc87e4b828c5f0df433b4ef6f46786a3f5c))
+* **perf:** Various perf improvements ([#2029](https://github.com/Altinn/dialogporten/issues/2029)) ([0f82962](https://github.com/Altinn/dialogporten/commit/0f82962b79a65a9b12245a98d15fee331e392229))
+
 ## [1.70.0](https://github.com/Altinn/dialogporten/compare/v1.69.1...v1.70.0) (2025-06-17)
 
 

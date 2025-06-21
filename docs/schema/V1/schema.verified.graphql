@@ -148,6 +148,7 @@ type Dialog {
   expiresAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
+  contentUpdatedAt: DateTime!
   dialogToken: String
   status: DialogStatus!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
@@ -158,6 +159,7 @@ type Dialog {
   apiActions: [ApiAction!]!
   activities: [Activity!]!
   seenSinceLastUpdate: [SeenLog!]!
+  seenSinceLastContentUpdate: [SeenLog!]!
   transmissions: [Transmission!]!
   endUserContext: EndUserContext!
 }
@@ -249,6 +251,7 @@ type SearchDialog {
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!
+  seenSinceLastContentUpdate: [SeenLog!]!
   endUserContext: EndUserContext!
 }
 

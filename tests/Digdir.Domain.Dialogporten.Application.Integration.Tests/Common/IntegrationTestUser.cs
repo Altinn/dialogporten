@@ -6,12 +6,14 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 internal sealed class IntegrationTestUser : IUser
 {
-    public IntegrationTestUser(List<Claim> claims)
+    public IntegrationTestUser(List<Claim> claims, bool addDefaultClaims = true)
     {
-        var defaultClaims = GetDefaultClaims();
-        defaultClaims.AddRange(claims);
+        if (addDefaultClaims)
+        {
+            claims.AddRange(GetDefaultClaims());
+        }
 
-        _principal = new ClaimsPrincipal(new ClaimsIdentity(defaultClaims));
+        _principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
     }
     public IntegrationTestUser()
     {
@@ -22,7 +24,7 @@ internal sealed class IntegrationTestUser : IUser
 
     public ClaimsPrincipal GetPrincipal() => _principal;
 
-    private static List<Claim> GetDefaultClaims()
+    public static List<Claim> GetDefaultClaims()
     {
         return
         [

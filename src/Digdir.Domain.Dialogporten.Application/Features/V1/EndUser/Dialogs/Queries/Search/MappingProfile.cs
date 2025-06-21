@@ -23,6 +23,10 @@ internal sealed class MappingProfile : Profile
                 .Where(x => x.CreatedAt >= x.Dialog.UpdatedAt)
                 .OrderByDescending(x => x.CreatedAt)
             ))
+            .ForMember(dest => dest.SeenSinceLastContentUpdate, opt => opt.MapFrom(src => src.SeenLog
+                .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
+                .OrderByDescending(x => x.CreatedAt)
+            ))
             .ForMember(dest => dest.GuiAttachmentCount, opt => opt.MapFrom(src => src.Attachments
                 .Count(x => x.Urls
                     .Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))))

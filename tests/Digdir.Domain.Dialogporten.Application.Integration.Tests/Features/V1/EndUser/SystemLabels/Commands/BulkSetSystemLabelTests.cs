@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
@@ -5,7 +6,9 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 
 using FluentAssertions;
 
@@ -32,15 +35,16 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                 ],
                 SystemLabels = [SystemLabel.Values.Bin]
             })
-            .SendCommand(GetDialog(dialogId1))
+            .SendCommand(_ => GetDialog(dialogId1))
             .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin))
-            .SendCommand(GetDialog(dialogId2))
+            .SendCommand(_ => GetDialog(dialogId2))
             .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
     }
 
     [Fact]
     public async Task BulkSet_Updates_System_Labels_With_Revisions()
     {
+        var enduserId = NorwegianPersonIdentifier.PrefixWithSeparator + "22834498646";
         Guid? dialogId1 = NewUuidV7();
         Guid? revision1 = null;
 
@@ -48,15 +52,17 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         Guid? revision2 = null;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId1)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId2)
-            .SendCommand(GetDialog(dialogId1))
-            .AssertResult<DialogDto>(x => revision1 = x.EndUserContext.Revision)
-            .SendCommand(GetDialog(dialogId2))
-            .ExecuteAndAssert<DialogDto>(x => revision2 = x.EndUserContext.Revision);
-
-        await FlowBuilder.For(Application)
-            .SendCommand(new BulkSetSystemLabelCommand
+            .CreateSimpleDialog(x => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId1))
+            .CreateSimpleDialog(x => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId2))
+            .SearchEndUserDialogs(x => x.Party = [enduserId])
+            .AssertResult<PaginatedList<SearchDialogDto>>(x =>
+            {
+                var dialog1 = x.Items.Single(d => d.Id == dialogId1);
+                var dialog2 = x.Items.Single(d => d.Id == dialogId2);
+                revision1 = dialog1.EndUserContext.Revision;
+                revision2 = dialog2.EndUserContext.Revision;
+            })
+            .SendCommand(_ => new BulkSetSystemLabelCommand
             {
                 Dto = new BulkSetSystemLabelDto
                 {
@@ -68,9 +74,9 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     SystemLabels = [SystemLabel.Values.Bin]
                 }
             })
-            .SendCommand(GetDialog(dialogId1))
+            .SendCommand(_ => GetDialog(dialogId1))
             .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin))
-            .SendCommand(GetDialog(dialogId2))
+            .SendCommand(_ => GetDialog(dialogId2))
             .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
     }
 

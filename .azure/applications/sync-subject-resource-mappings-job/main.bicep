@@ -58,6 +58,14 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   tags: tags
 }
 
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+  name: 'keyVaultReaderAccessPolicy-${name}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalIds: [managedIdentity.properties.principalId]
+  }
+}
+
 var containerAppEnvVars = [
   {
     name: 'Infrastructure__DialogDbConnectionString'
@@ -113,14 +121,6 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
     workloadProfileName: workloadProfileName
-  }
-}
-
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
-  name: 'keyVaultReaderAccessPolicy-${name}'
-  params: {
-    keyvaultName: environmentKeyVaultName
-    principalIds: [managedIdentity.properties.principalId]
   }
 }
 

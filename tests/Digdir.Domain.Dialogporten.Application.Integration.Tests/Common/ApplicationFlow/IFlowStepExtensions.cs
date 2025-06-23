@@ -30,47 +30,47 @@ public static class IFlowStepExtensions
     private const string PartyKey = "Party";
     private const string ServiceResource = "ServiceResource";
 
-    public static IFlowExecutor<CreateDialogResult> CreateDialog(this IFlowStep step, CreateDialogCommand command)
-    {
-        step.Context.Bag[DialogIdKey] = command.Dto.Id = command.Dto.Id.CreateVersion7IfDefault();
-        step.Context.Bag[ServiceResource] = command.Dto.ServiceResource;
-        step.Context.Bag[PartyKey] = command.Dto.Party;
-        return step.SendCommand(command);
-    }
-
-    public static IFlowExecutor<CreateDialogResult> CreateDialogs(this IFlowStep step,
+    public static IFlowExecutor<CreateDialogSuccess> CreateDialogs(this IFlowStep step,
         params CreateDialogCommand[] commands)
     {
-        if (commands.Length == 0)
-        {
-            throw new ArgumentException("At least one command is required to create dialogs.", nameof(commands));
-        }
-
-        for (var i = 0; i < commands.Length - 1; i++)
+        foreach (var command in commands)
         {
             step = step
-                .SendCommand(commands[i])
+                .SendCommand(_ => command)
                 .AssertResult<CreateDialogSuccess>();
         }
 
-        return step.SendCommand(commands[^1]);
+        return step as IFlowExecutor<CreateDialogSuccess>
+               ?? throw new ArgumentException("At least one command is required to create dialogs.", nameof(commands));
     }
+
+    public static IFlowExecutor<CreateDialogResult> CreateDialog(this IFlowStep step, Func<FlowContext, CreateDialogCommand> commandSelector) =>
+        step.SendCommand(ctx =>
+        {
+            var command = commandSelector(ctx);
+            ctx.Bag[DialogIdKey] = command.Dto.Id = command.Dto.Id.CreateVersion7IfDefault();
+            ctx.Bag[ServiceResource] = command.Dto.ServiceResource;
+            ctx.Bag[PartyKey] = command.Dto.Party;
+            return command;
+        });
 
     public static IFlowExecutor<CreateDialogResult> CreateComplexDialog(this IFlowStep step,
-        Action<CreateDialogCommand>? initialState = null)
-    {
-        var command = DialogGenerator.GenerateFakeCreateDialogCommand();
-        initialState?.Invoke(command);
-        return step.CreateDialog(command);
-    }
+        Action<CreateDialogCommand>? initialState = null) =>
+        step.CreateDialog(_ =>
+        {
+            var command = DialogGenerator.GenerateFakeCreateDialogCommand();
+            initialState?.Invoke(command);
+            return command;
+        });
 
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
-        Action<CreateDialogCommand>? initialState = null)
-    {
-        var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        initialState?.Invoke(command);
-        return step.CreateDialog(command);
-    }
+        Action<CreateDialogCommand>? initialState = null) =>
+        step.CreateDialog(_ =>
+        {
+            var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+            initialState?.Invoke(command);
+            return command;
+        });
 
     public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<CreateDialogResult> step,
         Action<PurgeDialogCommand>? modify = null) =>
@@ -144,34 +144,42 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
         Action<SearchDialogQuerySO> modify)
     {
-        var query = new SearchDialogQuerySO();
-        modify(query);
-        return step.SendCommand(query);
+        return step.SendCommand(_ =>
+        {
+            var query = new SearchDialogQuerySO();
+            modify(query);
+            return query;
+        });
     }
 
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
         Action<SearchDialogQueryEU> modify)
     {
-        var query = new SearchDialogQueryEU();
-        modify(query);
-        return step.SendCommand(query);
+        return step.SendCommand(_ =>
+        {
+            var query = new SearchDialogQueryEU();
+            modify(query);
+            return query;
+        });
     }
 
     public static IFlowExecutor<BulkSetSystemLabelResultEU> BulkSetSystemLabelEndUser(
-        this IFlowStep<CreateDialogResult> step, Action<BulkSetSystemLabelCommandEU, FlowContext> modify)
-    {
-        var command = new BulkSetSystemLabelCommandEU { Dto = new() };
-        modify(command, step.Context);
-        return step.SendCommand(command);
-    }
+        this IFlowStep<CreateDialogResult> step, Action<BulkSetSystemLabelCommandEU, FlowContext> modify) =>
+        step.SendCommand((_, ctx) =>
+        {
+            var command = new BulkSetSystemLabelCommandEU { Dto = new() };
+            modify(command, ctx);
+            return command;
+        });
 
     public static IFlowExecutor<BulkSetSystemLabelResultSO> BulkSetSystemLabelServiceOwner(
-        this IFlowStep<CreateDialogResult> step, Action<BulkSetSystemLabelCommandSO, FlowContext> modify)
-    {
-        var command = new BulkSetSystemLabelCommandSO { Dto = new() };
-        modify(command, step.Context);
-        return step.SendCommand(command);
-    }
+        this IFlowStep<CreateDialogResult> step, Action<BulkSetSystemLabelCommandSO, FlowContext> modify) =>
+        step.SendCommand((_, ctx) =>
+        {
+            var command = new BulkSetSystemLabelCommandSO { Dto = new() };
+            modify(command, ctx);
+            return command;
+        });
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,

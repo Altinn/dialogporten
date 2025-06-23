@@ -278,6 +278,13 @@ public static class DialogGenerator
             guiActions: [],
             apiActions: [],
             searchTags: [],
+            content: new()
+            {
+                Title = new()
+                {
+                    Value = GenerateFakeLocalizations(3)
+                }
+            },
             transmissions: []);
     }
 

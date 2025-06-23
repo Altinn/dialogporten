@@ -332,7 +332,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var userDefinedGuiActionId = NewUuidV7();
 
         var updatedDialog = await FlowBuilder.For(Application)
-            .CreateDialog(DialogGenerator.GenerateSimpleFakeCreateDialogCommand())
+            .CreateSimpleDialog()
             .UpdateDialog(x =>
             {
                 x.Dto.GuiActions.Add(new GuiActionDto

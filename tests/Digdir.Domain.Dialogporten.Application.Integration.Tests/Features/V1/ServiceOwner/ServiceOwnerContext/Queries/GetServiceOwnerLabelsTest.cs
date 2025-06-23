@@ -25,7 +25,7 @@ public class GetServiceOwnerLabelsTest : ApplicationCollectionFixture
     [Fact]
     public Task Get_ServiceOwnerLabels_With_Invalid_DialogId_Returns_NotFound() =>
         FlowBuilder.For(Application)
-            .SendCommand(new GetServiceOwnerLabelsQuery { DialogId = NewUuidV7() })
+            .SendCommand(_ => new GetServiceOwnerLabelsQuery { DialogId = NewUuidV7() })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
 
     private static List<ServiceOwnerLabelDto> CreateLabels(params string[] labels) =>

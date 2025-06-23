@@ -15,7 +15,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchEndUserContextRevision { get; set; }
-    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = Array.Empty<SystemLabel.Values>();
+    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = [];
 }
 
 public sealed record SetSystemLabelSuccess(Guid Revision);
@@ -71,7 +71,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             _ => throw new UnreachableException() // Should be caught in validator
         };
 
-        dialog.EndUserContext.UpdateLabel(newLabel, currentUserInformation.UserId.ExternalIdWithPrefix);
+        dialog.EndUserContext.UpdateSystemLabel(currentUserInformation.UserId.ExternalIdWithPrefix, newLabel);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)

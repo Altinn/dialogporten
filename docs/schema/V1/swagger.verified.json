@@ -43,21 +43,21 @@
       "DialogsEntities_DialogStatus": {
         "description": "",
         "enum": [
-          "NotApplicable",
           "InProgress",
           "Draft",
-          "Awaiting",
           "RequiresAttention",
-          "Completed"
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
         ],
         "type": "string",
         "x-enumNames": [
-          "NotApplicable",
           "InProgress",
           "Draft",
-          "Awaiting",
           "RequiresAttention",
-          "Completed"
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
         ]
       },
       "DialogsEntitiesActions_DialogGuiActionPriority": {
@@ -2013,6 +2013,30 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerCommonDialogStatuses_DialogStatusInput": {
+        "description": "",
+        "enum": [
+          "New",
+          "InProgress",
+          "Draft",
+          "Sent",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "New",
+          "InProgress",
+          "Draft",
+          "Sent",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ]
+      },
       "V1ServiceOwnerDialogsCommandsCreate_Activity": {
         "additionalProperties": false,
         "properties": {
@@ -2426,7 +2450,7 @@
             "description": "The aggregated status of the dialog.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"
               }
             ]
           },
@@ -3252,7 +3276,7 @@
             "description": "The aggregated status of the dialog.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"
               }
             ]
           },

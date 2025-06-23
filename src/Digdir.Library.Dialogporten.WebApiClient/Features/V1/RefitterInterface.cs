@@ -1820,23 +1820,23 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public enum DialogsEntities_DialogStatus
     {
 
-        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
-        NotApplicable = 0,
-
         [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
-        InProgress = 1,
+        InProgress = 0,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
-        Draft = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
-        Awaiting = 3,
+        Draft = 1,
 
         [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
-        RequiresAttention = 4,
+        RequiresAttention = 2,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
-        Completed = 5,
+        Completed = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 5,
 
     }
 
@@ -3338,7 +3338,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntities_DialogStatus Status { get; set; }
+        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
 
         /// <summary>
         /// The dialog unstructured text content.
@@ -3390,6 +3390,36 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("activities")]
         public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Activity> Activities { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum V1ServiceOwnerCommonDialogStatuses_DialogStatusInput
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"New")]
+        New = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
+        InProgress = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
+        Draft = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Sent")]
+        Sent = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
+        RequiresAttention = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
+        Completed = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 7,
 
     }
 
@@ -4208,7 +4238,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntities_DialogStatus Status { get; set; }
+        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
 
         /// <summary>
         /// Set the system label of the dialog.

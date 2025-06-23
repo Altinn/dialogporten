@@ -1,6 +1,8 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -113,7 +115,7 @@ public sealed class CreateDialogDto
     /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
-    public DialogStatus.Values Status { get; set; }
+    public DialogStatusInput Status { get; set; }
 
     /// <summary>
     /// Set the system label of the dialog.
@@ -168,6 +170,7 @@ public sealed class DialogServiceOwnerContextDto
     /// </summary>
     public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
 }
+
 
 public sealed class TransmissionDto
 {

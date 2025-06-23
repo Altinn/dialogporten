@@ -145,6 +145,11 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
+        catch (Exception ex)
+        {
+            Console.Write(ex.Message);
+            throw;
+        }
 
         // Interceptors can add domain errors, so check again
         return !_domainContext.IsValid

@@ -3805,14 +3805,6 @@
               }
             ]
           },
-          "systemLabel": {
-            "description": "Current display state.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
-              }
-            ]
-          },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
             "items": {

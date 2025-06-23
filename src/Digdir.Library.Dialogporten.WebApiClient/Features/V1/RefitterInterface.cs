@@ -1780,13 +1780,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
-        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
-        /// </summary>
-
-        [JsonPropertyName("hasUnopenedContent")]
-        public bool HasUnopenedContent { get; set; }
-
-        /// <summary>
         /// The latest entry in the dialog's activity log.
         /// </summary>
 
@@ -2483,21 +2476,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
-        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
-        /// </summary>
-
-        [JsonPropertyName("hasUnopenedContent")]
-        public bool HasUnopenedContent { get; set; }
-
-        /// <summary>
-        /// Current display state.
-        /// </summary>
-
-        [JsonPropertyName("systemLabel")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
-
-        /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
 
@@ -2782,13 +2760,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent Content { get; set; }
-
-        /// <summary>
-        /// Indicates whether the dialog transmission has been opened.
-        /// </summary>
-
-        [JsonPropertyName("isOpened")]
-        public bool? IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.

@@ -144,11 +144,6 @@ public sealed class DialogDto
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
-    /// Current display state.
-    /// </summary>
-    public SystemLabel.Values SystemLabel { get; set; }
-
-    /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
     public ContentDto? Content { get; set; }

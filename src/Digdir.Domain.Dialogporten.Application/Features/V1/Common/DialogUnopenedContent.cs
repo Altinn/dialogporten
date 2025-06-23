@@ -14,18 +14,16 @@ public static class DialogUnopenedContent
         var transmissions = dialog.Transmissions
             .Where(transmission => transmission.TypeId is not (DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission));
 
-        var hasUnopenedContent = transmissions
+        if (transmissions
             .Any(transmission =>
-                !transmission.Activities
-                    .Any(a => a.TypeId == DialogActivityType.Values.TransmissionOpened));
-
-        if (serviceResourceInformation?.ResourceType == Constants.CorrespondenceService)
+                transmission.Activities
+                    .All(x => x.TypeId != DialogActivityType.Values.TransmissionOpened)))
         {
-            hasUnopenedContent = !dialog.Activities
-                .Any(a => a.TypeId == DialogActivityType.Values.CorrespondenceOpened);
+            return true;
         }
 
-        return hasUnopenedContent;
+        return serviceResourceInformation?.ResourceType == Constants.CorrespondenceService &&
+            dialog.Activities.All(a => a.TypeId != DialogActivityType.Values.CorrespondenceOpened);
     }
 
     public static bool? IsOpened(DialogTransmission transmission) =>

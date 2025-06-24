@@ -687,6 +687,16 @@
               }
             ]
           },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead.)"
+          },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
             "items": {
@@ -1572,6 +1582,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead.)"
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",
@@ -3796,6 +3816,16 @@
               }
             ]
           },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead.)"
+          },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
             "items": {
@@ -4793,6 +4823,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead.)"
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",

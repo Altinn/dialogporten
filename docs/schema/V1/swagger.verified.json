@@ -695,7 +695,7 @@
                 "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ],
-            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead.)"
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
@@ -1591,7 +1591,7 @@
                 "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ],
-            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead.)"
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",
@@ -3824,7 +3824,7 @@
                 "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ],
-            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead.)"
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
@@ -4832,7 +4832,7 @@
                 "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
               }
             ],
-            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead.)"
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",

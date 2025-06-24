@@ -81,6 +81,7 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserReso
             concurrencyError => concurrencyError
         );
     }
+
     private static DialogActivity? LatestActivity(DialogEntity dialog)
     {
         DialogActivity? activity = null;

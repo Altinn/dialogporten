@@ -95,10 +95,7 @@ public static class DialogGenerator
         .RuleFor(o => o.DueAt, f => f.Date.Future(10, RefTime))
         .RuleFor(o => o.ExpiresAt, f => f.Date.Future(20, RefTime.AddYears(11)))
         .RuleFor(o => o.VisibleFrom, _ => null)
-#pragma warning disable CS0618 // Type or member is obsolete
-        .RuleFor(o => o.Status, f => DialogStatusInput.New)
-#pragma warning restore CS0618 // Type or member is obsolete
-        // .RuleFor(o => o.Status, f => f.PickRandom<DialogStatusInput>())
+        .RuleFor(o => o.Status, f => f.PickRandom<DialogStatusInput>())
         .RuleFor(o => o.Content, _ => GenerateFakeContent())
         .RuleFor(o => o.SearchTags, _ => GenerateFakeSearchTags())
         .RuleFor(o => o.Attachments, _ => GenerateFakeDialogAttachments())

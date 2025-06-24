@@ -628,6 +628,7 @@
           },
           "incomingTransmissions": {
             "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "format": "int32",
             "type": "integer"
           },
           "isApiOnly": {
@@ -641,6 +642,7 @@
           },
           "outgoingTransmissions": {
             "description": "Indicates how many transmissions are of type Submission or Correction",
+            "format": "int32",
             "type": "integer"
           },
           "party": {
@@ -1519,6 +1521,7 @@
           },
           "incomingTransmissions": {
             "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "format": "int32",
             "type": "integer"
           },
           "isApiOnly": {
@@ -1541,6 +1544,7 @@
           },
           "outgoingTransmissions": {
             "description": "Indicates how many transmissions are of type Submission or Correction",
+            "format": "int32",
             "type": "integer"
           },
           "party": {
@@ -3713,6 +3717,7 @@
           },
           "incomingTransmissions": {
             "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "format": "int32",
             "type": "integer"
           },
           "isApiOnly": {
@@ -3726,6 +3731,7 @@
           },
           "outgoingTransmissions": {
             "description": "Indicates how many transmissions are of type Submission or Correction",
+            "format": "int32",
             "type": "integer"
           },
           "party": {
@@ -4718,6 +4724,7 @@
           },
           "incomingTransmissions": {
             "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "format": "int32",
             "type": "integer"
           },
           "isApiOnly": {
@@ -4740,6 +4747,7 @@
           },
           "outgoingTransmissions": {
             "description": "Indicates how many transmissions are of type Submission or Correction",
+            "format": "int32",
             "type": "integer"
           },
           "party": {

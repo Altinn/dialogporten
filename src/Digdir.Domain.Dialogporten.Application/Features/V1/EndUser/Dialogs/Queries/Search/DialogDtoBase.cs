@@ -110,12 +110,12 @@ public class DialogDtoBase
     /// <summary>
     /// Indicates how many transmissions are not of type Submission or Correction
     /// </summary>
-    public ushort IncomingTransmissions { get; set; }
+    public int IncomingTransmissions { get; set; }
 
     /// <summary>
     /// Indicates how many transmissions are of type Submission or Correction
     /// </summary>
-    public ushort OutgoingTransmissions { get; set; }
+    public int OutgoingTransmissions { get; set; }
 
     /// <summary>
     /// The latest entry in the dialog's activity log.

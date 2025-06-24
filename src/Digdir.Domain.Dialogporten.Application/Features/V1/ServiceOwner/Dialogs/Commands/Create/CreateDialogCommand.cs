@@ -113,8 +113,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             maxDepth: 20,
             maxWidth: 20));
 
-        dialog.OutgoingTransmissions = (ushort)dialog.Transmissions.Count(x => x.TypeId is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
-        dialog.IncomingTransmissions = (ushort)dialog.Transmissions.Count(x => x.TypeId is not (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
+        dialog.OutgoingTransmissions = dialog.Transmissions.Count(x => x.TypeId is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
+        dialog.IncomingTransmissions = dialog.Transmissions.Count(x => x.TypeId is not (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
         _db.Dialogs.Add(dialog);
 

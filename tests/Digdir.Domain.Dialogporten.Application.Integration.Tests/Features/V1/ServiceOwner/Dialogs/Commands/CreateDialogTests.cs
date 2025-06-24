@@ -307,7 +307,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert(expectedType);
 
-    private sealed class IncomingOutgoingTransmissionsTestData : TheoryData<string, Action<CreateDialogCommand>, ushort, ushort>
+    private sealed class IncomingOutgoingTransmissionsTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
     {
         public IncomingOutgoingTransmissionsTestData()
         {
@@ -373,7 +373,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(IncomingOutgoingTransmissionsTestData))]
-    public Task Can_Create_Dialog_With_Outgoing_Incoming_Transmissions(string _, Action<CreateDialogCommand> createDialog, ushort outgoing, ushort incoming) =>
+    public Task Can_Create_Dialog_With_Outgoing_Incoming_Transmissions(string _, Action<CreateDialogCommand> createDialog, int outgoing, int incoming) =>
         FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>

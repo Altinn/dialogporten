@@ -171,7 +171,6 @@ public sealed class DialogServiceOwnerContextDto
     public List<ServiceOwnerLabelDto> ServiceOwnerLabels { get; set; } = [];
 }
 
-
 public sealed class TransmissionDto
 {
     /// <summary>

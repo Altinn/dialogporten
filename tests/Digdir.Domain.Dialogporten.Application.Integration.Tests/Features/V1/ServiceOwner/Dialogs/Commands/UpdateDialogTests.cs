@@ -405,7 +405,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .AssertResult<DialogDtoEU>(x =>
             {
                 x.IncomingTransmissions.Should().Be(0);
-                x.OutgoingTransmissions.Should().Be(1);
+                x.OutgoingTransmissions.Should().Be(0);
             })
             .UpdateDialog(x =>
                 x.Dto.Transmissions.Add(new TransmissionDto

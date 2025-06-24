@@ -73,7 +73,8 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserReso
             .DisableImmutableFilter()
             .DisableUpdatableFilter()
             .DisableAggregateFilter()
-            .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision).SaveChangesAsync(cancellationToken);
+            .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)
+            .SaveChangesAsync(cancellationToken);
 
         return result.Match<BumpFormSavedResult>(
             _ => new BumpFormSavedSuccess(dialog.Revision),

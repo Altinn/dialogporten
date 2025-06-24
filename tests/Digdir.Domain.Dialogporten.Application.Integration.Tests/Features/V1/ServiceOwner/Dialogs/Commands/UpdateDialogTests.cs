@@ -1,4 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -21,6 +23,8 @@ using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceO
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
 using GuiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.GuiActionDto;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
+using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
+using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionContentDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -363,6 +367,18 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .UpdateDialog(x =>
                 x.Dto.Transmissions.Add(new TransmissionDto
                 {
+                    Content = new TransmissionContentDto
+                    {
+                        Title = new ContentValueDto
+                        {
+                            Value = [new LocalizationDto
+                                {
+                                    Value = "Hei",
+                                    LanguageCode = "nb"
+                                }
+                            ]
+                        },
+                    },
                     Type = DialogTransmissionType.Values.Information,
                     Sender = new ActorDto
                     {
@@ -378,10 +394,22 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
-            .AssertResult<DialogDto>(x => x.IncomingTransmissions.Should().Be(0))
+            .AssertResult<DialogDtoEU>(x => x.IncomingTransmissions.Should().Be(0))
             .UpdateDialog(x =>
                 x.Dto.Transmissions.Add(new TransmissionDto
                 {
+                    Content = new TransmissionContentDto
+                    {
+                        Title = new ContentValueDto
+                        {
+                            Value = [new LocalizationDto
+                                {
+                                    Value = "Hei",
+                                    LanguageCode = "nb"
+                                }
+                            ]
+                        },
+                    },
                     Type = DialogTransmissionType.Values.Information,
                     Sender = new ActorDto
                     {

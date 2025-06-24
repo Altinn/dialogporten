@@ -1780,14 +1780,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
-        /// Indicates how many transmissions are of type Submission or Correction
+        /// Indicates how many transmissions are not of type Submission or Correction
         /// </summary>
 
         [JsonPropertyName("incomingTransmissions")]
         public int IncomingTransmissions { get; set; }
 
         /// <summary>
-        /// Indicates how many transmissions are not of type Submission or Correction
+        /// Indicates how many transmissions are of type Submission or Correction
         /// </summary>
 
         [JsonPropertyName("outgoingTransmissions")]
@@ -2497,14 +2497,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1ServiceOwnerDialogsQueriesGet_Content Content { get; set; }
 
         /// <summary>
-        /// Indicates how many transmissions are of type Submission or Correction
+        /// Indicates how many transmissions are not of type Submission or Correction
         /// </summary>
 
         [JsonPropertyName("incomingTransmissions")]
         public int IncomingTransmissions { get; set; }
 
         /// <summary>
-        /// Indicates how many transmissions are not of type Submission or Correction
+        /// Indicates how many transmissions are of type Submission or Correction
         /// </summary>
 
         [JsonPropertyName("outgoingTransmissions")]

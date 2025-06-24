@@ -51,12 +51,12 @@ public sealed class DialogEntity :
     public bool IsApiOnly { get; set; }
 
     /// <summary>
-    /// Indicates how many transmissions are of type Submission or Correction
+    /// Indicates how many transmissions are not of type Submission or Correction
     /// </summary>
     public ushort IncomingTransmissions { get; set; }
 
     /// <summary>
-    /// Indicates how many transmissions are not of type Submission or Correction
+    /// Indicates how many transmissions are of type Submission or Correction
     /// </summary>
     public ushort OutgoingTransmissions { get; set; }
 

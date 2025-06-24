@@ -114,8 +114,6 @@ public static class IFlowStepExtensions
             });
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
         Action<UpdateDialogCommand> modify) => step
-        .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
-        .AssertResult<DialogDtoSO>()
         .SendCommand((x, ctx) =>
         {
             var command = CreateUpdateDialogCommand(x, ctx);
@@ -126,7 +124,7 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoEU> step,
         Action<UpdateDialogCommand> modify) => step
         .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
-        .AssertResult<DialogDtoEU>()
+        .AssertResult<DialogDtoSO>()
         .SendCommand((x, ctx) =>
         {
             var command = CreateUpdateDialogCommand(x, ctx);

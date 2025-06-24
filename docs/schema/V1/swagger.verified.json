@@ -627,7 +627,7 @@
             "type": "string"
           },
           "incomingTransmissions": {
-            "description": "Indicates how many transmissions are of type Submission or Correction",
+            "description": "Indicates how many transmissions are not of type Submission or Correction",
             "type": "integer"
           },
           "isApiOnly": {
@@ -640,7 +640,7 @@
             "type": "string"
           },
           "outgoingTransmissions": {
-            "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "description": "Indicates how many transmissions are of type Submission or Correction",
             "type": "integer"
           },
           "party": {
@@ -1518,7 +1518,7 @@
             "type": "string"
           },
           "incomingTransmissions": {
-            "description": "Indicates how many transmissions are of type Submission or Correction",
+            "description": "Indicates how many transmissions are not of type Submission or Correction",
             "type": "integer"
           },
           "isApiOnly": {
@@ -1540,7 +1540,7 @@
             "type": "string"
           },
           "outgoingTransmissions": {
-            "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "description": "Indicates how many transmissions are of type Submission or Correction",
             "type": "integer"
           },
           "party": {
@@ -3712,7 +3712,7 @@
             "type": "string"
           },
           "incomingTransmissions": {
-            "description": "Indicates how many transmissions are of type Submission or Correction",
+            "description": "Indicates how many transmissions are not of type Submission or Correction",
             "type": "integer"
           },
           "isApiOnly": {
@@ -3725,7 +3725,7 @@
             "type": "string"
           },
           "outgoingTransmissions": {
-            "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "description": "Indicates how many transmissions are of type Submission or Correction",
             "type": "integer"
           },
           "party": {
@@ -4717,7 +4717,7 @@
             "type": "string"
           },
           "incomingTransmissions": {
-            "description": "Indicates how many transmissions are of type Submission or Correction",
+            "description": "Indicates how many transmissions are not of type Submission or Correction",
             "type": "integer"
           },
           "isApiOnly": {
@@ -4739,7 +4739,7 @@
             "type": "string"
           },
           "outgoingTransmissions": {
-            "description": "Indicates how many transmissions are not of type Submission or Correction",
+            "description": "Indicates how many transmissions are of type Submission or Correction",
             "type": "integer"
           },
           "party": {

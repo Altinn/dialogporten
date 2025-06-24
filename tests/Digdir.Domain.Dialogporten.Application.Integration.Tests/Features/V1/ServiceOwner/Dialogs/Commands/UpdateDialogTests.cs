@@ -363,7 +363,11 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
-            .AssertResult<DialogDto>(x => x.IncomingTransmissions.Should().Be(0))
+            .AssertResult<DialogDto>(x =>
+            {
+                x.IncomingTransmissions.Should().Be(0);
+                x.OutgoingTransmissions.Should().Be(0);
+            })
             .UpdateDialog(x =>
                 x.Dto.Transmissions.Add(new TransmissionDto
                 {
@@ -385,7 +389,11 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                         ActorType = ActorType.Values.ServiceOwner,
                     },
                 })).GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.IncomingTransmissions.Should().Be(1));
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.IncomingTransmissions.Should().Be(1);
+                x.OutgoingTransmissions.Should().Be(0);
+            });
     }
 
     [Fact]
@@ -394,7 +402,11 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
-            .AssertResult<DialogDtoEU>(x => x.IncomingTransmissions.Should().Be(0))
+            .AssertResult<DialogDtoEU>(x =>
+            {
+                x.IncomingTransmissions.Should().Be(0);
+                x.OutgoingTransmissions.Should().Be(1);
+            })
             .UpdateDialog(x =>
                 x.Dto.Transmissions.Add(new TransmissionDto
                 {
@@ -416,6 +428,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                         ActorType = ActorType.Values.ServiceOwner,
                     },
                 })).GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.IncomingTransmissions.Should().Be(1));
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.IncomingTransmissions.Should().Be(1);
+                x.OutgoingTransmissions.Should().Be(0);
+            });
     }
 }

@@ -40,6 +40,7 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserReso
 
         var dialog = await _db.Dialogs
             .Include(x => x.Activities)
+            .Include(x => x.Status)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);
 
@@ -50,23 +51,22 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserReso
 
         if (dialog.Status.Id != DialogStatus.Values.Draft)
         {
-            return new DomainError(new DomainFailure(nameof(DialogEntity.Status), "Can only bump when status is Draft"));
+            return new DomainError(new DomainFailure(nameof(DialogEntity.Status), "Can only bump timestamp when dialog status is Draft"));
         }
 
-        if (dialog.UpdatedAt < fromSavedAt)
+        if (dialog.UpdatedAt > fromSavedAt)
         {
-            return new DomainError(new DomainFailure(nameof(DialogEntity.UpdatedAt), "Cannot bump to older timestamp"));
+            return new DomainError(new DomainFailure(nameof(DialogEntity.UpdatedAt), "Cannot bump to timestamp a in the past"));
         }
 
-        var activity = dialog.Activities.FirstOrDefault();
+        var activity = LatestActivity(dialog);
 
         if (activity is not { TypeId: DialogActivityType.Values.FormSaved })
         {
-            return new DomainError(new DomainFailure(nameof(DialogEntity.Activities), "Latest activity is not of type FormSaved"));
+            return new DomainError(new DomainFailure(nameof(DialogActivity.Type), "Latest activity is not of type FormSaved"));
         }
 
-
-        dialog.Activities.First().CreatedAt = fromSavedAt;
+        activity.CreatedAt = fromSavedAt;
         dialog.UpdatedAt = fromSavedAt;
 
         var result = await _unitOfWork
@@ -80,6 +80,23 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserReso
             domainError => domainError,
             concurrencyError => concurrencyError
         );
+    }
+    private static DialogActivity? LatestActivity(DialogEntity dialog)
+    {
+        DialogActivity? activity = null;
+        foreach (var dialogActivity in dialog.Activities)
+        {
+            if (activity == null)
+            {
+                activity = dialogActivity;
+                continue;
+            }
+            if (activity.CreatedAt < dialogActivity.CreatedAt)
+            {
+                activity = dialogActivity;
+            }
+        }
+        return activity;
     }
 
 }

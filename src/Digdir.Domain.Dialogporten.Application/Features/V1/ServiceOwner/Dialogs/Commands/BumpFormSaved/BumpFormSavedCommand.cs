@@ -36,7 +36,7 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserReso
         {
             return new Forbidden("Requires admin scope");
         }
-        var fromSavedAt = request.FormSavedAt ?? DateTimeOffset.UtcNow;
+        var formSavedAt = request.FormSavedAt ?? DateTimeOffset.UtcNow;
 
         var dialog = await _db.Dialogs
             .Include(x => x.Activities)
@@ -54,9 +54,9 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserReso
             return new DomainError(new DomainFailure(nameof(DialogEntity.Status), "Can only bump timestamp when dialog status is Draft"));
         }
 
-        if (dialog.UpdatedAt > fromSavedAt)
+        if (dialog.UpdatedAt > formSavedAt)
         {
-            return new DomainError(new DomainFailure(nameof(DialogEntity.UpdatedAt), "Cannot bump to timestamp a in the past"));
+            return new DomainError(new DomainFailure(nameof(DialogEntity.UpdatedAt), "Cannot bump to timestamp in the past"));
         }
 
         var activity = LatestActivity(dialog);
@@ -66,8 +66,8 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserReso
             return new DomainError(new DomainFailure(nameof(DialogActivity.Type), "Latest activity is not of type FormSaved"));
         }
 
-        activity.CreatedAt = fromSavedAt;
-        dialog.UpdatedAt = fromSavedAt;
+        activity.CreatedAt = formSavedAt;
+        dialog.UpdatedAt = formSavedAt;
 
         var result = await _unitOfWork
             .DisableImmutableFilter()

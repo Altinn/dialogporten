@@ -47,7 +47,6 @@ public sealed class BumpFormSavedEndpoint(ISender sender) : Endpoint<BumpFormSav
 
 public sealed class BumpFormSavedRequest
 {
-    [QueryParam]
     public Guid DialogId { get; set; }
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

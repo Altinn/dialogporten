@@ -2,9 +2,9 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using FluentAssertions;
-using NSubstitute;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries;
 
@@ -59,4 +59,14 @@ public class GetDialogTests : ApplicationCollectionFixture
                     .Excluding(x => x.Status));
             });
     }
+
+    [Fact]
+    [Obsolete("Testing obsolete SystemLabel, will be removed in future versions.")]
+    public Task Get_Should_Populate_Obsolete_SystemLabel() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.SystemLabel.Should()
+                    .Be(SystemLabel.Values.Default));
 }

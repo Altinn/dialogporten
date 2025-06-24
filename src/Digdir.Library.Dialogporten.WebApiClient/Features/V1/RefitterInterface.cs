@@ -377,83 +377,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
         Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsBulkSetSystenLabelsBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
 
-        /// <summary>Gets a list of dialogs</summary>
-        /// <remarks>
-        /// Performs a search for dialogs, returning a paginated list of dialogs.
-        /// 
-        /// * All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00+01:00
-        /// * See "continuationToken" in the response for how to get the next page of results.
-        /// * hasNextPage will be set to true if there are more items to get.
-        /// </remarks>
-        /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog list.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json")]
-        [Get("/api/v1/serviceowner/dialogs")]
-        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsQueriesSearchDialog([Query] V1ServiceOwnerDialogsQueriesSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
-
-        /// <summary>Creates a new dialog</summary>
-        /// <remarks>
-        /// The dialog is created with the given configuration.
-        /// 
-        /// For detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)
-        /// </remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>201</term>
-        /// <description>The UUID of the created dialog aggregate. A relative URL to the newly created activity is set in the \"Location\" header.</description>
-        /// </item>
-        /// <item>
-        /// <term>204</term>
-        /// <description>No Content</description>
-        /// </item>
-        /// <item>
-        /// <term>400</term>
-        /// <description>Validation error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>409</term>
-        /// <description>Dialog with IdempotentKey 01941821-ffca-73a1-9335-435a882be014 has already been created.</description>
-        /// </item>
-        /// <item>
-        /// <term>422</term>
-        /// <description>Domain error occurred. See problem details for a list of errors.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
-        [Post("/api/v1/serviceowner/dialogs")]
-        Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
-
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
         /// <returns>
@@ -665,6 +588,83 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(System.Guid dialogId, [Body, AliasAs("CreateActivityRequest")] V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest createActivityRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
+        /// <summary>Gets a list of dialogs</summary>
+        /// <remarks>
+        /// Performs a search for dialogs, returning a paginated list of dialogs.
+        /// 
+        /// * All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00+01:00
+        /// * See "continuationToken" in the response for how to get the next page of results.
+        /// * hasNextPage will be set to true if there are more items to get.
+        /// </remarks>
+        /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog list.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json")]
+        [Get("/api/v1/serviceowner/dialogs")]
+        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsQueriesSearchDialog([Query] V1ServiceOwnerDialogsQueriesSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
+
+        /// <summary>Creates a new dialog</summary>
+        /// <remarks>
+        /// The dialog is created with the given configuration.
+        /// 
+        /// For detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>201</term>
+        /// <description>The UUID of the created dialog aggregate. A relative URL to the newly created activity is set in the \"Location\" header.</description>
+        /// </item>
+        /// <item>
+        /// <term>204</term>
+        /// <description>No Content</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Dialog with IdempotentKey 01941821-ffca-73a1-9335-435a882be014 has already been created.</description>
+        /// </item>
+        /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Post("/api/v1/serviceowner/dialogs")]
+        Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
+
         /// <summary>Returns a boolean value based on conditions used to determine if a notification is to be sent</summary>
         /// <remarks>Used by Altinn Notification only. Takes a dialogId and returns a boolean value based on conditions used to determine if a notification is to be sent.</remarks>
         /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
@@ -692,6 +692,111 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Headers("Accept: application/json")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition>> V1ServiceOwnerDialogsQueriesNotificationConditionNotificationCondition(System.Guid dialogId, [Query] V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams queryParams, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a single dialog transmission</summary>
+        /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog transmission.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The specified dialog ID or transmission ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a single dialog seen log record</summary>
+        /// <remarks>Gets a single dialog seen log record.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog seen log record.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog>> V1ServiceOwnerDialogsQueriesGetSeenLogDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets a single dialog activity</summary>
+        /// <remarks>Gets a single activity belonging to a dialog.</remarks>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog activity.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The specified dialog ID or activity ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}")]
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetActivity_Activity>> V1ServiceOwnerDialogsQueriesGetActivityDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog</summary>
         /// <remarks>
@@ -881,111 +986,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Headers("Accept: application/json", "Content-Type: application/json")]
         [Patch("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse> V1ServiceOwnerDialogsPatchDialog(System.Guid dialogId, [Body] IEnumerable<JsonPatchOperations_Operation> patchDocument, [Header("If-Match")] System.Guid? etag, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a single dialog transmission</summary>
-        /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog transmission.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The specified dialog ID or transmission ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a single dialog seen log record</summary>
-        /// <remarks>Gets a single dialog seen log record.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog seen log record.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Unauthorized</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Forbidden</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The given dialog ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog>> V1ServiceOwnerDialogsQueriesGetSeenLogDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
-
-        /// <summary>Gets a single dialog activity</summary>
-        /// <remarks>Gets a single activity belonging to a dialog.</remarks>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>Successfully returned the dialog activity.</description>
-        /// </item>
-        /// <item>
-        /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
-        /// </item>
-        /// <item>
-        /// <term>403</term>
-        /// <description>Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy).</description>
-        /// </item>
-        /// <item>
-        /// <term>404</term>
-        /// <description>The specified dialog ID or activity ID was not found.</description>
-        /// </item>
-        /// <item>
-        /// <term>410</term>
-        /// <description>Entity with the given key(s) is removed.</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetActivity_Activity>> V1ServiceOwnerDialogsQueriesGetActivityDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
 
         /// <summary>Restore a dialog</summary>
         /// <remarks>Restore a dialog.</remarks>
@@ -1209,6 +1209,395 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("endUserContextRevision")]
         public System.Guid? EndUserContextRevision { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission
+    {
+        /// <summary>
+        /// The unique identifier for the transmission in UUIDv7 format.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// The date and time when the transmission was created.
+        /// </summary>
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        /// <summary>
+        /// The authorization attribute associated with the transmission.
+        /// </summary>
+
+        [JsonPropertyName("authorizationAttribute")]
+        public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// The extended type URI for the transmission.
+        /// </summary>
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
+
+        /// <summary>
+        /// The unique identifier for the related transmission, if any.
+        /// </summary>
+
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; }
+
+        /// <summary>
+        /// The date and time when the transmission was deleted, if applicable.
+        /// </summary>
+
+        [JsonPropertyName("deletedAt")]
+        public System.DateTimeOffset? DeletedAt { get; set; }
+
+        /// <summary>
+        /// The type of the transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
+
+        /// <summary>
+        /// The sender actor information for the transmission.
+        /// </summary>
+
+        [JsonPropertyName("sender")]
+        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
+
+        /// <summary>
+        /// The content of the transmission.
+        /// </summary>
+
+        [JsonPropertyName("content")]
+        public V1ServiceOwnerDialogsQueriesSearchTransmissions_Content Content { get; set; }
+
+        /// <summary>
+        /// The attachments associated with the transmission.
+        /// </summary>
+
+        [JsonPropertyName("attachments")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment> Attachments { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntitiesTransmissions_DialogTransmissionType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
+        Information = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Acceptance")]
+        Acceptance = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Rejection")]
+        Rejection = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Request")]
+        Request = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Alert")]
+        Alert = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Decision")]
+        Decision = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Submission")]
+        Submission = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Correction")]
+        Correction = 7,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerCommonActors_Actor
+    {
+        /// <summary>
+        /// The type of actor; either the service owner, or someone representing the party.
+        /// </summary>
+
+        [JsonPropertyName("actorType")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Actors_ActorType ActorType { get; set; }
+
+        /// <summary>
+        /// The name of the actor.
+        /// </summary>
+
+        [JsonPropertyName("actorName")]
+        public string ActorName { get; set; }
+
+        /// <summary>
+        /// The identifier (national identity number or organization number) of the actor.
+        /// </summary>
+
+        [JsonPropertyName("actorId")]
+        public string ActorId { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Actors_ActorType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
+        PartyRepresentative = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
+        ServiceOwner = 1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Content
+    {
+        /// <summary>
+        /// The title of the content.
+        /// </summary>
+
+        [JsonPropertyName("title")]
+        public V1CommonContent_ContentValue Title { get; set; }
+
+        /// <summary>
+        /// The summary of the content.
+        /// </summary>
+
+        [JsonPropertyName("summary")]
+        public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
+        /// </summary>
+
+        [JsonPropertyName("contentReference")]
+        public V1CommonContent_ContentValue ContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonContent_ContentValue
+    {
+        /// <summary>
+        /// A list of localizations for the content.
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public ICollection<V1CommonLocalizations_Localization> Value { get; set; }
+
+        /// <summary>
+        /// Media type of the content, this can also indicate that the content is embeddable.
+        /// </summary>
+
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonLocalizations_Localization
+    {
+        /// <summary>
+        /// The localized text (or URL if a front-channel embed).
+        /// </summary>
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+        /// <summary>
+        /// The language code of the localization in ISO 639-1 format.
+        /// </summary>
+
+        [JsonPropertyName("languageCode")]
+        public string LanguageCode { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment
+    {
+        /// <summary>
+        /// The unique identifier for the attachment in UUIDv7 format.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// The display name of the attachment that should be used in GUIs.
+        /// </summary>
+
+        [JsonPropertyName("displayName")]
+        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("urls")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl> Urls { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl
+    {
+        /// <summary>
+        /// The unique identifier for the attachment URL in UUIDv7 format.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
+        /// <br/>not authorized to access the transmission.
+        /// </summary>
+
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The media type of the attachment.
+        /// </summary>
+
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// The type of consumer the URL is intended for.
+        /// </summary>
+
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Attachments_AttachmentUrlConsumerType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Gui")]
+        Gui = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Api")]
+        Api = 1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog
+    {
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; }
+
+        [JsonPropertyName("seenBy")]
+        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
+
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchActivities_Activity
+    {
+
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
+
+        [JsonPropertyName("deletedAt")]
+        public System.DateTimeOffset? DeletedAt { get; set; }
+
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntitiesActivities_DialogActivityType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogCreated")]
+        DialogCreated = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogClosed")]
+        DialogClosed = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
+        Information = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"TransmissionOpened")]
+        TransmissionOpened = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PaymentMade")]
+        PaymentMade = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SignatureProvided")]
+        SignatureProvided = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogOpened")]
+        DialogOpened = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogDeleted")]
+        DialogDeleted = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogRestored")]
+        DialogRestored = 8,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SentToSigning")]
+        SentToSigning = 9,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SentToFormFill")]
+        SentToFormFill = 10,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SentToSendIn")]
+        SentToSendIn = 11,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SentToPayment")]
+        SentToPayment = 12,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FormSubmitted")]
+        FormSubmitted = 13,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FormSaved")]
+        FormSaved = 14,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceOpened")]
+        CorrespondenceOpened = 15,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceConfirmed")]
+        CorrespondenceConfirmed = 16,
 
     }
 
@@ -1520,121 +1909,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntitiesActivities_DialogActivityType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogCreated")]
-        DialogCreated = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogClosed")]
-        DialogClosed = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
-        Information = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TransmissionOpened")]
-        TransmissionOpened = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PaymentMade")]
-        PaymentMade = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SignatureProvided")]
-        SignatureProvided = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogOpened")]
-        DialogOpened = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogDeleted")]
-        DialogDeleted = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogRestored")]
-        DialogRestored = 8,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToSigning")]
-        SentToSigning = 9,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToFormFill")]
-        SentToFormFill = 10,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToSendIn")]
-        SentToSendIn = 11,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToPayment")]
-        SentToPayment = 12,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"FormSubmitted")]
-        FormSubmitted = 13,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"FormSaved")]
-        FormSaved = 14,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceOpened")]
-        CorrespondenceOpened = 15,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceConfirmed")]
-        CorrespondenceConfirmed = 16,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerCommonActors_Actor
-    {
-        /// <summary>
-        /// The type of actor; either the service owner, or someone representing the party.
-        /// </summary>
-
-        [JsonPropertyName("actorType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Actors_ActorType ActorType { get; set; }
-
-        /// <summary>
-        /// The name of the actor.
-        /// </summary>
-
-        [JsonPropertyName("actorName")]
-        public string ActorName { get; set; }
-
-        /// <summary>
-        /// The identifier (national identity number or organization number) of the actor.
-        /// </summary>
-
-        [JsonPropertyName("actorId")]
-        public string ActorId { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Actors_ActorType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
-        PartyRepresentative = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
-        ServiceOwner = 1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1CommonLocalizations_Localization
-    {
-        /// <summary>
-        /// The localized text (or URL if a front-channel embed).
-        /// </summary>
-
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
-
-        /// <summary>
-        /// The language code of the localization in ISO 639-1 format.
-        /// </summary>
-
-        [JsonPropertyName("languageCode")]
-        public string LanguageCode { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog
     {
         /// <summary>
@@ -1778,104 +2052,11 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1CommonContent_ContentValue
+    public partial class V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition
     {
-        /// <summary>
-        /// A list of localizations for the content.
-        /// </summary>
 
-        [JsonPropertyName("value")]
-        public ICollection<V1CommonLocalizations_Localization> Value { get; set; }
-
-        /// <summary>
-        /// Media type of the content, this can also indicate that the content is embeddable.
-        /// </summary>
-
-        [JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission
-    {
-        /// <summary>
-        /// The unique identifier for the transmission in UUIDv7 format.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The date and time when the transmission was created.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
-
-        /// <summary>
-        /// The authorization attribute associated with the transmission.
-        /// </summary>
-
-        [JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// The extended type URI for the transmission.
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// Arbitrary string with a service-specific reference to an external system or service.
-        /// </summary>
-
-        [JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
-
-        /// <summary>
-        /// The unique identifier for the related transmission, if any.
-        /// </summary>
-
-        [JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
-
-        /// <summary>
-        /// The date and time when the transmission was deleted, if applicable.
-        /// </summary>
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        /// <summary>
-        /// The type of the transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
-
-        /// <summary>
-        /// The sender actor information for the transmission.
-        /// </summary>
-
-        [JsonPropertyName("sender")]
-        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
-
-        /// <summary>
-        /// The content of the transmission.
-        /// </summary>
-
-        [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsQueriesSearchTransmissions_Content Content { get; set; }
-
-        /// <summary>
-        /// The attachments associated with the transmission.
-        /// </summary>
-
-        [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment> Attachments { get; set; }
+        [JsonPropertyName("sendNotification")]
+        public bool SendNotification { get; set; }
 
     }
 
@@ -1925,37 +2106,95 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntitiesTransmissions_DialogTransmissionType
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Transmission
     {
+        /// <summary>
+        /// The unique identifier for the transmission in UUIDv7 format.
+        /// </summary>
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
-        Information = 0,
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Acceptance")]
-        Acceptance = 1,
+        /// <summary>
+        /// The date and time when the transmission was created.
+        /// </summary>
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Rejection")]
-        Rejection = 2,
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Request")]
-        Request = 3,
+        /// <summary>
+        /// The authorization attribute associated with the transmission.
+        /// </summary>
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Alert")]
-        Alert = 4,
+        [JsonPropertyName("authorizationAttribute")]
+        public string AuthorizationAttribute { get; set; }
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Decision")]
-        Decision = 5,
+        /// <summary>
+        /// The extended type URI for the transmission.
+        /// </summary>
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Submission")]
-        Submission = 6,
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Correction")]
-        Correction = 7,
+        /// <summary>
+        /// The unique identifier for the related transmission, if any.
+        /// </summary>
+
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; }
+
+        /// <summary>
+        /// The date and time when the transmission was deleted, if applicable.
+        /// </summary>
+
+        [JsonPropertyName("deletedAt")]
+        public System.DateTimeOffset? DeletedAt { get; set; }
+
+        /// <summary>
+        /// The type of the transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
+
+        /// <summary>
+        /// The sender actor information for the transmission.
+        /// </summary>
+
+        [JsonPropertyName("sender")]
+        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
+
+        /// <summary>
+        /// The content of the transmission.
+        /// </summary>
+
+        [JsonPropertyName("content")]
+        public V1ServiceOwnerDialogsQueriesGetTransmission_Content Content { get; set; }
+
+        /// <summary>
+        /// The attachments associated with the transmission.
+        /// </summary>
+
+        [JsonPropertyName("attachments")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_Attachment> Attachments { get; set; }
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Content
+    public enum V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotExists")]
+        NotExists = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Exists")]
+        Exists = 1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Content
     {
         /// <summary>
         /// The title of the content.
@@ -1981,7 +2220,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Attachment
     {
         /// <summary>
         /// The unique identifier for the attachment in UUIDv7 format.
@@ -2002,12 +2241,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("urls")]
-        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl> Urls { get; set; }
+        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl> Urls { get; set; }
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl
     {
         /// <summary>
         /// The unique identifier for the attachment URL in UUIDv7 format.
@@ -2042,19 +2281,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Attachments_AttachmentUrlConsumerType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Gui")]
-        Gui = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Api")]
-        Api = 1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog
+    public partial class V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog
     {
 
         [JsonPropertyName("id")]
@@ -2072,14 +2299,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearchActivities_Activity
+    public partial class V1ServiceOwnerDialogsQueriesGetActivity_Activity
     {
 
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
 
         [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        public System.DateTimeOffset? CreatedAt { get; set; }
 
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
@@ -2094,14 +2321,11 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }
 
-    }
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition
-    {
-
-        [JsonPropertyName("sendNotification")]
-        public bool SendNotification { get; set; }
+        [JsonPropertyName("description")]
+        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
 
     }
 
@@ -2342,18 +2566,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("endUserContext")]
         public V1ServiceOwnerDialogsQueriesGet_DialogEndUserContext EndUserContext { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"NotExists")]
-        NotExists = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Exists")]
-        Exists = 1,
 
     }
 
@@ -3069,218 +3281,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Transmission
-    {
-        /// <summary>
-        /// The unique identifier for the transmission in UUIDv7 format.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The date and time when the transmission was created.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
-
-        /// <summary>
-        /// The authorization attribute associated with the transmission.
-        /// </summary>
-
-        [JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// The extended type URI for the transmission.
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// The unique identifier for the related transmission, if any.
-        /// </summary>
-
-        [JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
-
-        /// <summary>
-        /// The date and time when the transmission was deleted, if applicable.
-        /// </summary>
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        /// <summary>
-        /// The type of the transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
-
-        /// <summary>
-        /// The sender actor information for the transmission.
-        /// </summary>
-
-        [JsonPropertyName("sender")]
-        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
-
-        /// <summary>
-        /// The content of the transmission.
-        /// </summary>
-
-        [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsQueriesGetTransmission_Content Content { get; set; }
-
-        /// <summary>
-        /// The attachments associated with the transmission.
-        /// </summary>
-
-        [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_Attachment> Attachments { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Content
-    {
-        /// <summary>
-        /// The title of the content.
-        /// </summary>
-
-        [JsonPropertyName("title")]
-        public V1CommonContent_ContentValue Title { get; set; }
-
-        /// <summary>
-        /// The summary of the content.
-        /// </summary>
-
-        [JsonPropertyName("summary")]
-        public V1CommonContent_ContentValue Summary { get; set; }
-
-        /// <summary>
-        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
-        /// </summary>
-
-        [JsonPropertyName("contentReference")]
-        public V1CommonContent_ContentValue ContentReference { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Attachment
-    {
-        /// <summary>
-        /// The unique identifier for the attachment in UUIDv7 format.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The display name of the attachment that should be used in GUIs.
-        /// </summary>
-
-        [JsonPropertyName("displayName")]
-        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
-
-        /// <summary>
-        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("urls")]
-        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl> Urls { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl
-    {
-        /// <summary>
-        /// The unique identifier for the attachment URL in UUIDv7 format.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
-        /// <br/>not authorized to access the transmission.
-        /// </summary>
-
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The media type of the attachment.
-        /// </summary>
-
-        [JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
-
-        /// <summary>
-        /// The type of consumer the URL is intended for.
-        /// </summary>
-
-        [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog
-    {
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        [JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
-
-        [JsonPropertyName("seenBy")]
-        public V1ServiceOwnerCommonActors_Actor SeenBy { get; set; }
-
-        [JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGetActivity_Activity
-    {
-
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        [JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
-
-        [JsonPropertyName("performedBy")]
-        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
-
-        [JsonPropertyName("description")]
-        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Dialog
     {
         /// <summary>
@@ -3938,6 +3938,147 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Activity
+    {
+        /// <summary>
+        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// <br/>If not supplied, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// If supplied, overrides the creating date and time for the transmission.
+        /// <br/>If not supplied, the current date /time will be used.
+        /// </summary>
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; }
+
+        /// <summary>
+        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// </summary>
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// The type of transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
+
+        /// <summary>
+        /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
+        /// <br/>Must be present in the request body.
+        /// </summary>
+
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; }
+
+        /// <summary>
+        /// The actor that performed the activity.
+        /// </summary>
+
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
+
+        /// <summary>
+        /// Unstructured text describing the activity. Only set if the activity type is "Information".
+        /// </summary>
+
+        [JsonPropertyName("description")]
+        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest
+    {
+        /// <summary>
+        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// <br/>If not supplied, a new UUIDv7 will be generated.
+        /// </summary>
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// If supplied, overrides the creating date and time for the transmission.
+        /// <br/>If not supplied, the current date /time will be used.
+        /// </summary>
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        /// <summary>
+        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
+        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+        /// <br/>            
+        /// <br/>Can also be used to refer to other service policies.
+        /// </summary>
+
+        [JsonPropertyName("authorizationAttribute")]
+        public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// <br/>            
+        /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
+        /// </summary>
+
+        [JsonPropertyName("extendedType")]
+        public System.Uri ExtendedType { get; set; }
+
+        /// <summary>
+        /// Arbitrary string with a service-specific reference to an external system or service.
+        /// </summary>
+
+        [JsonPropertyName("externalReference")]
+        public string ExternalReference { get; set; }
+
+        /// <summary>
+        /// Reference to any other transmission that this transmission is related to.
+        /// </summary>
+
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; }
+
+        /// <summary>
+        /// The type of transmission.
+        /// </summary>
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
+
+        /// <summary>
+        /// The actor that sent the transmission.
+        /// </summary>
+
+        [JsonPropertyName("sender")]
+        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
+
+        /// <summary>
+        /// The transmission unstructured text content.
+        /// </summary>
+
+        [JsonPropertyName("content")]
+        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
+
+        /// <summary>
+        /// The transmission-level attachments.
+        /// </summary>
+
+        [JsonPropertyName("attachments")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
     {
         /// <summary>
         /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
@@ -4697,147 +4838,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of activities. If not provided, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
-        /// <br/>If not supplied, the current date /time will be used.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
-
-        /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// The type of transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
-
-        /// <summary>
-        /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
-        /// <br/>Must be present in the request body.
-        /// </summary>
-
-        [JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
-
-        /// <summary>
-        /// The actor that performed the activity.
-        /// </summary>
-
-        [JsonPropertyName("performedBy")]
-        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
-
-        /// <summary>
-        /// Unstructured text describing the activity. Only set if the activity type is "Information".
-        /// </summary>
-
-        [JsonPropertyName("description")]
-        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest
-    {
-        /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
-        /// <br/>If not supplied, a new UUIDv7 will be generated.
-        /// </summary>
-
-        [JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
-        /// <br/>If not supplied, the current date /time will be used.
-        /// </summary>
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
-
-        /// <summary>
-        /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
-        /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
-        /// <br/>Can also be used to refer to other service policies.
-        /// </summary>
-
-        [JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
-
-        /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
-        /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
-        /// </summary>
-
-        [JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
-
-        /// <summary>
-        /// Arbitrary string with a service-specific reference to an external system or service.
-        /// </summary>
-
-        [JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
-
-        /// <summary>
-        /// Reference to any other transmission that this transmission is related to.
-        /// </summary>
-
-        [JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
-
-        /// <summary>
-        /// The type of transmission.
-        /// </summary>
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
-
-        /// <summary>
-        /// The actor that sent the transmission.
-        /// </summary>
-
-        [JsonPropertyName("sender")]
-        public V1ServiceOwnerCommonActors_Actor Sender { get; set; }
-
-        /// <summary>
-        /// The transmission unstructured text content.
-        /// </summary>
-
-        [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
-
-        /// <summary>
-        /// The transmission-level attachments.
-        /// </summary>
-
-        [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
-    {
-        /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
-        /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
 
         [JsonPropertyName("id")]

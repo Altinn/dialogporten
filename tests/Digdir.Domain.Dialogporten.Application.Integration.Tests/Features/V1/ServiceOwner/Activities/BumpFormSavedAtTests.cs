@@ -61,6 +61,10 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
             {
                 DialogId = ctx.GetDialogId()
             })
+            .SendCommand(ctx => new GetDialogQuery
+            {
+                DialogId = ctx.GetDialogId(),
+            })
             .ExecuteAndAssert<DialogDto>(x => x.Activities.Last().CreatedAt.Should().BeMoreThan(timestamp.Offset));
     }
 

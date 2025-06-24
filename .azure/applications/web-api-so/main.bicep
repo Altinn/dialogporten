@@ -105,6 +105,26 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   tags: tags
 }
 
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
+  name: environmentKeyVaultName
+}
+
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+  name: 'keyVaultReaderAccessPolicy-${containerAppName}'
+  params: {
+    keyvaultName: environmentKeyVaultResource.name
+    principalIds: [managedIdentity.properties.principalId]
+  }
+}
+
+module appConfigReaderAccessPolicy '../../modules/appConfiguration/addReaderRoles.bicep' = {
+  name: 'appConfigReaderAccessPolicy-${containerAppName}'
+  params: {
+    appConfigurationName: appConfigurationName
+    principalIds: [managedIdentity.properties.principalId]
+  }
+}
+
 var containerAppEnvVars = [
   {
     name: 'ASPNETCORE_ENVIRONMENT'
@@ -136,9 +156,6 @@ var containerAppEnvVars = [
   }
 ]
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
-  name: environmentKeyVaultName
-}
 
 var containerAppName = '${namePrefix}-webapi-so-ca'
 
@@ -158,22 +175,10 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     userAssignedIdentityId: managedIdentity.id
     workloadProfileName: workloadProfileName
   }
-}
-
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
-  name: 'keyVaultReaderAccessPolicy-${containerAppName}'
-  params: {
-    keyvaultName: environmentKeyVaultResource.name
-    principalIds: [managedIdentity.properties.principalId]
-  }
-}
-
-module appConfigReaderAccessPolicy '../../modules/appConfiguration/addReaderRoles.bicep' = {
-  name: 'appConfigReaderAccessPolicy-${containerAppName}'
-  params: {
-    appConfigurationName: appConfigurationName
-    principalIds: [managedIdentity.properties.principalId]
-  }
+  dependsOn: [
+    keyVaultReaderAccessPolicy
+    appConfigReaderAccessPolicy
+  ]
 }
 
 output name string = containerApp.outputs.name

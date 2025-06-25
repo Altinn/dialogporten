@@ -1780,7 +1780,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("systemLabel")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        [System.Obsolete("Use EndUserContext.SystemLabels instead.)")]
+        [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
         public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
         /// <summary>
@@ -2487,7 +2487,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("systemLabel")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        [System.Obsolete("Use EndUserContext.SystemLabels instead.)")]
+        [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
         public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
         /// <summary>

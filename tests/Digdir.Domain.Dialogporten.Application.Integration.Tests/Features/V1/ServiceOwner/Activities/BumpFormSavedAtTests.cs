@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.BumpFormSaved;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -23,7 +24,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
             {
-                x.Dto.Status = DialogStatus.Values.Draft;
+                x.Dto.Status = DialogStatusInput.Draft;
                 x.Dto.Activities =
                 [
                     new ActivityDto
@@ -68,7 +69,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     public async Task Cannot_Bump_FormSavedAt_When_FormSaved_Is_Not_Latest_Activity()
     {
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Status = DialogStatus.Values.Draft)
+            .CreateSimpleDialog(x => x.Dto.Status = DialogStatusInput.Draft)
             .BumpFormSaved()
             .ExecuteAndAssert<DomainError>(x => x.ShouldHaveErrorWithText("Latest activity is not of type FormSaved"));
     }
@@ -78,7 +79,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     public async Task Cannot_Bump_FormSavedAt_When_Dialog_Is_Not_Draft()
     {
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Status = DialogStatus.Values.InProgress)
+            .CreateSimpleDialog(x => x.Dto.Status = DialogStatusInput.InProgress)
             .BumpFormSaved()
             .ExecuteAndAssert<DomainError>(x => x.ShouldHaveErrorWithText("Can only bump timestamp when dialog status is Draft"));
     }

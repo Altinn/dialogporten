@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 
@@ -18,6 +19,7 @@ internal sealed class MappingProfile : Profile
     {
         CreateMap<DialogEntity, DialogDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
+            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.EndUserContext.SystemLabelId))
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.Ignore());
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()

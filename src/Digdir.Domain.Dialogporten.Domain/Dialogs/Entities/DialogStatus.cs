@@ -12,7 +12,7 @@ public sealed class DialogStatus : AbstractLookupEntity<DialogStatus, DialogStat
         /// <summary>
         /// No explicit status. This is the default.
         /// </summary>
-        NotApplicable = 1,
+        NotApplicable = 7,
 
         /// <summary>
         /// Started. In a serial process, this is used to indicate that, for example, a form filling is ongoing.
@@ -27,7 +27,7 @@ public sealed class DialogStatus : AbstractLookupEntity<DialogStatus, DialogStat
         /// <summary>
         /// Awaiting action by the service owner. Indicates that the dialog is in a state where the party representative has no further tasks, and the responsibility lies with the service owner.
         /// </summary>
-        Awaiting = 4,
+        Awaiting = 8,
 
         /// <summary>
         /// Used to indicate that the dialogue is in progress/under work, but is in a state where the user must do something - for example, correct an error, or other conditions that hinder further processing.

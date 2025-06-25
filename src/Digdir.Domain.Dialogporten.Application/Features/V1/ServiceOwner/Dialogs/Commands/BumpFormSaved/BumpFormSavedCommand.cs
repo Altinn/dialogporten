@@ -35,7 +35,6 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
 
         var dialog = await _db.Dialogs
             .Include(x => x.Activities)
-            .Include(x => x.Status)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);
 
@@ -44,7 +43,7 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        if (dialog.Status.Id != DialogStatus.Values.Draft)
+        if (dialog.StatusId != DialogStatus.Values.Draft)
         {
             return new DomainError(new DomainFailure(nameof(DialogEntity.Status), "Can only bump timestamp when dialog status is Draft"));
         }
@@ -54,7 +53,7 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
             return new DomainError(new DomainFailure(nameof(DialogEntity.UpdatedAt), "Cannot bump to timestamp in the past"));
         }
 
-        var activity = LatestActivity(dialog);
+        var activity = dialog.Activities.MaxBy(x => x.CreatedAt);
 
         if (activity is not { TypeId: DialogActivityType.Values.FormSaved })
         {
@@ -77,23 +76,4 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
             concurrencyError => concurrencyError
         );
     }
-
-    private static DialogActivity? LatestActivity(DialogEntity dialog)
-    {
-        DialogActivity? activity = null;
-        foreach (var dialogActivity in dialog.Activities)
-        {
-            if (activity == null)
-            {
-                activity = dialogActivity;
-                continue;
-            }
-            if (activity.CreatedAt < dialogActivity.CreatedAt)
-            {
-                activity = dialogActivity;
-            }
-        }
-        return activity;
-    }
-
 }

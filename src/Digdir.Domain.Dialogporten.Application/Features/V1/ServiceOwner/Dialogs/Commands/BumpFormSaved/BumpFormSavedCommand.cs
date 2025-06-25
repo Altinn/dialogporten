@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -10,13 +11,15 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.BumpFormSaved;
 
-public sealed class BumpFormSavedCommand : IRequest<BumpFormSavedResult>
+public sealed class BumpFormSavedCommand : IRequest<BumpFormSavedResult>, ISilentUpdater
 {
     public Guid DialogId { get; set; }
 
     public DateTimeOffset? FormSavedAt { get; set; }
 
     public Guid? IfMatchDialogRevision { get; set; }
+
+    public bool IsSilentUpdate => true;
 }
 
 public sealed record BumpFormSavedSuccess(Guid Revision);
@@ -65,8 +68,6 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
 
         var result = await _unitOfWork
             .DisableImmutableFilter()
-            .DisableUpdatableFilter()
-            .DisableAggregateFilter()
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)
             .SaveChangesAsync(cancellationToken);
 

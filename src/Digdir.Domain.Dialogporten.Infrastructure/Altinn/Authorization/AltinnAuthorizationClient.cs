@@ -102,7 +102,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
         }
 
-        return !flatten ? authorizedParties : GetFlattenedAuthorizedParties(authorizedParties);
+        return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
     }
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
@@ -156,8 +156,14 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             {
                 Party = party.Party,
                 ParentParty = null,
-                AuthorizedRoles = party.AuthorizedRoles.Count > 0
-                    ? [.. party.AuthorizedRoles]
+                AuthorizedResources = party.AuthorizedResources.Count > 0
+                    ? [.. party.AuthorizedResources]
+                    : EmptyRolesList,
+                AuthorizedRolesAndAccessPackages = party.AuthorizedRolesAndAccessPackages.Count > 0
+                    ? [.. party.AuthorizedRolesAndAccessPackages]
+                    : EmptyRolesList,
+                AuthorizedInstances = party.AuthorizedInstances.Count > 0
+                    ? [.. party.AuthorizedInstances]
                     : EmptyRolesList,
                 SubParties = EmptySubPartiesList
             });
@@ -171,8 +177,14 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 {
                     Party = subParty.Party,
                     ParentParty = party.Party,
-                    AuthorizedRoles = subParty.AuthorizedRoles.Count > 0
-                        ? [.. subParty.AuthorizedRoles]
+                    AuthorizedResources = subParty.AuthorizedResources.Count > 0
+                        ? [.. subParty.AuthorizedResources]
+                        : EmptyRolesList,
+                    AuthorizedRolesAndAccessPackages = subParty.AuthorizedRolesAndAccessPackages.Count > 0
+                        ? [.. subParty.AuthorizedRolesAndAccessPackages]
+                        : EmptyRolesList,
+                    AuthorizedInstances = party.AuthorizedInstances.Count > 0
+                        ? [.. party.AuthorizedInstances]
                         : EmptyRolesList,
                     SubParties = EmptySubPartiesList
                 });

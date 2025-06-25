@@ -23,21 +23,21 @@ internal static class AuthorizationHelper
 
         // Step 1: Pre-filter parties with roles and build the unique subjects set. Skip any parties that are not in the constraints (if supplied)
         var uniqueSubjects = new HashSet<string>(100);
-        var partiesWithRoles = new List<(string Party, List<string> Roles)>();
+        var partiesWithRolesOrAccessPackages = new List<(string Party, List<string> RolesAndAccessPackages)>();
         var constraintPartiesSet = constraintParties.Count > 0 ? new HashSet<string>(constraintParties) : null;
 
         foreach (var party in authorizedParties.AuthorizedParties.Where(p => constraintPartiesSet is null || constraintPartiesSet.Contains(p.Party)))
         {
-            if (!(party.AuthorizedRoles.Count > 0)) continue;
-            partiesWithRoles.Add((party.Party, party.AuthorizedRoles));
+            if (!(party.AuthorizedRolesAndAccessPackages.Count > 0)) continue;
+            partiesWithRolesOrAccessPackages.Add((party.Party, party.AuthorizedRolesAndAccessPackages));
 
-            foreach (var role in party.AuthorizedRoles)
+            foreach (var role in party.AuthorizedRolesAndAccessPackages)
             {
                 uniqueSubjects.Add(role);
             }
         }
 
-        if (partiesWithRoles.Count == 0)
+        if (partiesWithRolesOrAccessPackages.Count == 0)
             return result;
 
         // Step 2: Get and preprocess subject resources
@@ -72,7 +72,7 @@ internal static class AuthorizationHelper
         }
 
         // Step 4: Populate result dictionary with a single pass
-        foreach (var (party, roles) in partiesWithRoles)
+        foreach (var (party, roles) in partiesWithRolesOrAccessPackages)
         {
             var partyResources = new HashSet<string>();
             var hasResources = false;
@@ -89,6 +89,26 @@ internal static class AuthorizationHelper
             if (hasResources)
             {
                 result.ResourcesByParties[party] = partyResources;
+            }
+        }
+
+        // Step 5: Handle parties that have direct resource authorizations
+        foreach (var party in authorizedParties.AuthorizedParties.Where(p => constraintPartiesSet is null || constraintPartiesSet.Contains(p.Party)))
+        {
+            if (party.AuthorizedResources.Count == 0) continue;
+
+            if (!result.ResourcesByParties.TryGetValue(party.Party, out var existingResources))
+            {
+                existingResources = new HashSet<string>();
+                result.ResourcesByParties[party.Party] = existingResources;
+            }
+
+            foreach (var resource in party.AuthorizedResources)
+            {
+                if (constraintResourcesSet == null || constraintResourcesSet.Contains(resource))
+                {
+                    existingResources.Add(resource);
+                }
             }
         }
 

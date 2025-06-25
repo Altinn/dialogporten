@@ -33,9 +33,4 @@ internal static class Constants
         internal const string OptimisticConcurrencyNoteEnduserContext = "Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.";
         internal const string IdempotentKeyConflict = "Dialog with IdempotentKey {0} has already been created.";
     }
-
-    internal static class EndpointTags
-    {
-        internal const string Hidden = "hidden"; // Ignore this endpoint in Swagger generation
-    }
 }

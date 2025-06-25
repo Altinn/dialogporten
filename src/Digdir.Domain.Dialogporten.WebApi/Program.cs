@@ -113,9 +113,6 @@ static void BuildAndRun(string[] args)
             x.MaxEndpointVersion = 1;
             x.ShortSchemaNames = true;
             x.RemoveEmptyRequestSchema = true;
-            x.EndpointFilter = s =>
-                s.EndpointTags == null ||
-                !s.EndpointTags.Contains(Constants.EndpointTags.Hidden);
             x.DocumentSettings = s =>
             {
                 s.PostProcess = document =>

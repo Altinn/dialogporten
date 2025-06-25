@@ -16,7 +16,7 @@ public sealed class BumpFormSavedEndpoint(ISender sender) : Endpoint<BumpFormSav
         Post("dialogs/{dialogId}/actions/bumpformsaved");
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
-        Tags([Constants.EndpointTags.Hidden]);
+        Description(x => x.ExcludeFromDescription());
     }
 
 

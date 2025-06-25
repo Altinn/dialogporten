@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.BumpFormSaved;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
@@ -180,6 +181,20 @@ public static class IFlowStepExtensions
             modify(command, ctx);
             return command;
         });
+
+    public static IFlowExecutor<BumpFormSavedResult> BumpFormSaved(this IFlowStep<CreateDialogResult> step, Action<BumpFormSavedCommand>? modify = null)
+    {
+        return step.AssertResult<CreateDialogSuccess>()
+            .SendCommand(ctx =>
+            {
+                var command = new BumpFormSavedCommand
+                {
+                    DialogId = ctx.DialogId,
+                };
+                modify?.Invoke(command);
+                return command;
+            });
+    }
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,

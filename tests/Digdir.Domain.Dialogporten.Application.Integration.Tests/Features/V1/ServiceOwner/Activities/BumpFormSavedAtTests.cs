@@ -56,11 +56,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
                 ];
                 x.Dto.CreatedAt = timestamp;
             })
-            .AssertResult<CreateDialogSuccess>()
-            .SendCommand(ctx => new BumpFormSavedCommand
-            {
-                DialogId = ctx.GetDialogId()
-            })
+            .BumpFormSaved()
             .SendCommand(ctx => new GetDialogQuery
             {
                 DialogId = ctx.GetDialogId(),
@@ -73,11 +69,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     {
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.Status = DialogStatus.Values.Draft)
-            .AssertResult<CreateDialogSuccess>()
-            .SendCommand(ctx => new BumpFormSavedCommand
-            {
-                DialogId = ctx.DialogId,
-            })
+            .BumpFormSaved()
             .ExecuteAndAssert<DomainError>(x => x.ShouldHaveErrorWithText("Latest activity is not of type FormSaved"));
     }
 
@@ -87,11 +79,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     {
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.Status = DialogStatus.Values.InProgress)
-            .AssertResult<CreateDialogSuccess>()
-            .SendCommand(ctx => new BumpFormSavedCommand
-            {
-                DialogId = ctx.DialogId,
-            })
+            .BumpFormSaved()
             .ExecuteAndAssert<DomainError>(x => x.ShouldHaveErrorWithText("Can only bump timestamp when dialog status is Draft"));
     }
 }

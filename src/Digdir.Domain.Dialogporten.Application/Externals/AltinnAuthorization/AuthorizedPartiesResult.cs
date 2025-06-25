@@ -19,8 +19,7 @@ public sealed class AuthorizedParty
     public bool HasOnlyAccessToSubParties { get; init; }
     public List<string> AuthorizedResources { get; init; } = [];
     public List<string> AuthorizedRolesAndAccessPackages { get; init; } = [];
-
-    public List<string> AuthorizedInstances { get; set; } = [];
+    public List<string> AuthorizedInstances { get; init; } = [];
 
     // Only populated in case of flatten = false
     public List<AuthorizedParty>? SubParties { get; set; }

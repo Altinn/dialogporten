@@ -1,6 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -71,7 +72,7 @@ public sealed class UpdateDialogDto
     /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
-    public DialogStatus.Values Status { get; set; }
+    public DialogStatusInput Status { get; set; }
 
     // IsApiOnly is immutable after creation and not included in the update DTO
 

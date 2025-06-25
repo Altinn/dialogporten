@@ -24,18 +24,13 @@ public sealed record BumpFormSavedSuccess(Guid Revision);
 [GenerateOneOf]
 public sealed partial class BumpFormSavedResult : OneOfBase<BumpFormSavedSuccess, Forbidden, DomainError, EntityNotFound, ConcurrencyError>;
 
-internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUserResourceRegistry userResourceRegistry, IUnitOfWork unitOfWork) : IRequestHandler<BumpFormSavedCommand, BumpFormSavedResult>
+internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWork unitOfWork) : IRequestHandler<BumpFormSavedCommand, BumpFormSavedResult>
 {
     private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
-    private readonly IUserResourceRegistry _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
     public async Task<BumpFormSavedResult> Handle(BumpFormSavedCommand request, CancellationToken cancellationToken)
     {
-        if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
-        {
-            return new Forbidden("Requires admin scope");
-        }
         var formSavedAt = request.FormSavedAt ?? DateTimeOffset.UtcNow;
 
         var dialog = await _db.Dialogs

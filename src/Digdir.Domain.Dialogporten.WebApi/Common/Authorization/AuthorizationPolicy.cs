@@ -7,4 +7,5 @@ internal static class AuthorizationPolicy
     public const string NotificationConditionCheck = "notificationConditionCheck";
     public const string ServiceProviderSearch = "serviceproviderSearch";
     public const string Testing = "testing";
+    public const string Admin = "admin";
 }

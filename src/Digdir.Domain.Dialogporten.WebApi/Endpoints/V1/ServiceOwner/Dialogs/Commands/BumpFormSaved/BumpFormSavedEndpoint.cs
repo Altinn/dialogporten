@@ -14,7 +14,7 @@ public sealed class BumpFormSavedEndpoint(ISender sender) : Endpoint<BumpFormSav
     public override void Configure()
     {
         Post("dialogs/{dialogId}/actions/bumpformsaved");
-        Policies(AuthorizationPolicy.ServiceProvider);
+        Policies(AuthorizationPolicy.Admin);
         Group<ServiceOwnerGroup>();
         Description(x => x.ExcludeFromDescription());
     }

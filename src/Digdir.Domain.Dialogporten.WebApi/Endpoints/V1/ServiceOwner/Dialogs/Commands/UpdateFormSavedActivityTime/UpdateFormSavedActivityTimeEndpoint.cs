@@ -1,32 +1,32 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.BumpFormSaved;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 
-namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.BumpFormSaved;
+namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 
-public sealed class BumpFormSavedEndpoint(ISender sender) : Endpoint<BumpFormSavedRequest>
+public sealed class UpdateFormSavedActivityTimeEndpoint(ISender sender) : Endpoint<UpdateFormSavedActivityTimeRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
     public override void Configure()
     {
-        Post("dialogs/{dialogId}/actions/bumpformsaved");
-        Policies(AuthorizationPolicy.Admin);
+        Post("dialogs/{dialogId:guid}/activities/{activityId:guid}/actions/updateFormSavedActivityTime");
+        Policies(AuthorizationPolicy.ServiceProviderAdmin);
         Group<ServiceOwnerGroup>();
         Description(x => x.ExcludeFromDescription());
     }
 
 
-    public override async Task HandleAsync(BumpFormSavedRequest req, CancellationToken ct)
+    public override async Task HandleAsync(UpdateFormSavedActivityTimeRequest req, CancellationToken ct)
     {
-
-        var command = new BumpFormSavedCommand
+        var command = new UpdateFormSavedActivityTimeCommand
         {
             DialogId = req.DialogId,
-            FormSavedAt = req.FormSavedAt,
+            ActivityId = req.ActivityId,
+            NewCreatedAt = req.NewCreatedAt,
             IfMatchDialogRevision = req.IfMatchDialogRevision
         };
 
@@ -45,13 +45,12 @@ public sealed class BumpFormSavedEndpoint(ISender sender) : Endpoint<BumpFormSav
     }
 }
 
-public sealed class BumpFormSavedRequest
+public sealed class UpdateFormSavedActivityTimeRequest
 {
     public Guid DialogId { get; set; }
-
+    public Guid ActivityId { get; set; }
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchDialogRevision { get; set; }
-
     [FromBody]
-    public DateTimeOffset? FormSavedAt { get; set; }
+    public DateTimeOffset NewCreatedAt { get; set; }
 }

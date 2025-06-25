@@ -1,9 +1,9 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.BumpFormSaved;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -22,6 +22,7 @@ using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Featur
 using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
 using BulkSetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+using BumpFormSavedResult = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime.BumpFormSavedResult;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -182,12 +183,12 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<BumpFormSavedResult> BumpFormSaved(this IFlowStep<CreateDialogResult> step, Action<BumpFormSavedCommand>? modify = null)
+    public static IFlowExecutor<BumpFormSavedResult> BumpFormSaved(this IFlowStep<CreateDialogResult> step, Action<UpdateFormSavedActivityTimeCommand>? modify = null)
     {
         return step.AssertResult<CreateDialogSuccess>()
             .SendCommand(ctx =>
             {
-                var command = new BumpFormSavedCommand
+                var command = new UpdateFormSavedActivityTimeCommand
                 {
                     DialogId = ctx.DialogId,
                 };

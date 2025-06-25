@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -56,6 +57,14 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
         }
 
         activity.CreatedAt = request.NewCreatedAt;
+
+        // Since we are opting out of UpdatableFilter through ISilentUpdater
+        // we need to manually update Dialog.UpdatedAt conditionally, and
+        // always Dialog.Revision.
+        activity.Dialog.UpdatedAt = activity.Dialog.UpdatedAt < activity.CreatedAt
+            ? activity.CreatedAt
+            : activity.Dialog.UpdatedAt;
+        activity.Dialog.NewVersion();
 
         var result = await _unitOfWork
             .DisableImmutableFilter()

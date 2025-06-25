@@ -43,21 +43,21 @@
       "DialogsEntities_DialogStatus": {
         "description": "",
         "enum": [
-          "NotApplicable",
           "InProgress",
           "Draft",
-          "Awaiting",
           "RequiresAttention",
-          "Completed"
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
         ],
         "type": "string",
         "x-enumNames": [
-          "NotApplicable",
           "InProgress",
           "Draft",
-          "Awaiting",
           "RequiresAttention",
-          "Completed"
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
         ]
       },
       "DialogsEntitiesActions_DialogGuiActionPriority": {
@@ -686,6 +686,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
@@ -1573,6 +1583,16 @@
               }
             ]
           },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
+          },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",
             "example": "2022-12-31T23:59:59Z",
@@ -2013,6 +2033,30 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerCommonDialogStatuses_DialogStatusInput": {
+        "description": "",
+        "enum": [
+          "New",
+          "InProgress",
+          "Draft",
+          "Sent",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "New",
+          "InProgress",
+          "Draft",
+          "Sent",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ]
+      },
       "V1ServiceOwnerDialogsCommandsCreate_Activity": {
         "additionalProperties": false,
         "properties": {
@@ -2426,7 +2470,7 @@
             "description": "The aggregated status of the dialog.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"
               }
             ]
           },
@@ -3252,7 +3296,7 @@
             "description": "The aggregated status of the dialog.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"
               }
             ]
           },
@@ -3771,6 +3815,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
@@ -4769,6 +4823,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",

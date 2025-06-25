@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 
 namespace Digdir.Tool.Dialogporten.GenerateFakeData;
 
@@ -94,7 +95,7 @@ public static class DialogGenerator
         .RuleFor(o => o.DueAt, f => f.Date.Future(10, RefTime))
         .RuleFor(o => o.ExpiresAt, f => f.Date.Future(20, RefTime.AddYears(11)))
         .RuleFor(o => o.VisibleFrom, _ => null)
-        .RuleFor(o => o.Status, f => f.PickRandom<DialogStatus.Values>())
+        .RuleFor(o => o.Status, f => f.PickRandom<DialogStatusInput>())
         .RuleFor(o => o.Content, _ => GenerateFakeContent())
         .RuleFor(o => o.SearchTags, _ => GenerateFakeSearchTags())
         .RuleFor(o => o.Attachments, _ => GenerateFakeDialogAttachments())
@@ -127,7 +128,7 @@ public static class DialogGenerator
         DateTimeOffset? expiresAt = null,
         DateTimeOffset? visibleFrom = null,
         string? process = null,
-        DialogStatus.Values? status = null,
+        DialogStatusInput? status = null,
         ContentDto? content = null,
         List<SearchTagDto>? searchTags = null,
         List<AttachmentDto>? attachments = null,
@@ -176,7 +177,7 @@ public static class DialogGenerator
         DateTimeOffset? expiresAt = null,
         DateTimeOffset? visibleFrom = null,
         string? process = null,
-        DialogStatus.Values? status = null,
+        DialogStatusInput? status = null,
         ContentDto? content = null,
         List<SearchTagDto>? searchTags = null,
         List<AttachmentDto>? attachments = null,
@@ -226,7 +227,7 @@ public static class DialogGenerator
         DateTimeOffset? expiresAt = null,
         DateTimeOffset? visibleFrom = null,
         string? process = null,
-        DialogStatus.Values? status = null,
+        DialogStatusInput? status = null,
         ContentDto? content = null,
         List<SearchTagDto>? searchTags = null,
         List<AttachmentDto>? attachments = null,

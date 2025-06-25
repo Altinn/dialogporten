@@ -113,7 +113,7 @@ public enum ActivityType
 public enum DialogStatus
 {
     [GraphQLDescription("No explicit status. This is the default.")]
-    NotApplicable = 1,
+    NotApplicable = 7,
 
     [GraphQLDescription("Started. In a serial process, this is used to indicate that, for example, a form filling is ongoing.")]
     InProgress = 2,

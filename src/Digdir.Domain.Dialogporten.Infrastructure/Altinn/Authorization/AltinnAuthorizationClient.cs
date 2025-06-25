@@ -128,7 +128,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     }
 
     // Create static empty lists to reuse and avoid allocations
-    private static readonly List<string> EmptyRolesList = [];
+    private static readonly List<string> EmptyStringList = [];
     private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
 
     private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)
@@ -158,13 +158,13 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 ParentParty = null,
                 AuthorizedResources = party.AuthorizedResources.Count > 0
                     ? [.. party.AuthorizedResources]
-                    : EmptyRolesList,
+                    : EmptyStringList,
                 AuthorizedRolesAndAccessPackages = party.AuthorizedRolesAndAccessPackages.Count > 0
                     ? [.. party.AuthorizedRolesAndAccessPackages]
-                    : EmptyRolesList,
+                    : EmptyStringList,
                 AuthorizedInstances = party.AuthorizedInstances.Count > 0
                     ? [.. party.AuthorizedInstances]
-                    : EmptyRolesList,
+                    : EmptyStringList,
                 SubParties = EmptySubPartiesList
             });
 
@@ -179,13 +179,13 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                     ParentParty = party.Party,
                     AuthorizedResources = subParty.AuthorizedResources.Count > 0
                         ? [.. subParty.AuthorizedResources]
-                        : EmptyRolesList,
+                        : EmptyStringList,
                     AuthorizedRolesAndAccessPackages = subParty.AuthorizedRolesAndAccessPackages.Count > 0
                         ? [.. subParty.AuthorizedRolesAndAccessPackages]
-                        : EmptyRolesList,
-                    AuthorizedInstances = party.AuthorizedInstances.Count > 0
-                        ? [.. party.AuthorizedInstances]
-                        : EmptyRolesList,
+                        : EmptyStringList,
+                    AuthorizedInstances = subParty.AuthorizedInstances.Count > 0
+                        ? [.. subParty.AuthorizedInstances]
+                        : EmptyStringList,
                     SubParties = EmptySubPartiesList
                 });
             }

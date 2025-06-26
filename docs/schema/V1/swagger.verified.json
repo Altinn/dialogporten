@@ -612,6 +612,16 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative ",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by a service owner ",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiActions": {
             "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
             "items": {
@@ -630,11 +640,6 @@
             "format": "guid",
             "type": "string"
           },
-          "incomingTransmissions": {
-            "description": "Indicates how many transmissions are not of type Submission or Correction",
-            "format": "int32",
-            "type": "integer"
-          },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
             "type": "boolean"
@@ -643,11 +648,6 @@
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
             "type": "string"
-          },
-          "outgoingTransmissions": {
-            "description": "Indicates how many transmissions are of type Submission or Correction",
-            "format": "int32",
-            "type": "integer"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
@@ -1526,6 +1526,16 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative ",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by the service owner ",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiAttachmentCount": {
             "description": "The number of attachments in the dialog made available for browser-based frontends.",
             "format": "int32",
@@ -1541,11 +1551,6 @@
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "type": "string"
-          },
-          "incomingTransmissions": {
-            "description": "Indicates how many transmissions are not of type Submission or Correction",
-            "format": "int32",
-            "type": "integer"
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
@@ -1564,11 +1569,6 @@
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
             "type": "string"
-          },
-          "outgoingTransmissions": {
-            "description": "Indicates how many transmissions are of type Submission or Correction",
-            "format": "int32",
-            "type": "integer"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
@@ -3753,6 +3753,16 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by the service owner",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiActions": {
             "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
             "items": {
@@ -3776,11 +3786,6 @@
             "nullable": true,
             "type": "string"
           },
-          "incomingTransmissions": {
-            "description": "Indicates how many transmissions are not of type Submission or Correction",
-            "format": "int32",
-            "type": "integer"
-          },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
             "type": "boolean"
@@ -3789,11 +3794,6 @@
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
             "type": "string"
-          },
-          "outgoingTransmissions": {
-            "description": "Indicates how many transmissions are of type Submission or Correction",
-            "format": "int32",
-            "type": "integer"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
@@ -4786,6 +4786,16 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionCount": {
+            "description": "The number of transmissions sent by a party representative ",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by a service owner ",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiAttachmentCount": {
             "description": "The number of attachments in the dialog made available for browser-based frontends.",
             "format": "int32",
@@ -4801,11 +4811,6 @@
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "type": "string"
-          },
-          "incomingTransmissions": {
-            "description": "Indicates how many transmissions are not of type Submission or Correction",
-            "format": "int32",
-            "type": "integer"
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
@@ -4824,11 +4829,6 @@
             "description": "The service owner code representing the organization (service owner) related to this dialog.",
             "example": "ske",
             "type": "string"
-          },
-          "outgoingTransmissions": {
-            "description": "Indicates how many transmissions are of type Submission or Correction",
-            "format": "int32",
-            "type": "integer"
           },
           "party": {
             "description": "The party code representing the organization or person that the dialog belongs to in URN format.",

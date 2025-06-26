@@ -289,8 +289,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
-        dialog.OutgoingTransmissions += newDialogTransmissions.Count(x => x.TypeId is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
-        dialog.IncomingTransmissions += newDialogTransmissions.Count(x => x.TypeId is not (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
+        dialog.FromPartyTransmissionsCount += newDialogTransmissions.Count(x => x.TypeId is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
+        dialog.FromServiceOwnerTransmissionsCount += newDialogTransmissions.Count(x => x.TypeId is not (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
         dialog.Transmissions.AddRange(newDialogTransmissions);
         // Tell ef explicitly to add transmissions as new to the database.

@@ -147,14 +147,14 @@ public sealed class DialogDto
     public string? DialogToken { get; set; }
 
     /// <summary>
-    /// Indicates how many transmissions are not of type Submission or Correction
+    /// The number of transmissions sent by a service owner 
     /// </summary>
-    public int IncomingTransmissions { get; set; }
+    public int FromServiceOwnerTransmissionsCount { get; set; }
 
     /// <summary>
-    /// Indicates how many transmissions are of type Submission or Correction
+    /// The number of transmissions sent by a party representative 
     /// </summary>
-    public int OutgoingTransmissions { get; set; }
+    public int FromPartyTransmissionsCount { get; set; }
 
     /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).

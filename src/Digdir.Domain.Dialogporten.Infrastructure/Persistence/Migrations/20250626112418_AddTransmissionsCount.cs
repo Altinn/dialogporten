@@ -5,20 +5,20 @@
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIncomingOutgoingTransmissions : Migration
+    public partial class AddTransmissionsCount : Migration
     {
-        /// <inheritdoc />
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "IncomingTransmissions",
+                name: "FromPartyTransmissionsCount",
                 table: "Dialog",
                 type: "integer",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "OutgoingTransmissions",
+                name: "FromServiceOwnerTransmissionsCount",
                 table: "Dialog",
                 type: "integer",
                 nullable: false,
@@ -29,11 +29,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IncomingTransmissions",
+                name: "FromPartyTransmissionsCount",
                 table: "Dialog");
 
             migrationBuilder.DropColumn(
-                name: "OutgoingTransmissions",
+                name: "FromServiceOwnerTransmissionsCount",
                 table: "Dialog");
         }
     }

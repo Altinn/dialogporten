@@ -1791,6 +1791,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
+        /// The number of transmissions sent by a service owner 
+        /// </summary>
+
+        [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
+        public int FromServiceOwnerTransmissionsCount { get; set; }
+
+        /// <summary>
+        /// The number of transmissions sent by a party representative 
+        /// </summary>
+
+        [JsonPropertyName("fromPartyTransmissionCount")]
+        public int FromPartyTransmissionCount { get; set; }
+
+        /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
         /// </summary>
 
@@ -2517,6 +2531,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_Content Content { get; set; }
+
+        /// <summary>
+        /// The number of transmissions sent by the service owner
+        /// </summary>
+
+        [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
+        public int FromServiceOwnerTransmissionsCount { get; set; }
+
+        /// <summary>
+        /// The number of transmissions sent by a party representative
+        /// </summary>
+
+        [JsonPropertyName("fromPartyTransmissionsCount")]
+        public int FromPartyTransmissionsCount { get; set; }
 
         /// <summary>
         /// The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.

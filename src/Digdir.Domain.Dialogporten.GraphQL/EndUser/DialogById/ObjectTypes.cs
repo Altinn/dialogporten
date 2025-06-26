@@ -60,8 +60,8 @@ public sealed class Dialog
     public DialogStatus Status { get; set; }
     public bool HasUnopenedContent { get; set; }
 
-    public int IncomingTransmissions { get; set; }
-    public int OutgoingTransmissions { get; set; }
+    public int FromServiceOwnerTransmissionsCount { get; set; }
+    public int FromPartyTransmissionsCount { get; set; }
 
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
     public bool IsApiOnly { get; set; }

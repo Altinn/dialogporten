@@ -310,11 +310,11 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert(expectedType);
 
-    private sealed class IncomingOutgoingTransmissionsTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
+    private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
     {
-        public IncomingOutgoingTransmissionsTestData()
+        public TransmissionsCountTestData()
         {
-            Add("2 Outgoing (Submission, Correction), 1 incoming (Alert)",
+            Add("2 From Party, 1 From ServiceOwner",
                 x =>
                 {
                     x.AddTransmission(x =>
@@ -348,7 +348,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 }, 2, 1
             );
 
-            Add("1 Incoming (Information)", x =>
+            Add("1 From ServiceOwner", x =>
             {
                 x.AddTransmission(x =>
                 {
@@ -360,7 +360,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 });
             }, 0, 1);
 
-            Add("1 Outgoing (Correction)", x =>
+            Add("1 From Party", x =>
             {
                 x.AddTransmission(x =>
                 {
@@ -374,15 +374,15 @@ public class CreateDialogTests : ApplicationCollectionFixture
             }, 1, 0);
         }
     }
-
-    [Theory, ClassData(typeof(IncomingOutgoingTransmissionsTestData))]
-    public Task Can_Create_Dialog_With_Outgoing_Incoming_Transmissions(string _, Action<CreateDialogCommand> createDialog, int outgoing, int incoming) =>
+    // Amund: Navn help
+    [Theory, ClassData(typeof(TransmissionsCountTestData))]
+    public Task Creating_Dialogs_With_Transmissions_Should_Count_Correctly(string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
         FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.OutgoingTransmissions.Should().Be(outgoing);
-                x.IncomingTransmissions.Should().Be(incoming);
+                x.FromPartyTransmissionsCount.Should().Be(fromPartyCount);
+                x.FromServiceOwnerTransmissionsCount.Should().Be(fromServiceOwnerCount);
             });
 
     [Fact]

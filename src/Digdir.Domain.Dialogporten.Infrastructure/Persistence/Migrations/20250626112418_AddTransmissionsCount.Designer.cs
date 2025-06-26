@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250619060731_AddIncomingOutgoingTransmissions")]
-    partial class AddIncomingOutgoingTransmissions
+    [Migration("20250626112418_AddTransmissionsCount")]
+    partial class AddTransmissionsCount
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -785,7 +785,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             MaxLength = 255,
                             Name = "Summary",
                             OutputInList = true,
-                            Required = true
+                            Required = false
                         },
                         new
                         {
@@ -866,12 +866,18 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<int>("FromPartyTransmissionsCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FromServiceOwnerTransmissionsCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("HasUnopenedContent")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("IdempotentKey")
                         .HasMaxLength(36)
                         .HasColumnType("character varying(36)");
-
-                    b.Property<int>("IncomingTransmissions")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("IsApiOnly")
                         .ValueGeneratedOnAdd()
@@ -883,9 +889,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .UseCollation("C");
-
-                    b.Property<int>("OutgoingTransmissions")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Party")
                         .IsRequired()
@@ -1046,11 +1049,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            Name = "NotApplicable"
-                        },
-                        new
-                        {
                             Id = 2,
                             Name = "InProgress"
                         },
@@ -1061,11 +1059,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = 4,
-                            Name = "Awaiting"
-                        },
-                        new
-                        {
                             Id = 5,
                             Name = "RequiresAttention"
                         },
@@ -1073,6 +1066,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 6,
                             Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "NotApplicable"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Awaiting"
                         });
                 });
 
@@ -1195,7 +1198,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             AllowedMediaTypes = new[] { "text/plain" },
                             MaxLength = 255,
                             Name = "Summary",
-                            Required = true
+                            Required = false
                         },
                         new
                         {

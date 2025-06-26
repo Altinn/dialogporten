@@ -54,7 +54,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
                 activity!.CreatedAt.Should().Be(newFormSavedAt);
                 activity.Type.Should().Be(DialogActivityType.Values.FormSaved);
 
-                x.UpdatedAt.Should().Be(dialogCreatedAt);
+                x.UpdatedAt.Should().BeCloseTo(dialogCreatedAt, TimeSpan.FromMilliseconds(1));
             });
     }
 

@@ -374,9 +374,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
             }, 1, 0);
         }
     }
-    // Amund: Navn help
     [Theory, ClassData(typeof(TransmissionsCountTestData))]
-    public Task Creating_Dialogs_With_Transmissions_Should_Count_Correctly(string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
+    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
         FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>

@@ -62,7 +62,7 @@ public static class InfrastructureExtensions
                 {
                     o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 })
-                .EnableSensitiveDataLogging()
+                .EnableSensitiveDataLogging(environment.IsDevelopment())
                 .AddInterceptors(
                     services.GetRequiredService<PopulateActorNameInterceptor>(),
                     services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()

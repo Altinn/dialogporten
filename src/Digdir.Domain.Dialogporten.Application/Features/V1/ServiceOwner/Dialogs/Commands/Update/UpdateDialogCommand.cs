@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -46,6 +47,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
+    private readonly IResourceRegistry _resourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly IDataLoaderContext _dataLoaderContext;
 
@@ -56,6 +58,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IUserResourceRegistry userResourceRegistry,
+        IResourceRegistry resourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
         IDataLoaderContext dataLoaderContext)
     {
@@ -65,6 +68,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
     }
@@ -161,6 +165,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             _domainContext.Pop();
             return forbiddenResult;
         }
+
+        var serviceResourceInformation = await _resourceRegistry.GetResourceInformation(dialog.ServiceResource, cancellationToken);
+        dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
 
         if (!request.IsSilentUpdate)
         {

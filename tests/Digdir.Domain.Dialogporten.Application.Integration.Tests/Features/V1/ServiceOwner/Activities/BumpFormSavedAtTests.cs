@@ -110,9 +110,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
                 x.ActivityId = activityId;
             })
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x =>
-            {
-            });
+            .ExecuteAndAssert<DialogDto>();
         success.Revision.Should().NotBeEmpty();
         success.Revision.Should().NotBe(initialRevision!.Value);
 

@@ -174,6 +174,65 @@ resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/admin
   }
 }
 
+// Add the deployment script managed identity as PostgreSQL administrator
+// so it can create database users for application managed identities
+resource addDeploymentScriptAsAdmin 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
+  name: 'add-deployment-script-as-postgres-admin'
+  location: location
+  tags: tags
+  kind: 'AzureCLI'
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${deploymentScriptIdentity.id}': {}
+    }
+  }
+  properties: {
+    azCliVersion: '2.63.0'
+    retentionInterval: 'PT1H'
+    timeout: 'PT10M'
+    cleanupPreference: 'OnSuccess'
+    environmentVariables: [
+      {
+        name: 'POSTGRES_SERVER_NAME'
+        value: postgres.name
+      }
+      {
+        name: 'RESOURCE_GROUP_NAME'
+        value: resourceGroup().name
+      }
+      {
+        name: 'DEPLOYMENT_SCRIPT_IDENTITY_NAME'
+        value: deploymentScriptIdentity.name
+      }
+    ]
+    scriptContent: '''
+      #!/bin/bash
+      set -euo pipefail
+      
+      echo "Adding deployment script managed identity as PostgreSQL administrator..."
+      
+      # Get the object ID of the current managed identity (the deployment script identity)
+      IDENTITY_OBJECT_ID=$(az account show --query user.name -o tsv)
+      
+      echo "Identity Object ID: $IDENTITY_OBJECT_ID"
+      echo "PostgreSQL Server: $POSTGRES_SERVER_NAME"
+      
+      # Add the managed identity as a PostgreSQL administrator
+      az postgres flexible-server ad-admin create \
+        --resource-group "$RESOURCE_GROUP_NAME" \
+        --server-name "$POSTGRES_SERVER_NAME" \
+        --display-name "$DEPLOYMENT_SCRIPT_IDENTITY_NAME" \
+        --object-id "$IDENTITY_OBJECT_ID" \
+        --type User \
+        --output none
+      
+      echo "Successfully added deployment script identity as PostgreSQL administrator"
+    '''
+  }
+  dependsOn: [postgresAdministrators]
+}
+
 resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {
     parent: postgres
     name: 'azure.extensions'

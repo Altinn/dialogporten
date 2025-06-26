@@ -68,6 +68,26 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   tags: tags
 }
 
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+  name: 'keyVaultReaderAccessPolicy-${name}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalIds: [managedIdentity.id]
+  }
+}
+
+module addPostgresUser '../../modules/postgreSql/addDatabaseUser.bicep' = {
+  name: 'addPostgresUser-${name}'
+  params: {
+    postgresServerName: postgresServerName
+    managedIdentityName: managedIdentity.name
+    managedIdentityObjectId: managedIdentity.properties.principalId
+    location: location
+    tags: tags
+    virtualNetworkName: virtualNetworkName
+  }
+}
+
 var containerAppEnvVars = [
   {
     name: 'Infrastructure__DialogDbConnectionString'
@@ -124,34 +144,8 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
     workloadProfileName: workloadProfileName
   }
-}
-
-<<<<<<< Updated upstream
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
-  name: 'keyVaultReaderAccessPolicy-${name}'
-  params: {
-    keyvaultName: environmentKeyVaultName
-    principalIds: [migrationJob.outputs.identityPrincipalId]
-  }
+  dependsOn: [keyVaultReaderAccessPolicy, addPostgresUser]
 }
 
 output identityPrincipalId string = migrationJob.outputs.identityPrincipalId
-||||||| Stash base
-output identityPrincipalId string = managedIdentity.properties.principalId
-=======
-module addPostgresUser '../../modules/postgreSql/addDatabaseUser.bicep' = {
-  name: 'addPostgresUser-${name}'
-  params: {
-    postgresServerName: postgresServerName
-    managedIdentityName: managedIdentity.name
-    managedIdentityObjectId: managedIdentity.properties.principalId
-    location: location
-    tags: tags
-    virtualNetworkName: virtualNetworkName
-  }
-  dependsOn: [migrationJob, keyVaultReaderAccessPolicy]
-}
-
-output identityPrincipalId string = managedIdentity.properties.principalId
->>>>>>> Stashed changes
 output name string = migrationJob.outputs.name

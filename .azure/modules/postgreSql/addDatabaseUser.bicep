@@ -4,20 +4,32 @@ param postgresServerName string
 @description('The name of the database')
 param databaseName string = 'dialogporten'
 
-@description('The name of the managed identity to add as database user')
+@description('The name of the managed identity to create as PostgreSQL user')
 param managedIdentityName string
 
-@description('The object ID (principal ID) of the managed identity')
+@description('The object ID of the managed identity')
 param managedIdentityObjectId string
 
 @description('The location for the deployment script')
 param location string
 
-@description('Tags to apply to resources')
+@description('Tags to apply to the deployment script')
 param tags object
 
 @description('The name of the virtual network')
 param virtualNetworkName string
+
+// Service principal credentials (secure parameters)
+@secure()
+@description('The client ID of the deployment service principal')
+param deploymentServicePrincipalClientId string
+
+@secure()
+@description('The client secret of the deployment service principal')
+param deploymentServicePrincipalClientSecret string
+
+@description('The tenant ID')
+param tenantId string = tenant().tenantId
 
 resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'add-postgres-user-${managedIdentityName}'
@@ -64,8 +76,16 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
         value: 'https://ossrdbms-aad${environment().suffixes.sqlServerHostname}'
       }
       {
-        name: 'AZ_USER_NAME'
-        value: deployer().objectId
+        name: 'CLIENT_ID'
+        secureValue: deploymentServicePrincipalClientId
+      }
+      {
+        name: 'CLIENT_SECRET'
+        secureValue: deploymentServicePrincipalClientSecret
+      }
+      {
+        name: 'TENANT_ID'
+        value: tenantId
       }
     ]
     scriptContent: '''
@@ -76,7 +96,6 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
       echo "PostgreSQL Server: $POSTGRES_SERVER"
       echo "Database: $DATABASE_NAME"
       echo "Identity Object ID: $MANAGED_IDENTITY_OBJECT_ID"
-      echo "Deployer User: $AZ_USER_NAME"
 
       POSTGRES_HOST="${POSTGRES_SERVER}.postgres.database.azure.com"
 
@@ -84,10 +103,25 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
       echo "Installing PostgreSQL client..."
       apt-get update && apt-get install -y postgresql-client
 
-      # Get access token for Azure AD authentication
-      echo "Getting Azure AD access token for PostgreSQL..."
-      ACCESS_TOKEN=$(az account get-access-token --resource "$AAD_RESOURCE_ENDPOINT" --query accessToken -o tsv)
+      # Login with the deployment service principal (PostgreSQL admin)
+      echo "Logging in with deployment service principal..."
+      az login --service-principal \
+        --username "$CLIENT_ID" \
+        --password "$CLIENT_SECRET" \
+        --tenant "$TENANT_ID" \
+        --output none
+      
+      echo "Connecting to PostgreSQL as admin: $CLIENT_ID"
 
+      # Get PostgreSQL access token
+      echo "Getting PostgreSQL access token..."
+      ACCESS_TOKEN=$(az account get-access-token --resource "$AAD_RESOURCE_ENDPOINT" --query accessToken -o tsv)
+      
+      if [ -z "$ACCESS_TOKEN" ]; then
+        echo "ERROR: Failed to get access token for PostgreSQL"
+        exit 1
+      fi
+      
       # Create the SQL commands to add the user and grant permissions
       SQL_COMMANDS=$(cat <<EOF
       DO \$\$
@@ -121,8 +155,9 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
 
       # Execute the SQL commands using Azure AD authentication
       echo "Executing SQL commands to create user and grant permissions..."
+      
       export PGPASSWORD="$ACCESS_TOKEN"
-      echo "$SQL_COMMANDS" | psql -h "$POSTGRES_HOST" -p 5432 -d "$DATABASE_NAME" -U "$AZ_USER_NAME" -v ON_ERROR_STOP=1
+      echo "$SQL_COMMANDS" | psql -h "$POSTGRES_HOST" -p 5432 -d "$DATABASE_NAME" -U "$CLIENT_ID" -v ON_ERROR_STOP=1
 
       echo "Successfully added managed identity '$MANAGED_IDENTITY_NAME' as PostgreSQL user"
       echo "Granted permissions: CONNECT, USAGE, CREATE, SELECT, INSERT, UPDATE, DELETE on database '$DATABASE_NAME'"

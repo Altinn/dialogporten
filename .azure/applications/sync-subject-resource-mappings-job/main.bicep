@@ -126,7 +126,6 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
   }
 }
 
-<<<<<<< Updated upstream
 module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
   name: 'keyVaultReaderAccessPolicy-${name}'
   params: {
@@ -135,8 +134,6 @@ module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' 
   }
 }
 
-||||||| Stash base
-=======
 module addPostgresUser '../../modules/postgreSql/addDatabaseUser.bicep' = {
   name: 'addPostgresUser-${name}'
   params: {
@@ -150,6 +147,5 @@ module addPostgresUser '../../modules/postgreSql/addDatabaseUser.bicep' = {
   dependsOn: [migrationJob, keyVaultReaderAccessPolicy]
 }
 
->>>>>>> Stashed changes
 output identityPrincipalId string = managedIdentity.properties.principalId
 output name string = migrationJob.outputs.name

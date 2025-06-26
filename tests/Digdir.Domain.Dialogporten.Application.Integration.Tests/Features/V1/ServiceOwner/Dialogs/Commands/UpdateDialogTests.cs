@@ -16,7 +16,6 @@ using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
@@ -352,5 +351,35 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         updatedDialog.GuiActions
             .Should()
             .ContainSingle(x => x.Id == userDefinedGuiActionId);
+    }
+
+    [Fact]
+    public async Task Dialog_Opened_Content()
+    {
+        var guid = Guid.CreateVersion7();
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.AddTransmission(transmissionDto =>
+            {
+                transmissionDto.Id = guid;
+                transmissionDto.Type = DialogTransmissionType.Values.Information;
+            }))
+            .UpdateDialog(x => x.Dto.Activities =
+            [
+                new ActivityDto
+                {
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = guid,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    },
+                }
+            ])
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.HasUnopenedContent.Should().BeFalse();
+                x.Transmissions.First().IsOpened.Should().BeTrue();
+            });
     }
 }

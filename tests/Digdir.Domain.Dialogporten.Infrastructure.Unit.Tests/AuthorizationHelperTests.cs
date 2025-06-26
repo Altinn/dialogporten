@@ -57,7 +57,8 @@ public class AuthorizationHelperTests
                 {
                     ["party1"] = new() { "resource1", "resource2", "resource3", "resource4", "resource5", "resource6" },
                     ["party2"] = new() { "resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" },
-                    ["party3"] = new() { "resource5", "resource6" }
+                    ["party3"] = new() { "resource5", "resource6" },
+                    ["party4"] = new() { "resource7" }
                 }
             },
 
@@ -143,7 +144,7 @@ public class AuthorizationHelperTests
                      */
                     Party = "party1",
                     AuthorizedRolesAndAccessPackages = ["role1", "role2", "accesspackage1"],
-                    AuthorizedResources = ["resource1", "resource5" ]
+                    AuthorizedResources = ["resource1", "resource5"]
                 },
                 new()
                 {
@@ -160,7 +161,7 @@ public class AuthorizationHelperTests
                      */
                     Party = "party2",
                     AuthorizedRolesAndAccessPackages = ["role2", "accesspackage1", "accesspackage2"],
-                    AuthorizedResources = ["resource1", "resource2", "resource5" ]
+                    AuthorizedResources = ["resource1", "resource2", "resource5"]
                 },
                 new()
                 {
@@ -171,7 +172,17 @@ public class AuthorizationHelperTests
                      */
                     Party = "party3",
                     AuthorizedRolesAndAccessPackages = ["role3"],
-                    AuthorizedResources = ["resource6" ]
+                    AuthorizedResources = ["resource6"]
+                },
+                new()
+                {
+                    /*
+                     * Should be flattened to:
+                     * - resource7 (from AuthorizedResources)
+                     */
+                    Party = "party4",
+                    AuthorizedRolesAndAccessPackages = [],
+                    AuthorizedResources = ["resource7"]
                 }
             }
         };

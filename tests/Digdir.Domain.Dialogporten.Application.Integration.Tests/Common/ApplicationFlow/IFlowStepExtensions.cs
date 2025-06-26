@@ -187,14 +187,28 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<BumpFormSavedResult> BumpFormSaved(this IFlowStep<CreateDialogResult> step, Action<UpdateFormSavedActivityTimeCommand> modify)
+    public static IFlowExecutor<BumpFormSavedResult> UpdateFormSavedActivityTime(this IFlowStep<CreateDialogResult> step, Action<UpdateFormSavedActivityTimeCommand> modify)
     {
         return step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(ctx =>
+            .SendCommand(x =>
             {
                 var command = new UpdateFormSavedActivityTimeCommand
                 {
-                    DialogId = ctx.DialogId,
+                    DialogId = x.DialogId,
+                    NewCreatedAt = DateTimeOffset.UtcNow
+                };
+                modify.Invoke(command);
+                return command;
+            });
+    }
+
+    public static IFlowExecutor<BumpFormSavedResult> UpdateFormSavedActivityTime(this IFlowStep<DialogDtoSO> step, Action<UpdateFormSavedActivityTimeCommand> modify)
+    {
+        return step.SendCommand(ctx =>
+            {
+                var command = new UpdateFormSavedActivityTimeCommand
+                {
+                    DialogId = ctx.GetDialogId(),
                     NewCreatedAt = DateTimeOffset.UtcNow
                 };
                 modify.Invoke(command);

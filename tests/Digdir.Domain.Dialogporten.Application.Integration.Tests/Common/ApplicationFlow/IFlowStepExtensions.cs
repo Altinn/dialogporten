@@ -22,7 +22,6 @@ using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Featur
 using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
 using BulkSetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
-using BumpFormSavedResult = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime.BumpFormSavedResult;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -139,8 +138,8 @@ public static class IFlowStepExtensions
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<BumpFormSavedResult> step) =>
-        step.AssertResult<BumpFormSavedSuccess>()
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateFormSavedActivityTimeResult> step) =>
+        step.AssertResult<UpdateFormSavedActivityTimeSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
@@ -187,7 +186,7 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<BumpFormSavedResult> UpdateFormSavedActivityTime(this IFlowStep<CreateDialogResult> step, Action<UpdateFormSavedActivityTimeCommand> modify)
+    public static IFlowExecutor<UpdateFormSavedActivityTimeResult> UpdateFormSavedActivityTime(this IFlowStep<CreateDialogResult> step, Action<UpdateFormSavedActivityTimeCommand> modify)
     {
         return step.AssertResult<CreateDialogSuccess>()
             .SendCommand(x =>
@@ -202,7 +201,7 @@ public static class IFlowStepExtensions
             });
     }
 
-    public static IFlowExecutor<BumpFormSavedResult> UpdateFormSavedActivityTime(this IFlowStep<DialogDtoSO> step, Action<UpdateFormSavedActivityTimeCommand> modify)
+    public static IFlowExecutor<UpdateFormSavedActivityTimeResult> UpdateFormSavedActivityTime(this IFlowStep<DialogDtoSO> step, Action<UpdateFormSavedActivityTimeCommand> modify)
     {
         return step.SendCommand(ctx =>
             {

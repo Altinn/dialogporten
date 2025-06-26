@@ -11,7 +11,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 
-public sealed class UpdateFormSavedActivityTimeCommand : IRequest<BumpFormSavedResult>, ISilentUpdater
+public sealed class UpdateFormSavedActivityTimeCommand : IRequest<UpdateFormSavedActivityTimeResult>, ISilentUpdater
 {
     public Guid DialogId { get; set; }
 
@@ -22,19 +22,19 @@ public sealed class UpdateFormSavedActivityTimeCommand : IRequest<BumpFormSavedR
     public Guid? IfMatchDialogRevision { get; set; }
 }
 
-public sealed record BumpFormSavedSuccess(Guid Revision);
+public sealed record UpdateFormSavedActivityTimeSuccess(Guid Revision);
 
 [GenerateOneOf]
-public sealed partial class BumpFormSavedResult : OneOfBase<BumpFormSavedSuccess, Forbidden, DomainError, EntityNotFound, ConcurrencyError>;
+public sealed partial class UpdateFormSavedActivityTimeResult : OneOfBase<UpdateFormSavedActivityTimeSuccess, Forbidden, DomainError, EntityNotFound, ConcurrencyError>;
 
 internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWork unitOfWork, IUserResourceRegistry userResourceRegistry)
-    : IRequestHandler<UpdateFormSavedActivityTimeCommand, BumpFormSavedResult>
+    : IRequestHandler<UpdateFormSavedActivityTimeCommand, UpdateFormSavedActivityTimeResult>
 {
     private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
     private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     private readonly IUserResourceRegistry _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
 
-    public async Task<BumpFormSavedResult> Handle(UpdateFormSavedActivityTimeCommand request, CancellationToken cancellationToken)
+    public async Task<UpdateFormSavedActivityTimeResult> Handle(UpdateFormSavedActivityTimeCommand request, CancellationToken cancellationToken)
     {
         if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
@@ -71,8 +71,8 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
             .EnableConcurrencyCheck(activity.Dialog, request.IfMatchDialogRevision)
             .SaveChangesAsync(cancellationToken);
 
-        return result.Match<BumpFormSavedResult>(
-            _ => new BumpFormSavedSuccess(activity.Dialog.Revision),
+        return result.Match<UpdateFormSavedActivityTimeResult>(
+            _ => new UpdateFormSavedActivityTimeSuccess(activity.Dialog.Revision),
             domainError => domainError,
             concurrencyError => concurrencyError
         );

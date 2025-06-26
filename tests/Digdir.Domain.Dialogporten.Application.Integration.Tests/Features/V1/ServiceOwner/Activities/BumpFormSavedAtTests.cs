@@ -26,7 +26,6 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
         var newFormSavedAt = dialogCreatedAt - TimeSpan.FromDays(1);
 
         var formSavedActivityId = Guid.CreateVersion7();
-
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
             {
@@ -57,5 +56,17 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
 
                 x.UpdatedAt.Should().Be(dialogCreatedAt);
             });
+    }
+
+    [Fact]
+    public async Task Cannot_Bump_Activity_Without_Type_FormSaved()
+    {
+        var activityId = Guid.CreateVersion7();
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddActivity(DialogActivityType.Values.Information, x => x.Id = activityId)
+            ).BumpFormSaved(x => x.ActivityId = activityId)
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText($"Only {nameof(DialogActivityType.Values.FormSaved)} activities is allowed to be updated using admin scope."));
     }
 }

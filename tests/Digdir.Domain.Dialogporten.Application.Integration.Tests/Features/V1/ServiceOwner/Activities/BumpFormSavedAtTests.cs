@@ -119,7 +119,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     }
 
     [Fact]
-    public async Task Cannot_Update_CreatedAt_When_Activity_Not_Of_Type_FormSaved()
+    public async Task Cannot_Update_Activity_CreatedAt_When_Activity_Not_Of_Type_FormSaved()
     {
         var activityId = Guid.CreateVersion7();
         await FlowBuilder.For(Application)

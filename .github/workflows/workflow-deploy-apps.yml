@@ -132,7 +132,7 @@ jobs:
         uses: azure/CLI@089eac9d8cc39f5d003e94f8b65efc51076c9cbd # v2.1.0
         if: ${{!inputs.dryRun}}
         id: verify-migration
-        timeout-minutes: 60
+        timeout-minutes: 1440
         with:
           inlineScript: |
             ./.github/tools/containerAppJobVerifier.sh ${{ steps.deploy.outputs.name }} ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} ${{ inputs.version }}

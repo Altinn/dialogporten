@@ -139,6 +139,10 @@ public static class IFlowStepExtensions
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<BumpFormSavedResult> step) =>
+        step.AssertResult<BumpFormSavedSuccess>()
+            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
+
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
@@ -183,7 +187,7 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<BumpFormSavedResult> BumpFormSaved(this IFlowStep<CreateDialogResult> step, Action<UpdateFormSavedActivityTimeCommand>? modify = null)
+    public static IFlowExecutor<BumpFormSavedResult> BumpFormSaved(this IFlowStep<CreateDialogResult> step, Action<UpdateFormSavedActivityTimeCommand> modify)
     {
         return step.AssertResult<CreateDialogSuccess>()
             .SendCommand(ctx =>
@@ -191,8 +195,9 @@ public static class IFlowStepExtensions
                 var command = new UpdateFormSavedActivityTimeCommand
                 {
                     DialogId = ctx.DialogId,
+                    NewCreatedAt = DateTimeOffset.UtcNow
                 };
-                modify?.Invoke(command);
+                modify.Invoke(command);
                 return command;
             });
     }

@@ -1,3 +1,4 @@
+using Castle.Components.DictionaryAdapter.Xml;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -6,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -17,69 +19,43 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
-    public async Task Can_Bump_FormSavedAt_When_Dialog_Id_Draft()
+    public async Task Can_Bump_FormSavedAt_Without_Updating_UpdatedAt()
     {
-        var timestamp = DateTimeOffset.UtcNow - TimeSpan.FromDays(1);
+        var dialogCreatedAt = DateTimeOffset.UtcNow - TimeSpan.FromHours(1);
+        var activitiesCreatedAt = dialogCreatedAt - TimeSpan.FromDays(2);
+        var newFormSavedAt = dialogCreatedAt - TimeSpan.FromDays(1);
+
+        var formSavedActivityId = Guid.CreateVersion7();
+
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
             {
+                x.Dto.CreatedAt = dialogCreatedAt;
+                x.Dto.UpdatedAt = dialogCreatedAt;
                 x.Dto.Status = DialogStatusInput.Draft;
-                x.Dto.Activities =
-                [
-                    new ActivityDto
-                    {
-                        Type = DialogActivityType.Values.FormSaved,
-                        PerformedBy = new ActorDto
-                        {
-                            ActorType = ActorType.Values.ServiceOwner
-                        },
-                        CreatedAt = timestamp
-                    },
-                    new ActivityDto
-                    {
-                        CreatedAt = timestamp - TimeSpan.FromDays(1),
-                        Type = DialogActivityType.Values.Information,
-                        PerformedBy = new ActorDto
-                        {
-                            ActorType = ActorType.Values.PartyRepresentative,
-                            ActorName = "Fredrik"
-                        },
-                        Description =
-                        [
-                            new LocalizationDto
-                            {
-                                Value = "Desc",
-                                LanguageCode = "nb"
-                            }
-                        ]
-                    }
-                ];
-                x.Dto.CreatedAt = timestamp;
+                x.AddActivity(DialogActivityType.Values.FormSaved, x =>
+                {
+                    x.CreatedAt = activitiesCreatedAt;
+                    x.Id = formSavedActivityId;
+                });
+                x.AddActivity(DialogActivityType.Values.Information);
+                x.Dto.CreatedAt = activitiesCreatedAt;
             })
-            .BumpFormSaved()
-            .SendCommand(ctx => new GetDialogQuery
+            .BumpFormSaved(x =>
             {
-                DialogId = ctx.GetDialogId(),
+                x.ActivityId = formSavedActivityId;
+                x.NewCreatedAt = newFormSavedAt;
             })
-            .ExecuteAndAssert<DialogDto>(x => x.Activities.Last().CreatedAt.Should().BeMoreThan(timestamp.Offset));
-    }
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var activity = x.Activities.Single(activity => activity.Id == formSavedActivityId);
+                activity.Should().NotBeNull();
 
-    [Fact]
-    public async Task Cannot_Bump_FormSavedAt_When_FormSaved_Is_Not_Latest_Activity()
-    {
-        await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Status = DialogStatusInput.Draft)
-            .BumpFormSaved()
-            .ExecuteAndAssert<DomainError>(x => x.ShouldHaveErrorWithText("Latest activity is not of type FormSaved"));
-    }
+                activity!.CreatedAt.Should().Be(newFormSavedAt);
+                activity.Type.Should().Be(DialogActivityType.Values.FormSaved);
 
-
-    [Fact]
-    public async Task Cannot_Bump_FormSavedAt_When_Dialog_Is_Not_Draft()
-    {
-        await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Status = DialogStatusInput.InProgress)
-            .BumpFormSaved()
-            .ExecuteAndAssert<DomainError>(x => x.ShouldHaveErrorWithText("Can only bump timestamp when dialog status is Draft"));
+                x.UpdatedAt.Should().Be(dialogCreatedAt);
+            });
     }
 }

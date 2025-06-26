@@ -186,34 +186,17 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<UpdateFormSavedActivityTimeResult> UpdateFormSavedActivityTime(this IFlowStep<CreateDialogResult> step, Action<UpdateFormSavedActivityTimeCommand> modify)
-    {
-        return step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x =>
+    public static IFlowExecutor<UpdateFormSavedActivityTimeResult> UpdateFormSavedActivityTime(
+        this IFlowStep<CreateDialogResult> step,
+        Guid activityId,
+        DateTimeOffset? newCreatedAt = null) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .SendCommand(ctx => new UpdateFormSavedActivityTimeCommand
             {
-                var command = new UpdateFormSavedActivityTimeCommand
-                {
-                    DialogId = x.DialogId,
-                    NewCreatedAt = DateTimeOffset.UtcNow
-                };
-                modify.Invoke(command);
-                return command;
+                DialogId = ctx.GetDialogId(),
+                ActivityId = activityId,
+                NewCreatedAt = newCreatedAt ?? DateTimeOffset.UtcNow
             });
-    }
-
-    public static IFlowExecutor<UpdateFormSavedActivityTimeResult> UpdateFormSavedActivityTime(this IFlowStep<DialogDtoSO> step, Action<UpdateFormSavedActivityTimeCommand> modify)
-    {
-        return step.SendCommand(ctx =>
-            {
-                var command = new UpdateFormSavedActivityTimeCommand
-                {
-                    DialogId = ctx.GetDialogId(),
-                    NewCreatedAt = DateTimeOffset.UtcNow
-                };
-                modify.Invoke(command);
-                return command;
-            });
-    }
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,

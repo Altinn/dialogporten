@@ -1,15 +1,9 @@
-using Castle.Components.DictionaryAdapter.Xml;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
-using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using FluentAssertions;
 
@@ -29,27 +23,22 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
             {
-                x.Dto.CreatedAt = dialogCreatedAt;
-                x.Dto.UpdatedAt = dialogCreatedAt;
-                x.AddActivity(DialogActivityType.Values.FormSaved, x =>
+                x.Dto.CreatedAt = x.Dto.UpdatedAt = dialogCreatedAt;
+                x.AddActivity(DialogActivityType.Values.FormSaved, a =>
                 {
-                    x.CreatedAt = formCreatedAt;
-                    x.Id = formSavedActivityId;
+                    a.CreatedAt = formCreatedAt;
+                    a.Id = formSavedActivityId;
                 });
             })
-            .UpdateFormSavedActivityTime(x =>
-            {
-                x.ActivityId = formSavedActivityId;
-                x.NewCreatedAt = newFormCreatedAt;
-            })
+            .UpdateFormSavedActivityTime(formSavedActivityId, newFormCreatedAt)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.Activities
                     .Single(activity => activity.Id == formSavedActivityId)
-                    .CreatedAt.Should().Be(newFormCreatedAt);
+                    .CreatedAt.Should().BeCloseTo(newFormCreatedAt, TimeSpan.FromMicroseconds(1));
 
-                x.UpdatedAt.Should().BeCloseTo(dialogCreatedAt, TimeSpan.FromMilliseconds(1));
+                x.UpdatedAt.Should().BeCloseTo(dialogCreatedAt, TimeSpan.FromMicroseconds(1));
             });
     }
 
@@ -65,27 +54,22 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
             {
-                x.Dto.CreatedAt = dialogCreatedAt;
-                x.Dto.UpdatedAt = dialogCreatedAt;
-                x.AddActivity(DialogActivityType.Values.FormSaved, x =>
+                x.Dto.CreatedAt = x.Dto.UpdatedAt = dialogCreatedAt;
+                x.AddActivity(DialogActivityType.Values.FormSaved, a =>
                 {
-                    x.Id = formSavedActivityId;
-                    x.CreatedAt = formCreatedAt;
+                    a.Id = formSavedActivityId;
+                    a.CreatedAt = formCreatedAt;
                 });
             })
-            .UpdateFormSavedActivityTime(x =>
-            {
-                x.ActivityId = formSavedActivityId;
-                x.NewCreatedAt = newFormCreatedAt;
-            })
+            .UpdateFormSavedActivityTime(formSavedActivityId, newFormCreatedAt)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.Activities
                     .Single(x => x.Id == formSavedActivityId)
-                    .CreatedAt.Should().Be(newFormCreatedAt);
+                    .CreatedAt.Should().BeCloseTo(newFormCreatedAt, TimeSpan.FromMicroseconds(1));
 
-                x.UpdatedAt.Should().BeCloseTo(newFormCreatedAt, TimeSpan.FromMilliseconds(1));
+                x.UpdatedAt.Should().BeCloseTo(newFormCreatedAt, TimeSpan.FromMicroseconds(1));
             });
     }
 
@@ -93,27 +77,24 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     public async Task Updating_Activity_CreatedAt_Will_Update_Dialog_Revision()
     {
         var activityId = Guid.CreateVersion7();
-
         Guid? initialRevision = null;
-        var success = await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-            {
-                x.AddActivity(DialogActivityType.Values.FormSaved, x =>
-                {
-                    x.Id = activityId;
-                });
-            })
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.AddActivity(DialogActivityType.Values.FormSaved, a => a.Id = activityId))
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>(x => initialRevision = x.Revision)
-            .UpdateFormSavedActivityTime(x =>
+            .SendCommand(ctx => new UpdateFormSavedActivityTimeCommand
             {
-                x.ActivityId = activityId;
+                DialogId = ctx.GetDialogId(),
+                ActivityId = activityId,
+                NewCreatedAt = DateTimeOffset.UtcNow
             })
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>();
-        success.Revision.Should().NotBeEmpty();
-        success.Revision.Should().NotBe(initialRevision!.Value);
-
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Revision.Should().NotBeEmpty();
+                x.Revision.Should().NotBe(initialRevision!.Value);
+            });
     }
 
     [Fact]
@@ -121,9 +102,8 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     {
         var activityId = Guid.CreateVersion7();
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-                x.AddActivity(DialogActivityType.Values.Information, x => x.Id = activityId)
-            ).UpdateFormSavedActivityTime(x => x.ActivityId = activityId)
+            .CreateSimpleDialog(x => x.AddActivity(DialogActivityType.Values.Information, a => a.Id = activityId))
+            .UpdateFormSavedActivityTime(activityId)
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithText($"Only {nameof(DialogActivityType.Values.FormSaved)} activities is allowed to be updated using admin scope."));
     }

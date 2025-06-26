@@ -55,5 +55,10 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
         options.AddPolicy(AuthorizationPolicy.NotificationConditionCheck, builder => builder
             .Combine(options.DefaultPolicy)
             .RequireScope(AuthorizationScope.NotificationConditionCheck));
+
+        options.AddPolicy(AuthorizationPolicy.ServiceProviderAdmin, builder => builder
+            .Combine(options.GetPolicy(AuthorizationPolicy.ServiceProvider)!)
+            .RequireScope(AuthorizationScope.ServiceOwnerAdminScope)
+        );
     }
 }

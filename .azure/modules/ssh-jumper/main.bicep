@@ -117,6 +117,7 @@ module virtualMachine '../../modules/virtualMachine/main.bicep' = {
         vTpmEnabled: true
       }
       securityType: 'TrustedLaunch'
+      encryptionAtHost: true
     }
     networkProfile: {
       networkInterfaces: [

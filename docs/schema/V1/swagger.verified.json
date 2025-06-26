@@ -43,21 +43,21 @@
       "DialogsEntities_DialogStatus": {
         "description": "",
         "enum": [
-          "NotApplicable",
           "InProgress",
           "Draft",
-          "Awaiting",
           "RequiresAttention",
-          "Completed"
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
         ],
         "type": "string",
         "x-enumNames": [
-          "NotApplicable",
           "InProgress",
           "Draft",
-          "Awaiting",
           "RequiresAttention",
-          "Completed"
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
         ]
       },
       "DialogsEntitiesActions_DialogGuiActionPriority": {
@@ -626,6 +626,10 @@
             "nullable": true,
             "type": "array"
           },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -700,6 +704,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
@@ -1090,6 +1104,11 @@
           },
           "isAuthorized": {
             "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
+            "type": "boolean"
+          },
+          "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
+            "nullable": true,
             "type": "boolean"
           },
           "relatedTransmissionId": {
@@ -1523,6 +1542,10 @@
             "nullable": true,
             "type": "integer"
           },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -1600,6 +1623,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",
@@ -2041,6 +2074,30 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerCommonDialogStatuses_DialogStatusInput": {
+        "description": "",
+        "enum": [
+          "New",
+          "InProgress",
+          "Draft",
+          "Sent",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "New",
+          "InProgress",
+          "Draft",
+          "Sent",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ]
+      },
       "V1ServiceOwnerDialogsCommandsCreate_Activity": {
         "additionalProperties": false,
         "properties": {
@@ -2454,7 +2511,7 @@
             "description": "The aggregated status of the dialog.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"
               }
             ]
           },
@@ -3280,7 +3337,7 @@
             "description": "The aggregated status of the dialog.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"
               }
             ]
           },
@@ -3718,6 +3775,10 @@
             "nullable": true,
             "type": "array"
           },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -3813,6 +3874,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
@@ -4245,6 +4316,11 @@
           },
           "isAuthorized": {
             "description": "Flag indicating if the authenticated user supplied in the query is authorized for this transmission.",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
             "nullable": true,
             "type": "boolean"
           },
@@ -4734,6 +4810,10 @@
             "nullable": true,
             "type": "integer"
           },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -4825,6 +4905,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",

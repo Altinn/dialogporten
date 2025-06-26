@@ -1,5 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
@@ -17,7 +18,6 @@ using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
@@ -366,7 +366,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             Add($"{baseDesc} transmissions are added", x => x.AddTransmission());
             Add($"{baseDesc} GUI actions are added", x => x.AddGuiAction());
             Add($"{baseDesc} API actions are added", x => x.AddApiAction());
-            Add($"{baseDesc} status changes", x => x.Dto.Status = DialogStatus.Values.InProgress);
+            Add($"{baseDesc} status changes", x => x.Dto.Status = DialogStatusInput.InProgress);
             Add($"{baseDesc} extended status changes", x => x.Dto.ExtendedStatus = "new extended status");
         }
     }
@@ -408,4 +408,34 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.ContentUpdatedAt.Should().Be(x.CreatedAt));
+
+    [Fact]
+    public async Task Dialog_Opened_Content()
+    {
+        var transmissionId = Guid.CreateVersion7();
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.AddTransmission(transmissionDto =>
+            {
+                transmissionDto.Id = transmissionId;
+                transmissionDto.Type = DialogTransmissionType.Values.Information;
+            }))
+            .UpdateDialog(x => x.Dto.Activities =
+            [
+                new ActivityDto
+                {
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = transmissionId,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    },
+                }
+            ])
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.HasUnopenedContent.Should().BeFalse();
+                x.Transmissions.First().IsOpened.Should().BeTrue();
+            });
+    }
 }

@@ -192,7 +192,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Retrieve service owner labels for a dialog</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.5.6.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.6.0.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Retrieve service owner labels for a dialog</summary>
@@ -1792,11 +1792,29 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public DialogsEntities_DialogStatus Status { get; set; }
 
         /// <summary>
+        /// System defined label used to categorize dialogs.
+        /// <br/>This is obsolete and will only show; Default, Bin or Archive.
+        /// <br/>Use SystemLabels on EndUserContext instead.
+        /// </summary>
+
+        [JsonPropertyName("systemLabel")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
+        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
+
+        /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
 
         [JsonPropertyName("isApiOnly")]
         public bool IsApiOnly { get; set; }
+
+        /// <summary>
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// </summary>
+
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
 
         /// <summary>
         /// The latest entry in the dialog's activity log.
@@ -1846,23 +1864,23 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public enum DialogsEntities_DialogStatus
     {
 
-        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
-        NotApplicable = 0,
-
         [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
-        InProgress = 1,
+        InProgress = 0,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
-        Draft = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
-        Awaiting = 3,
+        Draft = 1,
 
         [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
-        RequiresAttention = 4,
+        RequiresAttention = 2,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
-        Completed = 5,
+        Completed = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 5,
 
     }
 
@@ -2502,11 +2520,29 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public DialogsEntities_DialogStatus Status { get; set; }
 
         /// <summary>
+        /// System defined label used to categorize dialogs.
+        /// <br/>This is obsolete and will only show; Default, Bin or Archive.
+        /// <br/>Use SystemLabels on EndUserContext instead.
+        /// </summary>
+
+        [JsonPropertyName("systemLabel")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
+        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
+
+        /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
 
         [JsonPropertyName("isApiOnly")]
         public bool IsApiOnly { get; set; }
+
+        /// <summary>
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// </summary>
+
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
 
         /// <summary>
         /// The dialog unstructured text content.
@@ -2800,6 +2836,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent Content { get; set; }
+
+        /// <summary>
+        /// Indicates whether the dialog transmission has been opened.
+        /// </summary>
+
+        [JsonPropertyName("isOpened")]
+        public bool? IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.
@@ -3378,7 +3421,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntities_DialogStatus Status { get; set; }
+        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
 
         /// <summary>
         /// The dialog unstructured text content.
@@ -3430,6 +3473,36 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("activities")]
         public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Activity> Activities { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum V1ServiceOwnerCommonDialogStatuses_DialogStatusInput
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"New")]
+        New = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
+        InProgress = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
+        Draft = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Sent")]
+        Sent = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
+        RequiresAttention = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
+        Completed = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 7,
 
     }
 
@@ -4248,7 +4321,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntities_DialogStatus Status { get; set; }
+        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
 
         /// <summary>
         /// Set the system label of the dialog.

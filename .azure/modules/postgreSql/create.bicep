@@ -77,6 +77,10 @@ param srcKeyVault object
 @secure()
 param administratorLoginPassword string
 
+@description('The name of the deployer principal used as the PostgreSQL administrator')
+@minLength(3)
+param deployerPrincipalName string
+
 var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
@@ -158,7 +162,7 @@ resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/admin
   name: deployer().objectId
   parent: postgres
   properties: {
-    principalName: deployer().userPrincipalName
+    principalName: deployerPrincipalName
     principalType: 'ServicePrincipal'
     tenantId: deployer().tenantId
   }
@@ -171,6 +175,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
       value: 'PG_TRGM'
       source: 'user-override'
     }
+    dependsOn: [postgresAdministrators]
   }
 
 resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {

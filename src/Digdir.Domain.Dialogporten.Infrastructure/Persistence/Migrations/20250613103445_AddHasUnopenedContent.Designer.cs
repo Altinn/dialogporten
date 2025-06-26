@@ -3,6 +3,7 @@ using System;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    partial class DialogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250613103445_AddHasUnopenedContent")]
+    partial class AddHasUnopenedContent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -782,7 +785,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             MaxLength = 255,
                             Name = "Summary",
                             OutputInList = true,
-                            Required = false
+                            Required = true
                         },
                         new
                         {
@@ -837,11 +840,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTimeOffset>("ContentUpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -932,8 +930,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ContentUpdatedAt");
 
                     b.HasIndex("CreatedAt");
 
@@ -1047,6 +1043,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
+                            Id = 1,
+                            Name = "New"
+                        },
+                        new
+                        {
                             Id = 2,
                             Name = "InProgress"
                         },
@@ -1057,6 +1058,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = 4,
+                            Name = "Sent"
+                        },
+                        new
+                        {
                             Id = 5,
                             Name = "RequiresAttention"
                         },
@@ -1064,16 +1070,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 6,
                             Name = "Completed"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "NotApplicable"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "Awaiting"
                         });
                 });
 
@@ -1196,7 +1192,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                             AllowedMediaTypes = new[] { "text/plain" },
                             MaxLength = 255,
                             Name = "Summary",
-                            Required = false
+                            Required = true
                         },
                         new
                         {
@@ -1872,7 +1868,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity", "Dialog")
-                        .WithOne("EndUserContext")
+                        .WithOne("DialogEndUserContext")
                         .HasForeignKey("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", "DialogId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -2327,7 +2323,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Content");
 
-                    b.Navigation("EndUserContext")
+                    b.Navigation("DialogEndUserContext")
                         .IsRequired();
 
                     b.Navigation("GuiActions");

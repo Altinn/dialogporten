@@ -118,9 +118,22 @@ public sealed class DialogDto
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
+    /// System defined label used to categorize dialogs.
+    /// This is obsolete and will only show; <see cref="SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
+    /// </summary>
+    [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]
+    public SystemLabel.Values SystemLabel { get; set; }
+
+    /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
     /// </summary>
     public bool IsApiOnly { get; set; }
+
+    /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
 
     /// <summary>
     /// The dialog unstructured text content.
@@ -240,6 +253,11 @@ public sealed class DialogTransmissionDto
     public ActorDto Sender { get; set; } = null!;
 
     /// <summary>
+    /// Indicates whether the dialog transmission has been opened.
+    /// </summary>
+    public bool? IsOpened { get; set; }
+
+    /// <summary>
     /// The transmission unstructured text content.
     /// </summary>
     public DialogTransmissionContentDto Content { get; set; } = null!;
@@ -279,7 +297,6 @@ public sealed class DialogSeenLogDto
     /// </summary>
     public bool IsCurrentEndUser { get; set; }
 }
-
 
 public sealed class ContentDto
 {
@@ -371,7 +388,6 @@ public sealed class DialogActivityDto
     /// </summary>
     public List<LocalizationDto> Description { get; set; } = [];
 }
-
 
 public sealed class DialogApiActionDto
 {

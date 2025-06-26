@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -10,6 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
@@ -19,6 +21,7 @@ internal sealed class MappingProfile : Profile
     {
         CreateMap<DialogEntity, DialogDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
+            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.EndUserContext.SystemLabelId))
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.Ignore());
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()
@@ -55,7 +58,8 @@ internal sealed class MappingProfile : Profile
             .ConvertUsing<TransmissionContentOutputConverter<DialogTransmissionContentDto>>();
 
         CreateMap<DialogTransmission, DialogTransmissionDto>()
-            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId));
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId))
+            .ForMember(dest => dest.IsOpened, opt => opt.MapFrom(src => DialogUnopenedContent.IsOpened(src)));
 
         CreateMap<DialogTransmissionAttachment, DialogTransmissionAttachmentDto>();
         CreateMap<AttachmentUrl, DialogTransmissionAttachmentUrlDto>()

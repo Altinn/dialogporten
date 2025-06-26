@@ -150,6 +150,7 @@ type Dialog {
   updatedAt: DateTime!
   dialogToken: String
   status: DialogStatus!
+  hasUnopenedContent: Boolean!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
   content: Content!
@@ -450,8 +451,6 @@ enum DialogEventType {
 }
 
 enum DialogStatus {
-  "No explicit status. This is the default."
-  NOT_APPLICABLE
   "Started. In a serial process, this is used to indicate that, for example, a form filling is ongoing."
   IN_PROGRESS
   "Used to indicate user-initiated dialogs not yet sent."
@@ -462,6 +461,8 @@ enum DialogStatus {
   REQUIRES_ATTENTION
   "The dialogue was completed. This typically means that the dialogue is moved to a GUI archive or similar."
   COMPLETED
+  "No explicit status. This is the default."
+  NOT_APPLICABLE
 }
 
 enum GuiActionPriority {

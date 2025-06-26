@@ -58,6 +58,7 @@ public sealed class Dialog
     public string? DialogToken { get; set; }
 
     public DialogStatus Status { get; set; }
+    public bool HasUnopenedContent { get; set; }
 
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
     public bool IsApiOnly { get; set; }

@@ -1780,7 +1780,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("systemLabel")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        [System.Obsolete("Use EndUserContext.SystemLabels instead.)")]
+        [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
         public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
         /// <summary>
@@ -1791,18 +1791,11 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
-        /// Indicates how many transmissions are not of type Submission or Correction
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
         /// </summary>
 
-        [JsonPropertyName("incomingTransmissions")]
-        public int IncomingTransmissions { get; set; }
-
-        /// <summary>
-        /// Indicates how many transmissions are of type Submission or Correction
-        /// </summary>
-
-        [JsonPropertyName("outgoingTransmissions")]
-        public int OutgoingTransmissions { get; set; }
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
 
         /// <summary>
         /// The latest entry in the dialog's activity log.
@@ -2501,7 +2494,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("systemLabel")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        [System.Obsolete("Use EndUserContext.SystemLabels instead.)")]
+        [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
         public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
         /// <summary>
@@ -2512,25 +2505,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// </summary>
+
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
+
+        /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_Content Content { get; set; }
-
-        /// <summary>
-        /// Indicates how many transmissions are not of type Submission or Correction
-        /// </summary>
-
-        [JsonPropertyName("incomingTransmissions")]
-        public int IncomingTransmissions { get; set; }
-
-        /// <summary>
-        /// Indicates how many transmissions are of type Submission or Correction
-        /// </summary>
-
-        [JsonPropertyName("outgoingTransmissions")]
-        public int OutgoingTransmissions { get; set; }
 
         /// <summary>
         /// The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
@@ -2810,6 +2796,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent Content { get; set; }
+
+        /// <summary>
+        /// Indicates whether the dialog transmission has been opened.
+        /// </summary>
+
+        [JsonPropertyName("isOpened")]
+        public bool? IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.

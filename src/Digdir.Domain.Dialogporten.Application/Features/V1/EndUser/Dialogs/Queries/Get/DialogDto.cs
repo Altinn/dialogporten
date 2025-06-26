@@ -131,6 +131,11 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
+
+    /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
     public ContentDto Content { get; set; } = null!;
@@ -256,6 +261,11 @@ public sealed class DialogTransmissionDto
     /// The actor that sent the transmission.
     /// </summary>
     public ActorDto Sender { get; set; } = null!;
+
+    /// <summary>
+    /// Indicates whether the dialog transmission has been opened.
+    /// </summary>
+    public bool? IsOpened { get; set; }
 
     /// <summary>
     /// The transmission unstructured text content.

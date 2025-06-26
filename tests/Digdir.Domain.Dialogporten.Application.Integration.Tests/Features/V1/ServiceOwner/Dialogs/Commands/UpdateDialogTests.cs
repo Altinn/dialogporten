@@ -358,6 +358,36 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public async Task Dialog_Opened_Content()
+    {
+        var guid = Guid.CreateVersion7();
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.AddTransmission(transmissionDto =>
+            {
+                transmissionDto.Id = guid;
+                transmissionDto.Type = DialogTransmissionType.Values.Information;
+            }))
+            .UpdateDialog(x => x.Dto.Activities =
+            [
+                new ActivityDto
+                {
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = guid,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    },
+                }
+            ])
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.HasUnopenedContent.Should().BeFalse();
+                x.Transmissions.First().IsOpened.Should().BeTrue();
+            });
+    }
+
+    [Fact]
     public Task Adding_Transmission_Should_Increase_IncomingTransmissionsSO()
     {
         return FlowBuilder.For(Application)

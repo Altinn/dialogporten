@@ -59,6 +59,11 @@ public sealed class DialogEntity :
     /// Indicates how many transmissions are of type Submission or Correction
     /// </summary>
     public int OutgoingTransmissions { get; set; }
+    /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
+
 
     // === Dependent relationships ===
     public DialogStatus.Values StatusId { get; set; }
@@ -108,9 +113,9 @@ public sealed class DialogEntity :
     public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, string? endUserName)
     {
         var lastSeenAt = SeenLog
-                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
-                .MaxBy(x => x.CreatedAt)
-                ?.CreatedAt
+                         .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
+                         .MaxBy(x => x.CreatedAt)
+                         ?.CreatedAt
          ?? DateTimeOffset.MinValue;
 
         if (lastSeenAt >= UpdatedAt)

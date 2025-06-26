@@ -58,6 +58,7 @@ public sealed class Dialog
     public string? DialogToken { get; set; }
 
     public DialogStatus Status { get; set; }
+    public bool HasUnopenedContent { get; set; }
 
     public int IncomingTransmissions { get; set; }
     public int OutgoingTransmissions { get; set; }

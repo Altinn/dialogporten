@@ -91,6 +91,12 @@ public class DialogDtoBase
     public DateTimeOffset UpdatedAt { get; set; }
 
     /// <summary>
+    /// The date and time when the dialog content was last updated.
+    /// </summary>
+    /// <example>2022-12-31T23:59:59Z</example>
+    public DateTimeOffset ContentUpdatedAt { get; set; }
+
+    /// <summary>
     /// The due date for the dialog. This is the last date when the dialog is expected to be completed.
     /// </summary>
     /// <example>2022-12-31T23:59:59Z</example>
@@ -129,6 +135,11 @@ public class DialogDtoBase
     /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
+
+    /// <summary>
+    /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+    /// </summary>
+    public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
 
     /// <summary>
     /// Metadata about the dialog owned by end-users.

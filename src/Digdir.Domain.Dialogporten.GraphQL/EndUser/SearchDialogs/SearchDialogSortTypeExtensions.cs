@@ -72,6 +72,11 @@ internal static class SearchDialogSortTypeExtensions
             {
                 stringBuilder.Append(CultureInfo.InvariantCulture, $"dueAt_{orderBy.DueAt},");
             }
+
+            if (orderBy.ContentUpdatedAt.HasValue)
+            {
+                stringBuilder.Append(CultureInfo.InvariantCulture, $"contentUpdatedAt_{orderBy.ContentUpdatedAt},");
+            }
         }
 
         if (OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(stringBuilder.ToString(),
@@ -102,10 +107,16 @@ internal static class SearchDialogSortTypeExtensions
             return DuAtFactory;
         }
 
+        if (field.Equals("contentupdatedat", StringComparison.OrdinalIgnoreCase))
+        {
+            return ContentUpdatedAtFactory;
+        }
+
         throw new InvalidOperationException("Invalid sort field");
     }
 
     private static SearchDialogSortType DuAtFactory(OrderDirection dir) => new() { DueAt = dir };
     private static SearchDialogSortType UpdatedAtFactory(OrderDirection dir) => new() { UpdatedAt = dir };
     private static SearchDialogSortType CreatedAtFactory(OrderDirection dir) => new() { CreatedAt = dir };
+    private static SearchDialogSortType ContentUpdatedAtFactory(OrderDirection dir) => new() { ContentUpdatedAt = dir };
 }

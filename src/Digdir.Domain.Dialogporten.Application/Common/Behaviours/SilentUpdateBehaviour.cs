@@ -41,5 +41,5 @@ internal sealed class SilentUpdateBehaviour<TRequest, TResponse> : IPipelineBeha
 
 public interface ISilentUpdater
 {
-    bool IsSilentUpdate { get; }
+    bool IsSilentUpdate => true;
 }

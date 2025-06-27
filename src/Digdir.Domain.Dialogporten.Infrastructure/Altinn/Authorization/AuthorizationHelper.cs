@@ -23,72 +23,92 @@ internal static class AuthorizationHelper
 
         // Step 1: Pre-filter parties with roles and build the unique subjects set. Skip any parties that are not in the constraints (if supplied)
         var uniqueSubjects = new HashSet<string>(100);
-        var partiesWithRoles = new List<(string Party, List<string> Roles)>();
+        var partiesWithRolesOrAccessPackages = new List<(string Party, List<string> RolesAndAccessPackages)>();
         var constraintPartiesSet = constraintParties.Count > 0 ? new HashSet<string>(constraintParties) : null;
+        var constraintResourcesSet = constraintResources.Count > 0 ? new HashSet<string>(constraintResources) : null;
 
         foreach (var party in authorizedParties.AuthorizedParties.Where(p => constraintPartiesSet is null || constraintPartiesSet.Contains(p.Party)))
         {
-            if (!(party.AuthorizedRoles.Count > 0)) continue;
-            partiesWithRoles.Add((party.Party, party.AuthorizedRoles));
+            if (!(party.AuthorizedRolesAndAccessPackages.Count > 0)) continue;
+            partiesWithRolesOrAccessPackages.Add((party.Party, party.AuthorizedRolesAndAccessPackages));
 
-            foreach (var role in party.AuthorizedRoles)
+            foreach (var role in party.AuthorizedRolesAndAccessPackages)
             {
                 uniqueSubjects.Add(role);
             }
         }
 
-        if (partiesWithRoles.Count == 0)
-            return result;
-
-        // Step 2: Get and preprocess subject resources
-        var subjectResources = await getAllSubjectResources(cancellationToken);
-
-        HashSet<string>? constraintResourcesSet = null;
-        if (constraintResources.Count > 0)
+        if (partiesWithRolesOrAccessPackages.Count > 0)
         {
-            constraintResourcesSet = new HashSet<string>(constraintResources);
-        }
+            // Step 2: Get and preprocess subject resources
+            var subjectResources = await getAllSubjectResources(cancellationToken);
 
-        // Step 3: Build subject-to-resources dictionary with early filtering
-        var subjectToResources = new Dictionary<string, HashSet<string>>(uniqueSubjects.Count);
-        foreach (var sr in subjectResources)
-        {
-            // Skip if not in our subjects list
-            if (!uniqueSubjects.Contains(sr.Subject))
-                continue;
-
-            // Skip if constraint resources exist and this resource isn't in the constraints
-            if (constraintResourcesSet != null && !constraintResourcesSet.Contains(sr.Resource))
-                continue;
-
-            // Add to our lookup dictionary
-            if (!subjectToResources.TryGetValue(sr.Subject, out var resources))
+            // Step 3: Build subject-to-resources dictionary with early filtering
+            var subjectToResources = new Dictionary<string, HashSet<string>>(uniqueSubjects.Count);
+            foreach (var sr in subjectResources)
             {
-                resources = new HashSet<string>();
-                subjectToResources[sr.Subject] = resources;
+                // Skip if not in our subjects list
+                if (!uniqueSubjects.Contains(sr.Subject))
+                    continue;
+
+                // Skip if constraint resources exist and this resource isn't in the constraints
+                if (constraintResourcesSet != null && !constraintResourcesSet.Contains(sr.Resource))
+                    continue;
+
+                // Add to our lookup dictionary
+                if (!subjectToResources.TryGetValue(sr.Subject, out var resources))
+                {
+                    resources = new HashSet<string>();
+                    subjectToResources[sr.Subject] = resources;
+                }
+
+                resources.Add(sr.Resource);
             }
 
-            resources.Add(sr.Resource);
-        }
-
-        // Step 4: Populate result dictionary with a single pass
-        foreach (var (party, roles) in partiesWithRoles)
-        {
-            var partyResources = new HashSet<string>();
-            var hasResources = false;
-
-            foreach (var role in roles)
+            // Step 4: Populate result dictionary with a single pass
+            foreach (var (party, roles) in partiesWithRolesOrAccessPackages)
             {
-                if (subjectToResources.TryGetValue(role, out var resources))
+                var partyResources = new HashSet<string>();
+                var hasResources = false;
+
+                foreach (var role in roles)
                 {
-                    partyResources.UnionWith(resources);
-                    hasResources = true;
+                    if (subjectToResources.TryGetValue(role, out var resources))
+                    {
+                        partyResources.UnionWith(resources);
+                        hasResources = true;
+                    }
+                }
+
+                if (hasResources)
+                {
+                    result.ResourcesByParties[party] = partyResources;
                 }
             }
+        }
 
-            if (hasResources)
+        // Step 5: Handle parties that have direct resource authorizations
+        foreach (var party in authorizedParties.AuthorizedParties
+                     .Where(p => constraintPartiesSet is null || constraintPartiesSet.Contains(p.Party)))
+        {
+            // We'll only allocate/insert the HashSet if we hit at least one matching resource
+            HashSet<string>? existingResources = null;
+
+            foreach (var resource in party.AuthorizedResources)
             {
-                result.ResourcesByParties[party] = partyResources;
+                if (constraintResourcesSet != null && !constraintResourcesSet.Contains(resource))
+                    continue;
+
+                if (existingResources == null)
+                {
+                    if (!result.ResourcesByParties.TryGetValue(party.Party, out existingResources!))
+                    {
+                        existingResources = new HashSet<string>();
+                        result.ResourcesByParties[party.Party] = existingResources;
+                    }
+                }
+
+                existingResources.Add(resource);
             }
         }
 

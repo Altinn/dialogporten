@@ -10,8 +10,8 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -309,6 +309,81 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Dto.Content = null;
             })
             .ExecuteAndAssert(expectedType);
+
+    private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
+    {
+        public TransmissionsCountTestData()
+        {
+            Add("2 From Party, 1 From ServiceOwner",
+                x =>
+                {
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Submission;
+                        x.Sender = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = "Fredrik",
+                        };
+
+                    });
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Correction;
+                        x.Sender = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = "Fredrik",
+                        };
+
+                    });
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Alert;
+                        x.Sender = new ActorDto
+                        {
+                            ActorType = ActorType.Values.ServiceOwner
+                        };
+                    });
+                }, 2, 1
+            );
+
+            Add("1 From ServiceOwner", x =>
+            {
+                x.AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Information;
+                    x.Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner,
+                    };
+                });
+            }, 0, 1);
+
+            Add("1 From Party", x =>
+            {
+                x.AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Correction;
+                    x.Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.PartyRepresentative,
+                        ActorName = "Fredrik",
+                    };
+                });
+            }, 1, 0);
+        }
+    }
+    [Theory, ClassData(typeof(TransmissionsCountTestData))]
+    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
+        FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.FromPartyTransmissionsCount.Should().Be(fromPartyCount);
+                x.FromServiceOwnerTransmissionsCount.Should().Be(fromServiceOwnerCount);
+            });
+
     [Fact]
     public async Task Dialog_Has_Unopened_Content()
     {

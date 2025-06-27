@@ -131,6 +131,16 @@ public class DialogDtoBase
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// The number of transmissions sent by a service owner 
+    /// </summary>
+    public int FromServiceOwnerTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a party representative 
+    /// </summary>
+    public int FromPartyTransmissionCount { get; set; }
+
+    /// <summary>
     /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
     public bool HasUnopenedContent { get; set; }

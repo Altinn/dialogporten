@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.72.0](https://github.com/Altinn/dialogporten/compare/v1.71.0...v1.72.0) (2025-06-30)
+
+
+### Features
+
+* add action to bump FormSaved created timestamp ([#2489](https://github.com/Altinn/dialogporten/issues/2489)) ([2812a3c](https://github.com/Altinn/dialogporten/commit/2812a3c60aeba782cf0b2f6f36641bda53f51c59))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency benchmarkdotnet to 0.15.2 ([#2491](https://github.com/Altinn/dialogporten/issues/2491)) ([f858913](https://github.com/Altinn/dialogporten/commit/f858913a0263cc4e037b499c54fbc8c24f9f4b28))
+* **deps:** update dependency refitter.sourcegenerator to 1.6.0 ([#2492](https://github.com/Altinn/dialogporten/issues/2492)) ([0fae25a](https://github.com/Altinn/dialogporten/commit/0fae25a11c4325a4f30b4c4e2ccf6c5b8590e0d4))
+* **deps:** update docker/setup-buildx-action action to v3.11.1 ([#2502](https://github.com/Altinn/dialogporten/issues/2502)) ([4804820](https://github.com/Altinn/dialogporten/commit/48048203c928e3b3f5b952187e9b84994879f285))
+* **deps:** update hotchocolate monorepo to 15.1.6 ([#2501](https://github.com/Altinn/dialogporten/issues/2501)) ([07d0463](https://github.com/Altinn/dialogporten/commit/07d046385ea003e79b48c4871bdd35fd727d669e))
+
 ## [1.71.0](https://github.com/Altinn/dialogporten/compare/v1.70.0...v1.71.0) (2025-06-26)
 
 

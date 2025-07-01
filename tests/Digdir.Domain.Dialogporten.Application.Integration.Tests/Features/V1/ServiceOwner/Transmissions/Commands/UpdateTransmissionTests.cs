@@ -17,9 +17,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class UpdateTransmissionTests : ApplicationCollectionFixture
 {
-    public UpdateTransmissionTests(DialogApplication application) : base(application)
-    {
-    }
+    public UpdateTransmissionTests(DialogApplication application) : base(application) { }
 
     [Fact]
     public async Task Cannot_Use_Existing_Attachment_Id_In_Update()

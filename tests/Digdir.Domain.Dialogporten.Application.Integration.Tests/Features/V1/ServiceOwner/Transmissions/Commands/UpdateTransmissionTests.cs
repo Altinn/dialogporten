@@ -20,6 +20,22 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
     public UpdateTransmissionTests(DialogApplication application) : base(application) { }
 
     [Fact]
+    public async Task Cannot_Use_Existing_Attachment_Id_In_Update()
+    {
+        var existingAttachmentId = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.AddAttachment(x => x.Id = existingAttachmentId)))
+            .UpdateDialog(x =>
+                x.AddTransmission(x =>
+                    x.AddAttachment(x => x.Id = existingAttachmentId)))
+            .ExecuteAndAssert<DomainError>(error =>
+                error.ShouldHaveErrorWithText(existingAttachmentId.ToString()));
+    }
+
+    [Fact]
     public Task Can_Create_Simple_Transmission_In_Update() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

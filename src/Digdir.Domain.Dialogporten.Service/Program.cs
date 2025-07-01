@@ -59,8 +59,11 @@ static void BuildAndRun(string[] args)
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
-            additionalTracing: x => x.AddAspNetCoreInstrumentationExcludingHealthPaths()
-                .AddSource(DiagnosticHeaders.DefaultListenerName)) // MassTransit ActivitySource
+            additionalTracing: x =>
+            {
+                x.AddAspNetCoreInstrumentationExcludingHealthPaths();
+                x.AddSource(DiagnosticHeaders.DefaultListenerName); // MassTransit ActivitySource
+            })
         .AddAzureAppConfiguration()
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)

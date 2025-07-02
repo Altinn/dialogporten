@@ -26,18 +26,6 @@
         <ProjectReference Include="..\Digdir.Tool.Dialogporten.GenerateFakeData\Digdir.Tool.Dialogporten.GenerateFakeData.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Endpoints\V1\EndUser\Dialogs\Queries\" />
-      <Folder Include="Endpoints\V1\EndUser\EndUserContext\Commands\" />
-      <Folder Include="Endpoints\V1\EndUser\EndUserContext\Queries\" />
-      <Folder Include="Endpoints\V1\EndUser\AccessManagement\Queries\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\Dialogs\Commands\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\Dialogs\Queries\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\EndUserContext\Commands\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\ServiceOwnerContext\Commands\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\ServiceOwnerContext\Queries\" />
-    </ItemGroup>
-
     <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration)=='Release'">
         <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_net90) aspnetcore2openapi /nobuild:true /project:$(MSBuildProjectFullPath) /configuration:$(Configuration) /output:$(TargetDir)/swagger.json"/>
     </Target>

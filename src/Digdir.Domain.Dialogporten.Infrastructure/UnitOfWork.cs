@@ -151,6 +151,12 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
+        catch (ReferenceConstraintException ex)
+        {
+            // what do
+            Console.WriteLine(ex.Message);
+        }
+
 
         // Interceptors can add domain errors, so check again
         return !_domainContext.IsValid

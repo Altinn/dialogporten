@@ -190,7 +190,10 @@ public static class IFlowStepExtensions
     {
         return step.SendCommand(_ =>
         {
-            var query = new SearchDialogQueryEU();
+            var query = new SearchDialogQueryEU
+            {
+                Party = [step.Context.GetParty()]
+            };
             modify(query);
             return query;
         });

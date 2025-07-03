@@ -379,7 +379,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .UpdateDialog(updateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.ContentUpdatedAt.Should().NotBe(x.CreatedAt));
+            {
+                x.ContentUpdatedAt.Should().NotBe(x.CreatedAt);
+                x.ContentUpdatedAt.Should().Be(x.UpdatedAt);
+            });
 
     private sealed class ContentNotUpdatedAtTestData : TheoryData<string, Action<UpdateDialogCommand>>
     {
@@ -407,7 +410,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .UpdateDialog(updateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.ContentUpdatedAt.Should().Be(x.CreatedAt));
+            {
+                x.ContentUpdatedAt.Should().Be(x.CreatedAt);
+                x.ContentUpdatedAt.Should().NotBe(x.UpdatedAt);
+            });
 
     [Fact]
     public async Task Dialog_Opened_Content()

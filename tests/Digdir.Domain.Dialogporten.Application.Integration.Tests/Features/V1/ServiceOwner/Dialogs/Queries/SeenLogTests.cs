@@ -107,8 +107,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
-        Application.ConfigureServices(x =>
-            ChangeUserPid(x, "13213312833"));
+        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
 
         await FlowBuilder.For(Application)
             // Fetch as new EndUser
@@ -161,8 +160,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
-        Application.ConfigureServices(x =>
-            ChangeUserPid(x, "13213312833"));
+        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
 
         await FlowBuilder.For(Application)
             // Fetch as new EndUser
@@ -194,21 +192,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 .SeenSinceLastContentUpdate
                 .AssertSingleActorIdUnHashed());
 
-    private static void ChangeUserPid(IServiceCollection x, string pid)
-    {
-        x.RemoveAll<IUser>();
-
-        var claims = IntegrationTestUser
-            .GetDefaultClaims()
-            .Where(y => y.Type != "pid")
-            .Concat([new Claim("pid", pid)])
-            .ToList();
-
-        var newUser = new IntegrationTestUser(claims, addDefaultClaims: false);
-
-        x.AddSingleton<IUser>(newUser);
-    }
-
     private static void BothSeenLogsContainsOneUnHashedEntry(DialogDtoSO x)
     {
         x.SeenSinceLastContentUpdate.AssertSingleActorIdUnHashed();
@@ -216,7 +199,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     }
 }
 
-public static class SeenLogAssertionExtensions
+internal static class SeenLogAssertionExtensions
 {
     public static void AssertSingleActorIdUnHashed(this List<DialogSeenLogDto> seenLogs) =>
         seenLogs

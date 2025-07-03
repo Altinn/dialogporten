@@ -183,7 +183,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     }
 }
 
-public static class SeenLogExtensions
+public static class SeenLogAssertionExtensions
 {
     public static void AssertSingleActorIdHashed(this List<DialogSeenLogDto> seenLogs) =>
         seenLogs

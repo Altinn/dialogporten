@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddContentUpdatedAtOnDialog : Migration
+    public partial class AddContentUpdatedAtTimestamp : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,7 +23,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 UPDATE "Dialog" d
                 SET "ContentUpdatedAt" = d."UpdatedAt"
                 """);
-
+            
             migrationBuilder.CreateIndex(
                 name: "IX_Dialog_ContentUpdatedAt",
                 table: "Dialog",

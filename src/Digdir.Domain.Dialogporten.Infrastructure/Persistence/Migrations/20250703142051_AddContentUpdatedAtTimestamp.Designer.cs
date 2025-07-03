@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250619104652_AddContentUpdatedAtOnDialog")]
-    partial class AddContentUpdatedAtOnDialog
+    [Migration("20250703142051_AddContentUpdatedAtTimestamp")]
+    partial class AddContentUpdatedAtTimestamp
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -871,6 +871,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<bool>("HasUnopenedContent")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("IdempotentKey")
                         .HasMaxLength(36)
                         .HasColumnType("character varying(36)");
@@ -1047,11 +1050,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            Name = "NotApplicable"
-                        },
-                        new
-                        {
                             Id = 2,
                             Name = "InProgress"
                         },
@@ -1062,11 +1060,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = 4,
-                            Name = "Awaiting"
-                        },
-                        new
-                        {
                             Id = 5,
                             Name = "RequiresAttention"
                         },
@@ -1074,6 +1067,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 6,
                             Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "NotApplicable"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Awaiting"
                         });
                 });
 

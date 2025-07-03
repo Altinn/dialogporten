@@ -26,6 +26,7 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x => x.Dto.Party = Party)
             .SearchEndUserDialogs(x =>
             {
+                x.Party = [Party];
                 x.ContentUpdatedBefore = contentUpdatedAt;
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
@@ -47,6 +48,7 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
             .AssertResult<DialogDto>(x => contentUpdatedAt = x.ContentUpdatedAt)
             .SearchEndUserDialogs(x =>
             {
+                x.Party = [Party];
                 x.ContentUpdatedAfter = contentUpdatedAt;
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>

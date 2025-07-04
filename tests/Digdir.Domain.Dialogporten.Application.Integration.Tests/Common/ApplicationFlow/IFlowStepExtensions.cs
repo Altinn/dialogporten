@@ -286,7 +286,7 @@ public static class IFlowStepExtensions
         step.Select(result =>
         {
             result.Index.Should().Be(0);
-            var typedResult = result.Value.Should().BeOfType<object>().Subject;
+            var typedResult = result.Value;
             typedResult.Should().NotBeNull();
             return typedResult;
         });

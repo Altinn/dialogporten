@@ -30,9 +30,7 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
                 x.ContentUpdatedBefore = contentUpdatedAt;
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
-            {
-                x.Items.Should().HaveCount(1);
-            });
+                x.Items.Should().HaveCount(1));
     }
 
     [Fact]
@@ -52,8 +50,6 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
                 x.ContentUpdatedAfter = contentUpdatedAt;
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
-            {
-                x.Items.Should().HaveCount(1);
-            });
+                x.Items.Should().HaveCount(1));
     }
 }

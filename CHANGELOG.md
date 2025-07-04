@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.72.1](https://github.com/Altinn/dialogporten/compare/v1.72.0...v1.72.1) (2025-07-04)
+
+
+### Bug Fixes
+
+* **graphql:** Add missing mapping for hasUnopenedContent on search results ([#2517](https://github.com/Altinn/dialogporten/issues/2517)) ([e4ab490](https://github.com/Altinn/dialogporten/commit/e4ab490aacedf49cb3f6adc98d49d991c36f943a))
+
 ## [1.72.0](https://github.com/Altinn/dialogporten/compare/v1.71.0...v1.72.0) (2025-07-04)
 
 

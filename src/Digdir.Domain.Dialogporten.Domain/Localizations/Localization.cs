@@ -1,5 +1,4 @@
-﻿using Digdir.Library.Entity.Abstractions;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Digdir.Domain.Dialogporten.Domain.Localizations;
 

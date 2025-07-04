@@ -60,7 +60,7 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
     public Task Cannot_Update_Correspondence_Activities_Without_Required_Scope() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 x.Dto.Activities.Add(new()
                 {
@@ -88,7 +88,7 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
                 x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
             })
             .CreateSimpleDialog()
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 x.Dto.Activities.Add(new()
                 {

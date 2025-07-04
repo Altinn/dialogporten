@@ -10,7 +10,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -296,7 +295,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<DialogDto>();
 
         // Assert
-        updatedDialog!.Attachments
+        updatedDialog.Attachments
             .Should()
             .ContainSingle(x => x.Id == userDefinedAttachmentId);
     }
@@ -322,7 +321,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<DialogDto>();
 
         // Assert
-        updatedDialog!.ApiActions
+        updatedDialog.ApiActions
             .Should()
             .ContainSingle(x => x.Id == userDefinedApiActionId);
     }

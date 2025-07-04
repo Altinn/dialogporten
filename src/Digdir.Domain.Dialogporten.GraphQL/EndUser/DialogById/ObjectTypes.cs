@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
-using SystemLabel = Digdir.Domain.Dialogporten.GraphQL.EndUser.Common.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 

@@ -173,7 +173,7 @@ public enum AggregateNodeState
 /// </summary>
 public abstract class AggregateNodeProperty
 {
-    private static readonly Type _openGenericAggregateNodePropertyType = typeof(AggregateNodeProperty<>);
+    private static readonly Type OpenGenericAggregateNodePropertyType = typeof(AggregateNodeProperty<>);
 
     /// <summary>
     /// Gets the name of the name of the property that has been modified.
@@ -210,7 +210,7 @@ public abstract class AggregateNodeProperty
         object? currentValue)
     {
         var nodeArguments = new[] { propertyName, originalValue, currentValue };
-        var genericType = _openGenericAggregateNodePropertyType.MakeGenericType(propertyType);
+        var genericType = OpenGenericAggregateNodePropertyType.MakeGenericType(propertyType);
         var property = (AggregateNodeProperty)Activator.CreateInstance(genericType,
             BindingFlags.NonPublic | BindingFlags.Instance, null, nodeArguments, null)!;
         return property;

@@ -54,6 +54,7 @@ public sealed class Dialog
     public DateTimeOffset? ExpiresAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset ContentUpdatedAt { get; set; }
 
     public string? DialogToken { get; set; }
 
@@ -69,6 +70,7 @@ public sealed class Dialog
     public List<ApiAction> ApiActions { get; set; } = [];
     public List<Activity> Activities { get; set; } = [];
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
+    public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
     public List<Transmission> Transmissions { get; set; } = [];
     public EndUserContext EndUserContext { get; set; } = null!;
 }

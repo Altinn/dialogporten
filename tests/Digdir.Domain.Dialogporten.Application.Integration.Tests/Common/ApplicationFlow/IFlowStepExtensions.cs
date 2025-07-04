@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
@@ -10,6 +11,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
+using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
 using GetDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
 using SearchDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
@@ -101,10 +103,12 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step,
+    public static IFlowExecutor<UpdateDialogResult> AssertSuccessAndUpdateDialog(this IFlowStep<IOneOf> step,
+        Action<UpdateDialogCommand> modify) => step.AssertSuccess().UpdateDialog(modify);
+
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep step,
         Action<UpdateDialogCommand> modify) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.DialogId))
+        step.SendCommand(x => CreateGetServiceOwnerDialogQuery(x.GetDialogId()))
             .AssertResult<DialogDtoSO>()
             .SendCommand((x, ctx) =>
             {
@@ -144,6 +148,10 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
+
+    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<UpdateDialogResult> step) =>
+        step.AssertResult<UpdateDialogSuccess>()
             .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
@@ -229,6 +237,15 @@ public static class IFlowStepExtensions
             var typedResult = result.Value.Should().BeOfType<T>().Subject;
             typedResult.Should().NotBeNull();
             assert?.Invoke(typedResult);
+            return typedResult;
+        });
+
+    public static IFlowStep AssertSuccess(this IFlowStep<IOneOf> step) =>
+        step.Select(result =>
+        {
+            result.Index.Should().Be(0);
+            var typedResult = result.Value;
+            typedResult.Should().NotBeNull();
             return typedResult;
         });
 

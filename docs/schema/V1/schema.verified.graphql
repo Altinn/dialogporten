@@ -148,6 +148,7 @@ type Dialog {
   expiresAt: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
+  contentUpdatedAt: DateTime!
   dialogToken: String
   status: DialogStatus!
   hasUnopenedContent: Boolean!
@@ -159,6 +160,7 @@ type Dialog {
   apiActions: [ApiAction!]!
   activities: [Activity!]!
   seenSinceLastUpdate: [SeenLog!]!
+  seenSinceLastContentUpdate: [SeenLog!]!
   transmissions: [Transmission!]!
   endUserContext: EndUserContext!
 }
@@ -250,6 +252,7 @@ type SearchDialog {
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!
+  seenSinceLastContentUpdate: [SeenLog!]!
   endUserContext: EndUserContext!
 }
 
@@ -270,6 +273,7 @@ type SearchDialogSortType {
   createdAt: OrderDirection
   updatedAt: OrderDirection
   dueAt: OrderDirection
+  contentUpdatedAt: OrderDirection
 }
 
 type SearchDialogValidationError implements SearchDialogError {
@@ -381,6 +385,7 @@ input SearchDialogSortTypeInput {
   createdAt: OrderDirection
   updatedAt: OrderDirection
   dueAt: OrderDirection
+  contentUpdatedAt: OrderDirection
 }
 
 input SetSystemLabelInput {

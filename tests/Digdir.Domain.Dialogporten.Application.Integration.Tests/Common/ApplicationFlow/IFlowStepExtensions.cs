@@ -103,10 +103,20 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step,
+    public static IFlowExecutor<UpdateDialogResult> AssertSuccessAndUpdateDialog(this IFlowStep<IOneOf> step,
         Action<UpdateDialogCommand> modify) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.DialogId))
+        step.AssertSuccess()
+            .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.GetDialogId()))
+            .AssertResult<DialogDtoSO>()
+            .SendCommand((x, ctx) =>
+            {
+                var command = CreateUpdateDialogCommand(x, ctx);
+                modify(command);
+                return command;
+            });
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep step,
+        Action<UpdateDialogCommand> modify) =>
+        step.SendCommand(x => CreateGetServiceOwnerDialogQuery(x.GetDialogId()))
             .AssertResult<DialogDtoSO>()
             .SendCommand((x, ctx) =>
             {
@@ -115,27 +125,39 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
-        Action<UpdateDialogCommand> modify) => step
-        .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
-        .AssertResult<DialogDtoSO>()
-        .SendCommand((x, ctx) =>
-        {
-            var command = CreateUpdateDialogCommand(x, ctx);
-            modify(command);
-            return command;
-        });
+    // public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step,
+    //     Action<UpdateDialogCommand> modify) =>
+    //     step.AssertResult<CreateDialogSuccess>()
+    //         .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.DialogId))
+    //         .AssertResult<DialogDtoSO>()
+    //         .SendCommand((x, ctx) =>
+    //         {
+    //             var command = CreateUpdateDialogCommand(x, ctx);
+    //             modify(command);
+    //             return command;
+    //         });
 
-    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoEU> step,
-        Action<UpdateDialogCommand> modify) => step
-            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
-            .AssertResult<DialogDtoSO>()
-            .SendCommand((x, ctx) =>
-            {
-                var command = CreateUpdateDialogCommand(x, ctx);
-                modify(command);
-                return command;
-            });
+    // public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
+    //     Action<UpdateDialogCommand> modify) => step
+    //     .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
+    //     .AssertResult<DialogDtoSO>()
+    //     .SendCommand((x, ctx) =>
+    //     {
+    //         var command = CreateUpdateDialogCommand(x, ctx);
+    //         modify(command);
+    //         return command;
+    //     });
+
+    // public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoEU> step,
+    //     Action<UpdateDialogCommand> modify) => step
+    //         .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
+    //         .AssertResult<DialogDtoSO>()
+    //         .SendCommand((x, ctx) =>
+    //         {
+    //             var command = CreateUpdateDialogCommand(x, ctx);
+    //             modify(command);
+    //             return command;
+    //         });
 
     public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(this IFlowStep<CreateDialogResult> step,
         Action<UpdateDialogServiceOwnerContextCommand> modify) =>
@@ -257,6 +279,15 @@ public static class IFlowStepExtensions
             var typedResult = result.Value.Should().BeOfType<T>().Subject;
             typedResult.Should().NotBeNull();
             assert?.Invoke(typedResult);
+            return typedResult;
+        });
+
+    public static IFlowStep AssertSuccess(this IFlowStep<IOneOf> step) =>
+        step.Select(result =>
+        {
+            result.Index.Should().Be(0);
+            var typedResult = result.Value;
+            typedResult.Should().NotBeNull();
             return typedResult;
         });
 

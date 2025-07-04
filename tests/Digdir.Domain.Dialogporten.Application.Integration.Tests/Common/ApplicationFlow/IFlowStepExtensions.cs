@@ -166,12 +166,15 @@ public static class IFlowStepExtensions
     }
 
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
-        Action<SearchDialogQueryEU> modify)
+        Action<SearchDialogQueryEU> modify) => step.SearchEndUserDialogs((query, _) => modify(query));
+
+    public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
+        Action<SearchDialogQueryEU, FlowContext> modify)
     {
         return step.SendCommand(_ =>
         {
             var query = new SearchDialogQueryEU();
-            modify(query);
+            modify(query, step.Context);
             return query;
         });
     }

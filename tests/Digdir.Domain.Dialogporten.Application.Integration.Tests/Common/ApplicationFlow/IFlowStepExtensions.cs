@@ -104,16 +104,7 @@ public static class IFlowStepExtensions
             });
 
     public static IFlowExecutor<UpdateDialogResult> AssertSuccessAndUpdateDialog(this IFlowStep<IOneOf> step,
-        Action<UpdateDialogCommand> modify) =>
-        step.AssertSuccess()
-            .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.GetDialogId()))
-            .AssertResult<DialogDtoSO>()
-            .SendCommand((x, ctx) =>
-            {
-                var command = CreateUpdateDialogCommand(x, ctx);
-                modify(command);
-                return command;
-            });
+        Action<UpdateDialogCommand> modify) => step.AssertSuccess().UpdateDialog(modify);
 
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep step,
         Action<UpdateDialogCommand> modify) =>

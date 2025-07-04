@@ -13,32 +13,34 @@ public class AltinnAuthorizationClientTests
         // Arrange
         var input = new AuthorizedPartiesResult
         {
-            AuthorizedParties = new List<AuthorizedParty>
-            {
+            AuthorizedParties =
+            [
                 new()
                 {
                     Party = "parent",
-                    AuthorizedRoles = new List<string> { "role1" },
-                    SubParties = new List<AuthorizedParty>
-                    {
+                    AuthorizedRoles = ["role1"],
+                    SubParties =
+                    [
                         new()
                         {
                             Party = "child1",
-                            AuthorizedRoles = new List<string> { "role2" }
+                            AuthorizedRoles = ["role2"]
                         },
+
                         new()
                         {
                             Party = "child2",
-                            AuthorizedRoles = new List<string>()
+                            AuthorizedRoles = []
                         }
-                    }
+                    ]
                 },
+
                 new()
                 {
                     Party = "independent",
-                    AuthorizedRoles = new List<string>()
+                    AuthorizedRoles = []
                 }
-            }
+            ]
         };
 
         // Act

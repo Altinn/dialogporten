@@ -114,6 +114,7 @@ public static class IFlowStepExtensions
                 modify(command);
                 return command;
             });
+
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep step,
         Action<UpdateDialogCommand> modify) =>
         step.SendCommand(x => CreateGetServiceOwnerDialogQuery(x.GetDialogId()))
@@ -124,40 +125,6 @@ public static class IFlowStepExtensions
                 modify(command);
                 return command;
             });
-
-    // public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step,
-    //     Action<UpdateDialogCommand> modify) =>
-    //     step.AssertResult<CreateDialogSuccess>()
-    //         .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.DialogId))
-    //         .AssertResult<DialogDtoSO>()
-    //         .SendCommand((x, ctx) =>
-    //         {
-    //             var command = CreateUpdateDialogCommand(x, ctx);
-    //             modify(command);
-    //             return command;
-    //         });
-
-    // public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
-    //     Action<UpdateDialogCommand> modify) => step
-    //     .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
-    //     .AssertResult<DialogDtoSO>()
-    //     .SendCommand((x, ctx) =>
-    //     {
-    //         var command = CreateUpdateDialogCommand(x, ctx);
-    //         modify(command);
-    //         return command;
-    //     });
-
-    // public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoEU> step,
-    //     Action<UpdateDialogCommand> modify) => step
-    //         .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
-    //         .AssertResult<DialogDtoSO>()
-    //         .SendCommand((x, ctx) =>
-    //         {
-    //             var command = CreateUpdateDialogCommand(x, ctx);
-    //             modify(command);
-    //             return command;
-    //         });
 
     public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(this IFlowStep<CreateDialogResult> step,
         Action<UpdateDialogServiceOwnerContextCommand> modify) =>

@@ -13,32 +13,34 @@ public class AltinnAuthorizationClientTests
         // Arrange
         var input = new AuthorizedPartiesResult
         {
-            AuthorizedParties = new List<AuthorizedParty>
-            {
+            AuthorizedParties =
+            [
                 new()
                 {
                     Party = "parent",
-                    AuthorizedRoles = new List<string> { "role1" },
-                    SubParties = new List<AuthorizedParty>
-                    {
+                    AuthorizedRoles = ["role1"],
+                    SubParties =
+                    [
                         new()
                         {
                             Party = "child1",
-                            AuthorizedRoles = new List<string> { "role2" }
+                            AuthorizedRoles = ["role2"]
                         },
+
                         new()
                         {
                             Party = "child2",
-                            AuthorizedRoles = new List<string>()
+                            AuthorizedRoles = []
                         }
-                    }
+                    ]
                 },
+
                 new()
                 {
                     Party = "independent",
-                    AuthorizedRoles = new List<string>()
+                    AuthorizedRoles = []
                 }
-            }
+            ]
         };
 
         // Act
@@ -49,7 +51,7 @@ public class AltinnAuthorizationClientTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(4, result!.AuthorizedParties.Count);
+        Assert.Equal(4, result.AuthorizedParties.Count);
 
         var parent = result.AuthorizedParties[0];
         Assert.Equal("parent", parent.Party);

@@ -289,8 +289,33 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
-        dialog.FromPartyTransmissionsCount += newDialogTransmissions.Count(x => x.TypeId is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
-        dialog.FromServiceOwnerTransmissionsCount += newDialogTransmissions.Count(x => x.TypeId is not (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
+        dialog.FromPartyTransmissionsCount += newDialogTransmissions
+            .Count(x => x.TypeId
+                is DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction);
+
+        dialog.FromServiceOwnerTransmissionsCount += newDialogTransmissions
+            .Count(x => x.TypeId is not
+                (DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction));
+
+        var newAttachmentIds = newDialogTransmissions
+            .SelectMany(x => x.Attachments)
+            .Select(x => x.Id)
+            .ToList();
+
+        var existingAttachmentIds = _db.DialogTransmissions
+            .Local
+            .SelectMany(x => x.Attachments)
+            .Select(x => x.Id)
+            .Intersect(newAttachmentIds)
+            .ToArray();
+
+        if (existingAttachmentIds.Length != 0)
+        {
+            _domainContext.AddError(DomainFailure.EntityExists<DialogAttachment>(existingAttachmentIds));
+            return;
+        }
 
         dialog.Transmissions.AddRange(newDialogTransmissions);
         // Tell ef explicitly to add transmissions as new to the database.

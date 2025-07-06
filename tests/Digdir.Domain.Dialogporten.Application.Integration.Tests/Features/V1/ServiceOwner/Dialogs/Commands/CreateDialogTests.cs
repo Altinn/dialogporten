@@ -18,7 +18,6 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit.Abstractions;
-using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
@@ -374,6 +373,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             }, 1, 0);
         }
     }
+
     [Theory, ClassData(typeof(TransmissionsCountTestData))]
     public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
         FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
@@ -385,10 +385,22 @@ public class CreateDialogTests : ApplicationCollectionFixture
             });
 
     [Fact]
+    public Task Creating_Dialog_Should_Set_ContentUpdatedAt() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ContentUpdatedAt
+                    .Should()
+                    .Be(x.CreatedAt));
+
+    [Fact]
     public async Task Dialog_Has_Unopened_Content()
     {
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.AddTransmission(x => x.Type = DialogTransmissionType.Values.Information))
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.Type = DialogTransmissionType.Values.Information))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {

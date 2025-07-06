@@ -10,6 +10,7 @@ using Digdir.Library.Utils.AspNet;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenTelemetry.Metrics;
+using MassTransit.Logging;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -58,7 +59,11 @@ static void BuildAndRun(string[] args)
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
-            additionalTracing: x => x.AddAspNetCoreInstrumentationExcludingHealthPaths())
+            additionalTracing: x =>
+            {
+                x.AddAspNetCoreInstrumentationExcludingHealthPaths();
+                x.AddSource(DiagnosticHeaders.DefaultListenerName); // MassTransit ActivitySource
+            })
         .AddAzureAppConfiguration()
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)

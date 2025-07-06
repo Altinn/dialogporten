@@ -55,9 +55,9 @@ public class AuthorizationHelperTests
                 new List<string>(),
                 new Dictionary<string, List<string>>
                 {
-                    ["party1"] = new() { "resource1", "resource2", "resource3", "resource4" },
-                    ["party2"] = new() { "resource2", "resource3", "resource4" },
-                    ["party3"] = new() { "resource5" }
+                    ["party1"] = ["resource1", "resource2", "resource3", "resource4"],
+                    ["party2"] = ["resource2", "resource3", "resource4"],
+                    ["party3"] = ["resource5"]
                 }
             },
 
@@ -68,8 +68,8 @@ public class AuthorizationHelperTests
                 new List<string>(),
                 new Dictionary<string, List<string>>
                 {
-                    ["party1"] = new() { "resource1", "resource2", "resource3", "resource4" },
-                    ["party2"] = new() { "resource2", "resource3", "resource4" }
+                    ["party1"] = ["resource1", "resource2", "resource3", "resource4"],
+                    ["party2"] = ["resource2", "resource3", "resource4"]
                 }
             },
 
@@ -80,9 +80,9 @@ public class AuthorizationHelperTests
                 new List<string> { "resource1", "resource2", "resource5" },
                 new Dictionary<string, List<string>>
                 {
-                    ["party1"] = new() { "resource1", "resource2" },
-                    ["party2"] = new() { "resource2" },
-                    ["party3"] = new() { "resource5" }
+                    ["party1"] = ["resource1", "resource2"],
+                    ["party2"] = ["resource2"],
+                    ["party3"] = ["resource5"]
                 }
             },
 
@@ -93,7 +93,7 @@ public class AuthorizationHelperTests
                 new List<string> { "resource4" },
                 new Dictionary<string, List<string>>
                 {
-                    ["party2"] = new() { "resource4" }
+                    ["party2"] = ["resource4"]
                 }
             }
         };
@@ -116,24 +116,26 @@ public class AuthorizationHelperTests
     {
         return new AuthorizedPartiesResult
         {
-            AuthorizedParties = new List<AuthorizedParty>
-            {
+            AuthorizedParties =
+            [
                 new()
                 {
                     Party = "party1",
-                    AuthorizedRoles = new List<string> { "role1", "role2" }
+                    AuthorizedRoles = ["role1", "role2"]
                 },
+
                 new()
                 {
                     Party = "party2",
-                    AuthorizedRoles = new List<string> { "role2" }
+                    AuthorizedRoles = ["role2"]
                 },
+
                 new()
                 {
                     Party = "party3",
-                    AuthorizedRoles = new List<string> { "role3" }
+                    AuthorizedRoles = ["role3"]
                 }
-            }
+            ]
         };
     }
 }

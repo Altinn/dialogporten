@@ -20,10 +20,26 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
     public UpdateTransmissionTests(DialogApplication application) : base(application) { }
 
     [Fact]
+    public async Task Cannot_Use_Existing_Attachment_Id_In_Update()
+    {
+        var existingAttachmentId = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.AddAttachment(x => x.Id = existingAttachmentId)))
+            .AssertSuccessAndUpdateDialog(x =>
+                x.AddTransmission(x =>
+                    x.AddAttachment(x => x.Id = existingAttachmentId)))
+            .ExecuteAndAssert<DomainError>(error =>
+                error.ShouldHaveErrorWithText(existingAttachmentId.ToString()));
+    }
+
+    [Fact]
     public Task Can_Create_Simple_Transmission_In_Update() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 var transmission = UpdateDialogDialogTransmissionDto();
                 x.Dto.Transmissions.Add(transmission);
@@ -36,7 +52,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
     public Task Can_Update_Related_Transmission_With_Null_Id() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 var transmission = UpdateDialogDialogTransmissionDto();
                 var relatedTransmission = UpdateDialogDialogTransmissionDto();
@@ -54,7 +70,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
     public Task Can_Add_Transmission_Without_Summary_On_Update() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
                 x.AddTransmission(x =>
                     x.Content!.Summary = null))
             .GetServiceOwnerDialog()
@@ -74,7 +90,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
                 transmission.Id = existingTransmissionId;
                 x.Dto.Transmissions.Add(transmission);
             })
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 var transmission = UpdateDialogDialogTransmissionDto();
                 transmission.Id = existingTransmissionId;
@@ -88,7 +104,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
     public Task Cannot_Add_Transmissions_Without_Content_In_IsApiOnlyFalse_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
                 newTransmission.Content = null!;
@@ -101,7 +117,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
     public Task Can_Add_Transmissions_Without_Content_In_IsApiOnlyFTrue_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
                 newTransmission.Content = null!;
@@ -119,7 +135,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
     public Task Should_Validate_Supplied_Transmission_Content_If_IsApiOnlyTrue_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
                 newTransmission.Content!.Title = null!;

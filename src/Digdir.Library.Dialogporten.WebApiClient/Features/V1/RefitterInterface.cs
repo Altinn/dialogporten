@@ -83,6 +83,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset? UpdatedBefore { get; set; }
 
         /// <summary>
+        /// Only return dialogs with content updated after this date
+        /// </summary>
+        [Query] 
+        public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
+
+        /// <summary>
+        /// Only return dialogs with content updated before this date
+        /// </summary>
+        [Query] 
+        public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
+
+        /// <summary>
         /// Only return dialogs with due date after this date
         /// </summary>
         [Query] 
@@ -1744,6 +1756,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset UpdatedAt { get; set; }
 
         /// <summary>
+        /// The date and time when the dialog content was last updated.
+        /// </summary>
+
+        [JsonPropertyName("contentUpdatedAt")]
+        public System.DateTimeOffset ContentUpdatedAt { get; set; }
+
+        /// <summary>
         /// The due date for the dialog. This is the last date when the dialog is expected to be completed.
         /// </summary>
 
@@ -1824,6 +1843,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastUpdate { get; set; }
+
+        /// <summary>
+        /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+        /// </summary>
+
+        [JsonPropertyName("seenSinceLastContentUpdate")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
@@ -2493,6 +2519,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset UpdatedAt { get; set; }
 
         /// <summary>
+        /// The date and time when the dialog content was last updated.
+        /// </summary>
+
+        [JsonPropertyName("contentUpdatedAt")]
+        public System.DateTimeOffset ContentUpdatedAt { get; set; }
+
+        /// <summary>
         /// The aggregated status of the dialog.
         /// </summary>
 
@@ -2594,6 +2627,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastUpdate { get; set; }
+
+        /// <summary>
+        /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+        /// </summary>
+
+        [JsonPropertyName("seenSinceLastContentUpdate")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.

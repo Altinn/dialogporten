@@ -102,10 +102,12 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step,
+    public static IFlowExecutor<UpdateDialogResult> AssertSuccessAndUpdateDialog(this IFlowStep<IOneOf> step,
+        Action<UpdateDialogCommand> modify) => step.AssertSuccess().UpdateDialog(modify);
+
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep step,
         Action<UpdateDialogCommand> modify) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.DialogId))
+        step.SendCommand(x => CreateGetServiceOwnerDialogQuery(x.GetDialogId()))
             .AssertResult<DialogDtoSO>()
             .SendCommand((x, ctx) =>
             {
@@ -165,6 +167,10 @@ public static class IFlowStepExtensions
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 
+    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<UpdateDialogResult> step) =>
+        step.AssertResult<UpdateDialogSuccess>()
+            .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
+
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
         Action<SearchDialogQuerySO> modify)
     {
@@ -177,12 +183,15 @@ public static class IFlowStepExtensions
     }
 
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
-        Action<SearchDialogQueryEU> modify)
+        Action<SearchDialogQueryEU> modify) => step.SearchEndUserDialogs((query, _) => modify(query));
+
+    public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
+        Action<SearchDialogQueryEU, FlowContext> modify)
     {
         return step.SendCommand(_ =>
         {
             var query = new SearchDialogQueryEU();
-            modify(query);
+            modify(query, step.Context);
             return query;
         });
     }
@@ -248,6 +257,15 @@ public static class IFlowStepExtensions
             var typedResult = result.Value.Should().BeOfType<T>().Subject;
             typedResult.Should().NotBeNull();
             assert?.Invoke(typedResult);
+            return typedResult;
+        });
+
+    public static IFlowStep AssertSuccess(this IFlowStep<IOneOf> step) =>
+        step.Select(result =>
+        {
+            result.Index.Should().Be(0);
+            var typedResult = result.Value;
+            typedResult.Should().NotBeNull();
             return typedResult;
         });
 

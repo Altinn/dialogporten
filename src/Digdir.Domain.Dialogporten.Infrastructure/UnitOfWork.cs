@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Digdir.Domain.Dialogporten.Application.Common;
+﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -150,6 +149,13 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
              ex.InnerException.Data["TableName"] is string tableName)
         {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
+        }
+        catch (ReferenceConstraintException)
+        {
+            // A request triggers loading of exising data, but before it's saved,
+            // another request removes it — causing the save attempt to fail.
+            // On a retry, the client will get a "proper" error message
+            return new ConcurrencyError();
         }
 
         // Interceptors can add domain errors, so check again

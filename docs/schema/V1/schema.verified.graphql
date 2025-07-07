@@ -245,6 +245,7 @@ type SearchDialog {
   extendedStatus: String
   createdAt: DateTime!
   updatedAt: DateTime!
+  contentUpdatedAt: DateTime!
   dueAt: DateTime
   status: DialogStatus!
   hasUnopenedContent: Boolean!

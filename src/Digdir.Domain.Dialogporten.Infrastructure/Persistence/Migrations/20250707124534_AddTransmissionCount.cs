@@ -5,9 +5,9 @@
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTransmissionsCount : Migration
+    public partial class AddTransmissionCount : Migration
     {
-
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
@@ -23,6 +23,21 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 type: "integer",
                 nullable: false,
                 defaultValue: 0);
+
+            migrationBuilder.Sql(@"
+    UPDATE ""Dialog"" d
+    SET 
+        ""FromPartyTransmissionsCount"" = (
+            SELECT COUNT(1) FROM ""DialogTransmission"" t
+            WHERE t.""DialogId"" = d.""Id""
+              AND t.""TypeId"" IN (7, 8) 
+        ),
+        ""FromServiceOwnerTransmissionsCount"" = (
+            SELECT COUNT(1) FROM ""DialogTransmission"" t
+            WHERE t.""DialogId"" = d.""Id""
+              AND t.""TypeId"" NOT IN (7, 8)
+        )
+");
         }
 
         /// <inheritdoc />

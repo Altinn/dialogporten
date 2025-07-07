@@ -254,6 +254,10 @@ type SearchDialog {
   hasUnopenedContent: Boolean!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
+  "The number of transmissions sent by the service owner"
+  fromServiceOwnerTransmissionsCount: Int!
+  "The number of transmissions sent by a party representative"
+  fromPartyTransmissionsCount: Int!
   latestActivity: Activity
   content: SearchContent!
   seenSinceLastUpdate: [SeenLog!]!

@@ -245,8 +245,10 @@ type SearchDialog {
   precedingProcess: String
   guiAttachmentCount: Int
   extendedStatus: String
+  externalReference: String
   createdAt: DateTime!
   updatedAt: DateTime!
+  contentUpdatedAt: DateTime!
   dueAt: DateTime
   status: DialogStatus!
   hasUnopenedContent: Boolean!

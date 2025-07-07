@@ -63,6 +63,7 @@ public sealed class SearchDialog
     public string? PrecedingProcess { get; set; }
     public int? GuiAttachmentCount { get; set; }
     public string? ExtendedStatus { get; set; }
+    public string? ExternalReference { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset ContentUpdatedAt { get; set; }

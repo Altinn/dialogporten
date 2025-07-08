@@ -127,6 +127,16 @@ public class DialogDtoBase
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// The number of transmissions sent by the service owner 
+    /// </summary>
+    public int FromServiceOwnerTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a party representative 
+    /// </summary>
+    public int FromPartyTransmissionsCount { get; set; }
+
+    /// <summary>
     /// The latest entry in the dialog's activity log.
     /// </summary>
     public DialogActivityDto? LatestActivity { get; set; }

@@ -163,6 +163,16 @@ public sealed class DialogDto
     public ContentDto? Content { get; set; }
 
     /// <summary>
+    /// The number of transmissions sent by the service owner
+    /// </summary>
+    public int FromServiceOwnerTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a party representative
+    /// </summary>
+    public int FromPartyTransmissionsCount { get; set; }
+
+    /// <summary>
     /// The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
     /// </summary>
     public List<SearchTagDto>? SearchTags { get; set; }

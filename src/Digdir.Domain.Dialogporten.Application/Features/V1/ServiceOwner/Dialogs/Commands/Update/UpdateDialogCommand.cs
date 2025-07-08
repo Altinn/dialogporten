@@ -289,6 +289,16 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
+        dialog.FromPartyTransmissionsCount += (short)newDialogTransmissions
+            .Count(x => x.TypeId
+                is DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction);
+
+        dialog.FromServiceOwnerTransmissionsCount += (short)newDialogTransmissions
+            .Count(x => x.TypeId is not
+                (DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction));
+
         var newAttachmentIds = newDialogTransmissions
             .SelectMany(x => x.Attachments)
             .Select(x => x.Id)

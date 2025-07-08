@@ -20,6 +20,10 @@ internal sealed class MappingProfile : Profile
         CreateMap<DialogEntity, DialogDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
             .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.EndUserContext.SystemLabelId))
+            .ForMember(dest => dest.FromPartyTransmissionsCount, opt => opt
+                .MapFrom(src => (int)src.FromPartyTransmissionsCount))
+            .ForMember(dest => dest.FromServiceOwnerTransmissionsCount, opt => opt
+                .MapFrom(src => (int)src.FromServiceOwnerTransmissionsCount))
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.Ignore());
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()

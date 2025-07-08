@@ -1,8 +1,10 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using FluentAssertions;
@@ -63,7 +65,11 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
                 .AddTransmission(x => x.Type = DialogTransmissionType.Values.Alert)
-                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Submission))
+                .AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Submission;
+                    x.WithPartyRepresentativeActor();
+                }))
             .SearchEndUserDialogs((x, ctx) => x.Party = [ctx.GetParty()])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
             {

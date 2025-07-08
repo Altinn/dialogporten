@@ -76,7 +76,10 @@ public static class DialogGenerator
         .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.CreatedAt, f => f.Date.Past())
         .RuleFor(o => o.Type, f => f.PickRandom<DialogTransmissionType.Values>())
-        .RuleFor(o => o.Sender, _ => new ActorDto { ActorType = ActorType.Values.ServiceOwner })
+        .RuleFor(o => o.Sender, (_, o) =>
+            o.Type is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction
+                ? new ActorDto { ActorType = ActorType.Values.PartyRepresentative, ActorName = "Test Name" }
+                : new ActorDto { ActorType = ActorType.Values.ServiceOwner })
         .RuleFor(o => o.Content, _ => GenerateFakeTransmissionContent());
 
     private static readonly Faker<CreateDialogDto> CreateDialogFaker = new Faker<CreateDialogDto>()

@@ -457,7 +457,11 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.FromPartyTransmissionsCount.Should().Be(0);
             })
             .UpdateDialog(x => x
-                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Correction))
+                .AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Correction;
+                    x.WithPartyRepresentativeActor();
+                }))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {

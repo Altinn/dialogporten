@@ -1,6 +1,4 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -25,7 +23,6 @@ using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.Service
 using GuiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.GuiActionDto;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
-using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionContentDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -459,28 +456,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.FromServiceOwnerTransmissionsCount.Should().Be(0);
                 x.FromPartyTransmissionsCount.Should().Be(0);
             })
-            .UpdateDialog(x =>
-                x.Dto.Transmissions.Add(new TransmissionDto
-                {
-                    Content = new TransmissionContentDto
-                    {
-                        Title = new ContentValueDto
-                        {
-                            Value = [new LocalizationDto
-                                {
-                                    Value = "Hei",
-                                    LanguageCode = "nb"
-                                }
-                            ]
-                        },
-                    },
-                    Type = DialogTransmissionType.Values.Correction,
-                    Sender = new ActorDto
-                    {
-                        ActorType = ActorType.Values.PartyRepresentative,
-                        ActorName = "Fredrik"
-                    },
-                })).GetServiceOwnerDialog()
+            .UpdateDialog(x => x
+                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Correction))
+            .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.FromServiceOwnerTransmissionsCount.Should().Be(0);
@@ -499,27 +477,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.FromServiceOwnerTransmissionsCount.Should().Be(0);
                 x.FromPartyTransmissionsCount.Should().Be(0);
             })
-            .UpdateDialog(x =>
-                x.Dto.Transmissions.Add(new TransmissionDto
-                {
-                    Content = new TransmissionContentDto
-                    {
-                        Title = new ContentValueDto
-                        {
-                            Value = [new LocalizationDto
-                                {
-                                    Value = "Hei",
-                                    LanguageCode = "nb"
-                                }
-                            ]
-                        },
-                    },
-                    Type = DialogTransmissionType.Values.Information,
-                    Sender = new ActorDto
-                    {
-                        ActorType = ActorType.Values.ServiceOwner,
-                    },
-                })).GetServiceOwnerDialog()
+            .UpdateDialog(x => x
+                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Information))
+            .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.FromServiceOwnerTransmissionsCount.Should().Be(1);

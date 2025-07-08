@@ -319,30 +319,18 @@ public class CreateDialogTests : ApplicationCollectionFixture
                     x.AddTransmission(x =>
                     {
                         x.Type = DialogTransmissionType.Values.Submission;
-                        x.Sender = new ActorDto
-                        {
-                            ActorType = ActorType.Values.PartyRepresentative,
-                            ActorName = "Fredrik",
-                        };
-
+                        x.WithPartyRepresentativeActor();
                     });
+
                     x.AddTransmission(x =>
                     {
                         x.Type = DialogTransmissionType.Values.Correction;
-                        x.Sender = new ActorDto
-                        {
-                            ActorType = ActorType.Values.PartyRepresentative,
-                            ActorName = "Fredrik",
-                        };
-
+                        x.WithPartyRepresentativeActor();
                     });
                     x.AddTransmission(x =>
                     {
                         x.Type = DialogTransmissionType.Values.Alert;
-                        x.Sender = new ActorDto
-                        {
-                            ActorType = ActorType.Values.ServiceOwner
-                        };
+                        x.WithServiceOwnerActor();
                     });
                 }, 2, 1
             );
@@ -352,10 +340,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.AddTransmission(x =>
                 {
                     x.Type = DialogTransmissionType.Values.Information;
-                    x.Sender = new ActorDto
-                    {
-                        ActorType = ActorType.Values.ServiceOwner,
-                    };
+                    x.WithServiceOwnerActor();
                 });
             }, 0, 1);
 
@@ -364,18 +349,15 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.AddTransmission(x =>
                 {
                     x.Type = DialogTransmissionType.Values.Correction;
-                    x.Sender = new ActorDto
-                    {
-                        ActorType = ActorType.Values.PartyRepresentative,
-                        ActorName = "Fredrik",
-                    };
+                    x.WithPartyRepresentativeActor();
                 });
             }, 1, 0);
         }
     }
 
     [Theory, ClassData(typeof(TransmissionsCountTestData))]
-    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
+    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(
+        string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
         FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>

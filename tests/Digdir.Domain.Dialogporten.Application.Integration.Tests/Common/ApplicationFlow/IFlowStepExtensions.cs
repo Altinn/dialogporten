@@ -172,12 +172,15 @@ public static class IFlowStepExtensions
             .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
-        Action<SearchDialogQuerySO> modify)
+        Action<SearchDialogQuerySO> modify) => step.SearchServiceOwnerDialogs((query, _) => modify(query));
+
+    public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
+        Action<SearchDialogQuerySO, FlowContext> modify)
     {
         return step.SendCommand(_ =>
         {
             var query = new SearchDialogQuerySO();
-            modify(query);
+            modify(query, step.Context);
             return query;
         });
     }

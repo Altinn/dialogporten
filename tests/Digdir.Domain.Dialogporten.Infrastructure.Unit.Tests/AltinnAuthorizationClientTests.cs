@@ -20,20 +20,21 @@ public class AltinnAuthorizationClientTests
                     Party = "parent",
                     AuthorizedRolesAndAccessPackages = ["role1"],
                     AuthorizedResources = ["resource1", "resource2"],
-                    SubParties = new List<AuthorizedParty>
-                    {
+                    SubParties =
+                    [
                         new()
                         {
                             Party = "child1",
                             AuthorizedRolesAndAccessPackages = ["role2"],
                             AuthorizedResources = ["resource3"],
                         },
+
                         new()
                         {
                             Party = "child2",
                             AuthorizedRolesAndAccessPackages = []
                         }
-                    }
+                    ]
                 },
 
                 new()

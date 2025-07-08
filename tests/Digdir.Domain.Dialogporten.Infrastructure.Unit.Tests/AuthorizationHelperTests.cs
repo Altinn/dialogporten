@@ -55,10 +55,10 @@ public class AuthorizationHelperTests
                 new List<string>(),
                 new Dictionary<string, List<string>>
                 {
-                    ["party1"] = new() { "resource1", "resource2", "resource3", "resource4", "resource5", "resource6" },
-                    ["party2"] = new() { "resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" },
-                    ["party3"] = new() { "resource5", "resource6" },
-                    ["party4"] = new() { "resource7" }
+                    ["party1"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6"],
+                    ["party2"] = [ "resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" ],
+                    ["party3"] = ["resource5", "resource6"],
+                    ["party4"] = ["resource7"]
                 }
             },
 
@@ -69,8 +69,8 @@ public class AuthorizationHelperTests
                 new List<string>(),
                 new Dictionary<string, List<string>>
                 {
-                    ["party1"] = new() { "resource1", "resource2", "resource3", "resource4", "resource5", "resource6" },
-                    ["party2"] = new() { "resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" },
+                    ["party1"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6"],
+                    ["party2"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" ],
                 }
             },
 
@@ -81,9 +81,9 @@ public class AuthorizationHelperTests
                 new List<string> { "resource1", "resource2", "resource5" },
                 new Dictionary<string, List<string>>
                 {
-                    ["party1"] = new() { "resource1", "resource2", "resource5" },
-                    ["party2"] = new() { "resource1", "resource2", "resource5" },
-                    ["party3"] = new() { "resource5" }
+                    ["party1"] = ["resource1", "resource2", "resource5"],
+                    ["party2"] = ["resource1", "resource2", "resource5"],
+                    ["party3"] = ["resource5"]
                 }
             },
 
@@ -94,7 +94,7 @@ public class AuthorizationHelperTests
                 new List<string> { "resource4" },
                 new Dictionary<string, List<string>>
                 {
-                    ["party2"] = new() { "resource4" }
+                    ["party2"] = ["resource4"]
                 }
             }
         };

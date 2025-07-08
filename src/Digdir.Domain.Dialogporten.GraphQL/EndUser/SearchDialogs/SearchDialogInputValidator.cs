@@ -18,7 +18,13 @@ public sealed class SearchDialogInputValidator : AbstractValidator<SearchDialogI
 
         RuleForEach(x => x.OrderBy)
             .Must(order =>
-                new[] { order.CreatedAt.HasValue, order.UpdatedAt.HasValue, order.DueAt.HasValue }
+                new[]
+                    {
+                        order.CreatedAt.HasValue,
+                        order.UpdatedAt.HasValue,
+                        order.DueAt.HasValue,
+                        order.ContentUpdatedAt.HasValue
+                    }
                     .Count(x => x) == 1)
             .WithMessage("Exactly one property must be set on each OrderBy object.");
     }

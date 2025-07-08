@@ -85,6 +85,11 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .When(x => x.UpdatedAfter is not null && x.UpdatedBefore is not null)
             .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
 
+        RuleFor(x => x.ContentUpdatedAfter)
+            .LessThanOrEqualTo(x => x.ContentUpdatedBefore)
+            .When(x => x.ContentUpdatedAfter is not null && x.ContentUpdatedBefore is not null)
+            .WithMessage(PropertyNameMustBeLessThanOrEqualToComparisonProperty);
+
         RuleFor(x => x.VisibleAfter)
             .LessThanOrEqualTo(x => x.VisibleBefore)
             .When(x => x.VisibleAfter is not null && x.VisibleBefore is not null)

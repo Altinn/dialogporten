@@ -110,7 +110,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
         var originalTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.Transmissions.Add(originalTransmission))
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 var transmission = new TransmissionDto
                 {
@@ -136,7 +136,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.Activities.Add(dialogActivity))
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 x.Dto.Activities.Add(new()
                 {

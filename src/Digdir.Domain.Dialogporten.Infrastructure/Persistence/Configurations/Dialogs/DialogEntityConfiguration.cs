@@ -31,10 +31,14 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.Property(x => x.IdempotentKey)
             .HasMaxLength(36);
 
+        builder.Property(x => x.ContentUpdatedAt)
+            .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+
         builder.HasIndex(x => x.CreatedAt);
         builder.HasIndex(x => x.UpdatedAt);
         builder.HasIndex(x => x.DueAt);
         builder.HasIndex(x => x.VisibleFrom);
+        builder.HasIndex(x => x.ContentUpdatedAt);
 
         builder.HasIndex(x => x.ExtendedStatus);
         builder.HasIndex(x => x.ExternalReference);

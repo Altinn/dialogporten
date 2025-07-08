@@ -48,6 +48,7 @@ public sealed class SearchDialogSortType
     public OrderDirection? CreatedAt { get; set; }
     public OrderDirection? UpdatedAt { get; set; }
     public OrderDirection? DueAt { get; set; }
+    public OrderDirection? ContentUpdatedAt { get; set; }
 }
 
 public sealed class SearchDialog
@@ -62,11 +63,14 @@ public sealed class SearchDialog
     public string? PrecedingProcess { get; set; }
     public int? GuiAttachmentCount { get; set; }
     public string? ExtendedStatus { get; set; }
+    public string? ExternalReference { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset ContentUpdatedAt { get; set; }
     public DateTimeOffset? DueAt { get; set; }
 
     public DialogStatus Status { get; set; }
+    public bool HasUnopenedContent { get; set; }
 
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
     public bool IsApiOnly { get; set; }
@@ -75,6 +79,7 @@ public sealed class SearchDialog
 
     public SearchContent Content { get; set; } = null!;
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
+    public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
     public EndUserContext EndUserContext { get; set; } = null!;
 }
 

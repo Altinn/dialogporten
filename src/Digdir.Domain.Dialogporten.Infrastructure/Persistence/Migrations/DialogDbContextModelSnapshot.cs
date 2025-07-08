@@ -838,6 +838,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<DateTimeOffset>("ContentUpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -927,6 +932,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ContentUpdatedAt");
 
                     b.HasIndex("CreatedAt");
 

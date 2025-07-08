@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.72.1](https://github.com/Altinn/dialogporten/compare/v1.72.0...v1.72.1) (2025-07-04)
+
+
+### Bug Fixes
+
+* **graphql:** Add missing mapping for hasUnopenedContent on search results ([#2517](https://github.com/Altinn/dialogporten/issues/2517)) ([e4ab490](https://github.com/Altinn/dialogporten/commit/e4ab490aacedf49cb3f6adc98d49d991c36f943a))
+
+## [1.72.0](https://github.com/Altinn/dialogporten/compare/v1.71.0...v1.72.0) (2025-07-04)
+
+
+### Features
+
+* add action to bump FormSaved created timestamp ([#2489](https://github.com/Altinn/dialogporten/issues/2489)) ([2812a3c](https://github.com/Altinn/dialogporten/commit/2812a3c60aeba782cf0b2f6f36641bda53f51c59))
+* **app:** Add ContentUpdatedAt timestamp ([#2424](https://github.com/Altinn/dialogporten/issues/2424)) ([c4a880c](https://github.com/Altinn/dialogporten/commit/c4a880cdd43ac2b313e2d3c722aad8153eb817b8))
+
+
+### Bug Fixes
+
+* **app:** Check existing TransmissionAttachment ids on update ([#2508](https://github.com/Altinn/dialogporten/issues/2508)) ([3abf956](https://github.com/Altinn/dialogporten/commit/3abf956d322ed5f1f3bb9337e5688dd00c01002b))
+* **app:** ReferenceConstraintException race condition ([#2514](https://github.com/Altinn/dialogporten/issues/2514)) ([d82e671](https://github.com/Altinn/dialogporten/commit/d82e6717ef862b6f29e46781f5528e66e944ce2e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update Azure.Identity to 1.14.1 ([#2511](https://github.com/Altinn/dialogporten/issues/2511)) ([bec133e](https://github.com/Altinn/dialogporten/commit/bec133ef4916fc218fb506db4622f3a093bdc290))
+* **deps:** update dependency benchmarkdotnet to 0.15.2 ([#2491](https://github.com/Altinn/dialogporten/issues/2491)) ([f858913](https://github.com/Altinn/dialogporten/commit/f858913a0263cc4e037b499c54fbc8c24f9f4b28))
+* **deps:** update dependency refitter.sourcegenerator to 1.6.0 ([#2492](https://github.com/Altinn/dialogporten/issues/2492)) ([0fae25a](https://github.com/Altinn/dialogporten/commit/0fae25a11c4325a4f30b4c4e2ccf6c5b8590e0d4))
+* **deps:** update docker/setup-buildx-action action to v3.11.1 ([#2502](https://github.com/Altinn/dialogporten/issues/2502)) ([4804820](https://github.com/Altinn/dialogporten/commit/48048203c928e3b3f5b952187e9b84994879f285))
+* **deps:** update dotnet monorepo ([#2510](https://github.com/Altinn/dialogporten/issues/2510)) ([6d83b0e](https://github.com/Altinn/dialogporten/commit/6d83b0eecaebd7e484c9fbdaa5008df128d3dcb6))
+* **deps:** update hotchocolate monorepo to 15.1.6 ([#2501](https://github.com/Altinn/dialogporten/issues/2501)) ([07d0463](https://github.com/Altinn/dialogporten/commit/07d046385ea003e79b48c4871bdd35fd727d669e))
+* **service:** enable masstransit tracing ([#2509](https://github.com/Altinn/dialogporten/issues/2509)) ([a9f637c](https://github.com/Altinn/dialogporten/commit/a9f637ccedf57692a161499e25c98bfe05542400)), closes [#2494](https://github.com/Altinn/dialogporten/issues/2494)
+
 ## [1.71.0](https://github.com/Altinn/dialogporten/compare/v1.70.0...v1.71.0) (2025-06-26)
 
 

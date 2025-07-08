@@ -16,7 +16,7 @@ public sealed class MergableSubjectResource : SubjectResource
 
 public static class SubjectResourceExtensions
 {
-    public static MergableSubjectResource ToMergableSubjectResource(this UpdatedSubjectResource subjectResource, DateTimeOffset createdAt)
+    public static MergableSubjectResource ToMergeableSubjectResource(this UpdatedSubjectResource subjectResource, DateTimeOffset createdAt)
     {
         return new MergableSubjectResource
         {

@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -100,10 +101,12 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<CreateDialogResult> step,
+    public static IFlowExecutor<UpdateDialogResult> AssertSuccessAndUpdateDialog(this IFlowStep<IOneOf> step,
+        Action<UpdateDialogCommand> modify) => step.AssertSuccess().UpdateDialog(modify);
+
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep step,
         Action<UpdateDialogCommand> modify) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x => CreateGetServiceOwnerDialogQuery(x.DialogId))
+        step.SendCommand(x => CreateGetServiceOwnerDialogQuery(x.GetDialogId()))
             .AssertResult<DialogDtoSO>()
             .SendCommand((x, ctx) =>
             {
@@ -137,8 +140,16 @@ public static class IFlowStepExtensions
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateFormSavedActivityTimeResult> step) =>
+        step.AssertResult<UpdateFormSavedActivityTimeSuccess>()
+            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
+
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
+
+    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<UpdateDialogResult> step) =>
+        step.AssertResult<UpdateDialogSuccess>()
             .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
@@ -153,12 +164,15 @@ public static class IFlowStepExtensions
     }
 
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
-        Action<SearchDialogQueryEU> modify)
+        Action<SearchDialogQueryEU> modify) => step.SearchEndUserDialogs((query, _) => modify(query));
+
+    public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
+        Action<SearchDialogQueryEU, FlowContext> modify)
     {
         return step.SendCommand(_ =>
         {
             var query = new SearchDialogQueryEU();
-            modify(query);
+            modify(query, step.Context);
             return query;
         });
     }
@@ -180,6 +194,18 @@ public static class IFlowStepExtensions
             modify(command, ctx);
             return command;
         });
+
+    public static IFlowExecutor<UpdateFormSavedActivityTimeResult> UpdateFormSavedActivityTime(
+        this IFlowStep<CreateDialogResult> step,
+        Guid activityId,
+        DateTimeOffset? newCreatedAt = null) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .SendCommand(ctx => new UpdateFormSavedActivityTimeCommand
+            {
+                DialogId = ctx.GetDialogId(),
+                ActivityId = activityId,
+                NewCreatedAt = newCreatedAt ?? DateTimeOffset.UtcNow
+            });
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,
@@ -212,6 +238,15 @@ public static class IFlowStepExtensions
             var typedResult = result.Value.Should().BeOfType<T>().Subject;
             typedResult.Should().NotBeNull();
             assert?.Invoke(typedResult);
+            return typedResult;
+        });
+
+    public static IFlowStep AssertSuccess(this IFlowStep<IOneOf> step) =>
+        step.Select(result =>
+        {
+            result.Index.Should().Be(0);
+            var typedResult = result.Value;
+            typedResult.Should().NotBeNull();
             return typedResult;
         });
 

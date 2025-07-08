@@ -16,12 +16,12 @@ public class BulkSetSystemLabelCommandValidatorTests
             EndUserId = "01017512345",
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[]
-                {
+                Dialogs =
+                [
                     new DialogRevisionDto { DialogId = Guid.NewGuid() },
                     new DialogRevisionDto { DialogId = Guid.NewGuid() }
-                },
-                SystemLabels = new[] { SystemLabel.Values.Archive }
+                ],
+                SystemLabels = [SystemLabel.Values.Archive]
             }
         };
 
@@ -39,12 +39,12 @@ public class BulkSetSystemLabelCommandValidatorTests
             EndUserId = "01017512345",
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[]
-                {
+                Dialogs =
+                [
                     new DialogRevisionDto { DialogId = id },
                     new DialogRevisionDto { DialogId = id }
-                },
-                SystemLabels = new[] { SystemLabel.Values.Archive }
+                ],
+                SystemLabels = [SystemLabel.Values.Archive]
             }
         };
 
@@ -63,8 +63,8 @@ public class BulkSetSystemLabelCommandValidatorTests
             EndUserId = "urn:altinn:person:identifier-no:01020312345",
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[] { new DialogRevisionDto { DialogId = Guid.NewGuid() } },
-                SystemLabels = new[] { SystemLabel.Values.Bin, SystemLabel.Values.Archive }
+                Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
+                SystemLabels = [SystemLabel.Values.Bin, SystemLabel.Values.Archive]
             }
         };
 
@@ -82,8 +82,8 @@ public class BulkSetSystemLabelCommandValidatorTests
             EndUserId = "urn:altinn:person:identifier-no:01020312345",
             Dto = new BulkSetSystemLabelDto
             {
-                Dialogs = new[] { new DialogRevisionDto { DialogId = Guid.NewGuid() } },
-                SystemLabels = new[] { SystemLabel.Values.Bin }
+                Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
+                SystemLabels = [SystemLabel.Values.Bin]
             }
         };
 

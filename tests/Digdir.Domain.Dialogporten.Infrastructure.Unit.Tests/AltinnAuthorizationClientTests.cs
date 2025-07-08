@@ -53,7 +53,7 @@ public class AltinnAuthorizationClientTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(4, result!.AuthorizedParties.Count);
+        Assert.Equal(4, result.AuthorizedParties.Count);
 
         var parent = result.AuthorizedParties[0];
         Assert.Equal("parent", parent.Party);

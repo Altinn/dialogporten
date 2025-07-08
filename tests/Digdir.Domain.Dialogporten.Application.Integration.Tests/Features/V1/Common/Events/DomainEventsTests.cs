@@ -107,7 +107,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     public Task Creates_CloudEvent_When_Dialog_Updates() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(x => x.Dto.ExtendedStatus = "Updated status")
+            .AssertSuccessAndUpdateDialog(x => x.Dto.ExtendedStatus = "Updated status")
             .ExecuteAndAssert<UpdateDialogSuccess>(x =>
             {
                 var domainEvents = Application.GetPublishedEvents();
@@ -119,7 +119,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     public Task Creates_Update_Event_And_Activity_Created_Event_When_Activity_Is_Added() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 x.Dto.Activities.Add(new()
                 {
@@ -141,7 +141,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     public Task Creates_Update_Event_And_Transmission_Created_Event_When_Transmission_Is_Added() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 x.Dto.Transmissions.Add(new()
                 {
@@ -168,7 +168,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     public Task Creates_CloudEvent_When_Attachments_Updates() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 x.Dto.Attachments = [new AttachmentDto
                 {
@@ -241,7 +241,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
                 x.Dto.Activities.Add(DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information));
                 x.IsSilentUpdate = true;
             })
-            .UpdateDialog(x =>
+            .AssertSuccessAndUpdateDialog(x =>
             {
                 x.IsSilentUpdate = true;
                 x.Dto.ExtendedStatus = "Updated status";

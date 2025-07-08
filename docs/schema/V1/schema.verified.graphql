@@ -152,7 +152,9 @@ type Dialog {
   dialogToken: String
   status: DialogStatus!
   hasUnopenedContent: Boolean!
+  "The number of transmissions sent by the service owner"
   fromServiceOwnerTransmissionsCount: Int!
+  "The number of transmissions sent by a party representative"
   fromPartyTransmissionsCount: Int!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!

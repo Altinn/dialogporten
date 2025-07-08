@@ -868,11 +868,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<int>("FromPartyTransmissionsCount")
-                        .HasColumnType("integer");
+                    b.Property<short>("FromPartyTransmissionsCount")
+                        .HasColumnType("smallint");
 
-                    b.Property<int>("FromServiceOwnerTransmissionsCount")
-                        .HasColumnType("integer");
+                    b.Property<short>("FromServiceOwnerTransmissionsCount")
+                        .HasColumnType("smallint");
 
                     b.Property<bool>("HasUnopenedContent")
                         .HasColumnType("boolean");

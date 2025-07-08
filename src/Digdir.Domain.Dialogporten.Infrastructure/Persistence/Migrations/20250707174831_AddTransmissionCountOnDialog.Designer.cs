@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250707124534_AddTransmissionCount")]
-    partial class AddTransmissionCount
+    [Migration("20250707174831_AddTransmissionCountOnDialog")]
+    partial class AddTransmissionCountOnDialog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -871,11 +871,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<int>("FromPartyTransmissionsCount")
-                        .HasColumnType("integer");
+                    b.Property<short>("FromPartyTransmissionsCount")
+                        .HasColumnType("smallint");
 
-                    b.Property<int>("FromServiceOwnerTransmissionsCount")
-                        .HasColumnType("integer");
+                    b.Property<short>("FromServiceOwnerTransmissionsCount")
+                        .HasColumnType("smallint");
 
                     b.Property<bool>("HasUnopenedContent")
                         .HasColumnType("boolean");

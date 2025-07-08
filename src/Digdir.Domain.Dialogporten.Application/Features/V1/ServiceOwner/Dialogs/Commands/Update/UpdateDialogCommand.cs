@@ -289,12 +289,12 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
-        dialog.FromPartyTransmissionsCount += newDialogTransmissions
+        dialog.FromPartyTransmissionsCount += (short)newDialogTransmissions
             .Count(x => x.TypeId
                 is DialogTransmissionType.Values.Submission
                 or DialogTransmissionType.Values.Correction);
 
-        dialog.FromServiceOwnerTransmissionsCount += newDialogTransmissions
+        dialog.FromServiceOwnerTransmissionsCount += (short)newDialogTransmissions
             .Count(x => x.TypeId is not
                 (DialogTransmissionType.Values.Submission
                 or DialogTransmissionType.Values.Correction));

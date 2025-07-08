@@ -5,24 +5,24 @@
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTransmissionCount : Migration
+    public partial class AddTransmissionCountOnDialog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<short>(
                 name: "FromPartyTransmissionsCount",
                 table: "Dialog",
-                type: "integer",
+                type: "smallint",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: (short)0);
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<short>(
                 name: "FromServiceOwnerTransmissionsCount",
                 table: "Dialog",
-                type: "integer",
+                type: "smallint",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: (short)0);
 
             migrationBuilder.Sql("""
                                  UPDATE "Dialog" d

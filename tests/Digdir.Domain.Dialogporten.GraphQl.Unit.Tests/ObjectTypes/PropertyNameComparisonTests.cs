@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
@@ -25,94 +26,65 @@ public class PropertyNameComparisonTests
     {
         public PropertyNameComparisonTestsData()
         {
+            // ====== Dtos =======
             Add(typeof(DialogActivityDto), typeof(Activity), null);
-
             Add(typeof(DialogEndUserContextDto), typeof(EndUserContext), null);
+            Add(typeof(DialogSeenLogDto), typeof(SeenLog), null);
+            Add(typeof(DialogApiActionDto), typeof(ApiAction), null);
+            Add(typeof(DialogApiActionEndpointDto), typeof(ApiActionEndpoint), null);
+            Add(typeof(DialogAttachmentDto), typeof(Attachment), null);
+            Add(typeof(DialogAttachmentUrlDto), typeof(AttachmentUrl), null);
+            Add(typeof(DialogGuiActionDto), typeof(GuiAction), null);
+            Add(typeof(DialogTransmissionDto), typeof(Transmission), null);
+            Add(typeof(DialogTransmissionContentDto), typeof(TransmissionContent), null);
+            Add(typeof(DialogTransmissionAttachmentDto), typeof(Attachment), null);
+            Add(typeof(DialogTransmissionAttachmentUrlDto), typeof(AttachmentUrl), null);
 
-            Add(typeof(DialogSeenLogDto),
-                typeof(SeenLog),
-                null);
+            // ====== Enums =======
+            Add(typeof(DialogStatus.Values), typeof(GraphQL.EndUser.Common.DialogStatus), null);
+            Add(typeof(DialogActivityType.Values), typeof(ActivityType), null);
+            Add(typeof(SystemLabel.Values), typeof(GraphQL.EndUser.Common.SystemLabel), null);
+            Add(typeof(ActorType.Values), typeof(GraphQL.EndUser.Common.ActorType), null);
+            Add(typeof(HttpVerb.Values), typeof(GraphQL.EndUser.DialogById.HttpVerb), null);
+            Add(typeof(DialogGuiActionPriority.Values), typeof(GuiActionPriority), null);
+            Add(typeof(DialogTransmissionType.Values), typeof(TransmissionType), null);
+            Add(typeof(AttachmentUrlConsumerType.Values), typeof(AttachmentUrlConsumer), null);
 
-            Add(typeof(DialogApiActionDto),
-                typeof(ApiAction),
-                null);
-
-            Add(typeof(DialogApiActionEndpointDto),
-                typeof(ApiActionEndpoint),
-                null);
-
-            Add(typeof(DialogAttachmentDto),
-                typeof(Attachment),
-                null);
-
-            Add(typeof(DialogAttachmentUrlDto),
-                typeof(AttachmentUrl),
-                null);
-
-            Add(typeof(DialogGuiActionDto),
-                typeof(GuiAction),
-                null);
-
-            Add(typeof(DialogTransmissionDto),
-                typeof(Transmission),
-                null);
-
-            Add(typeof(DialogTransmissionContentDto),
-                typeof(TransmissionContent),
-                null);
-
-            Add(typeof(DialogTransmissionAttachmentDto),
-                typeof(Attachment),
-                null);
-
-            Add(typeof(DialogTransmissionAttachmentUrlDto),
-                typeof(AttachmentUrl),
-                null);
+            // ====== Special cases =======
 
             // Filtering out deprecated properties in the
             // REST API that are not present in GraphQL
-            Add(typeof(DialogDto),
-                typeof(Dialog),
+            Add(typeof(DialogDto), typeof(Dialog),
                 // Delete when dialogDto.SystemLabel is removed
-                name => !name.Contains(nameof(DialogDto.SystemLabel)));
+                name => !name.Equals(nameof(DialogDto.SystemLabel), StringComparison.Ordinal));
 
-            Add(typeof(SearchDialogDto),
-                typeof(SearchDialog),
+            Add(typeof(SearchDialogDto), typeof(SearchDialog),
                 // Delete when dialogDto.SystemLabel is removed
-                name => !name.Contains(nameof(SearchDialogDto.SystemLabel)));
+                name => !name.Equals(nameof(SearchDialogDto.SystemLabel), StringComparison.Ordinal));
 
-            // ====== Enums =======
-            Add(typeof(DialogStatus.Values),
-                typeof(GraphQL.EndUser.Common.DialogStatus),
-                null);
+            // Filtering out properties that are not present in GraphQL
+            // These properties are mapped to
+            // Title and Summary in the application layer
+            Add(typeof(DialogContentType.Values), typeof(Content),
+                name => !name.Equals(nameof(DialogContentType.Values.NonSensitiveTitle),
+                            StringComparison.OrdinalIgnoreCase)
+                        && !name.Equals(nameof(DialogContentType.Values.NonSensitiveSummary),
+                            StringComparison.OrdinalIgnoreCase));
 
-            Add(typeof(DialogActivityType.Values),
-                typeof(ActivityType),
-                null);
+            Add(typeof(DialogContentType.Values), typeof(SearchContent),
+                name =>
+                {
+                    var value = DialogContentType
+                        .GetValues()
+                        .FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
-            Add(typeof(SystemLabel.Values),
-                typeof(GraphQL.EndUser.Common.SystemLabel),
-                null);
-
-            Add(typeof(ActorType.Values),
-                typeof(GraphQL.EndUser.Common.ActorType),
-                null);
-
-            Add(typeof(HttpVerb.Values),
-                typeof(GraphQL.EndUser.DialogById.HttpVerb),
-                null);
-
-            Add(typeof(DialogGuiActionPriority.Values),
-                typeof(GuiActionPriority),
-                null);
-
-            Add(typeof(DialogTransmissionType.Values),
-                typeof(TransmissionType),
-                null);
-
-            Add(typeof(AttachmentUrlConsumerType.Values),
-                typeof(AttachmentUrlConsumer),
-                null);
+                    // SearchContent only has values with OutputInList = true
+                    return value!.OutputInList
+                           && !name.Equals(nameof(DialogContentType.Values.NonSensitiveTitle),
+                               StringComparison.OrdinalIgnoreCase)
+                           && !name.Equals(nameof(DialogContentType.Values.NonSensitiveSummary),
+                               StringComparison.OrdinalIgnoreCase);
+                });
         }
     }
 
@@ -120,8 +92,6 @@ public class PropertyNameComparisonTests
     public void GraphQl_Property_Name_Should_Match_EndUser_Dtos(Type dtoType, Type gqlType, Func<string, bool>? filter = null)
     {
         var dtoProperties = GetNames(dtoType)
-            // Filtering out properties that
-            // are not present in GraphQL
             .Where(filter ?? (_ => true))
             .ToList();
 

@@ -3,11 +3,16 @@ import encoding from "k6/encoding";
 import { extend } from "./extend.js";
 import { defaultEndUserSsn, defaultServiceOwnerOrgNo, tokenGeneratorEnv } from "./config.js";
 
-let defaultTokenOptions = {
-  scopes: "digdir:dialogporten digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search",
+let defaultTokenOptionsForServiceOwner = {
+  scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search",
   orgName: "digdir",
-  orgNo: defaultServiceOwnerOrgNo,
-  ssn: defaultEndUserSsn
+  orgNo: defaultServiceOwnerOrgNo
+};
+
+let defaultTokenOptionsForEndUser = {
+    scopes: "digdir:dialogporten",
+    ssn: defaultEndUserSsn,
+    orgNo: defaultServiceOwnerOrgNo // a organzation number for a party that the end user has access to
 };
 
 const tokenUsername = __ENV.TOKEN_GENERATOR_USERNAME;
@@ -56,19 +61,19 @@ export function fetchToken(url, tokenOptions, type) {
 }
 
 export function getServiceOwnerTokenFromGenerator(tokenOptions = null) {
-  let fullTokenOptions = extend({}, defaultTokenOptions, tokenOptions);
+  let fullTokenOptions = extend({}, defaultTokenOptionsForServiceOwner, tokenOptions);
   const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetEnterpriseToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&org=${fullTokenOptions.orgName}&orgNo=${fullTokenOptions.orgNo}&ttl=${tokenTtl}`;
   return fetchToken(url, fullTokenOptions, `service owner (orgno:${fullTokenOptions.orgNo} orgName:${fullTokenOptions.orgName} tokenGeneratorEnv:${tokenGeneratorEnv})`);
 }
 
 export function getEnduserTokenFromGenerator(tokenOptions = null) {
-  let fullTokenOptions = extend({}, defaultTokenOptions, tokenOptions);
+  let fullTokenOptions = extend({}, defaultTokenOptionsForEndUser, tokenOptions);
   const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&pid=${fullTokenOptions.ssn}&ttl=${tokenTtl}`;
   return fetchToken(url, fullTokenOptions, `end user (ssn:${fullTokenOptions.ssn}, tokenGeneratorEnv:${tokenGeneratorEnv})`);
 }
 
 export function getEndUserTokens(count, tokenOptions = null) {
-  let fullTokenOptions = extend({}, defaultTokenOptions, tokenOptions);
+  let fullTokenOptions = extend({}, defaultTokenOptionsForEndUser, tokenOptions);
   const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&bulkCount=${count}&ttl=${tokenTtl}`;
   tokenRequestOptions.timeout = 600000;
   let response = http.get(url, tokenRequestOptions);
@@ -79,11 +84,11 @@ export function getEndUserTokens(count, tokenOptions = null) {
 }
 
 export function getDefaultEnduserOrgNo() {
-  return defaultTokenOptions.orgNo;
+  return defaultTokenOptionsForEndUser.orgNo;
 }
 
 export function getDefaultEnduserSsn() {
-  return defaultTokenOptions.ssn;
+  return defaultTokenOptionsForEndUser.ssn;
 }
 
 export function getDefaultServiceOwnerOrgNo() {

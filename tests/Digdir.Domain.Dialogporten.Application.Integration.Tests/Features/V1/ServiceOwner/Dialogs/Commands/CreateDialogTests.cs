@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -308,6 +309,63 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert(expectedType);
 
+    private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
+    {
+        public TransmissionsCountTestData()
+        {
+            Add("2 From Party, 1 From ServiceOwner",
+                x =>
+                {
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Submission;
+                        x.WithPartyRepresentativeActor();
+                    });
+
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Correction;
+                        x.WithPartyRepresentativeActor();
+                    });
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Alert;
+                        x.WithServiceOwnerActor();
+                    });
+                }, 2, 1
+            );
+
+            Add("1 From ServiceOwner", x =>
+            {
+                x.AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Information;
+                    x.WithServiceOwnerActor();
+                });
+            }, 0, 1);
+
+            Add("1 From Party", x =>
+            {
+                x.AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Correction;
+                    x.WithPartyRepresentativeActor();
+                });
+            }, 1, 0);
+        }
+    }
+
+    [Theory, ClassData(typeof(TransmissionsCountTestData))]
+    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(
+        string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
+        FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.FromPartyTransmissionsCount.Should().Be(fromPartyCount);
+                x.FromServiceOwnerTransmissionsCount.Should().Be(fromServiceOwnerCount);
+            });
+
     [Fact]
     public Task Creating_Dialog_Should_Set_ContentUpdatedAt() =>
         FlowBuilder.For(Application)
@@ -317,6 +375,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.ContentUpdatedAt
                     .Should()
                     .Be(x.CreatedAt));
+
     [Fact]
     public async Task Dialog_Has_Unopened_Content()
     {

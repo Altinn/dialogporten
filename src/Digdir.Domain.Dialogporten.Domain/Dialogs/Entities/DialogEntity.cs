@@ -52,6 +52,16 @@ public sealed class DialogEntity :
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// The number of transmissions sent by the service owner
+    /// </summary>
+    public short FromServiceOwnerTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a party representative
+    /// </summary>
+    public short FromPartyTransmissionsCount { get; set; }
+
+    /// <summary>
     /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
     public bool HasUnopenedContent { get; set; }

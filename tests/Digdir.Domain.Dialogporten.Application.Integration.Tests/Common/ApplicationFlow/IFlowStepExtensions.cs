@@ -10,6 +10,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
+using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
 using GetDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
 using SearchDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
@@ -42,7 +43,7 @@ public static class IFlowStepExtensions
         }
 
         return step as IFlowExecutor<CreateDialogSuccess>
-               ?? throw new ArgumentException("At least one command is required to create dialogs.", nameof(commands));
+         ?? throw new ArgumentException("At least one command is required to create dialogs.", nameof(commands));
     }
 
     public static IFlowExecutor<CreateDialogResult> CreateDialog(this IFlowStep step, Func<FlowContext, CreateDialogCommand> commandSelector) =>
@@ -114,7 +115,25 @@ public static class IFlowStepExtensions
                 modify(command);
                 return command;
             });
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
+        Action<UpdateDialogCommand> modify) => step
+        .SendCommand((x, ctx) =>
+        {
+            var command = CreateUpdateDialogCommand(x, ctx);
+            modify(command);
+            return command;
+        });
 
+    public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoEU> step,
+        Action<UpdateDialogCommand> modify) => step
+        .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
+        .AssertResult<DialogDtoSO>()
+        .SendCommand((x, ctx) =>
+        {
+            var command = CreateUpdateDialogCommand(x, ctx);
+            modify(command);
+            return command;
+        });
     public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(this IFlowStep<CreateDialogResult> step,
         Action<UpdateDialogServiceOwnerContextCommand> modify) =>
         step.AssertResult<CreateDialogSuccess>()
@@ -153,12 +172,15 @@ public static class IFlowStepExtensions
             .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
-        Action<SearchDialogQuerySO> modify)
+        Action<SearchDialogQuerySO> modify) => step.SearchServiceOwnerDialogs((query, _) => modify(query));
+
+    public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
+        Action<SearchDialogQuerySO, FlowContext> modify)
     {
         return step.SendCommand(_ =>
         {
             var query = new SearchDialogQuerySO();
-            modify(query);
+            modify(query, step.Context);
             return query;
         });
     }
@@ -269,6 +291,17 @@ public static class IFlowStepExtensions
     }
 
     public static UpdateDialogCommand CreateUpdateDialogCommand(DialogDtoSO dto, FlowContext ctx)
+    {
+        var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(dto);
+        return new UpdateDialogCommand
+        {
+            IfMatchDialogRevision = dto.Revision,
+            Id = ctx.GetDialogId(),
+            Dto = updateDto
+        };
+    }
+
+    public static UpdateDialogCommand CreateUpdateDialogCommand(DialogDtoEU dto, FlowContext ctx)
     {
         var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(dto);
         return new UpdateDialogCommand

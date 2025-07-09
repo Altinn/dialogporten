@@ -1,4 +1,6 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -14,6 +16,27 @@ internal static class CreateDialogCommandExtensions
         modify?.Invoke(transmission);
         command.Dto.Transmissions.Add(transmission);
         return command;
+    }
+
+    public static TransmissionDto WithPartyRepresentativeActor(this TransmissionDto transmission)
+    {
+        transmission.Sender = new ActorDto
+        {
+            ActorType = ActorType.Values.PartyRepresentative,
+            ActorName = "Fredrik",
+        };
+
+        return transmission;
+    }
+
+    public static TransmissionDto WithServiceOwnerActor(this TransmissionDto transmission)
+    {
+        transmission.Sender = new ActorDto
+        {
+            ActorType = ActorType.Values.ServiceOwner,
+        };
+
+        return transmission;
     }
 
     public static CreateDialogCommand AddActivity(this CreateDialogCommand command, DialogActivityType.Values? type = null, Action<ActivityDto>? modify = null)

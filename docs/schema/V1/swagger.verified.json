@@ -618,6 +618,16 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative ",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by a service owner ",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiActions": {
             "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
             "items": {
@@ -1535,6 +1545,16 @@
             "description": "Arbitrary string with a service-specific reference to an external system or service.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
             "nullable": true,
             "type": "string"
+          },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative ",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by the service owner ",
+            "format": "int32",
+            "type": "integer"
           },
           "guiAttachmentCount": {
             "description": "The number of attachments in the dialog made available for browser-based frontends.",
@@ -3767,6 +3787,16 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by the service owner",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiActions": {
             "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
             "items": {
@@ -4803,6 +4833,16 @@
             "description": "Arbitrary string with a service-specific reference to an external system or service.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
             "nullable": true,
             "type": "string"
+          },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by a service owner",
+            "format": "int32",
+            "type": "integer"
           },
           "guiAttachmentCount": {
             "description": "The number of attachments in the dialog made available for browser-based frontends.",

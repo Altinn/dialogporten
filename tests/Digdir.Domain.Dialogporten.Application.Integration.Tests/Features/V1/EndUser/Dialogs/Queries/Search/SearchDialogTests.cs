@@ -57,4 +57,18 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.Party = [ctx.GetParty()])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Single().HasUnopenedContent.Should().BeTrue());
+
+    [Fact]
+    public Task Search_Should_Return_Number_Of_Transmissions_From_Party_And_ServiceOwner() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Alert)
+                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Submission))
+            .SearchEndUserDialogs((x, ctx) => x.Party = [ctx.GetParty()])
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+            {
+                var dialog = x.Items.Single();
+                dialog.FromPartyTransmissionsCount.Should().Be(1);
+                dialog.FromServiceOwnerTransmissionsCount.Should().Be(1);
+            });
 }

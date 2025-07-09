@@ -121,7 +121,7 @@ public sealed class Dialog
     [GraphQLDescription("An immutable list of activities associated with the dialog.")]
     public List<Activity> Activities { get; set; } = [];
 
-    [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ChangedAt date.")]
+    [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog UpdatedAt date.")]
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
 
     [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.")]

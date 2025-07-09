@@ -157,7 +157,7 @@ public class DialogDtoBase
     public DialogActivityDto? LatestActivity { get; set; }
 
     /// <summary>
-    /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+    /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
 

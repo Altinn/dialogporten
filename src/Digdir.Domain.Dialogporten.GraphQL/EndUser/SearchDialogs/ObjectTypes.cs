@@ -53,23 +53,55 @@ public sealed class SearchDialogSortType
 
 public sealed class SearchDialog
 {
+    [GraphQLDescription("The unique identifier for the dialog in UUIDv7 format. Example: 01913cd5-784f-7d3b-abef-4c77b1f0972d")]
     public Guid Id { get; set; }
+
+    [GraphQLDescription("The service owner code representing the organization (service owner) related to this dialog. Example: ske")]
     public string Org { get; set; } = null!;
+
+    [GraphQLDescription("The service identifier for the service that the dialog is related to in URN-format. This corresponds to a service resource in the Altinn Resource Registry. Example: urn:altinn:resource:some-service-identifier")]
     public string ServiceResource { get; set; } = null!;
+
+    [GraphQLDescription("The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).")]
     public string ServiceResourceType { get; set; } = null!;
+
+    [GraphQLDescription("The party code representing the organization or person that the dialog belongs to in URN format. Example: urn:altinn:person:identifier-no:01125512345, urn:altinn:organization:identifier-no:912345678")]
     public string Party { get; set; } = null!;
+
+    [GraphQLDescription("Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come to a natural completion (successful or not).")]
     public int? Progress { get; set; }
+
+    [GraphQLDescription("Optional process identifier used to indicate a business process this dialog belongs to.")]
     public string? Process { get; set; }
+
+    [GraphQLDescription("Optional preceding process identifier to indicate the business process that preceded the process indicated in the 'Process' field. Cannot be set without also 'Process' being set.")]
     public string? PrecedingProcess { get; set; }
+
+    [GraphQLDescription("The number of attachments in the dialog made available for browser-based frontends.")]
     public int? GuiAttachmentCount { get; set; }
+
+    [GraphQLDescription("Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of the dialog to further specify the 'status' enum. Refer to the service-specific documentation provided by the service owner for details on the possible values (if in use).")]
     public string? ExtendedStatus { get; set; }
+
+    [GraphQLDescription("Arbitrary string with a service-specific reference to an external system or service. Refer to the service-specific documentation provided by the service owner for details (if in use).")]
     public string? ExternalReference { get; set; }
+
+    [GraphQLDescription("The date and time when the dialog was created. Example: 2022-12-31T23:59:59Z")]
     public DateTimeOffset CreatedAt { get; set; }
+
+    [GraphQLDescription("The date and time when the dialog was last updated. Example: 2022-12-31T23:59:59Z")]
     public DateTimeOffset UpdatedAt { get; set; }
+
+    [GraphQLDescription("The date and time when the dialog content was last updated. Example: 2022-12-31T23:59:59Z")]
     public DateTimeOffset ContentUpdatedAt { get; set; }
+
+    [GraphQLDescription("The due date for the dialog. This is the last date when the dialog is expected to be completed. Example: 2022-12-31T23:59:59Z")]
     public DateTimeOffset? DueAt { get; set; }
 
+    [GraphQLDescription("The aggregated status of the dialog.")]
     public DialogStatus Status { get; set; }
+
+    [GraphQLDescription("Indicates whether the dialog contains content that has not been viewed or opened by the user yet.")]
     public bool HasUnopenedContent { get; set; }
 
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
@@ -81,19 +113,34 @@ public sealed class SearchDialog
     [GraphQLDescription("The number of transmissions sent by a party representative")]
     public int FromPartyTransmissionsCount { get; set; }
 
+    [GraphQLDescription("The latest entry in the dialog's activity log.")]
     public Activity? LatestActivity { get; set; }
 
-    public SearchContent Content { get; set; } = null!;
+    [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ChangedAt date.")]
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];
+
+    [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.")]
     public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
+
+    [GraphQLDescription("Metadata about the dialog owned by end-users.")]
     public EndUserContext EndUserContext { get; set; } = null!;
+
+    [GraphQLDescription("The content of the dialog in search results.")]
+    public SearchContent Content { get; set; } = null!;
 }
 
 public sealed class SearchContent
 {
+    [GraphQLDescription("The title of the dialog.")]
     public ContentValue Title { get; set; } = null!;
+
+    [GraphQLDescription("A short summary of the dialog and its current state.")]
     public ContentValue? Summary { get; set; }
+
+    [GraphQLDescription("Overridden sender name. If not supplied, assume 'org' as the sender name.")]
     public ContentValue? SenderName { get; set; }
+
+    [GraphQLDescription("Used as the human-readable label used to describe the 'ExtendedStatus' field.")]
     public ContentValue? ExtendedStatus { get; set; }
 }
 

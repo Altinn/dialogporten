@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -7,6 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
+using Activity = Digdir.Domain.Dialogporten.GraphQL.EndUser.Common.Activity;
 using ActorType = Digdir.Domain.Dialogporten.Domain.Actors.ActorType;
 using Attachment = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById.Attachment;
 using AttachmentUrl = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById.AttachmentUrl;
@@ -22,6 +24,23 @@ namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.ObjectTypes;
 
 public class PropertyNameComparisonTests
 {
+    [Theory, ClassData(typeof(PropertyNameComparisonTestsData))]
+    public void GraphQl_Contract_Objects_And_Enums_Should_Match_EndUser(Type dtoType, Type gqlType, Func<string, bool>? filter = null)
+    {
+        var dtoProperties = GetNames(dtoType)
+            .Where(filter ?? (_ => true))
+            .ToList();
+
+        var gqlProperties = GetNames(gqlType);
+
+        var missingProperties = dtoProperties
+            .Except(gqlProperties, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        Assert.True(missingProperties.Count == 0,
+            $"Properties missing in graphql {gqlType.Name}: {string.Join(", ", missingProperties)}");
+    }
+
     private sealed class PropertyNameComparisonTestsData : TheoryData<Type, Type, Func<string, bool>?>
     {
         public PropertyNameComparisonTestsData()
@@ -54,54 +73,38 @@ public class PropertyNameComparisonTests
 
             // Filtering out deprecated properties in the
             // REST API that are not present in GraphQL
-            Add(typeof(DialogDto), typeof(Dialog),
-                // Delete when dialogDto.SystemLabel is removed
-                name => !name.Equals(nameof(DialogDto.SystemLabel), StringComparison.Ordinal));
-
-            Add(typeof(SearchDialogDto), typeof(SearchDialog),
-                // Delete when dialogDto.SystemLabel is removed
-                name => !name.Equals(nameof(SearchDialogDto.SystemLabel), StringComparison.Ordinal));
+            // Delete filter when dialogDto.SystemLabel is removed
+            Add(typeof(DialogDto), typeof(Dialog), ExcludeSystemLabel);
+            Add(typeof(SearchDialogDto), typeof(SearchDialog), ExcludeSystemLabel);
 
             // Filtering out properties that are not present in GraphQL
             // These properties are mapped to
             // Title and Summary in the application layer
             Add(typeof(DialogContentType.Values), typeof(Content),
-                name => !name.Equals(nameof(DialogContentType.Values.NonSensitiveTitle),
-                            StringComparison.OrdinalIgnoreCase)
-                        && !name.Equals(nameof(DialogContentType.Values.NonSensitiveSummary),
-                            StringComparison.OrdinalIgnoreCase));
+                ExcludeNonSensitiveContentTypes);
 
             Add(typeof(DialogContentType.Values), typeof(SearchContent),
-                name =>
-                {
-                    var value = DialogContentType
-                        .GetValues()
-                        .FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-                    // SearchContent only has values with OutputInList = true
-                    return value!.OutputInList
-                           && !name.Equals(nameof(DialogContentType.Values.NonSensitiveTitle),
-                               StringComparison.OrdinalIgnoreCase)
-                           && !name.Equals(nameof(DialogContentType.Values.NonSensitiveSummary),
-                               StringComparison.OrdinalIgnoreCase);
-                });
+                OutputInListAndExcludeNonSensitive);
         }
     }
 
-    [Theory, ClassData(typeof(PropertyNameComparisonTestsData))]
-    public void GraphQl_Property_Name_Should_Match_EndUser_Dtos(Type dtoType, Type gqlType, Func<string, bool>? filter = null)
+    private static bool OutputInListAndExcludeNonSensitive(string name)
     {
-        var dtoProperties = GetNames(dtoType)
-            .Where(filter ?? (_ => true))
-            .ToList();
+        var value = DialogContentType
+            .GetValues()
+            .FirstOrDefault(x => x.Name
+                .Equals(name, StringComparison.OrdinalIgnoreCase));
 
-        var gqlProperties = GetNames(gqlType);
-
-        var missingProperties = dtoProperties.Except(gqlProperties, StringComparer.OrdinalIgnoreCase).ToList();
-
-        Assert.True(missingProperties.Count == 0,
-            $"Properties missing in graphql {gqlType.Name}: {string.Join(", ", missingProperties)}");
+        return value!.OutputInList
+               && ExcludeNonSensitiveContentTypes(name);
     }
+
+    private static bool ExcludeNonSensitiveContentTypes(string name) =>
+        !name.Equals(nameof(DialogContentType.Values.NonSensitiveTitle), StringComparison.OrdinalIgnoreCase)
+        && !name.Equals(nameof(DialogContentType.Values.NonSensitiveSummary), StringComparison.OrdinalIgnoreCase);
+
+    private static bool ExcludeSystemLabel(string name) =>
+        !name.Equals(nameof(SearchDialogDto.SystemLabel), StringComparison.Ordinal);
 
     private static IEnumerable<string> GetNames(Type t) =>
         t.IsEnum

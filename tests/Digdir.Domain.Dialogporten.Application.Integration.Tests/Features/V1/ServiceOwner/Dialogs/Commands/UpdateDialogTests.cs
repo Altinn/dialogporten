@@ -22,6 +22,7 @@ using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceO
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
 using GuiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.GuiActionDto;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
+using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -441,6 +442,48 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             {
                 x.HasUnopenedContent.Should().BeFalse();
                 x.Transmissions.First().IsOpened.Should().BeTrue();
+            });
+    }
+
+    [Fact]
+    public Task Adding_Transmission_From_Party_Should_Increase_FromPartyTransmissionsCount()
+    {
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x =>
+            {
+                x.FromServiceOwnerTransmissionsCount.Should().Be(0);
+                x.FromPartyTransmissionsCount.Should().Be(0);
+            })
+            .UpdateDialog(x => x
+                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Correction))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.FromServiceOwnerTransmissionsCount.Should().Be(0);
+                x.FromPartyTransmissionsCount.Should().Be(1);
+            });
+    }
+
+    [Fact]
+    public Task Adding_Transmission_From_ServiceOwner_Should_Increase_FromServiceOwnerTransmissionsCount()
+    {
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .AssertResult<DialogDtoEU>(x =>
+            {
+                x.FromServiceOwnerTransmissionsCount.Should().Be(0);
+                x.FromPartyTransmissionsCount.Should().Be(0);
+            })
+            .UpdateDialog(x => x
+                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Information))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.FromServiceOwnerTransmissionsCount.Should().Be(1);
+                x.FromPartyTransmissionsCount.Should().Be(0);
             });
     }
 }

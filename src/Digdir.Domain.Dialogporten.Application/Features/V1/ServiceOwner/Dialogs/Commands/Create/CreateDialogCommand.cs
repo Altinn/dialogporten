@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -114,6 +115,16 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             propertyName: nameof(CreateDialogDto.Transmissions),
             maxDepth: 20,
             maxWidth: 20));
+
+        dialog.FromPartyTransmissionsCount = (short)dialog.Transmissions
+            .Count(x => x.TypeId
+                is DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction);
+
+        dialog.FromServiceOwnerTransmissionsCount = (short)dialog.Transmissions
+            .Count(x => x.TypeId is not
+                (DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction));
 
         _db.Dialogs.Add(dialog);
 

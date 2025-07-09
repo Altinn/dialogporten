@@ -2870,7 +2870,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("isOpened")]
-        public bool? IsOpened { get; set; }
+        public bool IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.

@@ -319,7 +319,7 @@ public sealed class DialogTransmissionDto
     /// <summary>
     /// Indicates whether the dialog transmission has been opened.
     /// </summary>
-    public bool? IsOpened { get; set; }
+    public bool IsOpened { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

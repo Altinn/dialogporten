@@ -63,10 +63,13 @@ static void BuildAndRun(string[] args)
         .ValidateFluently()
         .ValidateOnStart();
 
-    builder.Services.AddSingleton<IHostLifetime>(sp => new DelayedShutdownHostLifetime(
-        sp.GetRequiredService<IHostApplicationLifetime>(),
-        TimeSpan.FromSeconds(10)
-    ));
+    if (!builder.Environment.IsDevelopment())
+    {
+        builder.Services.AddSingleton<IHostLifetime>(sp => new DelayedShutdownHostLifetime(
+            sp.GetRequiredService<IHostApplicationLifetime>(),
+            TimeSpan.FromSeconds(10)
+        ));
+    }
 
     var thisAssembly = Assembly.GetExecutingAssembly();
 

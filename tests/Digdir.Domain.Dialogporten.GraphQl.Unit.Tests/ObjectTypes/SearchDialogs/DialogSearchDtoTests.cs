@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.ObjectTypes;
+namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.ObjectTypes.SearchDialogs;
 
 public class DialogSearchDtoTests
 {

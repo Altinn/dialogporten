@@ -25,6 +25,8 @@ public sealed class SeenLog
 
     public Actor SeenBy { get; set; } = null!;
 
+    public bool? IsViaServiceOwner { get; set; }
+
     public bool IsCurrentEndUser { get; set; }
 }
 

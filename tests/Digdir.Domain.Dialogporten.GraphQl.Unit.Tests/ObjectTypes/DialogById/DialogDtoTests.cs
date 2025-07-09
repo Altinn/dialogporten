@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.ObjectTypes;
+namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.ObjectTypes.DialogById;
 
 public class DialogDtoTests
 {

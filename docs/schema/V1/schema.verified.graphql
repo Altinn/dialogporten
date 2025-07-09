@@ -350,14 +350,14 @@ type SearchDialog {
   fromPartyTransmissionsCount: Int!
   "The latest entry in the dialog's activity log."
   latestActivity: Activity
+  "The content of the dialog in search results."
+  content: SearchContent!
   "The list of seen log entries for the dialog newer than the dialog ChangedAt date."
   seenSinceLastUpdate: [SeenLog!]!
   "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
   seenSinceLastContentUpdate: [SeenLog!]!
   "Metadata about the dialog owned by end-users."
   endUserContext: EndUserContext!
-  "The content of the dialog in search results."
-  content: SearchContent!
 }
 
 type SearchDialogContinuationTokenParsingError implements SearchDialogError {

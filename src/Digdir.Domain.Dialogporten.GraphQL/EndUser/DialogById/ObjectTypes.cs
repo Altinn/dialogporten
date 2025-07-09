@@ -160,6 +160,9 @@ public sealed class Transmission
     [GraphQLDescription("The actor that sent the transmission.")]
     public Actor Sender { get; set; } = null!;
 
+    [GraphQLDescription("Indicates whether the dialog transmission has been opened.")]
+    public bool IsOpened { get; set; }
+
     [GraphQLDescription("The transmission unstructured text content.")]
     public TransmissionContent Content { get; set; } = null!;
 

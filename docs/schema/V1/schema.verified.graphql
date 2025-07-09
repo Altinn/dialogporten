@@ -397,6 +397,7 @@ type SeenLog {
   id: UUID!
   seenAt: DateTime!
   seenBy: Actor!
+  isViaServiceOwner: Boolean
   isCurrentEndUser: Boolean!
 }
 
@@ -431,6 +432,8 @@ type Transmission {
   type: TransmissionType!
   "The actor that sent the transmission."
   sender: Actor!
+  "Indicates whether the dialog transmission has been opened."
+  isOpened: Boolean!
   "The transmission unstructured text content."
   content: TransmissionContent!
   "The transmission-level attachments."

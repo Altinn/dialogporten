@@ -26,8 +26,7 @@ public static class DialogUnopenedContent
             dialog.Activities.All(a => a.TypeId != DialogActivityType.Values.CorrespondenceOpened);
     }
 
-    public static bool? IsOpened(DialogTransmission transmission) =>
-        transmission.TypeId is DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission
-            ? null
-            : transmission.Activities.Any(x => x.TypeId == DialogActivityType.Values.TransmissionOpened);
+    public static bool IsOpened(DialogTransmission transmission) => transmission.TypeId
+        is not (DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission)
+        && transmission.Activities.Any(x => x.TypeId == DialogActivityType.Values.TransmissionOpened);
 }

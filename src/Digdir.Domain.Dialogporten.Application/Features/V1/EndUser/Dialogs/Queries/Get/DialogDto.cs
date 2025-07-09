@@ -153,12 +153,12 @@ public sealed class DialogDto
     public string? DialogToken { get; set; }
 
     /// <summary>
-    /// The number of transmissions sent by a service owner 
+    /// The number of transmissions sent by a service owner
     /// </summary>
     public int FromServiceOwnerTransmissionsCount { get; set; }
 
     /// <summary>
-    /// The number of transmissions sent by a party representative 
+    /// The number of transmissions sent by a party representative
     /// </summary>
     public int FromPartyTransmissionsCount { get; set; }
 
@@ -276,7 +276,7 @@ public sealed class DialogTransmissionDto
     /// <summary>
     /// Indicates whether the dialog transmission has been opened.
     /// </summary>
-    public bool? IsOpened { get; set; }
+    public bool IsOpened { get; set; }
 
     /// <summary>
     /// The transmission unstructured text content.

@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.73.1](https://github.com/Altinn/dialogporten/compare/v1.73.0...v1.73.1) (2025-07-10)
+
+
+### Bug Fixes
+
+* **app:** Silent updates sets ContentUpdatedAt ([#2546](https://github.com/Altinn/dialogporten/issues/2546)) ([9d4d447](https://github.com/Altinn/dialogporten/commit/9d4d44718f7c8c9c6ac3d63893d499382072dca7))
+* Consider authorizedResources, authorizedAccessPackages from party list ([#2495](https://github.com/Altinn/dialogporten/issues/2495)) ([bac8f7c](https://github.com/Altinn/dialogporten/commit/bac8f7cb0684e5ca747e779fd8f74f4c90475364))
+
+
+### Miscellaneous Chores
+
+* Fix schema comments, use UpdatedAt not ChangedAt ([#2542](https://github.com/Altinn/dialogporten/issues/2542)) ([7eb16bf](https://github.com/Altinn/dialogporten/commit/7eb16bfb4498da57a954b9f6385c340971499c99))
+
 ## [1.73.0](https://github.com/Altinn/dialogporten/compare/v1.72.1...v1.73.0) (2025-07-09)
 
 

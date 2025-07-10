@@ -31,7 +31,7 @@ internal static class AggregateExtensions
 
             if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateUpdatedHandler updated && aggregateNode.IsModified())
             {
-                updated.OnUpdate(aggregateNode, utcNow);
+                updated.OnUpdate(aggregateNode, utcNow, options.EnableUpdatableFilter);
             }
 
             if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateDeletedHandler deleted && aggregateNode.IsDeleted())

@@ -106,9 +106,14 @@ public sealed class DialogEntity :
         ContentUpdatedAt = utcNow;
     }
 
-    public void OnUpdate(AggregateNode self, DateTimeOffset utcNow)
+    public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
     {
         _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+
+        if (!enableUpdatableFilter)
+        {
+            return;
+        }
 
         if (ContentHasChanged(self))
         {

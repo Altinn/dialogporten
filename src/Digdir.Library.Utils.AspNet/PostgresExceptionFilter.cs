@@ -19,9 +19,10 @@ public class PostgresExceptionFilter : OpenTelemetry.BaseProcessor<Activity>
 
 internal static class ActivityExtensions
 {
+    // "23505" is the PostgreSQL error code for unique constraint violation
+    // "23503" is the PostgreSQL error code for foreign key violation
+    // This mutes Slack notifications and error logging in AppInsights
     public static bool ContainsUniqueConstraintError(this IEnumerable<KeyValuePair<string, string?>> tags) =>
         tags.Any(t => t is { Key: "otel.status_code", Value: "ERROR" }) &&
-        // "23505" is the PostgreSQL error code for unique constraint violation
-        // This mutes Slack notifications and error logging in AppInsights
-        tags.Any(t => t.Key == "otel.status_description" && t.Value?.Contains("23505") == true);
+        tags.Any(t => t is { Key: "otel.status_description", Value: "23505" or "23503" });
 }

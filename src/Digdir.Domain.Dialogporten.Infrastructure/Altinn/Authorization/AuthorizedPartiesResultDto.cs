@@ -10,7 +10,10 @@ internal sealed class AuthorizedPartiesResultDto
     public required string Type { get; set; }
     public required bool IsDeleted { get; set; }
     public required bool OnlyHierarchyElementWithNoAccess { get; set; }
+    public required List<string> AuthorizedAccessPackages { get; set; }
     public required List<string> AuthorizedResources { get; set; }
+
     public required List<string> AuthorizedRoles { get; set; }
+    public required List<string> AuthorizedInstances { get; set; }
     public required List<AuthorizedPartiesResultDto> Subunits { get; set; }
 }

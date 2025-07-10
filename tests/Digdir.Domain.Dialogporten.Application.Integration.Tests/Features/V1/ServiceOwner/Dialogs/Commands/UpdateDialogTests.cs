@@ -424,6 +424,36 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.ContentUpdatedAt.Should().NotBe(x.UpdatedAt);
             });
 
+    private sealed class ContentNotUpdatedAtSilentUpdateTestData : TheoryData<string, Action<UpdateDialogCommand>>
+    {
+        public ContentNotUpdatedAtSilentUpdateTestData()
+        {
+            const string baseDesc = "ContentUpdatedAt should not update when";
+            const string whenSilent = "and IsSilentUpdate is set to true";
+
+            Add($"{baseDesc} dialog content is updated {whenSilent}", x => { x.ChangeTitle(); x.IsSilentUpdate = true; });
+            Add($"{baseDesc} attachments are added {whenSilent}", x => { x.AddAttachment(); x.IsSilentUpdate = true; });
+            Add($"{baseDesc} transmissions are added {whenSilent}", x => { x.AddTransmission(); x.IsSilentUpdate = true; });
+            Add($"{baseDesc} GUI actions are added {whenSilent}", x => { x.AddGuiAction(); x.IsSilentUpdate = true; });
+            Add($"{baseDesc} API actions are added {whenSilent}", x => { x.AddApiAction(); x.IsSilentUpdate = true; });
+            Add($"{baseDesc} status changes {whenSilent}", x => { x.Dto.Status = DialogStatusInput.InProgress; x.IsSilentUpdate = true; });
+            Add($"{baseDesc} extended status changes {whenSilent}", x => { x.Dto.ExtendedStatus = "new extended status"; x.IsSilentUpdate = true; });
+        }
+    }
+
+    [Theory, ClassData(typeof(ContentNotUpdatedAtSilentUpdateTestData))]
+    public Task ContentUpdatedAt_Should_Not_Change_When_Content_Updated_Silently(string _,
+        Action<UpdateDialogCommand> updateDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(updateDialog)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.ContentUpdatedAt.Should().Be(x.CreatedAt);
+                x.ContentUpdatedAt.Should().Be(x.UpdatedAt);
+            });
+
     [Fact]
     public async Task Dialog_Opened_Content()
     {

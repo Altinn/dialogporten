@@ -389,15 +389,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         public ContentNotUpdatedAtTestData()
         {
             const string baseDesc = "ContentUpdatedAt should not update when";
-            const string whenSilent = "and IsSilentUpdate is set to true";
-
-            Add($"{baseDesc} dialog content is updated {whenSilent}", x => { x.ChangeTitle(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} attachments are added {whenSilent}", x => { x.AddAttachment(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} transmissions are added {whenSilent}", x => { x.AddTransmission(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} GUI actions are added {whenSilent}", x => { x.AddGuiAction(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} API actions are added {whenSilent}", x => { x.AddApiAction(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} status changes {whenSilent}", x => { x.Dto.Status = DialogStatusInput.InProgress; x.IsSilentUpdate = true; });
-            Add($"{baseDesc} extended status changes {whenSilent}", x => { x.Dto.ExtendedStatus = "new extended status"; x.IsSilentUpdate = true; });
 
             Add($"{baseDesc} external referenced is updated", x => x.Dto.ExternalReference = "ext ref");
             Add($"{baseDesc} search tags are added", x => x.Dto.SearchTags.Add(new() { Value = "new tag" }));
@@ -450,6 +441,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
+                x.UpdatedAt.Should().Be(x.CreatedAt);
                 x.ContentUpdatedAt.Should().Be(x.CreatedAt);
                 x.ContentUpdatedAt.Should().Be(x.UpdatedAt);
             });

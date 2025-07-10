@@ -691,7 +691,7 @@
             "type": "array"
           },
           "seenSinceLastUpdate": {
-            "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogSeenLog"
             },
@@ -1546,12 +1546,12 @@
             "type": "string"
           },
           "fromPartyTransmissionsCount": {
-            "description": "The number of transmissions sent by a party representative ",
+            "description": "The number of transmissions sent by a party representative",
             "format": "int32",
             "type": "integer"
           },
           "fromServiceOwnerTransmissionsCount": {
-            "description": "The number of transmissions sent by the service owner ",
+            "description": "The number of transmissions sent by the service owner",
             "format": "int32",
             "type": "integer"
           },
@@ -1619,7 +1619,7 @@
             "type": "array"
           },
           "seenSinceLastUpdate": {
-            "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogSeenLog"
             },
@@ -3872,7 +3872,7 @@
             "type": "array"
           },
           "seenSinceLastUpdate": {
-            "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
             "items": {
               "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogSeenLog"
             },
@@ -4912,7 +4912,7 @@
             "type": "array"
           },
           "seenSinceLastUpdate": {
-            "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
             "items": {
               "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog"
             },

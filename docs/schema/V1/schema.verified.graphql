@@ -216,7 +216,7 @@ type Dialog {
   apiActions: [ApiAction!]!
   "An immutable list of activities associated with the dialog."
   activities: [Activity!]!
-  "The list of seen log entries for the dialog newer than the dialog ChangedAt date."
+  "The list of seen log entries for the dialog newer than the dialog UpdatedAt date."
   seenSinceLastUpdate: [SeenLog!]!
   "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
   seenSinceLastContentUpdate: [SeenLog!]!
@@ -352,7 +352,7 @@ type SearchDialog {
   latestActivity: Activity
   "The content of the dialog in search results."
   content: SearchContent!
-  "The list of seen log entries for the dialog newer than the dialog ChangedAt date."
+  "The list of seen log entries for the dialog newer than the dialog UpdatedAt date."
   seenSinceLastUpdate: [SeenLog!]!
   "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
   seenSinceLastContentUpdate: [SeenLog!]!
@@ -397,6 +397,7 @@ type SeenLog {
   id: UUID!
   seenAt: DateTime!
   seenBy: Actor!
+  isViaServiceOwner: Boolean
   isCurrentEndUser: Boolean!
 }
 
@@ -431,6 +432,8 @@ type Transmission {
   type: TransmissionType!
   "The actor that sent the transmission."
   sender: Actor!
+  "Indicates whether the dialog transmission has been opened."
+  isOpened: Boolean!
   "The transmission unstructured text content."
   content: TransmissionContent!
   "The transmission-level attachments."

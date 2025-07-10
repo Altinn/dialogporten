@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.73.2](https://github.com/Altinn/dialogporten/compare/v1.73.1...v1.73.2) (2025-07-10)
+
+
+### Miscellaneous Chores
+
+* **app:** Mute OTEL PostgreSQL exception tracing ([#2545](https://github.com/Altinn/dialogporten/issues/2545)) ([a225f11](https://github.com/Altinn/dialogporten/commit/a225f11743ec7448e2668cec699977581424cf21))
+
 ## [1.73.1](https://github.com/Altinn/dialogporten/compare/v1.73.0...v1.73.1) (2025-07-10)
 
 

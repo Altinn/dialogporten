@@ -195,6 +195,13 @@ public static class ClaimsPrincipalExtensions
             };
         }
 
+        if (claimsPrincipal.TryGetSystemUserId(out _))
+        {
+            // System users are always considered to have authentication level 3
+            // See https://github.com/Altinn/altinn-authentication/blob/242ef98de4094f15a1a444aeebb2caa1e808b482/src/Authentication/Controllers/AuthenticationController.cs#L495
+            return 3;
+        }
+
         throw new UnreachableException("No authentication level claim found");
     }
 

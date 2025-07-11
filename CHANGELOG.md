@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.73.4](https://github.com/Altinn/dialogporten/compare/v1.73.3...v1.73.4) (2025-07-11)
+
+
+### Bug Fixes
+
+* **app:** Assume level 3 authentication for system users ([#2551](https://github.com/Altinn/dialogporten/issues/2551)) ([a97e8be](https://github.com/Altinn/dialogporten/commit/a97e8bea91421b66a9874000e6f62f8ecf49ae47))
+
+
+### Miscellaneous Chores
+
+* **deps:** update microsoft dependencies (major) ([#2536](https://github.com/Altinn/dialogporten/issues/2536)) ([3f807d7](https://github.com/Altinn/dialogporten/commit/3f807d79d37162440891a99006aa23b834e4b00f))
+
 ## [1.73.3](https://github.com/Altinn/dialogporten/compare/v1.73.2...v1.73.3) (2025-07-11)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.73.5](https://github.com/Altinn/dialogporten/compare/v1.73.4...v1.73.5) (2025-07-11)
+
+
+### Miscellaneous Chores
+
+* **deps:** update Microsoft dependencies to 9.0.7 ([#2555](https://github.com/Altinn/dialogporten/issues/2555)) ([94f1606](https://github.com/Altinn/dialogporten/commit/94f16067c9fb4d918f9876730ba8b0dc81f1930c))
+
 ## [1.73.4](https://github.com/Altinn/dialogporten/compare/v1.73.3...v1.73.4) (2025-07-11)
 
 

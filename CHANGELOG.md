@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.73.3](https://github.com/Altinn/dialogporten/compare/v1.73.2...v1.73.3) (2025-07-11)
+
+
+### Miscellaneous Chores
+
+* **app:** Mute OTEL PostgreSQL foreign key constraint exception tracing ([#2549](https://github.com/Altinn/dialogporten/issues/2549)) ([69acdff](https://github.com/Altinn/dialogporten/commit/69acdff15c5cd232601b8079f0cc3d2efa3be225))
+
+## [1.73.2](https://github.com/Altinn/dialogporten/compare/v1.73.1...v1.73.2) (2025-07-10)
+
+
+### Miscellaneous Chores
+
+* **app:** Mute OTEL PostgreSQL exception tracing ([#2545](https://github.com/Altinn/dialogporten/issues/2545)) ([a225f11](https://github.com/Altinn/dialogporten/commit/a225f11743ec7448e2668cec699977581424cf21))
+
+## [1.73.1](https://github.com/Altinn/dialogporten/compare/v1.73.0...v1.73.1) (2025-07-10)
+
+
+### Bug Fixes
+
+* **app:** Silent updates sets ContentUpdatedAt ([#2546](https://github.com/Altinn/dialogporten/issues/2546)) ([9d4d447](https://github.com/Altinn/dialogporten/commit/9d4d44718f7c8c9c6ac3d63893d499382072dca7))
+* Consider authorizedResources, authorizedAccessPackages from party list ([#2495](https://github.com/Altinn/dialogporten/issues/2495)) ([bac8f7c](https://github.com/Altinn/dialogporten/commit/bac8f7cb0684e5ca747e779fd8f74f4c90475364))
+
+
+### Miscellaneous Chores
+
+* Fix schema comments, use UpdatedAt not ChangedAt ([#2542](https://github.com/Altinn/dialogporten/issues/2542)) ([7eb16bf](https://github.com/Altinn/dialogporten/commit/7eb16bfb4498da57a954b9f6385c340971499c99))
+
+## [1.73.0](https://github.com/Altinn/dialogporten/compare/v1.72.1...v1.73.0) (2025-07-09)
+
+
+### Features
+
+* add FromServiceOwnerTransmissionsCount and FromPartyTransmissionsCount ([#2470](https://github.com/Altinn/dialogporten/issues/2470)) ([6cf8ebf](https://github.com/Altinn/dialogporten/commit/6cf8ebf54d3fab924d2994a8c7c1f7c68f6a57db))
+
+
+### Bug Fixes
+
+* Add user type per endpoint policy validation ([#2540](https://github.com/Altinn/dialogporten/issues/2540)) ([048e0a5](https://github.com/Altinn/dialogporten/commit/048e0a53c7ab4bad9823d88e9d71e288c4e94aba))
+* **graphql:** Add missing ContentUpdatedAt mapping on search DTO ([#2525](https://github.com/Altinn/dialogporten/issues/2525)) ([fea0aee](https://github.com/Altinn/dialogporten/commit/fea0aee12fa0f3ea8ee8f43fba6fc8342b0445e3))
+
+
+### Miscellaneous Chores
+
+* **deps:** update Azure CLI to 2.75.0 ([#2527](https://github.com/Altinn/dialogporten/issues/2527)) ([6734dba](https://github.com/Altinn/dialogporten/commit/6734dbaf517357c102ebaddc0f6b7839db53c3b9))
+* **deps:** update dotnet monorepo ([#2530](https://github.com/Altinn/dialogporten/issues/2530)) ([f0b439c](https://github.com/Altinn/dialogporten/commit/f0b439c34f60cb8e2e6f29b6053cb536e9dda4e6))
+* **deps:** update grafana/grafana docker tag to v11.6.3 ([#2532](https://github.com/Altinn/dialogporten/issues/2532)) ([ee5b010](https://github.com/Altinn/dialogporten/commit/ee5b0101793c6fe3df06f8a78ef266482200326b))
+* **deps:** update hotchocolate monorepo to 15.1.7 ([#2521](https://github.com/Altinn/dialogporten/issues/2521)) ([aaae451](https://github.com/Altinn/dialogporten/commit/aaae451c21010accaea66cb9bc833c3309184a21))
+* **deps:** update masstransit monorepo to 8.5.0 ([#2533](https://github.com/Altinn/dialogporten/issues/2533)) ([6fd1b22](https://github.com/Altinn/dialogporten/commit/6fd1b223901814a7f4ddd9aef310cfafae6d8291))
+* **deps:** update nginx docker tag to v1.29.0 ([#2535](https://github.com/Altinn/dialogporten/issues/2535)) ([e809fde](https://github.com/Altinn/dialogporten/commit/e809fdea879df35dc2d72a9812e3dadb3d8e3f59))
+* **deps:** update prom/prometheus docker tag to v3.4.2 ([#2522](https://github.com/Altinn/dialogporten/issues/2522)) ([c1bb43f](https://github.com/Altinn/dialogporten/commit/c1bb43f513b4538bf50065d176bfabeaad6a71c4))
+* **deps:** update step-security/harden-runner action to v2.12.2 ([#2531](https://github.com/Altinn/dialogporten/issues/2531)) ([6cef32a](https://github.com/Altinn/dialogporten/commit/6cef32a25345509ec7d06880e03f20e2b8f550b9))
+* Disable delayed shutdown in dev ([#2534](https://github.com/Altinn/dialogporten/issues/2534)) ([6a1b6f0](https://github.com/Altinn/dialogporten/commit/6a1b6f031951616c5e784098c3eadfdd8f42aadb))
+* **graphql:** Update GraphQL descriptions ([#2529](https://github.com/Altinn/dialogporten/issues/2529)) ([a4eba28](https://github.com/Altinn/dialogporten/commit/a4eba2873e829bf9c6fa9c115423dd9714c75272))
+* Remove Transmission IsOpened nullability ([#2539](https://github.com/Altinn/dialogporten/issues/2539)) ([d9104f0](https://github.com/Altinn/dialogporten/commit/d9104f06cde68f3bbe940d928a056b5c9aed8bc1))
+* Upgrade to SDK version 9.0.302  ([#2537](https://github.com/Altinn/dialogporten/issues/2537)) ([c8456b5](https://github.com/Altinn/dialogporten/commit/c8456b59d59dfa39b2566145ac1b79ef54e93c0b))
+
 ## [1.72.1](https://github.com/Altinn/dialogporten/compare/v1.72.0...v1.72.1) (2025-07-04)
 
 

@@ -127,12 +127,12 @@ public class DialogDtoBase
     public bool IsApiOnly { get; set; }
 
     /// <summary>
-    /// The number of transmissions sent by the service owner 
+    /// The number of transmissions sent by the service owner
     /// </summary>
     public int FromServiceOwnerTransmissionsCount { get; set; }
 
     /// <summary>
-    /// The number of transmissions sent by a party representative 
+    /// The number of transmissions sent by a party representative
     /// </summary>
     public int FromPartyTransmissionsCount { get; set; }
 
@@ -142,7 +142,7 @@ public class DialogDtoBase
     public DialogActivityDto? LatestActivity { get; set; }
 
     /// <summary>
-    /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+    /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
 

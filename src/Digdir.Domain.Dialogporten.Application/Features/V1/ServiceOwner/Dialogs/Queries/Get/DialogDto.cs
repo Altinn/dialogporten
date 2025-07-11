@@ -203,7 +203,7 @@ public sealed class DialogDto
     public List<DialogActivityDto> Activities { get; set; } = [];
 
     /// <summary>
-    /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+    /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
 
@@ -319,7 +319,7 @@ public sealed class DialogTransmissionDto
     /// <summary>
     /// Indicates whether the dialog transmission has been opened.
     /// </summary>
-    public bool? IsOpened { get; set; }
+    public bool IsOpened { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

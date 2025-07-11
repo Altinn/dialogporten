@@ -31,7 +31,8 @@ public interface IAggregateUpdatedHandler
     /// </summary>
     /// <param name="self">The aggregate representing this entity with metadata.</param>
     /// <param name="utcNow">The timestamp of the update event in UTC time.</param>
-    void OnUpdate(AggregateNode self, DateTimeOffset utcNow);
+    /// <param name="enableUpdatableFilter">Indicates whether the updatable filter is enabled for this update.</param>
+    void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter = false);
 }
 
 /// <summary>

@@ -1,7 +1,7 @@
 param appConfigurationName string
 param principalIds array
 
-resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
+resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
     name: appConfigurationName
 }
 

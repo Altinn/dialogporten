@@ -86,9 +86,18 @@ public static class ClaimsPrincipalExtensions
             return false;
         }
 
-        var authDetailsJsonNode = JsonNode.Parse(authDetailsJson);
-        if (authDetailsJsonNode is null)
+        JsonNode? authDetailsJsonNode;
+        try
         {
+            authDetailsJsonNode = JsonNode.Parse(authDetailsJson);
+            if (authDetailsJsonNode is null)
+            {
+                return false;
+            }
+        }
+        catch (JsonException)
+        {
+            // If the JSON is malformed, we cannot parse it, so we return false
             return false;
         }
 
@@ -178,7 +187,7 @@ public static class ClaimsPrincipalExtensions
 
     public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
     {
-        if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level))
+        if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level) && level >= 0)
         {
             return level;
         }

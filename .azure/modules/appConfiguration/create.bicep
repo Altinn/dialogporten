@@ -23,7 +23,7 @@ param sku Sku
 var appConfigNameMaxLength = 63
 var appConfigName = uniqueResourceName('${namePrefix}-appConfiguration', appConfigNameMaxLength)
 
-resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-05-01' = {
+resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-06-01' = {
   name: appConfigName
   location: location
   sku: sku
@@ -40,7 +40,7 @@ resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-05-01' =
   tags: tags
 }
 
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-02-01' existing = {
   name: logAnalyticsWorkspaceName
 }
 

@@ -18,7 +18,7 @@ var serviceBusSubnetPrefix = '10.0.4.0/24'
 var redisSubnetPrefix = '10.0.5.0/24'
 var sshJumperSubnetPrefix = '10.0.6.0/24'
 
-resource defaultNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+resource defaultNSG 'Microsoft.Network/networkSecurityGroups@2024-07-01' = {
   name: '${namePrefix}-default-nsg'
   location: location
   properties: {
@@ -58,7 +58,7 @@ resource defaultNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
 }
 
 // https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration?tabs=consumption-only
-resource containerAppEnvironmentNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+resource containerAppEnvironmentNSG 'Microsoft.Network/networkSecurityGroups@2024-07-01' = {
   name: '${namePrefix}-container-app-environment-nsg'
   location: location
   properties: {
@@ -157,7 +157,7 @@ resource containerAppEnvironmentNSG 'Microsoft.Network/networkSecurityGroups@202
   tags: tags
 }
 
-resource postgresqlNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+resource postgresqlNSG 'Microsoft.Network/networkSecurityGroups@2024-07-01' = {
   name: '${namePrefix}-postgresql-nsg'
   location: location
   properties: {
@@ -196,7 +196,7 @@ resource postgresqlNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   tags: tags
 }
 
-resource redisNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+resource redisNSG 'Microsoft.Network/networkSecurityGroups@2024-07-01' = {
   name: '${namePrefix}-redis-nsg'
   location: location
   properties: {
@@ -235,7 +235,7 @@ resource redisNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   tags: tags
 }
 
-resource serviceBusNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+resource serviceBusNSG 'Microsoft.Network/networkSecurityGroups@2024-07-01' = {
   name: '${namePrefix}-service-bus-nsg'
   location: location
   properties: {
@@ -274,7 +274,7 @@ resource serviceBusNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   tags: tags
 }
 
-resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
+resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-07-01' = {
   name: '${namePrefix}-ssh-jumper-nsg'
   location: location
   properties: {
@@ -298,7 +298,7 @@ resource sshJumperNSG 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   tags: tags
 }
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-05-01' = {
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-07-01' = {
   name: '${namePrefix}-vnet'
   location: location
   properties: {

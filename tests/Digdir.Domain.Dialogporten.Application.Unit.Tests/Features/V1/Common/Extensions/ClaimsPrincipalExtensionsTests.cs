@@ -1,9 +1,12 @@
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.Extensions;
 
+[SuppressMessage("Globalization", "CA1305:Specify IFormatProvider")]
 public class ClaimsPrincipalExtensionsTests
 {
     [Fact]
@@ -271,7 +274,7 @@ public class ClaimsPrincipalExtensionsTests
     {
         // Arrange
         var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim("authorization_details", null)
+            new Claim("authorization_details", null!)
         ]));
 
         // Act

@@ -24,7 +24,7 @@ param tags object = {}
 var parsedContentType = keyValueType == 'keyVaultReference' ? 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' : keyValueType == 'featureFlag' ? 'application/vnd.microsoft.appconfig.ff+json;charset=utf-8' : contentType
 var parsedValue = keyValueType == 'keyVaultReference' ? '{"uri":"${value}"}' : value
 
-resource configStore 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
+resource configStore 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
     name: configStoreName
     resource configStoreKeyValue 'keyValues' = {
         name: key

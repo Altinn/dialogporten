@@ -1838,7 +1838,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1ServiceOwnerDialogsQueriesSearch_DialogActivity LatestActivity { get; set; }
 
         /// <summary>
-        /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+        /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
         /// </summary>
 
         [JsonPropertyName("seenSinceLastUpdate")]
@@ -2622,7 +2622,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogActivity> Activities { get; set; }
 
         /// <summary>
-        /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+        /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
         /// </summary>
 
         [JsonPropertyName("seenSinceLastUpdate")]
@@ -2870,7 +2870,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
 
         [JsonPropertyName("isOpened")]
-        public bool? IsOpened { get; set; }
+        public bool IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.

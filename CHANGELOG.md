@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.73.3](https://github.com/Altinn/dialogporten/compare/v1.73.2...v1.73.3) (2025-07-11)
+
+
+### Miscellaneous Chores
+
+* **app:** Mute OTEL PostgreSQL foreign key constraint exception tracing ([#2549](https://github.com/Altinn/dialogporten/issues/2549)) ([69acdff](https://github.com/Altinn/dialogporten/commit/69acdff15c5cd232601b8079f0cc3d2efa3be225))
+
 ## [1.73.2](https://github.com/Altinn/dialogporten/compare/v1.73.1...v1.73.2) (2025-07-10)
 
 

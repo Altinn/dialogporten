@@ -18,7 +18,7 @@ internal sealed class AuthorizedPartiesResultDto
     public required List<AuthorizedPartiesResultDto> Subunits { get; set; }
 }
 
-public class AuthorizedResource
+internal sealed class AuthorizedResource
 {
     public string ResourceId { get; set; } = null!;
     public string InstanceId { get; set; } = null!;

@@ -1,10 +1,25 @@
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Domain.Common;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 internal static class AuthorizationHelper
 {
+    /// <summary>
+    /// This method resolves subjects (ie. roles and access packages) based on the authorized parties and constraints provided,
+    /// returning a list of all the (unique) resources associated with each party.
+    ///
+    /// Additionally, it collects Altinn app instance delegations for parties that have them, returning them as a intermediate
+    /// list of instance ids that can later be used to determine the actual dialog ids for these app instances. This is performed
+    /// in this method as well, to avoid having to loop/filter over (the potentially large) list of parties multiple times.
+    /// </summary>
+    /// <param name="authorizedParties"></param>
+    /// <param name="constraintParties"></param>
+    /// <param name="constraintResources"></param>
+    /// <param name="getAllSubjectResources"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public static async Task<DialogSearchAuthorizationResult> CollapseSubjectResources(
         AuthorizedPartiesResult authorizedParties, // Do NOT mutate as this might be a reference to a memory cache
         List<string> constraintParties,
@@ -87,7 +102,7 @@ internal static class AuthorizationHelper
             }
         }
 
-        // Step 5: Handle parties that have direct resource authorizations
+        // Step 5: Handle parties that have direct resource authorizations and instance delegations
         foreach (var party in authorizedParties.AuthorizedParties
                      .Where(p => constraintPartiesSet is null || constraintPartiesSet.Contains(p.Party)))
         {
@@ -109,6 +124,18 @@ internal static class AuthorizationHelper
                 }
 
                 existingResources.Add(resource);
+            }
+
+            foreach (var instance in party.AuthorizedInstances)
+            {
+                // We currently only support Altinn 3.0 app instance delegations from Altinn Access Management
+                if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (constraintResourcesSet != null && !constraintResourcesSet.Contains(Constants.ServiceResourcePrefix + instance.ResourceId))
+                    continue;
+
+                result.AltinnAppInstanceIds.Add(Constants.ServiceContextInstanceIdPrefix + party.PartyId + "/" + instance.InstanceId);
             }
         }
 

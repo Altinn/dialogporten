@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.73.5](https://github.com/Altinn/dialogporten/compare/v1.73.4...v1.73.5) (2025-07-15)
+
+
+### Miscellaneous Chores
+
+* **deps:** update jaegertracing/all-in-one docker tag to v1.71.0 ([#2559](https://github.com/Altinn/dialogporten/issues/2559)) ([aa06c37](https://github.com/Altinn/dialogporten/commit/aa06c376539500bd43ec9821f7601b7acda4b25e))
+* **deps:** update Microsoft dependencies to 9.0.7 ([#2555](https://github.com/Altinn/dialogporten/issues/2555)) ([94f1606](https://github.com/Altinn/dialogporten/commit/94f16067c9fb4d918f9876730ba8b0dc81f1930c))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.129.1 ([#2560](https://github.com/Altinn/dialogporten/issues/2560)) ([bc539e9](https://github.com/Altinn/dialogporten/commit/bc539e95a12aff72e5df18bb7bfdc981e72420df))
+
 ## [1.73.4](https://github.com/Altinn/dialogporten/compare/v1.73.3...v1.73.4) (2025-07-11)
 
 

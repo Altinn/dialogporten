@@ -1,5 +1,3 @@
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-
 namespace Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 /// <summary>

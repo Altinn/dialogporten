@@ -7,16 +7,23 @@ using FluentAssertions;
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Get;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class GetDialogTests : ApplicationCollectionFixture
+public class GetDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    public GetDialogTests(DialogApplication application) : base(application) { }
-
     [Fact]
-    public Task Get_New_Dialog_Should_Return_Empty_SystemLabels() =>
+    public Task Get_Should_Populate_EnduserContextRevision() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.Should()
-                    .ContainSingle(x => x == SystemLabel.Values.Default));
+                x.EndUserContext.Revision.Should().NotBeEmpty());
+
+    [Fact]
+    [Obsolete("Testing obsolete SystemLabel, will be removed in future versions.")]
+    public Task Get_Should_Populate_Obsolete_SystemLabel() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.SystemLabel.Should()
+                    .Be(SystemLabel.Values.Default));
 }

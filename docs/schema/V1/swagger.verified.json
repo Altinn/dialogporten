@@ -43,21 +43,21 @@
       "DialogsEntities_DialogStatus": {
         "description": "",
         "enum": [
-          "NotApplicable",
           "InProgress",
           "Draft",
-          "Awaiting",
           "RequiresAttention",
-          "Completed"
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
         ],
         "type": "string",
         "x-enumNames": [
-          "NotApplicable",
           "InProgress",
           "Draft",
-          "Awaiting",
           "RequiresAttention",
-          "Completed"
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
         ]
       },
       "DialogsEntitiesActions_DialogGuiActionPriority": {
@@ -569,6 +569,12 @@
               }
             ]
           },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
@@ -612,6 +618,16 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by a service owner",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiActions": {
             "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
             "items": {
@@ -619,6 +635,10 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -662,8 +682,16 @@
             "format": "guid",
             "type": "string"
           },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "seenSinceLastUpdate": {
-            "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogSeenLog"
             },
@@ -686,6 +714,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
@@ -1078,6 +1116,10 @@
             "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
             "type": "boolean"
           },
+          "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
+            "type": "boolean"
+          },
           "relatedTransmissionId": {
             "description": "Reference to any other transmission that this transmission is related to.",
             "format": "guid",
@@ -1466,6 +1508,12 @@
               }
             ]
           },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
@@ -1497,11 +1545,25 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by the service owner",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiAttachmentCount": {
             "description": "The number of attachments in the dialog made available for browser-based frontends.",
             "format": "int32",
             "nullable": true,
             "type": "integer"
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -1548,8 +1610,16 @@
             "nullable": true,
             "type": "integer"
           },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "seenSinceLastUpdate": {
-            "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogSeenLog"
             },
@@ -1572,6 +1642,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",
@@ -2013,6 +2093,30 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerCommonDialogStatuses_DialogStatusInput": {
+        "description": "",
+        "enum": [
+          "New",
+          "InProgress",
+          "Draft",
+          "Sent",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "New",
+          "InProgress",
+          "Draft",
+          "Sent",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ]
+      },
       "V1ServiceOwnerDialogsCommandsCreate_Activity": {
         "additionalProperties": false,
         "properties": {
@@ -2426,7 +2530,7 @@
             "description": "The aggregated status of the dialog.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"
               }
             ]
           },
@@ -3252,7 +3356,7 @@
             "description": "The aggregated status of the dialog.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"
               }
             ]
           },
@@ -3632,6 +3736,12 @@
               }
             ]
           },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
@@ -3676,6 +3786,16 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by the service owner",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiActions": {
             "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
             "items": {
@@ -3683,6 +3803,10 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -3739,8 +3863,16 @@
             "nullable": true,
             "type": "array"
           },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "seenSinceLastUpdate": {
-            "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
             "items": {
               "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogSeenLog"
             },
@@ -3771,6 +3903,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "transmissions": {
             "description": "The immutable list of transmissions associated with the dialog.",
@@ -4204,6 +4346,10 @@
           "isAuthorized": {
             "description": "Flag indicating if the authenticated user supplied in the query is authorized for this transmission.",
             "nullable": true,
+            "type": "boolean"
+          },
+          "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
             "type": "boolean"
           },
           "relatedTransmissionId": {
@@ -4643,6 +4789,12 @@
               }
             ]
           },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the dialog was created.",
             "example": "2022-12-31T23:59:59Z",
@@ -4680,11 +4832,25 @@
             "nullable": true,
             "type": "string"
           },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by a service owner",
+            "format": "int32",
+            "type": "integer"
+          },
           "guiAttachmentCount": {
             "description": "The number of attachments in the dialog made available for browser-based frontends.",
             "format": "int32",
             "nullable": true,
             "type": "integer"
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -4737,8 +4903,16 @@
             "format": "guid",
             "type": "string"
           },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "seenSinceLastUpdate": {
-            "description": "The list of seen log entries for the dialog newer than the dialog ChangedAt date.",
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
             "items": {
               "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog"
             },
@@ -4769,6 +4943,16 @@
                 "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
               }
             ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
           },
           "updatedAt": {
             "description": "The date and time when the dialog was last updated.",
@@ -5447,6 +5631,26 @@
             "description": "Only return dialogs updated before this date",
             "in": "query",
             "name": "updatedBefore",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated after this date",
+            "in": "query",
+            "name": "contentUpdatedAfter",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated before this date",
+            "in": "query",
+            "name": "contentUpdatedBefore",
             "schema": {
               "format": "date-time",
               "nullable": true,
@@ -6427,6 +6631,26 @@
             "description": "Only return dialogs updated before this date",
             "in": "query",
             "name": "updatedBefore",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated after this date",
+            "in": "query",
+            "name": "contentUpdatedAfter",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated before this date",
+            "in": "query",
+            "name": "contentUpdatedBefore",
             "schema": {
               "format": "date-time",
               "nullable": true,

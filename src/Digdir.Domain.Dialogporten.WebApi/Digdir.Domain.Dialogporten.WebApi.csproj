@@ -7,15 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Azure.Identity" Version="1.14.0"/>
+        <PackageReference Include="Azure.Identity" Version="1.14.1"/>
         <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0"/>
         <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.2.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0"/>
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
         <PackageReference Include="FastEndpoints.Swagger" Version="5.35.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.6" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.6" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.7" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
         <PackageReference Include="NSwag.MSBuild" Version="14.2.0"/>
     </ItemGroup>
 
@@ -24,18 +24,6 @@
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.Infrastructure\Digdir.Domain.Dialogporten.Infrastructure.csproj"/>
         <ProjectReference Include="..\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj"/>
         <ProjectReference Include="..\Digdir.Tool.Dialogporten.GenerateFakeData\Digdir.Tool.Dialogporten.GenerateFakeData.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Endpoints\V1\EndUser\Dialogs\Queries\" />
-      <Folder Include="Endpoints\V1\EndUser\EndUserContext\Commands\" />
-      <Folder Include="Endpoints\V1\EndUser\EndUserContext\Queries\" />
-      <Folder Include="Endpoints\V1\EndUser\AccessManagement\Queries\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\Dialogs\Commands\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\Dialogs\Queries\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\EndUserContext\Commands\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\ServiceOwnerContext\Commands\" />
-      <Folder Include="Endpoints\V1\ServiceOwner\ServiceOwnerContext\Queries\" />
     </ItemGroup>
 
     <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration)=='Release'">

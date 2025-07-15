@@ -5,9 +5,9 @@ using Digdir.Library.Entity.Abstractions.Features.Updatable;
 namespace Digdir.Library.Entity.Abstractions;
 
 /// <summary>
-/// Convenience interface to mark an entity with 
-/// <see cref="IIdentifiableEntity"/>, 
-/// <see cref="ICreatableEntity"/>, and 
+/// Convenience interface to mark an entity with
+/// <see cref="IIdentifiableEntity"/>,
+/// <see cref="ICreatableEntity"/>, and
 /// <see cref="IUpdateableEntity"/>.
 /// </summary>
 public interface IEntity :

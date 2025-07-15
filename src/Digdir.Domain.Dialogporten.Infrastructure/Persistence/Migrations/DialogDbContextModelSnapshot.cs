@@ -838,6 +838,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<DateTimeOffset>("ContentUpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -862,6 +867,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Property<string>("ExternalReference")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<short>("FromPartyTransmissionsCount")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("FromServiceOwnerTransmissionsCount")
+                        .HasColumnType("smallint");
+
+                    b.Property<bool>("HasUnopenedContent")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("IdempotentKey")
                         .HasMaxLength(36)
@@ -924,6 +938,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ContentUpdatedAt");
 
                     b.HasIndex("CreatedAt");
 
@@ -1037,11 +1053,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            Name = "NotApplicable"
-                        },
-                        new
-                        {
                             Id = 2,
                             Name = "InProgress"
                         },
@@ -1052,11 +1063,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
-                            Id = 4,
-                            Name = "Awaiting"
-                        },
-                        new
-                        {
                             Id = 5,
                             Name = "RequiresAttention"
                         },
@@ -1064,6 +1070,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 6,
                             Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "NotApplicable"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Awaiting"
                         });
                 });
 

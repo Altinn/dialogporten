@@ -102,7 +102,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
         }
 
-        return !flatten ? authorizedParties : GetFlattenedAuthorizedParties(authorizedParties);
+        return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
     }
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
@@ -128,7 +128,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     }
 
     // Create static empty lists to reuse and avoid allocations
-    private static readonly List<string> EmptyRolesList = [];
+    private static readonly List<string> EmptyStringList = [];
     private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
 
     private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)
@@ -156,9 +156,15 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             {
                 Party = party.Party,
                 ParentParty = null,
-                AuthorizedRoles = party.AuthorizedRoles.Count > 0
-                    ? [.. party.AuthorizedRoles]
-                    : EmptyRolesList,
+                AuthorizedResources = party.AuthorizedResources.Count > 0
+                    ? [.. party.AuthorizedResources]
+                    : EmptyStringList,
+                AuthorizedRolesAndAccessPackages = party.AuthorizedRolesAndAccessPackages.Count > 0
+                    ? [.. party.AuthorizedRolesAndAccessPackages]
+                    : EmptyStringList,
+                AuthorizedInstances = party.AuthorizedInstances.Count > 0
+                    ? [.. party.AuthorizedInstances]
+                    : EmptyStringList,
                 SubParties = EmptySubPartiesList
             });
 
@@ -171,9 +177,15 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 {
                     Party = subParty.Party,
                     ParentParty = party.Party,
-                    AuthorizedRoles = subParty.AuthorizedRoles.Count > 0
-                        ? [.. subParty.AuthorizedRoles]
-                        : EmptyRolesList,
+                    AuthorizedResources = subParty.AuthorizedResources.Count > 0
+                        ? [.. subParty.AuthorizedResources]
+                        : EmptyStringList,
+                    AuthorizedRolesAndAccessPackages = subParty.AuthorizedRolesAndAccessPackages.Count > 0
+                        ? [.. subParty.AuthorizedRolesAndAccessPackages]
+                        : EmptyStringList,
+                    AuthorizedInstances = subParty.AuthorizedInstances.Count > 0
+                        ? [.. subParty.AuthorizedInstances]
+                        : EmptyStringList,
                     SubParties = EmptySubPartiesList
                 });
             }

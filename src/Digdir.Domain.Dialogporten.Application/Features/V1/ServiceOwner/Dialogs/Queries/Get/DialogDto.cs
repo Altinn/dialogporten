@@ -129,9 +129,23 @@ public sealed class DialogDto
     public DateTimeOffset UpdatedAt { get; set; }
 
     /// <summary>
+    /// The date and time when the dialog content was last updated.
+    /// </summary>
+    /// <example>2022-12-31T23:59:59Z</example>
+    public DateTimeOffset ContentUpdatedAt { get; set; }
+
+    /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
     public DialogStatus.Values Status { get; set; }
+
+    /// <summary>
+    /// System defined label used to categorize dialogs.
+    /// This is obsolete and will only show; <see cref="SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
+    /// </summary>
+    [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]
+    public SystemLabel.Values SystemLabel { get; set; }
 
     /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
@@ -139,9 +153,24 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
+
+    /// <summary>
     /// The dialog unstructured text content.
     /// </summary>
     public ContentDto? Content { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by the service owner
+    /// </summary>
+    public int FromServiceOwnerTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a party representative
+    /// </summary>
+    public int FromPartyTransmissionsCount { get; set; }
 
     /// <summary>
     /// The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
@@ -174,9 +203,14 @@ public sealed class DialogDto
     public List<DialogActivityDto> Activities { get; set; } = [];
 
     /// <summary>
-    /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+    /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
+
+    /// <summary>
+    /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+    /// </summary>
+    public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
 
     /// <summary>
     /// Metadata about the dialog owned by the service owner.
@@ -281,6 +315,11 @@ public sealed class DialogTransmissionDto
     /// The transmission unstructured text content.
     /// </summary>
     public DialogTransmissionContentDto Content { get; set; } = null!;
+
+    /// <summary>
+    /// Indicates whether the dialog transmission has been opened.
+    /// </summary>
+    public bool IsOpened { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

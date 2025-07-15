@@ -37,36 +37,58 @@ type Actor {
 }
 
 type ApiAction {
+  "The unique identifier for the action in UUIDv7 format."
   id: UUID!
+  "String identifier for the action, corresponding to the 'action' attributeId used in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog."
   action: String!
+  "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies."
   authorizationAttribute: String
+  "True if the authenticated user is authorized for this action. If not, the action will not be available and all endpoints will be replaced with a fixed placeholder."
   isAuthorized: Boolean!
+  "The logical name of the operation the API action refers to."
   name: String
+  "The endpoints associated with the action."
   endpoints: [ApiActionEndpoint!]!
 }
 
 type ApiActionEndpoint {
+  "The unique identifier for the endpoint in UUIDv7 format."
   id: UUID!
+  "Arbitrary string indicating the version of the endpoint. Consult the service-specific documentation provided by the service owner for details (if in use)."
   version: String
+  "The fully qualified URL of the API endpoint. Will be set to 'urn:dialogporten:unauthorized' if the user is not authorized to perform the action."
   url: URL!
+  "The HTTP method that the endpoint expects for this action."
   httpMethod: HttpVerb!
+  "Link to service provider documentation for the endpoint. Used for service owners to provide documentation for integrators. Should be a URL to a human-readable page."
   documentationUrl: URL
+  "Link to the request schema for the endpoint. Used by service owners to provide documentation for integrators. Dialogporten will not validate information on this endpoint."
   requestSchema: URL
+  "Link to the response schema for the endpoint. Used for service owners to provide documentation for integrators. Dialogporten will not validate information on this endpoint."
   responseSchema: URL
+  "Boolean indicating if the endpoint is deprecated. Integrators should migrate to endpoints with a higher version."
   deprecated: Boolean!
+  "Date and time when the service owner has indicated that endpoint will no longer function. Only set if the endpoint is deprecated. Dialogporten will not enforce this date."
   sunsetAt: DateTime
 }
 
 type Attachment {
+  "The unique identifier for the attachment in UUIDv7 format."
   id: UUID!
+  "The display name of the attachment that should be used in GUIs."
   displayName: [Localization!]!
+  "The URLs associated with the attachment, each referring to a different representation of the attachment."
   urls: [AttachmentUrl!]!
 }
 
 type AttachmentUrl {
+  "The unique identifier for the attachment URL in UUIDv7 format."
   id: UUID!
+  "The fully qualified URL of the attachment."
   url: URL!
+  "The media type of the attachment."
   mediaType: String
+  "What type of consumer the URL is intended for."
   consumerType: AttachmentUrlConsumer!
 }
 
@@ -118,11 +140,17 @@ type BulkSetSystemLabelValidationError implements BulkSetSystemLabelError {
 }
 
 type Content {
+  "The title of the dialog."
   title: ContentValue!
+  "A short summary of the dialog and its current state."
   summary: ContentValue
+  "Overridden sender name. If not supplied, assume 'org' as the sender name."
   senderName: ContentValue
+  "Additional information about the dialog, this may contain Markdown."
   additionalInfo: ContentValue
+  "Used as the human-readable label used to describe the 'ExtendedStatus' field."
   extendedStatus: ContentValue
+  "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL."
   mainContentReference: ContentValue
 }
 
@@ -132,33 +160,69 @@ type ContentValue {
 }
 
 type Dialog {
+  "The unique identifier for the dialog in UUIDv7 format. Example: 01913cd5-784f-7d3b-abef-4c77b1f0972d"
   id: UUID!
+  "The unique identifier for the revision in UUIDv4 format. Example: a312cb9c-7632-43c2-aa38-69b06aed56ca"
   revision: UUID!
+  "The service owner code representing the organization (service owner) related to this dialog. Example: ske"
   org: String!
+  "The service identifier for the service that the dialog is related to in URN-format. This corresponds to a service resource in the Altinn Resource Registry. Example: urn:altinn:resource:some-service-identifier"
   serviceResource: String!
+  "The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType)."
   serviceResourceType: String!
+  "The party code representing the organization or person that the dialog belongs to in URN format. Example: urn:altinn:person:identifier-no:01125512345, urn:altinn:organization:identifier-no:912345678"
   party: String!
+  "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come to a natural completion (successful or not)."
   progress: Int
+  "Optional process identifier used to indicate a business process this dialog belongs to."
   process: String
+  "Optional preceding process identifier to indicate the business process that preceded the process indicated in the 'Process' field. Cannot be set without also 'Process' being set."
   precedingProcess: String
+  "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of the dialog to further specify the 'status' enum. Refer to the service-specific documentation provided by the service owner for details on the possible values (if in use)."
   extendedStatus: String
+  "Arbitrary string with a service-specific reference to an external system or service. Refer to the service-specific documentation provided by the service owner for details (if in use)."
   externalReference: String
+  "The date and time when the dialog becomes visible to the end user."
   visibleFrom: DateTime
+  "The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available. Example: 2022-12-31T23:59:59Z"
   dueAt: DateTime
+  "The expiration date for the dialog. This is the last date when the dialog is available for the end user. After this date is passed, the dialog will be considered expired and no longer available for the end user in any API. If not supplied, the dialog will be considered to never expire. This field can be changed by the service owner after the dialog has been created. Example: 2022-12-31T23:59:59Z"
   expiresAt: DateTime
+  "The date and time when the dialog was created. Example: 2022-12-31T23:59:59Z"
   createdAt: DateTime!
+  "The date and time when the dialog was last updated. Example: 2022-12-31T23:59:59Z"
   updatedAt: DateTime!
+  "The date and time when the dialog content was last updated. Example: 2022-12-31T23:59:59Z"
+  contentUpdatedAt: DateTime!
+  "The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds."
   dialogToken: String
+  "The aggregated status of the dialog."
   status: DialogStatus!
+  "Indicates whether the dialog contains content that has not been viewed or opened by the user yet."
+  hasUnopenedContent: Boolean!
+  "The number of transmissions sent by the service owner"
+  fromServiceOwnerTransmissionsCount: Int!
+  "The number of transmissions sent by a party representative"
+  fromPartyTransmissionsCount: Int!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
+  "The dialog unstructured text content."
   content: Content!
+  "The attachments associated with the dialog (on an aggregate level)."
   attachments: [Attachment!]!
+  "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends."
   guiActions: [GuiAction!]!
+  "The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations."
   apiActions: [ApiAction!]!
+  "An immutable list of activities associated with the dialog."
   activities: [Activity!]!
+  "The list of seen log entries for the dialog newer than the dialog UpdatedAt date."
   seenSinceLastUpdate: [SeenLog!]!
+  "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
+  seenSinceLastContentUpdate: [SeenLog!]!
+  "The immutable list of transmissions associated with the dialog."
   transmissions: [Transmission!]!
+  "Metadata about the dialog owned by end-users."
   endUserContext: EndUserContext!
 }
 
@@ -194,15 +258,25 @@ type EndUserContext {
 }
 
 type GuiAction {
+  "The unique identifier for the action in UUIDv7 format."
   id: UUID!
+  "The action identifier for the action, corresponding to the 'action' attributeId used in the XACML service policy."
   action: String!
+  "The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to 'urn:dialogporten:unauthorized' if the user is not authorized to perform the action."
   url: URL!
+  "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies."
   authorizationAttribute: String
+  "Whether the user is authorized to perform the action."
   isAuthorized: Boolean!
+  "Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX for delete actions."
   isDeleteDialogAction: Boolean!
+  "Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action priority."
   priority: GuiActionPriority!
+  "The HTTP method that the frontend should use when redirecting the user."
   httpMethod: HttpVerb!
+  "The title of the action, this should be short and in verb form."
   title: [Localization!]!
+  "If there should be a prompt asking the user for confirmation before the action is executed, this field should contain the prompt text."
   prompt: [Localization!]
 }
 
@@ -223,32 +297,66 @@ type Queries @authorize(policy: "enduser") {
 }
 
 type SearchContent {
+  "The title of the dialog."
   title: ContentValue!
+  "A short summary of the dialog and its current state."
   summary: ContentValue
+  "Overridden sender name. If not supplied, assume 'org' as the sender name."
   senderName: ContentValue
+  "Used as the human-readable label used to describe the 'ExtendedStatus' field."
   extendedStatus: ContentValue
 }
 
 type SearchDialog {
+  "The unique identifier for the dialog in UUIDv7 format. Example: 01913cd5-784f-7d3b-abef-4c77b1f0972d"
   id: UUID!
+  "The service owner code representing the organization (service owner) related to this dialog. Example: ske"
   org: String!
+  "The service identifier for the service that the dialog is related to in URN-format. This corresponds to a service resource in the Altinn Resource Registry. Example: urn:altinn:resource:some-service-identifier"
   serviceResource: String!
+  "The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType)."
   serviceResourceType: String!
+  "The party code representing the organization or person that the dialog belongs to in URN format. Example: urn:altinn:person:identifier-no:01125512345, urn:altinn:organization:identifier-no:912345678"
   party: String!
+  "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come to a natural completion (successful or not)."
   progress: Int
+  "Optional process identifier used to indicate a business process this dialog belongs to."
   process: String
+  "Optional preceding process identifier to indicate the business process that preceded the process indicated in the 'Process' field. Cannot be set without also 'Process' being set."
   precedingProcess: String
+  "The number of attachments in the dialog made available for browser-based frontends."
   guiAttachmentCount: Int
+  "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of the dialog to further specify the 'status' enum. Refer to the service-specific documentation provided by the service owner for details on the possible values (if in use)."
   extendedStatus: String
+  "Arbitrary string with a service-specific reference to an external system or service. Refer to the service-specific documentation provided by the service owner for details (if in use)."
+  externalReference: String
+  "The date and time when the dialog was created. Example: 2022-12-31T23:59:59Z"
   createdAt: DateTime!
+  "The date and time when the dialog was last updated. Example: 2022-12-31T23:59:59Z"
   updatedAt: DateTime!
+  "The date and time when the dialog content was last updated. Example: 2022-12-31T23:59:59Z"
+  contentUpdatedAt: DateTime!
+  "The due date for the dialog. This is the last date when the dialog is expected to be completed. Example: 2022-12-31T23:59:59Z"
   dueAt: DateTime
+  "The aggregated status of the dialog."
   status: DialogStatus!
+  "Indicates whether the dialog contains content that has not been viewed or opened by the user yet."
+  hasUnopenedContent: Boolean!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
+  "The number of transmissions sent by the service owner"
+  fromServiceOwnerTransmissionsCount: Int!
+  "The number of transmissions sent by a party representative"
+  fromPartyTransmissionsCount: Int!
+  "The latest entry in the dialog's activity log."
   latestActivity: Activity
+  "The content of the dialog in search results."
   content: SearchContent!
+  "The list of seen log entries for the dialog newer than the dialog UpdatedAt date."
   seenSinceLastUpdate: [SeenLog!]!
+  "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
+  seenSinceLastContentUpdate: [SeenLog!]!
+  "Metadata about the dialog owned by end-users."
   endUserContext: EndUserContext!
 }
 
@@ -269,6 +377,7 @@ type SearchDialogSortType {
   createdAt: OrderDirection
   updatedAt: OrderDirection
   dueAt: OrderDirection
+  contentUpdatedAt: OrderDirection
 }
 
 type SearchDialogValidationError implements SearchDialogError {
@@ -288,6 +397,7 @@ type SeenLog {
   id: UUID!
   seenAt: DateTime!
   seenBy: Actor!
+  isViaServiceOwner: Boolean
   isCurrentEndUser: Boolean!
 }
 
@@ -306,21 +416,36 @@ type Subscriptions {
 }
 
 type Transmission {
+  "The unique identifier for the transmission in UUIDv7 format."
   id: UUID!
+  "The date and time when the transmission was created."
   createdAt: DateTime!
+  "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies. Example: mycustomresource, urn:altinn:subresource:mycustomresource, urn:altinn:task:Task_1, urn:altinn:resource:some-other-service-identifier"
   authorizationAttribute: String
+  "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and the attachments will not be available."
   isAuthorized: Boolean!
+  "Arbitrary URI\/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use)."
   extendedType: URL
+  "Reference to any other transmission that this transmission is related to."
   relatedTransmissionId: UUID
+  "The type of transmission."
   type: TransmissionType!
+  "The actor that sent the transmission."
   sender: Actor!
+  "Indicates whether the dialog transmission has been opened."
+  isOpened: Boolean!
+  "The transmission unstructured text content."
   content: TransmissionContent!
+  "The transmission-level attachments."
   attachments: [Attachment!]!
 }
 
 type TransmissionContent {
+  "The transmission title."
   title: ContentValue!
+  "The transmission summary."
   summary: ContentValue
+  "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL."
   contentReference: ContentValue
 }
 
@@ -380,6 +505,7 @@ input SearchDialogSortTypeInput {
   createdAt: OrderDirection
   updatedAt: OrderDirection
   dueAt: OrderDirection
+  contentUpdatedAt: OrderDirection
 }
 
 input SetSystemLabelInput {
@@ -450,8 +576,6 @@ enum DialogEventType {
 }
 
 enum DialogStatus {
-  "No explicit status. This is the default."
-  NOT_APPLICABLE
   "Started. In a serial process, this is used to indicate that, for example, a form filling is ongoing."
   IN_PROGRESS
   "Used to indicate user-initiated dialogs not yet sent."
@@ -462,6 +586,8 @@ enum DialogStatus {
   REQUIRES_ATTENTION
   "The dialogue was completed. This typically means that the dialogue is moved to a GUI archive or similar."
   COMPLETED
+  "No explicit status. This is the default."
+  NOT_APPLICABLE
 }
 
 enum GuiActionPriority {

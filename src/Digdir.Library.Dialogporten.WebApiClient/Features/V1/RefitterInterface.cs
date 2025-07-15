@@ -83,6 +83,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset? UpdatedBefore { get; set; }
 
         /// <summary>
+        /// Only return dialogs with content updated after this date
+        /// </summary>
+        [Query] 
+        public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
+
+        /// <summary>
+        /// Only return dialogs with content updated before this date
+        /// </summary>
+        [Query] 
+        public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
+
+        /// <summary>
         /// Only return dialogs with due date after this date
         /// </summary>
         [Query] 
@@ -180,7 +192,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Retrieve service owner labels for a dialog</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.5.6.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.6.0.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Retrieve service owner labels for a dialog</summary>
@@ -1744,6 +1756,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset UpdatedAt { get; set; }
 
         /// <summary>
+        /// The date and time when the dialog content was last updated.
+        /// </summary>
+
+        [JsonPropertyName("contentUpdatedAt")]
+        public System.DateTimeOffset ContentUpdatedAt { get; set; }
+
+        /// <summary>
         /// The due date for the dialog. This is the last date when the dialog is expected to be completed.
         /// </summary>
 
@@ -1773,11 +1792,43 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public DialogsEntities_DialogStatus Status { get; set; }
 
         /// <summary>
+        /// System defined label used to categorize dialogs.
+        /// <br/>This is obsolete and will only show; Default, Bin or Archive.
+        /// <br/>Use SystemLabels on EndUserContext instead.
+        /// </summary>
+
+        [JsonPropertyName("systemLabel")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
+        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
+
+        /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
 
         [JsonPropertyName("isApiOnly")]
         public bool IsApiOnly { get; set; }
+
+        /// <summary>
+        /// The number of transmissions sent by a service owner
+        /// </summary>
+
+        [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
+        public int FromServiceOwnerTransmissionsCount { get; set; }
+
+        /// <summary>
+        /// The number of transmissions sent by a party representative
+        /// </summary>
+
+        [JsonPropertyName("fromPartyTransmissionsCount")]
+        public int FromPartyTransmissionsCount { get; set; }
+
+        /// <summary>
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// </summary>
+
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
 
         /// <summary>
         /// The latest entry in the dialog's activity log.
@@ -1787,11 +1838,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1ServiceOwnerDialogsQueriesSearch_DialogActivity LatestActivity { get; set; }
 
         /// <summary>
-        /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+        /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
         /// </summary>
 
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastUpdate { get; set; }
+
+        /// <summary>
+        /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+        /// </summary>
+
+        [JsonPropertyName("seenSinceLastContentUpdate")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
@@ -1820,23 +1878,23 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public enum DialogsEntities_DialogStatus
     {
 
-        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
-        NotApplicable = 0,
-
         [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
-        InProgress = 1,
+        InProgress = 0,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
-        Draft = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
-        Awaiting = 3,
+        Draft = 1,
 
         [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
-        RequiresAttention = 4,
+        RequiresAttention = 2,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
-        Completed = 5,
+        Completed = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 5,
 
     }
 
@@ -2461,12 +2519,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset UpdatedAt { get; set; }
 
         /// <summary>
+        /// The date and time when the dialog content was last updated.
+        /// </summary>
+
+        [JsonPropertyName("contentUpdatedAt")]
+        public System.DateTimeOffset ContentUpdatedAt { get; set; }
+
+        /// <summary>
         /// The aggregated status of the dialog.
         /// </summary>
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public DialogsEntities_DialogStatus Status { get; set; }
+
+        /// <summary>
+        /// System defined label used to categorize dialogs.
+        /// <br/>This is obsolete and will only show; Default, Bin or Archive.
+        /// <br/>Use SystemLabels on EndUserContext instead.
+        /// </summary>
+
+        [JsonPropertyName("systemLabel")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
+        public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
         /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
@@ -2476,11 +2552,32 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
+        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// </summary>
+
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; }
+
+        /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_Content Content { get; set; }
+
+        /// <summary>
+        /// The number of transmissions sent by the service owner
+        /// </summary>
+
+        [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
+        public int FromServiceOwnerTransmissionsCount { get; set; }
+
+        /// <summary>
+        /// The number of transmissions sent by a party representative
+        /// </summary>
+
+        [JsonPropertyName("fromPartyTransmissionsCount")]
+        public int FromPartyTransmissionsCount { get; set; }
 
         /// <summary>
         /// The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
@@ -2525,11 +2622,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogActivity> Activities { get; set; }
 
         /// <summary>
-        /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+        /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
         /// </summary>
 
         [JsonPropertyName("seenSinceLastUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastUpdate { get; set; }
+
+        /// <summary>
+        /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+        /// </summary>
+
+        [JsonPropertyName("seenSinceLastContentUpdate")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
@@ -2760,6 +2864,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("content")]
         public V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent Content { get; set; }
+
+        /// <summary>
+        /// Indicates whether the dialog transmission has been opened.
+        /// </summary>
+
+        [JsonPropertyName("isOpened")]
+        public bool IsOpened { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.
@@ -3338,7 +3449,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntities_DialogStatus Status { get; set; }
+        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
 
         /// <summary>
         /// The dialog unstructured text content.
@@ -3390,6 +3501,36 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("activities")]
         public ICollection<V1ServiceOwnerDialogsCommandsUpdate_Activity> Activities { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum V1ServiceOwnerCommonDialogStatuses_DialogStatusInput
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"New")]
+        New = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
+        InProgress = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
+        Draft = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Sent")]
+        Sent = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
+        RequiresAttention = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
+        Completed = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 7,
 
     }
 
@@ -4208,7 +4349,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public DialogsEntities_DialogStatus Status { get; set; }
+        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
 
         /// <summary>
         /// Set the system label of the dialog.

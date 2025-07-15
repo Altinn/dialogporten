@@ -86,9 +86,18 @@ public static class ClaimsPrincipalExtensions
             return false;
         }
 
-        var authDetailsJsonNode = JsonNode.Parse(authDetailsJson);
-        if (authDetailsJsonNode is null)
+        JsonNode? authDetailsJsonNode;
+        try
         {
+            authDetailsJsonNode = JsonNode.Parse(authDetailsJson);
+            if (authDetailsJsonNode is null)
+            {
+                return false;
+            }
+        }
+        catch (JsonException)
+        {
+            // If the JSON is malformed, we cannot parse it, so we return false
             return false;
         }
 
@@ -178,7 +187,7 @@ public static class ClaimsPrincipalExtensions
 
     public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
     {
-        if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level))
+        if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level) && level >= 0)
         {
             return level;
         }
@@ -193,6 +202,13 @@ public static class ClaimsPrincipalExtensions
                 Constants.IdportenLoaHigh => 4,
                 _ => throw new ArgumentException("Unknown acr value")
             };
+        }
+
+        if (claimsPrincipal.TryGetSystemUserId(out _))
+        {
+            // System users are always considered to have authentication level 3
+            // See https://github.com/Altinn/altinn-authentication/blob/242ef98de4094f15a1a444aeebb2caa1e808b482/src/Authentication/Controllers/AuthenticationController.cs#L495
+            return 3;
         }
 
         throw new UnreachableException("No authentication level claim found");

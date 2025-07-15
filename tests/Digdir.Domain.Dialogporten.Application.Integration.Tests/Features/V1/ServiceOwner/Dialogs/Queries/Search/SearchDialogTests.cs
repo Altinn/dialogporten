@@ -12,13 +12,9 @@ using FluentAssertions;
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class SearchDialogTests : ApplicationCollectionFixture
+public class SearchDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    public SearchDialogTests(DialogApplication application) : base(application) { }
-
     [Fact]
-
-
     public Task Search_Dialog_With_Non_Default_SystemLabel_Should_Return_SystemLabels() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.SystemLabel = SystemLabel.Values.Bin)

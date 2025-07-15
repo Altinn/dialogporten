@@ -36,11 +36,15 @@ internal sealed class MappingProfile : Profile
                 .Count(x => x.Urls
                     .Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
-            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.EndUserContext.SystemLabelId))
+            .ForMember(dest => dest.SystemLabel, opt => opt
+                .MapFrom(src => src.EndUserContext != null
+                    ? src.EndUserContext.SystemLabelId
+                    : SystemLabel.Values.Default))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId));
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()
-            .ForMember(dest => dest.SystemLabels, opt => opt.MapFrom(src => new List<SystemLabel.Values> { src.SystemLabelId }));
+            .ForMember(dest => dest.SystemLabels, opt => opt
+                .MapFrom(src => new List<SystemLabel.Values> { src.SystemLabelId }));
 
         CreateMap<DialogSeenLog, DialogSeenLogDto>()
             .ForMember(dest => dest.SeenAt, opt => opt.MapFrom(src => src.CreatedAt));

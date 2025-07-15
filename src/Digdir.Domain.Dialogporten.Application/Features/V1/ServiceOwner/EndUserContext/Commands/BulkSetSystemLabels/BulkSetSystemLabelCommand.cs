@@ -69,7 +69,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
         foreach (var dialog in dialogs)
         {
-            dialog.EndUserContext.UpdateSystemLabel(userInfo.UserId.ExternalIdWithPrefix, newLabel);
+            dialog.UpdateSystemLabel(userInfo.UserId.ExternalIdWithPrefix, newLabel);
             _unitOfWork.EnableConcurrencyCheck(dialog.EndUserContext, request.Dto.Dialogs.Single(x => x.DialogId == dialog.Id).EndUserContextRevision);
         }
 

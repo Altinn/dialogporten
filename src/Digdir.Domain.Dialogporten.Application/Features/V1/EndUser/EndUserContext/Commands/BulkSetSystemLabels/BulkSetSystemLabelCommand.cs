@@ -113,7 +113,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
         foreach (var (dto, entity) in updateSets)
         {
-            entity.EndUserContext.UpdateSystemLabel(userInfo.UserId.ExternalIdWithPrefix, newLabel);
+            entity.UpdateSystemLabel(userInfo.UserId.ExternalIdWithPrefix, newLabel);
             _unitOfWork.EnableConcurrencyCheck(entity.EndUserContext, dto.EndUserContextRevision);
         }
     }

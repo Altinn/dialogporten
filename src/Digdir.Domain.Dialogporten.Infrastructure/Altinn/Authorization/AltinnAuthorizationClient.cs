@@ -217,7 +217,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         var partyIdentifier = request.Claims.GetEndUserPartyIdentifier() ?? throw new UnreachableException();
         var authorizedParties = await GetAuthorizedParties(partyIdentifier, flatten: true, cancellationToken: cancellationToken);
 
-        var result = await AuthorizationHelper.CollapseSubjectResources(
+        var result = await AuthorizationHelper.CreateDialogSearchAuthorizationResultFromAuthorizedParties(
             authorizedParties,
             request.ConstraintParties,
             request.ConstraintServiceResources,

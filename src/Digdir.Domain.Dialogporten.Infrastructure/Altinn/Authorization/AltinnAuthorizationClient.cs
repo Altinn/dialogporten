@@ -164,7 +164,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                     : EmptyStringList,
                 AuthorizedInstances = party.AuthorizedInstances.Count > 0
                     ? [.. party.AuthorizedInstances]
-                    : EmptyStringList,
+                    : [],
                 SubParties = EmptySubPartiesList
             });
 
@@ -185,7 +185,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                         : EmptyStringList,
                     AuthorizedInstances = subParty.AuthorizedInstances.Count > 0
                         ? [.. subParty.AuthorizedInstances]
-                        : EmptyStringList,
+                        : [],
                     SubParties = EmptySubPartiesList
                 });
             }

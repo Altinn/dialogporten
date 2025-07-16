@@ -19,7 +19,7 @@ public sealed class AuthorizedParty
     public bool HasOnlyAccessToSubParties { get; init; }
     public List<string> AuthorizedResources { get; init; } = [];
     public List<string> AuthorizedRolesAndAccessPackages { get; init; } = [];
-    public List<string> AuthorizedInstances { get; init; } = [];
+    public List<AuthorizedResource> AuthorizedInstances { get; init; } = [];
 
     // Only populated in case of flatten = false
     public List<AuthorizedParty>? SubParties { get; set; }
@@ -27,6 +27,12 @@ public sealed class AuthorizedParty
     // Only populated in case of flatten = true
     public string? ParentParty { get; set; }
 
+}
+
+public sealed class AuthorizedResource
+{
+    public string ResourceId { get; set; } = null!;
+    public string InstanceId { get; set; } = null!;
 }
 
 public enum AuthorizedPartyType

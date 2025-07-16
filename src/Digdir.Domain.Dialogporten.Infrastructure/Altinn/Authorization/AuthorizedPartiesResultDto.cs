@@ -14,6 +14,12 @@ internal sealed class AuthorizedPartiesResultDto
     public required List<string> AuthorizedResources { get; set; }
 
     public required List<string> AuthorizedRoles { get; set; }
-    public required List<string> AuthorizedInstances { get; set; }
+    public required List<AuthorizedResourceDto> AuthorizedInstances { get; set; }
     public required List<AuthorizedPartiesResultDto> Subunits { get; set; }
+}
+
+internal sealed class AuthorizedResourceDto
+{
+    public string ResourceId { get; set; } = null!;
+    public string InstanceId { get; set; } = null!;
 }

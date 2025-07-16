@@ -120,14 +120,17 @@ internal static class AuthorizationHelper
             // Handle app instance delegations from Altinn Access Management.
             foreach (var instance in party.AuthorizedInstances)
             {
-                if (instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
+                if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    var serviceResource = Constants.ServiceResourcePrefix + instance.ResourceId;
-                    if (constraintResourcesSet is null || constraintResourcesSet.Contains(serviceResource))
-                    {
-                        result.AltinnAppInstanceIds.Add(
-                            $"{Constants.ServiceContextInstanceIdPrefix}{party.PartyId}/{instance.InstanceId}");
-                    }
+                    continue;
+                }
+
+                if ((constraintResourcesSet is null
+                    || constraintResourcesSet.Contains(Constants.ServiceResourcePrefix + instance.ResourceId))
+                    && Guid.TryParse(instance.ResourceId, out _))
+                {
+                    result.AltinnAppInstanceIds.Add(
+                        $"{Constants.ServiceContextInstanceIdPrefix}{party.PartyId}/{instance.InstanceId}");
                 }
             }
         }

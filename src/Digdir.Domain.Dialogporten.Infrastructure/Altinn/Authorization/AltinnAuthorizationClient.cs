@@ -177,7 +177,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 flattenedList.Add(new AuthorizedParty
                 {
                     Party = subParty.Party,
-                    PartyId = party.PartyId,
+                    PartyId = subParty.PartyId,
                     ParentParty = party.Party,
                     AuthorizedResources = subParty.AuthorizedResources.Count > 0
                         ? [.. subParty.AuthorizedResources]

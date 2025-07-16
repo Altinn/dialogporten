@@ -11,7 +11,6 @@ using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -231,7 +230,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     {
         if (result.AltinnAppInstanceIds.Count == 0)
         {
-            return await Task.FromResult(result);
+            return result;
         }
 
         result.DialogIds = await _db.DialogServiceOwnerLabels

@@ -125,8 +125,8 @@ internal static class AuthorizationHelper
                     var serviceResource = Constants.ServiceResourcePrefix + instance.ResourceId;
                     if (constraintResourcesSet is null || constraintResourcesSet.Contains(serviceResource))
                     {
-                        result.AltinnAppInstanceIds.Add(Constants.ServiceContextInstanceIdPrefix + party.PartyId + "/" +
-                                                        instance.InstanceId);
+                        result.AltinnAppInstanceIds.Add(
+                            $"{Constants.ServiceContextInstanceIdPrefix}{party.PartyId}/{instance.InstanceId}");
                     }
                 }
             }

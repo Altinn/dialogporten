@@ -74,6 +74,16 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public DateTimeOffset? UpdatedBefore { get; set; }
 
     /// <summary>
+    /// Only return dialogs with content updated after this date
+    /// </summary>
+    public DateTimeOffset? ContentUpdatedAfter { get; set; }
+
+    /// <summary>
+    /// Only return dialogs with content updated before this date
+    /// </summary>
+    public DateTimeOffset? ContentUpdatedBefore { get; set; }
+
+    /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
     public DateTimeOffset? DueAfter { get; set; }
@@ -119,6 +129,7 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<Intermed
         options.AddId(x => x.Id)
             .AddDefault("createdAt", x => x.CreatedAt)
             .AddOption("updatedAt", x => x.UpdatedAt)
+            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
             .AddOption("dueAt", x => x.DueAt)
             .Build();
 }
@@ -188,10 +199,12 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
             .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
             .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
+            .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
+            .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
             .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
             .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
             .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
-            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x => request.SystemLabel!.Contains(x.DialogEndUserContext.SystemLabelId))
+            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x => request.SystemLabel!.Contains(x.EndUserContext.SystemLabelId))
             .WhereIf(request.Search is not null, x =>
                 x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
                 x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
@@ -202,9 +215,28 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
-        foreach (var seenLog in paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
+        foreach (var dialog in paginatedList.Items)
         {
-            seenLog.IsCurrentEndUser = IdentifierMasker.GetMaybeMaskedIdentifier(_userRegistry.GetCurrentUserId().ExternalIdWithPrefix) == seenLog.SeenBy.ActorId;
+            // This filtering cannot be done in AutoMapper using ProjectTo
+            dialog.SeenSinceLastContentUpdate = dialog.SeenSinceLastContentUpdate
+                .GroupBy(log => log.SeenBy.ActorId)
+                .Select(group => group
+                    .OrderByDescending(log => log.SeenAt)
+                    .First())
+                .ToList();
+        }
+
+        var seenLogs = paginatedList.Items
+            .SelectMany(x => x.SeenSinceLastContentUpdate)
+            .Concat(paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
+            .ToList();
+
+        foreach (var seenLog in seenLogs)
+        {
+            seenLog.IsCurrentEndUser = IdentifierMasker
+                .GetMaybeMaskedIdentifier(_userRegistry
+                    .GetCurrentUserId()
+                    .ExternalIdWithPrefix) == seenLog.SeenBy.ActorId;
         }
 
         var serviceResources = paginatedList.Items

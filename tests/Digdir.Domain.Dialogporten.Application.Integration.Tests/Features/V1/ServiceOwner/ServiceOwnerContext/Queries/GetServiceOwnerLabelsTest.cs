@@ -1,5 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.ServiceOwnerLabels.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Queries.GetServiceOwnerLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -25,7 +25,7 @@ public class GetServiceOwnerLabelsTest : ApplicationCollectionFixture
     [Fact]
     public Task Get_ServiceOwnerLabels_With_Invalid_DialogId_Returns_NotFound() =>
         FlowBuilder.For(Application)
-            .SendCommand(new GetServiceOwnerLabelsQuery { DialogId = NewUuidV7() })
+            .SendCommand(_ => new GetServiceOwnerLabelsQuery { DialogId = NewUuidV7() })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
 
     private static List<ServiceOwnerLabelDto> CreateLabels(params string[] labels) =>

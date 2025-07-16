@@ -28,6 +28,7 @@ public sealed class DialogEntity :
     public string? IdempotentKey { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset ContentUpdatedAt { get; set; }
     public bool Deleted { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
     public string Org { get; set; } = null!;
@@ -49,6 +50,21 @@ public sealed class DialogEntity :
     /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
     /// </summary>
     public bool IsApiOnly { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by the service owner
+    /// </summary>
+    public short FromServiceOwnerTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a party representative
+    /// </summary>
+    public short FromPartyTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool HasUnopenedContent { get; set; }
 
 
     // === Dependent relationships ===
@@ -81,14 +97,45 @@ public sealed class DialogEntity :
     [AggregateChild]
     public List<DialogSeenLog> SeenLog { get; set; } = [];
 
-    public DialogEndUserContext DialogEndUserContext { get; set; } = null!;
+    public DialogEndUserContext EndUserContext { get; set; } = null!;
     public DialogServiceOwnerContext ServiceOwnerContext { get; set; } = null!;
 
     public void OnCreate(AggregateNode self, DateTimeOffset utcNow)
-        => _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+    {
+        _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+        ContentUpdatedAt = utcNow;
+    }
 
-    public void OnUpdate(AggregateNode self, DateTimeOffset utcNow)
-        => _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+    public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
+    {
+        _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+
+        if (!enableUpdatableFilter)
+        {
+            return;
+        }
+
+        if (ContentHasChanged(self))
+        {
+            ContentUpdatedAt = utcNow;
+        }
+    }
+
+    private static bool ContentHasChanged(AggregateNode self)
+    {
+        var childrenChanged = self.Children.Any(x =>
+            x.Entity is
+                DialogTransmission or
+                DialogContent or
+                DialogAttachment or
+                DialogGuiAction or
+                DialogApiAction);
+
+        var propertiesChanged = self.ModifiedProperties.Any(x =>
+            x.PropertyName is nameof(ExtendedStatus) or nameof(StatusId));
+
+        return childrenChanged || propertiesChanged;
+    }
 
     public void OnDelete(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogDeletedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
@@ -99,10 +146,10 @@ public sealed class DialogEntity :
     public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, string? endUserName)
     {
         var lastSeenAt = SeenLog
-                             .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
-                             .MaxBy(x => x.CreatedAt)
-                             ?.CreatedAt
-                         ?? DateTimeOffset.MinValue;
+                         .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
+                         .MaxBy(x => x.CreatedAt)
+                         ?.CreatedAt
+         ?? DateTimeOffset.MinValue;
 
         if (lastSeenAt >= UpdatedAt)
         {
@@ -127,6 +174,7 @@ public sealed class DialogEntity :
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];
+
     public IEnumerable<IDomainEvent> PopDomainEvents()
     {
         var events = _domainEvents.ToList();

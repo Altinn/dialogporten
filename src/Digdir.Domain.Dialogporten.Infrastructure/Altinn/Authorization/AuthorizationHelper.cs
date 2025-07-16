@@ -5,48 +5,113 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 internal static class AuthorizationHelper
 {
-    public static async Task CollapseSubjectResources(
-        DialogSearchAuthorizationResult dialogSearchAuthorizationResult,
-        AuthorizedPartiesResult authorizedParties,
+    public static async Task<DialogSearchAuthorizationResult> CollapseSubjectResources(
+        AuthorizedPartiesResult authorizedParties, // Do NOT mutate as this might be a reference to a memory cache
+        List<string> constraintParties,
         List<string> constraintResources,
         Func<CancellationToken, Task<List<SubjectResource>>> getAllSubjectResources,
         CancellationToken cancellationToken)
     {
-        var authorizedPartiesWithRoles = authorizedParties.AuthorizedParties
-            .Where(p => p.AuthorizedRoles.Count != 0)
-            .ToList();
-
-        var uniqueSubjects = authorizedPartiesWithRoles
-            .SelectMany(p => p.AuthorizedRoles)
-            .ToHashSet();
-
-        var subjectResources = (await getAllSubjectResources(cancellationToken))
-            .Where(x => uniqueSubjects.Contains(x.Subject) && (constraintResources.Count == 0 || constraintResources.Contains(x.Resource))).ToList();
-
-        var subjectToResources = subjectResources
-            .GroupBy(sr => sr.Subject)
-            .ToDictionary(g => g.Key, g => g.Select(sr => sr.Resource).ToHashSet());
-
-        foreach (var partyEntry in authorizedPartiesWithRoles)
+        var result = new DialogSearchAuthorizationResult
         {
-            if (!dialogSearchAuthorizationResult.ResourcesByParties.TryGetValue(partyEntry.Party, out var resourceList))
-            {
-                resourceList = new HashSet<string>();
-                dialogSearchAuthorizationResult.ResourcesByParties[partyEntry.Party] = resourceList;
-            }
+            ResourcesByParties = new Dictionary<string, HashSet<string>>(100) // Pre-size with a reasonable capacity
+        };
 
-            foreach (var subject in partyEntry.AuthorizedRoles)
-            {
-                if (subjectToResources.TryGetValue(subject, out var subjectResourceSet))
-                {
-                    resourceList.UnionWith(subjectResourceSet);
-                }
-            }
+        // Quick check for empty input
+        if (authorizedParties.AuthorizedParties.Count == 0)
+            return result;
 
-            if (resourceList.Count == 0)
+        // Step 1: Pre-filter parties with roles and build the unique subjects set. Skip any parties that are not in the constraints (if supplied)
+        var uniqueSubjects = new HashSet<string>(100);
+        var partiesWithRolesOrAccessPackages = new List<(string Party, List<string> RolesAndAccessPackages)>();
+        var constraintPartiesSet = constraintParties.Count > 0 ? new HashSet<string>(constraintParties) : null;
+        var constraintResourcesSet = constraintResources.Count > 0 ? new HashSet<string>(constraintResources) : null;
+
+        foreach (var party in authorizedParties.AuthorizedParties.Where(p => constraintPartiesSet is null || constraintPartiesSet.Contains(p.Party)))
+        {
+            if (!(party.AuthorizedRolesAndAccessPackages.Count > 0)) continue;
+            partiesWithRolesOrAccessPackages.Add((party.Party, party.AuthorizedRolesAndAccessPackages));
+
+            foreach (var role in party.AuthorizedRolesAndAccessPackages)
             {
-                dialogSearchAuthorizationResult.ResourcesByParties.Remove(partyEntry.Party);
+                uniqueSubjects.Add(role);
             }
         }
+
+        if (partiesWithRolesOrAccessPackages.Count > 0)
+        {
+            // Step 2: Get and preprocess subject resources
+            var subjectResources = await getAllSubjectResources(cancellationToken);
+
+            // Step 3: Build subject-to-resources dictionary with early filtering
+            var subjectToResources = new Dictionary<string, HashSet<string>>(uniqueSubjects.Count);
+            foreach (var sr in subjectResources)
+            {
+                // Skip if not in our subjects list
+                if (!uniqueSubjects.Contains(sr.Subject))
+                    continue;
+
+                // Skip if constraint resources exist and this resource isn't in the constraints
+                if (constraintResourcesSet != null && !constraintResourcesSet.Contains(sr.Resource))
+                    continue;
+
+                // Add to our lookup dictionary
+                if (!subjectToResources.TryGetValue(sr.Subject, out var resources))
+                {
+                    resources = new HashSet<string>();
+                    subjectToResources[sr.Subject] = resources;
+                }
+
+                resources.Add(sr.Resource);
+            }
+
+            // Step 4: Populate result dictionary with a single pass
+            foreach (var (party, roles) in partiesWithRolesOrAccessPackages)
+            {
+                var partyResources = new HashSet<string>();
+                var hasResources = false;
+
+                foreach (var role in roles)
+                {
+                    if (subjectToResources.TryGetValue(role, out var resources))
+                    {
+                        partyResources.UnionWith(resources);
+                        hasResources = true;
+                    }
+                }
+
+                if (hasResources)
+                {
+                    result.ResourcesByParties[party] = partyResources;
+                }
+            }
+        }
+
+        // Step 5: Handle parties that have direct resource authorizations
+        foreach (var party in authorizedParties.AuthorizedParties
+                     .Where(p => constraintPartiesSet is null || constraintPartiesSet.Contains(p.Party)))
+        {
+            // We'll only allocate/insert the HashSet if we hit at least one matching resource
+            HashSet<string>? existingResources = null;
+
+            foreach (var resource in party.AuthorizedResources)
+            {
+                if (constraintResourcesSet != null && !constraintResourcesSet.Contains(resource))
+                    continue;
+
+                if (existingResources == null)
+                {
+                    if (!result.ResourcesByParties.TryGetValue(party.Party, out existingResources!))
+                    {
+                        existingResources = new HashSet<string>();
+                        result.ResourcesByParties[party.Party] = existingResources;
+                    }
+                }
+
+                existingResources.Add(resource);
+            }
+        }
+
+        return result;
     }
 }

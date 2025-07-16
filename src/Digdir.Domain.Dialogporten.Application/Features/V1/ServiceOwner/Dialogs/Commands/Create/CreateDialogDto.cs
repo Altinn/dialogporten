@@ -1,9 +1,9 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -113,13 +113,16 @@ public sealed class CreateDialogDto
     /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
-    public DialogStatus.Values Status { get; set; }
+    public DialogStatusInput Status { get; set; }
 
     /// <summary>
     /// Set the system label of the dialog.
     /// </summary>
     public SystemLabel.Values? SystemLabel { get; set; }
 
+    /// <summary>
+    /// Metadata about the dialog owned by the service owner.
+    /// </summary>
     public DialogServiceOwnerContextDto? ServiceOwnerContext { get; set; }
 
     /// <summary>
@@ -252,7 +255,7 @@ public sealed class ContentDto
     /// A short summary of the dialog and its current state.
     /// Supported media types: text/plain
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// An optional non-sensitive summary of the dialog and its current state.
@@ -294,7 +297,7 @@ public sealed class TransmissionContentDto
     /// <summary>
     /// The transmission summary.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.

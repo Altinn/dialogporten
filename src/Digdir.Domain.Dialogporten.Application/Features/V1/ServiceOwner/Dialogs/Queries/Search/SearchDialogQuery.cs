@@ -73,6 +73,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// Only return dialogs created before this date
     /// </summary>
     public DateTimeOffset? CreatedBefore { get; set; }
+
     /// <summary>
     /// Only return dialogs updated after this date
     /// </summary>
@@ -82,6 +83,16 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// Only return dialogs updated before this date
     /// </summary>
     public DateTimeOffset? UpdatedBefore { get; set; }
+
+    /// <summary>
+    /// Only return dialogs with content updated after this date
+    /// </summary>
+    public DateTimeOffset? ContentUpdatedAfter { get; set; }
+
+    /// <summary>
+    /// Only return dialogs with content updated before this date
+    /// </summary>
+    public DateTimeOffset? ContentUpdatedBefore { get; set; }
 
     /// <summary>
     /// Only return dialogs with due date after this date
@@ -144,6 +155,7 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<Intermed
         options.AddId(x => x.Id)
             .AddDefault("createdAt", x => x.CreatedAt)
             .AddOption("updatedAt", x => x.UpdatedAt)
+            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
             .AddOption("dueAt", x => x.DueAt)
             .Build();
 }
@@ -213,13 +225,14 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
             .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
             .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
+            .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
+            .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
             .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
             .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
             .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
             .WhereIf(request.VisibleAfter.HasValue, x => request.VisibleAfter <= x.VisibleFrom)
             .WhereIf(request.VisibleBefore.HasValue, x => x.VisibleFrom <= request.VisibleBefore)
-            .WhereIf(!request.SystemLabel.IsNullOrEmpty(),
-                x => request.SystemLabel!.Contains(x.DialogEndUserContext.SystemLabelId))
+            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x => request.SystemLabel!.Contains(x.EndUserContext.SystemLabelId))
             .WhereIf(request.Search is not null, x =>
                 x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
                 x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
@@ -271,9 +284,25 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
+        foreach (var dialog in paginatedList.Items)
+        {
+            // This filtering cannot be done in AutoMapper using ProjectTo
+            dialog.SeenSinceLastContentUpdate = dialog.SeenSinceLastContentUpdate
+                .GroupBy(log => log.SeenBy.ActorId)
+                .Select(group => group
+                    .OrderByDescending(log => log.SeenAt)
+                    .First())
+                .ToList();
+        }
+
         if (request.EndUserId is not null)
         {
-            foreach (var seenRecord in paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
+            var seenRecords = paginatedList.Items
+                .SelectMany(x => x.SeenSinceLastContentUpdate)
+                .Concat(paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
+                .ToList();
+
+            foreach (var seenRecord in seenRecords)
             {
                 seenRecord.IsCurrentEndUser = seenRecord.SeenBy.ActorId == request.EndUserId;
             }

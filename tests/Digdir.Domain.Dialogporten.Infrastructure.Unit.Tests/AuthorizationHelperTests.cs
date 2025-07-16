@@ -7,72 +7,184 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;
 
 public class AuthorizationHelperTests
 {
-    [Fact]
-    public async Task CollapseSubjectResources_ShouldCollapseCorrectly()
+    [Theory]
+    [MemberData(nameof(CollapseScenarios))]
+    public async Task CollapseSubjectResources_ShouldCollapseCorrectly(
+        string _, // Used for test explorer readability
+        List<string> constraintParties,
+        List<string> constraintResources,
+        Dictionary<string, List<string>> expectedResult)
     {
         // Arrange
-        var dialogSearchAuthorizationResult = new DialogSearchAuthorizationResult
+        var authorizedParties = GetAuthorizedParties();
+
+        // Act
+        var actualResult = await AuthorizationHelper.CollapseSubjectResources(
+            authorizedParties,
+            constraintParties,
+            constraintResources,
+            GetSubjectResources,
+            CancellationToken.None);
+
+        // Assert
+        // 1. Ensure the number of parties in the result is as expected.
+        Assert.Equal(expectedResult.Count, actualResult.ResourcesByParties.Count);
+
+        // 2. Iterate through each expected party and its resources for detailed validation.
+        foreach (var (expectedParty, expectedResources) in expectedResult)
         {
-            ResourcesByParties = new Dictionary<string, HashSet<string>>()
-        };
-        var authorizedParties = new AuthorizedPartiesResult
+            // Verify the party is in the actual result
+            Assert.Contains(expectedParty, actualResult.ResourcesByParties.Keys);
+            var actualResources = actualResult.ResourcesByParties[expectedParty];
+
+            // Verify the resource count for the party is correct
+            Assert.Equal(expectedResources.Count, actualResources.Count);
+
+            // Verify that all expected resources are present (order doesn't matter)
+            Assert.Empty(expectedResources.Except(actualResources));
+        }
+    }
+
+    public static IEnumerable<object[]> CollapseScenarios =>
+        new List<object[]>
         {
-            AuthorizedParties = new List<AuthorizedParty>
+            new object[]
             {
-                new()
+                "No constraints applied",
+                new List<string>(),
+                new List<string>(),
+                new Dictionary<string, List<string>>
                 {
-                    Party = "party1",
-                    AuthorizedRoles = new List<string> { "role1", "role2" }
-                },
-                new()
+                    ["party1"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6"],
+                    ["party2"] = [ "resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" ],
+                    ["party3"] = ["resource5", "resource6"],
+                    ["party4"] = ["resource7"]
+                }
+            },
+
+            new object[]
+            {
+                "With party constraints, without resource constraints",
+                new List<string> { "party1", "party2" },
+                new List<string>(),
+                new Dictionary<string, List<string>>
                 {
-                    Party = "party2",
-                    AuthorizedRoles = new List<string> { "role2" }
-                },
-                new()
+                    ["party1"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6"],
+                    ["party2"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" ],
+                }
+            },
+
+            new object[]
+            {
+                "Without party constraints, with resource constraints",
+                new List<string>(),
+                new List<string> { "resource1", "resource2", "resource5" },
+                new Dictionary<string, List<string>>
                 {
-                    Party = "party3",
-                    AuthorizedRoles = new List<string> { "role3" }
+                    ["party1"] = ["resource1", "resource2", "resource5"],
+                    ["party2"] = ["resource1", "resource2", "resource5"],
+                    ["party3"] = ["resource5"]
+                }
+            },
+
+            new object[]
+            {
+                "With both party and resource constraints",
+                new List<string> { "party2" },
+                new List<string> { "resource4" },
+                new Dictionary<string, List<string>>
+                {
+                    ["party2"] = ["resource4"]
                 }
             }
         };
-        var constraintResources = new List<string> { "resource1", "resource2", "resource4" };
 
-        // Simulate subject resources
-        var subjectResources = new List<SubjectResource>
+
+    private static Task<List<SubjectResource>> GetSubjectResources(CancellationToken token)
+    {
+        /* The mocked mapping of subjects to resources is as follows:
+         *
+         * role1: resource1, resource2
+         * role2: resource2, resource3, resource4
+         * role3: resource5
+         * accesspackage1: resource1, resource6
+         * accesspackage2: resource7, resource8
+         */
+        return Task.FromResult(new List<SubjectResource>
         {
             new() { Subject = "role1", Resource = "resource1" },
             new() { Subject = "role1", Resource = "resource2" },
             new() { Subject = "role2", Resource = "resource2" },
             new() { Subject = "role2", Resource = "resource3" },
             new() { Subject = "role2", Resource = "resource4" },
-            new() { Subject = "role3", Resource = "resource5" }, // Note: not in constraintResources
-        };
+            new() { Subject = "role3", Resource = "resource5" },
+            new() { Subject = "accesspackage1", Resource = "resource1" },
+            new() { Subject = "accesspackage1", Resource = "resource6" },
+            new() { Subject = "accesspackage2", Resource = "resource7" },
+            new() { Subject = "accesspackage2", Resource = "resource8" }
+        });
+    }
 
-        Task<List<SubjectResource>> GetSubjectResources(CancellationToken token)
+    private static AuthorizedPartiesResult GetAuthorizedParties()
+    {
+        return new AuthorizedPartiesResult
         {
-            return Task.FromResult(subjectResources);
-        }
-
-        // Act
-        await AuthorizationHelper.CollapseSubjectResources(
-            dialogSearchAuthorizationResult,
-            authorizedParties,
-            constraintResources,
-            GetSubjectResources,
-            CancellationToken.None);
-
-        // Assert
-        Assert.Equal(2, dialogSearchAuthorizationResult.ResourcesByParties.Count);
-        Assert.Contains("party1", dialogSearchAuthorizationResult.ResourcesByParties.Keys);
-        Assert.Contains("resource1", dialogSearchAuthorizationResult.ResourcesByParties["party1"]);
-        Assert.Contains("resource2", dialogSearchAuthorizationResult.ResourcesByParties["party1"]);
-        Assert.Contains("resource4", dialogSearchAuthorizationResult.ResourcesByParties["party1"]);
-        Assert.Equal(3, dialogSearchAuthorizationResult.ResourcesByParties["party1"].Count);
-
-        Assert.Contains("party2", dialogSearchAuthorizationResult.ResourcesByParties.Keys);
-        Assert.Contains("resource2", dialogSearchAuthorizationResult.ResourcesByParties["party2"]);
-        Assert.Contains("resource4", dialogSearchAuthorizationResult.ResourcesByParties["party2"]);
-        Assert.Equal(2, dialogSearchAuthorizationResult.ResourcesByParties["party2"].Count);
+            AuthorizedParties = new List<AuthorizedParty>
+            {
+                new()
+                {
+                    /*
+                     * Should be flattened to:
+                     * - resource1 (from role1, accesspackage1, AuthorizedResources)
+                     * - resource2 (from role1, role2)
+                     * - resource3 (from role2)
+                     * - resource4 (from role2)
+                     * - resource5 (from AuthorizedResources)
+                     * - resource6 (from accesspackage1)
+                     */
+                    Party = "party1",
+                    AuthorizedRolesAndAccessPackages = ["role1", "role2", "accesspackage1"],
+                    AuthorizedResources = ["resource1", "resource5"]
+                },
+                new()
+                {
+                    /*
+                     * Should be flattened to:
+                     * - resource1 (from accesspackage1, AuthorizedResources)
+                     * - resource2 (from role2, AuthorizedResources)
+                     * - resource3 (from role2)
+                     * - resource4 (from role2)
+                     * - resource5 (from AuthorizedResources)
+                     * - resource6 (from accesspackage1)
+                     * - resource7 (from accesspackage2)
+                     * - resource8 (from accesspackage2)
+                     */
+                    Party = "party2",
+                    AuthorizedRolesAndAccessPackages = ["role2", "accesspackage1", "accesspackage2"],
+                    AuthorizedResources = ["resource1", "resource2", "resource5"]
+                },
+                new()
+                {
+                    /*
+                     * Should be flattened to:
+                     * - resource5 (from role3)
+                     * - resource6 (from AuthorizedResources)
+                     */
+                    Party = "party3",
+                    AuthorizedRolesAndAccessPackages = ["role3"],
+                    AuthorizedResources = ["resource6"]
+                },
+                new()
+                {
+                    /*
+                     * Should be flattened to:
+                     * - resource7 (from AuthorizedResources)
+                     */
+                    Party = "party4",
+                    AuthorizedRolesAndAccessPackages = [],
+                    AuthorizedResources = ["resource7"]
+                }
+            }
+        };
     }
 }

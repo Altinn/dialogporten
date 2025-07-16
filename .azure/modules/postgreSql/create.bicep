@@ -77,6 +77,10 @@ param srcKeyVault object
 @secure()
 param administratorLoginPassword string
 
+@description('The name of the deployer principal used as the PostgreSQL administrator')
+@minLength(3)
+param deployerPrincipalName string
+
 var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
@@ -103,9 +107,21 @@ module privateDnsZone '../privateDnsZone/main.bicep' = {
   }
 }
 
+resource postgresAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-postgres-admin-identity'
+  location: location
+  tags: tags
+}
+
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: postgresServerName
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${postgresAdminIdentity.id}': {}
+    }
+  }
   properties: {
     version: '16'
     administratorLogin: administratorLogin
@@ -138,7 +154,18 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
       collation: 'en_US.utf8'
     }
   }
+
   tags: tags
+}
+
+resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2024-08-01' = {
+  name: deployer().objectId
+  parent: postgres
+  properties: {
+    principalName: deployerPrincipalName
+    principalType: 'ServicePrincipal'
+    tenantId: deployer().tenantId
+  }
 }
 
 resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {
@@ -148,6 +175,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
       value: 'PG_TRGM'
       source: 'user-override'
     }
+    dependsOn: [postgresAdministrators]
   }
 
 resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {

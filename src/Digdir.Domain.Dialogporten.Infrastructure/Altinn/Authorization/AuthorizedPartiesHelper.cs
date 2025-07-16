@@ -9,6 +9,7 @@ internal static class AuthorizedPartiesHelper
     private const string PartyTypePerson = "Person";
     private const string AttributeIdResource = "urn:altinn:resource";
     private const string AttributeIdRoleCode = "urn:altinn:rolecode";
+    private const string AttributeIdAccessPackage = "urn:altinn:accesspackage";
     private const string MainAdministratorRoleCode = "HADM";
     private const string AccessManagerRoleCode = "ADMAI";
     private static readonly string[] KeyRoleCodes = ["DAGL", "LEDE", "INNH", "DTPR", "DTSO", "BEST"];
@@ -55,13 +56,18 @@ internal static class AuthorizedPartiesHelper
             IsAccessManager = dto.AuthorizedRoles.Contains(AccessManagerRoleCode),
             HasOnlyAccessToSubParties = dto.OnlyHierarchyElementWithNoAccess,
             AuthorizedResources = GetPrefixedResources(dto.AuthorizedResources),
-            AuthorizedRoles = GetPrefixedRoles(dto.AuthorizedRoles),
+            AuthorizedRolesAndAccessPackages = GetPrefixedRolesAndAccessPackages(dto.AuthorizedRoles, dto.AuthorizedAccessPackages),
+            AuthorizedInstances = [], // TODO! Wait until authorization supports instance delegation and map these accordingly,
             SubParties = dto.Subunits.Count > 0 ? dto.Subunits.Select(x => MapFromDto(x, currentUserValue)).ToList() : null
         };
     }
 
-    private static List<string> GetPrefixedRoles(List<string> dtoAuthorizedRoles) =>
-        dtoAuthorizedRoles.Select(role => $"{AttributeIdRoleCode}:{role.ToLowerInvariant()}").ToList();
+    private static List<string> GetPrefixedRolesAndAccessPackages(List<string> dtoAuthorizedRoles, List<string> dtoAuthorizedAccessPackages) =>
+        dtoAuthorizedRoles.Select(role
+                => $"{AttributeIdRoleCode}:{role.ToLowerInvariant()}")
+            .Concat(dtoAuthorizedAccessPackages.Select(accessPackage
+                => $"{AttributeIdAccessPackage}:{accessPackage.ToLowerInvariant()}")
+            ).ToList();
 
     private static List<string> GetPrefixedResources(List<string> dtoAuthorizedResources) =>
         dtoAuthorizedResources.Select(resource => $"{AttributeIdResource}:{resource}").ToList();

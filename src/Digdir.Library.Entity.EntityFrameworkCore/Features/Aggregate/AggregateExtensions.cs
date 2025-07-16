@@ -31,7 +31,7 @@ internal static class AggregateExtensions
 
             if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateUpdatedHandler updated && aggregateNode.IsModified())
             {
-                updated.OnUpdate(aggregateNode, utcNow);
+                updated.OnUpdate(aggregateNode, utcNow, options.EnableUpdatableFilter);
             }
 
             if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateDeletedHandler deleted && aggregateNode.IsDeleted())
@@ -234,6 +234,7 @@ internal static class AggregateExtensions
                     $"Aggregate child navigation property {childNav.Metadata.Name} on {parentEntry.Metadata.Name} is not loaded. " +
                     $"The whole aggregate tree must be loaded before saving.");
             }
+
             var currentValues = childNav.Metadata.IsCollection
                 ? childNav.CurrentValue as IEnumerable<object> ?? []
                 : Enumerable.Empty<object>()
@@ -268,20 +269,19 @@ internal static class AggregateExtensions
             _ => throw new UnreachableException()
         };
 
-        // Add this to modifiedProperties if needed in the future.
-        //var modifiedProperties = entry.Properties
-        //.Where(x => x.IsModified && !x.IsTemporary)
-        //.Select(x => AggregateNodeProperty.Create(
-        //    x.Metadata.ClrType,
-        //    x.Metadata.Name,
-        //    x.OriginalValue,
-        //    x.CurrentValue));
+        var modifiedProperties = entry.Properties
+            .Where(x => x.IsModified && !x.IsTemporary)
+            .Select(x => AggregateNodeProperty.Create(
+                x.Metadata.ClrType,
+                x.Metadata.Name,
+                x.OriginalValue,
+                x.CurrentValue));
 
         return AggregateNode.Create(
             entry.Entity.GetType(),
             entry.Entity,
             aggregateState,
-            []);
+            modifiedProperties);
     }
 
     private static IEnumerable<IReadOnlyForeignKey> FindAggregateParents(this IReadOnlyEntityType entityType)

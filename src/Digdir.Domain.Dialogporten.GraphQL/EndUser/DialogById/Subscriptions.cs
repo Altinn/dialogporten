@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
 using HotChocolate.Authorization;
-using Constants = Digdir.Domain.Dialogporten.Infrastructure.GraphQl.GraphQlSubscriptionConstants;
+using Constants = Digdir.Domain.Dialogporten.Infrastructure.GraphQL.GraphQlSubscriptionConstants;
 
 // ReSharper disable ClassNeverInstantiated.Global
 

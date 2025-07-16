@@ -31,7 +31,7 @@ public sealed class ContentDto
     /// <summary>
     /// A short summary of the dialog and its current state.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// An optional non-sensitive summary of the dialog and its current state.

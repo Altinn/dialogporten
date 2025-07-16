@@ -1,8 +1,8 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -71,7 +71,7 @@ public sealed class UpdateDialogDto
     /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
-    public DialogStatus.Values Status { get; set; }
+    public DialogStatusInput Status { get; set; }
 
     // IsApiOnly is immutable after creation and not included in the update DTO
 
@@ -192,7 +192,7 @@ public sealed class TransmissionContentDto
     /// <summary>
     /// The transmission summary.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
@@ -216,7 +216,7 @@ public sealed class ContentDto
     /// <summary>
     /// A short summary of the dialog and its current state. Must be text/plain.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// An optional non-sensitive summary of the dialog and its current state.

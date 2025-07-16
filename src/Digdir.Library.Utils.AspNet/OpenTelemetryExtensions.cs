@@ -52,6 +52,8 @@ public static class OpenTelemetryExtensions
                     tracing.SetSampler(new AlwaysOnSampler());
                 }
 
+                tracing.AddProcessor(new PostgresExceptionFilter());
+
                 tracing
                     .AddHttpClientInstrumentation(o =>
                     {
@@ -117,7 +119,10 @@ public static class OpenTelemetryExtensions
         return otelEndpoint switch
         {
             null =>
-                writeTo.Console(formatProvider: CultureInfo.InvariantCulture),
+                writeTo.Console(
+                    formatProvider: CultureInfo.InvariantCulture,
+                    // Override output template to include microseconds
+                    outputTemplate: "[{Timestamp:HH:mm:ss.ffffff} {Level:u3}] {Message:lj}{NewLine}{Exception}"),
             not null when Uri.IsWellFormedUriString(otelEndpoint, UriKind.Absolute) =>
                 writeTo.OpenTelemetry(ConfigureOtlpSink(otelEndpoint, ParseOtlpProtocol(otelProtocol))),
             _ => throw new InvalidOperationException($"Invalid otel endpoint: {otelEndpoint}")

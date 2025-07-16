@@ -7,10 +7,12 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -105,12 +107,24 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             transmission.Id = transmission.Id.CreateVersion7IfDefault();
         }
 
+        dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
+
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,
             propertyName: nameof(CreateDialogDto.Transmissions),
             maxDepth: 20,
             maxWidth: 20));
+
+        dialog.FromPartyTransmissionsCount = (short)dialog.Transmissions
+            .Count(x => x.TypeId
+                is DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction);
+
+        dialog.FromServiceOwnerTransmissionsCount = (short)dialog.Transmissions
+            .Count(x => x.TypeId is not
+                (DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction));
 
         _db.Dialogs.Add(dialog);
 
@@ -138,7 +152,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
     private void CreateDialogEndUserContext(CreateDialogCommand request, DialogEntity dialog)
     {
-        dialog.DialogEndUserContext = new();
+        dialog.EndUserContext = new();
         if (!request.Dto.SystemLabel.HasValue)
         {
             return;
@@ -150,7 +164,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return;
         }
 
-        dialog.DialogEndUserContext.UpdateLabel(
+        dialog.EndUserContext.UpdateLabel(
             request.Dto.SystemLabel.Value,
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);

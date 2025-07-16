@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Digdir.Domain.Dialogporten.Application.Common;
+﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -86,6 +85,12 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         return this;
     }
 
+    public IUnitOfWork DisableImmutableFilter()
+    {
+        _saveChangesOptions.EnableImmutableFilter = false;
+        return this;
+    }
+
     public async Task<SaveChangesResult> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -144,6 +149,13 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
              ex.InnerException.Data["TableName"] is string tableName)
         {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
+        }
+        catch (ReferenceConstraintException)
+        {
+            // A request triggers loading of exising data, but before it's saved,
+            // another request removes it — causing the save attempt to fail.
+            // On a retry, the client will get a "proper" error message
+            return new ConcurrencyError();
         }
 
         // Interceptors can add domain errors, so check again
@@ -223,7 +235,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
     private sealed class SaveChangesOptions : IEntityOptions
     {
         public bool EnableSoftDeletableFilter { get; set; } = true;
-        public bool EnableImmutableFilter { get; } = true;
+        public bool EnableImmutableFilter { get; set; } = true;
         public bool EnableVersionableFilter { get; set; } = true;
         public bool EnableUpdatableFilter { get; set; } = true;
         public bool EnableCreatableFilter { get; } = true;

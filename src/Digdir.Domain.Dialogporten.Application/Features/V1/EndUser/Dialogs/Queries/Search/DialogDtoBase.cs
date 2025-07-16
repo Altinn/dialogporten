@@ -91,6 +91,12 @@ public class DialogDtoBase
     public DateTimeOffset UpdatedAt { get; set; }
 
     /// <summary>
+    /// The date and time when the dialog content was last updated.
+    /// </summary>
+    /// <example>2022-12-31T23:59:59Z</example>
+    public DateTimeOffset ContentUpdatedAt { get; set; }
+
+    /// <summary>
     /// The due date for the dialog. This is the last date when the dialog is expected to be completed.
     /// </summary>
     /// <example>2022-12-31T23:59:59Z</example>
@@ -102,8 +108,16 @@ public class DialogDtoBase
     public DialogStatus.Values Status { get; set; }
 
     /// <summary>
-    /// Current display state.
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
+    public bool HasUnopenedContent { get; set; }
+
+    /// <summary>
+    /// System defined label used to categorize dialogs.
+    /// This is obsolete and will only show; <see cref="SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
+    /// </summary>
+    [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]
     public SystemLabel.Values SystemLabel { get; set; }
 
     /// <summary>
@@ -113,14 +127,48 @@ public class DialogDtoBase
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// The number of transmissions sent by the service owner
+    /// </summary>
+    public int FromServiceOwnerTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a party representative
+    /// </summary>
+    public int FromPartyTransmissionsCount { get; set; }
+
+    /// <summary>
     /// The latest entry in the dialog's activity log.
     /// </summary>
     public DialogActivityDto? LatestActivity { get; set; }
 
     /// <summary>
-    /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+    /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
+
+    /// <summary>
+    /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+    /// </summary>
+    public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
+
+    /// <summary>
+    /// Metadata about the dialog owned by end-users.
+    /// </summary>
+    public DialogEndUserContextDto EndUserContext { get; set; } = null!;
+}
+
+public sealed class DialogEndUserContextDto
+{
+    /// <summary>
+    /// The unique identifier for the end user context revision in UUIDv4 format.
+    /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
+    public Guid Revision { get; set; }
+
+    /// <summary>
+    /// System defined labels used to categorize dialogs.
+    /// </summary>
+    public List<SystemLabel.Values> SystemLabels { get; set; } = [];
 }
 
 public sealed class DialogSeenLogDto

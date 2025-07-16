@@ -21,13 +21,13 @@ public class TokenValidatorBenchmarks
         new("dp-staging-240322-o5ymn", ToPublicKey("zs9hR9oqgf53th2lTdrBq3C1TZ9UlR-HVJOiUpWV63o")),
         new("dp-staging-240322-rju3g", ToPublicKey("23Sijekv5ATW4sSEiRPzL_rXH-zRV8MK8jcs5ExCmSU"))
     ];
-    private static readonly DialogTokenValidator _sut = new(
+    private static readonly DialogTokenValidator Sut = new(
         new DefaultEdDsaSecurityKeysCache(ValidPublicKeyPairs),
         new BenchmarkClock(ValidTimeStampString));
 
 
     [Benchmark]
-    public IValidationResult ValidateDialogToken() => _sut.Validate(DialogToken);
+    public IValidationResult ValidateDialogToken() => Sut.Validate(DialogToken);
 
     private static PublicKey ToPublicKey(string key)
         => PublicKey.Import(SignatureAlgorithm.Ed25519, Base64Url.DecodeFromChars(key), KeyBlobFormat.RawPublicKey);

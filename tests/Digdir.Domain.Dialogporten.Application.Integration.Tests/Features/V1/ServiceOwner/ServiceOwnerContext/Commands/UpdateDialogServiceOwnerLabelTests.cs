@@ -1,14 +1,12 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.ServiceOwnerLabels.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Queries.GetServiceOwnerLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update.ServiceOwnerLabelDto;
@@ -23,7 +21,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Call_Update_ServiceOwnerLabels_Without_DialogId_Or_Dto() =>
         FlowBuilder.For(Application)
-            .SendCommand(new UpdateDialogServiceOwnerContextCommand())
+            .SendCommand(_ => new UpdateDialogServiceOwnerContextCommand())
             .ExecuteAndAssert<ValidationError>(x =>
             {
                 x.ShouldHaveErrorWithText(nameof(UpdateDialogServiceOwnerContextCommand.DialogId));
@@ -35,7 +33,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     {
         var invalidDialogId = NewUuidV7();
         await FlowBuilder.For(Application)
-            .SendCommand(new UpdateDialogServiceOwnerContextCommand
+            .SendCommand(_ => new UpdateDialogServiceOwnerContextCommand
             {
                 DialogId = invalidDialogId,
                 Dto = new()

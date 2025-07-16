@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
@@ -10,7 +10,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
-using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogActivities.Queries.Get.ActivityDto;
+using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.ActivityDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries;
 
@@ -20,7 +20,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
     [Fact]
     public Task Get_Dialog_ActivityLog_Should_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
-            .CreateDialog(DialogWithActivity())
+            .CreateDialog(_ => DialogWithActivity())
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Activities.Single()
@@ -32,7 +32,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
     [Fact]
     public Task Search_Dialog_LatestActivity_Should_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
-            .CreateDialog(DialogWithActivity())
+            .CreateDialog(_ => DialogWithActivity())
             .SendCommand((_, ctx) => new SearchDialogQuery
             {
                 ServiceResource = [ctx.GetServiceResource()]
@@ -48,7 +48,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
     [Fact]
     public Task Get_ActivityLog_Should_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
-            .CreateDialog(DialogWithActivity())
+            .CreateDialog(_ => DialogWithActivity())
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>()
             .SendCommand(x => new GetActivityQuery

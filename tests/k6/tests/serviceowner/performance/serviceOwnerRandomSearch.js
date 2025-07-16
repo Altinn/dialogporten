@@ -52,7 +52,7 @@ function get_filter_value(filter, label) {
         case "endUserId": return "urn:altinn:person:identifier-no:" +randomItem(endUsers).ssn;
         case "serviceResource": return "urn:altinn:resource:" +randomItem(resources);
         case "party": return "urn:altinn:organization:identifier-no:" +randomItem(orgNos);
-        case "status": return "New";
+        case "status": return "NotApplicable";
         case "deleted": return "Exclude";
         case "createdAfter": return new Date(Date.now() - 7*24*60*60*1000).toISOString();
         case "createdBefore": return new Date(Date.now() - 7*24*60*60*1000).toISOString();
@@ -81,7 +81,7 @@ export default function() {
 
     const url = new URL(baseUrlServiceOwner + 'dialogs');
     for (const key in queryParams) {
-        url.searchParams.append(key, queryParams[key]);    
+        url.searchParams.append(key, queryParams[key]);
     }
 
     describe('Perform serviceowner dialog list', () => {
@@ -91,6 +91,3 @@ export default function() {
         return r
     });
 }
-
-
-

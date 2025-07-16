@@ -79,6 +79,8 @@ param postgresConfiguration {
   availabilityZone: string
 }
 
+param deployerPrincipalName string
+
 import { Sku as ServiceBusSku } from '../modules/serviceBus/main.bicep'
 param serviceBusSku ServiceBusSku
 
@@ -128,6 +130,7 @@ module appConfiguration '../modules/appConfiguration/create.bicep' = {
     location: location
     sku: appConfigurationSku
     tags: tags
+    logAnalyticsWorkspaceName: appInsights.outputs.appInsightsWorkspaceName
   }
 }
 
@@ -232,6 +235,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     highAvailability: postgresConfiguration.?highAvailability
     backupRetentionDays: postgresConfiguration.backupRetentionDays
     availabilityZone: postgresConfiguration.availabilityZone
+    deployerPrincipalName: deployerPrincipalName
     tags: tags
   }
 }

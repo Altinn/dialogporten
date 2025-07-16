@@ -7,14 +7,18 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit.Abstractions;
+using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -66,6 +70,14 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x => x.Id.Should().Be(expectedDialogId));
     }
+
+    [Fact]
+    public Task Can_Create_Dialog_With_Empty_Content_Summary() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Content!.Summary = null)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Content!.Summary.Should().BeNull());
 
     [Fact]
     public async Task Create_Dialog_When_Dialog_Is_Complex()
@@ -296,4 +308,86 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Dto.Content = null;
             })
             .ExecuteAndAssert(expectedType);
+
+    private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
+    {
+        public TransmissionsCountTestData()
+        {
+            Add("2 From Party, 1 From ServiceOwner",
+                x =>
+                {
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Submission;
+                        x.WithPartyRepresentativeActor();
+                    });
+
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Correction;
+                        x.WithPartyRepresentativeActor();
+                    });
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Alert;
+                        x.WithServiceOwnerActor();
+                    });
+                }, 2, 1
+            );
+
+            Add("1 From ServiceOwner", x =>
+            {
+                x.AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Information;
+                    x.WithServiceOwnerActor();
+                });
+            }, 0, 1);
+
+            Add("1 From Party", x =>
+            {
+                x.AddTransmission(x =>
+                {
+                    x.Type = DialogTransmissionType.Values.Correction;
+                    x.WithPartyRepresentativeActor();
+                });
+            }, 1, 0);
+        }
+    }
+
+    [Theory, ClassData(typeof(TransmissionsCountTestData))]
+    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(
+        string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
+        FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.FromPartyTransmissionsCount.Should().Be(fromPartyCount);
+                x.FromServiceOwnerTransmissionsCount.Should().Be(fromServiceOwnerCount);
+            });
+
+    [Fact]
+    public Task Creating_Dialog_Should_Set_ContentUpdatedAt() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ContentUpdatedAt
+                    .Should()
+                    .Be(x.CreatedAt));
+
+    [Fact]
+    public async Task Dialog_Has_Unopened_Content()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.Type = DialogTransmissionType.Values.Information))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.HasUnopenedContent.Should().BeTrue();
+                x.Transmissions.First().IsOpened.Should().BeFalse();
+            });
+    }
 }

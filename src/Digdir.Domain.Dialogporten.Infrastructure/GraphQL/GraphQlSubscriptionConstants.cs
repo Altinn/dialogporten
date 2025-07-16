@@ -1,4 +1,4 @@
-namespace Digdir.Domain.Dialogporten.Infrastructure.GraphQl;
+namespace Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 
 public static class GraphQlSubscriptionConstants
 {

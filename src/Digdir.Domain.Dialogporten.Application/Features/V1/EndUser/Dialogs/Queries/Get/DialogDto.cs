@@ -113,9 +113,23 @@ public sealed class DialogDto
     public DateTimeOffset UpdatedAt { get; set; }
 
     /// <summary>
+    /// The date and time when the dialog content was last updated.
+    /// </summary>
+    /// <example>2022-12-31T23:59:59Z</example>
+    public DateTimeOffset ContentUpdatedAt { get; set; }
+
+    /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
     public DialogStatus.Values Status { get; set; }
+
+    /// <summary>
+    /// System defined label used to categorize dialogs.
+    /// This is obsolete and will only show; <see cref="SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
+    /// </summary>
+    [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]
+    public SystemLabel.Values SystemLabel { get; set; }
 
     /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
@@ -123,9 +137,9 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
-    /// Current display state.
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
-    public SystemLabel.Values SystemLabel { get; set; }
+    public bool HasUnopenedContent { get; set; }
 
     /// <summary>
     /// The dialog unstructured text content.
@@ -137,6 +151,16 @@ public sealed class DialogDto
     /// transmissions or attachments. It should also be used for front-channel embeds.
     /// </summary>
     public string? DialogToken { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a service owner
+    /// </summary>
+    public int FromServiceOwnerTransmissionsCount { get; set; }
+
+    /// <summary>
+    /// The number of transmissions sent by a party representative
+    /// </summary>
+    public int FromPartyTransmissionsCount { get; set; }
 
     /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).
@@ -164,9 +188,33 @@ public sealed class DialogDto
     public List<DialogActivityDto> Activities { get; set; } = [];
 
     /// <summary>
-    /// The list of seen log entries for the dialog newer than the dialog ChangedAt date.
+    /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastUpdate { get; set; } = [];
+
+    /// <summary>
+    /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
+    /// </summary>
+    public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
+
+    /// <summary>
+    /// Metadata about the dialog owned by end-users.
+    /// </summary>
+    public DialogEndUserContextDto EndUserContext { get; set; } = null!;
+}
+
+public sealed class DialogEndUserContextDto
+{
+    /// <summary>
+    /// The unique identifier for the end user context revision in UUIDv4 format.
+    /// </summary>
+    /// <example>0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5</example>
+    public Guid Revision { get; set; }
+
+    /// <summary>
+    /// System defined labels used to categorize dialogs.
+    /// </summary>
+    public List<SystemLabel.Values> SystemLabels { get; set; } = [];
 }
 
 public sealed class DialogTransmissionDto
@@ -226,6 +274,11 @@ public sealed class DialogTransmissionDto
     public ActorDto Sender { get; set; } = null!;
 
     /// <summary>
+    /// Indicates whether the dialog transmission has been opened.
+    /// </summary>
+    public bool IsOpened { get; set; }
+
+    /// <summary>
     /// The transmission unstructured text content.
     /// </summary>
     public DialogTransmissionContentDto Content { get; set; } = null!;
@@ -266,7 +319,6 @@ public sealed class DialogSeenLogDto
     public bool IsCurrentEndUser { get; set; }
 }
 
-
 public sealed class ContentDto
 {
     /// <summary>
@@ -277,7 +329,7 @@ public sealed class ContentDto
     /// <summary>
     /// A short summary of the dialog and its current state.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Overridden sender name. If not supplied, assume "org" as the sender name.
@@ -310,7 +362,7 @@ public sealed class DialogTransmissionContentDto
     /// <summary>
     /// The transmission summary.
     /// </summary>
-    public ContentValueDto Summary { get; set; } = null!;
+    public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
@@ -357,7 +409,6 @@ public sealed class DialogActivityDto
     /// </summary>
     public List<LocalizationDto> Description { get; set; } = [];
 }
-
 
 public sealed class DialogApiActionDto
 {

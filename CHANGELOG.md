@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.73.6](https://github.com/Altinn/dialogporten/compare/v1.73.5...v1.73.6) (2025-07-16)
+
+
+### Bug Fixes
+
+* **auth:** Increase FailSafeMaxDuration for RR data ([#2565](https://github.com/Altinn/dialogporten/issues/2565)) ([8eb62fa](https://github.com/Altinn/dialogporten/commit/8eb62fa53dba8fb2013fc7cb1668c6c9c14ee0f8))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.6.1 ([#2563](https://github.com/Altinn/dialogporten/issues/2563)) ([3e1662e](https://github.com/Altinn/dialogporten/commit/3e1662ec6cee44ac2acc3a7ce8595d5213be35b8))
+
 ## [1.73.5](https://github.com/Altinn/dialogporten/compare/v1.73.4...v1.73.5) (2025-07-15)
 
 

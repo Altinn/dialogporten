@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.74.0](https://github.com/Altinn/dialogporten/compare/v1.73.6...v1.74.0) (2025-07-17)
+
+
+### Features
+
+* **auth:** Add app instance delegation support ([#2561](https://github.com/Altinn/dialogporten/issues/2561)) ([83b4e22](https://github.com/Altinn/dialogporten/commit/83b4e225d17a6f39c61f507885861f3b5f4213e0))
+
+
+### Miscellaneous Chores
+
+* **tests:** Using service owner labels for sentinel handling ([#2568](https://github.com/Altinn/dialogporten/issues/2568)) ([0cd4985](https://github.com/Altinn/dialogporten/commit/0cd498528e979c738708b88c38b683992cd7e618))
+
 ## [1.73.6](https://github.com/Altinn/dialogporten/compare/v1.73.5...v1.73.6) (2025-07-16)
 
 

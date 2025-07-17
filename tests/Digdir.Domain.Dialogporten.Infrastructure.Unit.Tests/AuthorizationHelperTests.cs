@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Xunit;
@@ -8,18 +9,19 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;
 public class AuthorizationHelperTests
 {
     [Theory]
-    [MemberData(nameof(CollapseScenarios))]
-    public async Task CollapseSubjectResources_ShouldCollapseCorrectly(
+    [MemberData(nameof(ResolvingScenarios))]
+    public async Task ResolveDialogSearchAuthorization_ShouldResolveCorrectly(
         string _, // Used for test explorer readability
         List<string> constraintParties,
         List<string> constraintResources,
-        Dictionary<string, List<string>> expectedResult)
+        Dictionary<string, List<string>> expectedResourcesByParties,
+        List<string> expectedInstanceIds)
     {
         // Arrange
         var authorizedParties = GetAuthorizedParties();
 
         // Act
-        var actualResult = await AuthorizationHelper.CollapseSubjectResources(
+        var actualResult = await AuthorizationHelper.ResolveDialogSearchAuthorization(
             authorizedParties,
             constraintParties,
             constraintResources,
@@ -28,10 +30,10 @@ public class AuthorizationHelperTests
 
         // Assert
         // 1. Ensure the number of parties in the result is as expected.
-        Assert.Equal(expectedResult.Count, actualResult.ResourcesByParties.Count);
+        Assert.Equal(expectedResourcesByParties.Count, actualResult.ResourcesByParties.Count);
 
         // 2. Iterate through each expected party and its resources for detailed validation.
-        foreach (var (expectedParty, expectedResources) in expectedResult)
+        foreach (var (expectedParty, expectedResources) in expectedResourcesByParties)
         {
             // Verify the party is in the actual result
             Assert.Contains(expectedParty, actualResult.ResourcesByParties.Keys);
@@ -43,9 +45,13 @@ public class AuthorizationHelperTests
             // Verify that all expected resources are present (order doesn't matter)
             Assert.Empty(expectedResources.Except(actualResources));
         }
+
+        // 3. Assert Altinn App Instance IDs
+        Assert.Equal(expectedInstanceIds.Count, actualResult.AltinnAppInstanceIds.Count);
+        Assert.Empty(expectedInstanceIds.Except(actualResult.AltinnAppInstanceIds));
     }
 
-    public static IEnumerable<object[]> CollapseScenarios =>
+    public static IEnumerable<object[]> ResolvingScenarios =>
         new List<object[]>
         {
             new object[]
@@ -59,6 +65,13 @@ public class AuthorizationHelperTests
                     ["party2"] = [ "resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" ],
                     ["party3"] = ["resource5", "resource6"],
                     ["party4"] = ["resource7"]
+                },
+                new List<string>
+                {
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000001",
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003",
+                    Constants.ServiceContextInstanceIdPrefix + "444/00000000-0000-0000-0000-000000000004",
                 }
             },
 
@@ -71,6 +84,12 @@ public class AuthorizationHelperTests
                 {
                     ["party1"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6"],
                     ["party2"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" ],
+                },
+                new List<string>
+                {
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000001",
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -84,7 +103,8 @@ public class AuthorizationHelperTests
                     ["party1"] = ["resource1", "resource2", "resource5"],
                     ["party2"] = ["resource1", "resource2", "resource5"],
                     ["party3"] = ["resource5"]
-                }
+                },
+                new List<string>()
             },
 
             new object[]
@@ -95,7 +115,42 @@ public class AuthorizationHelperTests
                 new Dictionary<string, List<string>>
                 {
                     ["party2"] = ["resource4"]
+                },
+                new List<string>()
+            },
+
+            new object[]
+            {
+                "With instance resource constraint",
+                new List<string>(),
+                new List<string> { "urn:altinn:resource:app_org_app-2" },
+                new Dictionary<string, List<string>>(),
+                new List<string>
+                {
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003"
                 }
+            },
+
+            new object[]
+            {
+                "With party and instance resource constraint",
+                new List<string> { "party1" },
+                new List<string> { "urn:altinn:resource:app_org_app-2" },
+                new Dictionary<string, List<string>>(),
+                new List<string>
+                {
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                }
+            },
+
+            new object[]
+            {
+                "With party constraint and without matching instance resource constraint",
+                new List<string> { "party2" },
+                new List<string> { "urn:altinn:resource:app_org_app-1" },
+                new Dictionary<string, List<string>>(),
+                new List<string>()
             }
         };
 
@@ -129,8 +184,8 @@ public class AuthorizationHelperTests
     {
         return new AuthorizedPartiesResult
         {
-            AuthorizedParties = new List<AuthorizedParty>
-            {
+            AuthorizedParties =
+            [
                 new()
                 {
                     /*
@@ -143,9 +198,16 @@ public class AuthorizationHelperTests
                      * - resource6 (from accesspackage1)
                      */
                     Party = "party1",
+                    PartyId = 111,
                     AuthorizedRolesAndAccessPackages = ["role1", "role2", "accesspackage1"],
-                    AuthorizedResources = ["resource1", "resource5"]
+                    AuthorizedResources = ["resource1", "resource5"],
+                    AuthorizedInstances =
+                    [
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000001", ResourceId = "app_org_app-1" },
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000002", ResourceId = "app_org_app-2" }
+                    ]
                 },
+
                 new()
                 {
                     /*
@@ -160,9 +222,15 @@ public class AuthorizationHelperTests
                      * - resource8 (from accesspackage2)
                      */
                     Party = "party2",
+                    PartyId = 222,
                     AuthorizedRolesAndAccessPackages = ["role2", "accesspackage1", "accesspackage2"],
-                    AuthorizedResources = ["resource1", "resource2", "resource5"]
+                    AuthorizedResources = ["resource1", "resource2", "resource5"],
+                    AuthorizedInstances =
+                    [
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000003", ResourceId = "app_org_app-2" }
+                    ]
                 },
+
                 new()
                 {
                     /*
@@ -171,9 +239,11 @@ public class AuthorizationHelperTests
                      * - resource6 (from AuthorizedResources)
                      */
                     Party = "party3",
+                    PartyId = 333,
                     AuthorizedRolesAndAccessPackages = ["role3"],
                     AuthorizedResources = ["resource6"]
                 },
+
                 new()
                 {
                     /*
@@ -181,10 +251,17 @@ public class AuthorizationHelperTests
                      * - resource7 (from AuthorizedResources)
                      */
                     Party = "party4",
+                    PartyId = 444,
                     AuthorizedRolesAndAccessPackages = [],
-                    AuthorizedResources = ["resource7"]
+                    AuthorizedResources = ["resource7"],
+                    AuthorizedInstances =
+                    [
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000004", ResourceId = "app_org_app-3" },
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000005", ResourceId = "not-an-app" },
+                        new() { InstanceId = "invalid-instance-id", ResourceId = "app_org_app-3" }
+                    ]
                 }
-            }
+            ]
         };
     }
 }

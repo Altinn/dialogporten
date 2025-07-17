@@ -10,7 +10,7 @@ public class AuthorizationHelperTests
 {
     [Theory]
     [MemberData(nameof(ResolvingScenarios))]
-    public async Task CreateDialogSearchAuthorizationResultFromAuthorizedParties_ShouldResolveCorrectly(
+    public async Task ResolveDialogSearchAuthorization_ShouldResolveCorrectly(
         string _, // Used for test explorer readability
         List<string> constraintParties,
         List<string> constraintResources,
@@ -21,7 +21,7 @@ public class AuthorizationHelperTests
         var authorizedParties = GetAuthorizedParties();
 
         // Act
-        var actualResult = await AuthorizationHelper.CreateDialogSearchAuthorizationResultFromAuthorizedParties(
+        var actualResult = await AuthorizationHelper.ResolveDialogSearchAuthorization(
             authorizedParties,
             constraintParties,
             constraintResources,

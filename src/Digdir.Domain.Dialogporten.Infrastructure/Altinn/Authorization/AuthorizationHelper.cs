@@ -20,7 +20,7 @@ internal static class AuthorizationHelper
     /// <param name="getAllSubjectResources"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public static async Task<DialogSearchAuthorizationResult> CreateDialogSearchAuthorizationResultFromAuthorizedParties(
+    public static async Task<DialogSearchAuthorizationResult> ResolveDialogSearchAuthorization(
         AuthorizedPartiesResult authorizedParties, // Do NOT mutate as this might be a reference to a memory cache
         List<string> constraintParties,
         List<string> constraintResources,

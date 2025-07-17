@@ -125,7 +125,6 @@ export default function () {
         // Assert
         expectStatusFor(searchResponse).to.equal(400);
         let responseString = JSON.stringify(searchResponse.json());
-        console.log(responseString);
         expect(responseString).to.contain('at least');
         expect(responseString).to.contain('or fewer');
     });

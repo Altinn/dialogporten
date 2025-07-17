@@ -5,22 +5,19 @@ import {
     getSO,
     postSO,
     purgeSO,
-    deleteSO,
-    customConsole as console
+    setServiceOwnerLabels
 } from '../../common/testimports.js'
 
 import { default as dialogToInsert } from './testdata/01-create-dialog.js';
+
 
 export default function () {
 
     describe('Can retrieve all labels and service owner context revision', () => {
         let dialogToCreate = dialogToInsert();
-        let labels = [
-            { value: 'label1' },
-            { value: 'label2' }
-        ];
+        let labels = ['label1', 'label2'];
 
-        dialogToCreate.serviceOwnerContext.ServiceOwnerLabels = labels;
+        setServiceOwnerLabels(dialogToCreate, labels);
 
         // Create the dialog with labels
         let createResponse = postSO('dialogs', dialogToCreate);
@@ -35,7 +32,7 @@ export default function () {
 
         // Verify labels in the response
         let responseBody = getResponse.json();
-        expect(responseBody).to.have.length(labels.length);
+        expect(responseBody).to.have.length(labels.length + 1); // + 1 for the sentinel label
 
         // Verify ETag header is present
         let eTagHeader = getResponse.headers['Etag'];
@@ -49,11 +46,9 @@ export default function () {
 
     describe('Can create labels via create endpoint', () => {
         let dialogToCreate = dialogToInsert();
-        let labels = [
-            { value: 'label1' },
-            { value: 'label2' }
-        ];
-        dialogToCreate.serviceOwnerContext.ServiceOwnerLabels = labels;
+        let labels = ['label1', 'label2'];
+
+        setServiceOwnerLabels(dialogToCreate, labels);
 
         // Create the dialog with labels
         let createResponse = postSO('dialogs', dialogToCreate);
@@ -71,7 +66,7 @@ export default function () {
         expectStatusFor(getResponse).to.equal(200);
         expect(getResponse, 'response').to.have.validJsonBody();
         let responseBody = getResponse.json();
-        expect(responseBody).to.have.length(3);
+        expect(responseBody).to.have.length(3 + 1); // + 1 for the sentinel label
 
         // Cleanup
         let purgeResponse = purgeSO('dialogs/' + dialogId);
@@ -80,9 +75,10 @@ export default function () {
 
     describe('Cannot create duplicate labels via create endpoint', () => {
         let dialogToCreate = dialogToInsert();
-        let someLabel = { value: "some-label" };
+        let someLabel = 'some-label';
         let labels = [someLabel];
-        dialogToCreate.serviceOwnerContext.ServiceOwnerLabels = labels;
+
+        setServiceOwnerLabels(dialogToCreate, labels);
 
         // Create the dialog with labels
         let createResponse = postSO('dialogs', dialogToCreate);
@@ -91,7 +87,7 @@ export default function () {
         let dialogId = createResponse.json();
 
         // Attempt to create duplicate labels again
-        let duplicateLabelCreationResponse = postSO('dialogs/' + dialogId + '/context/labels', someLabel);
+        let duplicateLabelCreationResponse = postSO('dialogs/' + dialogId + '/context/labels', { "value": someLabel });
         expectStatusFor(duplicateLabelCreationResponse).to.equal(400);
 
         // Verify error message in the response

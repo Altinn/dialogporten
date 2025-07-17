@@ -42,6 +42,7 @@ internal static class AuthorizedPartiesHelper
         {
             Party = party,
             PartyUuid = dto.PartyUuid,
+            PartyId = dto.PartyId,
             Name = dto.Name,
             PartyType = dto.Type switch
             {
@@ -57,7 +58,12 @@ internal static class AuthorizedPartiesHelper
             HasOnlyAccessToSubParties = dto.OnlyHierarchyElementWithNoAccess,
             AuthorizedResources = GetPrefixedResources(dto.AuthorizedResources),
             AuthorizedRolesAndAccessPackages = GetPrefixedRolesAndAccessPackages(dto.AuthorizedRoles, dto.AuthorizedAccessPackages),
-            AuthorizedInstances = [], // TODO! Wait until authorization supports instance delegation and map these accordingly,
+            AuthorizedInstances = dto.AuthorizedInstances
+                .Select(x => new AuthorizedResource
+                {
+                    ResourceId = x.ResourceId,
+                    InstanceId = x.InstanceId,
+                }).ToList(),
             SubParties = dto.Subunits.Count > 0 ? dto.Subunits.Select(x => MapFromDto(x, currentUserValue)).ToList() : null
         };
     }

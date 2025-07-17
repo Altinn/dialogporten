@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250715113708_AddCoveringIndexToLabelValue")]
+    [Migration("20250717124239_AddCoveringIndexToLabelValue")]
     partial class AddCoveringIndexToLabelValue
     {
         /// <inheritdoc />
@@ -367,6 +367,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasDefaultValueSql("current_timestamp at time zone 'utc'");
 
                     b.HasKey("DialogServiceOwnerContextId", "Value");
+
+                    b.HasIndex("Value")
+                        .HasDatabaseName("IX_DialogServiceOwnerLabel_Value_Covering");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Value"), new[] { "DialogServiceOwnerContextId" });
 
                     b.ToTable("DialogServiceOwnerLabel");
                 });

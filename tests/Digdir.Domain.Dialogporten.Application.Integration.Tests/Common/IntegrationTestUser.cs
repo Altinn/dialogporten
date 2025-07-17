@@ -1,11 +1,15 @@
 using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 internal sealed class IntegrationTestUser : IUser
 {
+    private static string DefaultPid => "22834498646";
+    public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
+
     public IntegrationTestUser(List<Claim> claims, bool addDefaultClaims = true)
     {
         if (addDefaultClaims)
@@ -31,7 +35,7 @@ internal sealed class IntegrationTestUser : IUser
             new Claim(ClaimTypes.Name, "Integration Test User"),
             new Claim("acr", Constants.IdportenLoaHigh),
             new Claim(ClaimTypes.NameIdentifier, "integration-test-user"),
-            new Claim("pid", "22834498646"),
+            new Claim("pid", DefaultPid),
             new Claim("consumer",
                 """
                 {

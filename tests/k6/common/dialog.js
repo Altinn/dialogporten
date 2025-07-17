@@ -156,7 +156,6 @@ export function setSystemLabel(dialog, systemLabel) {
 export function setServiceOwnerLabels(dialog, serviceOwnerLabels) {
     if (!Array.isArray(serviceOwnerLabels) || serviceOwnerLabels.some(label => typeof label !== "string")) {
         throw new Error("Invalid service owner labels provided");
-        console.log(serviceOwnerLabels);
     }
     let labels = [];
     serviceOwnerLabels.forEach((l) => {

@@ -68,8 +68,10 @@ public class AuthorizationHelperTests
                 },
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/instance-1",
-                    Constants.ServiceContextInstanceIdPrefix + "222/instance-2"
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000001",
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003",
+                    Constants.ServiceContextInstanceIdPrefix + "444/00000000-0000-0000-0000-000000000004",
                 }
             },
 
@@ -85,8 +87,9 @@ public class AuthorizationHelperTests
                 },
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/instance-1",
-                    Constants.ServiceContextInstanceIdPrefix + "222/instance-2"
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000001",
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -120,11 +123,12 @@ public class AuthorizationHelperTests
             {
                 "With instance resource constraint",
                 new List<string>(),
-                new List<string> { "urn:altinn:resource:app_org_app-1" },
+                new List<string> { "urn:altinn:resource:app_org_app-2" },
                 new Dictionary<string, List<string>>(),
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/instance-1"
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -132,11 +136,11 @@ public class AuthorizationHelperTests
             {
                 "With party and instance resource constraint",
                 new List<string> { "party1" },
-                new List<string> { "urn:altinn:resource:app_org_app-1" },
+                new List<string> { "urn:altinn:resource:app_org_app-2" },
                 new Dictionary<string, List<string>>(),
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/instance-1"
+                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
                 }
             },
 
@@ -180,8 +184,8 @@ public class AuthorizationHelperTests
     {
         return new AuthorizedPartiesResult
         {
-            AuthorizedParties = new List<AuthorizedParty>
-            {
+            AuthorizedParties =
+            [
                 new()
                 {
                     /*
@@ -199,9 +203,11 @@ public class AuthorizationHelperTests
                     AuthorizedResources = ["resource1", "resource5"],
                     AuthorizedInstances =
                     [
-                        new() { InstanceId = "instance-1", ResourceId = "app_org_app-1" }
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000001", ResourceId = "app_org_app-1" },
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000002", ResourceId = "app_org_app-2" }
                     ]
                 },
+
                 new()
                 {
                     /*
@@ -221,9 +227,10 @@ public class AuthorizationHelperTests
                     AuthorizedResources = ["resource1", "resource2", "resource5"],
                     AuthorizedInstances =
                     [
-                        new() { InstanceId = "instance-2", ResourceId = "app_org_app-2" }
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000003", ResourceId = "app_org_app-2" }
                     ]
                 },
+
                 new()
                 {
                     /*
@@ -236,6 +243,7 @@ public class AuthorizationHelperTests
                     AuthorizedRolesAndAccessPackages = ["role3"],
                     AuthorizedResources = ["resource6"]
                 },
+
                 new()
                 {
                     /*
@@ -248,11 +256,12 @@ public class AuthorizationHelperTests
                     AuthorizedResources = ["resource7"],
                     AuthorizedInstances =
                     [
-                        // This one should be ignored as its resource id does not start with app_
-                        new() { InstanceId = "instance-4", ResourceId = "xapp_org_app-4" }
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000004", ResourceId = "app_org_app-3" },
+                        new() { InstanceId = "00000000-0000-0000-0000-000000000005", ResourceId = "not-an-app" },
+                        new() { InstanceId = "invalid-instance-id", ResourceId = "app_org_app-3" }
                     ]
                 }
-            }
+            ]
         };
     }
 }

@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -7,7 +8,9 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using FluentAssertions;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
@@ -77,4 +80,59 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 dialog.FromPartyTransmissionsCount.Should().Be(1);
                 dialog.FromServiceOwnerTransmissionsCount.Should().Be(1);
             });
+
+    private const string DummyService = "urn:altinn:resource:test-service";
+
+    [Fact]
+    public async Task Search_Should_Return_Delegated_Instances()
+    {
+        var delegatedDialogId = NewUuidV7();
+        var delegatedDialogParty = NorwegianPersonIdentifier.PrefixWithSeparator + "13213312833";
+
+        await FlowBuilder.For(Application, x =>
+            {
+                x.ConfigureAltinnAuthorization(x =>
+                {
+                    x.ConfigureGetAuthorizedResourcesForSearch(
+                        new DialogSearchAuthorizationResult
+                        {
+                            ResourcesByParties = new Dictionary<string, HashSet<string>>
+                            {
+                                // Default integration test user party
+                                { IntegrationTestUser.DefaultParty, [DummyService] }
+                            },
+                            // Delegated dialog
+                            DialogIds = [delegatedDialogId]
+                        });
+                });
+            })
+            .CreateSimpleDialog(x =>
+            {
+                // Delegated dialog
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.Id = delegatedDialogId;
+                x.Dto.Party = delegatedDialogParty;
+            })
+            .CreateSimpleDialog(x =>
+            {
+                // Default integration test user dialog
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.Party = IntegrationTestUser.DefaultParty;
+            })
+            .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+            {
+                x.Items.Should().HaveCount(2);
+
+                // Delegated dialog
+                x.Items.Should().ContainSingle(d =>
+                    d.Id == delegatedDialogId &&
+                    d.Party == delegatedDialogParty);
+
+                // Default integration test user dialog
+                x.Items.Should().ContainSingle(d =>
+                    d.Id != delegatedDialogId &&
+                    d.Party == IntegrationTestUser.DefaultParty);
+            });
+    }
 }

@@ -116,6 +116,7 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(nameof(Altinn.ResourceRegistry), new()
         {
             Duration = TimeSpan.FromMinutes(20),
+            FailSafeMaxDuration = TimeSpan.FromHours(26),
             // The resource list is several megabytes and might take a while to process
             FactoryHardTimeout = TimeSpan.FromSeconds(10)
         })

@@ -155,6 +155,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             flattenedList.Add(new AuthorizedParty
             {
                 Party = party.Party,
+                PartyId = party.PartyId,
                 ParentParty = null,
                 AuthorizedResources = party.AuthorizedResources.Count > 0
                     ? [.. party.AuthorizedResources]
@@ -176,6 +177,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                 flattenedList.Add(new AuthorizedParty
                 {
                     Party = subParty.Party,
+                    PartyId = subParty.PartyId,
                     ParentParty = party.Party,
                     AuthorizedResources = subParty.AuthorizedResources.Count > 0
                         ? [.. subParty.AuthorizedResources]
@@ -214,13 +216,31 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         var partyIdentifier = request.Claims.GetEndUserPartyIdentifier() ?? throw new UnreachableException();
         var authorizedParties = await GetAuthorizedParties(partyIdentifier, flatten: true, cancellationToken: cancellationToken);
 
-        return await AuthorizationHelper.CollapseSubjectResources(
+        var result = await AuthorizationHelper.ResolveDialogSearchAuthorization(
             authorizedParties,
             request.ConstraintParties,
             request.ConstraintServiceResources,
             GetAllSubjectResources,
             cancellationToken);
+
+        return await PopulateDialogIdsFromInstanceDelegationIds(result, cancellationToken);
     }
+
+    private async Task<DialogSearchAuthorizationResult> PopulateDialogIdsFromInstanceDelegationIds(DialogSearchAuthorizationResult result, CancellationToken cancellationToken)
+    {
+        if (result.AltinnAppInstanceIds.Count == 0)
+        {
+            return result;
+        }
+
+        result.DialogIds = await _db.DialogServiceOwnerLabels
+            .Where(l => result.AltinnAppInstanceIds.Contains(l.Value))
+            .Select(l => l.DialogServiceOwnerContext.DialogId)
+            .ToListAsync(cancellationToken: cancellationToken);
+
+        return result;
+    }
+
     private async Task<List<SubjectResource>> GetAllSubjectResources(CancellationToken cancellationToken) =>
         await _subjectResourcesCache.GetOrSetAsync(nameof(SubjectResource), async ct =>
             {

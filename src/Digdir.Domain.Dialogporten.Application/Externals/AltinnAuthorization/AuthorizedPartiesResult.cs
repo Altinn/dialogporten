@@ -9,6 +9,7 @@ public sealed class AuthorizedParty
 {
     public string Party { get; init; } = null!;
     public Guid PartyUuid { get; init; }
+    public int PartyId { get; init; }
     public string Name { get; init; } = null!;
     public AuthorizedPartyType PartyType { get; init; }
     public bool IsDeleted { get; init; }

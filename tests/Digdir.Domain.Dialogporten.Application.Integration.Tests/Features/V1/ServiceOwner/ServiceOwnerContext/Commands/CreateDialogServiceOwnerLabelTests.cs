@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using FluentAssertions;
@@ -19,8 +20,8 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Create_Dialog_With_ServiceOwner_Labels() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-                x.Dto.ServiceOwnerContext!.ServiceOwnerLabels = CreateLabels("Scadrial", "Roshar", "Sel"))
+            .CreateSimpleDialog(x => x
+                .AddServiceOwnerLabels("Scadrial", "Roshar", "Sel"))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.ServiceOwnerContext
@@ -32,12 +33,9 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Create_Dialog_With_Duplicate_ServiceOwner_Labels() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-            {
-                const string label = "SCADRIAL";
-                var labels = CreateLabels(label, label.ToLowerInvariant());
-                x.Dto.ServiceOwnerContext!.ServiceOwnerLabels = labels;
-            })
+            .CreateSimpleDialog(x => x
+                // Case-insensitive, duplicate labels
+                .AddServiceOwnerLabels("sel", "SEL"))
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("duplicate"));
 
@@ -45,12 +43,10 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public Task Cannot_Create_Labels_With_Invalid_Length() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
-            {
-                x.Dto.ServiceOwnerContext!.ServiceOwnerLabels = CreateLabels(
+                x.AddServiceOwnerLabels(
                     null!,
                     new string('a', Constants.MinSearchStringLength - 1),
-                    new string('a', Constants.DefaultMaxStringLength + 1));
-            })
+                    new string('a', Constants.DefaultMaxStringLength + 1)))
             .ExecuteAndAssert<ValidationError>(x =>
             {
                 x.ShouldHaveErrorWithText("not be empty");
@@ -73,7 +69,4 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 x.ShouldHaveErrorWithText("Maximum");
                 x.ShouldHaveErrorWithText($"{DialogServiceOwnerLabel.MaxNumberOfLabels}");
             });
-
-    private static List<ServiceOwnerLabelDto> CreateLabels(params string[] values) =>
-        values.Select(value => new ServiceOwnerLabelDto { Value = value }).ToList();
 }

@@ -33,6 +33,7 @@ using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.NullObjects;
 using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using MassTransit;
 using MediatR;
 
@@ -68,6 +69,7 @@ public static class InfrastructureExtensions
                     services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
                 );
             })
+            .AddHostedService<FusionCacheWarmupHostedService>()
             .AddHostedService<DevelopmentMigratorHostedService>()
             .AddHostedService<DevelopmentCleanupOutboxHostedService>()
             .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()

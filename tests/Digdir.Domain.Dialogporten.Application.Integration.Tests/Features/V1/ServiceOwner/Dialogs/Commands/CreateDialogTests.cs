@@ -278,12 +278,14 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x =>
             {
                 x.Dto.Transmissions = DialogGenerator.GenerateFakeDialogTransmissions(2);
+                x.Dto.Transmissions[0].Type = DialogTransmissionType.Values.Submission;
                 x.Dto.Transmissions[0].Sender = new ActorDto
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
                     ActorName = "Fredrik",
                     ActorId = null
                 };
+                x.Dto.Transmissions[1].Type = DialogTransmissionType.Values.Submission;
                 x.Dto.Transmissions[1].Sender = new ActorDto
                 {
                     ActorType = ActorType.Values.PartyRepresentative,

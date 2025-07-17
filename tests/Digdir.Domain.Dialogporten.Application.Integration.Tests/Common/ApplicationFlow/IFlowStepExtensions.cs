@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
@@ -9,6 +10,7 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using OneOf;
+using Xunit.Sdk;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
@@ -257,19 +259,43 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>
         step.Select(result =>
         {
-            var typedResult = result.Value.Should().BeOfType<T>().Subject;
-            typedResult.Should().NotBeNull();
-            assert?.Invoke(typedResult);
-            return typedResult;
+            try
+            {
+                var typedResult = result.Value.Should().BeOfType<T>().Subject;
+                typedResult.Should().NotBeNull();
+                assert?.Invoke(typedResult);
+                return typedResult;
+            }
+            catch (XunitException)
+            {
+                if (result.Value is not ValidationError ve) throw;
+                foreach (var error in ve.Errors)
+                {
+                    Console.WriteLine(error);
+                }
+                throw;
+            }
         });
 
     public static IFlowStep AssertSuccess(this IFlowStep<IOneOf> step) =>
         step.Select(result =>
         {
-            result.Index.Should().Be(0);
-            var typedResult = result.Value;
-            typedResult.Should().NotBeNull();
-            return typedResult;
+            try
+            {
+                result.Index.Should().Be(0);
+                var typedResult = result.Value;
+                typedResult.Should().NotBeNull();
+                return typedResult;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            // result.Index.Should().Be(0);
+            // var typedResult = result.Value;
+            // typedResult.Should().NotBeNull();
+            // return typedResult;
         });
 
     public static Guid GetDialogId(this FlowContext ctx)

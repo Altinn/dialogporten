@@ -45,9 +45,6 @@ export function setSearchTags(dialog, searchTags) {
         tags.push({ "value": t });
     })
 
-    // Always set the sentinel string that we use to check for leftover dialogs after the run
-    tags.push({ "value": sentinelValue });
-
     dialog.searchTags = tags;
 }
 
@@ -155,6 +152,24 @@ export function setSystemLabel(dialog, systemLabel) {
     }
     dialog.systemLabel = systemLabel;
 }
+
+export function setServiceOwnerLabels(dialog, serviceOwnerLabels) {
+    if (!Array.isArray(serviceOwnerLabels) || serviceOwnerLabels.some(label => typeof label !== "string")) {
+        throw new Error("Invalid service owner labels provided");
+    }
+    let labels = [];
+    serviceOwnerLabels.forEach((l) => {
+        labels.push({ "value": l });
+    })
+
+    dialog.serviceOwnerContext = dialog.serviceOwnerContext || {};
+
+    // Always add the sentinel value to the labels to ensure dialogs are cleaned up
+    labels.push({ "value": sentinelValue });
+
+    dialog.serviceOwnerContext.ServiceOwnerLabels = labels;
+}
+
 export function setActivities(dialog, activities) {
     if (activities == null) {
         delete dialog.activities;

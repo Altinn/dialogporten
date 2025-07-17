@@ -15,7 +15,7 @@ export default function () {
         oneHourAgo.setHours(oneHourAgo.getHours() - 1);
         let createdAfter = oneHourAgo.toISOString();
         do {
-            let r = getSO('dialogs/?CreatedAfter=' + createdAfter + '&Limit=1000&Search=' + sentinelValue + continuationToken, null, tokenOptions);
+            let r = getSO('dialogs/?CreatedAfter=' + createdAfter + '&Limit=1000&ServiceOwnerLabels=' + sentinelValue + continuationToken, null, tokenOptions);
             expectStatusFor(r).to.equal(200);
             expect(r, 'response').to.have.validJsonBody();
             let response = r.json();

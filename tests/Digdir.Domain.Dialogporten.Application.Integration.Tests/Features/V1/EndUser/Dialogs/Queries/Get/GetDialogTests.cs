@@ -10,6 +10,15 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 public class GetDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
+    public Task Get_New_Dialog_Should_Return_Default_SystemLabel() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should()
+                    .ContainSingle(x => x == SystemLabel.Values.Default));
+
+    [Fact]
     public Task Get_Should_Populate_EnduserContextRevision() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

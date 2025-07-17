@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
@@ -89,7 +90,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return new Conflict(nameof(dialog.IdempotentKey), $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
         }
 
-        CreateDialogEndUserContext(request, dialog);
+        UpdateSystemLabel(request, dialog);
         CreateDialogServiceOwnerContext(request, dialog);
 
         var activityTypes = dialog.Activities
@@ -150,23 +151,17 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         return dialogId == Guid.Empty ? null : dialogId;
     }
 
-    private void CreateDialogEndUserContext(CreateDialogCommand request, DialogEntity dialog)
+    private void UpdateSystemLabel(CreateDialogCommand request, DialogEntity dialog)
     {
-        dialog.EndUserContext = new();
-        if (!request.Dto.SystemLabel.HasValue)
-        {
-            return;
-        }
-
         if (!_user.TryGetOrganizationNumber(out var organizationNumber))
         {
             _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
             return;
         }
 
-        dialog.EndUserContext.UpdateLabel(
-            request.Dto.SystemLabel.Value,
+        dialog.UpdateSystemLabel(
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
+            request.Dto.SystemLabel,
             ActorType.Values.ServiceOwner);
     }
 

@@ -13,6 +13,23 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 public class SearchDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
+    public Task Search_Dialog_With_Non_Default_SystemLabel_Should_Return_SystemLabels() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.SystemLabel = SystemLabel.Values.Bin)
+            .SearchEndUserDialogs((x, ctx) => x.Party = [ctx.GetParty()])
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+                x.Items.First().EndUserContext.SystemLabels
+                    .Should().Contain(SystemLabel.Values.Bin));
+
+    [Fact]
+    public Task Search_New_Dialog_Should_Return_Empty_SystemLabels() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SearchEndUserDialogs((x, ctx) => x.Party = [ctx.GetParty()])
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+                x.Items.First().EndUserContext.SystemLabels.Should()
+                    .ContainSingle(x => x == SystemLabel.Values.Default));
+    [Fact]
     public async Task Search_Should_Populate_EnduserContextRevision()
     {
         string? party = null;

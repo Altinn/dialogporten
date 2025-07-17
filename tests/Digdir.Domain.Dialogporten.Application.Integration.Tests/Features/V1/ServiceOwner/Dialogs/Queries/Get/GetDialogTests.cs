@@ -6,12 +6,21 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using FluentAssertions;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class GetDialogTests : ApplicationCollectionFixture
 {
     public GetDialogTests(DialogApplication application) : base(application) { }
+
+    [Fact]
+    public Task Get_New_Dialog_Should_Return_Empty_SystemLabels() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should()
+                    .ContainSingle(x => x == SystemLabel.Values.Default));
 
     [Fact]
     public async Task Get_ReturnsSimpleDialog_WhenDialogExists()

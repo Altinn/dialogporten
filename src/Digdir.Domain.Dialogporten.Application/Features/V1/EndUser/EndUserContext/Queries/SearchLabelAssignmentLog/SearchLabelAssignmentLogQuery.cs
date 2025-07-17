@@ -36,7 +36,7 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
         var dialog = await _dialogDbContext.Dialogs
             .AsNoTracking()
             .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.LabelAssignmentLogs)
+                .ThenInclude(x => x!.LabelAssignmentLogs)
                 .ThenInclude(x => x.PerformedBy)
                 .ThenInclude(x => x.ActorNameEntity)
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
@@ -62,6 +62,6 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        return _mapper.Map<List<LabelAssignmentLogDto>>(dialog.EndUserContext.LabelAssignmentLogs);
+        return _mapper.Map<List<LabelAssignmentLogDto>>(dialog.EndUserContext?.LabelAssignmentLogs ?? []);
     }
 }

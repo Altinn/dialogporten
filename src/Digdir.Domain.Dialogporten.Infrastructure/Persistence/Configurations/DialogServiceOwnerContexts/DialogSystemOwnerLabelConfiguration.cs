@@ -7,5 +7,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.D
 internal sealed class DialogSystemOwnerLabelConfiguration : IEntityTypeConfiguration<DialogServiceOwnerLabel>
 {
     public void Configure(EntityTypeBuilder<DialogServiceOwnerLabel> builder)
-        => builder.HasKey(x => new { x.DialogServiceOwnerContextId, x.Value });
+    {
+        builder.HasKey(x => new { x.DialogServiceOwnerContextId, x.Value });
+
+        builder.HasIndex(x => x.Value)
+            .HasDatabaseName("IX_DialogServiceOwnerLabel_Value_Covering")
+            .IncludeProperties(x => x.DialogServiceOwnerContextId);
+    }
 }

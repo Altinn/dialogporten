@@ -365,6 +365,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("DialogServiceOwnerContextId", "Value");
 
+                    b.HasIndex("Value")
+                        .HasDatabaseName("IX_DialogServiceOwnerLabel_Value_Covering");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Value"), new[] { "DialogServiceOwnerContextId" });
+
                     b.ToTable("DialogServiceOwnerLabel");
                 });
 

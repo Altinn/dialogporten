@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,16 +9,38 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Extensions;
 
 public static class DbSetExtensions
 {
-    public static (string sql, object[] parameters) GeneratePrefilterAuthorizedDialogsSql(DialogSearchAuthorizationResult authorizedResources)
+    public static (string sql, object[] parameters) GeneratePrefilterAuthorizedDialogsSql(
+        DialogSearchAuthorizationResult authorizedResources,
+        DeletedFilter deletedFilter)
     {
         var parameters = new List<object>();
+        var deletedFilterCondition = deletedFilter switch
+        {
+            DeletedFilter.Include => "",
+            DeletedFilter.Exclude => "NOT \"Deleted\" AND",
+            DeletedFilter.Only => "\"Deleted\" AND",
+            _ => throw new ArgumentOutOfRangeException(nameof(deletedFilter), deletedFilter, null)
+        };
+
         var sb = new StringBuilder()
             .AppendLine(CultureInfo.InvariantCulture, $"""
-                SELECT *
+                SELECT "Id", "Deleted", "Party", "ServiceResource", "CreatedAt", "UpdatedAt", "DueAt"
                 FROM "Dialog"
-                WHERE "Id" = ANY(@p{parameters.Count})
+                WHERE {deletedFilterCondition} (
                 """);
-        parameters.Add(authorizedResources.DialogIds);
+
+        if (authorizedResources.DialogIds.Count > 0)
+        {
+            sb.AppendLine(CultureInfo.InvariantCulture, $"\"Id\" = ANY(@p{parameters.Count})");
+            parameters.Add(authorizedResources.DialogIds);
+        }
+        else
+        {
+            // Sending FALSE instead of an empty array to avoid forcing a Bitmap scan and lets
+            // PG optimize it away and use an index-only scan when getting dialog ids and only
+            // filtering by a single party, which is usually the case in Arbeidsflate.
+            sb.AppendLine("FALSE");
+        }
 
         // Group parties that have the same resources
         var groupedResult = authorizedResources.ResourcesByParties
@@ -39,13 +62,18 @@ public static class DbSetExtensions
             parameters.Add(resources);
         }
 
+        sb.AppendLine(")");
+
         return (sb.ToString(), parameters.ToArray());
     }
 
-    public static IQueryable<DialogEntity> PrefilterAuthorizedDialogs(this DbSet<DialogEntity> dialogs, DialogSearchAuthorizationResult authorizedResources)
+    public static IQueryable<DialogEntity> PrefilterAuthorizedDialogs(
+        this DbSet<DialogEntity> dialogs,
+        DialogSearchAuthorizationResult authorizedResources,
+        DeletedFilter? deletedFilter)
     {
-        var (sql, parameters) = GeneratePrefilterAuthorizedDialogsSql(authorizedResources);
-        return dialogs.FromSqlRaw(sql, parameters);
+        var (sql, parameters) = GeneratePrefilterAuthorizedDialogsSql(authorizedResources, deletedFilter ?? DeletedFilter.Exclude);
+        return dialogs.FromSqlRaw(sql, parameters).IgnoreQueryFilters();
     }
 }
 

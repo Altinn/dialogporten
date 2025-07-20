@@ -10,6 +10,16 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.C
 
 internal static class CreateDialogCommandExtensions
 {
+    public static CreateDialogCommand AddServiceOwnerLabels(this CreateDialogCommand command, params string[] labels)
+    {
+        command.Dto.ServiceOwnerContext ??= new DialogServiceOwnerContextDto();
+        foreach (var label in labels)
+        {
+            command.Dto.ServiceOwnerContext.ServiceOwnerLabels.Add(new ServiceOwnerLabelDto { Value = label });
+        }
+        return command;
+    }
+
     public static CreateDialogCommand AddTransmission(this CreateDialogCommand command, Action<TransmissionDto>? modify = null)
     {
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();

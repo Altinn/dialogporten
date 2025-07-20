@@ -143,6 +143,7 @@ public static class IFlowStepExtensions
             {
                 var command = new UpdateDialogServiceOwnerContextCommand
                 {
+                    Dto = new(),
                     DialogId = ctx.GetDialogId()
                 };
                 modify(command);

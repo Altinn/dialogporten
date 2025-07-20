@@ -13,12 +13,13 @@ export default function (endUser = getDefaultEnduserSsn()) {
         "visibleFrom": "2032-11-25T06:37:54.2920190Z", // must be UTC
         "process": "urn:test:process:1",
         "serviceOwnerContext": {
-            "serviceOwnerLabels": []
+            "serviceOwnerLabels": [
+                { "value" : sentinelValue } // Do not remove this, this is used to look for unpurged dialogs after a run
+            ]
         },
         "searchTags": [
             { "value": "something searchable" },
-            { "value": "something else searchable" },
-            { "value": sentinelValue } // Do not remove this, this is used to look for unpurged dialogs after a run
+            { "value": "something else searchable" }
         ],
         "content": {
             "Title": {

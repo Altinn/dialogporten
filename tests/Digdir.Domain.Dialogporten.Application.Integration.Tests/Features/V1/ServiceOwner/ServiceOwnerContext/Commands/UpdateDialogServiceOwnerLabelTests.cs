@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwn
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Queries.GetServiceOwnerLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
@@ -45,8 +46,8 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Remove_ServiceOwnerLabels() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-                x.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = "Scadrial" }])
+            .CreateSimpleDialog(x => x
+                .AddServiceOwnerLabels("Scadrial"))
             .UpdateServiceOwnerContext(x => x.Dto = new()
             {
                 ServiceOwnerLabels = []
@@ -63,10 +64,8 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public Task Can_Add_ServiceOwnerLabel_To_Existing_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateServiceOwnerContext(x => x.Dto = new()
-            {
-                ServiceOwnerLabels = CreateLabels("Scadrial", "Roshar")
-            })
+            .UpdateServiceOwnerContext(x => x
+                .AddServiceOwnerLabels("Scadrial", "Roshar"))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.ServiceOwnerContext
@@ -79,14 +78,9 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public Task Cannot_Update_ServiceOwnerLabels_With_Duplicates() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateServiceOwnerContext(x =>
-            {
-                const string label = "SCADRIAL";
-                x.Dto = new()
-                {
-                    ServiceOwnerLabels = CreateLabels(label, label.ToLowerInvariant())
-                };
-            })
+            .UpdateServiceOwnerContext(x => x
+                // Case-insensitive, duplicate labels
+                .AddServiceOwnerLabels("sel", "SEL"))
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("duplicate"));
 
@@ -94,16 +88,11 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public Task Cannot_Update_ServiceOwnerLabels_With_Invalid_Length() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateServiceOwnerContext(x =>
-            {
-                x.Dto = new()
-                {
-                    ServiceOwnerLabels = CreateLabels(
-                        null,
-                        new string('a', Constants.MinSearchStringLength - 1),
-                        new string('a', Constants.DefaultMaxStringLength + 1))
-                };
-            })
+            .UpdateServiceOwnerContext(x => x
+                .AddServiceOwnerLabels(
+                    null!,
+                    new string('a', Constants.MinSearchStringLength - 1),
+                    new string('a', Constants.DefaultMaxStringLength + 1)))
             .ExecuteAndAssert<ValidationError>(x =>
             {
                 x.ShouldHaveErrorWithText("not be empty");
@@ -150,7 +139,4 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 x.ShouldHaveErrorWithText("Maximum");
                 x.ShouldHaveErrorWithText($"{DialogServiceOwnerLabel.MaxNumberOfLabels}");
             });
-
-    private static List<ServiceOwnerLabelDto> CreateLabels(params string?[] values) =>
-        values.Select(value => new ServiceOwnerLabelDto { Value = value! }).ToList();
 }

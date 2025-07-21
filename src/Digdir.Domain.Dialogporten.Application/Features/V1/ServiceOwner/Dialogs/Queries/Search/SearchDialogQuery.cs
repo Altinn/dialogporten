@@ -210,7 +210,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .Include(x => x.Content)
                 .ThenInclude(x => x.Value.Localizations)
             .Include(x => x.ServiceOwnerContext)
-                .ThenInclude(x => x.ServiceOwnerLabels)
+                .ThenInclude(x => x!.ServiceOwnerLabels)
             .WhereIf(!request.ServiceResource.IsNullOrEmpty(),
                 x => request.ServiceResource!.Contains(x.ServiceResource))
             .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
@@ -230,14 +230,19 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
             .WhereIf(request.VisibleAfter.HasValue, x => request.VisibleAfter <= x.VisibleFrom)
             .WhereIf(request.VisibleBefore.HasValue, x => x.VisibleFrom <= request.VisibleBefore)
-            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x => request.SystemLabel!.Contains(x.EndUserContext.SystemLabelId))
+            .WhereIf(
+                !request.SystemLabel.IsNullOrEmpty(),
+                x => request.SystemLabel!.Contains(
+                    x.EndUserContext != null
+                        ? x.EndUserContext.SystemLabelId
+                        : SystemLabel.Values.Default))
             .WhereIf(request.Search is not null, x =>
                 x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
-                x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
-            )
+                x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!)))
             .WhereIf(request.Deleted == DeletedFilter.Exclude, x => !x.Deleted)
             .WhereIf(request.Deleted == DeletedFilter.Only, x => x.Deleted)
             .WhereIf(formattedServiceOwnerLabels is not null && formattedServiceOwnerLabels.Count != 0, x =>
+                x.ServiceOwnerContext != null &&
                 formattedServiceOwnerLabels!
                     .All(formattedLabel =>
                         x.ServiceOwnerContext.ServiceOwnerLabels

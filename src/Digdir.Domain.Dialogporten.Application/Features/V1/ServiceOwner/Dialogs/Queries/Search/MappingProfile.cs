@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -14,31 +14,37 @@ internal sealed class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // See IntermediateSearchDialogDto
-        CreateMap<IntermediateDialogDto, DialogDto>();
+        // This mapping profile is designed in two stages for performance reasons.
+        // 1. DialogEntity -> IntermediateDialogDto: This stage is executed by Entity Framework
+        //    and translated to SQL. It's kept simple to generate efficient queries.
+        // 2. IntermediateDialogDto -> DialogDto: This stage is executed in-memory after
+        //    the data has been fetched from the database. It handles more complex logic.
+
+        // Stage 2: In-memory mapping from intermediate to final DTO
+        CreateMap<IntermediateDialogDto, DialogDto>()
+            .ForMember(dest => dest.LatestActivity, opt => opt.MapFrom(src => src.Activities.FirstOrDefault()))
+            .ForMember(dest => dest.GuiAttachmentCount, opt => opt.MapFrom(src => src.Attachments
+                .Count(x => x.Urls.Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))));
+
+        // Stage 1: EF Core to SQL mapping from domain entity to intermediate DTO
         CreateMap<DialogEntity, IntermediateDialogDto>()
-            .ForMember(dest => dest.FromPartyTransmissionsCount, opt => opt
-                .MapFrom(src => (int)src.FromPartyTransmissionsCount))
-            .ForMember(dest => dest.FromServiceOwnerTransmissionsCount, opt => opt
-                .MapFrom(src => (int)src.FromServiceOwnerTransmissionsCount))
-            .ForMember(dest => dest.LatestActivity, opt => opt.MapFrom(src => src.Activities
-                .OrderByDescending(activity => activity.CreatedAt).ThenByDescending(activity => activity.Id)
-                .FirstOrDefault()
-            ))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
+            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.DialogEndUserContext.SystemLabelId))
+            .ForMember(dest => dest.FromPartyTransmissionsCount, opt => opt.MapFrom(src => (int)src.FromPartyTransmissionsCount))
+            .ForMember(dest => dest.FromServiceOwnerTransmissionsCount, opt => opt.MapFrom(src => (int)src.FromServiceOwnerTransmissionsCount))
+            .ForMember(dest => dest.Activities, opt => opt.MapFrom(src => src.Activities
+                .OrderByDescending(activity => activity.CreatedAt)
+                .ThenByDescending(activity => activity.Id)))
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.MapFrom(src => src.SeenLog
                 .Where(x => x.CreatedAt >= x.Dialog.UpdatedAt)
-                .OrderByDescending(x => x.CreatedAt)
-            ))
+                .OrderByDescending(x => x.CreatedAt)))
             .ForMember(dest => dest.SeenSinceLastContentUpdate, opt => opt.MapFrom(src => src.SeenLog
                 .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
-                .OrderByDescending(x => x.CreatedAt)
-            ))
-            .ForMember(dest => dest.GuiAttachmentCount, opt => opt.MapFrom(src => src.Attachments
-                .Count(x => x.Urls
-                    .Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))))
-            .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
-            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.EndUserContext.SystemLabelId))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId));
+                .OrderByDescending(x => x.CreatedAt)))
+            // Attachments and Content are mapped directly to avoid complex SQL generation.
+            // Filtering and counting are handled in the second mapping stage.
+            .ForMember(dest => dest.Attachments, opt => opt.MapFrom(src => src.Attachments))
+            .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content));
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()
             .ForMember(dest => dest.SystemLabels, opt => opt.MapFrom(src => new List<SystemLabel.Values> { src.SystemLabelId }));

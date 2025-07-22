@@ -18,16 +18,16 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
     public Guid? DialogId { get; set; }
     public DialogEntity? Dialog { get; set; }
 
-    public SystemLabel.Values SystemLabelId { get; private set; } = SystemLabel.Values.Default;
-    public SystemLabel SystemLabel { get; private set; } = null!;
+    public List<SystemLabel.Values> SystemLabelIds { get; private set; } = [SystemLabel.Values.Default];
+    public List<SystemLabel> SystemLabels { get; private set; } = [];
 
     [AggregateChild]
     public IReadOnlyCollection<LabelAssignmentLog> LabelAssignmentLogs => _labelAssignmentLogs.AsReadOnly();
 
     public void UpdateLabel(SystemLabel.Values newLabel, string userId, ActorType.Values actorType = ActorType.Values.PartyRepresentative)
     {
-        var currentLabel = SystemLabelId;
-        if (newLabel == currentLabel)
+        var currentLabels = SystemLabelIds;
+        if (currentLabels.Contains(newLabel))
         {
             return;
         }
@@ -39,35 +39,92 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
                 ActorId = userId
             } : null;
 
-        // remove old label then add new one
-        if (currentLabel != SystemLabel.Values.Default)
+        var actor = new LabelAssignmentLogActor()
+        {
+            ActorTypeId = actorType,
+            ActorNameEntity = actorNameEntity
+        };
+
+        if (newLabel.IsExclusive() && currentLabels.Any(x => x.IsExclusive()))
+        {
+            var label = currentLabels.First(x => x.IsExclusive());
+            // remove old label then add new one
+            RemoveLabel(label, actor);
+        }
+
+        AddLabel(newLabel, actor);
+    }
+
+
+    public void MarkAsUnopened(string userId, ActorType.Values actorType = ActorType.Values.PartyRepresentative)
+    {
+        if (SystemLabelIds.Contains(SystemLabel.Values.MarkedAsUnopened))
+        {
+            return;
+        }
+
+        var actorNameEntity = actorType == ActorType.Values.PartyRepresentative
+            ? new ActorName
+            {
+                ActorId = userId
+            } : null;
+
+        var actor = new LabelAssignmentLogActor()
+        {
+            ActorTypeId = actorType,
+            ActorNameEntity = actorNameEntity
+        };
+
+        AddLabel(SystemLabel.Values.MarkedAsUnopened, actor);
+    }
+
+    public void UnmarkAsUnopened(string userId, ActorType.Values actorType = ActorType.Values.PartyRepresentative)
+    {
+        if (!SystemLabelIds.Contains(SystemLabel.Values.MarkedAsUnopened))
+        {
+            return;
+        }
+
+        var actorNameEntity = actorType == ActorType.Values.PartyRepresentative
+            ? new ActorName
+            {
+                ActorId = userId
+            } : null;
+
+        var actor = new LabelAssignmentLogActor()
+        {
+            ActorTypeId = actorType,
+            ActorNameEntity = actorNameEntity
+        };
+
+        RemoveLabel(SystemLabel.Values.MarkedAsUnopened, actor);
+    }
+
+    private void RemoveLabel(SystemLabel.Values label, LabelAssignmentLogActor actor)
+    {
+        if (label != SystemLabel.Values.Default)
         {
             _labelAssignmentLogs.Add(new()
             {
-                Name = currentLabel.ToNamespacedName(),
+                Name = label.ToNamespacedName(),
                 Action = "remove",
-                PerformedBy = new()
-                {
-                    ActorTypeId = actorType,
-                    ActorNameEntity = actorNameEntity
-                }
+                PerformedBy = actor
             });
         }
+        SystemLabelIds.Remove(label);
+    }
 
-        if (newLabel != SystemLabel.Values.Default)
+    private void AddLabel(SystemLabel.Values label, LabelAssignmentLogActor actor)
+    {
+        if (label != SystemLabel.Values.Default)
         {
             _labelAssignmentLogs.Add(new()
             {
-                Name = newLabel.ToNamespacedName(),
+                Name = label.ToNamespacedName(),
                 Action = "set",
-                PerformedBy = new()
-                {
-                    ActorTypeId = actorType,
-                    ActorNameEntity = actorNameEntity
-                }
+                PerformedBy = actor
             });
         }
-
-        SystemLabelId = newLabel;
+        SystemLabelIds.Add(label);
     }
 }

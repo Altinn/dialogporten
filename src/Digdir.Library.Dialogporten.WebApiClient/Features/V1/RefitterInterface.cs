@@ -1182,6 +1182,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
         Archive = 2,
 
+        [System.Runtime.Serialization.EnumMember(Value = @"MarkedAsUnopened")]
+        MarkedAsUnopened = 3,
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]

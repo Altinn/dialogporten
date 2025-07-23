@@ -6,11 +6,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.D
 
 internal sealed class DialogEndUserContextConfiguration : IEntityTypeConfiguration<DialogEndUserContext>
 {
-
     public void Configure(EntityTypeBuilder<DialogEndUserContext> builder)
     {
         builder.HasOne(d => d.Dialog)
             .WithOne(d => d.EndUserContext)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasIndex(d => d.SystemLabelIds)
+            .HasMethod("GIN");
     }
 }

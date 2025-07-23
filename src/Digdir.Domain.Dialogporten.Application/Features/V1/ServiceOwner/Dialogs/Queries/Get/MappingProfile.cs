@@ -21,7 +21,9 @@ internal sealed class MappingProfile : Profile
     {
         CreateMap<DialogEntity, DialogDto>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
-            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.EndUserContext.SystemLabelId))
+            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src =>
+                src.EndUserContext.SystemLabelIds
+                    .FirstOrDefault(l => SystemLabel.MutuallyExclusiveLabels.Contains(l))))
             .ForMember(dest => dest.FromPartyTransmissionsCount, opt => opt
                 .MapFrom(src => (int)src.FromPartyTransmissionsCount))
             .ForMember(dest => dest.FromServiceOwnerTransmissionsCount, opt => opt
@@ -29,7 +31,7 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.Ignore());
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()
-            .ForMember(dest => dest.SystemLabels, opt => opt.MapFrom(src => new List<SystemLabel.Values> { src.SystemLabelId }));
+            .ForMember(dest => dest.SystemLabels, opt => opt.MapFrom(src => src.SystemLabelIds.ToList()));
 
         CreateMap<DialogServiceOwnerContext, DialogServiceOwnerContextDto>();
         CreateMap<DialogServiceOwnerLabel, DialogServiceOwnerLabelDto>();

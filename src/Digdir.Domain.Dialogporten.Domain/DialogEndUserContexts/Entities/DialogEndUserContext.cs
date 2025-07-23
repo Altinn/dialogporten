@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.Abstractions;
@@ -18,19 +19,23 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
     public Guid? DialogId { get; set; }
     public DialogEntity? Dialog { get; set; }
 
-    public SystemLabel.Values SystemLabelId { get; private set; } = SystemLabel.Values.Default;
-    public SystemLabel SystemLabel { get; private set; } = null!;
+    public List<SystemLabel.Values> SystemLabelIds { get; private set; } = [];
+    [NotMapped]
+    public List<SystemLabel> SystemLabels { get; private set; } = [];
 
     [AggregateChild]
     public IReadOnlyCollection<LabelAssignmentLog> LabelAssignmentLogs => _labelAssignmentLogs.AsReadOnly();
 
     public void UpdateLabel(SystemLabel.Values newLabel, string userId, ActorType.Values actorType = ActorType.Values.PartyRepresentative)
     {
-        var currentLabel = SystemLabelId;
+        var currentLabel = SystemLabelIds.FirstOrDefault(l => SystemLabel.MutuallyExclusiveLabels.Contains(l));
         if (newLabel == currentLabel)
         {
             return;
         }
+
+        SystemLabelIds.Remove(currentLabel);
+        SystemLabelIds.Add(newLabel);
 
         // No need to store actor name for ServiceOwner label updates
         var actorNameEntity = actorType == ActorType.Values.PartyRepresentative
@@ -67,7 +72,5 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
                 }
             });
         }
-
-        SystemLabelId = newLabel;
     }
 }

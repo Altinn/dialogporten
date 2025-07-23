@@ -20,6 +20,7 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
     public DialogEntity? Dialog { get; set; }
 
     public List<SystemLabel.Values> SystemLabelIds { get; private set; } = [SystemLabel.Values.Default];
+
     [NotMapped]
     public List<SystemLabel> SystemLabels { get; private set; } = [];
 

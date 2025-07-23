@@ -5,16 +5,11 @@
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSentSystemLabel : Migration
+    public partial class SupportForMultipleSystemLabels : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.InsertData(
-                table: "SystemLabel",
-                columns: new[] { "Id", "Name" },
-                values: new object[] { 4, "Sent" });
-
             migrationBuilder.AddColumn<int[]>(
                 name: "SystemLabelIds",
                 table: "DialogEndUserContext",
@@ -28,6 +23,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 WHERE ""SystemLabelId"" IS NOT NULL;
             ");
 
+            migrationBuilder.CreateIndex(
+                    name: "IX_DialogEndUserContext_SystemLabelIds",
+                    table: "DialogEndUserContext",
+                    column: "SystemLabelIds")
+                .Annotation("Npgsql:IndexMethod", "GIN");
+
             migrationBuilder.DropForeignKey(
                 name: "FK_DialogEndUserContext_SystemLabel_SystemLabelId",
                 table: "DialogEndUserContext");
@@ -39,12 +40,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.DropColumn(
                 name: "SystemLabelId",
                 table: "DialogEndUserContext");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DialogEndUserContext_SystemLabelIds",
-                table: "DialogEndUserContext",
-                column: "SystemLabelIds")
-                .Annotation("Npgsql:IndexMethod", "GIN");
         }
 
         /// <inheritdoc />
@@ -53,11 +48,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_DialogEndUserContext_SystemLabelIds",
                 table: "DialogEndUserContext");
-
-            migrationBuilder.DeleteData(
-                table: "SystemLabel",
-                keyColumn: "Id",
-                keyValue: 4);
 
             migrationBuilder.DropColumn(
                 name: "SystemLabelIds",

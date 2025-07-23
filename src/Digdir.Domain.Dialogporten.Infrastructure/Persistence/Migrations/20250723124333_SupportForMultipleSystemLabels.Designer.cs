@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250722111822_AddSentSystemLabel")]
-    partial class AddSentSystemLabel
+    [Migration("20250723124333_SupportForMultipleSystemLabels")]
+    partial class SupportForMultipleSystemLabels
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -326,11 +326,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 3,
                             Name = "Archive"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Sent"
                         });
                 });
 

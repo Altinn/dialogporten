@@ -36,7 +36,9 @@ internal sealed class MappingProfile : Profile
                 .Count(x => x.Urls
                     .Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
-            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src => src.EndUserContext.SystemLabelIds.First(x => x.IsExclusive())))
+            .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src =>
+                src.EndUserContext.SystemLabelIds
+                    .GetExclusiveLabel()))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId));
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()

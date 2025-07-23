@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250722081123_AddMarkAsUnopened")]
-    partial class AddMarkAsUnopened
+    [Migration("20250723065303_AddMarkedAsUnopened")]
+    partial class AddMarkedAsUnopened
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

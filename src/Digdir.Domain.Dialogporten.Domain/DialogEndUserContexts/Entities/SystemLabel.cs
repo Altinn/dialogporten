@@ -35,10 +35,11 @@ public static class SystemLabelExtensions
 
     public static bool IsExclusive(this SystemLabel.Values label) => label switch
     {
-        SystemLabel.Values.Default => true,
-        SystemLabel.Values.Bin => true,
-        SystemLabel.Values.Archive => true,
+        SystemLabel.Values.Default or SystemLabel.Values.Bin or SystemLabel.Values.Archive => true,
         SystemLabel.Values.MarkedAsUnopened => false,
         _ => throw new InvalidEnumArgumentException(nameof(label), (int)label, typeof(SystemLabel.Values))
     };
+
+    public static SystemLabel.Values GetExclusiveLabel(this IEnumerable<SystemLabel.Values> labelIds) =>
+        labelIds.First(x => x.IsExclusive());
 }

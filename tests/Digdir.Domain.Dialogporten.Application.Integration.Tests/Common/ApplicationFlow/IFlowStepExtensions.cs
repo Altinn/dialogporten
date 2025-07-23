@@ -66,11 +66,24 @@ public static class IFlowStepExtensions
         });
 
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
-        Action<CreateDialogCommand>? initialState = null) =>
+        Action<CreateDialogCommand> initialState) =>
         step.CreateDialog(_ =>
         {
             var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-            initialState?.Invoke(command);
+            initialState.Invoke(command);
+            return command;
+        });
+
+    public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step) =>
+        step.CreateDialog(_ => DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+
+    public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(
+        this IFlowStep step,
+        Action<CreateDialogCommand, FlowContext> initialState) =>
+        step.CreateDialog(ctx =>
+        {
+            var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+            initialState.Invoke(command, ctx);
             return command;
         });
 

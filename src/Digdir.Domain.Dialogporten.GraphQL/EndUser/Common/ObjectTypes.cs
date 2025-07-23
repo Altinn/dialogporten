@@ -137,5 +137,6 @@ public enum SystemLabel
 {
     Default = 1,
     Bin = 2,
-    Archive = 3
+    Archive = 3,
+    MarkedAsUnopened = 4
 }

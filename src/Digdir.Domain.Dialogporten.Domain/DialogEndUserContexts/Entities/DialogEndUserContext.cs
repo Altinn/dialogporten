@@ -19,7 +19,7 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
     public Guid? DialogId { get; set; }
     public DialogEntity? Dialog { get; set; }
 
-    public List<SystemLabel.Values> SystemLabelIds { get; private set; } = [];
+    public List<SystemLabel.Values> SystemLabelIds { get; private set; } = [SystemLabel.Values.Default];
     [NotMapped]
     public List<SystemLabel> SystemLabels { get; private set; } = [];
 
@@ -28,7 +28,7 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
 
     public void UpdateLabel(SystemLabel.Values newLabel, string userId, ActorType.Values actorType = ActorType.Values.PartyRepresentative)
     {
-        var currentLabel = SystemLabelIds.FirstOrDefault(l => SystemLabel.MutuallyExclusiveLabels.Contains(l));
+        var currentLabel = SystemLabelIds.First(l => SystemLabel.MutuallyExclusiveLabels.Contains(l));
         if (newLabel == currentLabel)
         {
             return;

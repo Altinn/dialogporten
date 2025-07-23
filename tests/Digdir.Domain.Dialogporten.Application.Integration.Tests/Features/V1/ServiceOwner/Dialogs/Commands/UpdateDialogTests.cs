@@ -375,7 +375,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public Task ContentUpdatedAt_Should_Change_When_Content_Updates(string _,
         Action<UpdateDialogCommand> updateDialog) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog()
+            .CreateSimpleDialog(x => x.Dto.Status = DialogStatusInput.Awaiting)
             .AssertSuccessAndUpdateDialog(updateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>

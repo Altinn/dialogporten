@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.74.0](https://github.com/Altinn/dialogporten/compare/v1.73.6...v1.74.0) (2025-07-26)
+
+
+### Features
+
+* **auth:** Add app instance delegation support ([#2561](https://github.com/Altinn/dialogporten/issues/2561)) ([83b4e22](https://github.com/Altinn/dialogporten/commit/83b4e225d17a6f39c61f507885861f3b5f4213e0))
+
+
+### Bug Fixes
+
+* Add warm up service for FusionCache ([#2572](https://github.com/Altinn/dialogporten/issues/2572)) ([f152bc8](https://github.com/Altinn/dialogporten/commit/f152bc8ad627e379fdda603f6ca980ac8734033a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update  FluentAssertions to 7.2.0 ([#2575](https://github.com/Altinn/dialogporten/issues/2575)) ([b7ba7f3](https://github.com/Altinn/dialogporten/commit/b7ba7f3fc402bf48a5d8ff5d532e8a0b9733bca1))
+* **deps:** update azure identity to 1.14.2 ([#2573](https://github.com/Altinn/dialogporten/issues/2573)) ([bff7bdb](https://github.com/Altinn/dialogporten/commit/bff7bdb6b90a45b3c55953eb7df4e94d69ef3ddb))
+* **deps:** update dependency xunit.runner.visualstudio to 3.1.2 ([#2579](https://github.com/Altinn/dialogporten/issues/2579)) ([3132de7](https://github.com/Altinn/dialogporten/commit/3132de760ddef3759280fb8ce99213eafa8ad22e))
+* **deps:** update dotnet monorepo ([#2578](https://github.com/Altinn/dialogporten/issues/2578)) ([20794af](https://github.com/Altinn/dialogporten/commit/20794af459b15579070492569f9e6816568966aa))
+* **deps:** update grafana/loki docker tag to v3.5.2 ([#2574](https://github.com/Altinn/dialogporten/issues/2574)) ([ca7b444](https://github.com/Altinn/dialogporten/commit/ca7b44491def30f802dbe3f43f8d2459c706eaed))
+* **tests:** Using service owner labels for sentinel handling ([#2568](https://github.com/Altinn/dialogporten/issues/2568)) ([0cd4985](https://github.com/Altinn/dialogporten/commit/0cd498528e979c738708b88c38b683992cd7e618))
+
 ## [1.73.6](https://github.com/Altinn/dialogporten/compare/v1.73.5...v1.73.6) (2025-07-16)
 
 

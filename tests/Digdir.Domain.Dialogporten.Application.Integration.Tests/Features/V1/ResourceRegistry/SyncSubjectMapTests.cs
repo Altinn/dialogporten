@@ -15,7 +15,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.R
 public class SyncSubjectMapTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
-    public Task SyncSubjectMapCommand_Should_Trim_Index_Properties() =>
+    public Task SyncSubjectMapCommand_Should_Execute_Successfully_With_Whitespace_URIs() =>
         FlowBuilder
             .For(Application, ConfigureResourceRegistry())
             .SendCommand(_ => new SyncSubjectMapCommand { Since = DateTimeOffset.MinValue })

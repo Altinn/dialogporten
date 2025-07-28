@@ -38,12 +38,16 @@ internal sealed class MappingProfile : Profile
                     .Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
             .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src =>
-                src.EndUserContext.SystemLabelIds
-                    .FirstOrDefault(l => SystemLabel.MutuallyExclusiveLabels.Contains(l))))
+                src.EndUserContext.DialogEndUserContextSystemLabels
+                    .First(l => SystemLabel.MutuallyExclusiveRequiredLabels.Contains(l.SystemLabelId))
+                    .SystemLabelId))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId));
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()
-            .ForMember(dest => dest.SystemLabels, opt => opt.MapFrom(src => src.SystemLabelIds.ToList()));
+            .ForMember(dest => dest.SystemLabels, opt => opt
+                .MapFrom(src => src.DialogEndUserContextSystemLabels
+                    .Select(x => x.SystemLabelId)
+                    .ToList()));
 
         CreateMap<DialogServiceOwnerContext, DialogServiceOwnerContextDto>();
         CreateMap<DialogServiceOwnerLabel, ServiceOwnerLabelDto>();

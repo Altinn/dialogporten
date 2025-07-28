@@ -153,6 +153,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private void CreateDialogEndUserContext(CreateDialogCommand request, DialogEntity dialog)
     {
         dialog.EndUserContext = new();
+        // Adding default label
+        dialog.EndUserContext
+            .DialogEndUserContextSystemLabels
+            .Add(new());
+
         if (!request.Dto.SystemLabel.HasValue)
         {
             return;
@@ -164,7 +169,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return;
         }
 
-        dialog.EndUserContext.UpdateLabel(
+        dialog.EndUserContext.UpdateRequiredMutuallyExclusiveLabel(
             request.Dto.SystemLabel.Value,
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);

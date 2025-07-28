@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250723124333_SupportForMultipleSystemLabels")]
-    partial class SupportForMultipleSystemLabels
+    [Migration("20250728144818_SupportForMultipleEndUserSystemLabels")]
+    partial class SupportForMultipleEndUserSystemLabels
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -244,10 +244,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.PrimitiveCollection<int[]>("SystemLabelIds")
-                        .IsRequired()
-                        .HasColumnType("integer[]");
-
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -258,11 +254,27 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("DialogId")
                         .IsUnique();
 
-                    b.HasIndex("SystemLabelIds");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SystemLabelIds"), "GIN");
-
                     b.ToTable("DialogEndUserContext");
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContextSystemLabel", b =>
+                {
+                    b.Property<Guid>("DialogEndUserContextId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SystemLabelId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+
+                    b.HasKey("DialogEndUserContextId", "SystemLabelId");
+
+                    b.HasIndex("SystemLabelId");
+
+                    b.ToTable("DialogEndUserContextSystemLabel");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.LabelAssignmentLog", b =>
@@ -1896,6 +1908,25 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Navigation("Dialog");
                 });
 
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContextSystemLabel", b =>
+                {
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", "DialogEndUserContext")
+                        .WithMany("DialogEndUserContextSystemLabels")
+                        .HasForeignKey("DialogEndUserContextId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel", "SystemLabel")
+                        .WithMany()
+                        .HasForeignKey("SystemLabelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DialogEndUserContext");
+
+                    b.Navigation("SystemLabel");
+                });
+
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.LabelAssignmentLog", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", "Context")
@@ -2286,6 +2317,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", b =>
                 {
+                    b.Navigation("DialogEndUserContextSystemLabels");
+
                     b.Navigation("LabelAssignmentLogs");
                 });
 

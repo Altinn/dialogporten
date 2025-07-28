@@ -44,8 +44,9 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         CancellationToken cancellationToken)
     {
         var dialog = await _db.Dialogs
-                              .Include(x => x.EndUserContext)
-                              .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+            .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
 
         if (dialog is null)
         {
@@ -72,7 +73,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             _ => throw new UnreachableException() // Should be caught in validator
         };
 
-        dialog.EndUserContext.UpdateLabel(newLabel, currentUserInformation.UserId.ExternalIdWithPrefix);
+        dialog.EndUserContext.UpdateRequiredMutuallyExclusiveLabel(newLabel, currentUserInformation.UserId.ExternalIdWithPrefix);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)

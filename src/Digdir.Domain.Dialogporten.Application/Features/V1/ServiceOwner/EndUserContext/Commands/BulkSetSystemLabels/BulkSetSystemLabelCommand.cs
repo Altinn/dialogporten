@@ -48,6 +48,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         var dialogs = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
             .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
             .ToListAsync(cancellationToken);
 
@@ -69,7 +70,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
         foreach (var dialog in dialogs)
         {
-            dialog.EndUserContext.UpdateLabel(newLabel, userInfo.UserId.ExternalIdWithPrefix);
+            dialog.EndUserContext.UpdateRequiredMutuallyExclusiveLabel(newLabel, userInfo.UserId.ExternalIdWithPrefix);
             _unitOfWork.EnableConcurrencyCheck(dialog.EndUserContext, request.Dto.Dialogs.Single(x => x.DialogId == dialog.Id).EndUserContextRevision);
         }
 

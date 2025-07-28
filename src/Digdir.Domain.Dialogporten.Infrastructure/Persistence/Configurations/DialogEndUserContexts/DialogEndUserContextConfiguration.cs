@@ -11,8 +11,13 @@ internal sealed class DialogEndUserContextConfiguration : IEntityTypeConfigurati
         builder.HasOne(d => d.Dialog)
             .WithOne(d => d.EndUserContext)
             .OnDelete(DeleteBehavior.SetNull);
+    }
+}
 
-        builder.HasIndex(d => d.SystemLabelIds)
-            .HasMethod("GIN");
+internal sealed class DialogEndUserContextSystemLabelConfiguration : IEntityTypeConfiguration<DialogEndUserContextSystemLabel>
+{
+    public void Configure(EntityTypeBuilder<DialogEndUserContextSystemLabel> builder)
+    {
+        builder.HasKey(x => new { x.DialogEndUserContextId, x.SystemLabelId });
     }
 }

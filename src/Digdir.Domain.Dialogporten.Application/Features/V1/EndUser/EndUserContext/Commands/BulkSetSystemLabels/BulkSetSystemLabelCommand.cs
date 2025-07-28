@@ -56,6 +56,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         var dialogs = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
             .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .Where(x => dialogIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
@@ -113,7 +114,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
         foreach (var (dto, entity) in updateSets)
         {
-            entity.EndUserContext.UpdateLabel(newLabel, userInfo.UserId.ExternalIdWithPrefix);
+            entity.EndUserContext.UpdateRequiredMutuallyExclusiveLabel(newLabel, userInfo.UserId.ExternalIdWithPrefix);
             _unitOfWork.EnableConcurrencyCheck(entity.EndUserContext, dto.EndUserContextRevision);
         }
     }

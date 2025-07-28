@@ -18,7 +18,7 @@ public sealed class SystemLabel(SystemLabel.Values id) :
 
     public override SystemLabel MapValue(Values id) => new(id);
 
-    public static IReadOnlyCollection<Values> MutuallyExclusiveLabels { get; } =
+    public static IReadOnlyCollection<Values> MutuallyExclusiveRequiredLabels { get; } =
     [
         Values.Default,
         Values.Bin,

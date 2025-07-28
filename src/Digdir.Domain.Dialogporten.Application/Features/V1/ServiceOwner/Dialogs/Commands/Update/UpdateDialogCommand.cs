@@ -192,7 +192,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
-        dialog.EndUserContext.UpdateLabel(
+        dialog.EndUserContext.UpdateRequiredMutuallyExclusiveLabel(
             SystemLabel.Values.Default,
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);

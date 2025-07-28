@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,18 +11,21 @@ public sealed class FullDialogAggregateDataLoader
 {
     private readonly IDialogDbContext _dialogDbContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
-    private readonly Dictionary<Guid, DialogEntity> _dialogEntities = new();
+    private readonly Dictionary<(Guid, UserId), DialogEntity> _dialogEntities = new();
+    private readonly UserRegistry _userRegistry;
 
-    public FullDialogAggregateDataLoader(IDialogDbContext dialogDbContext, IUserResourceRegistry userResourceRegistry)
+    public FullDialogAggregateDataLoader(IDialogDbContext dialogDbContext, IUserResourceRegistry userResourceRegistry, UserRegistry userRegistry)
     {
         _dialogDbContext = dialogDbContext;
         _userResourceRegistry = userResourceRegistry;
+        _userRegistry = userRegistry;
     }
 
     public async Task<DialogEntity?> LoadDialogEntity(Guid dialogId, CancellationToken cancellationToken)
     {
+        var userId = _userRegistry.GetCurrentUserId();
 
-        if (_dialogEntities.TryGetValue(dialogId, out var entity))
+        if (_dialogEntities.TryGetValue((dialogId, userId), out var entity))
         {
             return entity;
         }
@@ -73,7 +77,7 @@ public sealed class FullDialogAggregateDataLoader
 
         if (dialogEntity is not null)
         {
-            _dialogEntities.TryAdd(dialogId, dialogEntity);
+            _dialogEntities.TryAdd((dialogId, userId), dialogEntity);
             return dialogEntity;
         }
 

@@ -134,10 +134,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             .CreateSimpleDialog(x => x.Dto.SystemLabel = SystemLabel.Values.Bin)
             .BulkSetSystemLabelEndUser((x, ctx) => x.Dto = new()
             {
-                Dialogs =
-                [
-                    new() { DialogId = ctx.GetDialogId() }
-                ],
+                Dialogs = [new() { DialogId = ctx.GetDialogId() }],
                 RemoveLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand(ctx => GetDialog(ctx.GetDialogId()))

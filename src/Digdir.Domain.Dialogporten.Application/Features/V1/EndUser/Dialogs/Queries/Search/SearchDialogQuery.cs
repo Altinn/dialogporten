@@ -192,7 +192,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
             .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
             .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
-                request.SystemLabel!.Any(label =>
+                request.SystemLabel!.All(label =>
                     x.EndUserContext.DialogEndUserContextSystemLabels
                         .Any(sl => sl.SystemLabelId == label)))
             .WhereIf(request.Search is not null, x =>

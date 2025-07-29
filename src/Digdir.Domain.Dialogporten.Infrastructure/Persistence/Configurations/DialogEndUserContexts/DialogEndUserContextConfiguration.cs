@@ -13,11 +13,3 @@ internal sealed class DialogEndUserContextConfiguration : IEntityTypeConfigurati
             .OnDelete(DeleteBehavior.SetNull);
     }
 }
-
-internal sealed class DialogEndUserContextSystemLabelConfiguration : IEntityTypeConfiguration<DialogEndUserContextSystemLabel>
-{
-    public void Configure(EntityTypeBuilder<DialogEndUserContextSystemLabel> builder)
-    {
-        builder.HasKey(x => new { x.DialogEndUserContextId, x.SystemLabelId });
-    }
-}

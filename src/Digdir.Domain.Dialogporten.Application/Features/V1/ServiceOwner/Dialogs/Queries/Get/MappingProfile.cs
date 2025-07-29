@@ -23,7 +23,7 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId))
             .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src =>
                 src.EndUserContext.DialogEndUserContextSystemLabels
-                    .First(l => SystemLabel.MutuallyExclusiveRequiredLabels.Contains(l.SystemLabelId))
+                    .First(l => SystemLabel.IsDefaultArchiveBinGroup(l.SystemLabelId))
                     .SystemLabelId))
             .ForMember(dest => dest.FromPartyTransmissionsCount, opt => opt
                 .MapFrom(src => (int)src.FromPartyTransmissionsCount))

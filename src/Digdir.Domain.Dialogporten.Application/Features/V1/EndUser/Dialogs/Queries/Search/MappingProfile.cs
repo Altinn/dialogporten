@@ -38,7 +38,7 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content.Where(x => x.Type.OutputInList)))
             .ForMember(dest => dest.SystemLabel, opt => opt.MapFrom(src =>
                 src.EndUserContext.DialogEndUserContextSystemLabels
-                    .First(l => SystemLabel.MutuallyExclusiveRequiredLabels.Contains(l.SystemLabelId))
+                    .First(l => SystemLabel.DefaultArchiveBinGroup.Contains(l.SystemLabelId))
                     .SystemLabelId))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusId));
 

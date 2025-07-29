@@ -9,7 +9,6 @@ public sealed class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<SetSystemLabelInput, SetSystemLabelCommand>();
-        // .ForMember(dest => dest.AddLabels, opt => opt.MapFrom(src => src.AddLabels));
 
         CreateMap<DialogRevisionInput, DialogRevisionDto>();
 

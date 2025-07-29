@@ -1201,7 +1201,26 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("systemLabels")]
 
         // TODO(system.text.json): Add string enum item converter
+        [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
         public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+        /// <summary>
+        /// List of system labels to add to target dialogs
+        /// </summary>
+
+        [JsonPropertyName("addLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> AddLabels { get; set; }
+
+        /// <summary>
+        /// List of system labels to remove from target dialogs
+        /// </summary>
+
+        [JsonPropertyName("removeLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
     }
 

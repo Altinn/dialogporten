@@ -70,14 +70,13 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new EntityNotFound<DialogEntity>(notFound);
         }
 
-        // The domain model currently only supports one system label
-        var newLabel = request.Dto.SystemLabels.SingleOrDefault(SystemLabel.Values.Default);
-
         await dialogs.MergeAsync(
             sources: request.Dto.Dialogs,
             destinationKeySelector: x => x.Id,
             sourceKeySelector: x => x.DialogId,
-            update: (sets, ct) => UpdateDialogs(sets, newLabel, ct),
+            update: (sets, ct) => UpdateDialogs(sets,
+                request.Dto.AddLabels,
+                request.Dto.RemoveLabels, ct),
             cancellationToken: cancellationToken);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -95,26 +94,30 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             .Where(x => dialogIds.Contains(x.Id))
             .Select(x => new { x.ServiceResource, x.Party })
             .ToListAsync(cancellationToken);
+
         var distinctParties = relevantServiceResources
             .Select(x => x.Party)
             .Distinct()
             .ToList();
+
         var distinctServiceResources = relevantServiceResources
             .Select(x => x.ServiceResource)
             .Distinct()
             .ToList();
+
         return (distinctParties, distinctServiceResources);
     }
 
     private async Task UpdateDialogs(
         IEnumerable<UpdateSet<DialogEntity, DialogRevisionDto>> updateSets,
-        SystemLabel.Values newLabel,
+        IEnumerable<SystemLabel.Values> addLabels,
+        IEnumerable<SystemLabel.Values> removeLabels,
         CancellationToken cancellationToken)
     {
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
         foreach (var (dto, entity) in updateSets)
         {
-            entity.EndUserContext.UpdateRequiredMutuallyExclusiveLabel(newLabel, userInfo.UserId.ExternalIdWithPrefix);
+            entity.EndUserContext.UpdateSystemLabels(addLabels, removeLabels, userInfo.UserId.ExternalIdWithPrefix);
             _unitOfWork.EnableConcurrencyCheck(entity.EndUserContext, dto.EndUserContextRevision);
         }
     }

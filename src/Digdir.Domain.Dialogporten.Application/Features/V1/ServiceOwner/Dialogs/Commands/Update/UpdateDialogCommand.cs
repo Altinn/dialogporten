@@ -171,7 +171,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (!request.IsSilentUpdate)
         {
-            UpdateLabel(dialog);
+            UpdateSystemLabel(dialog);
         }
 
         var saveResult = await _unitOfWork
@@ -184,7 +184,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             concurrencyError => concurrencyError);
     }
 
-    private void UpdateLabel(DialogEntity dialog)
+    private void UpdateSystemLabel(DialogEntity dialog)
     {
         if (!_user.TryGetOrganizationNumber(out var organizationNumber))
         {
@@ -192,8 +192,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
-        dialog.EndUserContext.UpdateRequiredMutuallyExclusiveLabel(
-            SystemLabel.Values.Default,
+        dialog.EndUserContext.UpdateSystemLabels(
+            addLabels: [SystemLabel.Values.Default],
+            removeLabels: [],
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);
     }

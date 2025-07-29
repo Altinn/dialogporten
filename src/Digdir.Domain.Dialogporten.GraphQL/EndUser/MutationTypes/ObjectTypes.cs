@@ -11,7 +11,12 @@ public sealed class SetSystemLabelPayload
 public sealed class SetSystemLabelInput
 {
     public Guid DialogId { get; set; }
-    public List<SystemLabel> SystemLabels { get; set; } = [];
+
+    [GraphQLDescription("List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.")]
+    public List<SystemLabel> AddLabels { get; set; } = [];
+
+    [GraphQLDescription("List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.")]
+    public List<SystemLabel> RemoveLabels { get; set; } = [];
 }
 
 [InterfaceType("SetSystemLabelError")]

@@ -24,6 +24,9 @@ public sealed class SystemLabel(SystemLabel.Values id) :
         Values.Bin,
         Values.Archive
     ];
+
+    public static bool IsDefaultArchiveBinGroup(Values label) =>
+        label is Values.Bin or Values.Archive or Values.Default;
 }
 
 public static class SystemLabelExtensions

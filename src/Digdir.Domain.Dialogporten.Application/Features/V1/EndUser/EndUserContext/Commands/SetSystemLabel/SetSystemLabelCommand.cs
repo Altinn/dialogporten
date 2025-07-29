@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -15,7 +14,8 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchEndUserContextRevision { get; set; }
-    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = Array.Empty<SystemLabel.Values>();
+    public IReadOnlyCollection<SystemLabel.Values> AddLabels { get; init; } = [];
+    public IReadOnlyCollection<SystemLabel.Values> RemoveLabels { get; init; } = [];
 }
 
 public sealed record SetSystemLabelSuccess(Guid Revision);
@@ -65,14 +65,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
 
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        var newLabel = request.SystemLabels.Count switch // The domain model currently only supports one system label
-        {
-            0 => SystemLabel.Values.Default,
-            1 => request.SystemLabels.First(),
-            _ => throw new UnreachableException() // Should be caught in validator
-        };
-
-        dialog.EndUserContext.UpdateRequiredMutuallyExclusiveLabel(newLabel, currentUserInformation.UserId.ExternalIdWithPrefix);
+        dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, currentUserInformation.UserId.ExternalIdWithPrefix);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)

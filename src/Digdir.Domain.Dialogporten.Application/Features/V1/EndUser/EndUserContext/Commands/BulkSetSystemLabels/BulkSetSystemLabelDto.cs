@@ -4,6 +4,8 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserCont
 
 public sealed class BulkSetSystemLabelDto
 {
+    private readonly List<SystemLabel.Values> _addLabels = [];
+
     /// <summary>
     /// List of target dialog ids with optional revision ids
     /// </summary>
@@ -12,7 +14,26 @@ public sealed class BulkSetSystemLabelDto
     /// <summary>
     /// List of system labels to set on target dialogs
     /// </summary>
-    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; init; } = [];
+    [Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
+    public IReadOnlyCollection<SystemLabel.Values> SystemLabels
+    {
+        get => _addLabels;
+        init => _addLabels.AddRange(value);
+    }
+
+    /// <summary>
+    /// List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
+    /// </summary>
+    public IReadOnlyCollection<SystemLabel.Values> AddLabels
+    {
+        get => _addLabels;
+        init => _addLabels.AddRange(value);
+    }
+
+    /// <summary>
+    /// List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
+    /// </summary>
+    public IReadOnlyCollection<SystemLabel.Values> RemoveLabels { get; init; } = [];
 }
 
 public sealed class DialogRevisionDto

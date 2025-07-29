@@ -171,8 +171,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         dialog.EndUserContext.UpdateSystemLabels(
-            [request.Dto.SystemLabel.Value],
-            [],
+            addLabels: [request.Dto.SystemLabel.Value],
+            removeLabels: [],
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);
     }

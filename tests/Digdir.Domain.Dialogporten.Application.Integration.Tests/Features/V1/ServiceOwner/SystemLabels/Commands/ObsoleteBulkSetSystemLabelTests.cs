@@ -9,11 +9,12 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.SystemLabels.Commands;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class BulkSetSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
+public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
     public async Task BulkSet_Updates_System_Labels()
@@ -34,7 +35,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                         new() { DialogId = dialogId1.Value },
                         new() { DialogId = dialogId2.Value }
                     ],
-                    AddLabels = [SystemLabel.Values.Bin]
+                    SystemLabels = [SystemLabel.Values.Bin]
                 };
             })
             .SendCommand(_ => GetDialog(dialogId1))
@@ -59,7 +60,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                         new() { DialogId = ctx.GetDialogId() },
                         new() { DialogId = NewUuidV7() }
                     ],
-                    AddLabels = [SystemLabel.Values.Bin]
+                    SystemLabels = [SystemLabel.Values.Bin]
                 };
             })
             .ExecuteAndAssert<Forbidden>(x =>
@@ -82,7 +83,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                             EndUserContextRevision = NewUuidV7()
                         }
                     ],
-                    AddLabels = [SystemLabel.Values.Bin]
+                    SystemLabels = [SystemLabel.Values.Bin]
                 };
             })
             .ExecuteAndAssert<ConcurrencyError>();
@@ -118,7 +119,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                         new DialogRevisionDto { DialogId = dialogId1, EndUserContextRevision = revision1!.Value },
                         new DialogRevisionDto { DialogId = dialogId2, EndUserContextRevision = revision2!.Value }
                     ],
-                    AddLabels = [SystemLabel.Values.Bin]
+                    SystemLabels = [SystemLabel.Values.Bin]
                 }
             })
             .AssertResult<BulkSetSystemLabelSuccess>()
@@ -127,22 +128,6 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             .SendCommand(_ => GetDialog(dialogId2))
             .ExecuteAndAssert<DialogDto>(x => AssertOneLabelWithValue(x, SystemLabel.Values.Bin));
     }
-
-    [Fact]
-    public Task Bulk_Remove_Bin_Label_Should_Reset_To_Default_SystemLabel() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.SystemLabel = SystemLabel.Values.Bin)
-            .BulkSetSystemLabelEndUser((x, ctx) => x.Dto = new()
-            {
-                Dialogs =
-                [
-                    new() { DialogId = ctx.GetDialogId() }
-                ],
-                RemoveLabels = [SystemLabel.Values.Bin]
-            })
-            .SendCommand(ctx => GetDialog(ctx.GetDialogId()))
-            .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Default));
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 

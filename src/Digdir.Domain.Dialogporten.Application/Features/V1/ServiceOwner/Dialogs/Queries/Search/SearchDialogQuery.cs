@@ -231,7 +231,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.VisibleAfter.HasValue, x => request.VisibleAfter <= x.VisibleFrom)
             .WhereIf(request.VisibleBefore.HasValue, x => x.VisibleFrom <= request.VisibleBefore)
             .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
-                request.SystemLabel!.Any(label =>
+                request.SystemLabel!.All(label =>
                     x.EndUserContext.DialogEndUserContextSystemLabels
                         .Any(sl => sl.SystemLabelId == label)))
             .WhereIf(request.Search is not null, x =>

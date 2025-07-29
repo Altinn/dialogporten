@@ -12,10 +12,10 @@ public sealed class SetSystemLabelInput
 {
     public Guid DialogId { get; set; }
 
-    [GraphQLDescription("List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.")]
+    [GraphQLDescription("List of system labels to add to the target dialog. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.")]
     public List<SystemLabel> AddLabels { get; set; } = [];
 
-    [GraphQLDescription("List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.")]
+    [GraphQLDescription("List of system labels to remove from the target dialog. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.")]
     public List<SystemLabel> RemoveLabels { get; set; } = [];
 }
 
@@ -58,7 +58,12 @@ public sealed class SetSystemLabelValidationError : ISetSystemLabelError
 public sealed class BulkSetSystemLabelInput
 {
     public List<DialogRevisionInput> Dialogs { get; set; } = [];
-    public List<SystemLabel> SystemLabels { get; set; } = [];
+
+    [GraphQLDescription("List of system labels to add to the target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.")]
+    public List<SystemLabel> AddLabels { get; set; } = [];
+
+    [GraphQLDescription("List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.")]
+    public List<SystemLabel> RemoveLabels { get; set; } = [];
 }
 
 public sealed class DialogRevisionInput

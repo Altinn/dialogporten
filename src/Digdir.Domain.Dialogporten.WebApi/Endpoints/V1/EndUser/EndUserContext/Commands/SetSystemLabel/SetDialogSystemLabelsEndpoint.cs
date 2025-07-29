@@ -74,7 +74,7 @@ public sealed class SetDialogSystemLabelRequest
     }
 
     /// <summary>
-    /// List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
+    /// List of system labels to add to the target dialog. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
     /// </summary>
     public IReadOnlyCollection<SystemLabel.Values> AddLabels
     {
@@ -83,7 +83,7 @@ public sealed class SetDialogSystemLabelRequest
     }
 
     /// <summary>
-    /// List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
+    /// List of system labels to remove from the target dialog. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
     /// </summary>
     public IReadOnlyCollection<SystemLabel.Values> RemoveLabels { get; init; } = [];
 }

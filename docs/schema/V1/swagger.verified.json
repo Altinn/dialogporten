@@ -1999,6 +1999,14 @@
       "V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
+          "addLabels": {
+            "description": "List of system labels to add to the target dialogs. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "dialogs": {
             "description": "List of target dialog ids with optional revision ids",
             "items": {
@@ -2007,13 +2015,23 @@
             "nullable": true,
             "type": "array"
           },
-          "systemLabels": {
-            "description": "List of system labels to set on target dialogs",
+          "removeLabels": {
+            "description": "List of system labels to remove from the target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
             "items": {
               "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
             },
             "nullable": true,
             "type": "array"
+          },
+          "systemLabels": {
+            "deprecated": true,
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-deprecatedMessage": "Use AddLabels instead. This property will be removed in a future version."
           }
         },
         "type": "object"
@@ -2038,12 +2056,31 @@
       "V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest": {
         "additionalProperties": false,
         "properties": {
-          "systemLabels": {
+          "addLabels": {
+            "description": "List of system labels to add to the target dialog. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
             "items": {
               "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
             },
             "nullable": true,
             "type": "array"
+          },
+          "removeLabels": {
+            "description": "List of system labels to remove from the target dialog. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "deprecated": true,
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-deprecatedMessage": "Use AddLabels instead. This property will be removed in a future version."
           }
         },
         "type": "object"
@@ -5327,6 +5364,14 @@
       "V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
+          "addLabels": {
+            "description": "List of system labels to add to the target dialogs. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "dialogs": {
             "description": "List of target dialog ids with optional revision ids",
             "items": {
@@ -5335,13 +5380,23 @@
             "nullable": true,
             "type": "array"
           },
-          "systemLabels": {
-            "description": "List of system labels to set on target dialogs",
+          "removeLabels": {
+            "description": "List of system labels to remove from the target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
             "items": {
               "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
             },
             "nullable": true,
             "type": "array"
+          },
+          "systemLabels": {
+            "deprecated": true,
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-deprecatedMessage": "Use AddLabels instead. This property will be removed in a future version."
           }
         },
         "type": "object"
@@ -5375,12 +5430,31 @@
       "V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest": {
         "additionalProperties": false,
         "properties": {
-          "systemLabels": {
+          "addLabels": {
+            "description": "List of system labels to add to target dialogs. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
             "items": {
               "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
             },
             "nullable": true,
             "type": "array"
+          },
+          "removeLabels": {
+            "description": "List of system labels to remove from target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "deprecated": true,
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-deprecatedMessage": "Use AddLabels instead. This property will be removed in a future version."
           }
         },
         "type": "object"

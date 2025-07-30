@@ -335,6 +335,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 3,
                             Name = "Archive"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "MarkedAsUnopened"
                         });
                 });
 

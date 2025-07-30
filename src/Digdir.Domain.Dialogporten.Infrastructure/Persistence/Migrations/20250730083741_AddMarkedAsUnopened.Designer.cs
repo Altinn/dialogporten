@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250723065303_AddMarkedAsUnopened")]
+    [Migration("20250730083741_AddMarkedAsUnopened")]
     partial class AddMarkedAsUnopened
     {
         /// <inheritdoc />
@@ -25,21 +25,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("DialogEndUserContextSystemLabel", b =>
-                {
-                    b.Property<Guid>("DialogEndUserContextsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("SystemLabelsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("DialogEndUserContextsId", "SystemLabelsId");
-
-                    b.HasIndex("SystemLabelsId");
-
-                    b.ToTable("DialogEndUserContextSystemLabel (Dictionary<string, object>)");
-                });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.Actor", b =>
                 {
@@ -259,10 +244,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.PrimitiveCollection<int[]>("SystemLabelIds")
-                        .IsRequired()
-                        .HasColumnType("integer[]");
-
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -274,6 +255,26 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("DialogEndUserContext");
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContextSystemLabel", b =>
+                {
+                    b.Property<Guid>("DialogEndUserContextId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SystemLabelId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+
+                    b.HasKey("DialogEndUserContextId", "SystemLabelId");
+
+                    b.HasIndex("SystemLabelId");
+
+                    b.ToTable("DialogEndUserContextSystemLabel");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.LabelAssignmentLog", b =>
@@ -1866,22 +1867,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasDiscriminator().HasValue("DialogTransmissionContentValue");
                 });
 
-            modelBuilder.Entity("DialogEndUserContextSystemLabel", b =>
-                {
-                    b.HasOne("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", null)
-                        .WithMany()
-                        .HasForeignKey("DialogEndUserContextsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel", null)
-                        .WithMany()
-                        .HasForeignKey("SystemLabelsId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_DialogEndUserContextSystemLabel (Dictionary<string, object~1");
-                });
-
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.Actor", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", "ActorNameEntity")
@@ -1926,6 +1911,25 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Dialog");
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContextSystemLabel", b =>
+                {
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", "DialogEndUserContext")
+                        .WithMany("DialogEndUserContextSystemLabels")
+                        .HasForeignKey("DialogEndUserContextId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel", "SystemLabel")
+                        .WithMany()
+                        .HasForeignKey("SystemLabelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DialogEndUserContext");
+
+                    b.Navigation("SystemLabel");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.LabelAssignmentLog", b =>
@@ -2318,6 +2322,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContext", b =>
                 {
+                    b.Navigation("DialogEndUserContextSystemLabels");
+
                     b.Navigation("LabelAssignmentLogs");
                 });
 

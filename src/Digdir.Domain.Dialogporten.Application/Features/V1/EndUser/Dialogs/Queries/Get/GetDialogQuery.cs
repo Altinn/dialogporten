@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -139,6 +140,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             currentUserInformation.UserId.ExternalIdWithPrefix,
             currentUserInformation.UserId.Type,
             currentUserInformation.Name);
+
+        dialog.EndUserContext.UpdateSystemLabels(
+            addLabels: [],
+            removeLabels: [SystemLabel.Values.MarkedAsUnopened],
+            userId: currentUserInformation.UserId.ExternalIdWithPrefix
+        );
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()

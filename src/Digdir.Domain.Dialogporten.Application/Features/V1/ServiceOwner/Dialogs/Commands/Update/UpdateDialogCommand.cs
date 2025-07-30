@@ -171,7 +171,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (!request.IsSilentUpdate)
         {
-            UpdateSystemLabel(dialog);
+            UpdateSystemLabel(dialog, SystemLabel.Values.Default);
         }
 
         var saveResult = await _unitOfWork
@@ -184,7 +184,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             concurrencyError => concurrencyError);
     }
 
-    private void UpdateSystemLabel(DialogEntity dialog)
+    private void UpdateSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
     {
         if (!_user.TryGetOrganizationNumber(out var organizationNumber))
         {
@@ -193,7 +193,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
 
         dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [SystemLabel.Values.Default],
+            addLabels: [labelToAdd],
             removeLabels: [],
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);
@@ -316,6 +316,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogAttachment>(existingAttachmentIds));
             return;
+        }
+
+        if (newDialogTransmissions.ContainsTransmissionByEndUser())
+        {
+            UpdateSystemLabel(dialog, SystemLabel.Values.Sent);
         }
 
         dialog.Transmissions.AddRange(newDialogTransmissions);

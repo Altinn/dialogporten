@@ -1,12 +1,12 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using FluentValidation;
+using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.ValidationErrorStrings;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
 internal sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkSetSystemLabelCommand>
 {
-    private const int MaxDialogsPerRequest = 100;
-
     public BulkSetSystemLabelCommandValidator(IValidator<BulkSetSystemLabelDto> validator)
     {
         RuleFor(x => x.Dto)
@@ -26,5 +26,13 @@ internal sealed class BulkSetSystemLabelDtoValidator : AbstractValidator<BulkSet
             .Must(x => x.Count is > 0 and <= MaxDialogsPerRequest)
             .WithMessage($"Must supply between 1 and {MaxDialogsPerRequest} dialogs to update")
             .UniqueBy(x => x.DialogId);
+
+        RuleForEach(x => x.AddLabels)
+            .Must(label => label != SystemLabel.Values.Sent)
+            .WithMessage(SentLabelNotAllowed);
+
+        RuleForEach(x => x.RemoveLabels)
+            .Must(label => label != SystemLabel.Values.Sent)
+            .WithMessage(SentLabelNotAllowed);
     }
 }

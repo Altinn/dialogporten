@@ -17,7 +17,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
     public string EndUserId { get; set; } = null!; // // See ServiceOwnerOnBehalfOfPersonMiddleware
     public Guid? IfMatchEndUserContextRevision { get; set; }
 
-    public IReadOnlyCollection<SystemLabel.Values> AddLabels { get; init; } = [];
+    public IReadOnlyCollection<SystemLabel.Values> AddLabels { get; set; } = [];
     public IReadOnlyCollection<SystemLabel.Values> RemoveLabels { get; init; } = [];
 }
 

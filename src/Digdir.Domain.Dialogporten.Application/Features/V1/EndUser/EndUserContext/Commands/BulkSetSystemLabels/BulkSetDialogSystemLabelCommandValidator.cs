@@ -5,17 +5,17 @@ using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Validatio
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
-internal sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkSetSystemLabelCommand>
+public sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkSetSystemLabelCommand>
 {
-    public BulkSetSystemLabelCommandValidator(IValidator<BulkSetSystemLabelDto> validator)
+    public BulkSetSystemLabelCommandValidator(IValidator<BulkSetSystemLabelDto> dtoValidator)
     {
         RuleFor(x => x.Dto)
             .NotNull()
-            .SetValidator(validator);
+            .SetValidator(dtoValidator);
     }
 }
 
-internal sealed class BulkSetSystemLabelDtoValidator : AbstractValidator<BulkSetSystemLabelDto>
+public sealed class BulkSetSystemLabelDtoValidator : AbstractValidator<BulkSetSystemLabelDto>
 {
     private const int MaxDialogsPerRequest = 100;
 

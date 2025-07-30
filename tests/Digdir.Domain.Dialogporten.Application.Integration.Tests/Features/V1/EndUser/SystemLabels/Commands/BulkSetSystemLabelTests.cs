@@ -1,11 +1,14 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
@@ -126,6 +129,41 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             .SendCommand(ctx => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Default));
+
+    [Fact]
+    public Task Cannot_BulkSet_Sent_System_Label() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .BulkSetSystemLabelServiceOwner((x, ctx) =>
+            {
+                x.EndUserId = ctx.GetParty();
+                x.Dto = new()
+                {
+                    Dialogs = [new() { DialogId = ctx.GetDialogId() }],
+                    AddLabels = [SystemLabel.Values.Sent]
+                };
+            })
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText(
+                    ValidationErrorStrings.SentLabelNotAllowed));
+
+    [Fact]
+    public Task Cannot_Remove_Existing_Sent_System_Label() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.Type = DialogTransmissionType.Values.Submission))
+            .BulkSetSystemLabelEndUser((x, ctx) =>
+            {
+                x.Dto = new()
+                {
+                    Dialogs = [new() { DialogId = ctx.GetDialogId() }],
+                    RemoveLabels = [SystemLabel.Values.Sent]
+                };
+            })
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText(
+                    ValidationErrorStrings.SentLabelNotAllowed));
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

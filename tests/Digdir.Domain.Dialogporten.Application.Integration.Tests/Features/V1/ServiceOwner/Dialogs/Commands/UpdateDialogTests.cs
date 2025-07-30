@@ -517,4 +517,15 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.FromPartyTransmissionsCount.Should().Be(0);
             });
     }
+
+    [Fact]
+    public Task Adding_Transmission_On_Update_From_EndUser_Adds_Sent_System_Label() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+                x.AddTransmission(x =>
+                    x.Type = DialogTransmissionType.Values.Submission))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Sent));
 }

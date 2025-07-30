@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -389,4 +390,14 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Transmissions.First().IsOpened.Should().BeFalse();
             });
     }
+
+    [Fact]
+    public Task Adding_Transmission_On_Create_From_EndUser_Adds_Sent_System_Label() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.Type = DialogTransmissionType.Values.Submission))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Sent));
 }

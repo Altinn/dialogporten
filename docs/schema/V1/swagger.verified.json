@@ -31,13 +31,15 @@
         "enum": [
           "Default",
           "Bin",
-          "Archive"
+          "Archive",
+          "Sent"
         ],
         "type": "string",
         "x-enumNames": [
           "Default",
           "Bin",
-          "Archive"
+          "Archive",
+          "Sent"
         ]
       },
       "DialogsEntities_DialogStatus": {

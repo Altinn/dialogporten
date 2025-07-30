@@ -9,8 +9,8 @@ internal static class ValidationErrorStrings
         "'{PropertyName}' must be less than or equal to '{ComparisonProperty}'.";
 
     internal static readonly string SentLabelNotAllowed =
-        $"Cannot manually add system label {SystemLabel.Values.Sent}. " +
-        $"They are added automatically when a " +
+        $"Cannot manually add or remove system label {SystemLabel.Values.Sent}. " +
+        $"It is added automatically when a " +
         $"transmissions of type '{DialogTransmissionType.Values.Submission} or " +
-        $"'{DialogTransmissionType.Values.Correction}' is created.";
+        $"'{DialogTransmissionType.Values.Correction}' is added to the dialog.";
 }

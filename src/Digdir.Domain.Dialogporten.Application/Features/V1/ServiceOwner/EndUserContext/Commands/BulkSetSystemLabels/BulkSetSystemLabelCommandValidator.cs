@@ -7,7 +7,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUse
 
 public sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkSetSystemLabelCommand>
 {
-    public BulkSetSystemLabelCommandValidator(AbstractValidator<BulkSetSystemLabelDto> dtoValidator)
+    public BulkSetSystemLabelCommandValidator(IValidator<BulkSetSystemLabelDto> dtoValidator)
     {
         RuleFor(x => x.EndUserId)
             .NotEmpty()

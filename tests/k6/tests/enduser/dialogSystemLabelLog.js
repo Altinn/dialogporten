@@ -40,14 +40,14 @@ export default function () {
         expect(response.json(), 'response body').to.have.lengthOf(3);
     })
 
-    describe('Multiple labels are rejected', () => {
+    describe('Multiple labels are accepted', () => {
 
         let body = {
             'systemLabels': ['Bin', 'Archive']
         }
 
         let response = putEU('dialogs/' + dialogId + '/context/systemlabels', body);
-        expectStatusFor(response).to.equal(400);
+        expectStatusFor(response).to.equal(204);
     })
 
     describe('Invalid revision if-match header results in 412 Precondition Failed', () => {

@@ -16,7 +16,9 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>
     public Guid DialogId { get; set; }
     public string EndUserId { get; set; } = null!; // // See ServiceOwnerOnBehalfOfPersonMiddleware
     public Guid? IfMatchEndUserContextRevision { get; set; }
-    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = Array.Empty<SystemLabel.Values>();
+
+    public IReadOnlyCollection<SystemLabel.Values> AddLabels { get; init; } = [];
+    public IReadOnlyCollection<SystemLabel.Values> RemoveLabels { get; init; } = [];
 }
 
 public sealed record SetSystemLabelSuccess(Guid Revision);
@@ -44,8 +46,9 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         CancellationToken cancellationToken)
     {
         var dialog = await _db.Dialogs
-                              .Include(x => x.EndUserContext)
-                              .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+            .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
 
         if (dialog is null)
         {
@@ -65,14 +68,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
 
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        var newLabel = request.SystemLabels.Count switch // The domain model currently only supports one system label
-        {
-            0 => SystemLabel.Values.Default,
-            1 => request.SystemLabels.First(),
-            _ => throw new UnreachableException() // Should be caught in validator
-        };
-
-        dialog.EndUserContext.UpdateLabel(newLabel, currentUserInformation.UserId.ExternalIdWithPrefix);
+        dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, currentUserInformation.UserId.ExternalIdWithPrefix);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)

@@ -3,7 +3,8 @@ using Digdir.Library.Entity.Abstractions.Features.Lookup;
 
 namespace Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 
-public sealed class SystemLabel : AbstractLookupEntity<SystemLabel, SystemLabel.Values>
+public sealed class SystemLabel(SystemLabel.Values id) :
+    AbstractLookupEntity<SystemLabel, SystemLabel.Values>(id)
 {
     public const string Prefix = "systemlabel";
     public const string PrefixWithSeparator = Prefix + ":";
@@ -15,8 +16,17 @@ public sealed class SystemLabel : AbstractLookupEntity<SystemLabel, SystemLabel.
         Archive = 3
     }
 
-    public SystemLabel(Values id) : base(id) { }
     public override SystemLabel MapValue(Values id) => new(id);
+
+    public static HashSet<Values> DefaultArchiveBinGroup { get; } =
+    [
+        Values.Default,
+        Values.Bin,
+        Values.Archive
+    ];
+
+    public static bool IsDefaultArchiveBinGroup(Values label) =>
+        label is Values.Bin or Values.Archive or Values.Default;
 }
 
 public static class SystemLabelExtensions

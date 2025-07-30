@@ -19,7 +19,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .SendCommand((_, ctx) => new SetSystemLabelCommand
             {
                 DialogId = ctx.GetDialogId(),
-                SystemLabels = [SystemLabel.Values.Bin]
+                AddLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand((x, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
@@ -32,7 +32,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             {
                 DialogId = ctx.GetDialogId(),
                 IfMatchEndUserContextRevision = Guid.NewGuid(),
-                SystemLabels = [SystemLabel.Values.Bin]
+                AddLabels = [SystemLabel.Values.Bin]
             })
             .ExecuteAndAssert<ConcurrencyError>();
 
@@ -52,7 +52,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             {
                 DialogId = dialogId.Value,
                 IfMatchEndUserContextRevision = revision!.Value,
-                SystemLabels = [SystemLabel.Values.Bin]
+                AddLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand(_ => GetDialog(dialogId))
             .ExecuteAndAssert<DialogDto>(x =>

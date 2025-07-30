@@ -35,7 +35,8 @@ public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<Set
         {
             DialogId = req.DialogId,
             EndUserId = req.EnduserId,
-            SystemLabels = req.SystemLabels,
+            AddLabels = req.AddLabels,
+            RemoveLabels = req.RemoveLabels,
             IfMatchEndUserContextRevision = req.IfMatchEnduserContextRevision
         };
 
@@ -56,6 +57,8 @@ public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<Set
 
 public sealed class SetDialogSystemLabelRequest
 {
+    private readonly List<SystemLabel.Values> _addLabels = [];
+
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchEnduserContextRevision { get; set; }
 
@@ -64,5 +67,27 @@ public sealed class SetDialogSystemLabelRequest
 
     public Guid DialogId { get; set; }
 
-    public IReadOnlyCollection<SystemLabel.Values> SystemLabels { get; set; } = [];
+    /// <summary>
+    /// List of system labels to set on target dialogs
+    /// </summary>
+    [Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
+    public IReadOnlyCollection<SystemLabel.Values> SystemLabels
+    {
+        get => _addLabels;
+        init => _addLabels.AddRange(value);
+    }
+
+    /// <summary>
+    /// List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
+    /// </summary>
+    public IReadOnlyCollection<SystemLabel.Values> AddLabels
+    {
+        get => _addLabels;
+        init => _addLabels.AddRange(value);
+    }
+
+    /// <summary>
+    /// List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
+    /// </summary>
+    public IReadOnlyCollection<SystemLabel.Values> RemoveLabels { get; init; } = [];
 }

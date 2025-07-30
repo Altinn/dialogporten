@@ -19,7 +19,7 @@ public class BulkSetSystemLabelCommandValidatorTests
                     new DialogRevisionDto { DialogId = Guid.NewGuid() },
                     new DialogRevisionDto { DialogId = Guid.NewGuid() }
                 ],
-                SystemLabels = [SystemLabel.Values.Archive]
+                AddLabels = [SystemLabel.Values.Archive]
             }
         };
 
@@ -41,7 +41,7 @@ public class BulkSetSystemLabelCommandValidatorTests
                     new DialogRevisionDto { DialogId = id },
                     new DialogRevisionDto { DialogId = id }
                 ],
-                SystemLabels = [SystemLabel.Values.Archive]
+                AddLabels = [SystemLabel.Values.Archive]
             }
         };
 
@@ -53,21 +53,20 @@ public class BulkSetSystemLabelCommandValidatorTests
     }
 
     [Fact]
-    public void Multiple_System_Labels_Should_Return_Error()
+    public void Multiple_System_Labels_Should_Return_No_Errors()
     {
         var command = new BulkSetSystemLabelCommand
         {
             Dto = new BulkSetSystemLabelDto
             {
                 Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
-                SystemLabels = [SystemLabel.Values.Bin, SystemLabel.Values.Archive]
+                AddLabels = [SystemLabel.Values.Bin, SystemLabel.Values.Archive]
             }
         };
 
         var result = _validator.Validate(command);
 
-        Assert.False(result.IsValid);
-        Assert.Single(result.Errors);
-        Assert.Contains("Only one system label", result.Errors[0].ErrorMessage);
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Errors);
     }
 }

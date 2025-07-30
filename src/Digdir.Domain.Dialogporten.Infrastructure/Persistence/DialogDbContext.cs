@@ -46,6 +46,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<DialogContentType> DialogContentTypes => Set<DialogContentType>();
     public DbSet<SubjectResource> SubjectResources => Set<SubjectResource>();
     public DbSet<DialogEndUserContext> DialogEndUserContexts => Set<DialogEndUserContext>();
+    public DbSet<SystemLabel> SystemLabels => Set<SystemLabel>();
 
     public DbSet<DialogServiceOwnerContext> DialogServiceOwnerContexts => Set<DialogServiceOwnerContext>();
     public DbSet<DialogServiceOwnerLabel> DialogServiceOwnerLabels => Set<DialogServiceOwnerLabel>();

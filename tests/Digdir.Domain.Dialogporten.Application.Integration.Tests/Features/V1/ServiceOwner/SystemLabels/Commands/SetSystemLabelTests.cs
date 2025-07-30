@@ -20,7 +20,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             {
                 EndUserId = ctx.GetParty(),
                 DialogId = ctx.GetDialogId(),
-                SystemLabels = [SystemLabel.Values.Bin]
+                AddLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
@@ -35,7 +35,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 EndUserId = ctx.GetParty(),
                 DialogId = ctx.GetDialogId(),
                 IfMatchEndUserContextRevision = NewUuidV7(),
-                SystemLabels = [SystemLabel.Values.Bin]
+                AddLabels = [SystemLabel.Values.Bin]
             })
             .ExecuteAndAssert<ConcurrencyError>();
 
@@ -59,7 +59,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 EndUserId = party!,
                 DialogId = dialogId.Value,
                 IfMatchEndUserContextRevision = revision!.Value,
-                SystemLabels = [SystemLabel.Values.Bin]
+                AddLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand(_ => GetDialog(dialogId))
             .ExecuteAndAssert<DialogDto>(x =>

@@ -1161,11 +1161,33 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
     {
+        /// <summary>
+        /// List of system labels to set on target dialogs
+        /// </summary>
 
         [JsonPropertyName("systemLabels")]
 
         // TODO(system.text.json): Add string enum item converter
+        [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
         public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+        /// <summary>
+        /// List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
+        /// </summary>
+
+        [JsonPropertyName("addLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> AddLabels { get; set; }
+
+        /// <summary>
+        /// List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
+        /// </summary>
+
+        [JsonPropertyName("removeLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
     }
 
@@ -1204,7 +1226,26 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("systemLabels")]
 
         // TODO(system.text.json): Add string enum item converter
+        [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
         public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+        /// <summary>
+        /// List of system labels to add to the target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
+        /// </summary>
+
+        [JsonPropertyName("addLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> AddLabels { get; set; }
+
+        /// <summary>
+        /// List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
+        /// </summary>
+
+        [JsonPropertyName("removeLabels")]
+
+        // TODO(system.text.json): Add string enum item converter
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
     }
 

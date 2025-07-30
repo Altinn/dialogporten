@@ -451,7 +451,10 @@ type TransmissionContent {
 
 input BulkSetSystemLabelInput {
   dialogs: [DialogRevisionInput!]!
-  systemLabels: [SystemLabel!]!
+  "List of system labels to add to the target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used."
+  addLabels: [SystemLabel!]!
+  "List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list."
+  removeLabels: [SystemLabel!]!
 }
 
 input DialogRevisionInput {
@@ -510,7 +513,10 @@ input SearchDialogSortTypeInput {
 
 input SetSystemLabelInput {
   dialogId: UUID!
-  systemLabels: [SystemLabel!]!
+  "List of system labels to add to the target dialog. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used."
+  addLabels: [SystemLabel!]!
+  "List of system labels to remove from the target dialog. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list."
+  removeLabels: [SystemLabel!]!
 }
 
 enum ActivityType {

@@ -91,6 +91,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .ThenInclude(x => x.SeenBy)
                     .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .Where(x => !x.VisibleFrom.HasValue || x.VisibleFrom < _clock.UtcNowOffset)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);

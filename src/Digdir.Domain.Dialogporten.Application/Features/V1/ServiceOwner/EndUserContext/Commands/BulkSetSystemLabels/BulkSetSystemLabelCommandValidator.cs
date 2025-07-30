@@ -18,10 +18,5 @@ public sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkS
             .Must(x => x.Count is > 0 and <= MaxDialogsPerRequest)
             .WithMessage($"Must supply between 1 and {MaxDialogsPerRequest} dialogs to update")
             .UniqueBy(x => x.DialogId);
-
-        RuleFor(x => x.Dto.SystemLabels)
-            .NotNull()
-            .Must(x => x.Count <= 1)
-            .WithMessage("Only one system label is currently supported");
     }
 }

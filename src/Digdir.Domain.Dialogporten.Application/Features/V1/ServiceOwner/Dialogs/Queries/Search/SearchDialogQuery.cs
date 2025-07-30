@@ -230,7 +230,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
             .WhereIf(request.VisibleAfter.HasValue, x => request.VisibleAfter <= x.VisibleFrom)
             .WhereIf(request.VisibleBefore.HasValue, x => x.VisibleFrom <= request.VisibleBefore)
-            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x => x.EndUserContext.SystemLabelIds.Any(l => request.SystemLabel!.Contains(l)))
+            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
+                request.SystemLabel!.All(label =>
+                    x.EndUserContext.DialogEndUserContextSystemLabels
+                        .Any(sl => sl.SystemLabelId == label)))
             .WhereIf(request.Search is not null, x =>
                 x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
                 x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))

@@ -168,6 +168,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.SystemLabel)
             .Must(x => SystemLabel.IsDefaultArchiveBinGroup(x.GetValueOrDefault()))
             .When(x => x.SystemLabel is not null)
-            .WithMessage($"{{PropertyName}} must be {SystemLabel.Values.Default}, {SystemLabel.Values.Bin} or {SystemLabel.Values.Archive}.}}");
+            .WithMessage($"{{PropertyName}} must be {SystemLabel.Values.Default}, {SystemLabel.Values.Bin} or {SystemLabel.Values.Archive}.");
     }
 }

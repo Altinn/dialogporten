@@ -62,8 +62,6 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
     }
 
-
-
     [Fact]
     public Task Can_Set_And_Remove_MarkedAsUnopened_Label() =>
         FlowBuilder.For(Application)

@@ -37,7 +37,10 @@ internal static class SystemLabelService
             XorDefaultArchiveBinGroup(next, SystemLabel.Values.Default);
         }
 
-        // If mark as unopened, remove it
+        if (labelToRemove == SystemLabel.Values.MarkedAsUnopened && next.Contains(labelToRemove))
+        {
+            next.Remove(labelToRemove);
+        }
         // If "sent", ignore, do not remove
     }
 
@@ -46,6 +49,11 @@ internal static class SystemLabelService
         if (SystemLabel.IsDefaultArchiveBinGroup(labelToAdd))
         {
             XorDefaultArchiveBinGroup(next, labelToAdd);
+        }
+
+        if (labelToAdd == SystemLabel.Values.MarkedAsUnopened && !next.Contains(labelToAdd))
+        {
+            next.Add(labelToAdd);
         }
     }
 }

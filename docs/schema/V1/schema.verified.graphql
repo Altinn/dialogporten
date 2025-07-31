@@ -623,6 +623,7 @@ enum SystemLabel {
   DEFAULT
   BIN
   ARCHIVE
+  MARKED_AS_UNOPENED
 }
 
 enum TransmissionType {

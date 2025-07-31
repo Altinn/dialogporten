@@ -22,7 +22,8 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 AddLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand((x, ctx) => GetDialog(ctx.GetDialogId()))
-            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
 
     [Fact]
     public Task Set_Returns_ConcurrencyError_On_Revision_Mismatch() =>
@@ -57,6 +58,37 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .SendCommand(_ => GetDialog(dialogId))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+    }
+
+    [Fact]
+    public async Task Can_Set_And_Remove_MarkedAsUnopened_Label()
+    {
+        var dialogId = NewUuidV7();
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Id = dialogId)
+            .SetSystemLabelsEndUser(x =>
+                x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .ExecuteAndAssert<SetSystemLabelSuccess>();
+
+        var dialogSystemLabels = await Application
+            .GetDbEntities<DialogEndUserContextSystemLabel>();
+
+        dialogSystemLabels.Should().ContainSingle(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened);
+        dialogSystemLabels.Should().ContainSingle(x => x.SystemLabelId == SystemLabel.Values.Default);
+
+        await FlowBuilder.For(Application)
+            .SendCommand(_ => new SetSystemLabelCommand
+            {
+                RemoveLabels = [SystemLabel.Values.MarkedAsUnopened],
+                DialogId = dialogId
+            })
+            .ExecuteAndAssert<SetSystemLabelSuccess>();
+
+        dialogSystemLabels = await Application
+            .GetDbEntities<DialogEndUserContextSystemLabel>();
+
+        dialogSystemLabels.Should().NotContain(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened);
+        dialogSystemLabels.Should().ContainSingle(x => x.SystemLabelId == SystemLabel.Values.Default);
     }
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };

@@ -31,13 +31,15 @@
         "enum": [
           "Default",
           "Bin",
-          "Archive"
+          "Archive",
+          "MarkedAsUnopened"
         ],
         "type": "string",
         "x-enumNames": [
           "Default",
           "Bin",
-          "Archive"
+          "Archive",
+          "MarkedAsUnopened"
         ]
       },
       "DialogsEntities_DialogStatus": {

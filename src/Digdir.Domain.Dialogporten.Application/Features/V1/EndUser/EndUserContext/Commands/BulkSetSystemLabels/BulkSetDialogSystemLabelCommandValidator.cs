@@ -5,7 +5,7 @@ using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Validatio
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
-public sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkSetSystemLabelCommand>
+internal sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkSetSystemLabelCommand>
 {
     public BulkSetSystemLabelCommandValidator(IValidator<BulkSetSystemLabelDto> dtoValidator)
     {
@@ -15,7 +15,7 @@ public sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<BulkS
     }
 }
 
-public sealed class BulkSetSystemLabelDtoValidator : AbstractValidator<BulkSetSystemLabelDto>
+internal sealed class BulkSetSystemLabelDtoValidator : AbstractValidator<BulkSetSystemLabelDto>
 {
     private const int MaxDialogsPerRequest = 100;
 

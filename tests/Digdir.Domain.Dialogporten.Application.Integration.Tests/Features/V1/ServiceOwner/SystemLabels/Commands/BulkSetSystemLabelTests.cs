@@ -163,7 +163,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     ValidationErrorStrings.SentLabelNotAllowed));
 
     [Fact]
-    public Task Cannot_Remove_Existing_Sent_System_Label() =>
+    public Task Cannot_Bulk_Remove_Existing_Sent_System_Label() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
                 x.AddTransmission(x =>

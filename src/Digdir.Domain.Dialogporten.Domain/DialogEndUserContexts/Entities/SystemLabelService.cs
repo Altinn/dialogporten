@@ -60,6 +60,7 @@ internal static class SystemLabelService
         if (labelToAdd == SystemLabel.Values.MarkedAsUnopened && !next.Contains(labelToAdd))
         {
             next.Add(labelToAdd);
+            return;
         }
 
         if (labelToAdd == SystemLabel.Values.Sent && !next.Contains(labelToAdd))

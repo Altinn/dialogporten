@@ -5,7 +5,7 @@
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSentSystemLabel : Migration
+    public partial class AddMarkedAsUnopened : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -13,7 +13,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.InsertData(
                 table: "SystemLabel",
                 columns: new[] { "Id", "Name" },
-                values: new object[] { 4, "Sent" });
+                values: new object[] { 4, "MarkedAsUnopened" });
         }
 
         /// <inheritdoc />

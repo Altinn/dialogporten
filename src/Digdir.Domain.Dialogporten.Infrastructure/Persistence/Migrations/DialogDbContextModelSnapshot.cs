@@ -339,7 +339,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 4,
-                            Name = "Sent"
+                            Name = "MarkedAsUnopened"
                         });
                 });
 

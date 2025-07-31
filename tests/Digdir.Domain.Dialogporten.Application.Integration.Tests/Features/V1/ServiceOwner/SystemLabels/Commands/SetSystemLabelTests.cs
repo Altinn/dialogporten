@@ -62,6 +62,33 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
     }
 
+
+
+    [Fact]
+    public Task Can_Set_And_Remove_MarkedAsUnopened_Label() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsServiceOwner(x =>
+                x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
+            .AssertResult<DialogDto>(x =>
+            {
+                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.MarkedAsUnopened);
+                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Default);
+            })
+            .SendCommand((_, ctx) => new SetSystemLabelCommand
+            {
+                EndUserId = ctx.GetParty(),
+                DialogId = ctx.GetDialogId(),
+                RemoveLabels = [SystemLabel.Values.MarkedAsUnopened]
+            })
+            .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.EndUserContext.SystemLabels.Should().NotContain(x => x == SystemLabel.Values.MarkedAsUnopened);
+                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Default);
+            });
+
     [Fact]
     public Task Cannot_Set_Sent_System_Label() =>
         FlowBuilder.For(Application)
@@ -83,6 +110,5 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText(
                     ValidationErrorStrings.SentLabelNotAllowed));
-
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

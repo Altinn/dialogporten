@@ -138,5 +138,6 @@ public enum SystemLabel
     Default = 1,
     Bin = 2,
     Archive = 3,
-    Sent = 4,
+    MarkedAsUnopened = 4,
+    Sent = 5
 }

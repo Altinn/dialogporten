@@ -1204,8 +1204,11 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [System.Runtime.Serialization.EnumMember(Value = @"Archive")]
         Archive = 2,
 
+        [System.Runtime.Serialization.EnumMember(Value = @"MarkedAsUnopened")]
+        MarkedAsUnopened = 3,
+
         [System.Runtime.Serialization.EnumMember(Value = @"Sent")]
-        Sent = 3,
+        Sent = 4,
 
     }
 

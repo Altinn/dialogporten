@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250730130815_AddSentSystemLabel")]
-    partial class AddSentSystemLabel
+    [Migration("20250730083741_AddMarkedAsUnopened")]
+    partial class AddMarkedAsUnopened
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -342,7 +342,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 4,
-                            Name = "Sent"
+                            Name = "MarkedAsUnopened"
                         });
                 });
 

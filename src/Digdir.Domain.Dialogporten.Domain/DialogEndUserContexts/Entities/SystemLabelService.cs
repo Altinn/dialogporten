@@ -37,6 +37,11 @@ internal static class SystemLabelService
             XorDefaultArchiveBinGroup(next, SystemLabel.Values.Default);
         }
 
+        if (labelToRemove == SystemLabel.Values.MarkedAsUnopened && next.Contains(labelToRemove))
+        {
+            next.Remove(labelToRemove);
+        }
+
         if (labelToRemove == SystemLabel.Values.Sent)
         {
             // This should have been caught in the validation layer
@@ -50,6 +55,11 @@ internal static class SystemLabelService
         {
             XorDefaultArchiveBinGroup(next, labelToAdd);
             return;
+        }
+
+        if (labelToAdd == SystemLabel.Values.MarkedAsUnopened && !next.Contains(labelToAdd))
+        {
+            next.Add(labelToAdd);
         }
 
         if (labelToAdd == SystemLabel.Values.Sent && !next.Contains(labelToAdd))

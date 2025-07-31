@@ -56,7 +56,10 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
             {
                 var mergeableSubjectResources = resourceBatch
                     .Select(x => x.ToMergeableSubjectResource(syncTime))
+                    .GroupBy(x => new { x.Subject, x.Resource })
+                    .Select(g => g.OrderByDescending(x => x.UpdatedAt).First())
                     .ToList();
+
                 var batchMergeCount = await _subjectResourceRepository.Merge(mergeableSubjectResources, cancellationToken);
                 _logger.LogInformation("{BatchMergeCount} subject-resources added to transaction.", batchMergeCount);
                 mergeCount += batchMergeCount;

@@ -17,6 +17,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using OneOf;
 using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 
@@ -400,4 +401,40 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Sent));
+
+
+    private sealed class SystemLabelOnDialogCreateTestData : TheoryData<SystemLabel.Values, bool>
+    {
+        public SystemLabelOnDialogCreateTestData()
+        {
+            var systemLabels = Enum.GetValues<SystemLabel.Values>();
+
+            foreach (var systemLabel in systemLabels)
+            {
+                Add(systemLabel, SystemLabel.IsDefaultArchiveBinGroup(systemLabel));
+            }
+
+            Add(0, false);
+            Add((SystemLabel.Values)systemLabels.Length + 1, false);
+        }
+    }
+
+    [Theory, ClassData(typeof(SystemLabelOnDialogCreateTestData))]
+    public Task SystemLabel_On_Dialog_Create_Should_Be_Added_When_Valid(SystemLabel.Values systemLabel, bool shouldSucceed) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.SystemLabel = systemLabel)
+            .ExecuteAndAssert(resultObj =>
+            {
+                if (shouldSucceed)
+                {
+                    (resultObj is CreateDialogSuccess)
+                        .Should().BeTrue();
+                }
+                else
+                {
+                    (resultObj is ValidationError)
+                        .Should().BeTrue();
+                }
+            });
 }

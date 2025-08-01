@@ -1,5 +1,5 @@
 using System.Reflection;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.HorizontalDataLoaders;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.HorizontalDataLoaders;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;

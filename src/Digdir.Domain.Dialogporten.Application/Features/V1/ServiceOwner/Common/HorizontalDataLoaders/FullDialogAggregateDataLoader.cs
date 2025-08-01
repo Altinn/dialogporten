@@ -1,11 +1,10 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.HorizontalDataLoaders;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.HorizontalDataLoaders;
 
 public sealed class FullDialogAggregateDataLoader
 {
@@ -61,7 +60,6 @@ public sealed class FullDialogAggregateDataLoader
                 .ThenInclude(x => x.PerformedBy)
                 .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.SeenLog
-                .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
                 .OrderBy(x => x.CreatedAt))
                 .ThenInclude(x => x.SeenBy)
                 .ThenInclude(x => x.ActorNameEntity)

@@ -17,7 +17,6 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using OneOf;
 using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 
@@ -420,20 +419,21 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(SystemLabelOnDialogCreateTestData))]
-    public Task SystemLabel_On_Dialog_Create_Should_Be_Added_When_Valid(SystemLabel.Values systemLabel, bool shouldSucceed) =>
+    public Task SystemLabel_On_Dialog_Create_Should_Be_Accepted_When_In_Default_DAB_Group(
+        SystemLabel.Values systemLabel, bool shouldSucceed) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
                 x.Dto.SystemLabel = systemLabel)
-            .ExecuteAndAssert(resultObj =>
+            .ExecuteAndAssert(result =>
             {
                 if (shouldSucceed)
                 {
-                    (resultObj is CreateDialogSuccess)
+                    (result is CreateDialogSuccess)
                         .Should().BeTrue();
                 }
                 else
                 {
-                    (resultObj is ValidationError)
+                    (result is ValidationError)
                         .Should().BeTrue();
                 }
             });

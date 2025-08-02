@@ -392,7 +392,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(AddingEndUserTransmissionSentLabelTestData))]
-    public Task Adding_Transmission_On_Create_From_EndUser_Adds_Sent_System_Label(
+    public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
         DialogTransmissionType.Values transmissionType, bool shouldAddSentLabel) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>

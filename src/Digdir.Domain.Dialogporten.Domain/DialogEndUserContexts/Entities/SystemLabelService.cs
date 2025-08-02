@@ -10,6 +10,7 @@ internal static class SystemLabelService
             next.RemoveSystemLabel(labelToRemove);
         }
 
+        EnsureRequiredLabels(next);
         return next;
     }
 
@@ -21,6 +22,7 @@ internal static class SystemLabelService
             next.AddSystemLabel(labelToAdd);
         }
 
+        EnsureRequiredLabels(next);
         return next;
     }
 
@@ -66,6 +68,14 @@ internal static class SystemLabelService
         if (labelToAdd == SystemLabel.Values.Sent && !next.Contains(labelToAdd))
         {
             next.Add(labelToAdd);
+        }
+    }
+
+    private static void EnsureRequiredLabels(this List<SystemLabel.Values> next)
+    {
+        if (!next.Any(SystemLabel.IsDefaultArchiveBinGroup))
+        {
+            next.Add(SystemLabel.Values.Default);
         }
     }
 }

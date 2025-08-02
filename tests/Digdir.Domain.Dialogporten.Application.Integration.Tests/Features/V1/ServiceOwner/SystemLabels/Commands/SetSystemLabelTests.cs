@@ -108,5 +108,6 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText(
                     ValidationErrorStrings.SentLabelNotAllowed));
+
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

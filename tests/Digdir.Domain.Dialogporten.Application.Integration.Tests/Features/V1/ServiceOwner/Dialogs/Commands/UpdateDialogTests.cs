@@ -518,14 +518,24 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             });
     }
 
-    [Fact]
-    public Task Adding_Transmission_On_Update_From_EndUser_Adds_Sent_System_Label() =>
+    [Theory, ClassData(typeof(AddingEndUserTransmissionSentLabelTestData))]
+    public Task Adding_Transmission_On_Update_From_EndUser_Adds_Sent_System_Label(
+        DialogTransmissionType.Values transmissionType, bool shouldAddSentLabel) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog()
-            .UpdateDialog(x =>
-                x.AddTransmission(x =>
-                    x.Type = DialogTransmissionType.Values.Submission))
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x => x.Type = transmissionType))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Sent));
+            {
+                if (shouldAddSentLabel)
+                {
+                    x.EndUserContext.SystemLabels.Should().ContainSingle(
+                        label => label == SystemLabel.Values.Sent);
+                }
+                else
+                {
+                    x.EndUserContext.SystemLabels.Should().NotContain(
+                        label => label == SystemLabel.Values.Sent);
+                }
+            });
 }

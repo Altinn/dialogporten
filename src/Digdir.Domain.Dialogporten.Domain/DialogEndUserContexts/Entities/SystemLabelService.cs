@@ -26,7 +26,7 @@ internal static class SystemLabelService
         return next;
     }
 
-    public static void XorDefaultArchiveBinGroup(this List<SystemLabel.Values> next, SystemLabel.Values labelToAdd)
+    private static void XorDefaultArchiveBinGroup(this List<SystemLabel.Values> next, SystemLabel.Values labelToAdd)
     {
         next.RemoveAll(SystemLabel.IsDefaultArchiveBinGroup);
         next.Add(labelToAdd);
@@ -43,7 +43,12 @@ internal static class SystemLabelService
         {
             next.Remove(labelToRemove);
         }
-        // If "sent", ignore, do not remove
+
+        if (labelToRemove == SystemLabel.Values.Sent)
+        {
+            // This should have been caught in the validation layer
+            throw new InvalidOperationException("Cannot remove 'Sent' system label.");
+        }
     }
 
     private static void AddSystemLabel(this List<SystemLabel.Values> next, SystemLabel.Values labelToAdd)
@@ -51,9 +56,16 @@ internal static class SystemLabelService
         if (SystemLabel.IsDefaultArchiveBinGroup(labelToAdd))
         {
             XorDefaultArchiveBinGroup(next, labelToAdd);
+            return;
         }
 
         if (labelToAdd == SystemLabel.Values.MarkedAsUnopened && !next.Contains(labelToAdd))
+        {
+            next.Add(labelToAdd);
+            return;
+        }
+
+        if (labelToAdd == SystemLabel.Values.Sent && !next.Contains(labelToAdd))
         {
             next.Add(labelToAdd);
         }

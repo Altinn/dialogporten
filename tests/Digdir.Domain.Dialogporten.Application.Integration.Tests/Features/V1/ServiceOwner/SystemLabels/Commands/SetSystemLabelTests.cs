@@ -1,9 +1,12 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -16,12 +19,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     public Task Set_Updates_System_Label() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .SendCommand((_, ctx) => new SetSystemLabelCommand
-            {
-                EndUserId = ctx.GetParty(),
-                DialogId = ctx.GetDialogId(),
-                AddLabels = [SystemLabel.Values.Bin]
-            })
+            .SetSystemLabelsServiceOwner(x => x.AddLabels = [SystemLabel.Values.Bin])
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
@@ -30,12 +28,10 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     public Task Set_Returns_ConcurrencyError_On_Revision_Mismatch() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .SendCommand((_, ctx) => new SetSystemLabelCommand
+            .SetSystemLabelsServiceOwner(x =>
             {
-                EndUserId = ctx.GetParty(),
-                DialogId = ctx.GetDialogId(),
-                IfMatchEndUserContextRevision = NewUuidV7(),
-                AddLabels = [SystemLabel.Values.Bin]
+                x.IfMatchEndUserContextRevision = NewUuidV7();
+                x.AddLabels = [SystemLabel.Values.Bin];
             })
             .ExecuteAndAssert<ConcurrencyError>();
 
@@ -90,6 +86,28 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 x.EndUserContext.SystemLabels.Should().NotContain(x => x == SystemLabel.Values.MarkedAsUnopened);
                 x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Default);
             });
+
+    [Fact]
+    public Task Cannot_Set_Sent_System_Label() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsServiceOwner(x =>
+                x.AddLabels = [SystemLabel.Values.Sent])
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText(
+                    ValidationErrorStrings.SentLabelNotAllowed));
+
+    [Fact]
+    public Task Cannot_Remove_Existing_Sent_System_Label() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.Type = DialogTransmissionType.Values.Submission))
+            .SetSystemLabelsServiceOwner(x =>
+                x.RemoveLabels = [SystemLabel.Values.Sent])
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText(
+                    ValidationErrorStrings.SentLabelNotAllowed));
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

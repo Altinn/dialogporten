@@ -1,10 +1,11 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using FluentAssertions;
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
 
-public class BulkSetSystemLabelCommandValidatorTests
+public class ObsoleteBulkSetSystemLabelCommandValidatorTests
 {
     private readonly BulkSetSystemLabelCommandValidator _validator = new();
 
@@ -21,7 +22,7 @@ public class BulkSetSystemLabelCommandValidatorTests
                     new DialogRevisionDto { DialogId = Guid.NewGuid() },
                     new DialogRevisionDto { DialogId = Guid.NewGuid() }
                 ],
-                AddLabels = [SystemLabel.Values.Archive]
+                SystemLabels = [SystemLabel.Values.Archive]
             }
         };
 
@@ -44,7 +45,7 @@ public class BulkSetSystemLabelCommandValidatorTests
                     new DialogRevisionDto { DialogId = id },
                     new DialogRevisionDto { DialogId = id }
                 ],
-                AddLabels = [SystemLabel.Values.Archive]
+                SystemLabels = [SystemLabel.Values.Archive]
             }
         };
 
@@ -56,7 +57,7 @@ public class BulkSetSystemLabelCommandValidatorTests
     }
 
     [Fact]
-    public void Accept_Multiple_System_Labels()
+    public void Accepts_Multiple_System_Labels()
     {
         var command = new BulkSetSystemLabelCommand
         {
@@ -64,7 +65,7 @@ public class BulkSetSystemLabelCommandValidatorTests
             Dto = new BulkSetSystemLabelDto
             {
                 Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
-                AddLabels = [SystemLabel.Values.Bin, SystemLabel.Values.Archive]
+                SystemLabels = [SystemLabel.Values.Bin, SystemLabel.Values.Archive]
             }
         };
 
@@ -83,7 +84,7 @@ public class BulkSetSystemLabelCommandValidatorTests
             Dto = new BulkSetSystemLabelDto
             {
                 Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
-                AddLabels = [SystemLabel.Values.Bin]
+                SystemLabels = [SystemLabel.Values.Bin]
             }
         };
 

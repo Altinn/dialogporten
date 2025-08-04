@@ -6,9 +6,5 @@ public sealed class SetSystemLabelCommandValidator : AbstractValidator<SetSystem
 {
     public SetSystemLabelCommandValidator()
     {
-        RuleFor(x => x.SystemLabels)
-            .NotNull()
-            .Must(x => x.Count <= 1)
-            .WithMessage("Only one system label is currently supported");
     }
 }

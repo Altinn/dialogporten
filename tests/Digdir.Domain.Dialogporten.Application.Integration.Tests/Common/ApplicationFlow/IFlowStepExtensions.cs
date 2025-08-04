@@ -288,6 +288,16 @@ public static class IFlowStepExtensions
             return @in;
         });
 
+    public static Task<object> ExecuteAndAssert(
+        this IFlowStep<IOneOf> step,
+        Action<object>? assert) =>
+        step.Select(result =>
+        {
+            result.Value.Should().NotBeNull();
+            assert?.Invoke(result.Value);
+            return result.Value;
+        }).ExecuteAsync();
+
     public static Task<object> ExecuteAndAssert(this IFlowStep<IOneOf> step, Type type)
         => step.Select(result =>
             {

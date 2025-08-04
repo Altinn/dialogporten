@@ -32,14 +32,16 @@
           "Default",
           "Bin",
           "Archive",
-          "MarkedAsUnopened"
+          "MarkedAsUnopened",
+          "Sent"
         ],
         "type": "string",
         "x-enumNames": [
           "Default",
           "Bin",
           "Archive",
-          "MarkedAsUnopened"
+          "MarkedAsUnopened",
+          "Sent"
         ]
       },
       "DialogsEntities_DialogStatus": {

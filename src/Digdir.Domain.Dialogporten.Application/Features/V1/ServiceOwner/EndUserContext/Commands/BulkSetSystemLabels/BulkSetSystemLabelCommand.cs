@@ -1,10 +1,8 @@
-using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -48,6 +46,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         var dialogs = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
             .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
             .ToListAsync(cancellationToken);
 
@@ -59,17 +58,15 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         }
 
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        var newLabel = request.Dto.SystemLabels.Count switch // The domain model currently only supports one system label
-        {
-            0 => SystemLabel.Values.Default,
-            1 => request.Dto.SystemLabels.First(),
-            _ => throw new UnreachableException() // Should be caught in validator
-        };
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
         foreach (var dialog in dialogs)
         {
-            dialog.EndUserContext.UpdateLabel(newLabel, userInfo.UserId.ExternalIdWithPrefix);
+            dialog.EndUserContext.UpdateSystemLabels(
+                request.Dto.AddLabels,
+                request.Dto.RemoveLabels,
+                userInfo.UserId.ExternalIdWithPrefix);
+
             _unitOfWork.EnableConcurrencyCheck(dialog.EndUserContext, request.Dto.Dialogs.Single(x => x.DialogId == dialog.Id).EndUserContextRevision);
         }
 

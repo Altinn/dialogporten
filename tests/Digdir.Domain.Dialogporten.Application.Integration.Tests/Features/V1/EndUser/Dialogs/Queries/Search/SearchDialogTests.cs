@@ -44,7 +44,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             });
 
     [Fact]
-    public Task Should_Filter_On_Multiple_SystemLabels() =>
+    public Task Filter_On_Bin_And_Archive_Should_Return_No_Dialogs() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .CreateSimpleDialog((x, ctx) =>
@@ -63,13 +63,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.SystemLabel = [SystemLabel.Values.Bin, SystemLabel.Values.Archive];
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-            {
-                x.Items.Should().HaveCount(2);
-
-                x.Items.Should().NotContain(d => d
-                    .EndUserContext.SystemLabels
-                    .Contains(SystemLabel.Values.Default));
-            });
+                x.Items.Should().HaveCount(0));
 
     [Fact]
     public async Task Search_Should_Populate_EnduserContextRevision()

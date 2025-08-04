@@ -43,17 +43,17 @@ export default function () {
 
     });
 
-    describe('Reject multiple system labels', () => {
+    describe('Accept multiple system labels', () => {
         let body = {
             'systemLabels': ['Bin', 'Archive']
         }
         let r = putSO(`dialogs/${dialogId}/endusercontext/systemlabels?enduserId=${enduserId}`, body);
-        expectStatusFor(r).to.equal(400);
+        expectStatusFor(r).to.equal(204);
     });
 
     describe('Invalid revision if-match header results in 412 Precondition Failed', () => {
         let body = {
-            'systemLabels': ['Archive']
+            'addLabels': ['Bin']
         }
         let params = {
             headers: {

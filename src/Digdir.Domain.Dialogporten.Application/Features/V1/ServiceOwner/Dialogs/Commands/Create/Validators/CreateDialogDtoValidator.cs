@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using FluentValidation;
 
@@ -163,5 +164,10 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.ServiceOwnerContext)
             .SetValidator(serviceOwnerContextValidator)
             .When(x => x.ServiceOwnerContext is not null);
+
+        RuleFor(x => x.SystemLabel)
+            .Must(x => SystemLabel.IsDefaultArchiveBinGroup(x.GetValueOrDefault()))
+            .When(x => x.SystemLabel is not null)
+            .WithMessage($"{{PropertyName}} must be {SystemLabel.Values.Default}, {SystemLabel.Values.Bin} or {SystemLabel.Values.Archive}.");
     }
 }

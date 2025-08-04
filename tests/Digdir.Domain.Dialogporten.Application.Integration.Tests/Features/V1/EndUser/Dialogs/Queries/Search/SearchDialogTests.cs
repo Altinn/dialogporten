@@ -12,11 +12,61 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class SearchDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
+    [Fact]
+    public Task Should_Filter_On_SystemLabel() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog((x, ctx) =>
+            {
+                x.Dto.SystemLabel = SystemLabel.Values.Bin;
+                x.Dto.Party = ctx.GetParty();
+            })
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.SystemLabel = [SystemLabel.Values.Bin];
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+            {
+                var dialog = x.Items.Single();
+
+                // Obsolete SystemLabel
+                dialog.SystemLabel.Should().Be(SystemLabel.Values.Bin);
+
+                dialog.EndUserContext.SystemLabels.Should().HaveCount(1);
+                dialog.EndUserContext.SystemLabels.Should()
+                    .ContainSingle(s => s == SystemLabel.Values.Bin);
+            });
+
+    [Fact]
+    public Task Filter_On_Bin_And_Archive_Should_Return_No_Dialogs() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog((x, ctx) =>
+            {
+                x.Dto.SystemLabel = SystemLabel.Values.Bin;
+                x.Dto.Party = ctx.GetParty();
+            })
+            .CreateSimpleDialog((x, ctx) =>
+            {
+                x.Dto.SystemLabel = SystemLabel.Values.Archive;
+                x.Dto.Party = ctx.GetParty();
+            })
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.SystemLabel = [SystemLabel.Values.Bin, SystemLabel.Values.Archive];
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+                x.Items.Should().HaveCount(0));
+
     [Fact]
     public async Task Search_Should_Populate_EnduserContextRevision()
     {

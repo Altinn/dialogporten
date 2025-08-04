@@ -25,6 +25,10 @@ using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Featur
 using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
 using BulkSetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+using SetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelResult;
+using SetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
+using SetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelResult;
+using SetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelCommand;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -68,13 +72,53 @@ public static class IFlowStepExtensions
         });
 
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
-        Action<CreateDialogCommand>? initialState = null) =>
+        Action<CreateDialogCommand> initialState) =>
         step.CreateDialog(_ =>
         {
             var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-            initialState?.Invoke(command);
+            initialState.Invoke(command);
             return command;
         });
+
+    public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step) =>
+        step.CreateDialog(_ => DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+
+    public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(
+        this IFlowStep step,
+        Action<CreateDialogCommand, FlowContext> initialState) =>
+        step.CreateDialog(ctx =>
+        {
+            var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+            initialState.Invoke(command, ctx);
+            return command;
+        });
+
+    public static IFlowExecutor<SetSystemLabelResultEU> SetSystemLabelsEndUser(this IFlowStep<CreateDialogResult> step,
+        Action<SetSystemLabelCommandEU>? modify = null) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .SendCommand(x =>
+            {
+                var command = new SetSystemLabelCommandEU
+                {
+                    DialogId = x.GetDialogId(),
+                };
+                modify?.Invoke(command);
+                return command;
+            });
+
+    public static IFlowExecutor<SetSystemLabelResultSO> SetSystemLabelsServiceOwner(this IFlowStep<CreateDialogResult> step,
+        Action<SetSystemLabelCommandSO>? modify = null) =>
+        step.AssertResult<CreateDialogSuccess>()
+            .SendCommand(x =>
+            {
+                var command = new SetSystemLabelCommandSO
+                {
+                    DialogId = x.GetDialogId(),
+                    EndUserId = x.GetParty()
+                };
+                modify?.Invoke(command);
+                return command;
+            });
 
     public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<CreateDialogResult> step,
         Action<PurgeDialogCommand>? modify = null) =>

@@ -50,7 +50,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     {
         var dialog = GetDialogDataLoader.GetPreloadedData(_dataLoaderContext);
 
-
         if (dialog is null)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);

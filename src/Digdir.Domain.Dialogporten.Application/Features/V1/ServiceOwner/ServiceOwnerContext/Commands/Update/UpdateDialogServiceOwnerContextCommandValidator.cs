@@ -19,7 +19,7 @@ internal sealed class UpdateDialogServiceOwnerContextCommandValidator : Abstract
     }
 }
 
-public sealed class UpdateServiceOwnerContextDtoValidator : AbstractValidator<UpdateServiceOwnerContextDto>
+internal sealed class UpdateServiceOwnerContextDtoValidator : AbstractValidator<UpdateServiceOwnerContextDto>
 {
     public UpdateServiceOwnerContextDtoValidator(IValidator<ServiceOwnerLabelDto> serviceOwnerLabelValidator)
     {

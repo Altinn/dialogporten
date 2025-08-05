@@ -4,7 +4,7 @@ using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Validatio
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 
-public sealed class SetSystemLabelCommandValidator : AbstractValidator<SetSystemLabelCommand>
+internal sealed class SetSystemLabelCommandValidator : AbstractValidator<SetSystemLabelCommand>
 {
     public SetSystemLabelCommandValidator()
     {

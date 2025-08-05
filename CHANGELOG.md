@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.75.0](https://github.com/Altinn/dialogporten/compare/v1.74.0...v1.75.0) (2025-08-03)
+
+
+### Features
+
+* Add MarkedAsUnopened SystemLabel ([#2577](https://github.com/Altinn/dialogporten/issues/2577)) ([8e99313](https://github.com/Altinn/dialogporten/commit/8e993132247c7c8632f0526a1a052c525bd0715f))
+
+
+### Miscellaneous Chores
+
+* **deps:** update grafana/loki docker tag to v3.5.3 ([#2598](https://github.com/Altinn/dialogporten/issues/2598)) ([046dc2d](https://github.com/Altinn/dialogporten/commit/046dc2d70626643449d233ae85bfa171d921ede8))
+
 ## [1.74.0](https://github.com/Altinn/dialogporten/compare/v1.73.6...v1.74.0) (2025-07-30)
 
 

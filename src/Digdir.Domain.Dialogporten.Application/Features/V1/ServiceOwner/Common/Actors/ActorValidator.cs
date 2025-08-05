@@ -5,7 +5,7 @@ using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 
-public sealed class ActorValidator : AbstractValidator<ActorDto>
+internal sealed class ActorValidator : AbstractValidator<ActorDto>
 {
 
     public ActorValidator()

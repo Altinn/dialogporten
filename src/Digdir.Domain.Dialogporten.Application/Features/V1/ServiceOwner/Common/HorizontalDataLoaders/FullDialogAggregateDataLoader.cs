@@ -62,7 +62,7 @@ public sealed class FullDialogAggregateDataLoader
                 .OrderBy(x => x.CreatedAt))
                 .ThenInclude(x => x.SeenBy)
                 .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.EndUserContext)
+            .Include(x => x.EndUserContext.DialogEndUserContextSystemLabels)
             .Include(x => x.ServiceOwnerContext)
                 .ThenInclude(x => x.ServiceOwnerLabels.OrderBy(x => x.Value))
             .IgnoreQueryFilters()

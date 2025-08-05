@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.76.0](https://github.com/Altinn/dialogporten/compare/v1.75.0...v1.76.0) (2025-08-05)
+
+
+### Features
+
+* Add Sent SystemLabel ([#2593](https://github.com/Altinn/dialogporten/issues/2593)) ([339ffad](https://github.com/Altinn/dialogporten/commit/339ffadbbc31c084039a8c690bf243c237690310))
+
+
+### Miscellaneous Chores
+
+* **db:** add SetSentLabel migration script ([#2601](https://github.com/Altinn/dialogporten/issues/2601)) ([acf90c8](https://github.com/Altinn/dialogporten/commit/acf90c8007dc26987541a6c747017e1566791543))
+
 ## [1.75.0](https://github.com/Altinn/dialogporten/compare/v1.74.0...v1.75.0) (2025-08-03)
 
 

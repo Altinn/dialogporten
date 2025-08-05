@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace Digdir.Domain.Dialogporten.Domain.Localizations;
 
@@ -22,6 +23,7 @@ public sealed class Localization
     public LocalizationSet LocalizationSet { get; set; } = null!;
 
 
+    [return: NotNullIfNotNull(nameof(cultureCode))]
     public static string? NormalizeCultureCode(string? cultureCode)
     {
         cultureCode = cultureCode?.Trim().Replace('_', '-').ToLowerInvariant();
@@ -30,7 +32,7 @@ public sealed class Localization
             : cultureCode;
     }
 
-    public static bool IsValidCultureCode(string? cultureCode) =>
+    public static bool IsValidCultureCode([NotNullWhen(true)] string? cultureCode) =>
         cultureCode is not null
         && NeutralCultureByValidCultureCodes.TryGetValue(cultureCode, out var neutralCulture)
         && cultureCode == neutralCulture.TwoLetterISOLanguageName;

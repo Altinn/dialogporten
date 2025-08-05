@@ -31,4 +31,9 @@
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Application.Unit.Tests"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Features\V1\ServiceOwner\LocalizationTemplates\Commands\" />
+      <Folder Include="Features\V1\ServiceOwner\LocalizationTemplates\Queries\" />
+    </ItemGroup>
+
 </Project>

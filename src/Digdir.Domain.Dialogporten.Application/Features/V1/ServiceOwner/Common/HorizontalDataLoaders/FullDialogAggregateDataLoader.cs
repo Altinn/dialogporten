@@ -20,7 +20,6 @@ public sealed class FullDialogAggregateDataLoader
 
     public async Task<DialogEntity?> LoadDialogEntity(Guid dialogId, CancellationToken cancellationToken)
     {
-
         if (_dialogEntities.TryGetValue(dialogId, out var entity))
         {
             return entity;

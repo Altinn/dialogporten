@@ -20,7 +20,6 @@ public sealed class FullDialogAggregateDataLoader
 
     public async Task<DialogEntity?> LoadDialogEntity(Guid dialogId, CancellationToken cancellationToken)
     {
-
         if (_dialogEntities.TryGetValue(dialogId, out var entity))
         {
             return entity;
@@ -63,7 +62,7 @@ public sealed class FullDialogAggregateDataLoader
                 .OrderBy(x => x.CreatedAt))
                 .ThenInclude(x => x.SeenBy)
                 .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.EndUserContext)
+            .Include(x => x.EndUserContext.DialogEndUserContextSystemLabels)
             .Include(x => x.ServiceOwnerContext)
                 .ThenInclude(x => x.ServiceOwnerLabels.OrderBy(x => x.Value))
             .IgnoreQueryFilters()

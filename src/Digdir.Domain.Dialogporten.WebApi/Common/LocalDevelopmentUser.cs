@@ -1,6 +1,6 @@
-﻿using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using AuthConstants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common;
@@ -15,7 +15,8 @@ internal sealed class LocalDevelopmentUser : IUser
         new Claim("pid", "03886595947"),
         new Claim("scope", string.Join(" ", AuthorizationScope.AllScopes.Value)),
         new Claim("consumer",
-            """
+            /*lang=json,strict*/
+                                 """
             {
                 "authority": "iso6523-actorid-upis",
                 "ID": "0192:991825827"

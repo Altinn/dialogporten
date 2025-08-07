@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
@@ -93,6 +94,7 @@ static void BuildAndRun(string[] args)
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
+        .AddCostManagementMetrics()
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
 
@@ -180,6 +182,7 @@ static void BuildAndRun(string[] args)
         .UseServiceOwnerOnBehalfOfPerson()
         .UseUserTypeValidation()
         .UseAzureConfiguration()
+        .UseCostManagementMetrics()
         .UseFastEndpoints(x =>
         {
             x.Endpoints.RoutePrefix = "api";

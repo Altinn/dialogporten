@@ -19,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -200,8 +201,6 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("empty"));
-
-    private static IntegrationTestUser CreateUserWithScope(string scope) => new([new("scope", scope)]);
 
     private static Action<IServiceCollection> ConfigureUserWithScope(string scope) => services =>
     {

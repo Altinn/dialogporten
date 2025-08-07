@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 
-internal sealed class LocalDevelopmentResourceRegistry : IResourceRegistry
+internal class LocalDevelopmentResourceRegistry : IResourceRegistry
 {
     private const string LocalResourceType = "LocalResourceType";
     private const string LocalOrgId = "742859274";
@@ -33,7 +33,7 @@ internal sealed class LocalDevelopmentResourceRegistry : IResourceRegistry
         return CachedResourceIds;
     }
 
-    public Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken)
+    public virtual Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken)
     {
         return Task.FromResult<ServiceResourceInformation?>(
             new ServiceResourceInformation(serviceResourceId, LocalResourceType, LocalOrgId, LocalOrgShortName));

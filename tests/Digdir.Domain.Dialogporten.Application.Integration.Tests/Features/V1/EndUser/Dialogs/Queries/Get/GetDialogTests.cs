@@ -74,7 +74,6 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.HasUnopenedContent.Should().Be(expectedHasUnOpenedContent));
 }
 
-
 internal sealed class TestResourceRegistry(DialogDbContext db) : LocalDevelopmentResourceRegistry(db)
 {
     public override Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId,

@@ -37,4 +37,9 @@
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.GraphQL"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
+        <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Architecture.Tests"/>
+    </ItemGroup>
+
 </Project>

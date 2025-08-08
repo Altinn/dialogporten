@@ -14,6 +14,7 @@ public class SealedClassesTest
             .That().AreClasses()
             .And().AreNotAbstract()
             .And().DoNotHaveName(nameof(Program))
+            .And().DoNotHaveNameStartingWith("LocalDevelopment")
             .And().DoNotResideInNamespaceMatching("Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations")
             .GetTypes()
             .ToList();

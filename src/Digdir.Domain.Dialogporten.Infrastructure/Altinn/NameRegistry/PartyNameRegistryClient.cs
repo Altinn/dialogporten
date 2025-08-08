@@ -89,7 +89,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return nameLookup is not null;
     }
 
-
     private sealed class NameLookup
     {
         public List<NameLookupParty> Parties { get; set; } = null!;

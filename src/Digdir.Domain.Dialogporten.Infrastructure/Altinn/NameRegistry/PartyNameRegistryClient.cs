@@ -89,6 +89,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return nameLookup is not null;
     }
 
+
     private sealed class NameLookup
     {
         public List<NameLookupParty> Parties { get; set; } = null!;
@@ -105,4 +106,9 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         public string OrgNo { get; set; } = null!;
         public string? Name { get; set; }
     }
+}
+
+internal sealed class LocalPartNameRegistryClient : IPartyNameRegistry
+{
+    public Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) => Task.FromResult("Gunnar Gunnarson")!;
 }

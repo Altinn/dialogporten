@@ -188,7 +188,7 @@ public static class InfrastructureExtensions
             .ReplaceTransient<IResourceRegistry, LocalDevelopmentResourceRegistry>(predicate: localDeveloperSettings.UseLocalDevelopmentResourceRegister)
             .ReplaceTransient<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>(predicate: localDeveloperSettings.UseLocalDevelopmentAltinnAuthorization)
             .ReplaceSingleton<IFusionCache, NullFusionCache>(predicate: localDeveloperSettings.DisableCache)
-            .ReplaceSingleton<IPartyNameRegistry, LocalPartNameRegistryClient>(predicate: localDeveloperSettings.UseLocalPartyNameRegistry);
+            .ReplaceSingleton<IPartyNameRegistry, LocalPartNameRegistryClient>(predicate: localDeveloperSettings.UseLocalDevelopmentPartyNameRegistry);
     }
 
     internal static void AddPubSubCapabilities(InfrastructureBuilderContext builderContext, List<Action<IBusRegistrationConfigurator>> customConfigurations)

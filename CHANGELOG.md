@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.76.2](https://github.com/Altinn/dialogporten/compare/v1.76.1...v1.76.2) (2025-08-10)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency bouncycastle.cryptography to 2.6.2 ([#2613](https://github.com/Altinn/dialogporten/issues/2613)) ([bbf16b6](https://github.com/Altinn/dialogporten/commit/bbf16b694096bac3a051f97b4714cd2caa70982d))
+* **deps:** update Microsoft dependencies to version 9.0.8 ([#2618](https://github.com/Altinn/dialogporten/issues/2618)) ([5477475](https://github.com/Altinn/dialogporten/commit/547747547f08453f30ed088fc1049cb4e7b30a39))
+
 ## [1.76.1](https://github.com/Altinn/dialogporten/compare/v1.76.0...v1.76.1) (2025-08-08)
 
 

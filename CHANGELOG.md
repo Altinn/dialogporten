@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.76.2](https://github.com/Altinn/dialogporten/compare/v1.76.1...v1.76.2) (2025-08-10)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency bouncycastle.cryptography to 2.6.2 ([#2613](https://github.com/Altinn/dialogporten/issues/2613)) ([bbf16b6](https://github.com/Altinn/dialogporten/commit/bbf16b694096bac3a051f97b4714cd2caa70982d))
+* **deps:** update Microsoft dependencies to version 9.0.8 ([#2618](https://github.com/Altinn/dialogporten/issues/2618)) ([5477475](https://github.com/Altinn/dialogporten/commit/547747547f08453f30ed088fc1049cb4e7b30a39))
+
+## [1.76.1](https://github.com/Altinn/dialogporten/compare/v1.76.0...v1.76.1) (2025-08-08)
+
+
+### Bug Fixes
+
+* **local-dev:** Created LocalPartyNameRegistry ([#2612](https://github.com/Altinn/dialogporten/issues/2612)) ([fadb52f](https://github.com/Altinn/dialogporten/commit/fadb52f82e7f006eeeff8bfbc5528e5be73f0c12))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency microsoft.azure.appconfiguration.aspnetcore to 8.3.0 ([#2605](https://github.com/Altinn/dialogporten/issues/2605)) ([41f78ab](https://github.com/Altinn/dialogporten/commit/41f78ab4dc90007585af077982ce801b4b5bfb30))
+* **deps:** update dependency verify.xunit to 30.5.0 ([#2606](https://github.com/Altinn/dialogporten/issues/2606)) ([3c18814](https://github.com/Altinn/dialogporten/commit/3c18814999be96189fd6d195885b0642b26b1638))
+* **deps:** update dotnet monorepo ([#2603](https://github.com/Altinn/dialogporten/issues/2603)) ([551dc8c](https://github.com/Altinn/dialogporten/commit/551dc8c660cd1da6d95250270f6768769f1b4368))
+* **deps:** update hotchocolate monorepo to 15.1.8 ([#2604](https://github.com/Altinn/dialogporten/issues/2604)) ([90706f1](https://github.com/Altinn/dialogporten/commit/90706f119866803ada71835f00a8b9ecde003b75))
+
+## [1.76.0](https://github.com/Altinn/dialogporten/compare/v1.75.0...v1.76.0) (2025-08-05)
+
+
+### Features
+
+* Add Sent SystemLabel ([#2593](https://github.com/Altinn/dialogporten/issues/2593)) ([339ffad](https://github.com/Altinn/dialogporten/commit/339ffadbbc31c084039a8c690bf243c237690310))
+
+
+### Miscellaneous Chores
+
+* **db:** add SetSentLabel migration script ([#2601](https://github.com/Altinn/dialogporten/issues/2601)) ([acf90c8](https://github.com/Altinn/dialogporten/commit/acf90c8007dc26987541a6c747017e1566791543))
+
 ## [1.75.0](https://github.com/Altinn/dialogporten/compare/v1.74.0...v1.75.0) (2025-08-03)
 
 

@@ -106,3 +106,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         public string? Name { get; set; }
     }
 }
+
+internal sealed class LocalPartNameRegistryClient : IPartyNameRegistry
+{
+    public Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Gunnarson");
+}

@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.77.0](https://github.com/Altinn/dialogporten/compare/v1.76.2...v1.77.0) (2025-08-11)
+
+
+### Features
+
+* **webapi:** Make Status nullable when creating dialogs ([#2623](https://github.com/Altinn/dialogporten/issues/2623)) ([24de98c](https://github.com/Altinn/dialogporten/commit/24de98c254ac1ba2d47dee891402478be702fde2))
+
+
+### Bug Fixes
+
+* **webapi:** Use correct URL for create dialog validators in docs ([#2624](https://github.com/Altinn/dialogporten/issues/2624)) ([abd4484](https://github.com/Altinn/dialogporten/commit/abd44841cec5f0fb703aad9b8ad0032ac596d1b5))
+
+
+### Miscellaneous Chores
+
+* **deps:** update docker/metadata-action action to v5.8.0 ([#2615](https://github.com/Altinn/dialogporten/issues/2615)) ([2072bce](https://github.com/Altinn/dialogporten/commit/2072bce965bb70ab724ddb7e02e72e0eba4038a8))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.131.1 ([#2616](https://github.com/Altinn/dialogporten/issues/2616)) ([fdcd46a](https://github.com/Altinn/dialogporten/commit/fdcd46afd0fcdcd995c7e5d36ffcf750ec00fe6f))
+
 ## [1.76.2](https://github.com/Altinn/dialogporten/compare/v1.76.1...v1.76.2) (2025-08-10)
 
 

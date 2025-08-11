@@ -2,7 +2,9 @@
 
 [![CI/CD Main](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-main.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-main.yml)
 [![CI/CD Staging](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-staging.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-staging.yml)
-[![CI/CD YT01](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-yt01.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-yt01.yml)
+[![CI/CD YT01](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-yt01.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-yt01.yml)  
+
+[![CI/CD Production Dry Run](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod-dry-run.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod-dry-run.yml)
 [![CI/CD Production](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod.yml)
 
 ## Getting started with local development

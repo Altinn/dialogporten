@@ -7,7 +7,7 @@
 [![CI/CD Production Dry Run](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod-dry-run.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod-dry-run.yml)
 [![CI/CD Production](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod.yml)  
 
-![NuGet Version](https://img.shields.io/nuget/v/Altinn.ApiClients.Dialogporten)  
+![NuGet Version](https://img.shields.io/nuget/v/Altinn.ApiClients.Dialogporten)
 ![NPM Version](https://img.shields.io/npm/v/%40digdir%2Fdialogporten-schema)
 
 ## Getting started with local development

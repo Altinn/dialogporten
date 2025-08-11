@@ -4396,7 +4396,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
+        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput? Status { get; set; }
 
         /// <summary>
         /// Set the system label of the dialog.

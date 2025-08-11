@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -447,4 +448,12 @@ public class CreateDialogTests : ApplicationCollectionFixture
                         .Should().BeTrue();
                 }
             });
+
+    [Fact]
+    public Task Can_Create_Dialog_Without_Supplying_Dialog_Status() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Status = null)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Status.Should().Be(DialogStatus.Values.NotApplicable));
 }

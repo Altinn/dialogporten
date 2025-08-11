@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using NJsonSchema;
 using NSwag;
 
@@ -83,6 +84,33 @@ public static class OpenApiDocumentExtensions
         foreach (var schema in openApiDocument.Components.Schemas.Values)
         {
             MakeCollectionsNullable(schema);
+        }
+    }
+
+    /// <summary>
+    /// Changing the dialog status example to "notApplicable" since the "New" status is deprecated.
+    /// </summary>
+    /// <param name="openApiDocument"></param>
+    public static void ChangeDialogStatusExample(this OpenApiDocument openApiDocument)
+    {
+        if (!openApiDocument.Paths.TryGetValue("/api/v1/serviceowner/dialogs", out var pathItem))
+        {
+            return;
+        }
+
+        if (!pathItem.TryGetValue(OpenApiOperationMethod.Post, out var postOp))
+        {
+            return;
+        }
+
+        var requestBodyProperties = postOp.RequestBody?.Content?["application/json"]?.Schema?.ActualSchema?.ActualProperties;
+        if (requestBodyProperties == null)
+        {
+            return;
+        }
+        if (requestBodyProperties.TryGetValue("status", out var statusProperty))
+        {
+            statusProperty.Example = nameof(DialogStatus.Values.NotApplicable);
         }
     }
 

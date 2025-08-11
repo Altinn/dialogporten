@@ -2569,6 +2569,7 @@
           },
           "status": {
             "description": "The aggregated status of the dialog.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerCommonDialogStatuses_DialogStatusInput"

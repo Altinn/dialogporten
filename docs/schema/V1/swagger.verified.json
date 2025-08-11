@@ -6904,7 +6904,7 @@
         ]
       },
       "post": {
-        "description": "The dialog is created with the given configuration.\n\nFor detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)",
+        "description": "The dialog is created with the given configuration.\n\nFor detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)",
         "operationId": "V1ServiceOwnerDialogsCommandsCreate_Dialog",
         "requestBody": {
           "content": {

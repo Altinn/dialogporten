@@ -88,7 +88,7 @@ public static class OpenApiDocumentExtensions
     }
 
     /// <summary>
-    /// Changing the dialog status example to "notApplicable" since the "New" status is deprecated.
+    /// Changing the dialog status example to "NotApplicable" since the "New" status is deprecated.
     /// </summary>
     /// <param name="openApiDocument"></param>
     public static void ChangeDialogStatusExample(this OpenApiDocument openApiDocument)

@@ -12,6 +12,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Activities;
 
@@ -103,6 +104,4 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
                 });
             })
             .ExecuteAndAssert<UpdateDialogSuccess>();
-
-    private static IntegrationTestUser CreateUserWithScope(string scope) => new([new("scope", scope)]);
 }

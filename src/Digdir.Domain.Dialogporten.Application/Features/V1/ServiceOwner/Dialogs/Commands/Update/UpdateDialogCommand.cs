@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -171,7 +172,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (!request.IsSilentUpdate)
         {
-            UpdateSystemLabel(dialog);
+            AddSystemLabel(dialog, SystemLabel.Values.Default);
         }
 
         var saveResult = await _unitOfWork
@@ -184,7 +185,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             concurrencyError => concurrencyError);
     }
 
-    private void UpdateSystemLabel(DialogEntity dialog)
+    private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
     {
         if (!_user.TryGetOrganizationNumber(out var organizationNumber))
         {
@@ -193,7 +194,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
 
         dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [SystemLabel.Values.Default],
+            addLabels: [labelToAdd],
             removeLabels: [],
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);
@@ -316,6 +317,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogAttachment>(existingAttachmentIds));
             return;
+        }
+
+        if (newDialogTransmissions.ContainsTransmissionByEndUser())
+        {
+            AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
 
         dialog.Transmissions.AddRange(newDialogTransmissions);

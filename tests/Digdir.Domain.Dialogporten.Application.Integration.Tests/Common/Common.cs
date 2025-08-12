@@ -27,4 +27,6 @@ internal static class Common
     internal static string Party => NorwegianPersonIdentifier.PrefixWithSeparator + "03886595947";
 
     internal static Guid NewUuidV7() => IdentifiableExtensions.CreateVersion7();
+
+    internal static IntegrationTestUser CreateUserWithScope(string scope) => new([new("scope", scope)]);
 }

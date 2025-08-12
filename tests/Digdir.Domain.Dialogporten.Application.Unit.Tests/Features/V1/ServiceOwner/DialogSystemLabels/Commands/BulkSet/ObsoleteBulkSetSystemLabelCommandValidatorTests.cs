@@ -7,7 +7,7 @@ namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceO
 
 public class ObsoleteBulkSetSystemLabelCommandValidatorTests
 {
-    private readonly BulkSetSystemLabelCommandValidator _validator = new();
+    private readonly BulkSetSystemLabelCommandValidator _validator = new(new BulkSetSystemLabelDtoValidator());
 
     [Fact]
     public void Unique_DialogIds_Should_Be_Valid()

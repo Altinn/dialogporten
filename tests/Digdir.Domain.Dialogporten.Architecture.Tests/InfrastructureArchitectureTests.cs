@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
 using FluentAssertions;
+using FluentValidation;
 using NetArchTest.Rules;
 
 namespace Digdir.Domain.Dialogporten.Architecture.Tests;
@@ -31,5 +32,25 @@ public class InfrastructureArchitectureTests
 
         publicClasses.FailingTypes.Should().BeNullOrEmpty();
         publicClasses.IsSuccessful.Should().BeTrue();
+    }
+
+
+    [Fact]
+    public void All_Validators_Should_Be_Internal()
+    {
+        var validatorTypes = Types
+            .InAssemblies(DialogportenAssemblies.All)
+            .That().AreClasses()
+            .And().AreNotAbstract()
+            .And().Inherit(typeof(AbstractValidator<>))
+            .GetTypes();
+
+        var publicValidators = validatorTypes
+            .Where(t => t.IsPublic)
+            .ToList();
+
+        publicValidators.Should().BeEmpty(
+            $"These validators are public but should be internal: " +
+            $"{string.Join(", ", publicValidators.Select(t => t.FullName))}");
     }
 }

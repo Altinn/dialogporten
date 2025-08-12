@@ -3,7 +3,7 @@ using FluentValidation;
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed class SearchDialogInputValidator : AbstractValidator<SearchDialogInput>
+internal sealed class SearchDialogInputValidator : AbstractValidator<SearchDialogInput>
 {
     public SearchDialogInputValidator()
     {

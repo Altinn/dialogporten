@@ -113,7 +113,7 @@ public sealed class CreateDialogDto
     /// <summary>
     /// The aggregated status of the dialog.
     /// </summary>
-    public DialogStatusInput Status { get; set; }
+    public DialogStatusInput? Status { get; set; }
 
     /// <summary>
     /// Set the system label of the dialog.

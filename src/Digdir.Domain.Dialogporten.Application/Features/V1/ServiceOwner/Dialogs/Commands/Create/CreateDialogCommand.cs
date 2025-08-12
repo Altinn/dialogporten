@@ -8,9 +8,11 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
@@ -126,6 +128,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
                 (DialogTransmissionType.Values.Submission
                 or DialogTransmissionType.Values.Correction));
 
+        if (dialog.Transmissions.ContainsTransmissionByEndUser())
+        {
+            AddSystemLabel(dialog, SystemLabel.Values.Sent);
+        }
+
         _db.Dialogs.Add(dialog);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -164,6 +171,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return;
         }
 
+        AddSystemLabel(dialog, request.Dto.SystemLabel.Value);
+    }
+
+    private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
+    {
         if (!_user.TryGetOrganizationNumber(out var organizationNumber))
         {
             _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
@@ -171,7 +183,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [request.Dto.SystemLabel.Value],
+            addLabels: [labelToAdd],
             removeLabels: [],
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
             ActorType.Values.ServiceOwner);

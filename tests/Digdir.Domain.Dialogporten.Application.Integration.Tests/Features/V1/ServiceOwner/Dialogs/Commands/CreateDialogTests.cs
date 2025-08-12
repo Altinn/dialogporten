@@ -10,6 +10,8 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -18,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -199,8 +202,6 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("empty"));
-
-    private static IntegrationTestUser CreateUserWithScope(string scope) => new([new("scope", scope)]);
 
     private static Action<IServiceCollection> ConfigureUserWithScope(string scope) => services =>
     {
@@ -389,4 +390,70 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Transmissions.First().IsOpened.Should().BeFalse();
             });
     }
+
+    [Theory, ClassData(typeof(AddingEndUserTransmissionSentLabelTestData))]
+    public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
+        DialogTransmissionType.Values transmissionType, bool shouldAddSentLabel) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.Type = transmissionType))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                if (shouldAddSentLabel)
+                {
+                    x.EndUserContext.SystemLabels.Should().ContainSingle(
+                        label => label == SystemLabel.Values.Sent);
+                }
+                else
+                {
+                    x.EndUserContext.SystemLabels.Should().NotContain(
+                        label => label == SystemLabel.Values.Sent);
+                }
+            });
+
+    private sealed class SystemLabelOnDialogCreateTestData : TheoryData<SystemLabel.Values, bool>
+    {
+        public SystemLabelOnDialogCreateTestData()
+        {
+            var systemLabels = Enum.GetValues<SystemLabel.Values>();
+
+            foreach (var systemLabel in systemLabels)
+            {
+                Add(systemLabel, SystemLabel.IsDefaultArchiveBinGroup(systemLabel));
+            }
+
+            Add(0, false);
+            Add((SystemLabel.Values)systemLabels.Length + 1, false);
+        }
+    }
+
+    [Theory, ClassData(typeof(SystemLabelOnDialogCreateTestData))]
+    public Task SystemLabel_On_Dialog_Create_Should_Be_Accepted_When_In_Default_DAB_Group(
+        SystemLabel.Values systemLabel, bool shouldSucceed) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.SystemLabel = systemLabel)
+            .ExecuteAndAssert(result =>
+            {
+                if (shouldSucceed)
+                {
+                    (result is CreateDialogSuccess)
+                        .Should().BeTrue();
+                }
+                else
+                {
+                    (result is ValidationError)
+                        .Should().BeTrue();
+                }
+            });
+
+    [Fact]
+    public Task Can_Create_Dialog_Without_Supplying_Dialog_Status() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Status = null)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Status.Should().Be(DialogStatus.Values.NotApplicable));
 }

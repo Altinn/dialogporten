@@ -14,7 +14,7 @@ public sealed class CreateDialogEndpointSummary : Summary<CreateDialogEndpoint>
         Description = """
                       The dialog is created with the given configuration.
 
-                      For detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)
+                      For detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)
                       """;
 
         ResponseExamples[StatusCodes.Status201Created] = "018bb8e5-d9d0-7434-8ec5-569a6c8e01fc";

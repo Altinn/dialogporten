@@ -9,19 +9,29 @@ internal static class Activity
     public static readonly string CopyCommand = Create(nameof(Activity),
         "Id", "CreatedAt", "ExtendedType", "TypeId", "TransmissionId", "DialogId");
 
-    public const int DialogCreatedType = 1;
-    public const int InformationType = 2;
-
     public static List<ActivityDto> GetDtos(DialogTimestamp dialogDto)
     {
-        var activityId1 = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), DialogCreatedType);
-        var activityId2 = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), InformationType);
+        // All dialogs have a DialogCreated activity.
+        var dialogCreatedActivityId = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.DialogCreated);
+        List<ActivityDto> dtos = [new(dialogCreatedActivityId,(int)DialogActivityType.Values.DialogCreated)];
 
-        return
-        [
-            new(activityId1, DialogCreatedType),
-            new(activityId2, InformationType)
-        ];
+        var rng = dialogDto.GetRng();
+
+        // Approx. 1/2 of dialogs have a DialogOpened activity.
+        if (rng.Next(0, 2) == 0)
+        {
+            var dialogOpenedActivityId = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.DialogOpened);
+            dtos.Add(new(dialogOpenedActivityId, (int)DialogActivityType.Values.DialogOpened));
+        }
+
+        // Approx. 1/3 of dialogs have an Information activity.
+        if (rng.Next(0, 3) == 0)
+        {
+            var informationActivityId = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.Information);
+            dtos.Add(new(informationActivityId, (int)DialogActivityType.Values.Information));
+        }
+
+        return dtos;
     }
 
     public static string Generate(DialogTimestamp dto)

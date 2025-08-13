@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
 using Npgsql;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
@@ -68,5 +69,15 @@ internal static class ActorName
         return actorNameCsvData.ToString();
     }
 
-    internal static Guid GetActorNameId(string party) => InsertedActorNames[party];
+    internal static Guid GetActorNameId(string party)
+    {
+        var actorNameId = InsertedActorNames[party];
+
+        if (actorNameId == Guid.Empty)
+        {
+            throw new UnreachableException($"ActorNameId for party {party} should have been seeded");
+        }
+
+        return actorNameId;
+    }
 }

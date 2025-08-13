@@ -18,20 +18,12 @@ internal static class Actor
     {
         var actorCsvData = new StringBuilder();
 
-        // var rng = new Random(dto.DialogId.GetHashCode());
-        //
-        // var dialogPartyIndex = rng.Next(0, Parties.List.Length);
-        // var dialogParty = Parties.List[dialogPartyIndex];
-
-        var dialogParty = dto.GetParty();
-        var transmissionPartyIndex = rng.Next(0, Parties.List.Length);
-        var transmissionParty = Parties.List[transmissionPartyIndex];
+        var rng = dto.GetRng();
+        var dialogParty = rng.GetParty();
+        var transmissionParty = rng.GetParty();
 
         var dialogPartyActorNameId = ActorName.GetActorNameId(dialogParty);
-        if (dialogPartyActorNameId == Guid.Empty) throw new UnreachableException($"ActorNameId for party {dialogParty} should have been seeded");
-
         var transmissionPartyActorNameId = ActorName.GetActorNameId(transmissionParty);
-        if (transmissionPartyActorNameId == Guid.Empty) throw new UnreachableException($"ActorNameId for party {transmissionParty} should have been seeded");
 
         // DialogActivity
         // By serviceOwner, no actor name

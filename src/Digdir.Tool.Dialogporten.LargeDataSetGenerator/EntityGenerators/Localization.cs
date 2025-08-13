@@ -3,12 +3,14 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class Localization
 {
-    public const string CopyCommand = """COPY "Localization" ("LanguageCode", "LocalizationSetId", "CreatedAt", "UpdatedAt", "Value") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = Create(nameof(Localization),
+        "LanguageCode", "LocalizationSetId", "CreatedAt", "UpdatedAt", "Value");
 
     public static string Generate(DialogTimestamp dto)
     {

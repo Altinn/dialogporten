@@ -1,8 +1,11 @@
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class DialogEndUserContext
 {
-    public const string CopyCommand = """COPY "DialogEndUserContext" ("Id", "CreatedAt", "UpdatedAt", "Revision", "DialogId", "SystemLabelId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = Create(nameof(DialogEndUserContext),
+        "Id", "CreatedAt", "UpdatedAt", "Revision", "DialogId", "SystemLabelId");
 
     public static string Generate(DialogTimestamp dto) => $"{dto.DialogId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{Guid.NewGuid()},{dto.DialogId},1";
 }

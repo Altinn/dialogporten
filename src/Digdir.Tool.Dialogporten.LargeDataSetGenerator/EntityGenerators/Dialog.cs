@@ -1,10 +1,15 @@
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class Dialog
 {
     private static readonly string[] ServiceResources = File.ReadAllLines("./service_resources");
 
-    public const string CopyCommand = """COPY "Dialog" ("Id", "CreatedAt", "Deleted", "DeletedAt", "DueAt", "ExpiresAt", "ExtendedStatus", "ExternalReference", "Org", "Party", "PrecedingProcess", "Process", "Progress", "Revision", "ServiceResource", "ServiceResourceType", "StatusId", "VisibleFrom", "UpdatedAt") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = Create(nameof(Dialog),
+        "Id", "CreatedAt", "Deleted", "DeletedAt", "DueAt", "ExpiresAt", "ExtendedStatus",
+        "ExternalReference", "Org", "Party", "PrecedingProcess", "Process", "Progress",
+        "Revision", "ServiceResource", "ServiceResourceType", "StatusId", "VisibleFrom", "UpdatedAt");
 
     public static string Generate(DialogTimestamp dto)
     {

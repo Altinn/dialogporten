@@ -1,11 +1,13 @@
 using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class DialogSearchTag
 {
-    public const string CopyCommand = """COPY "DialogSearchTag" ("Id", "Value", "CreatedAt", "DialogId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = Create(nameof(DialogSearchTag),
+        "Id", "Value", "CreatedAt", "DialogId");
 
     public static string Generate(DialogTimestamp dto)
     {

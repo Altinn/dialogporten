@@ -1,11 +1,13 @@
 using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class DialogGuiAction
 {
-    public const string CopyCommand = """COPY "DialogGuiAction" ("Id", "CreatedAt", "UpdatedAt", "Action", "Url", "AuthorizationAttribute", "IsDeleteDialogAction", "PriorityId", "HttpMethodId", "DialogId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = Create(nameof(DialogGuiAction),
+        "Id", "CreatedAt", "UpdatedAt", "Action", "Url", "AuthorizationAttribute", "IsDeleteDialogAction", "PriorityId", "HttpMethodId", "DialogId");
 
     public static string Generate(DialogTimestamp dto)
     {

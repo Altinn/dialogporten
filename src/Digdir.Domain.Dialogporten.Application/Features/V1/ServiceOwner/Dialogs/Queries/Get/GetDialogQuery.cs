@@ -58,7 +58,21 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialog.SeenLog = dialog.SeenLog
             .Where(x => x.CreatedAt >= dialog.ContentUpdatedAt).ToList();
 
-        var dialogDto = _mapper.Map<DialogDto>(dialog);
+        DialogDto dialogDto;
+        try
+        {
+            dialogDto = _mapper.Map<DialogDto>(dialog);
+        }
+        catch (AutoMapperMappingException e)
+        {
+            if (e.Message.Contains("Destination Member:\nSystemLabel"))
+            {
+                // Edge case where the dialog is requested the same instant it is purged
+                return new EntityNotFound<DialogEntity>(request.DialogId);
+            }
+
+            throw;
+        }
 
         if (request.EndUserId is not null)
         {

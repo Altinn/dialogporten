@@ -1,5 +1,4 @@
 using System.Text;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;

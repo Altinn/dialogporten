@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
 
 

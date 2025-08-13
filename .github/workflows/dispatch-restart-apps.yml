@@ -45,6 +45,8 @@ jobs:
             "dp-be-${ENVIRONMENT}-service"
           )
 
+          az extension add --name containerapp --allow-preview --upgrade -y
+
           echo "Restarting apps in environment: $ENVIRONMENT"
 
           for APP in "${APPS[@]}"; do

@@ -1,6 +1,6 @@
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
-internal static class EndUserContext
+internal static class DialogEndUserContext
 {
     public const string CopyCommand = """COPY "DialogEndUserContext" ("Id", "CreatedAt", "UpdatedAt", "Revision", "DialogId", "SystemLabelId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
 

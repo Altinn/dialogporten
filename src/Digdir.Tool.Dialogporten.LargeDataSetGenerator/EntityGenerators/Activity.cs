@@ -1,25 +1,40 @@
 using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class Activity
 {
-    public const string CopyCommand = """COPY "DialogActivity" ("Id", "CreatedAt", "ExtendedType", "TypeId", "TransmissionId", "DialogId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = Create(nameof(Activity),
+        "Id", "CreatedAt", "ExtendedType", "TypeId", "TransmissionId", "DialogId");
 
     public const int DialogCreatedType = 1;
     public const int InformationType = 2;
+
+    public static List<ActivityDto> GetDtos(DialogTimestamp dialogDto)
+    {
+        var activityId1 = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), DialogCreatedType);
+        var activityId2 = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), InformationType);
+
+        return
+        [
+            new(activityId1, DialogCreatedType),
+            new(activityId2, InformationType)
+        ];
+    }
 
     public static string Generate(DialogTimestamp dto)
     {
         var activityCsvData = new StringBuilder();
 
-        var activityId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), DialogCreatedType);
-        var activityId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), InformationType);
-
-        activityCsvData.AppendLine($"{activityId1},{dto.FormattedTimestamp},,1,,{dto.DialogId}"); // Type DialogCreated
-        activityCsvData.AppendLine($"{activityId2},{dto.FormattedTimestamp},,3,,{dto.DialogId}"); // Type Information
+        foreach (var activity in GetDtos(dto))
+        {
+            activityCsvData.AppendLine($"{activity.Id},{dto.FormattedTimestamp},,{activity.TypeId},,{dto.DialogId}");
+        }
 
         return activityCsvData.ToString();
     }
+
+    public record ActivityDto(Guid Id, int TypeId);
 }

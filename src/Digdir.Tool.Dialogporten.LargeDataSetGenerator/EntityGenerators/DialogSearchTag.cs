@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
-internal static class SearchTags
+internal static class DialogSearchTag
 {
     public const string CopyCommand = """COPY "DialogSearchTag" ("Id", "Value", "CreatedAt", "DialogId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
 
@@ -11,9 +11,9 @@ internal static class SearchTags
     {
         var searchTagCsvData = new StringBuilder();
 
-        var searchTagId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogSearchTag), 1);
-        var searchTagId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogSearchTag), 2);
-        var searchTagId3 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogSearchTag), 3);
+        var searchTagId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag), 1);
+        var searchTagId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag), 2);
+        var searchTagId3 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag), 3);
 
         var rng = new Random(dto.DialogId.ToString().GetHashCode());
 

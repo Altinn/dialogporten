@@ -1,6 +1,6 @@
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
-internal static class SeenLog
+internal static class DialogSeenLog
 {
     public const string CopyCommand = """COPY "DialogSeenLog" ("Id", "CreatedAt", "IsViaServiceOwner", "DialogId", "EndUserTypeId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
 

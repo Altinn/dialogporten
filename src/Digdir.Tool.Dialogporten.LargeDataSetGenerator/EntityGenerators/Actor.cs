@@ -2,22 +2,29 @@ using System.Diagnostics;
 using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class Actor
 {
-    public const string CopyCommand = """COPY "Actor" ("Id", "ActorTypeId", "Discriminator", "ActivityId", "DialogSeenLogId", "TransmissionId", "CreatedAt", "UpdatedAt", "LabelAssignmentLogId", "ActorNameEntityId") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = Create(nameof(Actor),
+        "Id", "ActorTypeId", "Discriminator",
+        "ActivityId", "DialogSeenLogId", "TransmissionId",
+        "CreatedAt", "UpdatedAt", "LabelAssignmentLogId",
+        "ActorNameEntityId");
 
     public static string Generate(DialogTimestamp dto)
     {
         var actorCsvData = new StringBuilder();
 
-        var rng = new Random(dto.DialogId.GetHashCode());
+        // var rng = new Random(dto.DialogId.GetHashCode());
+        //
+        // var dialogPartyIndex = rng.Next(0, Parties.List.Length);
+        // var dialogParty = Parties.List[dialogPartyIndex];
 
-        var dialogPartyIndex = rng.Next(0, Parties.List.Length);
-        var dialogParty = Parties.List[dialogPartyIndex];
-
+        var dialogParty = dto.GetParty();
         var transmissionPartyIndex = rng.Next(0, Parties.List.Length);
         var transmissionParty = Parties.List[transmissionPartyIndex];
 
@@ -42,11 +49,11 @@ internal static class Actor
 
         // Transmission
         // By another ActorId/name
-        var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 1);
+        var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission), 1);
         actorCsvData.AppendLine($"{transmissionId1},1,DialogTransmissionSenderActor,,,{transmissionId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},,{transmissionPartyActorNameId}");
 
         // By service owner, no name
-        var transmissionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 2);
+        var transmissionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission), 2);
         actorCsvData.AppendLine($"{transmissionId2},2,DialogTransmissionSenderActor,,,{transmissionId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},,");
 
         return actorCsvData.ToString();

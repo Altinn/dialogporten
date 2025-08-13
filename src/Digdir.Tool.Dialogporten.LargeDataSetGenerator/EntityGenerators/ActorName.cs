@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 using Npgsql;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -24,8 +25,7 @@ internal static class ActorName
 
     internal static readonly ConcurrentDictionary<string, Guid> InsertedActorNames = [];
 
-    public const string CopyCommand =
-        """COPY "ActorName" ("Id", "ActorId", "Name", "CreatedAt") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = Create(nameof(ActorName), "Id", "ActorId", "Name", "CreatedAt");
 
     public static string Generate(DialogTimestamp dto)
     {

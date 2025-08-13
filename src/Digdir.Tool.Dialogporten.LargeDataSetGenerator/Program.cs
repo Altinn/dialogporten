@@ -183,19 +183,19 @@ try
     CreateCopyTasks(new CopyTaskDto(Actor.Generate, "actors", Actor.CopyCommand, NumberOfTasks: 4), tasks);
 
     // TransmissionContent, 4 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(TransmissionContent.Generate, "transmission content", TransmissionContent.CopyCommand, NumberOfTasks: 2), tasks);
+    CreateCopyTasks(new CopyTaskDto(DialogTransmissionContent.Generate, "transmission content", DialogTransmissionContent.CopyCommand, NumberOfTasks: 2), tasks);
 
     // No split, 2-3 lines per dialog
     CreateCopyTasks(new CopyTaskDto(DialogContent.Generate, "dialog content", DialogContent.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto(Transmission.Generate, "transmissions", Transmission.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto(GuiAction.Generate, "dialog gui actions", GuiAction.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto(DialogTransmission.Generate, "transmissions", DialogTransmission.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto(DialogGuiAction.Generate, "dialog gui actions", DialogGuiAction.CopyCommand), tasks);
     CreateCopyTasks(new CopyTaskDto(Activity.Generate, "activities", Activity.CopyCommand), tasks);
     CreateCopyTasks(new CopyTaskDto(Attachment.Generate, "attachments", Attachment.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto(SearchTags.Generate, "search tags", SearchTags.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto(DialogSearchTag.Generate, "search tags", DialogSearchTag.CopyCommand), tasks);
 
     // Single line per dialog
-    CreateCopyTasks(new CopyTaskDto(SeenLog.Generate, "seen logs", SeenLog.CopyCommand, SingleLinePerTimestamp: true), tasks);
-    CreateCopyTasks(new CopyTaskDto(EndUserContext.Generate, "end user contexts", EndUserContext.CopyCommand, SingleLinePerTimestamp: true), tasks);
+    CreateCopyTasks(new CopyTaskDto(DialogSeenLog.Generate, "seen logs", DialogSeenLog.CopyCommand, SingleLinePerTimestamp: true), tasks);
+    CreateCopyTasks(new CopyTaskDto(DialogEndUserContext.Generate, "end user contexts", DialogEndUserContext.CopyCommand, SingleLinePerTimestamp: true), tasks);
     CreateCopyTasks(new CopyTaskDto(Dialog.Generate, "dialogs", Dialog.CopyCommand, SingleLinePerTimestamp: true), tasks);
 
     await Task.WhenAll(tasks);

@@ -17,21 +17,21 @@ internal static class Localization
         List<Guid> localizationSetIds =
         [
             dto.DialogId,
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 1),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmission), 2),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogGuiAction), 1),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogGuiAction), 2),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogGuiAction), 3),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission), 1),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission), 2),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 1),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 2),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 3),
             DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), Activity.DialogCreatedType),
             DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), Activity.InformationType),
             DeterministicUuidV7.Generate(dto.Timestamp,
                 nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 1),
             DeterministicUuidV7.Generate(dto.Timestamp,
                 nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 2),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmissionContent), 1),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmissionContent), 2),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmissionContent), 3),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogTransmissionContent), 4)
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent), 1),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent), 2),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent), 3),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent), 4)
         ];
 
         foreach (var localizationSetId in localizationSetIds)

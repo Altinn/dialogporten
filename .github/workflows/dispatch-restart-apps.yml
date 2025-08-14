@@ -1,0 +1,77 @@
+name: Restart Container Apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to restart apps in"
+        required: true
+        type: choice
+        options:
+          - test
+          - yt01
+          - staging
+          - prod
+
+run-name: Restart Container Apps in ${{ inputs.environment }}
+
+jobs:
+  restart-container-apps:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Restart Container Apps
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP_NAME }}"
+          ENVIRONMENT="${{ inputs.environment }}"
+
+          APPS=(
+            "dp-be-${ENVIRONMENT}-webapi-so-ca"
+            "dp-be-${ENVIRONMENT}-webapi-eu-ca"
+            "dp-be-${ENVIRONMENT}-graphql-ca"
+            "dp-be-${ENVIRONMENT}-service"
+          )
+
+          az extension add --name containerapp --allow-preview --upgrade -y
+
+          echo "Restarting apps in environment: $ENVIRONMENT"
+
+          for APP in "${APPS[@]}"; do
+            echo "Finding latest revision for $APP..."
+            REVISION=$(az containerapp revision list \
+              --name "$APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "[?properties.active==\`true\`].name" \
+              -o tsv | head -n 1)
+
+            if [[ -n "$REVISION" ]]; then
+              echo "✅ Found active revision for $APP: $REVISION"
+              echo "Restarting revision $REVISION..."
+              az containerapp revision restart \
+                --name "$APP" \
+                --resource-group "$RESOURCE_GROUP" \
+                --revision "$REVISION"
+            else
+              echo "⚠️ No active revision found for $APP"
+            fi
+          done
+
+      - name: Logout from Azure
+        if: ${{ failure() || success() }}
+        run: az logout

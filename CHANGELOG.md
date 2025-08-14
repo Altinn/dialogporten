@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.78.0](https://github.com/Altinn/dialogporten/compare/v1.77.0...v1.78.0) (2025-08-13)
+
+
+### Features
+
+* Created mechanism to load entity aggregate once per request  ([#2586](https://github.com/Altinn/dialogporten/issues/2586)) ([eab7958](https://github.com/Altinn/dialogporten/commit/eab79584bfcb3b11b45562869bf0c090e3519d04))
+
+
+### Bug Fixes
+
+* **app:** Catch AutoMapper exceptions on get/purge race condition ([#2632](https://github.com/Altinn/dialogporten/issues/2632)) ([8aee722](https://github.com/Altinn/dialogporten/commit/8aee722c56242317a2bce366d62d089f88146655))
+
+
+### Miscellaneous Chores
+
+* **ci:** update Azure CLI version to 2.76.0 ([#2633](https://github.com/Altinn/dialogporten/issues/2633)) ([330693f](https://github.com/Altinn/dialogporten/commit/330693f4ec2859293ce4166c5ef574787fb10f15))
+* **deps:** update docker/login-action action to v3.5.0 ([#2635](https://github.com/Altinn/dialogporten/issues/2635)) ([acb47ec](https://github.com/Altinn/dialogporten/commit/acb47ec543ff5efcde6a68fe92b22e5f53064ccf))
+* **deps:** update prom/prometheus docker tag to v3.5.0 ([#2636](https://github.com/Altinn/dialogporten/issues/2636)) ([357cad0](https://github.com/Altinn/dialogporten/commit/357cad02b8d894a315834a36e5b5910d84a0c83a))
+
 ## [1.77.0](https://github.com/Altinn/dialogporten/compare/v1.76.2...v1.77.0) (2025-08-11)
 
 

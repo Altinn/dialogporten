@@ -233,11 +233,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
             Add("Can create mainContentRef content with embeddable HTML media type with valid html scope",
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
-                x => x.Dto.Content!.MainContentReference = new()
-                {
-                    MediaType = MediaTypes.LegacyEmbeddableHtml,
-                    Value = [new() { LanguageCode = "nb", Value = "https://external.html" }]
-                },
+                x => x.Dto.Content!.MainContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(CreateDialogSuccess));
         }
     }

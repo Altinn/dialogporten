@@ -46,4 +46,11 @@ internal static class Common
         MediaType = mediaType,
         Value = [new() { LanguageCode = "nb", Value = "<p>Some HTML content</p>" }]
     };
+
+    internal static ContentValueDto CreateEmbeddableHtmlContentValueDto(string mediaType) => new()
+    {
+        MediaType = mediaType,
+        Value = [new() { LanguageCode = "nb", Value = "https://example.html" }]
+    };
+
 }

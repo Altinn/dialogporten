@@ -161,7 +161,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
             Add("Cannot create transmission with embeddable HTML content without valid html scope",
                 _ => { }, // No change in user scopes
-                x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(ValidationError));
 
             Add("Cannot create transmission title content with HTML media type with valid html scope",
@@ -181,7 +181,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
             Add("Cannot create transmission with embeddable HTML content without valid html scope",
                 _ => { }, // No change in user scopes
-                x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtmlDeprecated),
+                x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtmlDeprecated),
                 typeof(ValidationError));
 
             Add("Cannot create content with HTML media type with valid html scope",
@@ -191,11 +191,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
             Add("Can create contentRef content with embeddable HTML media type with valid html scope",
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
-                x => x.Content!.ContentReference = new()
-                {
-                    MediaType = MediaTypes.LegacyEmbeddableHtml,
-                    Value = [new() { LanguageCode = "nb", Value = "https://external.html" }]
-                },
+                x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(CreateDialogSuccess));
         }
     }
@@ -206,7 +202,18 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         FlowBuilder.For(Application, appConfig)
             .CreateSimpleDialog(x =>
                 x.AddTransmission(createTransmission))
-            .ExecuteAndAssert(expectedType);
+            .ExecuteAndAssert(x =>
+            {
+                x.Should().BeOfType(expectedType);
+
+                if (expectedType != typeof(ValidationError))
+                {
+                    return;
+                }
+
+                var validationError = (ValidationError)x;
+                validationError.ShouldHaveErrorWithText("Allowed media types");
+            });
 
     [Fact]
     public Task Transmission_With_Legacy_Embeddable_HTML_Returns_New_Embeddable_MediaType() =>

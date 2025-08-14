@@ -43,12 +43,21 @@ public class SyncSubjectMapTests(DialogApplication application) : ApplicationCol
                 new Uri("urn:altinn:resource:another_app"),
                 DateTimeOffset.Parse("2025-07-25T10:32:37.827098+00:00"),
                 false),
+
+            new UpdatedSubjectResource(new Uri("urn:altinn:resource:delegation:\n                            app_din_innsending\n                        "),
+                new Uri("urn:altinn:resource:app_din_innsending"),
+                DateTimeOffset.Parse("2025-07-29T08:02:39.661376+00:00"),
+                true),
+            new UpdatedSubjectResource(new Uri("urn:altinn:resource:delegation:\n              app_din_innsending\n            "),
+                new Uri("urn:altinn:resource:app_din_innsending"),
+                DateTimeOffset.Parse("2025-07-29T08:02:39.661376+00:00"),
+                false)
         ];
 
         await Task.CompletedTask;
     }
 
-    private static Action<IServiceCollection>? ConfigureResourceRegistry() =>
+    private static Action<IServiceCollection> ConfigureResourceRegistry() =>
         x =>
         {
             x.RemoveAll<IResourceRegistry>();

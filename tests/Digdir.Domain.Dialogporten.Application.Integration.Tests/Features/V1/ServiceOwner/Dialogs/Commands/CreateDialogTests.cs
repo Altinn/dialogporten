@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -17,7 +16,6 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -202,19 +200,6 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("empty"));
-
-    private static Action<IServiceCollection> ConfigureUserWithScope(string scope) => services =>
-    {
-        var user = CreateUserWithScope(scope);
-        services.RemoveAll<IUser>();
-        services.AddSingleton<IUser>(user);
-    };
-
-    private static ContentValueDto CreateHtmlContentValueDto(string mediaType) => new()
-    {
-        MediaType = mediaType,
-        Value = [new() { LanguageCode = "nb", Value = "<p>Some HTML content</p>" }]
-    };
 
 
     private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>

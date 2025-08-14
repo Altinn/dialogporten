@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -7,10 +8,12 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -146,4 +149,47 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<ValidationError>(result => result
                 .ShouldHaveErrorWithText(nameof(DialogTransmission.ExternalReference)));
+
+    private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<TransmissionDto>, Type>
+    {
+        public HtmlContentTestData()
+        {
+            Add("Cannot create transmission with HTML content without valid html scope",
+                _ => { }, // No change in user scopes
+                x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
+
+            Add("Cannot create transmission title content with HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
+
+            Add("Cannot create transmission summary content with HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(ValidationError));
+
+            Add("Cannot create title content with embeddable HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                typeof(ValidationError));
+
+            Add("Can create contentRef content with embeddable HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Content!.ContentReference = new()
+                {
+                    MediaType = MediaTypes.LegacyEmbeddableHtml,
+                    Value = [new() { LanguageCode = "nb", Value = "https://external.html" }]
+                },
+                typeof(CreateDialogSuccess));
+        }
+    }
+
+    [Theory, ClassData(typeof(HtmlContentTestData))]
+    public Task Html_Content_Tests(string _, Action<IServiceCollection> appConfig,
+        Action<TransmissionDto> createTransmission, Type expectedType) =>
+        FlowBuilder.For(Application, appConfig)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(createTransmission))
+            .ExecuteAndAssert(expectedType);
 }

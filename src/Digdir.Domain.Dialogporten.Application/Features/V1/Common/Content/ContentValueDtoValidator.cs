@@ -17,19 +17,14 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 // The validator is manually created in the Create and Update validators
 internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueDto>, IIgnoreOnAssemblyScan
 {
-    public ContentValueDtoValidator(DialogTransmissionContentType contentType)
+    public ContentValueDtoValidator(DialogTransmissionContentType contentType, IUser? user = null)
     {
+        var allowedMediaTypes = GetAllowedMediaTypes(contentType, user);
         RuleFor(x => x.MediaType)
             .NotEmpty()
-            .Must(value => value is not null && contentType.AllowedMediaTypes
-                // Manually adding this for backwards compatibility
-                // until correspondence is updated and deployed
-                // TODO: https://github.com/Altinn/dialogporten/issues/1782
-                .Append(MediaTypes.EmbeddableMarkdownDeprecated).Contains(value))
+            .Must(value => value is not null && allowedMediaTypes.Contains(value))
             .WithMessage($"{{PropertyName}} '{{PropertyValue}}' is not allowed for content type {contentType.Name}. " +
                          $"Allowed media types are {string.Join(", ", contentType.AllowedMediaTypes
-                             // Removing the deprecated values from the list of allowed media types in the error message
-                             .Where(x => !x.Equals(MediaTypes.EmbeddableMarkdownDeprecated, StringComparison.Ordinal))
                              .Select(x => $"'{x}'"))}");
 
         When(x =>
@@ -95,6 +90,16 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
                 => contentType.AllowedMediaTypes.Append(MediaTypes.EmbeddableMarkdownDeprecated).ToArray(),
             _ => contentType.AllowedMediaTypes
         };
+
+    [SuppressMessage("Style", "IDE0072:Add missing cases")]
+    private static string[] GetAllowedMediaTypes(DialogTransmissionContentType contentType, IUser? user)
+        => contentType.Id switch
+        {
+            DialogTransmissionContentType.Values.ContentReference when UserHasLegacyHtmlScope(user)
+                => contentType.AllowedMediaTypes.Append(MediaTypes.LegacyEmbeddableHtml).ToArray(),
+            _ => contentType.AllowedMediaTypes
+        };
+
     private static bool UserHasLegacyHtmlScope(IUser? user)
         => user is not null && user.GetPrincipal().HasScope(AuthorizationScope.LegacyHtmlScope);
 }

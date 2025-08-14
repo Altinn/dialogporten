@@ -1,5 +1,9 @@
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
@@ -29,4 +33,17 @@ internal static class Common
     internal static Guid NewUuidV7() => IdentifiableExtensions.CreateVersion7();
 
     internal static IntegrationTestUser CreateUserWithScope(string scope) => new([new("scope", scope)]);
+
+    internal static Action<IServiceCollection> ConfigureUserWithScope(string scope) => services =>
+    {
+        var user = CreateUserWithScope(scope);
+        services.RemoveAll<IUser>();
+        services.AddSingleton<IUser>(user);
+    };
+
+    internal static ContentValueDto CreateHtmlContentValueDto(string mediaType) => new()
+    {
+        MediaType = mediaType,
+        Value = [new() { LanguageCode = "nb", Value = "<p>Some HTML content</p>" }]
+    };
 }

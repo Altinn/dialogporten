@@ -22,6 +22,7 @@ public static partial class SubjectResourceExtensions
         return new MergableSubjectResource
         {
             Id = IdentifiableExtensions.CreateVersion7(),
+            // Remove whitespace to workaround https://github.com/Altinn/altinn-resource-registry/issues/596
             Subject = AllWhitespaceRegex().Replace(subjectResource.SubjectUrn.ToString(), ""),
             Resource = AllWhitespaceRegex().Replace(subjectResource.ResourceUrn.ToString(), ""),
             CreatedAt = createdAt.ToUniversalTime(),

@@ -186,7 +186,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
             Add("Cannot create content with HTML media type with valid html scope",
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
-                x => x.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Can create contentRef content with embeddable HTML media type with valid html scope",

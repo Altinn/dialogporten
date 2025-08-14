@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using FluentAssertions;
 using HotChocolate.Subscriptions;
@@ -108,6 +109,7 @@ public class DialogApplication : IAsyncLifetime
                     .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
                     .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>()))
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
+            .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
             .AddScoped<IServiceOwnerNameRegistry>(_ => CreateServiceOwnerNameRegistrySubstitute())
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())

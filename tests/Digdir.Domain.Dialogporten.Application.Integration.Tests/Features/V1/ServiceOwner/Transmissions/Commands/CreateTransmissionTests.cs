@@ -192,4 +192,31 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x =>
                 x.AddTransmission(createTransmission))
             .ExecuteAndAssert(expectedType);
+
+    [Fact]
+    public Task Transmission_With_Legacy_Embeddable_HTML_Returns_New_Embeddable_MediaType() =>
+        FlowBuilder.For(Application,
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope))
+            .CreateSimpleDialog(x => x
+                .AddTransmission(SetLegacyEmbeddableHtmlDeprecated))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var transmission = x.Transmissions.Single();
+
+                // Deprecated media type should be converted
+                // to the new embeddable media type
+                transmission.Content.ContentReference!
+                    .MediaType.Should().Be(MediaTypes.LegacyEmbeddableHtml);
+            });
+
+    private static void SetLegacyEmbeddableHtmlDeprecated(TransmissionDto x) =>
+        x.Content!.ContentReference = new()
+        {
+            MediaType = MediaTypes.LegacyEmbeddableHtmlDeprecated,
+            Value = [new()
+            {
+                LanguageCode = "nb", Value = "https://external.html"
+            }]
+        };
 }

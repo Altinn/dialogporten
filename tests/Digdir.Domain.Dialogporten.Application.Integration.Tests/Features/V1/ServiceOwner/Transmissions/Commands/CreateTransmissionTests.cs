@@ -159,6 +159,11 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
+            Add("Cannot create transmission with embeddable HTML content without valid html scope",
+                _ => { }, // No change in user scopes
+                x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                typeof(ValidationError));
+
             Add("Cannot create transmission title content with HTML media type with valid html scope",
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
                 x => x.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
@@ -172,6 +177,16 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             Add("Cannot create title content with embeddable HTML media type with valid html scope",
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
                 x => x.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                typeof(ValidationError));
+
+            Add("Cannot create transmission with embeddable HTML content without valid html scope",
+                _ => { }, // No change in user scopes
+                x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtmlDeprecated),
+                typeof(ValidationError));
+
+            Add("Cannot create content with HTML media type with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Can create contentRef content with embeddable HTML media type with valid html scope",

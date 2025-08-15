@@ -437,4 +437,22 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Status.Should().Be(DialogStatus.Values.NotApplicable));
+
+    [Theory]
+    [InlineData(null, typeof(CreateDialogSuccess))]
+    [InlineData("element1", typeof(CreateDialogSuccess))]
+    [InlineData("this_is_valid", typeof(CreateDialogSuccess))]
+    [InlineData("this-is-valid", typeof(CreateDialogSuccess))]
+    [InlineData("urn:altinn:this:is--valid__", typeof(CreateDialogSuccess))]
+    [InlineData("urn:dialogporten:invalid:uri", typeof(ValidationError))]
+    [InlineData("this:is:invalid", typeof(ValidationError))]
+    [InlineData("this.is.invalid", typeof(ValidationError))]
+    [InlineData("", typeof(ValidationError))]
+    [InlineData("    ", typeof(ValidationError))]
+    public Task Create_With_AuthorizationAttribute(string? authAttribute, Type expectedTye) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.AuthorizationAttribute = authAttribute))
+            .ExecuteAndAssert(expectedTye);
 }

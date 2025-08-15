@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.79.0](https://github.com/Altinn/dialogporten/compare/v1.78.0...v1.79.0) (2025-08-15)
+
+
+### Features
+
+* **app:** Add legacy HTML embeddable content support on transmissions ([#2643](https://github.com/Altinn/dialogporten/issues/2643)) ([f103207](https://github.com/Altinn/dialogporten/commit/f1032073dd3471940aaf1fc22228c25d704036c6))
+
+
+### Bug Fixes
+
+* **ci:** Add missing checkout in 'Restart container apps' GitHub Action ([#2639](https://github.com/Altinn/dialogporten/issues/2639)) ([2361d35](https://github.com/Altinn/dialogporten/commit/2361d353df7983bd9ad7be5e9926b13cb4789ff2))
+* **janitor:** Check for duplicates when syncing SubjectResource ([#2585](https://github.com/Altinn/dialogporten/issues/2585)) ([fac5e17](https://github.com/Altinn/dialogporten/commit/fac5e1786df7eb6f3cba64f7426e4ab7d86e11ff))
+
 ## [1.78.0](https://github.com/Altinn/dialogporten/compare/v1.77.0...v1.78.0) (2025-08-13)
 
 

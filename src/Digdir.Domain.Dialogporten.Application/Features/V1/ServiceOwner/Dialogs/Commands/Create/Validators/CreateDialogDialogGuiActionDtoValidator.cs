@@ -25,7 +25,8 @@ internal sealed class CreateDialogDialogGuiActionDtoValidator : AbstractValidato
             .MaximumLength(Constants.DefaultMaxUriLength);
 
         RuleFor(x => x.AuthorizationAttribute)
-            .MaximumLength(Constants.DefaultMaxStringLength);
+            .MaximumLength(Constants.DefaultMaxStringLength)
+            .IsValidAuthorizationAttribute();
 
         RuleFor(x => x.Priority)
             .IsInEnum();

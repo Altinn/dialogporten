@@ -1,9 +1,10 @@
-﻿using FluentValidation;
+﻿using System.Text.RegularExpressions;
+using FluentValidation;
 using HtmlAgilityPack;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 
-internal static class FluentValidationStringExtensions
+internal static partial class FluentValidationStringExtensions
 {
     private static readonly string[] AllowedTags = ["p", "a", "br", "em", "strong", "ul", "ol", "li"];
     private static readonly string ContainsValidHtmlError =
@@ -39,6 +40,21 @@ internal static class FluentValidationStringExtensions
         return ruleBuilder
             .Must(x => x is null || x.HtmlAgilityPackCheck())
             .WithMessage(ContainsValidHtmlError);
+    }
+
+    [GeneratedRegex(
+        "^(?:urn:altinn:(?:app|resource|subresource):)?[a-z][a-z0-9_-]*$",
+        RegexOptions.CultureInvariant | RegexOptions.Singleline)]
+    private static partial Regex ValidAuthorizationAttributeRegex();
+
+    public static IRuleBuilderOptions<T, string?> IsValidAuthorizationAttribute<T>(
+        this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder
+            .Must(value => value is null || ValidAuthorizationAttributeRegex().IsMatch(value))
+            .WithMessage("'{PropertyName}' must be on format 'urn:altinn:app:{app-name}' or " +
+                         "'urn:altinn:resource:{resource-name}' or 'urn:altinn:subresource:{subresource-name}' " +
+                         "or {subresource-name} with valid names.");
     }
 
     private static bool HtmlAgilityPackCheck(this string html)

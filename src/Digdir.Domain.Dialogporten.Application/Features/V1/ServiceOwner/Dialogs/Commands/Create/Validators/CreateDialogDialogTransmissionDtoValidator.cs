@@ -40,7 +40,8 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
             .SetValidator(actorValidator);
 
         RuleFor(x => x.AuthorizationAttribute)
-            .MaximumLength(Constants.DefaultMaxStringLength);
+            .MaximumLength(Constants.DefaultMaxStringLength)
+            .IsValidAuthorizationAttribute();
 
         RuleFor(x => x.Attachments)
             .UniqueBy(x => x.Id);

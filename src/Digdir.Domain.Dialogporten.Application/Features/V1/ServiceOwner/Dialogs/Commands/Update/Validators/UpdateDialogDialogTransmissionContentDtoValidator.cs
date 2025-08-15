@@ -1,4 +1,5 @@
 using System.Reflection;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using FluentValidation;
@@ -17,7 +18,7 @@ internal sealed class UpdateDialogDialogTransmissionContentDtoValidator : Abstra
         })
         .ToDictionary(x => x.Property.Name, StringComparer.InvariantCultureIgnoreCase);
 
-    public UpdateDialogDialogTransmissionContentDtoValidator()
+    public UpdateDialogDialogTransmissionContentDtoValidator(IUser? user)
     {
         foreach (var (propertyName, propMetadata) in SourcePropertyMetaDataByName)
         {
@@ -28,12 +29,12 @@ internal sealed class UpdateDialogDialogTransmissionContentDtoValidator : Abstra
                         .NotNull()
                         .WithMessage($"{propertyName} must not be empty.")
                         .SetValidator(
-                            new ContentValueDtoValidator(DialogTransmissionContentType.Parse(propertyName))!);
+                            new ContentValueDtoValidator(DialogTransmissionContentType.Parse(propertyName), user)!);
                     break;
                 case NullabilityState.Nullable:
                     RuleFor(x => propMetadata.Property.GetValue(x) as ContentValueDto)
                         .SetValidator(
-                            new ContentValueDtoValidator(DialogTransmissionContentType.Parse(propertyName))!)
+                            new ContentValueDtoValidator(DialogTransmissionContentType.Parse(propertyName), user)!)
                         .When(x => propMetadata.Property.GetValue(x) is not null);
                     break;
                 case NullabilityState.Unknown:

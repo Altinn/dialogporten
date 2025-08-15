@@ -98,6 +98,7 @@ jobs:
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     permissions:
+      contents: read
       packages: write
 
   store-apps-version:

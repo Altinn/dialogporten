@@ -6,6 +6,10 @@ on:
       gitShortSha:
         description: "Git short sha"
         value: ${{ jobs.generate-git-short-sha.outputs.gitShortSha }}
+
+permissions:
+  contents: read
+
 jobs:
   generate-git-short-sha:
     name: Generate git short sha

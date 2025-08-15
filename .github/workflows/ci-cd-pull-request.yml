@@ -6,6 +6,12 @@ on:
     paths-ignore:
       - "tests/k6/**"
 
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+  deployments: write
+
 jobs:
   generate-git-short-sha:
     name: Generate git short sha

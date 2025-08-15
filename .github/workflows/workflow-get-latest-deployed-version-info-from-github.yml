@@ -18,6 +18,9 @@ on:
         description: "SHA of the latest deployed applications version"
         value: ${{ jobs.get-versions.outputs.apps_version_sha }}
 
+permissions:
+  contents: read
+
 jobs:
   get-versions:
     name: Get Latest Deployed Versions from GitHub Variables

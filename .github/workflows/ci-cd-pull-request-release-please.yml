@@ -6,6 +6,11 @@ on:
     paths-ignore:
       - "tests/k6/**"
 
+permissions:
+  contents: read
+  pull-requests: read
+  id-token: write
+
 jobs:
   verify-release-please-branch:
     if: startsWith(github.head_ref, 'release-please-')

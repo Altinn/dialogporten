@@ -20,6 +20,9 @@ on:
         required: true
         default: 'tests/k6/suites/all-single-pass.js'
 
+permissions:
+  contents: read
+
 jobs:
   k6-test:
     name: "Run K6 tests"

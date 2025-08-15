@@ -18,7 +18,7 @@ env:
   WORKING_DIRECTORY: docs/schema/V1
 
 permissions:
-  id-token: write
+  contents: read
 
 jobs:
   check-published-version:

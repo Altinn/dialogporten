@@ -13,7 +13,6 @@ permissions:
   contents: read
   id-token: write
   pull-requests: read
-  packages: write
 
 jobs:
   generate-git-short-sha:
@@ -98,6 +97,8 @@ jobs:
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    permissions:
+      packages: write
 
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable

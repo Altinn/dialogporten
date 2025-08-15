@@ -61,6 +61,7 @@ run-name: ${{ inputs.tag }} ${{ inputs.vus }}/${{ inputs.duration }}/${{ inputs.
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   k6-performance:

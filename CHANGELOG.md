@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.79.1](https://github.com/Altinn/dialogporten/compare/v1.79.0...v1.79.1) (2025-08-15)
+
+
+### Bug Fixes
+
+* **api:** Validate authorization attribute ([#2645](https://github.com/Altinn/dialogporten/issues/2645)) ([22ff75f](https://github.com/Altinn/dialogporten/commit/22ff75f2963c14a82a3f84402f8c83d845521195))
+
+
+### Miscellaneous Chores
+
+* **ci:** Added explicit permissions to Github workflows ([#2647](https://github.com/Altinn/dialogporten/issues/2647)) ([fa6ba60](https://github.com/Altinn/dialogporten/commit/fa6ba601d9744ad60d362da341f02bee8aabb7fe))
+* **deps:** update MassTransit to 8.5.2 ([#2650](https://github.com/Altinn/dialogporten/issues/2650)) ([732e8fa](https://github.com/Altinn/dialogporten/commit/732e8fa61c15bc5726530df80b60faa981c8e8cb))
+* **webapi:** Add Swagger summary for label assignment log endpoint ([#2651](https://github.com/Altinn/dialogporten/issues/2651)) ([1f44767](https://github.com/Altinn/dialogporten/commit/1f44767e4b8cdd77b9f29d830bf9aaeb3bd91075))
+
 ## [1.79.0](https://github.com/Altinn/dialogporten/compare/v1.78.0...v1.79.0) (2025-08-15)
 
 

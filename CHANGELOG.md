@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.79.2](https://github.com/Altinn/dialogporten/compare/v1.79.1...v1.79.2) (2025-08-15)
+
+
+### Bug Fixes
+
+* **ci:** Set correct permissions for pull requests in CI workflows ([#2652](https://github.com/Altinn/dialogporten/issues/2652)) ([38c6212](https://github.com/Altinn/dialogporten/commit/38c62125fec2a3b170a9b230dd7a3fc70dab0593))
+
 ## [1.79.1](https://github.com/Altinn/dialogporten/compare/v1.79.0...v1.79.1) (2025-08-15)
 
 

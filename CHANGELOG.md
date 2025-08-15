@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.79.3](https://github.com/Altinn/dialogporten/compare/v1.79.2...v1.79.3) (2025-08-15)
+
+
+### Miscellaneous Chores
+
+* Trigger release for testing ci/cd pipelines ([#2655](https://github.com/Altinn/dialogporten/issues/2655)) ([a46a7cb](https://github.com/Altinn/dialogporten/commit/a46a7cb2f9569e3eae9631690c0ffe16cbcbe344))
+
 ## [1.79.2](https://github.com/Altinn/dialogporten/compare/v1.79.1...v1.79.2) (2025-08-15)
 
 

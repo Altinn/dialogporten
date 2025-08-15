@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.79.4](https://github.com/Altinn/dialogporten/compare/v1.79.3...v1.79.4) (2025-08-15)
+
+
+### Miscellaneous Chores
+
+* **ci:** set contents permission to read for NuGet push staging ([#2657](https://github.com/Altinn/dialogporten/issues/2657)) ([e4e5de2](https://github.com/Altinn/dialogporten/commit/e4e5de20498693427fde48d808f1fda04c7e580f))
+
 ## [1.79.3](https://github.com/Altinn/dialogporten/compare/v1.79.2...v1.79.3) (2025-08-15)
 
 

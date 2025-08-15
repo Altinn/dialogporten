@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using FluentValidation;
 using HtmlAgilityPack;
 
@@ -44,13 +45,14 @@ internal static partial class FluentValidationStringExtensions
 
     [GeneratedRegex(
         "^(?:urn:altinn:(?:[a-z][a-z0-9_-]*):)?[a-z][a-z0-9_-]*$",
-        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline)]
+        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.NonBacktracking)]
     private static partial Regex ValidAuthorizationAttributeRegex();
 
     public static IRuleBuilderOptions<T, string?> IsValidAuthorizationAttribute<T>(
         this IRuleBuilder<T, string?> ruleBuilder)
     {
         return ruleBuilder
+            .MaximumLength(Constants.DefaultMaxStringLength)
             .Must(value => value is null || ValidAuthorizationAttributeRegex().IsMatch(value))
             .WithMessage("'{PropertyName}' must be on format 'urn:altinn:{resourcetype}:{resourcename}' or " +
                          "{resourcename} with valid names.");

@@ -1,6 +1,6 @@
-﻿using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 

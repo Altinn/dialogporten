@@ -13,6 +13,7 @@ permissions:
   contents: read
   id-token: write
   pull-requests: read
+  packages: write
 
 jobs:
   generate-git-short-sha:

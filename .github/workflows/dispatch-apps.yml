@@ -29,6 +29,9 @@ run-name: Dispatch apps ${{ inputs.environment }} v${{ inputs.version }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}-${{ inputs.environment }}
 
+permissions:
+  contents: read
+
 jobs:
 
   generate-git-short-sha:

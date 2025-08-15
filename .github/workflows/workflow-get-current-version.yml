@@ -7,6 +7,10 @@ on:
       version:
         description: "Version"
         value: ${{ jobs.get-current-version.outputs.version }}
+
+permissions:
+  contents: read
+
 jobs:
   get-current-version:
     name: Filter

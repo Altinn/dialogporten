@@ -18,6 +18,9 @@ on:
       token:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   send-deployment-to-swarmia:
     runs-on: ubuntu-latest

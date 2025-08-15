@@ -48,6 +48,9 @@ on:
       SLACK_CHANNEL_ID:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   send-slack-message:
     name: Send Slack message

@@ -39,6 +39,9 @@ on:
         description: "Schema package content or infrastructure has changed"
         value: ${{ jobs.check-for-changes.outputs.hasSchemaPackageChanges }}
 
+permissions:
+  contents: read
+
 jobs:
   check-for-changes:
     name: Filter

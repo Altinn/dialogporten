@@ -20,6 +20,9 @@ on:
         required: true
         description: "GitHub token with permission to set variables"
 
+permissions:
+  contents: read
+
 jobs:
   store-variable:
     name: Store GitHub Environment Variable

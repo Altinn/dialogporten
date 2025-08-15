@@ -18,6 +18,11 @@ on:
     secrets:
       NUGET_API_KEY:
         required: true
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest

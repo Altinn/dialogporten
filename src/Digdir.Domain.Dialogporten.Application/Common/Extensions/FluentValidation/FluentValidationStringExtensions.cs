@@ -43,8 +43,8 @@ internal static partial class FluentValidationStringExtensions
     }
 
     [GeneratedRegex(
-        "^(?:urn:altinn:(?:app|resource|subresource):)?[a-z][a-z0-9_-]*$",
-        RegexOptions.CultureInvariant | RegexOptions.Singleline)]
+        "^(?:urn:altinn:(?:[a-z][a-z0-9_-]*):)?[a-z][a-z0-9_-]*$",
+        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline)]
     private static partial Regex ValidAuthorizationAttributeRegex();
 
     public static IRuleBuilderOptions<T, string?> IsValidAuthorizationAttribute<T>(
@@ -52,9 +52,8 @@ internal static partial class FluentValidationStringExtensions
     {
         return ruleBuilder
             .Must(value => value is null || ValidAuthorizationAttributeRegex().IsMatch(value))
-            .WithMessage("'{PropertyName}' must be on format 'urn:altinn:app:{app-name}' or " +
-                         "'urn:altinn:resource:{resource-name}' or 'urn:altinn:subresource:{subresource-name}' " +
-                         "or {subresource-name} with valid names.");
+            .WithMessage("'{PropertyName}' must be on format 'urn:altinn:{resourcetype}:{resourcename}' or " +
+                         "{resourcename} with valid names.");
     }
 
     private static bool HtmlAgilityPackCheck(this string html)

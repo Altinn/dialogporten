@@ -7,6 +7,7 @@ namespace Digdir.Domain.Dialogporten.Application.Common;
 public interface IUserOrganizationRegistry
 {
     Task<string?> GetCurrentUserOrgShortName(CancellationToken cancellationToken);
+    Task<string> GetCurrentUserOrgShortNameStrict(CancellationToken cancellationToken);
 }
 
 public sealed class UserOrganizationRegistry : IUserOrganizationRegistry
@@ -32,6 +33,9 @@ public sealed class UserOrganizationRegistry : IUserOrganizationRegistry
         return orgInfo?.ShortName;
     }
 
+    public async Task<string> GetCurrentUserOrgShortNameStrict(CancellationToken cancellationToken) =>
+        await GetCurrentUserOrgShortName(cancellationToken)
+        ?? throw new InvalidOperationException("Current user organization short name is not set or could not be determined.");
 }
 
 internal sealed class LocalDevelopmentUserOrganizationRegistryDecorator : IUserOrganizationRegistry

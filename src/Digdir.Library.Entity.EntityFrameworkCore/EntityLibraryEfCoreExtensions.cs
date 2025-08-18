@@ -1,4 +1,5 @@
-﻿using Digdir.Library.Entity.Abstractions.Features.Aggregate;
+﻿using System.Diagnostics;
+using Digdir.Library.Entity.Abstractions.Features.Aggregate;
 using Digdir.Library.Entity.EntityFrameworkCore.Features.Creatable;
 using Digdir.Library.Entity.EntityFrameworkCore.Features.Identifiable;
 using Digdir.Library.Entity.EntityFrameworkCore.Features.Lookup;
@@ -103,7 +104,8 @@ public static class EntityLibraryEfCoreExtensions
     {
         var entities = modelBuilder.Model
             .GetEntityTypes()
-            .Where(x => x.BaseType is null);
+            .Where(x => x.BaseType is null)
+            .Where(x => !x.IsOwned());
 
         foreach (var entity in entities)
         {

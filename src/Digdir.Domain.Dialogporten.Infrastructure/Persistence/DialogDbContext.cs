@@ -15,6 +15,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
@@ -26,6 +27,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 internal sealed class DialogDbContext : DbContext, IDialogDbContext
 {
     public DialogDbContext(DbContextOptions<DialogDbContext> options) : base(options) { }
+
+    public DbSet<LocalizationTemplateSet> LocalizationTemplateSets => Set<LocalizationTemplateSet>();
 
     public DbSet<DialogEntity> Dialogs => Set<DialogEntity>();
     public DbSet<DialogStatus> DialogStatuses => Set<DialogStatus>();

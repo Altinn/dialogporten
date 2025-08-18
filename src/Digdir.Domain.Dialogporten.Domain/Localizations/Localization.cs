@@ -22,6 +22,14 @@ public sealed class Localization
     public Guid LocalizationSetId { get; set; }
     public LocalizationSet LocalizationSet { get; set; } = null!;
 
+    public static string NormalizeCultureCodeStrict(string? cultureCode)
+    {
+        cultureCode = cultureCode?.Trim().Replace('_', '-').ToLowerInvariant();
+        return cultureCode is not null && NeutralCultureByValidCultureCodes.TryGetValue(cultureCode, out var neutralCulture)
+            ? neutralCulture.TwoLetterISOLanguageName
+            : throw new ArgumentException(
+                $"'{cultureCode}' is an invalid language code.", nameof(cultureCode));
+    }
 
     [return: NotNullIfNotNull(nameof(cultureCode))]
     public static string? NormalizeCultureCode(string? cultureCode)

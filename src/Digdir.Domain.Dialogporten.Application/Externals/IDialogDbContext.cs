@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 
@@ -51,6 +52,7 @@ public interface IDialogDbContext
 
     DbSet<ActorName> ActorName { get; }
     DbSet<DialogAttachment> DialogAttachments { get; }
+    DbSet<LocalizationTemplateSet> LocalizationTemplateSets { get; }
 
     /// <summary>
     /// Validate a property on the <typeparamref name="TEntity"/> using a lambda

@@ -30,7 +30,7 @@
 
     <ItemGroup>
         <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.1"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.8" />
         <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="Refit" Version="8.0.0"/>
         <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0"/>
@@ -42,7 +42,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Digdir.Library.Dialogporten.WebApiClient.Unit.Tests"/>
-        <InternalsVisibleTo Include="Digdir.Tool.Dialogporten.Benchmarks"/>
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
 

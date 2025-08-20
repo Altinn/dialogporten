@@ -23,6 +23,10 @@ run-name: Dispatch infrastructure ${{ inputs.environment }} v${{ inputs.version 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}-${{ inputs.environment }}
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   generate-git-short-sha:
     name: Generate git short sha

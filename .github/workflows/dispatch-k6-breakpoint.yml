@@ -58,6 +58,11 @@ on:
           - 'tests/k6/tests/enduser/performance/enduserSearchBreakpoint.js'
 
 run-name: ${{ inputs.tag }} ${{ inputs.targetVus }}/${{ inputs.duration }}/${{ inputs.parallelism }}
+
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   k6-performance:
     name: "Run K6 performance test"

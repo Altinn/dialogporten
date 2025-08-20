@@ -44,5 +44,4 @@ public enum DialogStatusInput
     /// The dialogue was completed. This typically means that the dialogue is moved to a GUI archive or similar.
     /// </summary>
     Completed = 6
-
 }

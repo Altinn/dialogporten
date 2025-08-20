@@ -9,6 +9,11 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: read
+
 jobs:
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub

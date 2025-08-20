@@ -7,6 +7,10 @@ on:
       version:
         description: "Version"
         value: ${{ jobs.get-current-version.outputs.version }}
+
+permissions:
+  contents: read
+
 jobs:
   get-current-version:
     name: Filter
@@ -15,7 +19,7 @@ jobs:
       version: ${{ steps.set-current-version.outputs.version }}
     steps:
       - name: "Checkout GitHub Action"
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - name: Set current version
         id: set-current-version
         run: echo "version=$(cat version.txt)" >> $GITHUB_OUTPUT

@@ -81,7 +81,8 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .IsInFuture();
 
         RuleFor(x => x.Status)
-            .IsInEnum();
+            .IsInEnum()
+            .When(x => x.Status.HasValue);
 
         RuleFor(x => x.SearchTags)
             .UniqueBy(x => x.Value, StringComparer.InvariantCultureIgnoreCase)

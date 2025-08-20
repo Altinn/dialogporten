@@ -191,11 +191,11 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    /// <summary>Retrieve service owner labels for a dialog</summary>
+    /// <summary>Retrieve service owner labels for a dialog.</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.6.1.0")]
     public partial interface IServiceownerApi
     {
-        /// <summary>Retrieve service owner labels for a dialog</summary>
+        /// <summary>Retrieve service owner labels for a dialog.</summary>
         /// <remarks>Fetches all labels associated with the service owner context of a specific dialog.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -634,7 +634,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <remarks>
         /// The dialog is created with the given configuration.
         /// 
-        /// For detailed information on validation rules, see [the source for CreateDialogCommandValidator](https://github.com/altinn/dialogporten/blob/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/CreateDialogCommandValidator.cs)
+        /// For detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)
         /// </remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -4396,7 +4396,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
+        public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput? Status { get; set; }
 
         /// <summary>
         /// Set the system label of the dialog.

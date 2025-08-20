@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 
@@ -14,18 +15,22 @@ public sealed class MergableSubjectResource : SubjectResource
     public bool IsDeleted { get; set; }
 }
 
-public static class SubjectResourceExtensions
+public static partial class SubjectResourceExtensions
 {
     public static MergableSubjectResource ToMergeableSubjectResource(this UpdatedSubjectResource subjectResource, DateTimeOffset createdAt)
     {
         return new MergableSubjectResource
         {
             Id = IdentifiableExtensions.CreateVersion7(),
-            Subject = subjectResource.SubjectUrn.ToString()!,
-            Resource = subjectResource.ResourceUrn.ToString()!,
+            // Remove whitespace to workaround https://github.com/Altinn/altinn-resource-registry/issues/596
+            Subject = AllWhitespaceRegex().Replace(subjectResource.SubjectUrn.ToString(), ""),
+            Resource = AllWhitespaceRegex().Replace(subjectResource.ResourceUrn.ToString(), ""),
             CreatedAt = createdAt.ToUniversalTime(),
             UpdatedAt = subjectResource.UpdatedAt.ToUniversalTime(),
             IsDeleted = subjectResource.Deleted
         };
     }
+
+    [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
+    private static partial Regex AllWhitespaceRegex();
 }

@@ -221,6 +221,8 @@ static void BuildAndRun(string[] args)
                     .BaseUri
                     .ToString();
 
+                document.ChangeDialogStatusExample();
+
                 document.Servers.Clear();
                 document.Servers.Add(new OpenApiServer
                 {

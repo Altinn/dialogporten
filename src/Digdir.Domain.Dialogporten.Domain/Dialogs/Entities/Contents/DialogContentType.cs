@@ -58,7 +58,7 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         Values.ExtendedStatus => new(id)
         {
             Required = false,
-            MaxLength = 20,
+            MaxLength = Constants.DefaultMaxStringLength,
             OutputInList = true,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },

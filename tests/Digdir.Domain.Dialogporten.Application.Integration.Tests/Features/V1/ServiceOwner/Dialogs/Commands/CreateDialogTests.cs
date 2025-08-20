@@ -19,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -202,7 +203,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.ShouldHaveErrorWithText("empty"));
 
 
-    private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>
+    private sealed class
+        HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>
     {
         public HtmlContentTestData()
         {
@@ -233,7 +235,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
             Add("Can create mainContentRef content with embeddable HTML media type with valid html scope",
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
-                x => x.Dto.Content!.MainContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                x => x.Dto.Content!.MainContentReference =
+                    CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(CreateDialogSuccess));
         }
     }
@@ -337,8 +340,9 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(TransmissionsCountTestData))]
-    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(
-        string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
+    public Task
+        Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(
+            string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
         FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
@@ -455,4 +459,39 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.AddTransmission(x =>
                     x.AuthorizationAttribute = authAttribute))
             .ExecuteAndAssert(expectedTye);
+
+
+    private sealed class ExtendedStatusTestData : TheoryData<Action<CreateDialogCommand>, Type>
+    {
+        public ExtendedStatusTestData()
+        {
+
+            Add(SetExtendedStatus("OK"), typeof(CreateDialogSuccess));
+
+            var maxLengthString = new string('a', Constants.DefaultMaxStringLength);
+            Add(SetExtendedStatus(maxLengthString), typeof(CreateDialogSuccess));
+
+            var tooLongString = new string('a', Constants.DefaultMaxStringLength + 1);
+            Add(SetExtendedStatus(tooLongString), typeof(ValidationError));
+        }
+
+        private static Action<CreateDialogCommand> SetExtendedStatus(string extendedStatus) => x =>
+            x.Dto.Content!.ExtendedStatus = new()
+            {
+                Value =
+                [
+                    new()
+                    {
+                        Value = extendedStatus,
+                        LanguageCode = "nb"
+                    }
+                ]
+            };
+    }
+
+    [Theory, ClassData(typeof(ExtendedStatusTestData))]
+    public Task Create_Dialog_Accepts_Valid_Lengths_For_Extended_Status(Action<CreateDialogCommand> modify, Type expectedResult) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(modify)
+            .ExecuteAndAssert(expectedResult);
 }

@@ -58,21 +58,14 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialog.SeenLog = dialog.SeenLog
             .Where(x => x.CreatedAt >= dialog.ContentUpdatedAt).ToList();
 
-        DialogDto dialogDto;
-        try
+        // Edge case where the dialog is requested the same instant it is purged
+        // https://github.com/Altinn/dialogporten/issues/2627
+        if (!dialog.EndUserContext.DialogEndUserContextSystemLabels.Any())
         {
-            dialogDto = _mapper.Map<DialogDto>(dialog);
+            return new EntityNotFound<DialogEntity>(request.DialogId);
         }
-        catch (AutoMapperMappingException e)
-        {
-            if (e.Message.Contains("Destination Member:\nSystemLabel"))
-            {
-                // Edge case where the dialog is requested the same instant it is purged
-                return new EntityNotFound<DialogEntity>(request.DialogId);
-            }
 
-            throw;
-        }
+        var dialogDto = _mapper.Map<DialogDto>(dialog);
 
         if (request.EndUserId is not null)
         {

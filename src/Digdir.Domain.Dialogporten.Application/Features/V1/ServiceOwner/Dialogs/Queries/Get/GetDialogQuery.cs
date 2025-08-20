@@ -60,7 +60,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         // Edge case where the dialog is requested the same instant it is purged
         // https://github.com/Altinn/dialogporten/issues/2627
-        if (!dialog.EndUserContext.DialogEndUserContextSystemLabels.Any())
+        if (dialog.EndUserContext.DialogEndUserContextSystemLabels.Count == 0)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }

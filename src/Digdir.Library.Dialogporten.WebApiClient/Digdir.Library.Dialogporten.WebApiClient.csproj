@@ -42,7 +42,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Digdir.Library.Dialogporten.WebApiClient.Unit.Tests"/>
-        <InternalsVisibleTo Include="Digdir.Tool.Dialogporten.Benchmarks"/>
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
 

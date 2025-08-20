@@ -191,11 +191,11 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    /// <summary>Retrieve service owner labels for a dialog</summary>
+    /// <summary>Retrieve service owner labels for a dialog.</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.6.1.0")]
     public partial interface IServiceownerApi
     {
-        /// <summary>Retrieve service owner labels for a dialog</summary>
+        /// <summary>Retrieve service owner labels for a dialog.</summary>
         /// <remarks>Fetches all labels associated with the service owner context of a specific dialog.</remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:

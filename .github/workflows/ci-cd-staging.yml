@@ -9,6 +9,11 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: read
+
 jobs:
   generate-git-short-sha:
     name: Generate git short sha
@@ -92,6 +97,9 @@ jobs:
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    permissions:
+      contents: read
+      packages: write
 
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable

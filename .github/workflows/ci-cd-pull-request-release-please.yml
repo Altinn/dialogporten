@@ -6,6 +6,11 @@ on:
     paths-ignore:
       - "tests/k6/**"
 
+permissions:
+  contents: read
+  pull-requests: read
+  id-token: write
+
 jobs:
   verify-release-please-branch:
     if: startsWith(github.head_ref, 'release-please-')
@@ -71,7 +76,7 @@ jobs:
     needs: [dry-run-deploy-infra-staging, dry-run-deploy-apps-staging]
     runs-on: ubuntu-latest
     steps:
-      - uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+      - uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
         with:
           egress-policy: audit
 

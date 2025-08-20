@@ -10,7 +10,7 @@ public sealed class GetServiceOwnerLabelEndpointSummary : Summary<GetServiceOwne
 {
     public GetServiceOwnerLabelEndpointSummary()
     {
-        Summary = "Retrieve service owner labels for a dialog";
+        Summary = "Retrieve service owner labels for a dialog.";
         Description = "Fetches all labels associated with the service owner context of a specific dialog.";
         ResponseHeaders = [HttpResponseHeaderExamples.NewServiceOwnerContextETagHeader(StatusCodes.Status204NoContent)];
         Responses[StatusCodes.Status200OK] = "Successfully retrieved the service owner labels.";

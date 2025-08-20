@@ -1,5 +1,72 @@
 # Changelog
 
+## [1.79.4](https://github.com/Altinn/dialogporten/compare/v1.79.3...v1.79.4) (2025-08-15)
+
+
+### Miscellaneous Chores
+
+* **ci:** set contents permission to read for NuGet push staging ([#2657](https://github.com/Altinn/dialogporten/issues/2657)) ([e4e5de2](https://github.com/Altinn/dialogporten/commit/e4e5de20498693427fde48d808f1fda04c7e580f))
+
+## [1.79.3](https://github.com/Altinn/dialogporten/compare/v1.79.2...v1.79.3) (2025-08-15)
+
+
+### Miscellaneous Chores
+
+* Trigger release for testing ci/cd pipelines ([#2655](https://github.com/Altinn/dialogporten/issues/2655)) ([a46a7cb](https://github.com/Altinn/dialogporten/commit/a46a7cb2f9569e3eae9631690c0ffe16cbcbe344))
+
+## [1.79.2](https://github.com/Altinn/dialogporten/compare/v1.79.1...v1.79.2) (2025-08-15)
+
+
+### Bug Fixes
+
+* **ci:** Set correct permissions for pull requests in CI workflows ([#2652](https://github.com/Altinn/dialogporten/issues/2652)) ([38c6212](https://github.com/Altinn/dialogporten/commit/38c62125fec2a3b170a9b230dd7a3fc70dab0593))
+
+## [1.79.1](https://github.com/Altinn/dialogporten/compare/v1.79.0...v1.79.1) (2025-08-15)
+
+
+### Bug Fixes
+
+* **api:** Validate authorization attribute ([#2645](https://github.com/Altinn/dialogporten/issues/2645)) ([22ff75f](https://github.com/Altinn/dialogporten/commit/22ff75f2963c14a82a3f84402f8c83d845521195))
+
+
+### Miscellaneous Chores
+
+* **ci:** Added explicit permissions to Github workflows ([#2647](https://github.com/Altinn/dialogporten/issues/2647)) ([fa6ba60](https://github.com/Altinn/dialogporten/commit/fa6ba601d9744ad60d362da341f02bee8aabb7fe))
+* **deps:** update MassTransit to 8.5.2 ([#2650](https://github.com/Altinn/dialogporten/issues/2650)) ([732e8fa](https://github.com/Altinn/dialogporten/commit/732e8fa61c15bc5726530df80b60faa981c8e8cb))
+* **webapi:** Add Swagger summary for label assignment log endpoint ([#2651](https://github.com/Altinn/dialogporten/issues/2651)) ([1f44767](https://github.com/Altinn/dialogporten/commit/1f44767e4b8cdd77b9f29d830bf9aaeb3bd91075))
+
+## [1.79.0](https://github.com/Altinn/dialogporten/compare/v1.78.0...v1.79.0) (2025-08-15)
+
+
+### Features
+
+* **app:** Add legacy HTML embeddable content support on transmissions ([#2643](https://github.com/Altinn/dialogporten/issues/2643)) ([f103207](https://github.com/Altinn/dialogporten/commit/f1032073dd3471940aaf1fc22228c25d704036c6))
+
+
+### Bug Fixes
+
+* **ci:** Add missing checkout in 'Restart container apps' GitHub Action ([#2639](https://github.com/Altinn/dialogporten/issues/2639)) ([2361d35](https://github.com/Altinn/dialogporten/commit/2361d353df7983bd9ad7be5e9926b13cb4789ff2))
+* **janitor:** Check for duplicates when syncing SubjectResource ([#2585](https://github.com/Altinn/dialogporten/issues/2585)) ([fac5e17](https://github.com/Altinn/dialogporten/commit/fac5e1786df7eb6f3cba64f7426e4ab7d86e11ff))
+
+## [1.78.0](https://github.com/Altinn/dialogporten/compare/v1.77.0...v1.78.0) (2025-08-13)
+
+
+### Features
+
+* Created mechanism to load entity aggregate once per request  ([#2586](https://github.com/Altinn/dialogporten/issues/2586)) ([eab7958](https://github.com/Altinn/dialogporten/commit/eab79584bfcb3b11b45562869bf0c090e3519d04))
+
+
+### Bug Fixes
+
+* **app:** Catch AutoMapper exceptions on get/purge race condition ([#2632](https://github.com/Altinn/dialogporten/issues/2632)) ([8aee722](https://github.com/Altinn/dialogporten/commit/8aee722c56242317a2bce366d62d089f88146655))
+
+
+### Miscellaneous Chores
+
+* **ci:** update Azure CLI version to 2.76.0 ([#2633](https://github.com/Altinn/dialogporten/issues/2633)) ([330693f](https://github.com/Altinn/dialogporten/commit/330693f4ec2859293ce4166c5ef574787fb10f15))
+* **deps:** update docker/login-action action to v3.5.0 ([#2635](https://github.com/Altinn/dialogporten/issues/2635)) ([acb47ec](https://github.com/Altinn/dialogporten/commit/acb47ec543ff5efcde6a68fe92b22e5f53064ccf))
+* **deps:** update prom/prometheus docker tag to v3.5.0 ([#2636](https://github.com/Altinn/dialogporten/issues/2636)) ([357cad0](https://github.com/Altinn/dialogporten/commit/357cad02b8d894a315834a36e5b5910d84a0c83a))
+
 ## [1.77.0](https://github.com/Altinn/dialogporten/compare/v1.76.2...v1.77.0) (2025-08-11)
 
 

@@ -6052,6 +6052,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}/context/labellog": {
       "get": {
+        "description": "Gets the list of label assignment logs belonging to a dialog",
         "operationId": "V1EndUserEndUserContextQueriesSearchLabelAssignmentLogs_DialogLabelAssignmentLog",
         "parameters": [
           {
@@ -6076,13 +6077,13 @@
                 }
               }
             },
-            "description": "Success"
+            "description": "Successfully returned the dialog label assignment log list."
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "404": {
             "content": {
@@ -6092,10 +6093,10 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
           },
           "410": {
-            "description": ""
+            "description": "Entity with the given key(s) is removed."
           }
         },
         "security": [
@@ -6105,6 +6106,7 @@
             ]
           }
         ],
+        "summary": "Gets a list of dialog label assignment logs",
         "tags": [
           "Enduser"
         ]
@@ -7877,7 +7879,7 @@
             ]
           }
         ],
-        "summary": "Retrieve service owner labels for a dialog",
+        "summary": "Retrieve service owner labels for a dialog.",
         "tags": [
           "Serviceowner"
         ]

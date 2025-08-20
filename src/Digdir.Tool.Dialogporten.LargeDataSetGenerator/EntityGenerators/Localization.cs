@@ -1,6 +1,6 @@
-using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -9,10 +9,8 @@ internal static class Localization
     public static readonly string CopyCommand = Create(nameof(Localization),
         "LanguageCode", "LocalizationSetId", "CreatedAt", "UpdatedAt", "Value");
 
-    public static string Generate(DialogTimestamp dto)
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
-        var csvData = new StringBuilder();
-
         List<Guid> localizationSetIds =
         [
             dto.DialogId,
@@ -21,12 +19,10 @@ internal static class Localization
             DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 1),
             DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 2),
             DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 3),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), Activity.DialogCreatedType),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), Activity.InformationType),
-            DeterministicUuidV7.Generate(dto.Timestamp,
-                nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 1),
-            DeterministicUuidV7.Generate(dto.Timestamp,
-                nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 2),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.DialogCreated),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.Information),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 1),
+            DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 2),
             DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent), 1),
             DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent), 2),
             DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent), 3),
@@ -47,12 +43,10 @@ internal static class Localization
                   Words.Norwegian[rng.Next(0, Words.Norwegian.Length)]
                 : $"Norsk {Guid.NewGuid().ToString()[..8]}";
 
-            csvData.AppendLine(
+            sb.AppendLine(
                 $"nb,{localizationSetId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{norwegian}");
-            csvData.AppendLine(
+            sb.AppendLine(
                 $"en,{localizationSetId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{english}");
         }
-
-        return csvData.ToString();
-    }
+    });
 }

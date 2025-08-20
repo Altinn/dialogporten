@@ -1,4 +1,4 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -16,11 +16,9 @@ internal static class Dialog
         var serviceResourceIndex = dto.DialogCounter % ServiceResources.Length;
         var serviceResource = ServiceResources[serviceResourceIndex];
 
-        var rng = new Random(dto.DialogId.GetHashCode());
-        var partyIndex = rng.Next(0, Parties.List.Length);
-        var party = Parties.List[partyIndex];
+        // TODO: 1/X of dialogs should be from special party list.
+        var party = dto.GetRng().GetParty();
 
-        return
-            $"{dto.DialogId},{dto.FormattedTimestamp},FALSE,,,,sql-generated,,ttd,{party},,,11,{Guid.NewGuid()},{serviceResource},GenericAccessResource,1,,{dto.FormattedTimestamp}";
+        return $"{dto.DialogId},{dto.FormattedTimestamp},FALSE,,,,sql-generated,,ttd,{party},,,11,{Guid.NewGuid()},{serviceResource},GenericAccessResource,1,,{dto.FormattedTimestamp}";
     }
 }

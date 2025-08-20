@@ -2,7 +2,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
 using Npgsql;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -28,56 +29,36 @@ internal static class ActorName
 
     public static readonly string CopyCommand = Create(nameof(ActorName), "Id", "ActorId", "Name", "CreatedAt");
 
-    public static string Generate(DialogTimestamp dto)
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
-        var actorNameCsvData = new StringBuilder();
+        var rng = dto.GetRng();
 
-        var rng = new Random(dto.DialogId.GetHashCode());
-
-        var dialogPartyIndex = rng.Next(0, Parties.List.Length);
-        var dialogParty = Parties.List[dialogPartyIndex];
-
-        var transmissionPartyIndex = rng.Next(0, Parties.List.Length);
-        var transmissionParty = Parties.List[transmissionPartyIndex];
+        var dialogParty = rng.GetParty();
+        var transmissionParty = rng.GetParty();
 
         var dialogPartyActorNameId = DeterministicUuidV7.Generate(dto.Timestamp, nameof(ActorName), 1);
 
-        // Actor.cs Activity2, DialogSeenLog
         if (InsertedActorNames.TryAdd(dialogParty, dialogPartyActorNameId))
         {
-            // ActorId(party) should result in the same names across dialogs
             var dialogPartyActorName =
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
 
-            actorNameCsvData.AppendLine(
+            sb.AppendLine(
                 $"{dialogPartyActorNameId},{dialogParty},{dialogPartyActorName},{dto.FormattedTimestamp}");
         }
 
         var transmissionActorNameId = DeterministicUuidV7.Generate(dto.Timestamp, nameof(ActorName), 2);
-        // Actor.cs Transmission1
         if (InsertedActorNames.TryAdd(transmissionParty, transmissionActorNameId))
         {
             var transmissionActorName =
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
 
-            actorNameCsvData.AppendLine(
+            sb.AppendLine(
                 $"{transmissionActorNameId},{transmissionParty},{transmissionActorName},{dto.FormattedTimestamp}");
         }
+    });
 
-        return actorNameCsvData.ToString();
-    }
-
-    internal static Guid GetActorNameId(string party)
-    {
-        var actorNameId = InsertedActorNames[party];
-
-        if (actorNameId == Guid.Empty)
-        {
-            throw new UnreachableException($"ActorNameId for party {party} should have been seeded");
-        }
-
-        return actorNameId;
-    }
+    internal static Guid GetActorNameId(string party) => InsertedActorNames[party];
 }

@@ -1,6 +1,6 @@
-using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -13,7 +13,7 @@ internal static class Activity
     {
         // All dialogs have a DialogCreated activity.
         var dialogCreatedActivityId = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.DialogCreated);
-        List<ActivityDto> dtos = [new(dialogCreatedActivityId,(int)DialogActivityType.Values.DialogCreated)];
+        List<ActivityDto> dtos = [new(dialogCreatedActivityId, DialogActivityType.Values.DialogCreated)];
 
         var rng = dialogDto.GetRng();
 
@@ -21,30 +21,26 @@ internal static class Activity
         if (rng.Next(0, 2) == 0)
         {
             var dialogOpenedActivityId = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.DialogOpened);
-            dtos.Add(new(dialogOpenedActivityId, (int)DialogActivityType.Values.DialogOpened));
+            dtos.Add(new(dialogOpenedActivityId, DialogActivityType.Values.DialogOpened));
         }
 
         // Approx. 1/3 of dialogs have an Information activity.
         if (rng.Next(0, 3) == 0)
         {
             var informationActivityId = DeterministicUuidV7.Generate(dialogDto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.Information);
-            dtos.Add(new(informationActivityId, (int)DialogActivityType.Values.Information));
+            dtos.Add(new(informationActivityId, DialogActivityType.Values.Information));
         }
 
         return dtos;
     }
 
-    public static string Generate(DialogTimestamp dto)
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
-        var activityCsvData = new StringBuilder();
-
         foreach (var activity in GetDtos(dto))
         {
-            activityCsvData.AppendLine($"{activity.Id},{dto.FormattedTimestamp},,{activity.TypeId},,{dto.DialogId}");
+            sb.AppendLine($"{activity.Id},{dto.FormattedTimestamp},,{(int)activity.TypeId},,{dto.DialogId}");
         }
+    });
 
-        return activityCsvData.ToString();
-    }
-
-    public record ActivityDto(Guid Id, int TypeId);
+    public record ActivityDto(Guid Id, DialogActivityType.Values TypeId);
 }

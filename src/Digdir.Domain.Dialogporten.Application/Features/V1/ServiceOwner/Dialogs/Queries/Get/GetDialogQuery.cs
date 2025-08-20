@@ -107,6 +107,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
+        // TODO: Try/catch i main
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 
         if (request.EndUserId is not null)

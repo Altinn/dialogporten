@@ -1,25 +1,45 @@
 using System.Text;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
+using Digdir.Domain.Dialogporten.Domain.Http;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class DialogGuiAction
 {
     public static readonly string CopyCommand = Create(nameof(DialogGuiAction),
-        "Id", "CreatedAt", "UpdatedAt", "Action", "Url", "AuthorizationAttribute", "IsDeleteDialogAction", "PriorityId", "HttpMethodId", "DialogId");
+        "Id", "CreatedAt", "UpdatedAt", "Action",
+        "Url", "AuthorizationAttribute", "IsDeleteDialogAction",
+        "PriorityId", "HttpMethodId", "DialogId");
 
-    public static string Generate(DialogTimestamp dto)
+    private const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction);
+    private const string Action = "submit";
+    private const string Url = "https://digdir.apps.tt02.altinn.no";
+    private const int HttpMethodId = (int)HttpVerb.Values.POST;
+
+    public record DialogGuiActionDto(Guid Id, DialogGuiActionPriority.Values PriorityId);
+
+    public static List<DialogGuiActionDto> GetDtos(DialogTimestamp dto)
     {
-        var guiActionCsvData = new StringBuilder();
+        List<DialogGuiActionDto> dtos = [];
 
-        var guiActionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 1);
-        var guiActionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 2);
-        var guiActionId3 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 3);
+        foreach (var priority in Enum.GetValues<DialogGuiActionPriority.Values>())
+        {
+            var guiActionId = DeterministicUuidV7.Generate(dto.Timestamp, DomainName, (int)priority);
+            dtos.Add(new DialogGuiActionDto(guiActionId, priority));
+        }
 
-        guiActionCsvData.AppendLine($"{guiActionId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},submit,https://digdir.apps.tt02.altinn.no,,FALSE,1,2,{dto.DialogId}");
-        guiActionCsvData.AppendLine($"{guiActionId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},submit,https://digdir.apps.tt02.altinn.no,,FALSE,2,2,{dto.DialogId}");
-        guiActionCsvData.AppendLine($"{guiActionId3},{dto.FormattedTimestamp},{dto.FormattedTimestamp},submit,https://digdir.apps.tt02.altinn.no,,FALSE,3,2,{dto.DialogId}");
-
-        return guiActionCsvData.ToString();
+        return dtos;
     }
+
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
+    {
+        foreach (var guiAction in GetDtos(dto))
+        {
+            var priorityId = (int)guiAction.PriorityId;
+            // TODO: Could this point to the dummy service provider?
+            sb.AppendLine($"{guiAction.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{Action},{Url},,FALSE,{priorityId},{HttpMethodId},{dto.DialogId}");
+        }
+    });
 }

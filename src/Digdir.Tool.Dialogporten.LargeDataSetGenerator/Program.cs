@@ -200,6 +200,10 @@ try
 
     await Task.WhenAll(tasks);
 
+    // TODO: Start re-indexing command
+    // Import create validator
+    // Get dialog, map to create
+
     Console.WriteLine(string.Empty);
     Console.WriteLine(string.Empty);
 

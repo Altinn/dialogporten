@@ -1,5 +1,6 @@
-using System.Text;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -8,16 +9,26 @@ internal static class DialogContent
     public static readonly string CopyCommand = Create(nameof(DialogContent),
         "Id", "CreatedAt", "UpdatedAt", "MediaType", "DialogId", "TypeId");
 
-    public static string Generate(DialogTimestamp dto)
+    private const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent);
+
+    public record DialogContentDto(Guid Id, DialogContentType.Values TypeId);
+
+    public static List<DialogContentDto> GetDtos(DialogTimestamp dto)
     {
-        var contentId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 1);
-        var contentId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 2);
+        var dialogTitleId = DeterministicUuidV7.Generate(dto.Timestamp, DomainName, (int)DialogContentType.Values.Title);
+        var dialogTitle = new DialogContentDto(dialogTitleId, DialogContentType.Values.Title);
 
-        var dialogContentCsvData = new StringBuilder();
+        var dialogSummaryId = DeterministicUuidV7.Generate(dto.Timestamp, DomainName, (int)DialogContentType.Values.Summary);
+        var dialogSummary = new DialogContentDto(dialogSummaryId, DialogContentType.Values.Summary);
 
-        dialogContentCsvData.AppendLine($"{contentId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{dto.DialogId},1");
-        dialogContentCsvData.AppendLine($"{contentId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{dto.DialogId},3");
-
-        return dialogContentCsvData.ToString();
+        return [dialogTitle, dialogSummary];
     }
+
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
+    {
+        foreach (var dialogContent in GetDtos(dto))
+        {
+            sb.AppendLine($"{dialogContent.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{dto.DialogId},{(int)dialogContent.TypeId}");
+        }
+    });
 }

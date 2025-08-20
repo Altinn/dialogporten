@@ -1,5 +1,5 @@
-using System.Text;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -8,17 +8,35 @@ internal static class Attachment
     public static readonly string CopyCommand = Create(nameof(Attachment),
         "Id", "CreatedAt", "UpdatedAt", "Discriminator", "DialogId", "TransmissionId");
 
-    public static string Generate(DialogTimestamp dto)
+    public record AttachmentDto(Guid Id, Guid? DialogId, Guid? TransmissionId);
+    public static List<AttachmentDto> GetDtos(DialogTimestamp dto)
     {
-        var attachmentCsvData = new StringBuilder();
+        List<AttachmentDto> dtos = [];
 
-        var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission), 1);
-        var transmissionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission), 2);
-        attachmentCsvData.AppendLine($"{transmissionId1},{dto.FormattedTimestamp},{dto.FormattedTimestamp},DialogTransmissionAttachment,,{transmissionId1}");
-        attachmentCsvData.AppendLine($"{transmissionId2},{dto.FormattedTimestamp},{dto.FormattedTimestamp},DialogTransmissionAttachment,,{transmissionId2}");
+        // Transmission attachments.
+        foreach (var transmission in DialogTransmission.GetDtos(dto))
+        {
+            // Re-use transmission id as attachment id.
+            dtos.Add(new(transmission.Id, null, transmission.Id));
+        }
 
-        attachmentCsvData.AppendLine($"{dto.DialogId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},DialogAttachment,{dto.DialogId},");
+        // Dialog attachments.
+        // Re-use dialog id as attachment id.
+        dtos.Add(new(dto.DialogId, dto.DialogId, null));
 
-        return attachmentCsvData.ToString();
+        return dtos;
     }
+
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
+    {
+        foreach (var attachment in GetDtos(dto))
+        {
+            var discriminator = attachment.TransmissionId.HasValue ? "DialogTransmissionAttachment" : "DialogAttachment";
+
+            var dialogId = attachment.DialogId?.ToString() ?? string.Empty;
+            var transmissionId = attachment.TransmissionId?.ToString() ?? string.Empty;
+
+            sb.AppendLine($"{attachment.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{discriminator},{dialogId},{transmissionId}");
+        }
+    });
 }

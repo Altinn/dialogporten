@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
+namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator;
 
 public static class CopyCommand
 {
@@ -9,4 +9,14 @@ public static class CopyCommand
 
     public static string Create(string tableName, params string[] props) =>
         string.Format(null, CopyCommandBase, tableName, string.Join(", ", props));
+}
+
+public static class CsvBuilder
+{
+    public static string BuildCsv(Action<StringBuilder> buildAction)
+    {
+        var sb = new StringBuilder();
+        buildAction(sb);
+        return sb.ToString();
+    }
 }

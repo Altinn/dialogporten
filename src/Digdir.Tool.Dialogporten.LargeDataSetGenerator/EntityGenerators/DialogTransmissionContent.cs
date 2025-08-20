@@ -1,5 +1,5 @@
-using System.Text;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -9,6 +9,7 @@ internal static class DialogTransmissionContent
         "Id", "CreatedAt", "UpdatedAt",
         "MediaType", "TransmissionId", "TypeId");
 
+    private const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent);
     public static List<TransmissionContentDto> GetDtos(DialogTimestamp dto)
     {
         var transmissionDtos = DialogTransmission.GetDtos(dto);
@@ -18,7 +19,7 @@ internal static class DialogTransmissionContent
         {
             for (var i = 1; i <= 2; i++)
             {
-                var contentId = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent), i);
+                var contentId = DeterministicUuidV7.Generate(dto.Timestamp, DomainName, i);
                 contentDtos.Add(new TransmissionContentDto(contentId, transmission.Id, i));
             }
         }
@@ -28,16 +29,12 @@ internal static class DialogTransmissionContent
 
     public record TransmissionContentDto(Guid Id, Guid TransmissionId, int TypeId);
 
-    public static string Generate(DialogTimestamp dto)
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
-        var csvData = new StringBuilder();
-
-        var transmissionContents = GetDtos(dto);
-        foreach (var tc in transmissionContents)
+        foreach (var tc in GetDtos(dto))
         {
-            csvData.AppendLine($"{tc.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{tc.TransmissionId},{tc.TypeId}");
+            sb.AppendLine(
+                $"{tc.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{tc.TransmissionId},{tc.TypeId}");
         }
-
-        return csvData.ToString();
-    }
+    });
 }

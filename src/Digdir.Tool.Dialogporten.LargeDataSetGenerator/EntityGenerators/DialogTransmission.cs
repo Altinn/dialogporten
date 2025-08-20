@@ -9,7 +9,7 @@ internal static class DialogTransmission
     public static readonly string CopyCommand = Create(nameof(DialogTransmission),
         "Id", "CreatedAt", "AuthorizationAttribute", "ExtendedType", "TypeId", "DialogId", "RelatedTransmissionId");
 
-    private const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission);
+    public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission);
     public static List<TransmissionDto> GetDtos(DialogTimestamp dto)
     {
         var numTransmissions = dto.GetRng().Next(0, 5);
@@ -36,7 +36,7 @@ internal static class DialogTransmission
         return transmissionDtos;
     }
 
-    public record TransmissionDto(Guid Id, DialogTransmissionType.Values TypeId);
+    public sealed record TransmissionDto(Guid Id, DialogTransmissionType.Values TypeId);
 
     public static string Generate(DialogTimestamp dto)
     {

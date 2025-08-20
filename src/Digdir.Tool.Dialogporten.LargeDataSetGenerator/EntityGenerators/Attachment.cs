@@ -8,7 +8,7 @@ internal static class Attachment
     public static readonly string CopyCommand = Create(nameof(Attachment),
         "Id", "CreatedAt", "UpdatedAt", "Discriminator", "DialogId", "TransmissionId");
 
-    public record AttachmentDto(Guid Id, Guid? DialogId, Guid? TransmissionId);
+    public sealed record AttachmentDto(Guid Id, Guid? DialogId, Guid? TransmissionId);
     public static List<AttachmentDto> GetDtos(DialogTimestamp dto)
     {
         List<AttachmentDto> dtos = [];

@@ -9,9 +9,9 @@ internal static class DialogContent
     public static readonly string CopyCommand = Create(nameof(DialogContent),
         "Id", "CreatedAt", "UpdatedAt", "MediaType", "DialogId", "TypeId");
 
-    private const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent);
+    public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent);
 
-    public record DialogContentDto(Guid Id, DialogContentType.Values TypeId);
+    public sealed record DialogContentDto(Guid Id, DialogContentType.Values TypeId);
 
     public static List<DialogContentDto> GetDtos(DialogTimestamp dto)
     {

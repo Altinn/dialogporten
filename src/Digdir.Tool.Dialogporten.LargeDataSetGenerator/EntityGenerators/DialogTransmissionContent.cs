@@ -9,7 +9,7 @@ internal static class DialogTransmissionContent
         "Id", "CreatedAt", "UpdatedAt",
         "MediaType", "TransmissionId", "TypeId");
 
-    private const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent);
+    public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent);
     public static List<TransmissionContentDto> GetDtos(DialogTimestamp dto)
     {
         var transmissionDtos = DialogTransmission.GetDtos(dto);
@@ -27,7 +27,7 @@ internal static class DialogTransmissionContent
         return contentDtos;
     }
 
-    public record TransmissionContentDto(Guid Id, Guid TransmissionId, int TypeId);
+    public sealed record TransmissionContentDto(Guid Id, Guid TransmissionId, int TypeId);
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {

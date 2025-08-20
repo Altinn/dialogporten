@@ -10,7 +10,7 @@ internal static class AttachmentUrl
     public static readonly string CopyCommand = Create(nameof(AttachmentUrl),
         "Id", "CreatedAt", "MediaType", "Url", "ConsumerTypeId", "AttachmentId");
 
-    private const string DomainName = nameof(Domain.Dialogporten.Domain.Attachments.AttachmentUrl);
+    public const string DomainName = nameof(Domain.Dialogporten.Domain.Attachments.AttachmentUrl);
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {

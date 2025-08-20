@@ -42,5 +42,5 @@ internal static class Activity
         }
     });
 
-    public record ActivityDto(Guid Id, DialogActivityType.Values TypeId);
+    public sealed record ActivityDto(Guid Id, DialogActivityType.Values TypeId);
 }

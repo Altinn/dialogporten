@@ -9,7 +9,7 @@ internal static class DialogSearchTag
     public static readonly string CopyCommand = Create(nameof(DialogSearchTag),
         "Id", "Value", "CreatedAt", "DialogId");
 
-    private const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag);
+    public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag);
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {

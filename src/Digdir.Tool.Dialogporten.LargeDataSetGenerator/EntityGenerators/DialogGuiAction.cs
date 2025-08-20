@@ -13,12 +13,12 @@ internal static class DialogGuiAction
         "Url", "AuthorizationAttribute", "IsDeleteDialogAction",
         "PriorityId", "HttpMethodId", "DialogId");
 
-    private const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction);
+    public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction);
     private const string Action = "submit";
     private const string Url = "https://digdir.apps.tt02.altinn.no";
     private const int HttpMethodId = (int)HttpVerb.Values.POST;
 
-    public record DialogGuiActionDto(Guid Id, DialogGuiActionPriority.Values PriorityId);
+    public sealed record DialogGuiActionDto(Guid Id, DialogGuiActionPriority.Values PriorityId);
 
     public static List<DialogGuiActionDto> GetDtos(DialogTimestamp dto)
     {

@@ -13,23 +13,23 @@ internal static class LocalizationSet
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
         // Transmission Attachments
-        var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission), 1);
+        var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmission.DomainName, 1);
         sb.AppendLine($"{transmissionId1},{dto.FormattedTimestamp},AttachmentDisplayName,{transmissionId1},,,,");
 
-        var transmissionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission), 2);
+        var transmissionId2 = DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmission.DomainName, 2);
         sb.AppendLine($"{transmissionId2},{dto.FormattedTimestamp},AttachmentDisplayName,{transmissionId2},,,,");
 
         // DialogAttachment
         sb.AppendLine($"{dto.DialogId},{dto.FormattedTimestamp},AttachmentDisplayName,{dto.DialogId},,,,");
 
         // GuiAction
-        var guiActionId1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 1);
+        var guiActionId1 = DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 1);
         sb.AppendLine($"{guiActionId1},{dto.FormattedTimestamp},DialogGuiActionTitle,,{guiActionId1},,,");
 
-        var guiActionId2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 2);
+        var guiActionId2 = DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 2);
         sb.AppendLine($"{guiActionId2},{dto.FormattedTimestamp},DialogGuiActionTitle,,{guiActionId2},,,");
 
-        var guiActionId3 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction), 3);
+        var guiActionId3 = DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 3);
         sb.AppendLine($"{guiActionId3},{dto.FormattedTimestamp},DialogGuiActionTitle,,{guiActionId3},,,");
 
 
@@ -46,10 +46,10 @@ internal static class LocalizationSet
         }
 
         // DialogContent
-        var dialogContent1 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 1);
+        var dialogContent1 = DeterministicUuidV7.Generate(dto.Timestamp, DialogContent.DomainName, 1);
         sb.AppendLine($"{dialogContent1},{dto.FormattedTimestamp},DialogContentValue,,,,{dialogContent1},");
 
-        var dialogContent2 = DeterministicUuidV7.Generate(dto.Timestamp, nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent), 2);
+        var dialogContent2 = DeterministicUuidV7.Generate(dto.Timestamp, DialogContent.DomainName, 2);
         sb.AppendLine($"{dialogContent2},{dto.FormattedTimestamp},DialogContentValue,,,,{dialogContent2},");
 
 

@@ -7,44 +7,30 @@ public sealed class CostManagementMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ICostManagementMetricsService _metricsService;
-    private readonly ITransactionTypeMapper _transactionMapper;
     private readonly IServiceIdentifierExtractor _serviceExtractor;
     private readonly ILogger<CostManagementMiddleware> _logger;
 
     public CostManagementMiddleware(
         RequestDelegate next,
         ICostManagementMetricsService metricsService,
-        ITransactionTypeMapper transactionMapper,
         IServiceIdentifierExtractor serviceExtractor,
         ILogger<CostManagementMiddleware> logger)
     {
         _next = next;
         _metricsService = metricsService;
-        _transactionMapper = transactionMapper;
         _serviceExtractor = serviceExtractor;
         _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Skip metrics for health check endpoints and other non-dialog operations
-        if (ShouldSkipMetrics(context.Request.Path))
-        {
-            await _next(context);
-            return;
-        }
-
         string? orgIdentifier = null;
         TransactionType? transactionType = null;
 
         try
         {
-            // Determine transaction type
-            var hasEndUserId = context.Request.Query.ContainsKey("enduserid");
-            transactionType = _transactionMapper.GetTransactionType(
-                context.Request.Method,
-                context.Request.Path.Value ?? string.Empty,
-                hasEndUserId);
+            // Determine transaction type from endpoint metadata (attribute-based)
+            transactionType = ResolveTransactionTypeFromEndpointMetadata(context);
 
             // If we can't map to a transaction type, skip metrics
             if (!transactionType.HasValue)
@@ -88,20 +74,40 @@ public sealed class CostManagementMiddleware
         }
     }
 
-    private static bool ShouldSkipMetrics(PathString path)
+    private static TransactionType? ResolveTransactionTypeFromEndpointMetadata(HttpContext context)
     {
-        var pathValue = path.Value?.ToLowerInvariant();
-
-        return pathValue switch
+        // Try to get the endpoint metadata added by FastEndpoints configurator
+        var endpoint = context.GetEndpoint();
+        if (endpoint is null)
         {
-            null => true,
-            var p when p.StartsWith("/health", StringComparison.OrdinalIgnoreCase) => true,
-            var p when p.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase) => true,
-            var p when p.StartsWith("/metrics", StringComparison.OrdinalIgnoreCase) => true,
-            var p when p.Contains("/wellknown", StringComparison.OrdinalIgnoreCase) => true,
-            var p when !p.Contains("/api/v1/", StringComparison.OrdinalIgnoreCase) => true, // Only track v1 API calls
-            _ => false
-        };
+            return null;
+        }
+
+        var endpointTypeMetadata = endpoint.Metadata.GetMetadata<EndpointTypeMetadata>();
+        if (endpointTypeMetadata?.EndpointType is null)
+        {
+            return null;
+        }
+
+        var costTrackedAttr = endpointTypeMetadata.EndpointType
+            .GetCustomAttributes(typeof(CostTrackedAttribute), inherit: false)
+            .OfType<CostTrackedAttribute>()
+            .FirstOrDefault();
+
+        if (costTrackedAttr is null)
+        {
+            return null;
+        }
+
+        // Check if this endpoint has a query parameter variant
+        if (costTrackedAttr.HasVariant &&
+            costTrackedAttr.QueryParameterVariant != null &&
+            context.Request.Query.ContainsKey(costTrackedAttr.QueryParameterVariant))
+        {
+            return costTrackedAttr.VariantTransactionType;
+        }
+
+        return costTrackedAttr.TransactionType;
     }
 }
 
@@ -124,7 +130,6 @@ public static class CostManagementMiddlewareExtensions
     public static IServiceCollection AddCostManagementMetrics(this IServiceCollection services)
     {
         services.AddSingleton<ICostManagementMetricsService, CostManagementMetricsService>();
-        services.AddSingleton<ITransactionTypeMapper, TransactionTypeMapper>();
         services.AddSingleton<IServiceIdentifierExtractor, ServiceIdentifierExtractor>();
 
         return services;

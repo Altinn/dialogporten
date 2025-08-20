@@ -11,17 +11,14 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Create;
 
+[CostTracked(TransactionType.CreateDialog)]
 public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
 {
     private readonly ISender _sender;
-    private readonly ICostManagementMetricsService _metricsService;
-    private readonly IServiceIdentifierExtractor _serviceExtractor;
 
-    public CreateDialogEndpoint(ISender sender, ICostManagementMetricsService metricsService, IServiceIdentifierExtractor serviceExtractor)
+    public CreateDialogEndpoint(ISender sender)
     {
         _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-        _metricsService = metricsService ?? throw new ArgumentNullException(nameof(metricsService));
-        _serviceExtractor = serviceExtractor ?? throw new ArgumentNullException(nameof(serviceExtractor));
     }
 
     public override void Configure()
@@ -45,13 +42,6 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
         await result.Match(
             success =>
             {
-                // Record successful transaction manually (complementing middleware)
-                var orgIdentifier = _serviceExtractor.ExtractServiceIdentifier(HttpContext);
-                _metricsService.RecordTransaction(
-                    TransactionType.CreateDialog,
-                    StatusCodes.Status201Created,
-                    orgIdentifier);
-
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
                 return SendCreatedAtAsync<GetDialogEndpoint>(new GetDialogQuery { DialogId = success.DialogId },
                     success.DialogId, cancellation: ct);

@@ -1,11 +1,10 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class Localization
 {
-    public static readonly string CopyCommand = Create(nameof(Localization),
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(Localization),
         "LanguageCode", "LocalizationSetId", "CreatedAt", "UpdatedAt", "Value");
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>

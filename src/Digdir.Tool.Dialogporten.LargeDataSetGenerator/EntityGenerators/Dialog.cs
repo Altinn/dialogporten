@@ -1,4 +1,4 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -6,7 +6,7 @@ internal static class Dialog
 {
     private static readonly string[] ServiceResources = File.ReadAllLines("./service_resources");
 
-    public static readonly string CopyCommand = Create(nameof(Dialog),
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(Dialog),
         "Id", "CreatedAt", "Deleted", "DeletedAt", "DueAt", "ExpiresAt", "ExtendedStatus",
         "ExternalReference", "Org", "Party", "PrecedingProcess", "Process", "Progress",
         "Revision", "ServiceResource", "ServiceResourceType", "StatusId", "VisibleFrom", "UpdatedAt");

@@ -1,11 +1,10 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class DialogSearchTag
 {
-    public static readonly string CopyCommand = Create(nameof(DialogSearchTag),
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogSearchTag),
         "Id", "Value", "CreatedAt", "DialogId");
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag);

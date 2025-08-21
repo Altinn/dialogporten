@@ -1,17 +1,16 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.ListBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class DialogTransmissionContent
 {
-    public static readonly string CopyCommand = Create(nameof(DialogTransmissionContent),
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogTransmissionContent),
         "Id", "CreatedAt", "UpdatedAt",
         "MediaType", "TransmissionId", "TypeId");
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent);
-    public static List<TransmissionContentDto> GetDtos(DialogTimestamp dto) => BuildList<TransmissionContentDto>(dtos =>
+
+    public static List<TransmissionContentDto> GetDtos(DialogTimestamp dto) => BuildDtoList<TransmissionContentDto>(dtos =>
     {
         foreach (var transmission in DialogTransmission.GetDtos(dto))
         {

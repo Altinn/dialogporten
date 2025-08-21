@@ -1,14 +1,12 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Http;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.ListBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class DialogGuiAction
 {
-    public static readonly string CopyCommand = Create(nameof(DialogGuiAction),
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogGuiAction),
         "Id", "CreatedAt", "UpdatedAt", "Action",
         "Url", "AuthorizationAttribute", "IsDeleteDialogAction",
         "PriorityId", "HttpMethodId", "DialogId");
@@ -20,7 +18,7 @@ internal static class DialogGuiAction
 
     public sealed record DialogGuiActionDto(Guid Id, DialogGuiActionPriority.Values PriorityId);
 
-    public static List<DialogGuiActionDto> GetDtos(DialogTimestamp dto) => BuildList<DialogGuiActionDto>(dtos =>
+    public static List<DialogGuiActionDto> GetDtos(DialogTimestamp dto) => BuildDtoList<DialogGuiActionDto>(dtos =>
     {
         foreach (var priority in Enum.GetValues<DialogGuiActionPriority.Values>())
         {

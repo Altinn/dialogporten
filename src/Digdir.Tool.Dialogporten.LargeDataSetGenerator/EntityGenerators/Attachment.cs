@@ -1,17 +1,15 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.ListBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class Attachment
 {
-    public static readonly string CopyCommand = Create(nameof(Attachment),
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(Attachment),
         "Id", "CreatedAt", "UpdatedAt", "Discriminator", "DialogId", "TransmissionId");
 
     public sealed record AttachmentDto(Guid Id, Guid? DialogId, Guid? TransmissionId);
 
-    public static List<AttachmentDto> GetDtos(DialogTimestamp dto) => BuildList<AttachmentDto>(dtos =>
+    public static List<AttachmentDto> GetDtos(DialogTimestamp dto) => BuildDtoList<AttachmentDto>(dtos =>
     {
         // Transmission attachments.
         dtos.AddRange(DialogTransmission.GetDtos(dto)

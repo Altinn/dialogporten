@@ -1,13 +1,11 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.ListBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class LocalizationSet
 {
-    public static readonly string CopyCommand = Create(nameof(LocalizationSet),
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(LocalizationSet),
         "Id", "CreatedAt", "Discriminator", "AttachmentId", "GuiActionId",
         "ActivityId", "DialogContentId", "TransmissionContentId");
 
@@ -19,42 +17,40 @@ internal static class LocalizationSet
 
     public sealed record LocalizationSetDto(Guid Id, string Discriminator);
 
-    public static List<LocalizationSetDto> GetDtos(DialogTimestamp dto)
+    public static List<LocalizationSetDto> GetDtos(DialogTimestamp dto) => BuildDtoList<LocalizationSetDto>(dtos =>
     {
-        return BuildList<LocalizationSetDto>(dtos =>
-        {
-            // Attachments
-            dtos.AddRange(Attachment.GetDtos(dto)
-                .Select(attachment =>
-                    new LocalizationSetDto(attachment.Id, AttachmentDiscriminator)));
+        // Attachments
+        dtos.AddRange(Attachment.GetDtos(dto)
+            .Select(attachment =>
+                new LocalizationSetDto(attachment.Id, AttachmentDiscriminator)));
 
-            // GuiAction
-            dtos.AddRange(DialogGuiAction.GetDtos(dto)
-                .Select(guiAction =>
-                    new LocalizationSetDto(guiAction.Id, DialogGuiActionDiscriminator)));
+        // GuiAction
+        dtos.AddRange(DialogGuiAction.GetDtos(dto)
+            .Select(guiAction =>
+                new LocalizationSetDto(guiAction.Id, DialogGuiActionDiscriminator)));
 
-            // DialogActivity
-            var informationActivities = Activity
-                .GetDtos(dto)
-                // Only information activities have localization entries.
-                .Where(x => x.TypeId == DialogActivityType.Values.Information)
-                .ToList();
+        // DialogActivity
+        var informationActivities = Activity
+            .GetDtos(dto)
+            // Only information activities have localization entries.
+            .Where(x => x.TypeId == DialogActivityType.Values.Information)
+            .ToList();
 
-            dtos.AddRange(informationActivities
-                .Select(activity =>
-                    new LocalizationSetDto(activity.Id, DialogActivityDiscriminator)));
+        dtos.AddRange(informationActivities
+            .Select(activity =>
+                new LocalizationSetDto(activity.Id, DialogActivityDiscriminator)));
 
-            // DialogContent
-            dtos.AddRange(DialogContent.GetDtos(dto)
-                .Select(content =>
-                    new LocalizationSetDto(content.Id, DialogContentDiscriminator)));
+        // DialogContent
+        dtos.AddRange(DialogContent.GetDtos(dto)
+            .Select(content =>
+                new LocalizationSetDto(content.Id, DialogContentDiscriminator)));
 
-            // DialogTransmissionContent
-            dtos.AddRange(DialogTransmissionContent.GetDtos(dto)
-                .Select(tc =>
-                    new LocalizationSetDto(tc.Id, DialogTransmissionContentDiscriminator)));
-        });
-    }
+        // DialogTransmissionContent
+        dtos.AddRange(DialogTransmissionContent.GetDtos(dto)
+            .Select(tc =>
+                new LocalizationSetDto(tc.Id, DialogTransmissionContentDiscriminator)));
+    });
+
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
         foreach (var localizationSet in GetDtos(dto))

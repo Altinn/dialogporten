@@ -1,8 +1,7 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
 
 #pragma warning disable IDE0072
 
@@ -10,7 +9,7 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class Actor
 {
-    public static readonly string CopyCommand = Create(nameof(Actor),
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(Actor),
         "Id", "ActorTypeId", "Discriminator",
         "ActivityId", "DialogSeenLogId", "TransmissionId",
         "CreatedAt", "UpdatedAt", "LabelAssignmentLogId",

@@ -23,5 +23,5 @@ internal static class DialogTimestampExtensions
     }
 
     public static Guid ToUuidV7(this DialogTimestamp dto, string tableName, int tieBreaker = 0)
-        => DeterministicUuidV7.CreateUuidV7(dto.Timestamp, tableName, tieBreaker);
+        => DeterministicUuidV7.Create(dto.Timestamp, tableName, tieBreaker);
 }

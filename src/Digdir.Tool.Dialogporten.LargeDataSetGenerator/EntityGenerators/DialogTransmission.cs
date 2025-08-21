@@ -29,7 +29,7 @@ internal static class DialogTransmission
 
         for (var i = 0; i < numTransmissions; i++)
         {
-            var transmissionId = dto.UuidV7(DomainName, i);
+            var transmissionId = dto.ToUuidV7(DomainName, i);
             var typeId = Types[i % Types.Count];
             dtos.Add(new TransmissionDto(transmissionId, typeId));
         }

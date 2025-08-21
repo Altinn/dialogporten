@@ -16,7 +16,7 @@ internal static class DialogTransmissionContent
         {
             for (var i = 1; i <= 2; i++)
             {
-                var contentId = dto.UuidV7(DomainName, i);
+                var contentId = dto.ToUuidV7(DomainName, i);
                 dtos.Add(new TransmissionContentDto(contentId, transmission.Id, i));
             }
         }

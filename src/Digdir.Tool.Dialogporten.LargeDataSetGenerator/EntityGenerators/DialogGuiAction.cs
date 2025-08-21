@@ -22,7 +22,7 @@ internal static class DialogGuiAction
     {
         foreach (var priority in Enum.GetValues<DialogGuiActionPriority.Values>())
         {
-            var guiActionId = dto.UuidV7(DomainName, (int)priority);
+            var guiActionId = dto.ToUuidV7(DomainName, (int)priority);
             dtos.Add(new DialogGuiActionDto(guiActionId, priority));
         }
     });

@@ -22,6 +22,6 @@ internal static class DialogTimestampExtensions
         return (dialogPartyActorNameId, transmissionPartyActorNameId);
     }
 
-    public static Guid UuidV7(this DialogTimestamp dto, string tableName, int tieBreaker = 0)
-        => dto.UuidV7(tableName, tieBreaker);
+    public static Guid ToUuidV7(this DialogTimestamp dto, string tableName, int tieBreaker = 0)
+        => dto.ToUuidV7(tableName, tieBreaker);
 }

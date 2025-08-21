@@ -17,7 +17,7 @@ internal static class Activity
     public static List<ActivityDto> GetDtos(DialogTimestamp dto) => BuildDtoList<ActivityDto>(dtos =>
     {
         // All dialogs have a DialogCreated activity.
-        var dialogCreatedActivityId = dto.UuidV7(nameof(DialogActivity), (int)DialogCreated);
+        var dialogCreatedActivityId = dto.ToUuidV7(nameof(DialogActivity), (int)DialogCreated);
         dtos.Add(new(dialogCreatedActivityId, DialogCreated));
 
         var rng = dto.GetRng();
@@ -25,14 +25,14 @@ internal static class Activity
         // Approx. 1/2 of dialogs have a DialogOpened activity.
         if (rng.Next(0, 2) == 0)
         {
-            var dialogOpenedActivityId = dto.UuidV7(nameof(DialogActivity), (int)DialogOpened);
+            var dialogOpenedActivityId = dto.ToUuidV7(nameof(DialogActivity), (int)DialogOpened);
             dtos.Add(new(dialogOpenedActivityId, DialogOpened));
         }
 
         // Approx. 1/3 of dialogs have an Information activity.
         if (rng.Next(0, 3) == 0)
         {
-            var informationActivityId = dto.UuidV7(nameof(DialogActivity), (int)Information);
+            var informationActivityId = dto.ToUuidV7(nameof(DialogActivity), (int)Information);
             dtos.Add(new(informationActivityId, Information));
         }
     });

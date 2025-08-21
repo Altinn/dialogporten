@@ -15,7 +15,7 @@ internal static class AttachmentUrl
     {
         foreach (var attachment in Attachment.GetDtos(dto))
         {
-            var attachmentUrlId = dto.UuidV7(DomainName, attachment.Id.GetHashCode());
+            var attachmentUrlId = dto.ToUuidV7(DomainName, attachment.Id.GetHashCode());
             // TODO: Can we build URLs that fetches from the dummy service provider?
             sb.AppendLine($"{attachmentUrlId},{dto.FormattedTimestamp},text/plain,{Url},1,{attachment.Id}");
         }

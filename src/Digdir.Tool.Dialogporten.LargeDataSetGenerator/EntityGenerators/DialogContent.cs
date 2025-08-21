@@ -17,10 +17,10 @@ internal static class DialogContent
 
     public static List<DialogContentDto> GetDtos(DialogTimestamp dto) => BuildDtoList<DialogContentDto>(dtos =>
     {
-        var dialogTitleId = dto.UuidV7(DomainName, TitleTypeId);
+        var dialogTitleId = dto.ToUuidV7(DomainName, TitleTypeId);
         var dialogTitle = new DialogContentDto(dialogTitleId, DialogContentType.Values.Title);
 
-        var dialogSummaryId = dto.UuidV7(DomainName, SummaryTypeId);
+        var dialogSummaryId = dto.ToUuidV7(DomainName, SummaryTypeId);
         var dialogSummary = new DialogContentDto(dialogSummaryId, DialogContentType.Values.Summary);
 
         dtos.Add(dialogTitle);

@@ -14,25 +14,25 @@ internal static class Activity
 
     public sealed record ActivityDto(Guid Id, DialogActivityType.Values TypeId);
 
-    public static List<ActivityDto> GetDtos(DialogTimestamp dialogDto) => BuildDtoList<ActivityDto>(dtos =>
+    public static List<ActivityDto> GetDtos(DialogTimestamp dto) => BuildDtoList<ActivityDto>(dtos =>
     {
         // All dialogs have a DialogCreated activity.
-        var dialogCreatedActivityId = dialogDto.UuidV7(nameof(DialogActivity), (int)DialogCreated);
+        var dialogCreatedActivityId = dto.UuidV7(nameof(DialogActivity), (int)DialogCreated);
         dtos.Add(new(dialogCreatedActivityId, DialogCreated));
 
-        var rng = dialogDto.GetRng();
+        var rng = dto.GetRng();
 
         // Approx. 1/2 of dialogs have a DialogOpened activity.
         if (rng.Next(0, 2) == 0)
         {
-            var dialogOpenedActivityId = dialogDto.UuidV7(nameof(DialogActivity), (int)DialogOpened);
+            var dialogOpenedActivityId = dto.UuidV7(nameof(DialogActivity), (int)DialogOpened);
             dtos.Add(new(dialogOpenedActivityId, DialogOpened));
         }
 
         // Approx. 1/3 of dialogs have an Information activity.
         if (rng.Next(0, 3) == 0)
         {
-            var informationActivityId = dialogDto.UuidV7(nameof(DialogActivity), (int)Information);
+            var informationActivityId = dto.UuidV7(nameof(DialogActivity), (int)Information);
             dtos.Add(new(informationActivityId, Information));
         }
     });

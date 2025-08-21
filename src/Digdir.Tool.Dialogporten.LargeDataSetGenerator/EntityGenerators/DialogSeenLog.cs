@@ -10,9 +10,9 @@ internal static class DialogSeenLog
 
     public sealed record DialogSeenLogDto(Guid Id, DialogUserType.Values EndUserTypeId);
 
-    public static List<DialogSeenLogDto> GetDtos(DialogTimestamp dialogDto)
+    public static List<DialogSeenLogDto> GetDtos(DialogTimestamp dto)
         => BuildDtoList<DialogSeenLogDto>(dtos =>
-            dtos.Add(new(dialogDto.DialogId, DialogUserType.Values.Person)));
+            dtos.Add(new(dto.DialogId, DialogUserType.Values.Person)));
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {

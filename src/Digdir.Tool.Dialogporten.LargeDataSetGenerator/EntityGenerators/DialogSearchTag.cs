@@ -23,7 +23,7 @@ internal static class DialogSearchTag
 
         foreach (var tagText in searchTags)
         {
-            var searchTagId = DeterministicUuidV7.CreateUuidV7(dto.Timestamp, DomainName, tagText.GetHashCode());
+            var searchTagId = dto.UuidV7(DomainName, tagText.GetHashCode());
             sb.AppendLine($"{searchTagId},{tagText},{dto.FormattedTimestamp},{dto.DialogId}");
         }
     });

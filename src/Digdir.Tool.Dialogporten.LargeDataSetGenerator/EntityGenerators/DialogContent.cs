@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.DeterministicUuidV7;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -18,10 +17,10 @@ internal static class DialogContent
 
     public static List<DialogContentDto> GetDtos(DialogTimestamp dto) => BuildDtoList<DialogContentDto>(dtos =>
     {
-        var dialogTitleId = CreateUuidV7(dto.Timestamp, DomainName, TitleTypeId);
+        var dialogTitleId = dto.UuidV7(DomainName, TitleTypeId);
         var dialogTitle = new DialogContentDto(dialogTitleId, DialogContentType.Values.Title);
 
-        var dialogSummaryId = CreateUuidV7(dto.Timestamp, DomainName, SummaryTypeId);
+        var dialogSummaryId = dto.UuidV7(DomainName, SummaryTypeId);
         var dialogSummary = new DialogContentDto(dialogSummaryId, DialogContentType.Values.Summary);
 
         dtos.Add(dialogTitle);

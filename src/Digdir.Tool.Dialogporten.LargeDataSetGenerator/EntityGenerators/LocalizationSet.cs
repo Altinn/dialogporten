@@ -56,7 +56,8 @@ internal static class LocalizationSet
         foreach (var localizationSet in GetDtos(dto))
         {
             sb.AppendLine(
-                $"{localizationSet.Id},{dto.FormattedTimestamp},{localizationSet.Discriminator}," +
+                $"{localizationSet.Id},{dto.FormattedTimestamp}," +
+                $"{localizationSet.Discriminator}," +
                 $"{(localizationSet.Discriminator == AttachmentDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
                 $"{(localizationSet.Discriminator == DialogGuiActionDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
                 $"{(localizationSet.Discriminator == DialogActivityDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +

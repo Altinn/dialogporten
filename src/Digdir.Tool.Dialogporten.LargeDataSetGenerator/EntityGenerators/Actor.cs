@@ -43,7 +43,16 @@ internal static class Actor
                 _ => string.Empty
             };
 
-            sb.AppendLine($"{seenLog.Id},1,DialogSeenLogSeenByActor,,{dto.DialogId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},,{actorNameId}");
+            sb.AppendLine(
+                $"{seenLog.Id}," +
+                $"1," +
+                $"DialogSeenLogSeenByActor," +
+                $"{Null}," +
+                $"{dto.DialogId}," +
+                $"{dto.FormattedTimestamp}," +
+                $"{dto.FormattedTimestamp}," +
+                $"{Null}," +
+                $"{actorNameId}");
         }
 
         // Transmission

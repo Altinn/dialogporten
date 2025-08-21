@@ -23,4 +23,6 @@ public static class Utils
         buildAction(list);
         return list;
     }
+
+    public static string Null => string.Empty;
 }

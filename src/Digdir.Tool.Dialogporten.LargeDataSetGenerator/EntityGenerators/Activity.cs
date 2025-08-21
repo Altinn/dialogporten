@@ -41,7 +41,13 @@ internal static class Activity
     {
         foreach (var activity in GetDtos(dto))
         {
-            sb.AppendLine($"{activity.Id},{dto.FormattedTimestamp},,{(int)activity.TypeId},,{dto.DialogId}");
+            sb.AppendLine(
+                $"{activity.Id}," +
+                $"{dto.FormattedTimestamp}," +
+                $"{Null}," +
+                $"{(int)activity.TypeId}," +
+                $"{Null}," +
+                $"{dto.DialogId}");
         }
     });
 }

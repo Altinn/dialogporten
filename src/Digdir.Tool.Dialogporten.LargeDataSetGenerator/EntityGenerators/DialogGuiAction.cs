@@ -31,9 +31,16 @@ internal static class DialogGuiAction
     {
         foreach (var guiAction in GetDtos(dto))
         {
-            var priorityId = (int)guiAction.PriorityId;
-            // TODO: Could this point to the dummy service provider?
-            sb.AppendLine($"{guiAction.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{Action},{Url},,FALSE,{priorityId},{HttpMethodId},{dto.DialogId}");
+            sb.AppendLine(
+                $"{guiAction.Id}," +
+                $"{dto.FormattedTimestamp}," +
+                $"{dto.FormattedTimestamp}," +
+                $"{Action},{Url}," +
+                $"{Null}," +
+                $"FALSE," +
+                $"{(int)guiAction.PriorityId}," +
+                $"{HttpMethodId}," +
+                $"{dto.DialogId}");
         }
     });
 }

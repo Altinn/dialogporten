@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
 
@@ -11,42 +10,15 @@ internal static class Localization
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
-        List<Guid> localizationSetIds =
-        [
-            dto.DialogId,
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmission.DomainName, 1),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmission.DomainName, 2),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 1),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 2),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 3),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.DialogCreated),
-            DeterministicUuidV7.Generate(dto.Timestamp, nameof(DialogActivity), (int)DialogActivityType.Values.Information),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogContent.DomainName, 1),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogContent.DomainName, 2),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmissionContent.DomainName, 1),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmissionContent.DomainName, 2),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmissionContent.DomainName, 3),
-            DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmissionContent.DomainName, 4)
-        ];
+        var rng = dto.GetRng();
 
-        foreach (var localizationSetId in localizationSetIds)
+        foreach (var localizationSet in LocalizationSet.GetDtos(dto))
         {
-            var rng = new Random(localizationSetId.GetHashCode());
+            var english = $"{Words.English.GetRandomWord(rng)} {Words.English.GetRandomWord(rng)}";
+            var norwegian = $"{Words.Norwegian.GetRandomWord(rng)} {Words.Norwegian.GetRandomWord(rng)}";
 
-            var english = Words.English.Length != 0
-                ? Words.English[rng.Next(0, Words.English.Length)] + " " +
-                  Words.English[rng.Next(0, Words.English.Length)]
-                : $"English {Guid.NewGuid().ToString()[..8]}";
-
-            var norwegian = Words.Norwegian.Length != 0
-                ? Words.Norwegian[rng.Next(0, Words.Norwegian.Length)] + " " +
-                  Words.Norwegian[rng.Next(0, Words.Norwegian.Length)]
-                : $"Norsk {Guid.NewGuid().ToString()[..8]}";
-
-            sb.AppendLine(
-                $"nb,{localizationSetId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{norwegian}");
-            sb.AppendLine(
-                $"en,{localizationSetId},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{english}");
+            sb.AppendLine($"nb,{localizationSet.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{norwegian}");
+            sb.AppendLine($"en,{localizationSet.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{english}");
         }
     });
 }

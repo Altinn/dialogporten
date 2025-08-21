@@ -1,4 +1,3 @@
-using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;

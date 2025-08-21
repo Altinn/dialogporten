@@ -1,4 +1,3 @@
-using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
@@ -8,56 +7,59 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 internal static class LocalizationSet
 {
     public static readonly string CopyCommand = Create(nameof(LocalizationSet),
-        "Id", "CreatedAt", "Discriminator", "AttachmentId", "GuiActionId", "ActivityId", "DialogContentId", "TransmissionContentId");
+        "Id", "CreatedAt", "Discriminator", "AttachmentId", "GuiActionId",
+        "ActivityId", "DialogContentId", "TransmissionContentId");
 
-    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
+    private const string AttachmentDiscriminator = "AttachmentDisplayName";
+    private const string DialogGuiActionDiscriminator = "DialogGuiActionTitle";
+    private const string DialogActivityDiscriminator = "DialogActivityDescription";
+    private const string DialogContentDiscriminator = "DialogContentValue";
+    private const string DialogTransmissionContentDiscriminator = "DialogTransmissionContentValue";
+    public sealed record LocalizationSetDto(Guid Id, string Discriminator);
+
+    public static List<LocalizationSetDto> GetDtos(DialogTimestamp dto)
     {
-        // Transmission Attachments
-        var transmissionId1 = DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmission.DomainName, 1);
-        sb.AppendLine($"{transmissionId1},{dto.FormattedTimestamp},AttachmentDisplayName,{transmissionId1},,,,");
+        List<LocalizationSetDto> dtos = [];
 
-        var transmissionId2 = DeterministicUuidV7.Generate(dto.Timestamp, DialogTransmission.DomainName, 2);
-        sb.AppendLine($"{transmissionId2},{dto.FormattedTimestamp},AttachmentDisplayName,{transmissionId2},,,,");
-
-        // DialogAttachment
-        sb.AppendLine($"{dto.DialogId},{dto.FormattedTimestamp},AttachmentDisplayName,{dto.DialogId},,,,");
+        // Attachments
+        dtos.AddRange(Attachment.GetDtos(dto)
+            .Select(attachment => new LocalizationSetDto(attachment.Id, AttachmentDiscriminator)));
 
         // GuiAction
-        var guiActionId1 = DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 1);
-        sb.AppendLine($"{guiActionId1},{dto.FormattedTimestamp},DialogGuiActionTitle,,{guiActionId1},,,");
-
-        var guiActionId2 = DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 2);
-        sb.AppendLine($"{guiActionId2},{dto.FormattedTimestamp},DialogGuiActionTitle,,{guiActionId2},,,");
-
-        var guiActionId3 = DeterministicUuidV7.Generate(dto.Timestamp, DialogGuiAction.DomainName, 3);
-        sb.AppendLine($"{guiActionId3},{dto.FormattedTimestamp},DialogGuiActionTitle,,{guiActionId3},,,");
-
+        dtos.AddRange(DialogGuiAction.GetDtos(dto)
+            .Select(guiAction => new LocalizationSetDto(guiAction.Id, DialogGuiActionDiscriminator)));
 
         // DialogActivity
-        // Only information activities have localization entries.
         var informationActivities = Activity
             .GetDtos(dto)
+            // Only information activities have localization entries.
             .Where(x => x.TypeId == DialogActivityType.Values.Information)
             .ToList();
 
-        foreach (var activity in informationActivities)
-        {
-            sb.AppendLine($"{activity.Id},{dto.FormattedTimestamp},DialogActivityDescription,,,{activity.Id},,");
-        }
+        dtos.AddRange(informationActivities
+            .Select(activity => new LocalizationSetDto(activity.Id, DialogActivityDiscriminator)));
 
         // DialogContent
-        var dialogContent1 = DeterministicUuidV7.Generate(dto.Timestamp, DialogContent.DomainName, 1);
-        sb.AppendLine($"{dialogContent1},{dto.FormattedTimestamp},DialogContentValue,,,,{dialogContent1},");
-
-        var dialogContent2 = DeterministicUuidV7.Generate(dto.Timestamp, DialogContent.DomainName, 2);
-        sb.AppendLine($"{dialogContent2},{dto.FormattedTimestamp},DialogContentValue,,,,{dialogContent2},");
-
+        dtos.AddRange(DialogContent.GetDtos(dto)
+            .Select(content => new LocalizationSetDto(content.Id, DialogContentDiscriminator)));
 
         // DialogTransmissionContent
-        var transmissionContents = DialogTransmissionContent.GetDtos(dto);
-        foreach (var tc in transmissionContents)
+        dtos.AddRange(DialogTransmissionContent.GetDtos(dto)
+            .Select(tc => new LocalizationSetDto(tc.Id, DialogTransmissionContentDiscriminator)));
+
+        return dtos;
+    }
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
+    {
+        foreach (var localizationSet in GetDtos(dto))
         {
-            sb.AppendLine($"{tc.Id},{dto.FormattedTimestamp},DialogTransmissionContentValue,,,,,{tc.Id}");
+            sb.AppendLine(
+                $"{localizationSet.Id},{dto.FormattedTimestamp},{localizationSet.Discriminator}," +
+                $"{(localizationSet.Discriminator == AttachmentDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
+                $"{(localizationSet.Discriminator == DialogGuiActionDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
+                $"{(localizationSet.Discriminator == DialogActivityDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
+                $"{(localizationSet.Discriminator == DialogContentDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
+                $"{(localizationSet.Discriminator == DialogTransmissionContentDiscriminator ? localizationSet.Id.ToString() : string.Empty)}");
         }
     });
 }

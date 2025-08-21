@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Text;
 using Npgsql;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
@@ -44,8 +42,7 @@ internal static class ActorName
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
 
-            sb.AppendLine(
-                $"{dialogPartyActorNameId},{dialogParty},{dialogPartyActorName},{dto.FormattedTimestamp}");
+            sb.AppendLine($"{dialogPartyActorNameId},{dialogParty},{dialogPartyActorName},{dto.FormattedTimestamp}");
         }
 
         var transmissionActorNameId = DeterministicUuidV7.Generate(dto.Timestamp, nameof(ActorName), 2);
@@ -55,8 +52,7 @@ internal static class ActorName
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
 
-            sb.AppendLine(
-                $"{transmissionActorNameId},{transmissionParty},{transmissionActorName},{dto.FormattedTimestamp}");
+            sb.AppendLine($"{transmissionActorNameId},{transmissionParty},{transmissionActorName},{dto.FormattedTimestamp}");
         }
     });
 

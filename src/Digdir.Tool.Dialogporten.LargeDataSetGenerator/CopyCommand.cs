@@ -20,3 +20,13 @@ public static class CsvBuilder
         return sb.ToString();
     }
 }
+
+public static class ListBuilder
+{
+    public static List<T> BuildList<T>(Action<List<T>> buildAction)
+    {
+        var list = new List<T>();
+        buildAction(list);
+        return list;
+    }
+}

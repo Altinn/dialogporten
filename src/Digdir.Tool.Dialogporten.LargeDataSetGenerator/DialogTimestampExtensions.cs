@@ -21,4 +21,7 @@ internal static class DialogTimestampExtensions
 
         return (dialogPartyActorNameId, transmissionPartyActorNameId);
     }
+
+    public static Guid UuidV7(this DialogTimestamp dto, string tableName, int tieBreaker = 0)
+        => DeterministicUuidV7.CreateUuidV7(dto.Timestamp, tableName, tieBreaker);
 }

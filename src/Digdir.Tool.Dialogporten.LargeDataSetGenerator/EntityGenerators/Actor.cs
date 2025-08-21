@@ -53,7 +53,7 @@ internal static class Actor
             var actorNameId = transmission.TypeId switch
             {
                 DialogTransmissionType.Values.Submission or
-                    DialogTransmissionType.Values.Correction => transmissionPartyActorNameId.ToString(),
+                DialogTransmissionType.Values.Correction => transmissionPartyActorNameId.ToString(),
                 _ => string.Empty
             };
 

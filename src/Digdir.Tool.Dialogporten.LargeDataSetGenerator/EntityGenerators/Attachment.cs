@@ -1,5 +1,6 @@
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.ListBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -9,23 +10,19 @@ internal static class Attachment
         "Id", "CreatedAt", "UpdatedAt", "Discriminator", "DialogId", "TransmissionId");
 
     public sealed record AttachmentDto(Guid Id, Guid? DialogId, Guid? TransmissionId);
-    public static List<AttachmentDto> GetDtos(DialogTimestamp dto)
-    {
-        List<AttachmentDto> dtos = [];
 
+    public static List<AttachmentDto> GetDtos(DialogTimestamp dto) => BuildList<AttachmentDto>(dtos =>
+    {
         // Transmission attachments.
-        foreach (var transmission in DialogTransmission.GetDtos(dto))
-        {
-            // Re-use transmission id as attachment id.
-            dtos.Add(new(transmission.Id, null, transmission.Id));
-        }
+        dtos.AddRange(DialogTransmission.GetDtos(dto)
+            .Select(transmission =>
+                // Re-use transmission id as attachment id.
+                new AttachmentDto(transmission.Id, null, transmission.Id)));
 
         // Dialog attachments.
         // Re-use dialog id as attachment id.
         dtos.Add(new(dto.DialogId, dto.DialogId, null));
-
-        return dtos;
-    }
+    });
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {

@@ -29,7 +29,7 @@ internal sealed class SeedDatabaseDto
             {
                 var timestamp = FromDate + (Interval * x);
                 var formattedTimestamp = timestamp.ToString("yyyy-MM-dd HH:mm:ss zzz");
-                var dialogId = DeterministicUuidV7.Generate(timestamp, nameof(DialogEntity));
+                var dialogId = DeterministicUuidV7.CreateUuidV7(timestamp, nameof(DialogEntity));
                 var counter = x + 1;
                 return new DialogTimestamp(timestamp, formattedTimestamp, dialogId, counter);
             });

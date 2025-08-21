@@ -34,7 +34,7 @@ internal static class ActorName
         var dialogParty = rng.GetParty();
         var transmissionParty = rng.GetParty();
 
-        var dialogPartyActorNameId = DeterministicUuidV7.Generate(dto.Timestamp, nameof(ActorName), 1);
+        var dialogPartyActorNameId = DeterministicUuidV7.CreateUuidV7(dto.Timestamp, nameof(ActorName), 1);
 
         if (InsertedActorNames.TryAdd(dialogParty, dialogPartyActorNameId))
         {
@@ -45,7 +45,7 @@ internal static class ActorName
             sb.AppendLine($"{dialogPartyActorNameId},{dialogParty},{dialogPartyActorName},{dto.FormattedTimestamp}");
         }
 
-        var transmissionActorNameId = DeterministicUuidV7.Generate(dto.Timestamp, nameof(ActorName), 2);
+        var transmissionActorNameId = DeterministicUuidV7.CreateUuidV7(dto.Timestamp, nameof(ActorName), 2);
         if (InsertedActorNames.TryAdd(transmissionParty, transmissionActorNameId))
         {
             var transmissionActorName =

@@ -1,5 +1,6 @@
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.ListBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -10,22 +11,17 @@ internal static class DialogTransmissionContent
         "MediaType", "TransmissionId", "TypeId");
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent);
-    public static List<TransmissionContentDto> GetDtos(DialogTimestamp dto)
+    public static List<TransmissionContentDto> GetDtos(DialogTimestamp dto) => BuildList<TransmissionContentDto>(dtos =>
     {
-        var transmissionDtos = DialogTransmission.GetDtos(dto);
-        var contentDtos = new List<TransmissionContentDto>();
-
-        foreach (var transmission in transmissionDtos)
+        foreach (var transmission in DialogTransmission.GetDtos(dto))
         {
             for (var i = 1; i <= 2; i++)
             {
-                var contentId = DeterministicUuidV7.Generate(dto.Timestamp, DomainName, i);
-                contentDtos.Add(new TransmissionContentDto(contentId, transmission.Id, i));
+                var contentId = DeterministicUuidV7.CreateUuidV7(dto.Timestamp, DomainName, i);
+                dtos.Add(new TransmissionContentDto(contentId, transmission.Id, i));
             }
         }
-
-        return contentDtos;
-    }
+    });
 
     public sealed record TransmissionContentDto(Guid Id, Guid TransmissionId, int TypeId);
 
@@ -33,8 +29,7 @@ internal static class DialogTransmissionContent
     {
         foreach (var tc in GetDtos(dto))
         {
-            sb.AppendLine(
-                $"{tc.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{tc.TransmissionId},{tc.TypeId}");
+            sb.AppendLine($"{tc.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{tc.TransmissionId},{tc.TypeId}");
         }
     });
 }

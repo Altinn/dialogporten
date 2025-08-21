@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CopyCommand;
 using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.CsvBuilder;
+using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.ListBuilder;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
@@ -19,18 +20,14 @@ internal static class DialogGuiAction
 
     public sealed record DialogGuiActionDto(Guid Id, DialogGuiActionPriority.Values PriorityId);
 
-    public static List<DialogGuiActionDto> GetDtos(DialogTimestamp dto)
+    public static List<DialogGuiActionDto> GetDtos(DialogTimestamp dto) => BuildList<DialogGuiActionDto>(dtos =>
     {
-        List<DialogGuiActionDto> dtos = [];
-
         foreach (var priority in Enum.GetValues<DialogGuiActionPriority.Values>())
         {
-            var guiActionId = DeterministicUuidV7.Generate(dto.Timestamp, DomainName, (int)priority);
+            var guiActionId = DeterministicUuidV7.CreateUuidV7(dto.Timestamp, DomainName, (int)priority);
             dtos.Add(new DialogGuiActionDto(guiActionId, priority));
         }
-
-        return dtos;
-    }
+    });
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {

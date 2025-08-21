@@ -18,6 +18,7 @@
         <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="OneOf" Version="3.0.271"/>
         <PackageReference Include="OneOf.SourceGenerator" Version="3.0.271"/>
+        <PackageReference Include="Scriban" Version="6.2.1" />
         <PackageReference Include="Scrutor" Version="6.1.0"/>
     </ItemGroup>
 

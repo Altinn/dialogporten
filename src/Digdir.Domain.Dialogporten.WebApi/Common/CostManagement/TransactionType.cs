@@ -92,6 +92,16 @@ public static class CostManagementConstants
     public const string OrgTag = "org";
 
     /// <summary>
+    /// Tag name for organization name from dialog entity
+    /// </summary>
+    public const string OrgNameTag = "org_name";
+
+    /// <summary>
+    /// Tag name for service resource type from dialog entity
+    /// </summary>
+    public const string ServiceResourceTag = "service_resource";
+
+    /// <summary>
     /// Tag name for success/failure status
     /// </summary>
     public const string StatusTag = "status";

@@ -1,6 +1,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
@@ -142,19 +143,22 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
+    private readonly IApplicationContext _applicationContext;
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
-        IAltinnAuthorization altinnAuthorization)
+        IAltinnAuthorization altinnAuthorization,
+        IApplicationContext applicationContext)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -250,6 +254,22 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 dialog.Content.SetNonSensitiveContent();
             }
         }
+
+        // Add metadata for cost management
+        if (paginatedList.Items.Count > 0)
+        {
+            // Use first dialog as representative for metadata
+            var firstDialog = paginatedList.Items.First();
+            _applicationContext.AddMetadata("org", firstDialog.Org);
+            _applicationContext.AddMetadata("serviceResource", firstDialog.ServiceResource);
+        }
+        else
+        {
+            // For search operations with no results, set placeholder values
+            _applicationContext.AddMetadata("org", "search_operation");
+            _applicationContext.AddMetadata("serviceResource", "search_operation");
+        }
+
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }
 }

@@ -2,6 +2,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
@@ -168,17 +169,20 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IMapper _mapper;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
+    private readonly IApplicationContext _applicationContext;
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IUserResourceRegistry userResourceRegistry,
-        IAltinnAuthorization altinnAuthorization)
+        IAltinnAuthorization altinnAuthorization,
+        IApplicationContext applicationContext)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _altinnAuthorization = altinnAuthorization;
+        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -272,6 +276,27 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             foreach (var seenRecord in seenRecords)
             {
                 seenRecord.IsCurrentEndUser = seenRecord.SeenBy.ActorId == request.EndUserId;
+            }
+        }
+
+        // Add metadata for cost management
+        if (paginatedList.Items.Count > 0)
+        {
+            // Use first dialog as representative for metadata
+            var firstDialog = paginatedList.Items.First();
+            _applicationContext.AddMetadata("org", firstDialog.Org);
+            _applicationContext.AddMetadata("serviceResource", firstDialog.ServiceResource);
+        }
+        else
+        {
+            // If no results, use user's resource registry info as fallback
+            var userResources = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
+            if (userResources.Count > 0)
+            {
+                // For search operations, we can't determine org/serviceResource without results
+                // Set placeholder values to indicate this was a search operation
+                _applicationContext.AddMetadata("org", "search_operation");
+                _applicationContext.AddMetadata("serviceResource", "search_operation");
             }
         }
 

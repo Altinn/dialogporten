@@ -11,19 +11,17 @@ public sealed class CostManagementMiddleware
     private readonly ICostManagementMetricsService _metricsService;
     private readonly IServiceIdentifierExtractor _serviceExtractor;
     private readonly ILogger<CostManagementMiddleware> _logger;
-    private readonly IApplicationContext _applicationContext;
 
     public CostManagementMiddleware(
         RequestDelegate next,
         ICostManagementMetricsService metricsService,
         IServiceIdentifierExtractor serviceExtractor,
-        ILogger<CostManagementMiddleware> logger, IApplicationContext applicationContext)
+        ILogger<CostManagementMiddleware> logger)
     {
         _next = next;
         _metricsService = metricsService;
         _serviceExtractor = serviceExtractor;
         _logger = logger;
-        _applicationContext = applicationContext;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -58,18 +56,36 @@ public sealed class CostManagementMiddleware
             // Continue processing the request
             await _next(context);
 
-            // var serviceResource = scopedBag.ReadMetadata("ServiceResource");
-            // var org = scopedBag.ReadMetadata("Org);
-            var org = _applicationContext.Metadata["org"];
+            // Resolve IApplicationContext from the request scope
+            var applicationContext = context.RequestServices.GetService<IApplicationContext>();
 
-            // Rename "orgIdentifier", orgInToken, separate from dialog.org
-            // Log both
+            // Safely read metadata from application context
+            var org = applicationContext?.Metadata.TryGetValue("org", out var orgValue) == true ? orgValue : null;
+            var serviceResource = applicationContext?.Metadata.TryGetValue("serviceResource", out var srValue) == true ? srValue : null;
+
+            // Log warning if metadata is missing but continue gracefully
+            if (applicationContext == null)
+            {
+                _logger.LogWarning("IApplicationContext not available for cost management metrics on {Method} {Path}",
+                    context.Request.Method, context.Request.Path.Value);
+            }
+            else if (org == null || serviceResource == null)
+            {
+                _logger.LogWarning("Missing cost management metadata for {Method} {Path}: org={Org}, serviceResource={ServiceResource}",
+                    context.Request.Method, context.Request.Path.Value, org ?? "null", serviceResource ?? "null");
+            }
+
+            // Log both organization identifiers for debugging
+            _logger.LogDebug("Cost management metadata for {Method} {Path}: OrgFromToken={OrgFromToken}, OrgFromDialog={OrgFromDialog}, ServiceResource={ServiceResource}",
+                context.Request.Method, context.Request.Path.Value, orgIdentifier, org, serviceResource);
 
             // Record the metric after successful processing
             _metricsService.RecordTransaction(
                 transactionType.Value,
                 context.Response.StatusCode,
-                orgIdentifier);
+                orgIdentifier,
+                org,
+                serviceResource);
         }
         catch (Exception ex)
         {

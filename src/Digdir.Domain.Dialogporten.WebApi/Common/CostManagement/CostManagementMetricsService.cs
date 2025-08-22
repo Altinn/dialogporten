@@ -21,7 +21,7 @@ public sealed class CostManagementMetricsService : ICostManagementMetricsService
             description: CostManagementConstants.TransactionCounterDescription);
     }
 
-    public void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? orgIdentifier = null)
+    public void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? orgIdentifier = null, string? orgName = null, string? serviceResource = null)
     {
         var status = GetStatusFromHttpCode(httpStatusCode);
 
@@ -38,7 +38,9 @@ public sealed class CostManagementMetricsService : ICostManagementMetricsService
             new(CostManagementConstants.StatusTag, status),
             new(CostManagementConstants.HttpStatusCodeTag, httpStatusCode),
             new(CostManagementConstants.EnvironmentTag, _environment),
-                            new(CostManagementConstants.OrgTag, orgIdentifier ?? CostManagementConstants.NoOrgValue)
+            new(CostManagementConstants.OrgTag, orgIdentifier ?? CostManagementConstants.NoOrgValue),
+            new(CostManagementConstants.OrgNameTag, orgName ?? CostManagementConstants.NoOrgValue),
+            new(CostManagementConstants.ServiceResourceTag, serviceResource ?? CostManagementConstants.NoOrgValue)
         };
 
         _transactionCounter.Add(1, tags);

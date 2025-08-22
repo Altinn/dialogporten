@@ -6,10 +6,12 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 public interface ICostManagementMetricsService
 {
     /// <summary>
-    /// Records a transaction metric for cost management
+    /// Records a transaction for cost management metrics
     /// </summary>
     /// <param name="transactionType">The type of transaction</param>
     /// <param name="httpStatusCode">The HTTP status code of the response</param>
-    /// <param name="orgIdentifier">The organization identifier (null for end user searches)</param>
-    void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? orgIdentifier = null);
+    /// <param name="orgIdentifier">Organization identifier from JWT token (optional)</param>
+    /// <param name="orgName">Organization name from dialog entity (optional)</param>
+    /// <param name="serviceResource">Service resource type from dialog entity (optional)</param>
+    void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? orgIdentifier = null, string? orgName = null, string? serviceResource = null);
 }

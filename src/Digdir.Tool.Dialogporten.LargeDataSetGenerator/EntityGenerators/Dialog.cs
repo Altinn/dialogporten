@@ -19,6 +19,18 @@ internal static class Dialog
         // TODO: 1/X of dialogs should be from special party list.
         var party = dto.GetRng().GetParty();
 
-        return $"{dto.DialogId},{dto.FormattedTimestamp},FALSE,,,,sql-generated,,ttd,{party},,,11,{Guid.NewGuid()},{serviceResource},GenericAccessResource,1,,{dto.FormattedTimestamp}";
+        return
+            $"{dto.DialogId}," +
+            $"{dto.FormattedTimestamp}," +
+            $"FALSE," +
+            $"{Null}," +
+            $"{Null}," +
+            $"{Null}," +
+            $"sql-generated," +
+            $"{Null}," +
+            $"ttd,{party}," +
+            $"{Null}," +
+            $"{Null}," +
+            $"11,{Guid.NewGuid()},{serviceResource},GenericAccessResource,1,{Null},{dto.FormattedTimestamp}";
     }
 }

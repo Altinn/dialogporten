@@ -18,7 +18,8 @@ internal static class DialogSeenLog
     {
         foreach (var dialogSeenLog in GetDtos(dto))
         {
-            sb.AppendLine($"{dialogSeenLog.Id},{dto.FormattedTimestamp},FALSE,{dto.DialogId},{(int)dialogSeenLog.EndUserTypeId}");
+            sb.AppendSeenLog(id: foo, serviceResource: "bar");
+            // sb.AppendLine($"{dialogSeenLog.Id},{dto.FormattedTimestamp},FALSE,{dto.DialogId},{(int)dialogSeenLog.EndUserTypeId}");
         }
     });
 }

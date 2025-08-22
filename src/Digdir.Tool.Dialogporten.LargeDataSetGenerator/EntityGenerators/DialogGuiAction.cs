@@ -34,10 +34,11 @@ internal static class DialogGuiAction
     {
         foreach (var guiAction in GetDtos(dto))
         {
+            sb.AppendDialog()
             sb.AppendLine(
-                $"{guiAction.Id}," +
-                $"{dto.FormattedTimestamp}," +
-                $"{dto.FormattedTimestamp}," +
+                id: $"{guiAction.Id}," +
+                fooAt: $"{dto.FormattedTimestamp}," +
+                updatedAt: $"{dto.FormattedTimestamp}," +
                 $"{Action}," +
                 $"{Url}," +
                 $"{Null}," +

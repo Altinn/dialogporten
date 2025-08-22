@@ -13,14 +13,15 @@ internal static class DialogTransmission
         DialogTransmissionType.Values.Information,
         DialogTransmissionType.Values.Submission,
         DialogTransmissionType.Values.Rejection,
-        DialogTransmissionType.Values.Correction
+        DialogTransmissionType.Values.Correction,
+        DialogTransmissionType.Values.Acceptance
     ];
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission);
 
     public static List<TransmissionDto> GetDtos(DialogTimestamp dto) => BuildDtoList<TransmissionDto>(dtos =>
     {
-        var numTransmissions = dto.GetRng().Next(0, 5);
+        var numTransmissions = dto.GetRng().Next(0, Types.Count + 1);
 
         if (numTransmissions == 0)
         {

@@ -455,4 +455,23 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.AddTransmission(x =>
                     x.AuthorizationAttribute = authAttribute))
             .ExecuteAndAssert(expectedTye);
+
+    [Fact]
+    public Task Supplied_UpdatedAt_Should_Be_Used_For_ContentUpdatedAt() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.UpdatedAt = x.Dto.CreatedAt = DateTimeOffset.UtcNow.AddDays(-1))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ContentUpdatedAt.Should().Be(x.UpdatedAt));
+
+    [Fact]
+    public Task ContentUpdatedAt_Should_Default_To_Now_If_UpdatedAt_Not_Supplied() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ContentUpdatedAt.Should()
+                    .BeCloseTo(DateTimeOffset.UtcNow,
+                        TimeSpan.FromSeconds(1)));
 }

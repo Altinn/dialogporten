@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.79.5](https://github.com/Altinn/dialogporten/compare/v1.79.4...v1.79.5) (2025-08-22)
+
+
+### Bug Fixes
+
+* **app:** Set ContentUpdatedAt to UpdatedAt on create ([#2672](https://github.com/Altinn/dialogporten/issues/2672)) ([2e99f22](https://github.com/Altinn/dialogporten/commit/2e99f22fa92a747d5f0d3a560d2f8491dffaa51d))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v4.3.0 ([#2665](https://github.com/Altinn/dialogporten/issues/2665)) ([d7b9db2](https://github.com/Altinn/dialogporten/commit/d7b9db21e5bf2ed1f1812c09689cd465a4089d6d))
+* **deps:** update dependency verify.xunit to 30.6.1 ([#2660](https://github.com/Altinn/dialogporten/issues/2660)) ([2c99f10](https://github.com/Altinn/dialogporten/commit/2c99f103323fdf09993ad00b5f9abaa90a7c0bfe))
+* **deps:** update dotnet monorepo ([#2659](https://github.com/Altinn/dialogporten/issues/2659)) ([bef3c78](https://github.com/Altinn/dialogporten/commit/bef3c787b99194074363fe67687681a5c99c1306))
+* **deps:** update jaegertracing/all-in-one docker tag to v1.72.0 ([#2661](https://github.com/Altinn/dialogporten/issues/2661)) ([7e7b307](https://github.com/Altinn/dialogporten/commit/7e7b3073b4ef96c5ed679f291b4edc56034bcf05))
+* **deps:** update step-security/harden-runner action to v2.13.0 ([#2662](https://github.com/Altinn/dialogporten/issues/2662)) ([713eb15](https://github.com/Altinn/dialogporten/commit/713eb15d4b27750879b8ace859afe6d5d4bb8bed))
+
 ## [1.79.4](https://github.com/Altinn/dialogporten/compare/v1.79.3...v1.79.4) (2025-08-15)
 
 

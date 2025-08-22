@@ -471,7 +471,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.ContentUpdatedAt.Should()
-                    .BeCloseTo(DateTimeOffset.UtcNow,
-                        TimeSpan.FromSeconds(1)));
+                Assert.True(
+                    x.ContentUpdatedAt == x.UpdatedAt &&
+                    x.ContentUpdatedAt == x.CreatedAt));
 }

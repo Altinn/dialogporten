@@ -1,3 +1,5 @@
+using Digdir.Domain.Dialogporten.Application.Common.Context;
+
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 
 /// <summary>
@@ -9,17 +11,19 @@ public sealed class CostManagementMiddleware
     private readonly ICostManagementMetricsService _metricsService;
     private readonly IServiceIdentifierExtractor _serviceExtractor;
     private readonly ILogger<CostManagementMiddleware> _logger;
+    private readonly IApplicationContext _applicationContext;
 
     public CostManagementMiddleware(
         RequestDelegate next,
         ICostManagementMetricsService metricsService,
         IServiceIdentifierExtractor serviceExtractor,
-        ILogger<CostManagementMiddleware> logger)
+        ILogger<CostManagementMiddleware> logger, IApplicationContext applicationContext)
     {
         _next = next;
         _metricsService = metricsService;
         _serviceExtractor = serviceExtractor;
         _logger = logger;
+        _applicationContext = applicationContext;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -53,6 +57,13 @@ public sealed class CostManagementMiddleware
 
             // Continue processing the request
             await _next(context);
+
+            // var serviceResource = scopedBag.ReadMetadata("ServiceResource");
+            // var org = scopedBag.ReadMetadata("Org);
+            var org = _applicationContext.Metadata["org"];
+
+            // Rename "orgIdentifier", orgInToken, separate from dialog.org
+            // Log both
 
             // Record the metric after successful processing
             _metricsService.RecordTransaction(

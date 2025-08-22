@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -27,15 +28,17 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
     private readonly IDialogDbContext _db;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserResourceRegistry _userResourceRegistry;
+    private readonly IApplicationContext _applicationContext;
 
     public PurgeDialogCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
-        IUserResourceRegistry userResourceRegistry)
+        IUserResourceRegistry userResourceRegistry, IApplicationContext applicationContext)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        _applicationContext = applicationContext;
     }
 
     public async Task<PurgeDialogResult> Handle(PurgeDialogCommand request, CancellationToken cancellationToken)
@@ -53,6 +56,8 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
+
+        _applicationContext.AddMetadata("org", dialog.Org);
 
         if (!_userResourceRegistry.UserCanModifyResourceType(dialog.ServiceResourceType))
         {

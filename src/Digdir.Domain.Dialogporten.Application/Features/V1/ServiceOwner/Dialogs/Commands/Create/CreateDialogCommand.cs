@@ -85,6 +85,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             dialog.Org = serviceResourceInformation.OwnOrgShortName;
         }
 
+        _applicationContext.AddMetadata("org", dialog.Org);
+
         var dialogId = await GetExistingDialogIdByIdempotentKey(dialog, cancellationToken);
         if (dialogId is not null)
         {

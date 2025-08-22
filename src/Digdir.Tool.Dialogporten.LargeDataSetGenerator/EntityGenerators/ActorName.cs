@@ -41,7 +41,11 @@ internal static class ActorName
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
 
-            sb.AppendLine($"{dialogPartyActorNameId},{dialogParty},{dialogPartyActorName},{dto.FormattedTimestamp}");
+            sb.AppendLine(
+                $"{dialogPartyActorNameId}," +
+                $"{dialogParty}," +
+                $"{dialogPartyActorName}," +
+                $"{dto.FormattedTimestamp}");
         }
 
         var transmissionActorNameId = dto.ToUuidV7(nameof(ActorName), 2);

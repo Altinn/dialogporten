@@ -6,10 +6,13 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
 
 internal static class DialogGuiAction
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogGuiAction),
+    private static readonly string[] Properties = [
         "Id", "CreatedAt", "UpdatedAt", "Action",
         "Url", "AuthorizationAttribute", "IsDeleteDialogAction",
-        "PriorityId", "HttpMethodId", "DialogId");
+        "PriorityId", "HttpMethodId", "DialogId"
+    ];
+
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogGuiAction), Properties);
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction);
     private const string Action = "submit";
@@ -35,7 +38,8 @@ internal static class DialogGuiAction
                 $"{guiAction.Id}," +
                 $"{dto.FormattedTimestamp}," +
                 $"{dto.FormattedTimestamp}," +
-                $"{Action},{Url}," +
+                $"{Action}," +
+                $"{Url}," +
                 $"{Null}," +
                 $"FALSE," +
                 $"{(int)guiAction.PriorityId}," +

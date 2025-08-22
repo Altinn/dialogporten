@@ -65,7 +65,17 @@ internal static class Actor
                 _ => string.Empty
             };
 
-            sb.AppendLine($"{transmission.Id},1,DialogTransmissionSenderActor,,,{transmission.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},,{actorNameId}");
+            sb.AppendLine(
+                $"{transmission.Id}," +
+                $"1," +
+                $"DialogTransmissionSenderActor," +
+                $"{Null}," +
+                $"{Null}," +
+                $"{transmission.Id}," +
+                $"{dto.FormattedTimestamp}," +
+                $"{dto.FormattedTimestamp}," +
+                $"{Null}," +
+                $"{actorNameId}");
         }
     });
 }

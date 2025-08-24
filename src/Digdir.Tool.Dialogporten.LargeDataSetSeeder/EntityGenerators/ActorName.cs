@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
-using System.Text;
 using Npgsql;
+using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
-namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class ActorName
 {
@@ -24,49 +24,40 @@ internal static class ActorName
 
     internal static readonly ConcurrentDictionary<string, Guid> InsertedActorNames = [];
 
-    public const string CopyCommand =
-        """COPY "ActorName" ("Id", "ActorId", "Name", "CreatedAt") FROM STDIN (FORMAT csv, HEADER false, NULL '')""";
+    public static readonly string CopyCommand = CreateCopyCommand(nameof(ActorName), "Id", "ActorId", "Name", "CreatedAt");
 
-    public static string Generate(DialogTimestamp dto)
+    public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
-        var actorNameCsvData = new StringBuilder();
+        var rng = dto.GetRng();
 
-        var rng = new Random(dto.DialogId.GetHashCode());
+        var dialogParty = rng.GetParty();
+        var transmissionParty = rng.GetParty();
 
-        var dialogPartyIndex = rng.Next(0, Parties.List.Length);
-        var dialogParty = Parties.List[dialogPartyIndex];
+        var dialogPartyActorNameId = dto.ToUuidV7(nameof(ActorName), 1);
 
-        var transmissionPartyIndex = rng.Next(0, Parties.List.Length);
-        var transmissionParty = Parties.List[transmissionPartyIndex];
-
-        var dialogPartyActorNameId = DeterministicUuidV7.Generate(dto.Timestamp, nameof(ActorName), 1);
-
-        // Actor.cs Activity2, DialogSeenLog
         if (InsertedActorNames.TryAdd(dialogParty, dialogPartyActorNameId))
         {
-            // ActorId(party) should result in the same names across dialogs
             var dialogPartyActorName =
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
 
-            actorNameCsvData.AppendLine(
-                $"{dialogPartyActorNameId},{dialogParty},{dialogPartyActorName},{dto.FormattedTimestamp}");
+            sb.AppendLine(
+                $"{dialogPartyActorNameId}," +
+                $"{dialogParty}," +
+                $"{dialogPartyActorName}," +
+                $"{dto.FormattedTimestamp}");
         }
 
-        var transmissionActorNameId = DeterministicUuidV7.Generate(dto.Timestamp, nameof(ActorName), 2);
-        // Actor.cs Transmission1
+        var transmissionActorNameId = dto.ToUuidV7(nameof(ActorName), 2);
         if (InsertedActorNames.TryAdd(transmissionParty, transmissionActorNameId))
         {
             var transmissionActorName =
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
 
-            actorNameCsvData.AppendLine(
-                $"{transmissionActorNameId},{transmissionParty},{transmissionActorName},{dto.FormattedTimestamp}");
+            sb.AppendLine($"{transmissionActorNameId},{transmissionParty},{transmissionActorName},{dto.FormattedTimestamp}");
         }
-
-        return actorNameCsvData.ToString();
-    }
+    });
 
     internal static Guid GetActorNameId(string party) => InsertedActorNames[party];
 }

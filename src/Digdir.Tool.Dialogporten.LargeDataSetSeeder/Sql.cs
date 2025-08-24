@@ -1,7 +1,7 @@
 // Keeping this SQL for future improvement, disables all indexes and constraints in the database
 // Could be moved to runner.sh, or another pre-script
 
-// namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator;
+// namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 //
 // internal static class Sql
 // {

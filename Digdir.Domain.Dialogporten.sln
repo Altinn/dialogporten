@@ -64,7 +64,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApiClient", "WebApiClien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Library.Dialogporten.WebApiClient", "src\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj", "{714FBB11-ADC0-44E8-A768-D1A59D641D31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Tool.Dialogporten.LargeDataSetGenerator", "src\Digdir.Tool.Dialogporten.LargeDataSetGenerator\Digdir.Tool.Dialogporten.LargeDataSetGenerator.csproj", "{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Tool.Dialogporten.LargeDataSetSeeder", "src\Digdir.Tool.Dialogporten.LargeDataSetSeeder\Digdir.Tool.Dialogporten.LargeDataSetSeeder.csproj", "{B0E0E9EE-AFBE-4013-908C-5F8DF66AB671}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Library.Dialogporten.WebApiClient.WebApiSample", "src\Digdir.Library.Dialogporten.WebApiClient.WebApiSample\Digdir.Library.Dialogporten.WebApiClient.WebApiSample.csproj", "{FBF19369-21CD-437D-BB88-CCB81EC947CF}"
 EndProject

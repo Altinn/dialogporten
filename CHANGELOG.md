@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.79.6](https://github.com/Altinn/dialogporten/compare/v1.79.5...v1.79.6) (2025-08-24)
+
+
+### Bug Fixes
+
+* **release-please:** update new version of release please ([#2675](https://github.com/Altinn/dialogporten/issues/2675)) ([bee1cc4](https://github.com/Altinn/dialogporten/commit/bee1cc4aa963fd3acbdc4d5e755b784e418614b0))
+
+
+### Miscellaneous Chores
+
+* **deps:** update Azure.Identity to 1.15.0 ([#2679](https://github.com/Altinn/dialogporten/issues/2679)) ([995efe6](https://github.com/Altinn/dialogporten/commit/995efe6d2abecb79b27c21cc3781c48c7a776978))
+* **deps:** update dependency verify.xunit to 30.7.3 ([#2680](https://github.com/Altinn/dialogporten/issues/2680)) ([1793882](https://github.com/Altinn/dialogporten/commit/17938820bb56c3ae8686107d38057c6c7c288b89))
+* **deps:** update dependency xunit.runner.visualstudio to 3.1.4 ([#2677](https://github.com/Altinn/dialogporten/issues/2677)) ([c00c262](https://github.com/Altinn/dialogporten/commit/c00c262b1b492822f8062ba2d2c94e1310f439ee))
+* **deps:** update nginx docker tag to v1.29.1 ([#2678](https://github.com/Altinn/dialogporten/issues/2678)) ([146cc30](https://github.com/Altinn/dialogporten/commit/146cc309c4824b0cc5fc2f2c7861b391bd20fdd1))
+
 ## [1.79.5](https://github.com/Altinn/dialogporten/compare/v1.79.4...v1.79.5) (2025-08-22)
 
 

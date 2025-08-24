@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 
 [SuppressMessage("Style", "IDE0048:Add parentheses for clarity")]
 public static class ExponentialDistribution

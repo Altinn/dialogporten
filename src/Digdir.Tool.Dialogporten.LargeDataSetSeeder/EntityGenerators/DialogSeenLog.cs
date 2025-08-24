@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using static Digdir.Tool.Dialogporten.LargeDataSetGenerator.Utils;
+using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
-namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class DialogSeenLog
 {

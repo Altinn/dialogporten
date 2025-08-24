@@ -1,4 +1,4 @@
-namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 
 public record struct CopyTaskDto(
     Func<DialogTimestamp, string> Generator,

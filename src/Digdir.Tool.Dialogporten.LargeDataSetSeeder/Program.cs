@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using Digdir.Tool.Dialogporten.LargeDataSetGenerator;
-using Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 using Npgsql;
-using Activity = Digdir.Tool.Dialogporten.LargeDataSetGenerator.EntityGenerators.Activity;
+using Activity = Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators.Activity;
 
 try
 {

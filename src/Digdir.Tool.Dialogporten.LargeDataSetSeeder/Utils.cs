@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 
 public static class Utils
 {

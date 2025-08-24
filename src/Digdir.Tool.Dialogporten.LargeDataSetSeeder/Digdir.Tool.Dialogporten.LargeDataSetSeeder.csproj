@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <PublishAot>true</PublishAot>
-        <RootNamespace>Digdir.Tool.Dialogporten.LargeDataSetGenerator</RootNamespace>
+        <RootNamespace>Digdir.Tool.Dialogporten.LargeDataSetSeeder</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

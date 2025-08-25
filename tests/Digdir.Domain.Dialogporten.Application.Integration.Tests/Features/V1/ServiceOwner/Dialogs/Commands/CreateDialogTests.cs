@@ -44,8 +44,12 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
                 typeof(ValidationError));
 
-            Add("Validations for UUIDv7 with timestamp in the future",
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
                 IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(1)),
+                typeof(CreateDialogSuccess));
+
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(20)),
                 typeof(ValidationError));
 
             Add("Can create a dialog with a valid UUIDv7 format",

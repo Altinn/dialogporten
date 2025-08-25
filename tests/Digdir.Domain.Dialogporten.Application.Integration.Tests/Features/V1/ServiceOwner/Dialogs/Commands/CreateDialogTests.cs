@@ -49,7 +49,11 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(20)),
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(14)),
+                typeof(CreateDialogSuccess));
+
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(16)),
                 typeof(ValidationError));
 
             Add("Can create a dialog with a valid UUIDv7 format",

@@ -2,6 +2,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
@@ -9,7 +10,9 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -168,17 +171,23 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IMapper _mapper;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
+    private readonly IApplicationContext _applicationContext;
+    private readonly IUser _user;
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IUserResourceRegistry userResourceRegistry,
-        IAltinnAuthorization altinnAuthorization)
+        IAltinnAuthorization altinnAuthorization,
+        IApplicationContext applicationContext,
+        IUser user)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _altinnAuthorization = altinnAuthorization;
+        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
+        _user = user ?? throw new ArgumentNullException(nameof(user));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -274,6 +283,12 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 seenRecord.IsCurrentEndUser = seenRecord.SeenBy.ActorId == request.EndUserId;
             }
         }
+
+        // Add metadata for cost management
+        // For ServiceOwner search, get org from token since we don't have a specific dialog
+        var orgShortName = _user.GetPrincipal().TryGetOrganizationShortName(out var org) ? org : null;
+        _applicationContext.AddMetadata("org", orgShortName ?? "unknown");
+        _applicationContext.AddMetadata("serviceResource", ""); // Search can return dialogs with different service resources
 
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }

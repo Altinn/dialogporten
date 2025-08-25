@@ -2,6 +2,7 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -10,6 +11,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Create;
 
+[CostTracked(TransactionType.CreateDialog)]
 public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
 {
     private readonly ISender _sender;
@@ -34,8 +36,10 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
 
     public override async Task HandleAsync(CreateDialogRequest req, CancellationToken ct)
     {
+        // her
         var command = new CreateDialogCommand { Dto = req.Dto, IsSilentUpdate = req.IsSilentUpdate ?? false };
         var result = await _sender.Send(command, ct);
+
         await result.Match(
             success =>
             {

@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
@@ -93,6 +94,7 @@ static void BuildAndRun(string[] args)
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
+        .AddCostManagementMetrics()
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
 
@@ -180,6 +182,7 @@ static void BuildAndRun(string[] args)
         .UseServiceOwnerOnBehalfOfPerson()
         .UseUserTypeValidation()
         .UseAzureConfiguration()
+        .UseCostManagementMetrics()
         .UseFastEndpoints(x =>
         {
             x.Endpoints.RoutePrefix = "api";
@@ -189,10 +192,14 @@ static void BuildAndRun(string[] args)
             x.Endpoints.Configurator = endpointDefinition =>
             {
                 endpointDefinition.Description(routeHandlerBuilder
-                    => routeHandlerBuilder.Add(endpointBuilder
-                        => endpointBuilder.Metadata.Add(
+                    => routeHandlerBuilder.Add(endpointBuilder =>
+                    {
+                        endpointBuilder.Metadata.Add(
                             new EndpointNameMetadata(
-                                TypeNameConverter.ToShortName(endpointDefinition.EndpointType)))));
+                                TypeNameConverter.ToShortName(endpointDefinition.EndpointType)));
+                        // Add the concrete endpoint type to the ASP.NET endpoint metadata
+                        endpointBuilder.Metadata.Add(new EndpointTypeMetadata(endpointDefinition.EndpointType));
+                    }));
             };
             x.Serializer.Options.RespectNullableAnnotations = true;
             x.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

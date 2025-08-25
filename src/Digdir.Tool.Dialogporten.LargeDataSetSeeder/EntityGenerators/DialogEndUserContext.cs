@@ -2,10 +2,11 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
+
 internal static class DialogEndUserContext
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogEndUserContext),
-        "Id", "CreatedAt", "UpdatedAt", "Revision", "DialogId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogEndUserContext),
+    //     "Id", "CreatedAt", "UpdatedAt", "Revision", "DialogId");
 
     public sealed record EndUserContextDto(Guid Id);
 

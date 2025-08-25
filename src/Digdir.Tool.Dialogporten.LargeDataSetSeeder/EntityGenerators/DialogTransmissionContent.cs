@@ -4,9 +4,9 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class DialogTransmissionContent
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogTransmissionContent),
-        "Id", "CreatedAt", "UpdatedAt",
-        "MediaType", "TransmissionId", "TypeId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogTransmissionContent),
+    //     "Id", "CreatedAt", "UpdatedAt",
+    //     "MediaType", "TransmissionId", "TypeId");
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent);
 

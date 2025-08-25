@@ -6,6 +6,7 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class ActorName
 {
+    public static string CopyCommand = "foo";
     public static async Task FetchInsertedActorNames()
     {
         await using var conn = NpgsqlDataSource.Create(Environment.GetEnvironmentVariable("CONN_STRING")!);
@@ -23,8 +24,6 @@ internal static class ActorName
     }
 
     internal static readonly ConcurrentDictionary<string, Guid> InsertedActorNames = [];
-
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(ActorName), "Id", "ActorId", "Name", "CreatedAt");
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {

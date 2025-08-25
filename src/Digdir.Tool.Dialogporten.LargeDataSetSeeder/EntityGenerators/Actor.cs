@@ -9,12 +9,6 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class Actor
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(Actor),
-        "Id", "ActorTypeId", "Discriminator",
-        "ActivityId", "DialogSeenLogId", "TransmissionId",
-        "CreatedAt", "UpdatedAt", "LabelAssignmentLogId",
-        "ActorNameEntityId");
-
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {
         var (dialogPartyActorNameId, transmissionPartyActorNameId) = dto.GetActorNameIds();

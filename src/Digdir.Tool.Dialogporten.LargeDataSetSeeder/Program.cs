@@ -170,33 +170,35 @@ try
         }
     }
 
+    // var magic = new Magic();
+
     // Localizations, 28 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(Localization.Generate, "localizations", Localization.CopyCommand, NumberOfTasks: 12), tasks);
+    // CreateCopyTasks(new CopyTaskDto(Localization.Generate, "localizations", magic.MakeCopyCommand<Localization>, NumberOfTasks: 12), tasks);
 
     // LocalizationSets, 14 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(LocalizationSet.Generate, "localization sets", LocalizationSet.CopyCommand, NumberOfTasks: 7), tasks);
+    // CreateCopyTasks(new CopyTaskDto(LocalizationSet.Generate, "localization sets", LocalizationSet.CopyCommand, NumberOfTasks: 7), tasks);
 
     // AttachmentUrls, 6 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(AttachmentUrl.Generate, "attachment URLs", AttachmentUrl.CopyCommand, NumberOfTasks: 6), tasks);
+    // CreateCopyTasks(new CopyTaskDto(AttachmentUrl.Generate, "attachment URLs", AttachmentUrl.CopyCommand, NumberOfTasks: 6), tasks);
 
     // Actors, 5 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(Actor.Generate, "actors", Actor.CopyCommand, NumberOfTasks: 4), tasks);
+    // CreateCopyTasks(new CopyTaskDto(Actor.Generate, "actors", Actor.CopyCommand, NumberOfTasks: 4), tasks);
 
     // TransmissionContent, 4 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(DialogTransmissionContent.Generate, "transmission content", DialogTransmissionContent.CopyCommand, NumberOfTasks: 2), tasks);
+    // CreateCopyTasks(new CopyTaskDto(DialogTransmissionContent.Generate, "transmission content", DialogTransmissionContent.CopyCommand, NumberOfTasks: 2), tasks);
 
     // No split, 2-3 lines per dialog
-    CreateCopyTasks(new CopyTaskDto(DialogContent.Generate, "dialog content", DialogContent.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto(DialogTransmission.Generate, "transmissions", DialogTransmission.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto(DialogGuiAction.Generate, "dialog gui actions", DialogGuiAction.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto(Activity.Generate, "activities", Activity.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto(Attachment.Generate, "attachments", Attachment.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto(DialogSearchTag.Generate, "search tags", DialogSearchTag.CopyCommand), tasks);
+    // CreateCopyTasks(new CopyTaskDto(DialogContent.Generate, "dialog content", DialogContent.CopyCommand), tasks);
+    // CreateCopyTasks(new CopyTaskDto(DialogTransmission.Generate, "transmissions", DialogTransmission.CopyCommand), tasks);
+    // CreateCopyTasks(new CopyTaskDto(DialogGuiAction.Generate, "dialog gui actions", DialogGuiAction.CopyCommand), tasks);
+    // CreateCopyTasks(new CopyTaskDto(Activity.Generate, "activities", Activity.CopyCommand), tasks);
+    // CreateCopyTasks(new CopyTaskDto(Attachment.Generate, "attachments", Attachment.CopyCommand), tasks);
+    // CreateCopyTasks(new CopyTaskDto(DialogSearchTag.Generate, "search tags", DialogSearchTag.CopyCommand), tasks);
 
     // Single line per dialog
-    CreateCopyTasks(new CopyTaskDto(DialogSeenLog.Generate, "seen logs", DialogSeenLog.CopyCommand, SingleLinePerTimestamp: true), tasks);
-    CreateCopyTasks(new CopyTaskDto(DialogEndUserContext.Generate, "end user contexts", DialogEndUserContext.CopyCommand, SingleLinePerTimestamp: true), tasks);
-    CreateCopyTasks(new CopyTaskDto(Dialog.Generate, "dialogs", Dialog.CopyCommand, SingleLinePerTimestamp: true), tasks);
+    // CreateCopyTasks(new CopyTaskDto(DialogSeenLog.Generate, "seen logs", DialogSeenLog.CopyCommand, SingleLinePerTimestamp: true), tasks);
+    // CreateCopyTasks(new CopyTaskDto(DialogEndUserContext.Generate, "end user contexts", DialogEndUserContext.CopyCommand, SingleLinePerTimestamp: true), tasks);
+    // CreateCopyTasks(new CopyTaskDto(Dialog.Generate, "dialogs", Dialog.CopyCommand, SingleLinePerTimestamp: true), tasks);
 
     await Task.WhenAll(tasks);
 

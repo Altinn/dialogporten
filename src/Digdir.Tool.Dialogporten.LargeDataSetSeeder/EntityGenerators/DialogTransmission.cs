@@ -5,8 +5,8 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class DialogTransmission
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogTransmission),
-        "Id", "CreatedAt", "AuthorizationAttribute", "ExtendedType", "TypeId", "DialogId", "RelatedTransmissionId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogTransmission),
+    //     "Id", "CreatedAt", "AuthorizationAttribute", "ExtendedType", "TypeId", "DialogId", "RelatedTransmissionId");
 
     private static readonly List<DialogTransmissionType.Values> Types =
     [

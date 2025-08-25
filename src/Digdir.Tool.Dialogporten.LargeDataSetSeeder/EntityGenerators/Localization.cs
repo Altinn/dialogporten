@@ -4,8 +4,8 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class Localization
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(Localization),
-        "LanguageCode", "LocalizationSetId", "CreatedAt", "UpdatedAt", "Value");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(Localization),
+    //     "LanguageCode", "LocalizationSetId", "CreatedAt", "UpdatedAt", "Value");
 
     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
     {

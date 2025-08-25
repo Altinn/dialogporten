@@ -4,8 +4,8 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class Attachment
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(Attachment),
-        "Id", "CreatedAt", "UpdatedAt", "Discriminator", "DialogId", "TransmissionId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(Attachment),
+    //     "Id", "CreatedAt", "UpdatedAt", "Discriminator", "DialogId", "TransmissionId");
 
     public sealed record AttachmentDto(Guid Id, Guid? DialogId, Guid? TransmissionId);
 

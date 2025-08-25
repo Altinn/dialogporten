@@ -4,8 +4,8 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class DialogSearchTag
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogSearchTag),
-        "Id", "Value", "CreatedAt", "DialogId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogSearchTag),
+    //     "Id", "Value", "CreatedAt", "DialogId");
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag);
 

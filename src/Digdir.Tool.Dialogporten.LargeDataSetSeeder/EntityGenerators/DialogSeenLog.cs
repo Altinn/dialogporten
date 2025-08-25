@@ -5,8 +5,8 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class DialogSeenLog
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogSeenLog),
-        "Id", "CreatedAt", "IsViaServiceOwner", "DialogId", "EndUserTypeId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogSeenLog),
+    //     "Id", "CreatedAt", "IsViaServiceOwner", "DialogId", "EndUserTypeId");
 
     public sealed record DialogSeenLogDto(Guid Id, DialogUserType.Values EndUserTypeId);
 

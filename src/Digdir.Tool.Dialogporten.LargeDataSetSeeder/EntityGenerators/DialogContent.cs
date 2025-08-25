@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
@@ -5,8 +7,8 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class DialogContent
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogContent),
-        "Id", "CreatedAt", "UpdatedAt", "MediaType", "DialogId", "TypeId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogContent),
+    //     "Id", "CreatedAt", "UpdatedAt", "MediaType", "DialogId", "TypeId");
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent);
 

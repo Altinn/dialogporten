@@ -5,9 +5,9 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 internal static class LocalizationSet
 {
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(LocalizationSet),
-        "Id", "CreatedAt", "Discriminator", "AttachmentId", "GuiActionId",
-        "ActivityId", "DialogContentId", "TransmissionContentId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(LocalizationSet),
+    //     "Id", "CreatedAt", "Discriminator", "AttachmentId", "GuiActionId",
+    //     "ActivityId", "DialogContentId", "TransmissionContentId");
 
     private const string AttachmentDiscriminator = "AttachmentDisplayName";
     private const string DialogGuiActionDiscriminator = "DialogGuiActionTitle";

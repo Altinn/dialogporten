@@ -6,8 +6,13 @@ internal static class AttachmentUrl
 {
     private const string Url = "https://digdir.apps.tt02.altinn.no/";
 
-    public static readonly string CopyCommand = CreateCopyCommand(nameof(AttachmentUrl),
-        "Id", "CreatedAt", "MediaType", "Url", "ConsumerTypeId", "AttachmentId");
+    // public static readonly string CopyCommand = CreateCopyCommand(nameof(AttachmentUrl),
+    //      "Id",
+    //      "CreatedAt",
+    //      "MediaType",
+    //      "Url",
+    //      "ConsumerTypeId",
+    //      "AttachmentId");
 
     public const string DomainName = nameof(Domain.Dialogporten.Domain.Attachments.AttachmentUrl);
 
@@ -17,7 +22,13 @@ internal static class AttachmentUrl
         {
             var attachmentUrlId = dto.ToUuidV7(DomainName, attachment.Id.GetHashCode());
             // TODO: Can we build URLs that fetches from the dummy service provider?
-            sb.AppendLine($"{attachmentUrlId},{dto.FormattedTimestamp},text/plain,{Url},1,{attachment.Id}");
+            sb.AppendLine(
+                $"{attachmentUrlId}," +
+                $"{dto.FormattedTimestamp}," +
+                $"text/plain," +
+                $"{Url}," +
+                $"1," +
+                $"{attachment.Id}");
         }
     });
 }

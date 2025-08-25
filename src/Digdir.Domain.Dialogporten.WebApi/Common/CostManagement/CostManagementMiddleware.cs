@@ -9,18 +9,15 @@ public sealed class CostManagementMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ICostManagementMetricsService _metricsService;
-    private readonly IServiceIdentifierExtractor _serviceExtractor;
     private readonly ILogger<CostManagementMiddleware> _logger;
 
     public CostManagementMiddleware(
         RequestDelegate next,
         ICostManagementMetricsService metricsService,
-        IServiceIdentifierExtractor serviceExtractor,
         ILogger<CostManagementMiddleware> logger)
     {
         _next = next;
         _metricsService = metricsService;
-        _serviceExtractor = serviceExtractor;
         _logger = logger;
     }
 
@@ -42,16 +39,8 @@ public sealed class CostManagementMiddleware
             }
 
             // Extract organization identifier from authenticated user claims
-            try
-            {
-                orgIdentifier = _serviceExtractor.ExtractServiceIdentifier(context);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex, "Failed to extract organization identifier from user claims for {Method} {Path}",
-                    context.Request.Method, context.Request.Path.Value);
-                // Continue with null organization identifier
-            }
+            try { orgIdentifier = context.RequestServices.GetRequiredService<IServiceIdentifierExtractor>().ExtractServiceIdentifier(context); }
+            catch (Exception ex) { _logger.LogDebug(ex, "Failed to extract organization identifier from user claims for {Method} {Path}", context.Request.Method, context.Request.Path.Value); }
 
             // Continue processing the request
             await _next(context);
@@ -157,7 +146,7 @@ public static class CostManagementMiddlewareExtensions
     public static IServiceCollection AddCostManagementMetrics(this IServiceCollection services)
     {
         services.AddSingleton<ICostManagementMetricsService, CostManagementMetricsService>();
-        services.AddSingleton<IServiceIdentifierExtractor, ServiceIdentifierExtractor>();
+        services.AddScoped<IServiceIdentifierExtractor, ServiceIdentifierExtractor>();
 
         return services;
     }

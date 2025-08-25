@@ -10,7 +10,9 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -170,19 +172,22 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IApplicationContext _applicationContext;
+    private readonly IUser _user;
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IUserResourceRegistry userResourceRegistry,
         IAltinnAuthorization altinnAuthorization,
-        IApplicationContext applicationContext)
+        IApplicationContext applicationContext,
+        IUser user)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _altinnAuthorization = altinnAuthorization;
         _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
+        _user = user ?? throw new ArgumentNullException(nameof(user));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -280,25 +285,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         }
 
         // Add metadata for cost management
-        if (paginatedList.Items.Count > 0)
-        {
-            // Use first dialog as representative for metadata
-            var firstDialog = paginatedList.Items.First();
-            _applicationContext.AddMetadata("org", firstDialog.Org);
-            _applicationContext.AddMetadata("serviceResource", firstDialog.ServiceResource);
-        }
-        else
-        {
-            // If no results, use user's resource registry info as fallback
-            var userResources = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-            if (userResources.Count > 0)
-            {
-                // For search operations, we can't determine org/serviceResource without results
-                // Set placeholder values to indicate this was a search operation
-                _applicationContext.AddMetadata("org", "search_operation");
-                _applicationContext.AddMetadata("serviceResource", "search_operation");
-            }
-        }
+        // For ServiceOwner search, get org from token since we don't have a specific dialog
+        var orgShortName = _user.GetPrincipal().TryGetOrganizationShortName(out var org) ? org : null;
+        _applicationContext.AddMetadata("org", orgShortName ?? "unknown");
+        _applicationContext.AddMetadata("serviceResource", ""); // Search can return dialogs with different service resources
 
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }

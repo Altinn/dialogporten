@@ -1,5 +1,6 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -29,14 +30,18 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDataLoaderContext _dataLoaderContext;
     private readonly IMapper _mapper;
+    private readonly IApplicationContext _applicationContext;
 
     public UpdateDialogServiceOwnerContextCommandHandler(
         IUnitOfWork unitOfWork,
-        IDataLoaderContext dataLoaderContext, IMapper mapper)
+        IDataLoaderContext dataLoaderContext,
+        IMapper mapper,
+        IApplicationContext applicationContext)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public async Task<UpdateDialogServiceOwnerContextResult> Handle(UpdateDialogServiceOwnerContextCommand request,
@@ -48,6 +53,10 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
+
+        // Add metadata for cost management
+        _applicationContext.AddMetadata("org", serviceOwnerContext.Dialog.Org);
+        _applicationContext.AddMetadata("serviceResource", serviceOwnerContext.Dialog.ServiceResource);
 
         serviceOwnerContext.ServiceOwnerLabels
             .Merge(request.Dto.ServiceOwnerLabels,

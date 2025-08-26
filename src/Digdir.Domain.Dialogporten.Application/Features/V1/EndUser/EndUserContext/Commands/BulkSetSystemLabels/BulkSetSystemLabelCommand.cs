@@ -74,10 +74,10 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new EntityNotFound<DialogEntity>(notFound);
         }
 
-        // Add metadata for cost management (use first dialog as representative)
-        var firstDialog = dialogs.First();
-        _applicationContext.AddMetadata("org", firstDialog.Org);
-        _applicationContext.AddMetadata("serviceResource", firstDialog.ServiceResource);
+        // Add metadata for cost management
+        // For EndUser bulk operations, we can't attribute to specific org/resource since it can affect multiple dialogs
+        _applicationContext.AddMetadata("org", "");
+        _applicationContext.AddMetadata("serviceResource", "");
 
         await dialogs.MergeAsync(
             sources: request.Dto.Dialogs,

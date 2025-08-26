@@ -100,7 +100,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
 
         // Add metadata for cost management
-        _applicationContext.AddMetadata("org", dialog.Org);
+        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
         _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
 
         // Ensure transmissions have a UUIDv7 ID, needed for the transmission hierarchy validation.

@@ -60,7 +60,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         }
 
         // Add metadata for cost management
-        _applicationContext.AddMetadata("org", dialog.Org);
+        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
         _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
 
         dialog.SeenLog = dialog.SeenLog

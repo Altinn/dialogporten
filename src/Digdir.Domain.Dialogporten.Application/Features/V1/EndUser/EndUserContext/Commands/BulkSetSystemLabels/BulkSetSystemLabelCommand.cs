@@ -76,7 +76,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
 
         // Add metadata for cost management
         // For EndUser bulk operations, we can't attribute to specific org/resource since it can affect multiple dialogs
-        _applicationContext.AddMetadata("org", "");
+        _applicationContext.AddMetadata("serviceOrg", "");
         _applicationContext.AddMetadata("serviceResource", "");
 
         await dialogs.MergeAsync(

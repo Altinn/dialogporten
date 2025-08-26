@@ -1,4 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Context;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 
@@ -23,7 +25,7 @@ public sealed class CostManagementMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        string? orgIdentifier = null;
+        string? tokenOrg = null;
         TransactionType? transactionType = null;
 
         try
@@ -38,9 +40,9 @@ public sealed class CostManagementMiddleware
                 return;
             }
 
-            // Extract organization identifier from authenticated user claims
-            try { orgIdentifier = context.RequestServices.GetRequiredService<IServiceIdentifierExtractor>().ExtractServiceIdentifier(context); }
-            catch (Exception ex) { _logger.LogDebug(ex, "Failed to extract organization identifier from user claims for {Method} {Path}", context.Request.Method, context.Request.Path.Value); }
+            // Extract organization short name from authenticated user claims
+            try { tokenOrg = ExtractTokenOrg(context); }
+            catch (Exception ex) { _logger.LogDebug(ex, "Failed to extract organization short name from user claims for {Method} {Path}", context.Request.Method, context.Request.Path.Value); }
 
             // Continue processing the request
             await _next(context);
@@ -49,7 +51,7 @@ public sealed class CostManagementMiddleware
             var applicationContext = context.RequestServices.GetService<IApplicationContext>();
 
             // Safely read metadata from application context
-            var org = applicationContext?.Metadata.TryGetValue("org", out var orgValue) == true ? orgValue : null;
+            var serviceOrg = applicationContext?.Metadata.TryGetValue("serviceOrg", out var orgValue) == true ? orgValue : null;
             var serviceResource = applicationContext?.Metadata.TryGetValue("serviceResource", out var srValue) == true ? srValue : null;
 
             // Log warning if metadata is missing but continue gracefully
@@ -58,32 +60,32 @@ public sealed class CostManagementMiddleware
                 _logger.LogWarning("IApplicationContext not available for cost management metrics on {Method} {Path}",
                     context.Request.Method, context.Request.Path.Value);
             }
-            else if (org == null || serviceResource == null)
+            else if (serviceOrg == null || serviceResource == null)
             {
-                _logger.LogWarning("Missing cost management metadata for {Method} {Path}: org={Org}, serviceResource={ServiceResource}",
-                    context.Request.Method, context.Request.Path.Value, org ?? "null", serviceResource ?? "null");
+                _logger.LogWarning("Missing cost management metadata for {Method} {Path}: serviceOrg={ServiceOrg}, serviceResource={ServiceResource}",
+                    context.Request.Method, context.Request.Path.Value, serviceOrg ?? "null", serviceResource ?? "null");
             }
 
             // Log both organization identifiers for debugging
-            _logger.LogDebug("Cost management metadata for {Method} {Path}: OrgFromToken={OrgFromToken}, OrgFromDialog={OrgFromDialog}, ServiceResource={ServiceResource}",
-                context.Request.Method, context.Request.Path.Value, orgIdentifier, org, serviceResource);
+            _logger.LogDebug("Cost management metadata for {Method} {Path}: TokenOrg={TokenOrg}, ServiceOrg={ServiceOrg}, ServiceResource={ServiceResource}",
+                context.Request.Method, context.Request.Path.Value, tokenOrg, serviceOrg, serviceResource);
 
             // Record the metric after successful processing
             _metricsService.RecordTransaction(
                 transactionType.Value,
                 context.Response.StatusCode,
-                orgIdentifier,
-                org,
+                tokenOrg,
+                serviceOrg,
                 serviceResource);
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex,
-                "Failed to capture cost management metrics for {Method} {Path}. TransactionType: {TransactionType}, OrgIdentifier: {OrgIdentifier}",
+                "Failed to capture cost management metrics for {Method} {Path}. TransactionType: {TransactionType}, TokenOrg: {TokenOrg}",
                 context.Request.Method,
                 context.Request.Path.Value,
                 transactionType?.ToString() ?? "Unknown",
-                orgIdentifier ?? "null");
+                tokenOrg ?? "null");
 
             // Continue processing even if metrics capture fails
             await _next(context);
@@ -125,6 +127,19 @@ public sealed class CostManagementMiddleware
 
         return costTrackedAttr.TransactionType;
     }
+
+    private static string? ExtractTokenOrg(HttpContext context)
+    {
+        var user = context.RequestServices.GetRequiredService<IUser>();
+        var principal = user.GetPrincipal();
+
+        if (principal.TryGetOrganizationShortName(out var orgShortName))
+        {
+            return orgShortName;
+        }
+
+        return null;
+    }
 }
 
 /// <summary>
@@ -146,7 +161,6 @@ public static class CostManagementMiddlewareExtensions
     public static IServiceCollection AddCostManagementMetrics(this IServiceCollection services)
     {
         services.AddSingleton<ICostManagementMetricsService, CostManagementMetricsService>();
-        services.AddScoped<IServiceIdentifierExtractor, ServiceIdentifierExtractor>();
 
         return services;
     }

@@ -259,13 +259,13 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         if (paginatedList.Items.Count > 0)
         {
             // For search operations, we can't attribute to specific org/resource since results may vary
-            _applicationContext.AddMetadata("org", "");
+            _applicationContext.AddMetadata("serviceOrg", "");
             _applicationContext.AddMetadata("serviceResource", "");
         }
         else
         {
             // For search operations with no results, set to empty strings since we can't attribute to specific org/resource
-            _applicationContext.AddMetadata("org", "");
+            _applicationContext.AddMetadata("serviceOrg", "");
             _applicationContext.AddMetadata("serviceResource", "");
         }
 

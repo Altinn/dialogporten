@@ -55,7 +55,7 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
         }
 
         // Add metadata for cost management
-        _applicationContext.AddMetadata("org", serviceOwnerContext.Dialog.Org);
+        _applicationContext.AddMetadata("serviceOrg", serviceOwnerContext.Dialog.Org);
         _applicationContext.AddMetadata("serviceResource", serviceOwnerContext.Dialog.ServiceResource);
 
         serviceOwnerContext.ServiceOwnerLabels

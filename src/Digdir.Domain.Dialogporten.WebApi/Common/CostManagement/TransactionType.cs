@@ -87,14 +87,14 @@ public static class CostManagementConstants
     public const string TransactionTypeTag = "transaction_type";
 
     /// <summary>
-    /// Tag name for organization identifier
+    /// Tag name for organization short name from token
     /// </summary>
-    public const string OrgTag = "org";
+    public const string TokenOrgTag = "token_org";
 
     /// <summary>
-    /// Tag name for organization name from dialog entity
+    /// Tag name for organization short name from dialog entity
     /// </summary>
-    public const string OrgNameTag = "org_name";
+    public const string ServiceOrgTag = "service_org";
 
     /// <summary>
     /// Tag name for service resource type from dialog entity

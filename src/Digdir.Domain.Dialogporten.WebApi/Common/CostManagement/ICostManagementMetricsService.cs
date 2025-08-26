@@ -10,8 +10,8 @@ public interface ICostManagementMetricsService
     /// </summary>
     /// <param name="transactionType">The type of transaction</param>
     /// <param name="httpStatusCode">The HTTP status code of the response</param>
-    /// <param name="orgIdentifier">Organization identifier from JWT token (optional)</param>
-    /// <param name="orgName">Organization name from dialog entity (optional)</param>
+    /// <param name="tokenOrg">Organization short name from token (optional)</param>
+    /// <param name="serviceOrg">Organization short name from dialog entity (optional)</param>
     /// <param name="serviceResource">Service resource type from dialog entity (optional)</param>
-    void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? orgIdentifier = null, string? orgName = null, string? serviceResource = null);
+    void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? tokenOrg = null, string? serviceOrg = null, string? serviceResource = null);
 }

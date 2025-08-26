@@ -67,7 +67,7 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
         }
 
         // Add metadata for cost management
-        _applicationContext.AddMetadata("org", dialog.Org);
+        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
         _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
 
         if (!_userResourceRegistry.UserCanModifyResourceType(dialog.ServiceResourceType))

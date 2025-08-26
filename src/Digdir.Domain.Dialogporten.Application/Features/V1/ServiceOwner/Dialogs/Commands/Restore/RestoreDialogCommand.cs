@@ -55,7 +55,7 @@ internal sealed class RestoreDialogCommandHandler : IRequestHandler<RestoreDialo
         }
 
         // Add metadata for cost management
-        _applicationContext.AddMetadata("org", dialog.Org);
+        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
         _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
 
         if (!dialog.Deleted)

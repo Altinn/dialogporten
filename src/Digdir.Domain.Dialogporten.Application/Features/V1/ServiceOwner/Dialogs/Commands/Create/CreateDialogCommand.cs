@@ -89,9 +89,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             dialog.Org = serviceResourceInformation.OwnOrgShortName;
         }
 
-        _applicationContext.AddMetadata("org", dialog.Org);
-        _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
-
         var dialogId = await GetExistingDialogIdByIdempotentKey(dialog, cancellationToken);
         if (dialogId is not null)
         {
@@ -145,7 +142,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Add metadata for cost management after successful creation
-        _applicationContext.AddMetadata("org", dialog.Org);
+        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
         _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
 
         return saveResult.Match<CreateDialogResult>(

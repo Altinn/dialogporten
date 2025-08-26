@@ -287,7 +287,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         // Add metadata for cost management
         // For ServiceOwner search, get org from token since we don't have a specific dialog
         var orgShortName = _user.GetPrincipal().TryGetOrganizationShortName(out var org) ? org : null;
-        _applicationContext.AddMetadata("org", orgShortName ?? "unknown");
+        _applicationContext.AddMetadata("serviceOrg", orgShortName ?? "unknown");
         _applicationContext.AddMetadata("serviceResource", ""); // Search can return dialogs with different service resources
 
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);

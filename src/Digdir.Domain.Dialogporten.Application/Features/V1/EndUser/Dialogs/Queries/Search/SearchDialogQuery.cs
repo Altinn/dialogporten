@@ -256,18 +256,9 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         }
 
         // Add metadata for cost management
-        if (paginatedList.Items.Count > 0)
-        {
-            // For search operations, we can't attribute to specific org/resource since results may vary
-            _applicationContext.AddMetadata("serviceOrg", "");
-            _applicationContext.AddMetadata("serviceResource", "");
-        }
-        else
-        {
-            // For search operations with no results, set to empty strings since we can't attribute to specific org/resource
-            _applicationContext.AddMetadata("serviceOrg", "");
-            _applicationContext.AddMetadata("serviceResource", "");
-        }
+        // For search operations, we can't attribute to specific org/resource since results may vary
+        _applicationContext.AddMetadata("serviceOrg", "");
+        _applicationContext.AddMetadata("serviceResource", "");
 
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }

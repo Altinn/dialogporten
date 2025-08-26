@@ -4,26 +4,28 @@ This document describes the implementation of cost management metrics in Dialogp
 
 ## Overview
 
-The cost management metrics system tracks dialog transactions for billing and cost analysis purposes. It records metrics for successful operations (2xx status codes) and client errors (4xx status codes), but excludes server errors (5xx) as they don't incur costs.
+The cost management metrics system tracks dialog transactions for billing and cost analysis purposes. It records metrics for all HTTP requests (2xx, 4xx, and 5xx status codes) with detailed metadata about the organization making the request and the service being accessed.
 
 ## Architecture
 
 ### Components
 
-1. **CostManagementMetricsService**: Core service that emits OpenTelemetry metrics
-2. **TransactionTypeMapper**: Maps HTTP requests to transaction types
-3. **ServiceIdentifierExtractor**: Extracts organization identifiers from requests
-4. **CostManagementMiddleware**: Automatically captures metrics for all requests
+1. **`[CostTracked]` Attribute**: Custom attribute that marks endpoints for cost tracking and specifies the transaction type
+2. **`CostManagementMiddleware`**: ASP.NET Core middleware that intercepts requests and records metrics
+3. **`ICostManagementMetricsService`**: Service interface for recording transaction metrics
+4. **`CostManagementMetricsService`**: Implementation that emits OpenTelemetry metrics
+5. **`IApplicationContext`**: Scoped service for passing metadata from handlers to middleware
+6. **`TransactionType`**: Enum defining all supported transaction types
 
 ### Data Flow
 
 ```mermaid
-graph TD
-    A[HTTP Request] --> B[Cost Management Middleware]
-    B --> C[Transaction Type Mapper]
-    C --> D[Organization Identifier Extractor]
-    D --> E[Endpoint Handler]
-    E --> F[Cost Management Metrics Service]
+flowchart TD
+    A[HTTP Request] --> B[CostManagementMiddleware]
+    B --> C[Extract TransactionType from CostTracked attribute]
+    C --> D[Extract tokenOrg from JWT claims]
+    D --> E[Read serviceOrg and serviceResource from IApplicationContext]
+    E --> F[Record metrics via ICostManagementMetricsService]
     F --> G[OpenTelemetry Meter]
     G --> H[OTEL Collector]
     H --> I[Prometheus/Azure Monitor]
@@ -31,7 +33,7 @@ graph TD
 
 ## Transaction Types
 
-The system tracks 12 different transaction types:
+The system tracks various transaction types defined in the `TransactionType` enum:
 
 | Transaction Type | Description | Norwegian Term |
 |------------------|-------------|----------------|
@@ -41,12 +43,80 @@ The system tracks 12 different transaction types:
 | `HardDeleteDialog` | Hard delete/purge dialog operation | Hardslette dialog |
 | `GetDialogServiceOwner` | Get dialog by service owner | Hente dialog tjenesteeier |
 | `SearchDialogsServiceOwner` | Service owner search dialogs | Tjenesteeiersøk |
-| `SearchDialogsServiceOwnerWithEndUser` | Service owner search with end user ID | Tjenesteeiersøk m/sluttbruker-id |
 | `GetDialogEndUser` | Get dialog by end user | Hente dialog sluttbruker |
-| `SetDialogLabel` | Set label on single dialog | Sette label på enkeltdialog |
-| `BulkSetLabelsServiceOwnerWithEndUser` | Bulk set labels via service owner API | Bulk label setting with end user |
 | `SearchDialogsEndUser` | End user search dialogs | Sluttbrukersøk |
-| `BulkSetLabelsEndUser` | Bulk set labels via end user API | Bulk label setting end user |
+| `SetDialogLabel` | Set label on dialog | Sette label på dialog |
+| `BulkSetLabelsServiceOwner` | Bulk set labels via service owner API | Bulk label setting tjenesteeier |
+| `BulkSetLabelsEndUser` | Bulk set labels via end user API | Bulk label setting sluttbruker |
+
+## Endpoint Annotation
+
+Endpoints are marked for cost tracking using the `[CostTracked]` attribute:
+
+```csharp
+[CostTracked(TransactionType.CreateDialog)]
+public class CreateDialogEndpoint : Endpoint<CreateDialogCommand, CreateDialogResult>
+{
+    // Endpoint implementation
+}
+```
+
+## Metadata Structure
+
+The system captures three key pieces of metadata for each transaction:
+
+### 1. `tokenOrg` (Organization from JWT Token)
+- **Source**: `"urn:altinn:org"` claim from the JWT token
+- **Example**: `"digdir"`, `"skatteetaten"`
+- **Purpose**: Identifies the organization making the API call
+
+### 2. `serviceOrg` (Organization from Dialog Entity)
+- **Source**: `dialog.Org` property from the dialog being operated on
+- **Example**: `"digdir"`, `"skatteetaten"`
+- **Purpose**: Identifies the organization that owns the service being accessed
+
+### 3. `serviceResource` (Service Resource from Dialog Entity)
+- **Source**: `dialog.ServiceResource` property from the dialog being operated on
+- **Example**: `"skjema/NAV/123"`
+- **Purpose**: Identifies the specific service resource being accessed
+
+## Metadata Handling
+
+### Handler Implementation
+
+Handlers set metadata using `IApplicationContext`:
+
+```csharp
+public class CreateDialogCommandHandler : IRequestHandler<CreateDialogCommand, CreateDialogResult>
+{
+    private readonly IApplicationContext _applicationContext;
+    
+    public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
+    {
+        // ... business logic ...
+        
+        // Set metadata after successful operation
+        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
+        _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
+        
+        return result;
+    }
+}
+```
+
+### Special Cases
+
+For operations where metadata cannot be meaningfully attributed:
+
+```csharp
+// Search operations affecting multiple entities
+_applicationContext.AddMetadata("serviceOrg", "");
+_applicationContext.AddMetadata("serviceResource", "");
+
+// End user operations without organization context
+_applicationContext.AddMetadata("serviceOrg", "");
+_applicationContext.AddMetadata("serviceResource", "");
+```
 
 ## Metrics Schema
 
@@ -61,158 +131,109 @@ The system tracks 12 different transaction types:
 | Tag Name | Description | Example Values |
 |----------|-------------|----------------|
 | `transaction_type` | Type of transaction | `CreateDialog`, `GetDialogServiceOwner` |
-| `org` | Organization identifier | `991825827`, `null` |
-| `status` | Success/failure status | `success`, `failed` |
-| `http_status_code` | HTTP response status code | `200`, `201`, `400`, `404` |
+| `token_org` | Organization from JWT token | `"digdir"`, `"skatteetaten"` |
+| `service_org` | Organization from dialog entity | `"digdir"`, `"skatteetaten"` |
+| `service_resource` | Service resource from dialog entity | `"skjema/NAV/123"` |
+| `http_status_code` | HTTP response status code | `200`, `201`, `400`, `404`, `500` |
 | `environment` | Environment name | `Development`, `Test`, `Production` |
 
-## Route Mapping
+## Implementation & Configuration
 
-The system automatically maps HTTP requests to transaction types based on:
-
-- HTTP method (GET, POST, PUT, DELETE, PATCH)
-- Request path pattern
-- Presence of `enduserid` query parameter
-
-### Examples
-
-| HTTP Request | Transaction Type |
-|-------------|------------------|
-| `POST /api/v1/serviceowner/dialogs` | `CreateDialog` |
-| `GET /api/v1/serviceowner/dialogs/{id}` | `GetDialogServiceOwner` |
-| `GET /api/v1/serviceowner/dialogs?enduserid=...` | `SearchDialogsServiceOwnerWithEndUser` |
-| `GET /api/v1/enduser/dialogs/{id}` | `GetDialogEndUser` |
-| `DELETE /api/v1/serviceowner/dialogs/{id}` | `SoftDeleteDialog` |
-
-## Implementation Approaches
-
-The system provides two complementary approaches for recording metrics:
-
-### 1. Automatic Middleware (Recommended)
-
-The `CostManagementMiddleware` automatically captures metrics for all API requests:
-
-- Maps requests to transaction types
-- Extracts organization identifiers
-- Records metrics with proper tags
-- Handles errors gracefully
-
-### 2. Manual Endpoint Integration
-
-Individual endpoints can also record metrics directly:
-
-```csharp
-_metricsService.RecordTransaction(
-    TransactionType.CreateDialog, 
-    StatusCodes.Status201Created, 
-    orgIdentifier);
-```
-
-This approach provides more control and can include additional context not available to middleware.
-
-## Organization Identifier Extraction
-
-Organization identifiers represent the **organization making the API call** and are extracted from:
-
-1. **User Claims**: Organization number from the authenticated user's `consumer` claim
-2. **Service Owner Operations**: Extracts organization number when authenticated as service owner
-3. **End User Operations**: Returns `null` as specified (no organization context)
-
-For operations where no organization can be determined (e.g., end user searches, unauthenticated requests), the org tag is set to `"null"`.
-
-### Authentication Flow
-- **Service Owner**: `consumer` claim contains organization number (e.g., "991825827")
-- **End User**: No organization context, organization identifier is `null`
-- **Unauthenticated**: Organization identifier is `null`
-
-## Configuration
-
-### Registering Services
+### Service Registration
 
 In `Program.cs`:
 
 ```csharp
-builder.Services.AddCostManagementMetrics();
-```
+// Register services
+builder.Services.AddScoped<IApplicationContext, ApplicationContext>();
+builder.Services.AddSingleton<ICostManagementMetricsService, CostManagementMetricsService>();
 
-### Adding Middleware
-
-In `Program.cs`:
-
-```csharp
-app.UseCostManagementMetrics();
+// Add middleware
+app.UseMiddleware<CostManagementMiddleware>();
 ```
 
 ### OpenTelemetry Integration
 
-The cost management meter is automatically registered in the OpenTelemetry configuration:
+The cost management meter is automatically registered:
 
 ```csharp
 metrics.AddMeter("Dialogporten.CostManagement");
 ```
 
-## Local Testing
+### Endpoint Metadata
 
-### Prerequisites
+The middleware reads endpoint metadata to determine transaction types:
 
-1. Start the OTEL collector: `docker-compose -f docker-compose-otel.yml up`
-2. Run the WebApi: `dotnet run --project src/Digdir.Domain.Dialogporten.WebApi`
-
-### Viewing Metrics
-
-1. **Prometheus**: http://localhost:8889/metrics
-2. **Search for**: `dialogporten_transactions_total`
-
-### Test Requests
-
-Use the provided `test-cost-metrics.http` file to generate test transactions and verify metrics collection.
-
-### Example Metrics Output
-
+```csharp
+var endpoint = context.GetEndpoint();
+var costTrackedAttribute = endpoint?.Metadata.GetMetadata<CostTrackedAttribute>();
+var transactionType = costTrackedAttribute?.TransactionType;
 ```
-# Example metrics with the new "org" tag
-dialogporten_dialogporten_transactions_total{
-  transaction_type="GetDialogServiceOwner",
-  org="991825827",
-  status="success",
-  http_status_code="200",
-  environment="Development"
-} 14
 
-dialogporten_dialogporten_transactions_total{
-  transaction_type="CreateDialog",
-  org="991825827", 
-  status="success",
-  http_status_code="201",
-  environment="Development"
-} 5
+### JWT Claims Extraction
 
-dialogporten_dialogporten_transactions_total{
-  transaction_type="SearchDialogsEndUser",
-  org="null",
-  status="success", 
-  http_status_code="200",
-  environment="Development"
-} 3
+Organization information is extracted from JWT claims:
+
+```csharp
+private static string? ExtractTokenOrg(IUser user)
+{
+    var principal = user.GetPrincipal();
+    if (principal.TryGetOrganizationShortName(out var orgShortName))
+    {
+        return orgShortName;
+    }
+    return null;
+}
+```
+
+## Testing
+
+### Unit Tests
+
+Test individual components in isolation:
+
+- `CostTrackedAttribute` tests
+- `CostManagementMetricsService` tests
+- Handler metadata tests
+
+### Integration Tests
+
+Use `FlowBuilder` for application layer integration tests:
+
+```csharp
+[Fact]
+public async Task CreateDialog_ShouldSetMetadata()
+{
+    // Arrange
+    var flow = new FlowBuilder()
+        .WithUser(TestUsers.ServiceOwner)
+        .Build();
+    
+    // Act
+    var result = await flow.SendAsync(new CreateDialogCommand(...));
+    
+    // Assert
+    // Verify metadata was set correctly
+}
 ```
 
 ## Production Considerations
 
 ### Performance
 
-- Metrics collection uses OpenTelemetry's efficient counter implementation
 - Minimal overhead on request processing
-- Automatic batching and export handled by OTEL
+- Metadata extraction happens only for annotated endpoints
+- OpenTelemetry handles efficient metric batching and export
 
 ### Reliability
 
 - Middleware handles errors gracefully without affecting request processing
 - Failed metric collection is logged but doesn't impact API functionality
-- Organization extraction handles authentication failures gracefully
+- Graceful handling of missing or invalid metadata
 
 ### Monitoring
 
-Monitor the cost management metrics system itself by:
+Monitor the cost management system by:
 
 - Checking for metric collection errors in application logs
 - Verifying metric export to monitoring systems
@@ -220,8 +241,8 @@ Monitor the cost management metrics system itself by:
 
 ## Future Enhancements
 
-1. **Additional Organization Sources**: Extract organization identifiers from headers, query parameters, or database lookups
+1. **Additional Metadata Sources**: Extract metadata from headers, query parameters, or database lookups
 2. **Metric Aggregation**: Pre-aggregate metrics by time windows for cost reporting
-3. **Custom Dimensions**: Add organization, region, or other billing dimensions
+3. **Custom Dimensions**: Add region, environment, or other billing dimensions
 4. **Rate Limiting**: Implement metrics-based rate limiting for cost control
 5. **Cost Calculation**: Integrate with pricing models for real-time cost estimation

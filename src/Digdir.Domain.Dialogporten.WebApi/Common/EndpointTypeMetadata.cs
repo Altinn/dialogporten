@@ -13,5 +13,3 @@ public sealed class EndpointTypeMetadata
         EndpointType = endpointType ?? throw new ArgumentNullException(nameof(endpointType));
     }
 }
-
-

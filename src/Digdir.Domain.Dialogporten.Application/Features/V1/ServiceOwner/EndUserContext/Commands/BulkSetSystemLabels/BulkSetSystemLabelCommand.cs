@@ -68,10 +68,19 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         {
             _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, distinctOrgs[0]);
         }
+        else
+        {
+            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.BulkOperation);
+        }
+
         var distinctResources = dialogs.Select(d => d.ServiceResource).Where(r => !string.IsNullOrEmpty(r)).Distinct().ToList();
         if (distinctResources.Count == 1)
         {
             _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, distinctResources[0]);
+        }
+        else
+        {
+            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, CostManagementMetadataKeys.BulkOperation);
         }
 
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);

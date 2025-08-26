@@ -127,7 +127,7 @@ public static class CostManagementConstants
     public const string StatusFailed = "failed";
 
     /// <summary>
-    /// Value used when no organization can be determined
+    /// Value used when organization or service resource cannot be determined
     /// </summary>
-    public const string NoOrgValue = "null";
+    public const string UnknownValue = "unknown";
 }

@@ -26,27 +26,34 @@ public sealed class CostManagementMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         string? tokenOrg = null;
-        TransactionType? transactionType = null;
 
+        // Determine transaction type from endpoint metadata (attribute-based)
+        var transactionType = ResolveTransactionTypeFromEndpointMetadata(context);
+
+        // If we can't map to a transaction type, skip metrics and just process the request
+        if (!transactionType.HasValue)
+        {
+            await _next(context);
+            return;
+        }
+
+        // Extract organization short name from authenticated user claims
         try
         {
-            // Determine transaction type from endpoint metadata (attribute-based)
-            transactionType = ResolveTransactionTypeFromEndpointMetadata(context);
+            tokenOrg = ExtractTokenOrg(context);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Failed to extract organization short name from user claims for {Method} {Path}",
+                context.Request.Method, context.Request.Path.Value);
+        }
 
-            // If we can't map to a transaction type, skip metrics
-            if (!transactionType.HasValue)
-            {
-                await _next(context);
-                return;
-            }
+        // Process the request
+        await _next(context);
 
-            // Extract organization short name from authenticated user claims
-            try { tokenOrg = ExtractTokenOrg(context); }
-            catch (Exception ex) { _logger.LogDebug(ex, "Failed to extract organization short name from user claims for {Method} {Path}", context.Request.Method, context.Request.Path.Value); }
-
-            // Continue processing the request
-            await _next(context);
-
+        // Post-processing: Record metrics and logging in a try-catch to isolate failures
+        try
+        {
             // Resolve IApplicationContext from the request scope
             var applicationContext = context.RequestServices.GetService<IApplicationContext>();
 
@@ -60,10 +67,10 @@ public sealed class CostManagementMiddleware
                 _logger.LogWarning("IApplicationContext not available for cost management metrics on {Method} {Path}",
                     context.Request.Method, context.Request.Path.Value);
             }
-            else if (serviceOrg == null || serviceResource == null)
+            else if (serviceOrg == CostManagementConstants.UnknownValue || serviceResource == CostManagementConstants.UnknownValue)
             {
-                _logger.LogWarning("Missing cost management metadata for {Method} {Path}: serviceOrg={ServiceOrg}, serviceResource={ServiceResource}",
-                    context.Request.Method, context.Request.Path.Value, serviceOrg ?? "null", serviceResource ?? "null");
+                _logger.LogWarning("Unknown organization/resource for cost management on {Method} {Path}: serviceOrg={ServiceOrg}, serviceResource={ServiceResource}",
+                    context.Request.Method, context.Request.Path.Value, serviceOrg, serviceResource);
             }
 
             // Log both organization identifiers for debugging
@@ -86,9 +93,6 @@ public sealed class CostManagementMiddleware
                 context.Request.Path.Value,
                 transactionType?.ToString() ?? "Unknown",
                 tokenOrg ?? "null");
-
-            // Continue processing even if metrics capture fails
-            await _next(context);
         }
     }
 

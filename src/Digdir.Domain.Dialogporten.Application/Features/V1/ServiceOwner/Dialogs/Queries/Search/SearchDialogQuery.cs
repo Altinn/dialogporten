@@ -169,17 +169,20 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IMapper _mapper;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
+    private readonly IApplicationContext _applicationContext;
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IUserResourceRegistry userResourceRegistry,
-        IAltinnAuthorization altinnAuthorization)
+        IAltinnAuthorization altinnAuthorization,
+        IApplicationContext applicationContext)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _altinnAuthorization = altinnAuthorization;
+        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -275,6 +278,11 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 seenRecord.IsCurrentEndUser = seenRecord.SeenBy.ActorId == request.EndUserId;
             }
         }
+
+        // Add metadata for cost management
+        // For search operations, we can't attribute to specific org/resource since results may vary
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.SearchOperation);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, CostManagementMetadataKeys.SearchOperation);
 
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }

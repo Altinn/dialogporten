@@ -38,9 +38,9 @@ public sealed class CostManagementMetricsService : ICostManagementMetricsService
             new(CostManagementConstants.StatusTag, status),
             new(CostManagementConstants.HttpStatusCodeTag, httpStatusCode),
             new(CostManagementConstants.EnvironmentTag, _environment),
-            new(CostManagementConstants.TokenOrgTag, tokenOrg ?? CostManagementConstants.NoOrgValue),
-            new(CostManagementConstants.ServiceOrgTag, serviceOrg ?? CostManagementConstants.NoOrgValue),
-            new(CostManagementConstants.ServiceResourceTag, serviceResource ?? CostManagementConstants.NoOrgValue)
+            new(CostManagementConstants.TokenOrgTag, tokenOrg ?? CostManagementConstants.UnknownValue),
+            new(CostManagementConstants.ServiceOrgTag, serviceOrg ?? CostManagementConstants.UnknownValue),
+            new(CostManagementConstants.ServiceResourceTag, serviceResource ?? CostManagementConstants.UnknownValue)
         };
 
         _transactionCounter.Add(1, tags);

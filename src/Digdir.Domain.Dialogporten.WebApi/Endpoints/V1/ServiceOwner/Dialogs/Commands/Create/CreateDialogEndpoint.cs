@@ -36,10 +36,8 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
 
     public override async Task HandleAsync(CreateDialogRequest req, CancellationToken ct)
     {
-        // her
         var command = new CreateDialogCommand { Dto = req.Dto, IsSilentUpdate = req.IsSilentUpdate ?? false };
         var result = await _sender.Send(command, ct);
-
         await result.Match(
             success =>
             {

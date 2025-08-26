@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 

@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
@@ -28,6 +29,7 @@ internal sealed class SeedDatabaseDto
             .Select(x =>
             {
                 var timestamp = FromDate + (Interval * x);
+                // TODO: Remove?
                 var formattedTimestamp = timestamp.ToString("yyyy-MM-dd HH:mm:ss zzz");
                 var dialogId = DeterministicUuidV7.Create(timestamp, nameof(DialogEntity));
                 var counter = x + 1;
@@ -40,3 +42,24 @@ internal sealed class SeedDatabaseDto
     public TimeSpan Interval { get; }
     public int DialogAmount { get; }
 }
+
+// public sealed class JobBoard
+// {
+//     private readonly Channel<DialogTimestamp> _channel = Channel.CreateBounded<DialogTimestamp>(1000);
+//
+//     public void AddJobs(DateTimeOffset fromDate, DateTimeOffset toDate, int dialogAmount)
+//     {
+//         var interval = TimeSpan.FromTicks((toDate.Ticks - fromDate.Ticks) / dialogAmount);
+//         Enumerable.Range(0, dialogAmount)
+//             .Select(x =>
+//             {
+//                 var timestamp = fromDate + (interval * x);
+//                 var formattedTimestamp = timestamp.ToString("yyyy-MM-dd HH:mm:ss zzz");
+//                 var dialogId = DeterministicUuidV7.Create(timestamp, nameof(DialogEntity));
+//                 var counter = x + 1;
+//                 return new DialogTimestamp(timestamp, formattedTimestamp, dialogId, counter);
+//             });
+//         _channel.Reader.
+//         _channel.Writer.WriteAsync()
+//     }
+// }

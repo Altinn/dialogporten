@@ -1,8 +1,18 @@
 ﻿using System.Diagnostics;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder;
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 using Npgsql;
-using Activity = Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators.Activity;
+using DialogActivity = Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators.DialogActivity;
+
+// var cs = Environment.GetEnvironmentVariable("CONN_STRING")!;
+// await using var ds = NpgsqlDataSource.Create(cs);
+//
+// await using var writer = await PostgresCopyWriter<DialogActivity>.Create(ds);
+//
+// await writer.WriteRecords([
+//     new(Guid.CreateVersion7(), DialogActivityType.Values.DialogCreated),
+//     new(Guid.CreateVersion7(), DialogActivityType.Values.DialogCreated),
+//     new(Guid.CreateVersion7(), DialogActivityType.Values.DialogCreated),
+// ], CancellationToken.None);
 
 try
 {
@@ -42,6 +52,7 @@ try
         Console.Error.WriteLine("No connection string found, exiting...");
         Environment.Exit(1);
     }
+
     var startingDate = DateTimeOffset.Parse(Environment.GetEnvironmentVariable("FROM_DATE")!);
     var endDate = DateTimeOffset.Parse(Environment.GetEnvironmentVariable("TO_DATE")!);
     var dialogAmount = int.Parse(Environment.GetEnvironmentVariable("DIALOG_AMOUNT")!);
@@ -60,17 +71,16 @@ try
     const int taskRetryLimit = 1000;
     const int logThreshold = 500_000;
 
-
-    var actorFetchStartTimestamp = Stopwatch.GetTimestamp();
-    await ActorName.FetchInsertedActorNames();
-    Console.WriteLine($"Fetched {ActorName.InsertedActorNames.Count} actor names in {Stopwatch.GetElapsedTime(actorFetchStartTimestamp)}");
-
-    var actorNameTasks = new List<Task>();
-    CreateCopyTasks(new CopyTaskDto(ActorName.Generate, "actor names", ActorName.CopyCommand, NumberOfTasks: 20), actorNameTasks);
-    await Task.WhenAll(actorNameTasks);
+    // var actorFetchStartTimestamp = Stopwatch.GetTimestamp();
+    // await ActorName.FetchInsertedActorNames();
+    // Console.WriteLine($"Fetched {ActorName.InsertedActorNames.Count} actor names in {Stopwatch.GetElapsedTime(actorFetchStartTimestamp)}");
+    //
+    // var actorNameTasks = new List<Task>();
+    // CreateCopyTasks(new CopyTaskDto(ActorName.Generate, "actor names", ActorName.CopyCommand, NumberOfTasks: 20), actorNameTasks);
+    // await Task.WhenAll(actorNameTasks);
 
     var tasks = new List<Task>();
-    void CreateCopyTasks(CopyTaskDto copyTaskDto, List<Task> taskList)
+    void CreateCopyTasks<T>(CopyTaskDto<T> copyTaskDto, List<Task> taskList) where T : class
     {
         for (var splitIndex = 0; splitIndex < copyTaskDto.NumberOfTasks; splitIndex++)
         {
@@ -78,7 +88,7 @@ try
         }
     }
 
-    void RunCopyTask(CopyTaskDto copyTaskDto, int splitIndex, List<Task> taskList)
+    void RunCopyTask<T>(CopyTaskDto<T> copyTaskDto, int splitIndex, List<Task> taskList) where T : class
     {
         taskList.Add(Task.Run(async () =>
         {
@@ -96,14 +106,15 @@ try
         }));
     }
 
-    async Task<int> ConnectAndAttemptInsert(CopyTaskDto copyTaskDto, int splitIndex, int currentCounter)
+    async Task<int> ConnectAndAttemptInsert<T>(CopyTaskDto<T> copyTaskDto, int splitIndex, int currentCounter) where T : class
     {
         try
         {
-            await using var dbConnection = await dataSource.OpenConnectionAsync();
-            await using var writer = dbConnection.BeginTextImport(copyTaskDto.CopyCommand);
+            // await using var dbConnection = await dataSource.OpenConnectionAsync();
+            // await using var writer = dbConnection.BeginTextImport(copyTaskDto.CopyCommand);
+            await using var postgresCopyWriter = await PostgresCopyWriter<T>.Create(dataSource);
 
-            return await AttemptInsert(copyTaskDto, splitIndex, writer, dbConnection, currentCounter);
+            return await AttemptInsert(copyTaskDto, splitIndex, postgresCopyWriter, currentCounter);
         }
         catch (Exception e)
         {
@@ -114,11 +125,11 @@ try
         }
     }
 
-    async Task<int> AttemptInsert(CopyTaskDto copyTaskDto,
+    async Task<int> AttemptInsert<T>(CopyTaskDto<T> copyTaskDto,
         int splitIndex,
-        TextWriter textWriter,
-        NpgsqlConnection npgsqlConnection,
+        PostgresCopyWriter<T> textWriter,
         int currentCounter)
+    where T : class
     {
         try
         {
@@ -126,48 +137,46 @@ try
 
             await InsertData(copyTaskDto, splitIndex, textWriter, splitLogThreshold);
 
-            textWriter.Close();
-
             // Done, break out of the retry loop
             return taskRetryLimit;
         }
         catch (Exception e)
         {
             LogInsertError(copyTaskDto, splitIndex, e);
-
-            npgsqlConnection.Close();
-
             await Task.Delay(taskRetryDelayInMs);
             return ++currentCounter;
         }
     }
 
-    async Task InsertData(CopyTaskDto copyTaskDto, int splitIndex, TextWriter textWriter, int splitLogThreshold)
+    async Task InsertData<T>(CopyTaskDto<T> copyTaskDto, int splitIndex, PostgresCopyWriter<T> postgresWriter, int splitLogThreshold) where T : class
     {
-        foreach (var timestamp in dialogsDto.GetDialogTimestamps(copyTaskDto.NumberOfTasks, splitIndex))
-        {
-            var data = copyTaskDto.Generator(timestamp);
-            if (string.IsNullOrWhiteSpace(data))
-            {
-                continue;
-            }
-
-            if (copyTaskDto.SingleLinePerTimestamp)
-            {
-                await textWriter.WriteLineAsync(data);
-            }
-            else
-            {
-                await textWriter.WriteAsync(data);
-            }
-
-            if (timestamp.DialogCounter % logThreshold == 0)
-            {
-                Console.WriteLine(
-                    $"Inserted {splitLogThreshold} dialogs worth of {copyTaskDto.EntityName} " +
-                    $"(split {splitIndex + 1}/{copyTaskDto.NumberOfTasks}), counter at {timestamp.DialogCounter}");
-            }
-        }
+        var data = copyTaskDto.Generator(dialogsDto.GetDialogTimestamps(copyTaskDto.NumberOfTasks, splitIndex));
+        await postgresWriter.WriteRecords(data, CancellationToken.None);
+        // foreach (var timestamp in dialogsDto.GetDialogTimestamps(copyTaskDto.NumberOfTasks, splitIndex))
+        // {
+        //     var data = copyTaskDto.Generator(timestamp);
+        //     // if (string.IsNullOrWhiteSpace(data))
+        //     // {
+        //     //     continue;
+        //     // }
+        //
+        //     await postgresWriter.WriteRecords(data, CancellationToken.None);
+        //     // if (copyTaskDto.SingleLinePerTimestamp)
+        //     // {
+        //     //     await postgresWriter.WriteLineAsync(data);
+        //     // }
+        //     // else
+        //     // {
+        //     //     await postgresWriter.WriteAsync(data);
+        //     // }
+        //
+        //     if (timestamp.DialogCounter % logThreshold == 0)
+        //     {
+        //         Console.WriteLine(
+        //             $"Inserted {splitLogThreshold} dialogs worth of {copyTaskDto.EntityName} " +
+        //             $"(split {splitIndex + 1}/{copyTaskDto.NumberOfTasks}), counter at {timestamp.DialogCounter}");
+        //     }
+        // }
     }
 
     // var magic = new Magic();
@@ -191,7 +200,7 @@ try
     // CreateCopyTasks(new CopyTaskDto(DialogContent.Generate, "dialog content", DialogContent.CopyCommand), tasks);
     // CreateCopyTasks(new CopyTaskDto(DialogTransmission.Generate, "transmissions", DialogTransmission.CopyCommand), tasks);
     // CreateCopyTasks(new CopyTaskDto(DialogGuiAction.Generate, "dialog gui actions", DialogGuiAction.CopyCommand), tasks);
-    // CreateCopyTasks(new CopyTaskDto(Activity.Generate, "activities", Activity.CopyCommand), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogActivity>(DialogActivity.GenerateEntities, "activities"), tasks);
     // CreateCopyTasks(new CopyTaskDto(Attachment.Generate, "attachments", Attachment.CopyCommand), tasks);
     // CreateCopyTasks(new CopyTaskDto(DialogSearchTag.Generate, "search tags", DialogSearchTag.CopyCommand), tasks);
 
@@ -213,7 +222,7 @@ try
     Console.WriteLine($"Generated {dialogAmount} in {timeItTook}");
 
 
-    void LogInsertError(CopyTaskDto copyTaskDto1, int i, Exception exception)
+    void LogInsertError<T>(CopyTaskDto<T> copyTaskDto1, int i, Exception exception) where T : class
     {
         Console.WriteLine();
         Console.WriteLine("====================================");

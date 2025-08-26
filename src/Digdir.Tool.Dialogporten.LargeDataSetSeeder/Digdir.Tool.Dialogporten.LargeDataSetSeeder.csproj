@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="CsvHelper" Version="33.1.0" />
         <PackageReference Include="Npgsql" Version="9.0.3"/>
         <PackageReference Include="UUIDNext" Version="4.1.2"/>
     </ItemGroup>
@@ -33,4 +34,7 @@
         <ProjectReference Include="..\Digdir.Library.Entity.Abstractions\Digdir.Library.Entity.Abstractions.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Architecture.Tests"/>
+    </ItemGroup>
 </Project>

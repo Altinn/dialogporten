@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.79.7](https://github.com/Altinn/dialogporten/compare/v1.79.6...v1.79.7) (2025-08-26)
+
+
+### Bug Fixes
+
+* **app:** Add tolerance when validating uuidv7 timestamps ([#2682](https://github.com/Altinn/dialogporten/issues/2682)) ([41e6b31](https://github.com/Altinn/dialogporten/commit/41e6b311cdeb2fcd9bf7b282061adcdf43c36b3c))
+
 ## [1.79.6](https://github.com/Altinn/dialogporten/compare/v1.79.5...v1.79.6) (2025-08-24)
 
 

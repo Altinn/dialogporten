@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
@@ -55,8 +56,8 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
         }
 
         // Add metadata for cost management
-        _applicationContext.AddMetadata("serviceOrg", serviceOwnerContext.Dialog.Org);
-        _applicationContext.AddMetadata("serviceResource", serviceOwnerContext.Dialog.ServiceResource);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, serviceOwnerContext.Dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, serviceOwnerContext.Dialog.ServiceResource);
 
         serviceOwnerContext.ServiceOwnerLabels
             .Merge(request.Dto.ServiceOwnerLabels,

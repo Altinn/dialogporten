@@ -143,22 +143,21 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
-    private readonly IApplicationContext _applicationContext;
+
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
-        IAltinnAuthorization altinnAuthorization,
-        IApplicationContext applicationContext)
+        IAltinnAuthorization altinnAuthorization)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
+
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -255,10 +254,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             }
         }
 
-        // Add metadata for cost management
-        // For search operations, we can't attribute to specific org/resource since results may vary
-        _applicationContext.AddMetadata("serviceOrg", "");
-        _applicationContext.AddMetadata("serviceResource", "");
+
 
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }

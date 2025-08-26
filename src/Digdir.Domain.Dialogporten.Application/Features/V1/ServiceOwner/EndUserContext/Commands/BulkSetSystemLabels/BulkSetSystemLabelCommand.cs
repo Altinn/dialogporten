@@ -62,10 +62,17 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         }
 
         // Add metadata for cost management
-        // For ServiceOwner bulk operations, we can't attribute to specific service resource since it can affect multiple dialogs
-        var firstDialog = dialogs.First();
-        _applicationContext.AddMetadata("serviceOrg", firstDialog.Org);
-        _applicationContext.AddMetadata("serviceResource", "");
+        // For bulk operations, add tags only when unambiguous
+        var distinctOrgs = dialogs.Select(d => d.Org).Where(o => !string.IsNullOrEmpty(o)).Distinct().ToList();
+        if (distinctOrgs.Count == 1)
+        {
+            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, distinctOrgs[0]);
+        }
+        var distinctResources = dialogs.Select(d => d.ServiceResource).Where(r => !string.IsNullOrEmpty(r)).Distinct().ToList();
+        if (distinctResources.Count == 1)
+        {
+            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, distinctResources[0]);
+        }
 
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 

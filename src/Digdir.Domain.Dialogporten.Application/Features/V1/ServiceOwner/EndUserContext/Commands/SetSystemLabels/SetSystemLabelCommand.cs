@@ -64,8 +64,8 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         }
 
         // Add metadata for cost management
-        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
-        _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
 
         var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
         if (!authorizationResult.HasAccessToMainResource())

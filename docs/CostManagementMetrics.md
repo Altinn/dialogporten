@@ -110,12 +110,12 @@ For operations where metadata cannot be meaningfully attributed:
 
 ```csharp
 // Search operations affecting multiple entities
-_applicationContext.AddMetadata("serviceOrg", "");
-_applicationContext.AddMetadata("serviceResource", "");
+_applicationContext.AddMetadata("serviceOrg", CostManagementConstants.NoOrgValue);
+_applicationContext.AddMetadata("serviceResource", CostManagementConstants.NoOrgValue);
 
 // End user operations without organization context
-_applicationContext.AddMetadata("serviceOrg", "");
-_applicationContext.AddMetadata("serviceResource", "");
+_applicationContext.AddMetadata("serviceOrg", CostManagementConstants.NoOrgValue);
+_applicationContext.AddMetadata("serviceResource", CostManagementConstants.NoOrgValue);
 ```
 
 ## Metrics Schema
@@ -132,8 +132,8 @@ _applicationContext.AddMetadata("serviceResource", "");
 |----------|-------------|----------------|
 | `transaction_type` | Type of transaction | `CreateDialog`, `GetDialogServiceOwner` |
 | `token_org` | Organization from JWT token | `"digdir"`, `"skatteetaten"` |
-| `service_org` | Organization from dialog entity | `"digdir"`, `"skatteetaten"` |
-| `service_resource` | Service resource from dialog entity | `"skjema/NAV/123"` |
+| `service_org` | Organization from dialog entity | `"digdir"`, `"skatteetaten"`, `"null"` |
+| `service_resource` | Service resource from dialog entity | `"skjema/NAV/123"`, `"null"` |
 | `http_status_code` | HTTP response status code | `200`, `201`, `400`, `404`, `500` |
 | `environment` | Environment name | `Development`, `Test`, `Production` |
 

@@ -29,20 +29,17 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
-    private readonly IApplicationContext _applicationContext;
 
     public BulkSetSystemLabelCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
         IUserRegistry userRegistry,
-        IAltinnAuthorization altinnAuthorization,
-        IApplicationContext applicationContext)
+        IAltinnAuthorization altinnAuthorization)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public async Task<BulkSetSystemLabelResult> Handle(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
@@ -73,11 +70,6 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         {
             return new EntityNotFound<DialogEntity>(notFound);
         }
-
-        // Add metadata for cost management
-        // For EndUser bulk operations, we can't attribute to specific org/resource since it can affect multiple dialogs
-        _applicationContext.AddMetadata("serviceOrg", "");
-        _applicationContext.AddMetadata("serviceResource", "");
 
         await dialogs.MergeAsync(
             sources: request.Dto.Dialogs,

@@ -58,8 +58,8 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
-        _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
 
         if (!_userResourceRegistry.UserCanModifyResourceType(dialog.ServiceResourceType))
         {

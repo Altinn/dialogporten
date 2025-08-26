@@ -33,7 +33,8 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
     public PurgeDialogCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
-        IUserResourceRegistry userResourceRegistry, IApplicationContext applicationContext)
+        IUserResourceRegistry userResourceRegistry, 
+        IApplicationContext applicationContext)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

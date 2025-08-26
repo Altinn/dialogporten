@@ -61,27 +61,16 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new Forbidden().WithInvalidDialogIds(missing);
         }
 
-        // Add metadata for cost management
-        // For bulk operations, add tags only when unambiguous
-        var distinctOrgs = dialogs.Select(d => d.Org).Where(o => !string.IsNullOrEmpty(o)).Distinct().ToList();
-        if (distinctOrgs.Count == 1)
-        {
-            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, distinctOrgs[0]);
-        }
-        else
-        {
-            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.BulkOperation);
-        }
+        // Add cost management metadata (unique values or BulkOperation)
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg,
+            dialogs.Select(d => d.Org).Where(o => !string.IsNullOrEmpty(o)).Distinct().Take(2).Count() == 1
+                ? dialogs.First(d => !string.IsNullOrEmpty(d.Org)).Org
+                : CostManagementMetadataKeys.BulkOperation);
 
-        var distinctResources = dialogs.Select(d => d.ServiceResource).Where(r => !string.IsNullOrEmpty(r)).Distinct().ToList();
-        if (distinctResources.Count == 1)
-        {
-            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, distinctResources[0]);
-        }
-        else
-        {
-            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, CostManagementMetadataKeys.BulkOperation);
-        }
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource,
+            dialogs.Select(d => d.ServiceResource).Where(r => !string.IsNullOrEmpty(r)).Distinct().Take(2).Count() == 1
+                ? dialogs.First(d => !string.IsNullOrEmpty(d.ServiceResource)).ServiceResource
+                : CostManagementMetadataKeys.BulkOperation);
 
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 

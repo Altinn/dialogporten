@@ -1,5 +1,4 @@
 using Digdir.Domain.Dialogporten.Domain.Attachments;
-using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 

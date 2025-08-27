@@ -1,5 +1,3 @@
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
-
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 
 internal static class DialogTimestampExtensions

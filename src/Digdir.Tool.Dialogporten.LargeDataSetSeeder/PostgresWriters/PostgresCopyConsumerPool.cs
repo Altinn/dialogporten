@@ -1,5 +1,4 @@
 using System.Threading.Channels;
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 using Npgsql;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;

@@ -1,5 +1,4 @@
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
@@ -9,43 +8,33 @@ public sealed record DialogTransmissionContent(
     DateTimeOffset UpdatedAt,
     string MediaType,
     Guid TransmissionId,
-    DialogTransmissionType.Values TypeId
+    DialogTransmissionContentType.Values TypeId
 
 ) : IEntityGenerator<DialogTransmissionContent>
 {
     public static IEnumerable<DialogTransmissionContent> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
-    }
-}
+        foreach (var timestamp in timestamps)
+        {
+            foreach (var transmission in DialogTransmission.GenerateEntities([timestamp]))
+            {
+                yield return CreateTransmissionContent(transmission, timestamp,
+                    DialogTransmissionContentType.Values.Title);
 
-// internal static class DialogTransmissionContent
-// {
-//     // public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogTransmissionContent),
-//     //     "Id", "CreatedAt", "UpdatedAt",
-//     //     "MediaType", "TransmissionId", "TypeId");
-//
-//     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent);
-//
-//     public static List<TransmissionContentDto> GetDtos(DialogTimestamp dto) => BuildDtoList<TransmissionContentDto>(dtos =>
-//     {
-//         foreach (var transmission in DialogTransmission.GetDtos(dto))
-//         {
-//             for (var i = 1; i <= 2; i++)
-//             {
-//                 var contentId = dto.ToUuidV7(DomainName, i);
-//                 dtos.Add(new TransmissionContentDto(contentId, transmission.Id, i));
-//             }
-//         }
-//     });
-//
-//     public sealed record TransmissionContentDto(Guid Id, Guid TransmissionId, int TypeId);
-//
-//     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
-//     {
-//         foreach (var tc in GetDtos(dto))
-//         {
-//             sb.AppendLine($"{tc.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},text/plain,{tc.TransmissionId},{tc.TypeId}");
-//         }
-//     });
-// }
+                yield return CreateTransmissionContent(transmission, timestamp,
+                    DialogTransmissionContentType.Values.Summary);
+            }
+        }
+    }
+
+    private static DialogTransmissionContent CreateTransmissionContent(DialogTransmission transmission,
+        DialogTimestamp timestamp, DialogTransmissionContentType.Values typeId) =>
+        new(
+            Id: timestamp.ToUuidV7(transmission.DialogId, (int)typeId),
+            CreatedAt: timestamp.Timestamp,
+            UpdatedAt: timestamp.Timestamp,
+            MediaType: "text/plain",
+            TransmissionId: transmission.Id,
+            TypeId: typeId
+        );
+}

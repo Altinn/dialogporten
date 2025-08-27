@@ -15,36 +15,30 @@ public sealed record AttachmentUrl(
 {
     public static IEnumerable<AttachmentUrl> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            foreach (var attachment in Attachment.GenerateEntities([timestamp]))
+            {
+                const int numOfAttachmentUrls = 2;
+
+                for (var tieBreaker = 0; tieBreaker < numOfAttachmentUrls; tieBreaker++)
+                {
+                    yield return CreateAttachmentUrl(timestamp, attachment, tieBreaker);
+                }
+            }
+        }
+    }
+
+    private static AttachmentUrl CreateAttachmentUrl(DialogTimestamp timestamp, Attachment attachment, int tieBreaker)
+    {
+        return new AttachmentUrl(
+            Id: timestamp.ToUuidV7(attachment.Id, tieBreaker),
+            CreatedAt: timestamp.Timestamp,
+            UpdatedAt: timestamp.Timestamp,
+            MediaType: "text/plain",
+            Url: "https://digdir.apps.tt02.altinn.no/",
+            ConsumerTypeId: AttachmentUrlConsumerType.Values.Gui,
+            AttachmentId: attachment.Id
+        );
     }
 }
-// internal static class AttachmentUrl
-// {
-//     private const string Url = "https://digdir.apps.tt02.altinn.no/";
-//
-//     // public static readonly string CopyCommand = CreateCopyCommand(nameof(AttachmentUrl),
-//     //      "Id",
-//     //      "CreatedAt",
-//     //      "MediaType",
-//     //      "Url",
-//     //      "ConsumerTypeId",
-//     //      "AttachmentId");
-//
-//     public const string DomainName = nameof(Domain.Dialogporten.Domain.Attachments.AttachmentUrl);
-//
-//     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
-//     {
-//         foreach (var attachment in Attachment.GetDtos(dto))
-//         {
-//             var attachmentUrlId = dto.ToUuidV7(DomainName, attachment.Id.GetHashCode());
-//             // TODO: Can we build URLs that fetches from the dummy service provider?
-//             sb.AppendLine(
-//                 $"{attachmentUrlId}," +
-//                 $"{dto.FormattedTimestamp}," +
-//                 $"text/plain," +
-//                 $"{Url}," +
-//                 $"1," +
-//                 $"{attachment.Id}");
-//         }
-//     });
-// }

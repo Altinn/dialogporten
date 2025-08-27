@@ -108,6 +108,7 @@ public class EntityGeneratorTests
     {
         nameof(ActorName), // Handled by custom generator, runs before others
         nameof(DialogApiAction), // Don't care about these in YT01 seeding
+        nameof(DialogApiActionEndpoint), // Don't care about these in YT01 seeding
         nameof(MassTransit),
         nameof(NotificationAcknowledgement),
         nameof(SubjectResource),

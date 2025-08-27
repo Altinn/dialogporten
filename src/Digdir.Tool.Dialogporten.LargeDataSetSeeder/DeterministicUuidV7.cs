@@ -4,10 +4,16 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 
 public static class DeterministicUuidV7
 {
-    public static Guid Create(DateTimeOffset timestamp, string tableName, int tiebreaker = 0)
+    // public static Guid Create(DateTimeOffset timestamp, string tableName, int tiebreaker = 0)
+    // {
+    //     var timeBasedEmpty = Guid.Empty.ToVersion7(timestamp);
+    //     var nameBasedUuid = Uuid.NewNameBased(timeBasedEmpty, $"{tableName}{tiebreaker}");
+    //     return nameBasedUuid.ToVersion7(timestamp);
+    // }
+
+    public static Guid Create(DateTimeOffset timestamp, Guid @namespace, int tiebreaker = 0)
     {
-        var timeBasedEmpty = Guid.Empty.ToVersion7(timestamp);
-        var nameBasedUuid = Uuid.NewNameBased(timeBasedEmpty, $"{tableName}{tiebreaker}");
+        var nameBasedUuid = Uuid.NewNameBased(@namespace, $"{tiebreaker}");
         return nameBasedUuid.ToVersion7(timestamp);
     }
 

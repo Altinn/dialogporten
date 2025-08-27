@@ -14,39 +14,34 @@ public sealed record Attachment(
 {
     public static IEnumerable<Attachment> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            yield return CreateDialogAttachment(timestamp);
+
+            foreach (var transmission in DialogTransmission.GenerateEntities([timestamp]))
+            {
+                yield return CreateTransmissionAttachment(transmission);
+            }
+        }
     }
+
+    private static Attachment CreateDialogAttachment(DialogTimestamp timestamp) =>
+        new(
+            Id: timestamp.DialogId,
+            CreatedAt: DateTimeOffset.UtcNow,
+            UpdatedAt: DateTimeOffset.UtcNow,
+            Discriminator: "DialogAttachment",
+            DialogId: timestamp.DialogId,
+            TransmissionId: null
+        );
+
+    private static Attachment CreateTransmissionAttachment(DialogTransmission transmission) =>
+        new(
+            Id: transmission.Id,
+            CreatedAt: DateTimeOffset.UtcNow,
+            UpdatedAt: DateTimeOffset.UtcNow,
+            Discriminator: "DialogTransmissionAttachment",
+            DialogId: null,
+            TransmissionId: transmission.Id
+        );
 }
-// internal static class Attachment
-// {
-//     // public static readonly string CopyCommand = CreateCopyCommand(nameof(Attachment),
-//     //     "Id", "CreatedAt", "UpdatedAt", "Discriminator", "DialogId", "TransmissionId");
-//
-//     public sealed record AttachmentDto(Guid Id, Guid? DialogId, Guid? TransmissionId);
-//
-//     public static List<AttachmentDto> GetDtos(DialogTimestamp dto) => BuildDtoList<AttachmentDto>(dtos =>
-//     {
-//         // Transmission attachments.
-//         dtos.AddRange(DialogTransmission.GetDtos(dto)
-//             .Select(transmission =>
-//                 // Re-use transmission id as attachment id.
-//                 new AttachmentDto(transmission.Id, null, transmission.Id)));
-//
-//         // Dialog attachments.
-//         // Re-use dialog id as attachment id.
-//         dtos.Add(new(dto.DialogId, dto.DialogId, null));
-//     });
-//
-//     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
-//     {
-//         foreach (var attachment in GetDtos(dto))
-//         {
-//             var discriminator = attachment.TransmissionId.HasValue ? "DialogTransmissionAttachment" : "DialogAttachment";
-//
-//             var dialogId = attachment.DialogId?.ToString() ?? string.Empty;
-//             var transmissionId = attachment.TransmissionId?.ToString() ?? string.Empty;
-//
-//             sb.AppendLine($"{attachment.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{discriminator},{dialogId},{transmissionId}");
-//         }
-//     });
-// }

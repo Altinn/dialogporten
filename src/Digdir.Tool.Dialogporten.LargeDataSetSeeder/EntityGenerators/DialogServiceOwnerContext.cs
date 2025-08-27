@@ -11,7 +11,15 @@ public sealed record DialogServiceOwnerContext(
 {
     public static IEnumerable<DialogServiceOwnerContext> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            yield return new(
+                DialogId: timestamp.DialogId,
+                CreatedAt: timestamp.Timestamp,
+                UpdatedAt: timestamp.Timestamp,
+                Revision: Guid.NewGuid()
+            );
+        }
     }
 }
 

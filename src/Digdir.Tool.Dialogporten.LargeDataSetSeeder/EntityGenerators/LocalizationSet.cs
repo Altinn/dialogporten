@@ -1,5 +1,4 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
@@ -15,70 +14,80 @@ public sealed record LocalizationSet(
 {
     public static IEnumerable<LocalizationSet> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
-    }
-}
+        foreach (var timestamp in timestamps)
+        {
+            // Attachments
+            foreach (var attachment in Attachment.GenerateEntities([timestamp]))
+            {
+                yield return CreateLocalizationSet(
+                    id: attachment.Id,
+                    discriminator: "AttachmentDisplayName",
+                    attachmentId: attachment.Id
+                );
+            }
 
-// internal static class LocalizationSet
-// {
-//     // public static readonly string CopyCommand = CreateCopyCommand(nameof(LocalizationSet),
-//     //     "Id", "CreatedAt", "Discriminator", "AttachmentId", "GuiActionId",
-//     //     "ActivityId", "DialogContentId", "TransmissionContentId");
-//
-//     private const string AttachmentDiscriminator = "AttachmentDisplayName";
-//     private const string DialogGuiActionDiscriminator = "DialogGuiActionTitle";
-//     private const string DialogActivityDiscriminator = "DialogActivityDescription";
-//     private const string DialogContentDiscriminator = "DialogContentValue";
-//     private const string DialogTransmissionContentDiscriminator = "DialogTransmissionContentValue";
-//
-//     public sealed record LocalizationSetDto(Guid Id, string Discriminator);
-//
-//     public static List<LocalizationSetDto> GetDtos(DialogTimestamp dto) => BuildDtoList<LocalizationSetDto>(dtos =>
-//     {
-//         // Attachments
-//         dtos.AddRange(Attachment.GetDtos(dto)
-//             .Select(attachment =>
-//                 new LocalizationSetDto(attachment.Id, AttachmentDiscriminator)));
-//
-//         // GuiAction
-//         dtos.AddRange(DialogGuiAction.GetDtos(dto)
-//             .Select(guiAction =>
-//                 new LocalizationSetDto(guiAction.Id, DialogGuiActionDiscriminator)));
-//
-//         // DialogActivity
-//         // var informationActivities = ActivityFoo
-//         //     .GetDtos(dto)
-//         //     // Only information activities have localization entries.
-//         //     .Where(x => x.TypeId == DialogActivityType.Values.Information)
-//         //     .ToList();
-//         //
-//         // dtos.AddRange(informationActivities
-//         //     .Select(activity =>
-//         //         new LocalizationSetDto(activity.Id, DialogActivityDiscriminator)));
-//
-//         // DialogContent
-//         dtos.AddRange(DialogContent.GetDtos(dto)
-//             .Select(content =>
-//                 new LocalizationSetDto(content.Id, DialogContentDiscriminator)));
-//
-//         // DialogTransmissionContent
-//         dtos.AddRange(DialogTransmissionContent.GetDtos(dto)
-//             .Select(tc =>
-//                 new LocalizationSetDto(tc.Id, DialogTransmissionContentDiscriminator)));
-//     });
-//
-//     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
-//     {
-//         foreach (var localizationSet in GetDtos(dto))
-//         {
-//             sb.AppendLine(
-//                 $"{localizationSet.Id},{dto.FormattedTimestamp}," +
-//                 $"{localizationSet.Discriminator}," +
-//                 $"{(localizationSet.Discriminator == AttachmentDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
-//                 $"{(localizationSet.Discriminator == DialogGuiActionDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
-//                 $"{(localizationSet.Discriminator == DialogActivityDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
-//                 $"{(localizationSet.Discriminator == DialogContentDiscriminator ? localizationSet.Id.ToString() : string.Empty)}," +
-//                 $"{(localizationSet.Discriminator == DialogTransmissionContentDiscriminator ? localizationSet.Id.ToString() : string.Empty)}");
-//         }
-//     });
-// }
+            // GuiAction
+            foreach (var guiAction in DialogGuiAction.GenerateEntities([timestamp]))
+            {
+                yield return CreateLocalizationSet(
+                    id: guiAction.Id,
+                    discriminator: "DialogGuiActionTitle",
+                    guiActionId: guiAction.Id
+                );
+            }
+
+            // DialogActivity
+            var informationActivities = DialogActivity
+                .GenerateEntities([timestamp])
+                .Where(x => x.TypeId == DialogActivityType.Values.Information)
+                .ToList();
+
+            foreach (var activity in informationActivities)
+            {
+                yield return CreateLocalizationSet(
+                    id: activity.Id,
+                    discriminator: "DialogActivityDescription",
+                    activityId: activity.Id
+                );
+            }
+
+            // DialogContent
+            foreach (var content in DialogContent.GenerateEntities([timestamp]))
+            {
+                yield return CreateLocalizationSet(
+                    id: content.Id,
+                    discriminator: "DialogContentValue",
+                    dialogContentId: content.Id
+                );
+            }
+
+            // DialogTransmissionContent
+            foreach (var tc in DialogTransmissionContent.GenerateEntities([timestamp]))
+            {
+                yield return CreateLocalizationSet(
+                    id: tc.Id,
+                    discriminator: "DialogTransmissionContentValue",
+                    transmissionContentId: tc.Id
+                );
+            }
+        }
+    }
+
+    private static LocalizationSet CreateLocalizationSet(
+        Guid id,
+        string discriminator,
+        Guid? attachmentId = null,
+        Guid? guiActionId = null,
+        Guid? activityId = null,
+        Guid? dialogContentId = null,
+        Guid? transmissionContentId = null
+    ) => new(
+        Id: id,
+        Discriminator: discriminator,
+        AttachmentId: attachmentId,
+        GuiActionId: guiActionId,
+        ActivityId: activityId,
+        DialogContentId: dialogContentId,
+        TransmissionContentId: transmissionContentId
+    );
+}

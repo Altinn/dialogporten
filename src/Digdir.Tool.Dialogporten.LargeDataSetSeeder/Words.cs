@@ -23,10 +23,22 @@ internal static class Words
             Norwegian = Norwegian.Except(English).ToArray();
         }
     }
+
+    public static (string searchTag, int index)[] GetBetweenZeroAndCountWords(int count) =>
+        Enumerable.Range(0, Random.Shared.Next(0, count == 0 ? 0 : count + 1))
+            .Select(i => i % 2 == 0
+                ? Norwegian.GetRandomWord()
+                : English.GetRandomWord())
+            .Distinct()
+            .Select((x, i) => (x, i))
+            .ToArray();
 }
 
 public static class WordsExtensions
 {
     public static string GetRandomWord(this string[] words, Random rng)
         => words[rng.Next(0, words.Length)];
+
+    public static string GetRandomWord(this string[] words)
+        => words[Random.Shared.Next(0, words.Length)];
 }

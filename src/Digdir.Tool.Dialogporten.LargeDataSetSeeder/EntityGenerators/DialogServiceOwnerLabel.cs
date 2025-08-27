@@ -1,5 +1,3 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
-
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogServiceOwnerLabel(
@@ -10,7 +8,21 @@ public sealed record DialogServiceOwnerLabel(
 {
     public static IEnumerable<DialogServiceOwnerLabel> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            foreach (var context in DialogServiceOwnerContext.GenerateEntities([timestamp]))
+            {
+                var serviceOwnerLabels = Words.GetBetweenZeroAndCountWords(count: 5);
+                foreach (var (label, _) in serviceOwnerLabels)
+                {
+                    yield return new(
+                        DialogServiceOwnerContextId: context.DialogId,
+                        CreatedAt: timestamp.Timestamp,
+                        Value: label
+                    );
+                }
+            }
+        }
     }
 }
 

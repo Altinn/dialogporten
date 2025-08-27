@@ -1,5 +1,3 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
-
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogSearchTag(
@@ -11,32 +9,22 @@ public sealed record DialogSearchTag(
 {
     public static IEnumerable<DialogSearchTag> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            var searchTags = Words.GetBetweenZeroAndCountWords(count: 6);
+
+            foreach (var (searchTag, tieBreaker) in searchTags)
+            {
+                yield return CreateSearchTag(timestamp, tieBreaker, searchTag);
+            }
+        }
     }
+
+    private static DialogSearchTag CreateSearchTag(DialogTimestamp timestamp, int tieBreaker, string searchTag) =>
+        new(
+            Id: timestamp.ToUuidV7(timestamp.DialogId, tieBreaker),
+            Value: searchTag,
+            CreatedAt: timestamp.Timestamp,
+            DialogId: timestamp.DialogId
+        );
 }
-// internal static class DialogSearchTag
-// {
-//     // public static readonly string CopyCommand = CreateCopyCommand(nameof(DialogSearchTag),
-//     //     "Id", "Value", "CreatedAt", "DialogId");
-//
-//     public const string DomainName = nameof(Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag);
-//
-//     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
-//     {
-//         var rng = dto.GetRng();
-//         var numberOfSearchTags = rng.Next(1, 6);
-//
-//         var searchTags = Enumerable.Range(0, numberOfSearchTags)
-//             .Select(i => i % 2 == 0
-//                 ? Words.Norwegian.GetRandomWord(rng)
-//                 : Words.English.GetRandomWord(rng))
-//             .Distinct()
-//             .ToList();
-//
-//         foreach (var tagText in searchTags)
-//         {
-//             var searchTagId = dto.ToUuidV7(DomainName, tagText.GetHashCode());
-//             sb.AppendLine($"{searchTagId},{tagText},{dto.FormattedTimestamp},{dto.DialogId}");
-//         }
-//     });
-// }

@@ -8,26 +8,25 @@ public sealed record Localization(
 {
     public static IEnumerable<Localization> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            foreach (var localizationSet in LocalizationSet.GenerateEntities([timestamp]))
+            {
+                var english = $"{Words.English.GetRandomWord()} {Words.English.GetRandomWord()}";
+                var norwegian = $"{Words.Norwegian.GetRandomWord()} {Words.Norwegian.GetRandomWord()}";
+
+                yield return new(
+                    LocalizationSetId: localizationSet.Id,
+                    LanguageCode: "nb",
+                    Value: norwegian
+                );
+
+                yield return new(
+                    LocalizationSetId: localizationSet.Id,
+                    LanguageCode: "en",
+                    Value: english
+                );
+            }
+        }
     }
 }
-
-// internal static class Localization
-// {
-//     // public static readonly string CopyCommand = CreateCopyCommand(nameof(Localization),
-//     //     "LanguageCode", "LocalizationSetId", "CreatedAt", "UpdatedAt", "Value");
-//
-//     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
-//     {
-//         var rng = dto.GetRng();
-//
-//         foreach (var localizationSet in LocalizationSet.GetDtos(dto))
-//         {
-//             var english = $"{Words.English.GetRandomWord(rng)} {Words.English.GetRandomWord(rng)}";
-//             var norwegian = $"{Words.Norwegian.GetRandomWord(rng)} {Words.Norwegian.GetRandomWord(rng)}";
-//
-//             sb.AppendLine($"nb,{localizationSet.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{norwegian}");
-//             sb.AppendLine($"en,{localizationSet.Id},{dto.FormattedTimestamp},{dto.FormattedTimestamp},{english}");
-//         }
-//     });
-// }

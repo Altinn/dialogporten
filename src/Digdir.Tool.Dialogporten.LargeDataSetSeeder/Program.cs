@@ -5,17 +5,6 @@ using Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
 using Npgsql;
 using DialogActivity = Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators.DialogActivity;
 
-// var cs = Environment.GetEnvironmentVariable("CONN_STRING")!;
-// await using var ds = NpgsqlDataSource.Create(cs);
-//
-// await using var writer = await PostgresCopyWriter<DialogActivity>.Create(ds);
-//
-// await writer.WriteRecords([
-//     new(Guid.CreateVersion7(), DialogActivityType.Values.DialogCreated),
-//     new(Guid.CreateVersion7(), DialogActivityType.Values.DialogCreated),
-//     new(Guid.CreateVersion7(), DialogActivityType.Values.DialogCreated),
-// ], CancellationToken.None);
-
 try
 {
     var logicalProcessorCount = Environment.ProcessorCount;
@@ -73,21 +62,13 @@ try
     const int taskRetryLimit = 1000;
     const int logThreshold = 500_000;
 
-    // var actorFetchStartTimestamp = Stopwatch.GetTimestamp();
-    // await ActorName.FetchInsertedActorNames();
-    // Console.WriteLine($"Fetched {ActorName.InsertedActorNames.Count} actor names in {Stopwatch.GetElapsedTime(actorFetchStartTimestamp)}");
-    //
-    // var actorNameTasks = new List<Task>();
-    // CreateCopyTasks(new CopyTaskDto(ActorName.Generate, "actor names", ActorName.CopyCommand, NumberOfTasks: 20), actorNameTasks);
-    // await Task.WhenAll(actorNameTasks);
-
-
     await GenerateActorNames(dataSource);
 
-
-
     var tasks = new List<Task>();
+    // IL3050
+#pragma warning disable CS8321 // Local function is declared but never used
     void CreateCopyTasks<T>(CopyTaskDto<T> copyTaskDto, List<Task> taskList) where T : class
+#pragma warning restore CS8321 // Local function is declared but never used
     {
         for (var splitIndex = 0; splitIndex < copyTaskDto.NumberOfTasks; splitIndex++)
         {
@@ -117,8 +98,6 @@ try
     {
         try
         {
-            // await using var dbConnection = await dataSource.OpenConnectionAsync();
-            // await using var writer = dbConnection.BeginTextImport(copyTaskDto.CopyCommand);
             await using var postgresCopyWriter = await PostgresCopyWriter<T>.Create(dataSource);
 
             return await AttemptInsert(copyTaskDto, splitIndex, postgresCopyWriter, currentCounter);
@@ -157,64 +136,29 @@ try
 
     async Task InsertData<T>(CopyTaskDto<T> copyTaskDto, int splitIndex, PostgresCopyWriter<T> postgresWriter, int splitLogThreshold) where T : class
     {
-        var data = copyTaskDto.Generator(dialogsDto.GetDialogTimestamps(copyTaskDto.NumberOfTasks, splitIndex));
+        var data = copyTaskDto.Generator!(dialogsDto.GetDialogTimestamps(copyTaskDto.NumberOfTasks, splitIndex));
         await postgresWriter.WriteRecords(data, CancellationToken.None);
-        // foreach (var timestamp in dialogsDto.GetDialogTimestamps(copyTaskDto.NumberOfTasks, splitIndex))
-        // {
-        //     var data = copyTaskDto.Generator(timestamp);
-        //     // if (string.IsNullOrWhiteSpace(data))
-        //     // {
-        //     //     continue;
-        //     // }
-        //
-        //     await postgresWriter.WriteRecords(data, CancellationToken.None);
-        //     // if (copyTaskDto.SingleLinePerTimestamp)
-        //     // {
-        //     //     await postgresWriter.WriteLineAsync(data);
-        //     // }
-        //     // else
-        //     // {
-        //     //     await postgresWriter.WriteAsync(data);
-        //     // }
-        //
-        //     if (timestamp.DialogCounter % logThreshold == 0)
-        //     {
-        //         Console.WriteLine(
-        //             $"Inserted {splitLogThreshold} dialogs worth of {copyTaskDto.EntityName} " +
-        //             $"(split {splitIndex + 1}/{copyTaskDto.NumberOfTasks}), counter at {timestamp.DialogCounter}");
-        //     }
-        // }
     }
 
-    // var magic = new Magic();
+    CreateCopyTasks(new CopyTaskDto<Actor>(Actor.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<Attachment>(Attachment.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<AttachmentUrl>(AttachmentUrl.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<Dialog>(Dialog.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogActivity>(DialogActivity.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogContent>(DialogContent.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogEndUserContext>(DialogEndUserContext.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogEndUserContextSystemLabel>(DialogEndUserContextSystemLabel.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogGuiAction>(DialogGuiAction.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogSearchTag>(DialogSearchTag.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogSeenLog>(DialogSeenLog.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogServiceOwnerContext>(DialogServiceOwnerContext.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogServiceOwnerLabel>(DialogServiceOwnerLabel.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogTransmission>(DialogTransmission.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<DialogTransmissionContent>(DialogTransmissionContent.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<LabelAssignmentLog>(LabelAssignmentLog.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<Localization>(Localization.GenerateEntities, "temp"), tasks);
+    CreateCopyTasks(new CopyTaskDto<LocalizationSet>(LocalizationSet.GenerateEntities, "temp"), tasks);
 
-    // Localizations, 28 lines per dialog
-    // CreateCopyTasks(new CopyTaskDto(Localization.Generate, "localizations", magic.MakeCopyCommand<Localization>, NumberOfTasks: 12), tasks);
-
-    // LocalizationSets, 14 lines per dialog
-    // CreateCopyTasks(new CopyTaskDto(LocalizationSet.Generate, "localization sets", LocalizationSet.CopyCommand, NumberOfTasks: 7), tasks);
-
-    // AttachmentUrls, 6 lines per dialog
-    // CreateCopyTasks(new CopyTaskDto(AttachmentUrl.Generate, "attachment URLs", AttachmentUrl.CopyCommand, NumberOfTasks: 6), tasks);
-
-    // Actors, 5 lines per dialog
-    // CreateCopyTasks(new CopyTaskDto(Actor.Generate, "actors", Actor.CopyCommand, NumberOfTasks: 4), tasks);
-
-    // TransmissionContent, 4 lines per dialog
-    // CreateCopyTasks(new CopyTaskDto(DialogTransmissionContent.Generate, "transmission content", DialogTransmissionContent.CopyCommand, NumberOfTasks: 2), tasks);
-
-    // No split, 2-3 lines per dialog
-    // CreateCopyTasks(new CopyTaskDto(DialogContent.Generate, "dialog content", DialogContent.CopyCommand), tasks);
-    // CreateCopyTasks(new CopyTaskDto(DialogTransmission.Generate, "transmissions", DialogTransmission.CopyCommand), tasks);
-    // CreateCopyTasks(new CopyTaskDto(DialogGuiAction.Generate, "dialog gui actions", DialogGuiAction.CopyCommand), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogActivity>(DialogActivity.GenerateEntities, "activities"), tasks);
-    // CreateCopyTasks(new CopyTaskDto(Attachment.Generate, "attachments", Attachment.CopyCommand), tasks);
-    // CreateCopyTasks(new CopyTaskDto(DialogSearchTag.Generate, "search tags", DialogSearchTag.CopyCommand), tasks);
-
-    // Single line per dialog
-    // CreateCopyTasks(new CopyTaskDto(DialogSeenLog.Generate, "seen logs", DialogSeenLog.CopyCommand, SingleLinePerTimestamp: true), tasks);
-    // CreateCopyTasks(new CopyTaskDto(DialogEndUserContext.Generate, "end user contexts", DialogEndUserContext.CopyCommand, SingleLinePerTimestamp: true), tasks);
-    // CreateCopyTasks(new CopyTaskDto(Dialog.Generate, "dialogs", Dialog.CopyCommand, SingleLinePerTimestamp: true), tasks);
 
     await Task.WhenAll(tasks);
 

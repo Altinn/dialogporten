@@ -9,12 +9,21 @@ public sealed record DialogSeenLog(
     bool IsViaServiceOwner,
     Guid DialogId,
     DialogUserType.Values EndUserTypeId
-
 ) : IEntityGenerator<DialogSeenLog>
 {
     public static IEnumerable<DialogSeenLog> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            yield return new(
+                Id: timestamp.ToUuidV7(timestamp.DialogId),
+                CreatedAt: timestamp.Timestamp,
+                IsViaServiceOwner: false,
+                DialogId: timestamp.DialogId,
+                EndUserTypeId: DialogUserType.Values.Person
+            );
+        }
+
     }
 }
 

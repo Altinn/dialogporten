@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
@@ -33,7 +34,45 @@ public sealed record Dialog(
 {
     public static IEnumerable<Dialog> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            var rng = timestamp.GetRng();
+            var party = rng.GetParty();
+
+            var transmissions = DialogTransmission.GenerateEntities([timestamp]).ToList();
+
+            yield return new Dialog(
+                Id: timestamp.DialogId,
+                Revision: Guid.NewGuid(),
+                IdempotentKey: null,
+                CreatedAt: timestamp.Timestamp,
+                UpdatedAt: timestamp.Timestamp,
+                Deleted: false,
+                DeletedAt: null,
+                Org: "ttd", // TODO: fancy pick from Dagfinns list?
+                ServiceResource: "service/resource", // TODO: fancy pick from service_resources file?
+                ServiceResourceType: "GenericAccessResource", // based on picked service resource?
+                Party: party,
+                Progress: rng.Next(0, 101),
+                ExtendedStatus: null,
+                ExternalReference: null,
+                VisibleFrom: null,
+                DueAt: null,
+                ExpiresAt: null,
+                StatusId: DialogStatus.Values.NotApplicable,
+                Process: null,
+                PrecedingProcess: null,
+                IsApiOnly: false,
+                FromServiceOwnerTransmissionsCount: (short)transmissions.Count(x => x.TypeId
+                    is not DialogTransmissionType.Values.Submission
+                    and not DialogTransmissionType.Values.Correction),
+                FromPartyTransmissionsCount: (short)transmissions.Count(x => x.TypeId
+                    is DialogTransmissionType.Values.Submission
+                    or DialogTransmissionType.Values.Correction),
+                HasUnopenedContent: false, // TODO: ask Magnus about this
+                ContentUpdatedAt: timestamp.Timestamp
+            );
+        }
     }
 }
 // internal static class DialogFoo
@@ -59,6 +98,7 @@ public sealed record Dialog(
 //         //     Id = dto.DialogId,
 //         //     CreatedAt = dto.Timestamp
 //         // };
+//          var dialogId = Det.Create(dto.Timestamp, nameof(Dialog));
 //
 //         // return CsvBuilder.Magic(dialog);
 //         // return

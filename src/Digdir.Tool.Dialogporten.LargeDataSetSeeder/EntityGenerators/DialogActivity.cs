@@ -22,24 +22,34 @@ public sealed record DialogActivity(
         foreach (var timestamp in timestamps)
         {
             // All dialogs have a DialogCreated activity.
-            var dialogCreatedActivityId = timestamp.ToUuidV7(DomainName, (int)DialogCreated);
-            yield return new(dialogCreatedActivityId, timestamp.Timestamp, null, DialogCreated, timestamp.DialogId, null);
+            var dialogCreatedActivityId = timestamp.ToUuidV7(timestamp.DialogId, (int)DialogCreated);
+            yield return CreateDialogActivity(dialogCreatedActivityId, timestamp);
 
             var rng = timestamp.GetRng();
 
             // Approx. 1/2 of dialogs have a DialogOpened activity.
             if (rng.Next(0, 2) == 0)
             {
-                var dialogOpenedActivityId = timestamp.ToUuidV7(DomainName, (int)DialogOpened);
-                yield return new(dialogOpenedActivityId, timestamp.Timestamp, null, DialogCreated, timestamp.DialogId, null);
+                var dialogOpenedActivityId = timestamp.ToUuidV7(timestamp.DialogId, (int)DialogOpened);
+                yield return CreateDialogActivity(dialogOpenedActivityId, timestamp);
             }
 
             // Approx. 1/3 of dialogs have an Information activity.
             if (rng.Next(0, 3) == 0)
             {
-                var informationActivityId = timestamp.ToUuidV7(DomainName, (int)Information);
-                yield return new(informationActivityId, timestamp.Timestamp, null, DialogCreated, timestamp.DialogId, null);
+                var informationActivityId = timestamp.ToUuidV7(timestamp.DialogId, (int)Information);
+                yield return CreateDialogActivity(informationActivityId, timestamp);
             }
         }
     }
+
+    private static DialogActivity CreateDialogActivity(Guid dialogCreatedActivityId, DialogTimestamp timestamp) =>
+        new(
+            Id: dialogCreatedActivityId,
+            CreatedAt: timestamp.Timestamp,
+            ExtendedType: null,
+            TypeId: DialogCreated,
+            DialogId: timestamp.DialogId,
+            TransmissionId: null
+        );
 }

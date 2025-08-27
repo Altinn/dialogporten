@@ -1,8 +1,15 @@
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogTransmissionContent(
+    Guid Id,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt,
+    string MediaType,
+    Guid TransmissionId,
+    DialogTransmissionType.Values TypeId
 
 ) : IEntityGenerator<DialogTransmissionContent>
 {

@@ -5,7 +5,16 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogGuiAction(
-
+    Guid Id,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt,
+    string Action,
+    string Url,
+    string? AuthorizationAttribute,
+    bool IsDeleteDialogAction,
+    DialogGuiActionPriority.Values PriorityId,
+    HttpVerb.Values HttpMethodId,
+    Guid DialogId
 ) : IEntityGenerator<DialogGuiAction>
 {
     public static IEnumerable<DialogGuiAction> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)

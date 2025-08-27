@@ -1,9 +1,34 @@
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record Dialog(
-
+    Guid Id,
+    Guid Revision,
+    string? IdempotentKey,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt,
+    bool Deleted,
+    DateTimeOffset? DeletedAt,
+    string Org,
+    string ServiceResource,
+    string ServiceResourceType,
+    string Party,
+    int Progress,
+    string? ExtendedStatus,
+    string? ExternalReference,
+    DateTimeOffset? VisibleFrom,
+    DateTimeOffset? DueAt,
+    DateTimeOffset? ExpiresAt,
+    DialogStatus.Values StatusId,
+    string? Process,
+    string? PrecedingProcess,
+    bool IsApiOnly,
+    short FromServiceOwnerTransmissionsCount,
+    short FromPartyTransmissionsCount,
+    bool HasUnopenedContent,
+    DateTimeOffset ContentUpdatedAt
 ) : IEntityGenerator<Dialog>
 {
     public static IEnumerable<Dialog> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)

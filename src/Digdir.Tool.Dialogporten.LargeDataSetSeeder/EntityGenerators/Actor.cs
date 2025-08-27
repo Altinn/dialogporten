@@ -14,12 +14,68 @@ public sealed record Actor(
     DateTimeOffset UpdatedAt,
     ActorType.Values ActorTypeId,
     string Discriminator,
+    Guid? TransmissionId,
+    Guid? DialogSeenLogId,
+    Guid? ActivityId,
+    Guid? LabelAssignmentLogId,
     Guid? ActorNameEntityId
-    ) : IEntityGenerator<Actor>
+) : IEntityGenerator<Actor>
 {
     public static IEnumerable<Actor> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        return [];
+        foreach (var timestamp in timestamps)
+        {
+            foreach (var activity in DialogActivity.GenerateEntities([timestamp]))
+            {
+                Guid? actorNameId = activity.TypeId switch
+                {
+                    DialogActivityType.Values.DialogCreated or
+                        DialogActivityType.Values.DialogDeleted or
+                        DialogActivityType.Values.DialogRestored or
+                        DialogActivityType.Values.Information => null,
+                    _ => ActorName.GetRandomId()
+                };
+
+                yield return new Actor(
+                    Id: activity.Id,
+                    CreatedAt: timestamp.Timestamp,
+                    UpdatedAt: timestamp.Timestamp,
+                    ActorTypeId: actorNameId.HasValue
+                        ? ActorType.Values.ServiceOwner
+                        : ActorType.Values.PartyRepresentative,
+                    Discriminator: "DialogActivityPerformedByActor",
+                    TransmissionId: null,
+                    DialogSeenLogId: null,
+                    ActivityId: activity.Id,
+                    LabelAssignmentLogId: null,
+                    ActorNameEntityId: actorNameId
+                );
+            }
+
+            // foreach (var seenLog in DialogSeenLog.GenerateEntities([timestamp]))
+            // {
+            // Guid? actorNameId = seenLog. switch
+            // {
+            //     DialogUserType.Values.Person => ActorName.GetRandomId(),
+            //     _ => null
+            // };
+
+            // yield return new Actor(
+            //     Id: seenLog.Id,
+            //     CreatedAt: timestamp.Timestamp,
+            //     UpdatedAt: timestamp.Timestamp,
+            //     ActorTypeId: actorNameId.HasValue
+            //         ? ActorType.Values.PartyRepresentative
+            //         : ActorType.Values.ServiceOwner,
+            //     Discriminator: "DialogSeenLogSeenByActor",
+            //     TransmissionId: null,
+            //     DialogSeenLogId: seenLog.Id,
+            //     ActivityId: null,
+            //     LabelAssignmentLogId: null,
+            //     ActorNameEntityId: actorNameId
+            // );
+            // }
+        }
     }
 }
 

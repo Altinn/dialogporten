@@ -4,6 +4,14 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogTransmission(
+    Guid Id,
+    DateTime CreatedAt,
+    string AuthorizationAttribute,
+    string? ExtendedType,
+    string? ExternalReference,
+    DialogTransmissionType.Values TypeId,
+    Guid DialogId,
+    Guid? RelatedTransmissionId
 
 ) : IEntityGenerator<DialogTransmission>
 {

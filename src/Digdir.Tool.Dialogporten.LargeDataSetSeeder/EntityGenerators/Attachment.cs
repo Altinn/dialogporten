@@ -4,8 +4,13 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record Attachment(
-    Guid Id
-    ) : IEntityGenerator<Attachment>
+    Guid Id,
+    DateTimeOffset CreatedAt,
+    string Discriminator,
+    DateTimeOffset UpdatedAt,
+    Guid? DialogId,
+    Guid? TransmissionId
+) : IEntityGenerator<Attachment>
 {
     public static IEnumerable<Attachment> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {

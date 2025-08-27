@@ -1,10 +1,16 @@
+using Digdir.Domain.Dialogporten.Domain.Attachments;
 using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
-
 public sealed record AttachmentUrl(
-
+    Guid Id,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt,
+    string MediaType,
+    string Url,
+    AttachmentUrlConsumerType.Values ConsumerTypeId,
+    Guid AttachmentId
 ) : IEntityGenerator<AttachmentUrl>
 {
     public static IEnumerable<AttachmentUrl> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)

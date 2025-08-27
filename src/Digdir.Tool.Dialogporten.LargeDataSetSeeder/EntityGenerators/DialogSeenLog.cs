@@ -4,6 +4,11 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogSeenLog(
+    Guid Id,
+    DateTimeOffset CreatedAt,
+    bool IsViaServiceOwner,
+    Guid DialogId,
+    DialogUserType.Values EndUserTypeId
 
 ) : IEntityGenerator<DialogSeenLog>
 {

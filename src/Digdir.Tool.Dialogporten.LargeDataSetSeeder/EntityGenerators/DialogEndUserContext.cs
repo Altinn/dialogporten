@@ -3,7 +3,11 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogEndUserContext(
-
+    Guid Id,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt,
+    Guid DialogId,
+    Guid Revision
 ) : IEntityGenerator<DialogEndUserContext>
 {
     public static IEnumerable<DialogEndUserContext> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)

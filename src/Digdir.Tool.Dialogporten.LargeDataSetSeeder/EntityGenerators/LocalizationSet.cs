@@ -4,7 +4,13 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record LocalizationSet(
-
+    Guid Id,
+    string Discriminator,
+    Guid? AttachmentId,
+    Guid? GuiActionId,
+    Guid? ActivityId,
+    Guid? DialogContentId,
+    Guid? TransmissionContentId
 ) : IEntityGenerator<LocalizationSet>
 {
     public static IEnumerable<LocalizationSet> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)

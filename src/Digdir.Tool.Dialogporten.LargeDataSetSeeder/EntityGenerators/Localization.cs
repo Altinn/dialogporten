@@ -1,9 +1,9 @@
-using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
-
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record Localization(
-
+    Guid LocalizationSetId,
+    string LanguageCode,
+    string Value
 ) : IEntityGenerator<Localization>
 {
     public static IEnumerable<Localization> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)

@@ -3,7 +3,10 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogSearchTag(
-
+    Guid Id,
+    string Value,
+    DateTimeOffset CreatedAt,
+    Guid DialogId
 ) : IEntityGenerator<DialogSearchTag>
 {
     public static IEnumerable<DialogSearchTag> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)

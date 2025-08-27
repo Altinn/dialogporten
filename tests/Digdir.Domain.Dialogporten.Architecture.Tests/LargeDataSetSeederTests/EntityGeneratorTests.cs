@@ -1,4 +1,5 @@
 using System.Reflection;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
@@ -9,6 +10,7 @@ using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using ActorName = Digdir.Domain.Dialogporten.Domain.Actors.ActorName;
 
 namespace Digdir.Domain.Dialogporten.Architecture.Tests.LargeDataSetSeederTests;
 
@@ -37,28 +39,32 @@ public class EntityGeneratorTests
         List<string> missingGenerators = [];
         Dictionary<string, List<string>> missingPropertiesByType = [];
 
-        foreach (var entityType in GetEntityTypes(dbContext))
-        {
-            var tableName = entityType.GetTableName();
+        var ents = GetEntityTypes(dbContext)
+            .GroupBy(x => x.GetTableName()!)
+            .ToDictionary(x => x.Key, x => x.SelectMany(x =>
+            {
+                var scalarColumns = x.GetProperties().Select(x => x.GetColumnName());
+                var fkColumns = x.GetForeignKeys().SelectMany(x => x.Properties.Select(y => y.GetColumnName()));
+                return scalarColumns.Concat(fkColumns).Distinct();
+            }).ToHashSet());
 
+        foreach (var (tableName, columns) in ents)
+        {
             if (!entityGenerators.TryGetValue(tableName!, out var generatorType))
             {
-                missingGenerators.Add(tableName!);
+                missingGenerators.Add(tableName);
                 continue;
             }
 
-            var schema = entityType.GetSchema();
             List<string> missingPropertyNames = [];
 
             var generatorProperties = GetGeneratorProperties(generatorType);
 
-            foreach (var property in entityType.GetProperties())
+            foreach (var column in columns)
             {
-                var columnName = property.GetColumnName(StoreObjectIdentifier.Table(tableName!, schema));
-
-                if (!generatorProperties.Contains(columnName!))
+                if (!generatorProperties.Contains(column))
                 {
-                    missingPropertyNames.Add(columnName!);
+                    missingPropertyNames.Add(column);
                 }
             }
 
@@ -100,6 +106,8 @@ public class EntityGeneratorTests
 
     private static readonly string[] IgnoredEntityNames =
     {
+        nameof(ActorName), // Handled by custom generator, runs before others
+        nameof(DialogApiAction), // Don't care about these in YT01 seeding
         nameof(MassTransit),
         nameof(NotificationAcknowledgement),
         nameof(SubjectResource),

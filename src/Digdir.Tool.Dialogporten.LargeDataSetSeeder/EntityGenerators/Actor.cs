@@ -8,18 +8,6 @@ using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
-// public abstract class Actor : IEntity
-// {
-//     public Guid Id { get; set; }
-//     public DateTimeOffset CreatedAt { get; set; }
-//     public DateTimeOffset UpdatedAt { get; set; }
-//     public ActorType.Values ActorTypeId { get; set; }
-//     public ActorType ActorType { get; set; } = null!;
-//
-//     public Guid? ActorNameEntityId { get; set; }
-//     public ActorName? ActorNameEntity { get; set; } = null!;
-// }
-
 public sealed record Actor(
     Guid Id,
     DateTimeOffset CreatedAt,
@@ -34,6 +22,7 @@ public sealed record Actor(
         return [];
     }
 }
+
 // internal static class Actor
 // {
 //     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>

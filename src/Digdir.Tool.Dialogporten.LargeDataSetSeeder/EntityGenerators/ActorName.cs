@@ -1,72 +1,44 @@
 using System.Collections.Concurrent;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Npgsql;
 using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
-public sealed record ActorName(
-
-) : IEntityGenerator<ActorName>
+public sealed record ActorName(Guid Id, string ActorId, string Name, DateTimeOffset CreatedAt)
 {
-    public static IEnumerable<ActorName> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
+    private static readonly List<Guid> ActorNameIds = [];
+
+    public static IEnumerable<ActorName> GenerateEntities()
     {
-        return [];
+        var personUrns = Parties.List
+            .Where(x => x.StartsWith(NorwegianPersonIdentifier.PrefixWithSeparator,
+                StringComparison.OrdinalIgnoreCase));
+        HashSet<Guid> actorNameIds = [];
+
+        foreach (var personUrn in personUrns)
+        {
+            var name = PersonNames.List[Random.Shared.Next(PersonNames.List.Length)] + " " +
+                       PersonNames.List[Random.Shared.Next(PersonNames.List.Length)];
+            var nextId = Guid.CreateVersion7();
+            while (!actorNameIds.Add(nextId))
+            {
+                nextId = Guid.CreateVersion7();
+            }
+            yield return new ActorName(Id: nextId, ActorId: personUrn, Name: name, CreatedAt: DateTimeOffset.UtcNow);
+        }
+
+        ActorNameIds.AddRange(actorNameIds);
+    }
+
+    public static Guid GetRandomId()
+    {
+        if (ActorNameIds.Count == 0)
+        {
+            throw new InvalidOperationException("ActorName is not seeded.");
+        }
+
+        return ActorNameIds[Random.Shared.Next(ActorNameIds.Count)];
     }
 }
 
-// internal static class ActorName
-// {
-//     public static string CopyCommand = "foo";
-//     public static async Task FetchInsertedActorNames()
-//     {
-//         await using var conn = NpgsqlDataSource.Create(Environment.GetEnvironmentVariable("CONN_STRING")!);
-//         var connection = await conn.OpenConnectionAsync();
-//
-//         await using var cmd = new NpgsqlCommand("SELECT * FROM \"ActorName\"", connection);
-//         await using var reader = cmd.ExecuteReader();
-//
-//         while (reader.Read())
-//         {
-//             var id = reader.GetGuid(0);
-//             var actorId = reader.GetString(1);
-//             InsertedActorNames.TryAdd(actorId, id);
-//         }
-//     }
-//
-//     internal static readonly ConcurrentDictionary<string, Guid> InsertedActorNames = [];
-//
-//     public static string Generate(DialogTimestamp dto) => BuildCsv(sb =>
-//     {
-//         var rng = dto.GetRng();
-//
-//         var dialogParty = rng.GetParty();
-//         var transmissionParty = rng.GetParty();
-//
-//         var dialogPartyActorNameId = dto.ToUuidV7(nameof(ActorName), 1);
-//
-//         if (InsertedActorNames.TryAdd(dialogParty, dialogPartyActorNameId))
-//         {
-//             var dialogPartyActorName =
-//                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
-//                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
-//
-//             sb.AppendLine(
-//                 $"{dialogPartyActorNameId}," +
-//                 $"{dialogParty}," +
-//                 $"{dialogPartyActorName}," +
-//                 $"{dto.FormattedTimestamp}");
-//         }
-//
-//         var transmissionActorNameId = dto.ToUuidV7(nameof(ActorName), 2);
-//         if (InsertedActorNames.TryAdd(transmissionParty, transmissionActorNameId))
-//         {
-//             var transmissionActorName =
-//                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]} " +
-//                 $"{PersonNames.List[rng.Next(0, PersonNames.List.Length)]}";
-//
-//             sb.AppendLine($"{transmissionActorNameId},{transmissionParty},{transmissionActorName},{dto.FormattedTimestamp}");
-//         }
-//     });
-//
-//     internal static Guid GetActorNameId(string party) => InsertedActorNames[party];
-// }

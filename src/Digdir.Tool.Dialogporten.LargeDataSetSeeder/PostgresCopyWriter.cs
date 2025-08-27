@@ -44,9 +44,9 @@ internal sealed class PostgresCopyWriter<T> : IAsyncDisposable, IDisposable wher
         return new PostgresCopyWriter<T>(connection, csvWriter);
     }
 
-    public Task WriteRecords(IEnumerable<T> data, CancellationToken cancellationToken) =>
+    public Task WriteRecords(IEnumerable<T> data, CancellationToken cancellationToken = default) =>
         _csvWriter.WriteRecordsAsync(data, cancellationToken);
-    public Task WriteRecords(IAsyncEnumerable<T> data, CancellationToken cancellationToken) =>
+    public Task WriteRecords(IAsyncEnumerable<T> data, CancellationToken cancellationToken = default) =>
         _csvWriter.WriteRecordsAsync(data, cancellationToken);
 
     public void Dispose()
@@ -74,21 +74,21 @@ internal sealed class DateTimeOffsetConverter : DefaultTypeConverter
         value is DateTimeOffset offset ? offset.ToString("O") : base.ConvertToString(value, row, memberMapData);
 }
 
-internal sealed class ChannelManager<T> : IAsyncDisposable where T : class, new()
+internal sealed class ChannelManager<T> : IAsyncDisposable where T : class
 {
     private readonly Channel<T> _channel;
     private readonly List<ConsumerState> _consumers = [];
     private readonly NpgsqlDataSource _dataSource;
 
-    public ChannelManager(NpgsqlDataSource dataSource, int capacity = 100)
+    private ChannelManager(NpgsqlDataSource dataSource, int capacity = 10_000)
     {
         _channel = Channel.CreateBounded<T>(capacity);
         _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
     }
 
-    public static async Task<ChannelManager<T>> Create(NpgsqlDataSource dataSource, int initialConsumers = 1)
+    public static async Task<ChannelManager<T>> Create(NpgsqlDataSource dataSource, int initialConsumers = 1, int capacity = 10_000)
     {
-        var manager = new ChannelManager<T>(dataSource);
+        var manager = new ChannelManager<T>(dataSource, capacity);
         initialConsumers = Math.Max(1, initialConsumers);
         await Task.WhenAll(Enumerable
             .Range(0, initialConsumers)
@@ -99,10 +99,10 @@ internal sealed class ChannelManager<T> : IAsyncDisposable where T : class, new(
     public async Task ScaleUp()
     {
         var writer = await PostgresCopyWriter<T>.Create(_dataSource);
-        var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var task = Task.Run(() => writer.WriteRecords(_channel.Reader.ReadAllAsync()
-            .WIthTaskCompletionSource(finished), CancellationToken.None));
-        _consumers.Add(new ConsumerState(writer, task, finished));
+            .WIthTaskCompletionSource(completionSource), CancellationToken.None));
+        _consumers.Add(new ConsumerState(writer, task, completionSource));
     }
 
     public async Task ScaleDown()
@@ -113,10 +113,8 @@ internal sealed class ChannelManager<T> : IAsyncDisposable where T : class, new(
         await consumer.DisposeAsync();
     }
 
-    public async Task WriteAsync(T item, CancellationToken cancellationToken = default)
-    {
-        await _channel.Writer.WriteAsync(item, cancellationToken);
-    }
+    public ValueTask WriteAsync(T item, CancellationToken cancellationToken = default) =>
+        _channel.Writer.WriteAsync(item, cancellationToken);
 
     public async ValueTask CompleteAsync()
     {

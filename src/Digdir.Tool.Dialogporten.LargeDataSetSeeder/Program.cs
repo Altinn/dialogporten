@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 using Npgsql;
 using DialogActivity = Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators.DialogActivity;
 
@@ -78,6 +79,11 @@ try
     // var actorNameTasks = new List<Task>();
     // CreateCopyTasks(new CopyTaskDto(ActorName.Generate, "actor names", ActorName.CopyCommand, NumberOfTasks: 20), actorNameTasks);
     // await Task.WhenAll(actorNameTasks);
+
+
+    await GenerateActorNames(dataSource);
+
+
 
     var tasks = new List<Task>();
     void CreateCopyTasks<T>(CopyTaskDto<T> copyTaskDto, List<Task> taskList) where T : class
@@ -268,4 +274,10 @@ catch (Exception ex)
 {
     Console.Error.WriteLine(ex.Message);
     Console.Error.WriteLine(ex.StackTrace);
+}
+
+static async Task GenerateActorNames(NpgsqlDataSource dataSource)
+{
+    await using var actorNameWriter = await PostgresCopyWriter<ActorName>.Create(dataSource);
+    await actorNameWriter.WriteRecords(ActorName.GenerateEntities());
 }

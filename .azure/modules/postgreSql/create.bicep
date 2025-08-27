@@ -408,13 +408,17 @@ resource postgresBackupOperatorRole 'Microsoft.Authorization/roleDefinitions@202
   name: 'aaaa0a0a-bb1b-cc2c-dd3d-eeeeee4e4e4e'
 }
 
+// Variables to safely handle conditional backup vault properties
+var backupVaultPrincipalId = longTermBackupConfig != null ? backupVault.identity.principalId : ''
+var backupVaultId = longTermBackupConfig != null ? backupVault.id : ''
+
 // Role Assignment: PostgreSQL Backup And Export Operator Role
 // This role allows the backup vault to read the PostgreSQL server and perform backups
 resource roleAssignmentBackupExportOperator 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (longTermBackupConfig != null) {
-  name: guid(backupVault.id, postgres.id, 'PostgreSQLFlexibleServerLongTermRetentionBackupRole')
+  name: guid(backupVaultId, postgres.id, 'PostgreSQLFlexibleServerLongTermRetentionBackupRole')
   scope: postgres
   properties: {
-    principalId: backupVault.identity.principalId
+    principalId: backupVaultPrincipalId
     roleDefinitionId: postgresBackupOperatorRole.id
     principalType: 'ServicePrincipal'
   }

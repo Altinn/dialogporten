@@ -5872,7 +5872,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}": {
       "get": {
-        "description": "Gets a single dialog aggregate. ",
+        "description": "Gets a single dialog aggregate.",
         "operationId": "V1EndUserDialogsQueriesGet_Dialog",
         "parameters": [
           {

@@ -5,7 +5,7 @@ using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.LocalizationTemplates.Common;
 
-internal sealed class TemplateSetDtoValidator : AbstractValidator<TemplateSetDto>
+internal sealed class TemplateSetDtoValidator : AbstractValidator<LocalizationTemplateSetDto>
 {
     public TemplateSetDtoValidator(int maximumLength = LocalizationValidatorConstants.MaximumLength)
     {
@@ -17,7 +17,7 @@ internal sealed class TemplateSetDtoValidator : AbstractValidator<TemplateSetDto
     }
 }
 
-internal sealed class TemplateDtoValidator : AbstractValidator<TemplateDto>
+internal sealed class TemplateDtoValidator : AbstractValidator<LocalizationTemplateDto>
 {
     public TemplateDtoValidator(int maximumLength = LocalizationValidatorConstants.MaximumLength)
     {

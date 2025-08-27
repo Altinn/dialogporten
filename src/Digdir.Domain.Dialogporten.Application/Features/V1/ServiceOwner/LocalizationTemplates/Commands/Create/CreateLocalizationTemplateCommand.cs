@@ -11,7 +11,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Locali
 
 public sealed class CreateLocalizationTemplateCommand : IRequest<CreateLocalizationTemplateResult>
 {
-    public required TemplateSetDto TemplateSet { get; init; }
+    public required LocalizationTemplateSetDto TemplateSet { get; init; }
 }
 
 [GenerateOneOf]

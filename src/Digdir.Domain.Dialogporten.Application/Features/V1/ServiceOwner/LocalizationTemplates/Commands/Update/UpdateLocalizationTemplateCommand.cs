@@ -13,7 +13,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Locali
 public sealed class UpdateLocalizationTemplateCommand : IRequest<UpdateLocalizationTemplateResult>
 {
     public Guid? IfMatchRevision { get; init; }
-    public required TemplateSetDto TemplateSet { get; init; }
+    public required LocalizationTemplateSetDto TemplateSet { get; init; }
 }
 
 [GenerateOneOf]

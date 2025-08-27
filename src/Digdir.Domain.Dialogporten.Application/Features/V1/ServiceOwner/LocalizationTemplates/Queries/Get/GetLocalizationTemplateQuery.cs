@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.LocalizationTemplates.Common;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ public sealed class GetLocalizationTemplateQuery : IRequest<GetLocalizationTempl
 }
 
 [GenerateOneOf]
-public sealed partial class GetLocalizationTemplateResult : OneOfBase<List<GetLocalizationTemplateDto>, EntityNotFound, ValidationError>;
+public sealed partial class GetLocalizationTemplateResult : OneOfBase<LocalizationTemplateSetDto, EntityNotFound, ValidationError>;
 
 internal sealed class GetLocalizationTemplateQueryHandler : IRequestHandler<GetLocalizationTemplateQuery, GetLocalizationTemplateResult>
 {

@@ -43,4 +43,5 @@ internal sealed class LocalDevelopmentUserOrganizationRegistryDecorator : IUserO
     public LocalDevelopmentUserOrganizationRegistryDecorator(IUserOrganizationRegistry _) { }
 
     public Task<string?> GetCurrentUserOrgShortName(CancellationToken cancellationToken) => Task.FromResult("digdir")!;
+    public Task<string> GetCurrentUserOrgShortNameStrict(CancellationToken cancellationToken) => Task.FromResult("digdir");
 }

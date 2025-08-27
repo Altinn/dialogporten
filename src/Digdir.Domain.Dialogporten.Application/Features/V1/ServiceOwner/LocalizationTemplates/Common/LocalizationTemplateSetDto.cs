@@ -4,14 +4,14 @@ using Digdir.Domain.Dialogporten.Domain.Localizations;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.LocalizationTemplates.Common;
 
-public sealed class TemplateSetDto
+public sealed class LocalizationTemplateSetDto
 {
     public required string Id { get; init; }
     public string? Org { get; set; }
-    public required ReadOnlyCollection<TemplateDto> Templates { get; init; }
+    public required ReadOnlyCollection<LocalizationTemplateDto> Templates { get; init; }
 }
 
-public sealed class TemplateDto
+public sealed class LocalizationTemplateDto
 {
     private readonly string _languageCode;
     public required string LanguageCode

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
 using Npgsql;
 using DialogActivity = Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators.DialogActivity;
 

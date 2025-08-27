@@ -10,7 +10,7 @@ public sealed class GetDialogEndpointSummary : Summary<GetDialogEndpoint>
     {
         Summary = "Gets a single dialog";
         Description = """
-                      Gets a single dialog aggregate. 
+                      Gets a single dialog aggregate.
                       """;
 
         Responses[StatusCodes.Status200OK] =

@@ -279,5 +279,5 @@ catch (Exception ex)
 static async Task GenerateActorNames(NpgsqlDataSource dataSource)
 {
     await using var actorNameWriter = await PostgresCopyWriter<ActorName>.Create(dataSource);
-    await actorNameWriter.WriteRecords(ActorName.GenerateEntities());
+    await actorNameWriter.WriteRecords(ActorName.Values);
 }

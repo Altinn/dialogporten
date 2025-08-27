@@ -1,25 +1,27 @@
-using System.Collections.Concurrent;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using Npgsql;
-using static Digdir.Tool.Dialogporten.LargeDataSetSeeder.Utils;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record ActorName(Guid Id, string ActorId, string Name, DateTimeOffset CreatedAt)
 {
-    private static readonly List<Guid> ActorNameIds = [];
+    public static readonly ActorName[] Values = GenerateEntities().ToArray();
 
-    public static IEnumerable<ActorName> GenerateEntities()
+    public static Guid GetRandomId() =>
+        Values[Random.Shared.Next(Values.Length)].Id;
+
+    private static IEnumerable<ActorName> GenerateEntities()
     {
-        var personUrns = Parties.List
+        // TODO: Kan vi fjerne Parties.List og kun ha Values i minnet?
+        var personUrns = File.ReadLines("./parties")
             .Where(x => x.StartsWith(NorwegianPersonIdentifier.PrefixWithSeparator,
                 StringComparison.OrdinalIgnoreCase));
-        HashSet<Guid> actorNameIds = [];
+        var personNames = File.ReadAllLines("./person_names");
+        var actorNameIds = new HashSet<Guid>();
 
         foreach (var personUrn in personUrns)
         {
-            var name = PersonNames.List[Random.Shared.Next(PersonNames.List.Length)] + " " +
-                       PersonNames.List[Random.Shared.Next(PersonNames.List.Length)];
+            var name = personNames[Random.Shared.Next(personNames.Length)] + " " +
+                       personNames[Random.Shared.Next(personNames.Length)];
             var nextId = Guid.CreateVersion7();
             while (!actorNameIds.Add(nextId))
             {
@@ -27,18 +29,6 @@ public sealed record ActorName(Guid Id, string ActorId, string Name, DateTimeOff
             }
             yield return new ActorName(Id: nextId, ActorId: personUrn, Name: name, CreatedAt: DateTimeOffset.UtcNow);
         }
-
-        ActorNameIds.AddRange(actorNameIds);
-    }
-
-    public static Guid GetRandomId()
-    {
-        if (ActorNameIds.Count == 0)
-        {
-            throw new InvalidOperationException("ActorName is not seeded.");
-        }
-
-        return ActorNameIds[Random.Shared.Next(ActorNameIds.Count)];
     }
 }
 

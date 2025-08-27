@@ -29,9 +29,8 @@ public sealed record AttachmentUrl(
         }
     }
 
-    private static AttachmentUrl CreateAttachmentUrl(DialogTimestamp timestamp, Attachment attachment, int tieBreaker)
-    {
-        return new AttachmentUrl(
+    private static AttachmentUrl CreateAttachmentUrl(DialogTimestamp timestamp, Attachment attachment, int tieBreaker) =>
+        new(
             Id: timestamp.ToUuidV7(attachment.Id, tieBreaker),
             CreatedAt: timestamp.Timestamp,
             UpdatedAt: timestamp.Timestamp,
@@ -40,5 +39,4 @@ public sealed record AttachmentUrl(
             ConsumerTypeId: AttachmentUrlConsumerType.Values.Gui,
             AttachmentId: attachment.Id
         );
-    }
 }

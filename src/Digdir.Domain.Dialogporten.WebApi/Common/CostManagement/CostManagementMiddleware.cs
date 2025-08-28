@@ -85,7 +85,6 @@ public sealed class CostManagementMiddleware
                     context.Request.Method, context.Request.Path.Value, serviceOrg, serviceResource);
             }
 
-
             // Only enqueue billable outcomes (2xx, 4xx)
             var statusCode = context.Response.StatusCode;
             if (statusCode is not ((>= 200 and < 300) or (>= 400 and < 500)))
@@ -192,7 +191,7 @@ public static class CostManagementMiddlewareExtensions
         services.AddSingleton(provider => provider.GetRequiredService<System.Threading.Channels.Channel<TransactionRecord>>().Writer);
 
         // Register shared meter
-        services.AddSingleton(provider => new System.Diagnostics.Metrics.Meter("Dialogporten.CostManagement", "1.0.0"));
+        services.AddSingleton(_ => new System.Diagnostics.Metrics.Meter("Dialogporten.CostManagement", "1.0.0"));
 
         // Register metrics recorder with shared meter
         services.AddSingleton<IMetricsRecorder>(provider =>

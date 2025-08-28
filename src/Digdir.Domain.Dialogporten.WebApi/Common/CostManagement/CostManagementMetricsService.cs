@@ -20,14 +20,10 @@ internal sealed class CostManagementMetricsService : ICostManagementTransactionR
 
     public void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? tokenOrg = null, string? serviceOrg = null, string? serviceResource = null)
     {
-        var status = GetStatusFromHttpCode(httpStatusCode);
-
-        // Only record metrics for 2xx (success) and 4xx (client errors)
-        // 5xx errors should not incur costs according to requirements
-        if (status == null)
-        {
-            return;
-        }
+        // Middleware ensures only 2xx and 4xx reach this method
+        var status = httpStatusCode is >= 200 and < 300
+            ? CostManagementConstants.StatusSuccess
+            : CostManagementConstants.StatusFailed;
 
         // Use TagList to avoid array allocation on each call
         var tags = new TagList
@@ -42,16 +38,6 @@ internal sealed class CostManagementMetricsService : ICostManagementTransactionR
         };
 
         _metricsRecorder.RecordTransactionCounter(1, tags);
-    }
-
-    private static string? GetStatusFromHttpCode(int httpStatusCode)
-    {
-        return httpStatusCode switch
-        {
-            >= 200 and < 300 => CostManagementConstants.StatusSuccess,
-            >= 400 and < 500 => CostManagementConstants.StatusFailed,
-            _ => null // Don't record 5xx or other status codes
-        };
     }
 
 }

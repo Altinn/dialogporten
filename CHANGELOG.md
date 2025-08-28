@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.80.0](https://github.com/Altinn/dialogporten/compare/v1.79.8...v1.80.0) (2025-08-28)
+
+
+### Features
+
+* **infra:** long term back of postgresql server in prod ([#2687](https://github.com/Altinn/dialogporten/issues/2687)) ([621b258](https://github.com/Altinn/dialogporten/commit/621b25872c8f4777b41aa9bf7aedfbc516687486))
+
 ## [1.79.8](https://github.com/Altinn/dialogporten/compare/v1.79.7...v1.79.8) (2025-08-27)
 
 

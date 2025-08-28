@@ -228,8 +228,9 @@ var transactionType = costTrackedAttribute?.TransactionType;
 Organization information is extracted from JWT claims:
 
 ```csharp
-private static string? ExtractTokenOrg(IUser user)
+private static string? ExtractTokenOrg(HttpContext context)
 {
+    var user = context.RequestServices.GetRequiredService<IUser>();
     var principal = user.GetPrincipal();
     if (principal.TryGetOrganizationShortName(out var orgShortName))
     {

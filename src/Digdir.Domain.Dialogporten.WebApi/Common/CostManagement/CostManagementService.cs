@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Threading.Channels;
+using Microsoft.Extensions.Hosting;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 
@@ -57,11 +59,11 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
         {
             if (!_writer.TryWrite(transaction))
             {
-                _logger.LogWarning("Failed to queue cost management transaction - queue is full. Transaction: {TransactionType}, Status: {StatusCode}",
+                _logger.LogWarning("Failed to queue cost management transaction (queue unavailable or full). Transaction: {TransactionType}, Status: {StatusCode}",
                     transactionType, httpStatusCode);
 
                 // Track dropped transactions
-                _droppedTransactionsCounter?.Add(1);
+                _droppedTransactionsCounter?.Add(1, new TagList { { "reason", "enqueue_failed" } });
             }
         }
         catch (Exception ex)
@@ -70,7 +72,7 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
                 transactionType, httpStatusCode);
 
             // Track dropped transactions due to exceptions
-            _droppedTransactionsCounter?.Add(1);
+            _droppedTransactionsCounter?.Add(1, new TagList { { "reason", "exception" } });
         }
     }
 
@@ -90,4 +92,13 @@ public sealed class NoOpCostManagementService : ICostManagementMetricsService
     {
         // No-op: Do nothing when cost management is disabled
     }
+}
+
+/// <summary>
+/// No-operation implementation of IHostedService used when cost management is disabled.
+/// </summary>
+public sealed class NoOpHostedService : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

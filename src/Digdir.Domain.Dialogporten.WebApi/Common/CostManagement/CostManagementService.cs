@@ -25,8 +25,8 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
     {
         _writer = writer ?? throw new ArgumentNullException(nameof(writer));
         _reader = reader ?? throw new ArgumentNullException(nameof(reader));
-        _logger = logger;
-        _queueCapacity = options.QueueCapacity;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _queueCapacity = (options ?? throw new ArgumentNullException(nameof(options))).QueueCapacity;
 
         // Create dropped transactions counter whenever meter is available (independent of monitoring flag)
         if (meter != null)

@@ -18,9 +18,9 @@ internal sealed class CostManagementBackgroundService : BackgroundService
         ICostManagementTransactionRecorder transactionRecorder,
         ILogger<CostManagementBackgroundService> logger)
     {
-        _reader = reader;
-        _transactionRecorder = transactionRecorder;
-        _logger = logger;
+        _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+        _transactionRecorder = transactionRecorder ?? throw new ArgumentNullException(nameof(transactionRecorder));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

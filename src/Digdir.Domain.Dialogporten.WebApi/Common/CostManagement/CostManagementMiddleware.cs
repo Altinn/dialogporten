@@ -22,10 +22,10 @@ public sealed class CostManagementMiddleware
         ILogger<CostManagementMiddleware> logger,
         IOptions<CostManagementOptions> options)
     {
-        _next = next;
-        _metricsService = metricsService;
-        _logger = logger;
-        _options = options.Value;
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _metricsService = metricsService ?? throw new ArgumentNullException(nameof(metricsService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _options = (options ?? throw new ArgumentNullException(nameof(options))).Value;
     }
 
     public async Task InvokeAsync(HttpContext context)

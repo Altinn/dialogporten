@@ -184,18 +184,22 @@ public static class CostManagementMiddlewareExtensions
         services.AddSingleton(channel.Reader);
         services.AddSingleton(channel.Writer);
 
-        // Create cost management meter for monitoring
-        var costMeter = new System.Diagnostics.Metrics.Meter("Dialogporten.CostManagement", "1.0.0");
-        services.AddSingleton(costMeter);
+        // Register metrics recorder
+        services.AddSingleton<IMetricsRecorder, DotNetMetricsRecorder>();
 
         // Register services
         services.AddSingleton<CostManagementMetricsService>(); // For background service
+        services.AddSingleton<ICostManagementTransactionRecorder>(provider =>
+            provider.GetRequiredService<CostManagementMetricsService>());
         services.AddSingleton(provider =>
         {
             var writer = provider.GetRequiredService<System.Threading.Channels.ChannelWriter<TransactionRecord>>();
             var reader = provider.GetRequiredService<System.Threading.Channels.ChannelReader<TransactionRecord>>();
             var logger = provider.GetRequiredService<ILogger<CostManagementService>>();
-            var meter = provider.GetService<System.Diagnostics.Metrics.Meter>();
+
+            // Create a dedicated meter for cost management monitoring
+            var meter = options.EnableQueueMonitoring ? new System.Diagnostics.Metrics.Meter("Dialogporten.CostManagement", "1.0.0") : null;
+
             return new CostManagementService(writer, reader, logger, options, meter);
         });
 

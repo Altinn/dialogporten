@@ -11,9 +11,8 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
     private readonly ChannelWriter<TransactionRecord> _writer;
     private readonly ChannelReader<TransactionRecord> _reader;
     private readonly ILogger<CostManagementService> _logger;
-    private readonly Gauge<int>? _queueDepthGauge;
     private readonly Counter<long>? _droppedTransactionsCounter;
-    private readonly Timer? _monitoringTimer;
+    private readonly int _queueCapacity;
 
     public CostManagementService(
         ChannelWriter<TransactionRecord> writer,
@@ -25,22 +24,24 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
         _writer = writer;
         _reader = reader;
         _logger = logger;
+        _queueCapacity = options.QueueCapacity;
 
         // Set up monitoring if enabled
         if (options.EnableQueueMonitoring && meter != null)
         {
-            _queueDepthGauge = meter.CreateGauge<int>(
-                "dialogporten_cost_queue_depth",
+            // Observable gauge for current queue depth - reported on-demand
+            meter.CreateObservableGauge("dialogporten_cost_queue_depth",
+                () => _reader.CanCount ? _reader.Count : 0,
                 description: "Current number of transactions waiting in the cost management queue");
+
+            // Observable gauge for queue capacity - static value
+            meter.CreateObservableGauge("dialogporten_cost_queue_capacity",
+                () => _queueCapacity,
+                description: "Maximum capacity of the cost management queue");
 
             _droppedTransactionsCounter = meter.CreateCounter<long>(
                 "dialogporten_cost_dropped_transactions_total",
                 description: "Total number of cost management transactions dropped due to queue overflow");
-
-            // Start monitoring timer
-            _monitoringTimer = new Timer(ReportQueueDepth, null,
-                TimeSpan.FromMilliseconds(options.MonitoringIntervalMs),
-                TimeSpan.FromMilliseconds(options.MonitoringIntervalMs));
         }
     }
 
@@ -69,32 +70,8 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
         }
     }
 
-    private void ReportQueueDepth(object? state)
-    {
-        try
-        {
-            // Get approximate queue depth (items waiting to be read)
-            var queueDepth = _reader.CanCount ? _reader.Count : -1;
-            if (queueDepth >= 0)
-            {
-                _queueDepthGauge?.Record(queueDepth);
-
-                // Log warning if queue is getting full (above 80% capacity)
-                if (queueDepth > 0)
-                {
-                    _logger.LogDebug("Cost management queue depth: {QueueDepth}", queueDepth);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "Failed to report queue depth metrics");
-        }
-    }
-
     public void Dispose()
     {
-        _monitoringTimer?.Dispose();
         _writer.Complete();
     }
 }

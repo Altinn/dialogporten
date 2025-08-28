@@ -256,8 +256,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             }
         }
 
-
-
         // Add metadata for cost management
         // For search operations, we can't attribute to specific org/resource since results may vary
         _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.SearchOperation);

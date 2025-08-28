@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using Microsoft.Extensions.Hosting;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
@@ -8,19 +7,15 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 /// Internal service for recording cost management metrics to OpenTelemetry.
 /// Used exclusively by CostManagementBackgroundService to process queued transactions.
 /// </summary>
-public sealed class CostManagementMetricsService : IDisposable
+public sealed class CostManagementMetricsService : ICostManagementTransactionRecorder
 {
-    private readonly Counter<long> _transactionCounter;
-    private readonly Meter _meter;
+    private readonly IMetricsRecorder _metricsRecorder;
     private readonly string _environment;
 
-    public CostManagementMetricsService(IHostEnvironment hostEnvironment)
+    public CostManagementMetricsService(IMetricsRecorder metricsRecorder, IHostEnvironment hostEnvironment)
     {
+        _metricsRecorder = metricsRecorder;
         _environment = hostEnvironment.EnvironmentName;
-        _meter = new Meter("Dialogporten.CostManagement", "1.0.0");
-        _transactionCounter = _meter.CreateCounter<long>(
-            CostManagementConstants.TransactionCounterName,
-            description: CostManagementConstants.TransactionCounterDescription);
     }
 
     public void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? tokenOrg = null, string? serviceOrg = null, string? serviceResource = null)
@@ -46,7 +41,7 @@ public sealed class CostManagementMetricsService : IDisposable
             { CostManagementConstants.ServiceResourceTag, serviceResource ?? CostManagementConstants.UnknownValue }
         };
 
-        _transactionCounter.Add(1, tags);
+        _metricsRecorder.RecordCounter(CostManagementConstants.TransactionCounterName, 1, tags);
     }
 
     private static string? GetStatusFromHttpCode(int httpStatusCode)
@@ -59,8 +54,4 @@ public sealed class CostManagementMetricsService : IDisposable
         };
     }
 
-    public void Dispose()
-    {
-        _meter.Dispose();
-    }
 }

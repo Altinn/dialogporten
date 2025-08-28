@@ -8,16 +8,16 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 public sealed class CostManagementBackgroundService : BackgroundService
 {
     private readonly ChannelReader<TransactionRecord> _reader;
-    private readonly CostManagementMetricsService _metricsService;
+    private readonly ICostManagementTransactionRecorder _transactionRecorder;
     private readonly ILogger<CostManagementBackgroundService> _logger;
 
     public CostManagementBackgroundService(
         ChannelReader<TransactionRecord> reader,
-        CostManagementMetricsService metricsService,
+        ICostManagementTransactionRecorder transactionRecorder,
         ILogger<CostManagementBackgroundService> logger)
     {
         _reader = reader;
-        _metricsService = metricsService;
+        _transactionRecorder = transactionRecorder;
         _logger = logger;
     }
 
@@ -31,7 +31,7 @@ public sealed class CostManagementBackgroundService : BackgroundService
             {
                 try
                 {
-                    _metricsService.RecordTransaction(
+                    _transactionRecorder.RecordTransaction(
                         transaction.TransactionType,
                         transaction.HttpStatusCode,
                         transaction.TokenOrg,

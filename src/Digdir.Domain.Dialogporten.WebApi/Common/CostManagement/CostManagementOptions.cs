@@ -31,10 +31,4 @@ public sealed class CostManagementOptions
     /// Whether cost tracking is enabled (allows disabling per environment)
     /// </summary>
     public bool Enabled { get; set; } = true;
-
-    /// <summary>
-    /// How often to report queue depth metrics (in milliseconds)
-    /// </summary>
-    [Range(1000, 60_000)]
-    public int MonitoringIntervalMs { get; set; } = 5_000;
 }

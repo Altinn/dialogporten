@@ -166,8 +166,7 @@ Cost management can be configured via `appsettings.json`:
   "CostManagement": {
     "Enabled": true,
     "QueueCapacity": 100000,
-    "EnableQueueMonitoring": true,
-    "MonitoringIntervalMs": 5000
+    "EnableQueueMonitoring": true
   }
 }
 ```
@@ -178,8 +177,7 @@ Cost management can be configured via `appsettings.json`:
 |----------|-------------|---------|-------------------|
 | `Enabled` | Whether cost tracking is enabled | `true` | `false` for development, `true` for production |
 | `QueueCapacity` | Maximum queued transactions | `100,000` | Dev: 1,000; Test: 10,000; Prod: 100,000-500,000 |
-| `EnableQueueMonitoring` | Whether to monitor queue depth | `true` | `true` for production monitoring |
-| `MonitoringIntervalMs` | Queue monitoring frequency | `5,000` | 5,000-30,000ms depending on alerting needs |
+| `EnableQueueMonitoring` | Whether to enable queue monitoring metrics | `true` | `true` for production monitoring |
 
 ### Queue Capacity Planning
 

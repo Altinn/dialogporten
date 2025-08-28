@@ -182,7 +182,6 @@ static void BuildAndRun(string[] args)
         .UseServiceOwnerOnBehalfOfPerson()
         .UseUserTypeValidation()
         .UseAzureConfiguration()
-        .UseCostManagementMetrics()
         .UseFastEndpoints(x =>
         {
             x.Endpoints.RoutePrefix = "api";
@@ -213,6 +212,7 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
         })
+        .UseCostManagementMetrics()
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>
         {

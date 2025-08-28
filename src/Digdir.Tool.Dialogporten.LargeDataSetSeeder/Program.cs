@@ -3,7 +3,6 @@ using Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
 using Npgsql;
-using DialogActivity = Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators.DialogActivity;
 
 try
 {
@@ -56,109 +55,33 @@ try
     var totalDialogCreatedStartTimestamp = Stopwatch.GetTimestamp();
 
     await using var dataSource = NpgsqlDataSource.Create(connString);
-    const int taskRetryDelayInMs = 10000;
-    const int taskRetryLimit = 1000;
-    const int logThreshold = 500_000;
 
     await GenerateActorNames(dataSource);
 
-    var tasks = new List<Task>();
-    // IL3050
-#pragma warning disable CS8321 // Local function is declared but never used
-    void CreateCopyTasks<T>(CopyTaskDto<T> copyTaskDto, List<Task> taskList) where T : class
-#pragma warning restore CS8321 // Local function is declared but never used
-    {
-        for (var splitIndex = 0; splitIndex < copyTaskDto.NumberOfTasks; splitIndex++)
-        {
-            RunCopyTask(copyTaskDto, splitIndex, taskList);
-        }
-    }
+    var lala = new PostgresCopyWriterCoordinator(dataSource);
+    await lala.Handle(startingDate, endDate, dialogAmount);
 
-    void RunCopyTask<T>(CopyTaskDto<T> copyTaskDto, int splitIndex, List<Task> taskList) where T : class
-    {
-        taskList.Add(Task.Run(async () =>
-        {
-            var startTimestamp = Stopwatch.GetTimestamp();
-            var counter = 0;
-
-            do
-            {
-                counter = await ConnectAndAttemptInsert(copyTaskDto, splitIndex, counter);
-            } while (counter < taskRetryLimit);
-
-            Console.WriteLine(
-                $"Inserted {copyTaskDto.EntityName} (split {splitIndex + 1}/{copyTaskDto.NumberOfTasks})" +
-                $" in {Stopwatch.GetElapsedTime(startTimestamp)}");
-        }));
-    }
-
-    async Task<int> ConnectAndAttemptInsert<T>(CopyTaskDto<T> copyTaskDto, int splitIndex, int currentCounter) where T : class
-    {
-        try
-        {
-            await using var postgresCopyWriter = await PostgresCopyWriter<T>.Create(dataSource);
-
-            return await AttemptInsert(copyTaskDto, splitIndex, postgresCopyWriter, currentCounter);
-        }
-        catch (Exception e)
-        {
-            LogDatabaseError(e);
-
-            await Task.Delay(taskRetryDelayInMs);
-            return ++currentCounter;
-        }
-    }
-
-    async Task<int> AttemptInsert<T>(CopyTaskDto<T> copyTaskDto,
-        int splitIndex,
-        PostgresCopyWriter<T> textWriter,
-        int currentCounter)
-    where T : class
-    {
-        try
-        {
-            var splitLogThreshold = logThreshold / copyTaskDto.NumberOfTasks;
-
-            await InsertData(copyTaskDto, splitIndex, textWriter, splitLogThreshold);
-
-            // Done, break out of the retry loop
-            return taskRetryLimit;
-        }
-        catch (Exception e)
-        {
-            LogInsertError(copyTaskDto, splitIndex, e);
-            await Task.Delay(taskRetryDelayInMs);
-            return ++currentCounter;
-        }
-    }
-
-    async Task InsertData<T>(CopyTaskDto<T> copyTaskDto, int splitIndex, PostgresCopyWriter<T> postgresWriter, int splitLogThreshold) where T : class
-    {
-        var data = copyTaskDto.Generator!(DialogTimestamp.Generate(startingDate, endDate, dialogAmount));
-        await postgresWriter.WriteRecords(data, CancellationToken.None);
-    }
-
-    CreateCopyTasks(new CopyTaskDto<Actor>(Actor.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<Attachment>(Attachment.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<AttachmentUrl>(AttachmentUrl.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<Dialog>(Dialog.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogActivity>(DialogActivity.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogContent>(DialogContent.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogEndUserContext>(DialogEndUserContext.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogEndUserContextSystemLabel>(DialogEndUserContextSystemLabel.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogGuiAction>(DialogGuiAction.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogSearchTag>(DialogSearchTag.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogSeenLog>(DialogSeenLog.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogServiceOwnerContext>(DialogServiceOwnerContext.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogServiceOwnerLabel>(DialogServiceOwnerLabel.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogTransmission>(DialogTransmission.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<DialogTransmissionContent>(DialogTransmissionContent.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<LabelAssignmentLog>(LabelAssignmentLog.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<Localization>(Localization.GenerateEntities, "temp"), tasks);
-    CreateCopyTasks(new CopyTaskDto<LocalizationSet>(LocalizationSet.GenerateEntities, "temp"), tasks);
-
-
-    await Task.WhenAll(tasks);
+    // CreateCopyTasks(new CopyTaskDto<Actor>(Actor.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<Attachment>(Attachment.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<AttachmentUrl>(AttachmentUrl.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<Dialog>(Dialog.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogActivity>(DialogActivity.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogContent>(DialogContent.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogEndUserContext>(DialogEndUserContext.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogEndUserContextSystemLabel>(DialogEndUserContextSystemLabel.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogGuiAction>(DialogGuiAction.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogSearchTag>(DialogSearchTag.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogSeenLog>(DialogSeenLog.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogServiceOwnerContext>(DialogServiceOwnerContext.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogServiceOwnerLabel>(DialogServiceOwnerLabel.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogTransmission>(DialogTransmission.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<DialogTransmissionContent>(DialogTransmissionContent.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<LabelAssignmentLog>(LabelAssignmentLog.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<Localization>(Localization.GenerateEntities, "temp"), tasks);
+    // CreateCopyTasks(new CopyTaskDto<LocalizationSet>(LocalizationSet.GenerateEntities, "temp"), tasks);
+    //
+    //
+    // await Task.WhenAll(tasks);
 
     // TODO: Start re-indexing command
     // Import create validator
@@ -171,31 +94,31 @@ try
     Console.WriteLine($"Generated {dialogAmount} in {timeItTook}");
 
 
-    void LogInsertError<T>(CopyTaskDto<T> copyTaskDto1, int i, Exception exception) where T : class
-    {
-        Console.WriteLine();
-        Console.WriteLine("====================================");
-        Console.WriteLine(
-            $"Insert for table {copyTaskDto1.EntityName} failed (split {i + 1}/{copyTaskDto1.NumberOfTasks}), retrying in {taskRetryDelayInMs}ms");
-        Console.WriteLine(exception.Message);
-        Console.WriteLine(exception.StackTrace);
-        Console.WriteLine("====================================");
-        Console.WriteLine();
-    }
+    // void LogInsertError<T>(CopyTaskDto<T> copyTaskDto1, int i, Exception exception) where T : class
+    // {
+    //     Console.WriteLine();
+    //     Console.WriteLine("====================================");
+    //     Console.WriteLine(
+    //         $"Insert for table {copyTaskDto1.EntityName} failed (split {i + 1}/{copyTaskDto1.NumberOfTasks}), retrying in {taskRetryDelayInMs}ms");
+    //     Console.WriteLine(exception.Message);
+    //     Console.WriteLine(exception.StackTrace);
+    //     Console.WriteLine("====================================");
+    //     Console.WriteLine();
+    // }
+    //
+    // void LogDatabaseError(Exception exception)
+    // {
+    //     Console.WriteLine();
+    //     Console.WriteLine("====================================");
+    //     Console.WriteLine(
+    //         $"Database setup failed, either connection or transaction, retrying in {taskRetryDelayInMs}ms");
+    //     Console.WriteLine(exception.Message);
+    //     Console.WriteLine(exception.StackTrace);
+    //     Console.WriteLine("====================================");
+    //     Console.WriteLine();
+    // }
 
-    void LogDatabaseError(Exception exception)
-    {
-        Console.WriteLine();
-        Console.WriteLine("====================================");
-        Console.WriteLine(
-            $"Database setup failed, either connection or transaction, retrying in {taskRetryDelayInMs}ms");
-        Console.WriteLine(exception.Message);
-        Console.WriteLine(exception.StackTrace);
-        Console.WriteLine("====================================");
-        Console.WriteLine();
-    }
-
-    string MaskConnectionString(string input)
+    static string MaskConnectionString(string input)
     {
         const string passwordKey = "Password=";
 

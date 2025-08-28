@@ -9,8 +9,8 @@ internal interface IPostgresCopyWriterPool : IAsyncDisposable
 {
     Task WriteAsync(object item, CancellationToken cancellationToken = default);
     Task WriteAsync(IEnumerable<object> items, CancellationToken cancellationToken = default);
-    Task ScaleUp();
-    Task ScaleDown();
+    Task ScaleUp(int times);
+    Task ScaleDown(int times);
     int ConsumerCount { get; }
 }
 
@@ -48,6 +48,22 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
         items is IEnumerable<T> typedItems
             ? WriteAsync(typedItems, cancellationToken)
             : throw new ArgumentException($"Invalid item type, expected {typeof(IEnumerable<T>)}, got {items.GetType()}", nameof(items));
+
+    public async Task ScaleUp(int times)
+    {
+        for (var i = 0; i < times; i++)
+        {
+            await ScaleUp();
+        }
+    }
+
+    public async Task ScaleDown(int times)
+    {
+        for (var i = 0; i < times; i++)
+        {
+            await ScaleDown();
+        }
+    }
 
     public async Task ScaleUp()
     {

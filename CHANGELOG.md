@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.79.8](https://github.com/Altinn/dialogporten/compare/v1.79.7...v1.79.8) (2025-08-27)
+
+
+### Bug Fixes
+
+* **graphql:** ContentUpdatedBefore/After missing from search query ([#2690](https://github.com/Altinn/dialogporten/issues/2690)) ([5f58832](https://github.com/Altinn/dialogporten/commit/5f588325715a49ee67519ca3d0389f9b7660c24a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.6.2 ([#2684](https://github.com/Altinn/dialogporten/issues/2684)) ([8179361](https://github.com/Altinn/dialogporten/commit/8179361d5fd7032bd2489f2f5d25899897181af5))
+
 ## [1.79.7](https://github.com/Altinn/dialogporten/compare/v1.79.6...v1.79.7) (2025-08-26)
 
 

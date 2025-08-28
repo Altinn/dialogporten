@@ -107,7 +107,7 @@ public sealed class CostManagementMiddleware
                 "Failed to capture cost management metrics for {Method} {Path}. TransactionType: {TransactionType}, TokenOrg: {TokenOrg}",
                 context.Request.Method,
                 context.Request.Path.Value,
-                transactionType?.ToString() ?? "Unknown",
+                transactionType.ToString(),
                 tokenOrg ?? "null");
         }
     }

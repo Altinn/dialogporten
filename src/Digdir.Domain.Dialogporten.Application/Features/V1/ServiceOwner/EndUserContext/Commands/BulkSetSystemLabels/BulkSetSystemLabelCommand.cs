@@ -62,13 +62,16 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         }
 
         // Add cost management metadata (unique values or BulkOperation)
-        var distinctOrgs = dialogs.Select(d => d.Org).Where(o => !string.IsNullOrEmpty(o)).Distinct().ToArray();
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg,
-            distinctOrgs.Length == 1 ? distinctOrgs[0] : CostManagementMetadataKeys.BulkOperation);
+        if (dialogs.Count > 0)
+        {
+            var distinctOrgs = dialogs.Select(d => d.Org).Where(o => !string.IsNullOrEmpty(o)).Distinct().ToArray();
+            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg,
+                distinctOrgs.Length == 1 ? distinctOrgs[0] : CostManagementMetadataKeys.BulkOperation);
 
-        var distinctResources = dialogs.Select(d => d.ServiceResource).Where(r => !string.IsNullOrEmpty(r)).Distinct().ToArray();
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource,
-            distinctResources.Length == 1 ? distinctResources[0] : CostManagementMetadataKeys.BulkOperation);
+            var distinctResources = dialogs.Select(d => d.ServiceResource).Where(r => !string.IsNullOrEmpty(r)).Distinct().ToArray();
+            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource,
+                distinctResources.Length == 1 ? distinctResources[0] : CostManagementMetadataKeys.BulkOperation);
+        }
 
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 

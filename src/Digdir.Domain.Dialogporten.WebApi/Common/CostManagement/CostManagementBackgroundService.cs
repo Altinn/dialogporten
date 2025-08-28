@@ -46,10 +46,10 @@ public sealed class CostManagementBackgroundService : BackgroundService
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
             // Expected when shutting down
-            _logger.LogInformation("Cost management background service is shutting down");
+            _logger.LogInformation(ex, "Cost management background service is shutting down");
         }
         catch (Exception ex)
         {

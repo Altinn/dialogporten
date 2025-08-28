@@ -8,13 +8,12 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 /// </summary>
 internal sealed class DotNetMetricsRecorder : IMetricsRecorder
 {
-    private readonly Meter _meter;
     private readonly Counter<long> _transactionCounter;
 
     public DotNetMetricsRecorder(Meter meter)
     {
-        _meter = meter ?? throw new ArgumentNullException(nameof(meter));
-        _transactionCounter = _meter.CreateCounter<long>(
+        ArgumentNullException.ThrowIfNull(meter);
+        _transactionCounter = meter.CreateCounter<long>(
             CostManagementConstants.TransactionCounterName,
             description: CostManagementConstants.TransactionCounterDescription);
     }

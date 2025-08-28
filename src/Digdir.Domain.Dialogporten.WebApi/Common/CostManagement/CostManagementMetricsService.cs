@@ -14,8 +14,8 @@ internal sealed class CostManagementMetricsService : ICostManagementTransactionR
 
     public CostManagementMetricsService(IMetricsRecorder metricsRecorder, IHostEnvironment hostEnvironment)
     {
-        _metricsRecorder = metricsRecorder;
-        _environment = hostEnvironment.EnvironmentName;
+        _metricsRecorder = metricsRecorder ?? throw new ArgumentNullException(nameof(metricsRecorder));
+        _environment = (hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment))).EnvironmentName;
     }
 
     public void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? tokenOrg = null, string? serviceOrg = null, string? serviceResource = null)

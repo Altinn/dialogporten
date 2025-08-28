@@ -22,15 +22,15 @@ internal class PostgresCopyWriterCoordinator
         DateTimeOffset toDate,
         int dialogAmount)
     {
-        var poolAwaiters = new List<PoolAwaiter>();
+        var poolAwaiters = new List<PoolWriter>();
         var connectionPerPool = _maxConnections / EntityGeneratorExtensions.Generators.Count;
 
         foreach (var (targetType, generator) in EntityGeneratorExtensions.Generators)
         {
             var entityEnumerable = generator(DialogTimestamp.Generate(fromDate, toDate, dialogAmount));
             var writer = await PostgresCopyWriterPoolFactory.Create(targetType, _dataSource, initialConsumers: connectionPerPool);
-            var task = writer.WriteAsync(entityEnumerable);
-            poolAwaiters.Add(new PoolAwaiter(task, writer));
+            var poolWriterTask = writer.WriteAsync(entityEnumerable);
+            poolAwaiters.Add(new PoolWriter(poolWriterTask, writer));
         }
 
         await foreach (var poolAwaiterTask in Task.WhenEach(poolAwaiters.Select(x => x.WaitAndReturnPool()).ToList()))
@@ -48,13 +48,13 @@ internal class PostgresCopyWriterCoordinator
         }
     }
 
-    private sealed class PoolAwaiter(Task task, IPostgresCopyWriterPool pool)
+    private sealed class PoolWriter(Task poolWriterTask, IPostgresCopyWriterPool pool)
     {
         public IPostgresCopyWriterPool Pool => pool;
 
-        public async Task<PoolAwaiter> WaitAndReturnPool()
+        public async Task<PoolWriter> WaitAndReturnPool()
         {
-            await task;
+            await poolWriterTask;
             return this;
         }
     }

@@ -110,12 +110,12 @@ For operations where metadata cannot be meaningfully attributed:
 
 ```csharp
 // Search operations affecting multiple entities
-_applicationContext.AddMetadata("serviceOrg", CostManagementConstants.NoOrgValue);
-_applicationContext.AddMetadata("serviceResource", CostManagementConstants.NoOrgValue);
+_applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.SearchOperation);
+_applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, CostManagementMetadataKeys.SearchOperation);
 
 // End user operations without organization context
-_applicationContext.AddMetadata("serviceOrg", CostManagementConstants.NoOrgValue);
-_applicationContext.AddMetadata("serviceResource", CostManagementConstants.NoOrgValue);
+_applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.NotApplicable);
+_applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, CostManagementMetadataKeys.NotApplicable);
 ```
 
 ## Metrics Schema
@@ -132,8 +132,8 @@ _applicationContext.AddMetadata("serviceResource", CostManagementConstants.NoOrg
 |----------|-------------|----------------|
 | `transaction_type` | Type of transaction | `CreateDialog`, `GetDialogServiceOwner` |
 | `token_org` | Organization from JWT token | `"digdir"`, `"skatteetaten"` |
-| `service_org` | Organization from dialog entity | `"digdir"`, `"skatteetaten"`, `"null"` |
-| `service_resource` | Service resource from dialog entity | `"skjema/NAV/123"`, `"null"` |
+| `service_org` | Organization from dialog entity | `"digdir"`, `"skatteetaten"`, `"unknown"`, `"search_operation"`, `"bulk_operation"`, `"not_applicable"` |
+| `service_resource` | Service resource from dialog entity | `"skjema/NAV/123"`, `"unknown"`, `"search_operation"`, `"bulk_operation"`, `"not_applicable"` |
 | `http_status_code` | HTTP response status code | `200`, `201`, `400`, `404`, `500` |
 | `environment` | Environment name | `Development`, `Test`, `Production` |
 

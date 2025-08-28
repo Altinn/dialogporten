@@ -1,5 +1,5 @@
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using Microsoft.Extensions.Hosting;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 
@@ -32,15 +32,16 @@ public sealed class CostManagementMetricsService : ICostManagementMetricsService
             return;
         }
 
-        var tags = new KeyValuePair<string, object?>[]
+        // Use TagList to avoid array allocation on each call
+        var tags = new TagList
         {
-            new(CostManagementConstants.TransactionTypeTag, transactionType.ToString()),
-            new(CostManagementConstants.StatusTag, status),
-            new(CostManagementConstants.HttpStatusCodeTag, httpStatusCode),
-            new(CostManagementConstants.EnvironmentTag, _environment),
-            new(CostManagementConstants.TokenOrgTag, tokenOrg ?? CostManagementConstants.UnknownValue),
-            new(CostManagementConstants.ServiceOrgTag, serviceOrg ?? CostManagementConstants.UnknownValue),
-            new(CostManagementConstants.ServiceResourceTag, serviceResource ?? CostManagementConstants.UnknownValue)
+            { CostManagementConstants.TransactionTypeTag, transactionType.ToString() },
+            { CostManagementConstants.StatusTag, status },
+            { CostManagementConstants.HttpStatusCodeTag, httpStatusCode },
+            { CostManagementConstants.EnvironmentTag, _environment },
+            { CostManagementConstants.TokenOrgTag, tokenOrg ?? CostManagementConstants.UnknownValue },
+            { CostManagementConstants.ServiceOrgTag, serviceOrg ?? CostManagementConstants.UnknownValue },
+            { CostManagementConstants.ServiceResourceTag, serviceResource ?? CostManagementConstants.UnknownValue }
         };
 
         _transactionCounter.Add(1, tags);

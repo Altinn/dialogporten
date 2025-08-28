@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.80.1](https://github.com/Altinn/dialogporten/compare/v1.80.0...v1.80.1) (2025-08-28)
+
+
+### Bug Fixes
+
+* **infra:** use correct role and tag ([#2692](https://github.com/Altinn/dialogporten/issues/2692)) ([407513a](https://github.com/Altinn/dialogporten/commit/407513aff3abf8a8cd442d5da13b226348b1795b)), closes [#2607](https://github.com/Altinn/dialogporten/issues/2607)
+
 ## [1.80.0](https://github.com/Altinn/dialogporten/compare/v1.79.8...v1.80.0) (2025-08-28)
 
 

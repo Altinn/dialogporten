@@ -3,16 +3,32 @@ using Npgsql;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
 
-internal static class DaJob
+internal class PostgresCopyWriterCoordinator
 {
-    public static async Task Execute(NpgsqlDataSource dataSource, DateTimeOffset fromDate, DateTimeOffset toDate, int dialogAmount)
+    private readonly NpgsqlDataSource _dataSource;
+    // private readonly int _maxConnextions;
+
+    public PostgresCopyWriterCoordinator(
+        NpgsqlDataSource dataSource
+        // int maxConnextions
+        )
+    {
+        // ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxConnextions);
+        // _maxConnextions = maxConnextions;
+        _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+    }
+
+    public async Task Handle(
+        DateTimeOffset fromDate,
+        DateTimeOffset toDate,
+        int dialogAmount)
     {
         var writerByTask = new Dictionary<Task, IPostgresCopyWriterPool>();
 
         foreach (var (targetType, generator) in EntityGeneratorExtensions.Generators)
         {
             var entityEnumerable = generator(DialogTimestamp.Generate(fromDate, toDate, dialogAmount));
-            var writer = await PostgresCopyWriterPoolFactory.Create(targetType, dataSource);
+            var writer = await PostgresCopyWriterPoolFactory.Create(targetType, _dataSource);
             var task = writer.WriteAsync(entityEnumerable);
             writerByTask[task] = writer;
         }
@@ -24,3 +40,5 @@ internal static class DaJob
         }
     }
 }
+
+

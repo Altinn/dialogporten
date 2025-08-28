@@ -11,6 +11,7 @@ internal interface IPostgresCopyWriterPool : IAsyncDisposable
     Task WriteAsync(IEnumerable<object> items, CancellationToken cancellationToken = default);
     Task ScaleUp();
     Task ScaleDown();
+    int ConsumerCount { get; }
 }
 
 internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where T : class
@@ -19,6 +20,8 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
     private readonly List<ConsumerState> _consumers = [];
     private readonly NpgsqlDataSource _dataSource;
     private bool _disposed;
+
+    public int ConsumerCount => _consumers.Count;
 
     private PostgresCopyWriterPool(NpgsqlDataSource dataSource, int capacity = 10_000)
     {

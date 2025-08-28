@@ -1,11 +1,13 @@
 using System.Threading.Channels;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 
 /// <summary>
 /// Background service that processes cost management metrics from a queue
 /// </summary>
-public sealed class CostManagementBackgroundService : BackgroundService
+internal sealed class CostManagementBackgroundService : BackgroundService
 {
     private readonly ChannelReader<TransactionRecord> _reader;
     private readonly ICostManagementTransactionRecorder _transactionRecorder;
@@ -46,10 +48,10 @@ public sealed class CostManagementBackgroundService : BackgroundService
                 }
             }
         }
-        catch (OperationCanceledException ex)
+        catch (OperationCanceledException)
         {
             // Expected when shutting down
-            _logger.LogInformation(ex, "Cost management background service is shutting down");
+            _logger.LogInformation("Cost management background service is shutting down");
         }
         catch (Exception ex)
         {
@@ -61,7 +63,10 @@ public sealed class CostManagementBackgroundService : BackgroundService
     {
         _logger.LogInformation("Cost management background service stopping");
 
-        // Best-effort drain pending items (bounded by cancellation).
+        // First, stop the background execute loop
+        await base.StopAsync(cancellationToken);
+
+        // Then, best-effort drain pending items (bounded by cancellation)
         while (_reader.TryRead(out var transaction) && !cancellationToken.IsCancellationRequested)
         {
             try
@@ -80,7 +85,5 @@ public sealed class CostManagementBackgroundService : BackgroundService
                     transaction.TransactionType, transaction.HttpStatusCode);
             }
         }
-
-        await base.StopAsync(cancellationToken);
     }
 }

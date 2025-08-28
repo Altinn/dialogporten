@@ -4,9 +4,9 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 
 public static class DeterministicUuidV7
 {
-    public static Guid Create(DateTimeOffset timestamp, Guid @namespace, int tiebreaker = 0)
+    public static Guid Create<TEntity>(DateTimeOffset timestamp, Guid @namespace, int tiebreaker = 0)
     {
-        var nameBasedUuid = Uuid.NewNameBased(@namespace, $"{tiebreaker}");
+        var nameBasedUuid = Uuid.NewNameBased(@namespace, $"{typeof(TEntity).Name}{tiebreaker}");
         return nameBasedUuid.ToVersion7(timestamp);
     }
 

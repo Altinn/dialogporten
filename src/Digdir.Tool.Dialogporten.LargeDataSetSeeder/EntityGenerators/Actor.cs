@@ -38,20 +38,20 @@ public sealed record Actor(
                 yield return CreateTransmissionSenderActor(transmission, timestamp);
             }
 
-            foreach (var labelSeenLog in LabelAssignmentLog.GenerateEntities([timestamp]))
+            foreach (var labelAssignmentLog in LabelAssignmentLog.GenerateEntities([timestamp]))
             {
-                yield return CreateLabelAssignmentLog(labelSeenLog, timestamp);
+                yield return CreateLabelAssignmentLog(labelAssignmentLog, timestamp);
             }
         }
     }
 
-    private static Actor CreateLabelAssignmentLog(LabelAssignmentLog labelSeenLog, DialogTimestamp timestamp) =>
+    private static Actor CreateLabelAssignmentLog(LabelAssignmentLog labelAssignmentLog, DialogTimestamp timestamp) =>
         CreateActor(
-            id: labelSeenLog.Id,
+            id: timestamp.ToUuidV7<Actor>(labelAssignmentLog.Id),
             timestamp: timestamp.Timestamp,
             actorTypeId: ActorType.Values.PartyRepresentative,
             discriminator: "LabelAssignmentLogActor",
-            labelAssignmentLogId: labelSeenLog.Id,
+            labelAssignmentLogId: labelAssignmentLog.Id,
             actorNameEntityId: ActorName.GetRandomId());
 
     private static Actor CreateTransmissionSenderActor(DialogTransmission transmission, DialogTimestamp timestamp)
@@ -64,7 +64,7 @@ public sealed record Actor(
         };
 
         return CreateActor(
-            id: transmission.Id,
+            id: timestamp.ToUuidV7<Actor>(transmission.Id),
             timestamp: timestamp.Timestamp,
             actorTypeId: actorNameId.HasValue ? ActorType.Values.ServiceOwner : ActorType.Values.PartyRepresentative,
             discriminator: "DialogTransmissionSenderActor",
@@ -74,7 +74,7 @@ public sealed record Actor(
 
     private static Actor CreateDialogSeenLogActor(DialogSeenLog seenLog, DialogTimestamp timestamp) =>
         CreateActor(
-            id: seenLog.Id,
+            id: timestamp.ToUuidV7<Actor>(seenLog.Id),
             timestamp: timestamp.Timestamp,
             actorTypeId: ActorType.Values.PartyRepresentative,
             discriminator: "DialogSeenLogSeenByActor",
@@ -93,7 +93,7 @@ public sealed record Actor(
         };
 
         return CreateActor(
-            id: activity.Id,
+            id: timestamp.ToUuidV7<Actor>(activity.Id),
             timestamp: timestamp.Timestamp,
             actorTypeId: actorNameId.HasValue ? ActorType.Values.ServiceOwner : ActorType.Values.PartyRepresentative,
             discriminator: "DialogActivityPerformedByActor",

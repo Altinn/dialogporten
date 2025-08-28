@@ -30,7 +30,7 @@ public sealed record AttachmentUrl(
 
     private static AttachmentUrl CreateAttachmentUrl(DialogTimestamp timestamp, Attachment attachment, int tieBreaker) =>
         new(
-            Id: timestamp.ToUuidV7(attachment.Id, tieBreaker),
+            Id: timestamp.ToUuidV7<AttachmentUrl>(attachment.Id, tieBreaker),
             CreatedAt: timestamp.Timestamp,
             UpdatedAt: timestamp.Timestamp,
             MediaType: "text/plain",

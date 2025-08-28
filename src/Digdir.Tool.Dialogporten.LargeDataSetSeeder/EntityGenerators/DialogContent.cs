@@ -22,7 +22,7 @@ public sealed record DialogContent(
 
     private static DialogContent CreateDialogContent(DialogTimestamp timestamp, DialogContentType.Values typeId) =>
         new(
-            Id: timestamp.ToUuidV7(timestamp.DialogId, (int)typeId),
+            Id: timestamp.ToUuidV7<DialogContent>(timestamp.DialogId, (int)typeId),
             CreatedAt: timestamp.Timestamp,
             UpdatedAt: timestamp.Timestamp,
             MediaType: "text/plain",

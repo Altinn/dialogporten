@@ -22,7 +22,7 @@ public sealed record DialogSearchTag(
 
     private static DialogSearchTag CreateSearchTag(DialogTimestamp timestamp, int tieBreaker, string searchTag) =>
         new(
-            Id: timestamp.ToUuidV7(timestamp.DialogId, tieBreaker),
+            Id: timestamp.ToUuidV7<DialogSearchTag>(timestamp.DialogId, tieBreaker),
             Value: searchTag,
             CreatedAt: timestamp.Timestamp,
             DialogId: timestamp.DialogId

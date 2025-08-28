@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 
@@ -14,7 +14,7 @@ public record struct DialogTimestamp(
             .Select(x =>
             {
                 var timestamp = fromDate + (interval * x);
-                var dialogId = DeterministicUuidV7.Create(timestamp, nameof(DialogEntity));
+                var dialogId = DeterministicUuidV7.Create<Dialog>(timestamp, Guid.Empty);
                 return new DialogTimestamp(timestamp, dialogId, x + 1);
             });
     }

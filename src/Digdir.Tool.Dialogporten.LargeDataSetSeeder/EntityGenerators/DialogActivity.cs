@@ -22,7 +22,7 @@ public sealed record DialogActivity(
         foreach (var timestamp in timestamps)
         {
             // All dialogs have a DialogCreated activity.
-            var dialogCreatedActivityId = timestamp.ToUuidV7(timestamp.DialogId, (int)DialogCreated);
+            var dialogCreatedActivityId = timestamp.ToUuidV7<DialogActivity>(timestamp.DialogId, (int)DialogCreated);
             yield return CreateDialogActivity(dialogCreatedActivityId, timestamp);
 
             var rng = timestamp.GetRng();
@@ -30,14 +30,14 @@ public sealed record DialogActivity(
             // Approx. 1/2 of dialogs have a DialogOpened activity.
             if (rng.Next(0, 2) == 0)
             {
-                var dialogOpenedActivityId = timestamp.ToUuidV7(timestamp.DialogId, (int)DialogOpened);
+                var dialogOpenedActivityId = timestamp.ToUuidV7<DialogActivity>(timestamp.DialogId, (int)DialogOpened);
                 yield return CreateDialogActivity(dialogOpenedActivityId, timestamp);
             }
 
             // Approx. 1/3 of dialogs have an Information activity.
             if (rng.Next(0, 3) == 0)
             {
-                var informationActivityId = timestamp.ToUuidV7(timestamp.DialogId, (int)Information);
+                var informationActivityId = timestamp.ToUuidV7<DialogActivity>(timestamp.DialogId, (int)Information);
                 yield return CreateDialogActivity(informationActivityId, timestamp);
             }
         }

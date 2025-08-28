@@ -15,7 +15,7 @@ public sealed record DialogSeenLog(
         foreach (var timestamp in timestamps)
         {
             yield return new(
-                Id: timestamp.ToUuidV7(timestamp.DialogId),
+                Id: timestamp.ToUuidV7<DialogSeenLog>(timestamp.DialogId),
                 CreatedAt: timestamp.Timestamp,
                 IsViaServiceOwner: false,
                 DialogId: timestamp.DialogId,

@@ -20,7 +20,7 @@ public sealed record LocalizationSet(
             foreach (var attachment in Attachment.GenerateEntities([timestamp]))
             {
                 yield return CreateLocalizationSet(
-                    id: attachment.Id,
+                    id: timestamp.ToUuidV7<LocalizationSet>(attachment.Id),
                     discriminator: "AttachmentDisplayName",
                     attachmentId: attachment.Id
                 );
@@ -30,7 +30,7 @@ public sealed record LocalizationSet(
             foreach (var guiAction in DialogGuiAction.GenerateEntities([timestamp]))
             {
                 yield return CreateLocalizationSet(
-                    id: guiAction.Id,
+                    id: timestamp.ToUuidV7<LocalizationSet>(guiAction.Id),
                     discriminator: "DialogGuiActionTitle",
                     guiActionId: guiAction.Id
                 );
@@ -45,7 +45,7 @@ public sealed record LocalizationSet(
             foreach (var activity in informationActivities)
             {
                 yield return CreateLocalizationSet(
-                    id: activity.Id,
+                    id: timestamp.ToUuidV7<LocalizationSet>(activity.Id),
                     discriminator: "DialogActivityDescription",
                     activityId: activity.Id
                 );
@@ -55,7 +55,7 @@ public sealed record LocalizationSet(
             foreach (var content in DialogContent.GenerateEntities([timestamp]))
             {
                 yield return CreateLocalizationSet(
-                    id: content.Id,
+                    id: timestamp.ToUuidV7<LocalizationSet>(content.Id),
                     discriminator: "DialogContentValue",
                     dialogContentId: content.Id
                 );
@@ -65,7 +65,7 @@ public sealed record LocalizationSet(
             foreach (var tc in DialogTransmissionContent.GenerateEntities([timestamp]))
             {
                 yield return CreateLocalizationSet(
-                    id: tc.Id,
+                    id: timestamp.ToUuidV7<LocalizationSet>(tc.Id),
                     discriminator: "DialogTransmissionContentValue",
                     transmissionContentId: tc.Id
                 );

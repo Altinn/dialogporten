@@ -26,7 +26,7 @@ public sealed record DialogTransmission(
 
             for (var i = 0; i < numTransmissions; i++)
             {
-                var transmissionId = timestamp.ToUuidV7(timestamp.DialogId, i);
+                var transmissionId = timestamp.ToUuidV7<DialogTransmission>(timestamp.DialogId, i);
                 var typeId = TransmissionTypes[i % TransmissionTypes.Count];
                 yield return new(
                     Id: transmissionId,
@@ -36,7 +36,7 @@ public sealed record DialogTransmission(
                     ExternalReference: null,
                     TypeId: typeId,
                     DialogId: timestamp.DialogId,
-                    RelatedTransmissionId: i == 0 ? null : timestamp.ToUuidV7(timestamp.DialogId, i - 1)
+                    RelatedTransmissionId: i == 0 ? null : timestamp.ToUuidV7<DialogTransmission>(timestamp.DialogId, i - 1)
                 );
             }
         }

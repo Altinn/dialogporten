@@ -19,7 +19,7 @@ public sealed record LabelAssignmentLog(
             foreach (var (label, tieBreaker) in systemLabels)
             {
                 yield return new(
-                    Id: timestamp.ToUuidV7(label.DialogEndUserContextId, tieBreaker),
+                    Id: timestamp.ToUuidV7<LabelAssignmentLog>(label.DialogEndUserContextId, tieBreaker),
                     CreatedAt: label.CreatedAt,
                     Name: label.SystemLabelId.ToNamespacedName(),
                     Action: "set",

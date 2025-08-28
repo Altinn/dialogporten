@@ -23,7 +23,7 @@ public sealed record DialogGuiAction(
             foreach (var priority in Enum.GetValues<DialogGuiActionPriority.Values>())
             {
                 yield return new DialogGuiAction(
-                    Id: timestamp.ToUuidV7(timestamp.DialogId, (int)priority),
+                    Id: timestamp.ToUuidV7<DialogGuiAction>(timestamp.DialogId, (int)priority),
                     CreatedAt: timestamp.Timestamp,
                     UpdatedAt: timestamp.Timestamp,
                     Action: "submit", // TODO: ?

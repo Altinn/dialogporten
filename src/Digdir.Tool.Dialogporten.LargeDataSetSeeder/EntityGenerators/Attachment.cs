@@ -24,7 +24,7 @@ public sealed record Attachment(
 
     private static Attachment CreateDialogAttachment(DialogTimestamp timestamp) =>
         new(
-            Id: timestamp.DialogId,
+            Id: timestamp.ToUuidV7<Attachment>(timestamp.DialogId),
             CreatedAt: DateTimeOffset.UtcNow,
             UpdatedAt: DateTimeOffset.UtcNow,
             Discriminator: "DialogAttachment",
@@ -34,7 +34,7 @@ public sealed record Attachment(
 
     private static Attachment CreateTransmissionAttachment(DialogTransmission transmission) =>
         new(
-            Id: transmission.Id,
+            Id: DeterministicUuidV7.Create<Attachment>(transmission.CreatedAt, transmission.Id),
             CreatedAt: DateTimeOffset.UtcNow,
             UpdatedAt: DateTimeOffset.UtcNow,
             Discriminator: "DialogTransmissionAttachment",

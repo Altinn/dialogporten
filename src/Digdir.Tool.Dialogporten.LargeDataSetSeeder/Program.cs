@@ -56,8 +56,6 @@ try
     var totalDialogCreatedStartTimestamp = Stopwatch.GetTimestamp();
 
     await using var dataSource = NpgsqlDataSource.Create(connString);
-    var dialogsDto = new SeedDatabaseDto(startingDate, endDate, dialogAmount);
-
     const int taskRetryDelayInMs = 10000;
     const int taskRetryLimit = 1000;
     const int logThreshold = 500_000;
@@ -136,7 +134,7 @@ try
 
     async Task InsertData<T>(CopyTaskDto<T> copyTaskDto, int splitIndex, PostgresCopyWriter<T> postgresWriter, int splitLogThreshold) where T : class
     {
-        var data = copyTaskDto.Generator!(dialogsDto.GetDialogTimestamps(copyTaskDto.NumberOfTasks, splitIndex));
+        var data = copyTaskDto.Generator!(DialogTimestamp.Generate(startingDate, endDate, dialogAmount));
         await postgresWriter.WriteRecords(data, CancellationToken.None);
     }
 

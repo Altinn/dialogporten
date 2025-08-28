@@ -30,7 +30,7 @@ public sealed record DialogTransmissionContent(
     private static DialogTransmissionContent CreateTransmissionContent(DialogTransmission transmission,
         DialogTimestamp timestamp, DialogTransmissionContentType.Values typeId) =>
         new(
-            Id: timestamp.ToUuidV7(transmission.DialogId, (int)typeId),
+            Id: timestamp.ToUuidV7<DialogTransmissionContent>(transmission.Id, (int)typeId),
             CreatedAt: timestamp.Timestamp,
             UpdatedAt: timestamp.Timestamp,
             MediaType: "text/plain",

@@ -81,6 +81,17 @@ param administratorLoginPassword string
 @minLength(3)
 param deployerPrincipalName string
 
+@export()
+type BackupPolicyConfiguration = {
+  @description('The retention duration in months (1-60 for long-term storage)')
+  @minValue(1)
+  @maxValue(60)
+  retentionDurationMonths: int
+}
+
+@description('Long-term backup policy configuration')
+param longTermBackupConfig BackupPolicyConfiguration?
+
 var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
@@ -287,6 +298,155 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = {
     secretValue: 'psql \'host=${postgres.properties.fullyQualifiedDomainName} port=5432 dbname=${databaseName} user=${administratorLogin} password=${administratorLoginPassword} sslmode=require\''
     tags: tags
   }
+}
+
+// Long-term backup resources (conditional deployment)
+var backupVaultNameMaxLength = 50
+var backupVaultName = uniqueResourceName('${namePrefix}-backup-vault', backupVaultNameMaxLength)
+var backupPolicyName = 'PostgreSQL-LongTerm-Policy'
+
+// Create the Backup Vault (only if long-term backup is configured)
+resource backupVault 'Microsoft.DataProtection/backupVaults@2023-01-01' = if (longTermBackupConfig != null) {
+  name: backupVaultName
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    storageSettings: [
+      {
+        datastoreType: 'VaultStore'
+        type: 'LocallyRedundant'
+      }
+    ]
+    securitySettings: {
+      softDeleteSettings: {
+        state: 'On'
+        retentionDurationInDays: 14
+      }
+    }
+  }
+  tags: tags
+}
+
+// Create Backup Policy for PostgreSQL (only if long-term backup is configured)
+resource backupPolicy 'Microsoft.DataProtection/backupVaults/backupPolicies@2023-01-01' = if (longTermBackupConfig != null) {
+  name: backupPolicyName
+  parent: backupVault
+  properties: {
+    datasourceTypes: [
+      'Microsoft.DBforPostgreSQL/flexibleServers'
+    ]
+    objectType: 'BackupPolicy'
+    policyRules: [
+      {
+        name: 'WeeklyBackupSchedule'
+        objectType: 'AzureBackupRule'
+        backupParameters: {
+          objectType: 'AzureBackupParams'
+          backupType: 'Full'
+        }
+        trigger: {
+          objectType: 'ScheduleBasedTriggerContext'
+          schedule: {
+            repeatingTimeIntervals: [
+              'R/2024-01-07T02:00:00+01:00/P1W' // Weekly on Sunday at 2 AM CET
+            ]
+            timeZone: 'W. Europe Standard Time'
+          }
+          taggingCriteria: [
+            {
+              taggingPriority: 99
+              tagInfo: {
+                tagName: 'Weekly'
+              }
+              criteria: [
+                {
+                  objectType: 'ScheduleBasedBackupCriteria'
+                  scheduleTimes: [
+                    '2024-01-07T02:00:00+01:00'
+                  ]
+                  daysOfTheWeek: [
+                    'Sunday'
+                  ]
+                }
+              ]
+              isDefault: true
+            }
+          ]
+        }
+        dataStore: {
+          dataStoreType: 'VaultStore'
+          objectType: 'DataStoreInfoBase'
+        }
+      }
+      {
+        name: 'DefaultRetentionRule'
+        objectType: 'AzureRetentionRule'
+        isDefault: true
+        lifecycles: [
+          {
+            deleteAfter: {
+              objectType: 'AbsoluteDeleteOption'
+              duration: 'P${longTermBackupConfig!.retentionDurationMonths}M'
+            }
+            sourceDataStore: {
+              dataStoreType: 'VaultStore'
+              objectType: 'DataStoreInfoBase'
+            }
+            targetDataStoreCopySettings: []
+          }
+        ]
+      }
+    ]
+  }
+}
+
+@description('This is the built-in PostgreSQL Backup And Export Operator role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#postgresql-backup-and-export-operator')
+resource postgresBackupOperatorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: subscription()
+  name: 'aaaa0a0a-bb1b-cc2c-dd3d-eeeeee4e4e4e'
+}
+
+// Variables to safely handle conditional backup vault properties
+var backupVaultPrincipalId = longTermBackupConfig != null ? backupVault.identity.principalId : ''
+var backupVaultId = longTermBackupConfig != null ? backupVault.id : ''
+
+// Role Assignment: PostgreSQL Backup And Export Operator Role
+// This role allows the backup vault to read the PostgreSQL server and perform backups
+resource roleAssignmentBackupExportOperator 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (longTermBackupConfig != null) {
+  name: guid(backupVaultId, postgres.id, 'PostgreSQLFlexibleServerLongTermRetentionBackupRole')
+  scope: postgres
+  properties: {
+    principalId: backupVaultPrincipalId
+    roleDefinitionId: postgresBackupOperatorRole.id
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Create Backup Instance for PostgreSQL (only if long-term backup is configured)
+resource backupInstance 'Microsoft.DataProtection/backupVaults/backupInstances@2023-01-01' = if (longTermBackupConfig != null) {
+  name: 'PostgreSQL-${postgresServerName}-BackupInstance'
+  parent: backupVault
+  properties: {
+    friendlyName: 'PostgreSQL ${postgresServerName} Long-term Backup'
+    dataSourceInfo: {
+      datasourceType: 'Microsoft.DBforPostgreSQL/flexibleServers'
+      objectType: 'Datasource'
+      resourceID: postgres.id
+      resourceLocation: location
+      resourceName: postgresServerName
+      resourceType: 'Microsoft.DBforPostgreSQL/flexibleServers'
+      resourceUri: postgres.id
+    }
+    policyInfo: {
+      policyId: backupPolicy.id
+    }
+    objectType: 'BackupInstance'
+  }
+  dependsOn: [
+    roleAssignmentBackupExportOperator
+  ]
 }
 
 output adoConnectionStringSecretUri string = adoConnectionString.outputs.secretUri

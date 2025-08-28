@@ -4,7 +4,7 @@ This document describes the implementation of cost management metrics in Dialogp
 
 ## Overview
 
-The cost management metrics system tracks dialog transactions for billing and cost analysis purposes. It records metrics for all HTTP requests (2xx, 4xx, and 5xx status codes) with detailed metadata about the organization making the request and the service being accessed.
+The cost management metrics system tracks dialog transactions for billing and cost analysis purposes. It records metrics only for endpoints explicitly annotated with the `[CostTracked]` attribute, covering both successful (2xx) and error (4xx) responses for those opted-in endpoints, along with detailed metadata about the organization making the request and the service being accessed.
 
 ## Architecture
 

@@ -11,24 +11,33 @@ The cost management metrics system tracks dialog transactions for billing and co
 ### Components
 
 1. **`[CostTracked]` Attribute**: Custom attribute that marks endpoints for cost tracking and specifies the transaction type
-2. **`CostManagementMiddleware`**: ASP.NET Core middleware that intercepts requests and records metrics
-3. **`ICostManagementMetricsService`**: Service interface for recording transaction metrics
-4. **`CostManagementMetricsService`**: Implementation that emits OpenTelemetry metrics
-5. **`IApplicationContext`**: Scoped service for passing metadata from handlers to middleware
-6. **`TransactionType`**: Enum defining all supported transaction types
+2. **`CostManagementMiddleware`**: ASP.NET Core middleware that intercepts requests and queues transactions
+3. **`ICostManagementMetricsService`**: Service interface for queueing transaction metrics  
+4. **`CostManagementService`**: Implementation that queues transactions for background processing
+5. **`CostManagementBackgroundService`**: Background service that processes queued transactions
+6. **`CostManagementMetricsService`**: Internal service that emits .NET Meter metrics
+7. **`IApplicationContext`**: Scoped service for passing metadata from handlers to middleware
+8. **`TransactionRecord`**: Record type for queuing transaction data
+9. **`TransactionType`**: Enum defining all supported transaction types
+10. **`CostManagementOptions`**: Configuration options for queue capacity, monitoring, and feature toggles
+11. **`CostManagementConstants`**: Constants for metric names, tags, and status values
+12. **`CostManagementMetadataKeys`**: Constants for IApplicationContext metadata keys
 
-### Data Flow
+### Data Flow (Async Queue-Based)
 
 ```mermaid
 flowchart TD
     A[HTTP Request] --> B[CostManagementMiddleware]
-    B --> C[Extract TransactionType from CostTracked attribute]
+    B --> C[Extract TransactionType from CostTracked attribute]  
     C --> D[Extract tokenOrg from JWT claims]
     D --> E[Read serviceOrg and serviceResource from IApplicationContext]
-    E --> F[Record metrics via ICostManagementMetricsService]
-    F --> G[OpenTelemetry Meter]
-    G --> H[OTEL Collector]
-    H --> I[Prometheus/Azure Monitor]
+    E --> F[Queue transaction via ICostManagementMetricsService]
+    F --> G[Channel Queue]
+    G --> H[CostManagementBackgroundService]
+    H --> I[CostManagementMetricsService]
+    I --> J[.NET Meter]
+    J --> K[OTEL Collector]
+    K --> L[Prometheus/Azure Monitor]
 ```
 
 ## Transaction Types
@@ -96,8 +105,8 @@ public class CreateDialogCommandHandler : IRequestHandler<CreateDialogCommand, C
         // ... business logic ...
         
         // Set metadata after successful operation
-        _applicationContext.AddMetadata("serviceOrg", dialog.Org);
-        _applicationContext.AddMetadata("serviceResource", dialog.ServiceResource);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
         
         return result;
     }
@@ -134,22 +143,67 @@ _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, Cost
 | `token_org` | Organization from JWT token | `"digdir"`, `"skatteetaten"` |
 | `service_org` | Organization from dialog entity | `"digdir"`, `"skatteetaten"`, `"unknown"`, `"search_operation"`, `"bulk_operation"`, `"not_applicable"` |
 | `service_resource` | Service resource from dialog entity | `"skjema/NAV/123"`, `"unknown"`, `"search_operation"`, `"bulk_operation"`, `"not_applicable"` |
-| `http_status_code` | HTTP response status code | `200`, `201`, `400`, `404`, `500` |
+| `http_status_code` | HTTP response status code | `200`, `201`, `400`, `404` |
 | `environment` | Environment name | `Development`, `Test`, `Production` |
 
+### Monitoring Metrics
+
+Additional metrics for queue health monitoring:
+
+| Metric Name | Type | Description | 
+|-------------|------|-------------|
+| `dialogporten_cost_queue_depth` | Gauge | Current number of transactions waiting in queue |
+| `dialogporten_cost_dropped_transactions_total` | Counter | Total transactions dropped due to queue overflow |
+
 ## Implementation & Configuration
+
+### Configuration Options
+
+Cost management can be configured via `appsettings.json`:
+
+```json
+{
+  "CostManagement": {
+    "Enabled": true,
+    "QueueCapacity": 100000,
+    "EnableQueueMonitoring": true,
+    "MonitoringIntervalMs": 5000
+  }
+}
+```
+
+### Configuration Properties
+
+| Property | Description | Default | Recommended Values |
+|----------|-------------|---------|-------------------|
+| `Enabled` | Whether cost tracking is enabled | `true` | `false` for development, `true` for production |
+| `QueueCapacity` | Maximum queued transactions | `100,000` | Dev: 1,000; Test: 10,000; Prod: 100,000-500,000 |
+| `EnableQueueMonitoring` | Whether to monitor queue depth | `true` | `true` for production monitoring |
+| `MonitoringIntervalMs` | Queue monitoring frequency | `5,000` | 5,000-30,000ms depending on alerting needs |
+
+### Queue Capacity Planning
+
+For **high-traffic scenarios** (tax returns, deadlines):
+
+- **5M users, 3-5 API calls each** = 15-25M transactions
+- **Peak window: 2-3 hours** = ~2,000-4,000 TPS sustained  
+- **Burst capacity needed**: 10,000+ TPS for spikes
+- **Queue buffer recommendations**:
+  - **100,000 capacity** ≈ 25 seconds at 4,000 TPS
+  - **500,000 capacity** ≈ 2 minutes at 4,000 TPS
+  - **Memory impact**: ~200MB for 1M capacity (acceptable)
 
 ### Service Registration
 
 In `Program.cs`:
 
 ```csharp
-// Register services
+// Register services with configuration
 builder.Services.AddScoped<IApplicationContext, ApplicationContext>();
-builder.Services.AddSingleton<ICostManagementMetricsService, CostManagementMetricsService>();
+builder.Services.AddCostManagementMetrics(builder.Configuration);
 
 // Add middleware
-app.UseMiddleware<CostManagementMiddleware>();
+app.UseCostManagementMetrics();
 ```
 
 ### OpenTelemetry Integration

@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -12,20 +13,30 @@ public sealed class CostManagementMiddleware
     private readonly RequestDelegate _next;
     private readonly ICostManagementMetricsService _metricsService;
     private readonly ILogger<CostManagementMiddleware> _logger;
+    private readonly CostManagementOptions _options;
 
     public CostManagementMiddleware(
         RequestDelegate next,
         ICostManagementMetricsService metricsService,
-        ILogger<CostManagementMiddleware> logger)
+        ILogger<CostManagementMiddleware> logger,
+        CostManagementOptions options)
     {
         _next = next;
         _metricsService = metricsService;
         _logger = logger;
+        _options = options;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
         string? tokenOrg = null;
+
+        // If cost management is disabled, skip all processing
+        if (!_options.Enabled)
+        {
+            await _next(context);
+            return;
+        }
 
         // Determine transaction type from endpoint metadata (attribute-based)
         var transactionType = ResolveTransactionTypeFromEndpointMetadata(context);
@@ -58,8 +69,8 @@ public sealed class CostManagementMiddleware
             var applicationContext = context.RequestServices.GetService<IApplicationContext>();
 
             // Safely read metadata from application context
-            var serviceOrg = applicationContext?.Metadata.TryGetValue("serviceOrg", out var orgValue) == true ? orgValue : null;
-            var serviceResource = applicationContext?.Metadata.TryGetValue("serviceResource", out var srValue) == true ? srValue : null;
+            var serviceOrg = applicationContext?.Metadata.TryGetValue(CostManagementMetadataKeys.ServiceOrg, out var orgValue) == true ? orgValue : null;
+            var serviceResource = applicationContext?.Metadata.TryGetValue(CostManagementMetadataKeys.ServiceResource, out var srValue) == true ? srValue : null;
 
             // Log warning if metadata is missing but continue gracefully
             if (applicationContext == null)
@@ -73,12 +84,9 @@ public sealed class CostManagementMiddleware
                     context.Request.Method, context.Request.Path.Value, serviceOrg, serviceResource);
             }
 
-            // Log both organization identifiers for debugging
-            _logger.LogDebug("Cost management metadata for {Method} {Path}: TokenOrg={TokenOrg}, ServiceOrg={ServiceOrg}, ServiceResource={ServiceResource}",
-                context.Request.Method, context.Request.Path.Value, tokenOrg, serviceOrg, serviceResource);
 
-            // Record the metric after successful processing
-            _metricsService.RecordTransaction(
+            // Queue the transaction for background processing (fire-and-forget)
+            _metricsService.QueueTransaction(
                 transactionType.Value,
                 context.Response.StatusCode,
                 tokenOrg,
@@ -162,9 +170,43 @@ public static class CostManagementMiddlewareExtensions
     /// <summary>
     /// Registers cost management services
     /// </summary>
-    public static IServiceCollection AddCostManagementMetrics(this IServiceCollection services)
+    public static IServiceCollection AddCostManagementMetrics(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<ICostManagementMetricsService, CostManagementMetricsService>();
+        // Bind configuration options
+        var options = new CostManagementOptions();
+        configuration.GetSection(CostManagementOptions.SectionName).Bind(options);
+        services.AddSingleton(options);
+
+        // Create channel for background processing with configurable capacity
+        var channel = System.Threading.Channels.Channel.CreateBounded<TransactionRecord>(options.QueueCapacity);
+
+        // Register channel components
+        services.AddSingleton(channel.Reader);
+        services.AddSingleton(channel.Writer);
+
+        // Create cost management meter for monitoring
+        var costMeter = new System.Diagnostics.Metrics.Meter("Dialogporten.CostManagement", "1.0.0");
+        services.AddSingleton(costMeter);
+
+        // Register services
+        services.AddSingleton<CostManagementMetricsService>(); // For background service
+        services.AddSingleton(provider =>
+        {
+            var writer = provider.GetRequiredService<System.Threading.Channels.ChannelWriter<TransactionRecord>>();
+            var reader = provider.GetRequiredService<System.Threading.Channels.ChannelReader<TransactionRecord>>();
+            var logger = provider.GetRequiredService<ILogger<CostManagementService>>();
+            var meter = provider.GetService<System.Diagnostics.Metrics.Meter>();
+            return new CostManagementService(writer, reader, logger, options, meter);
+        });
+
+        // Register interface implementation
+        services.AddSingleton<ICostManagementMetricsService>(provider => provider.GetRequiredService<CostManagementService>());
+
+        // Register background service only if cost management is enabled
+        if (options.Enabled)
+        {
+            services.AddHostedService<CostManagementBackgroundService>();
+        }
 
         return services;
     }

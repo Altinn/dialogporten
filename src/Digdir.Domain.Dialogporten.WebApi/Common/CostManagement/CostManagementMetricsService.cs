@@ -1,12 +1,14 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Hosting;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 
 /// <summary>
-/// Implementation of cost management metrics service using OpenTelemetry
+/// Internal service for recording cost management metrics to OpenTelemetry.
+/// Used exclusively by CostManagementBackgroundService to process queued transactions.
 /// </summary>
-public sealed class CostManagementMetricsService : ICostManagementMetricsService, IDisposable
+public sealed class CostManagementMetricsService : IDisposable
 {
     private readonly Counter<long> _transactionCounter;
     private readonly Meter _meter;

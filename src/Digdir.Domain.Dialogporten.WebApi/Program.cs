@@ -94,7 +94,7 @@ static void BuildAndRun(string[] args)
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
-        .AddCostManagementMetrics()
+        .AddCostManagementMetrics(builder.Configuration)
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
 

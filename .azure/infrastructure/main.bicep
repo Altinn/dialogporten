@@ -259,8 +259,6 @@ module redis '../modules/redis/main.bicep' = {
   }
 }
 
-
-
 module copyCrossEnvironmentSecrets '../modules/keyvault/copySecrets.bicep' = {
   scope: resourceGroup
   name: 'copyCrossEnvironmentSecrets'

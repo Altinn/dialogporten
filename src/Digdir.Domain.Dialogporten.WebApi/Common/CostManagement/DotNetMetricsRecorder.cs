@@ -6,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 /// <summary>
 /// Implementation of IMetricsRecorder using .NET System.Diagnostics.Metrics
 /// </summary>
-public sealed class DotNetMetricsRecorder : IMetricsRecorder
+internal sealed class DotNetMetricsRecorder : IMetricsRecorder
 {
     private readonly Meter _meter;
     private readonly Counter<long> _transactionCounter;
@@ -19,13 +19,9 @@ public sealed class DotNetMetricsRecorder : IMetricsRecorder
             description: CostManagementConstants.TransactionCounterDescription);
     }
 
-    public void RecordCounter(string name, long value, TagList tags)
+    public void RecordTransactionCounter(long value, in TagList tags)
     {
-        // For now we only support the transaction counter, but this could be extended
-        if (name == CostManagementConstants.TransactionCounterName)
-        {
-            _transactionCounter.Add(value, tags);
-        }
+        _transactionCounter.Add(value, tags);
     }
 
 }

@@ -5,13 +5,12 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 /// <summary>
 /// Abstraction for recording cost management metrics to any backend
 /// </summary>
-public interface IMetricsRecorder
+internal interface IMetricsRecorder
 {
     /// <summary>
-    /// Records a counter metric with the specified tags
+    /// Records a transaction counter metric with the specified tags
     /// </summary>
-    /// <param name="name">Metric name</param>
     /// <param name="value">Value to add to the counter</param>
     /// <param name="tags">Tags to associate with the metric</param>
-    void RecordCounter(string name, long value, TagList tags);
+    void RecordTransactionCounter(long value, in TagList tags);
 }

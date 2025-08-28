@@ -7,7 +7,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 /// Internal service for recording cost management metrics to OpenTelemetry.
 /// Used exclusively by CostManagementBackgroundService to process queued transactions.
 /// </summary>
-public sealed class CostManagementMetricsService : ICostManagementTransactionRecorder
+internal sealed class CostManagementMetricsService : ICostManagementTransactionRecorder
 {
     private readonly IMetricsRecorder _metricsRecorder;
     private readonly string _environment;
@@ -41,7 +41,7 @@ public sealed class CostManagementMetricsService : ICostManagementTransactionRec
             { CostManagementConstants.ServiceResourceTag, serviceResource ?? CostManagementConstants.UnknownValue }
         };
 
-        _metricsRecorder.RecordCounter(CostManagementConstants.TransactionCounterName, 1, tags);
+        _metricsRecorder.RecordTransactionCounter(1, tags);
     }
 
     private static string? GetStatusFromHttpCode(int httpStatusCode)

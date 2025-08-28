@@ -4,7 +4,7 @@ This document describes the implementation of cost management metrics in Dialogp
 
 ## Overview
 
-The cost management metrics system tracks dialog transactions for billing and cost analysis purposes. It records metrics only for endpoints explicitly annotated with the `[CostTracked]` attribute, covering both successful (2xx) and error (4xx) responses for those opted-in endpoints, along with detailed metadata about the organization making the request and the service being accessed.
+The cost management metrics system tracks dialog transactions for billing and cost analysis purposes. It records metrics only for endpoints explicitly annotated with the `[CostTracked]` attribute, covering successful (2xx) and client error (4xx) responses for those opted-in endpoints; server errors (5xx) are excluded by design. It also records detailed metadata about the organization making the request and the service being accessed.
 
 ## Architecture
 
@@ -52,10 +52,11 @@ The system tracks various transaction types defined in the `TransactionType` enu
 | `HardDeleteDialog` | Hard delete/purge dialog operation | Hardslette dialog |
 | `GetDialogServiceOwner` | Get dialog by service owner | Hente dialog tjenesteeier |
 | `SearchDialogsServiceOwner` | Service owner search dialogs | Tjenesteeiersøk |
+| `SearchDialogsServiceOwnerWithEndUser` | Service owner search dialogs with end user ID | Tjenesteeiersøk m/sluttbruker-id |
 | `GetDialogEndUser` | Get dialog by end user | Hente dialog sluttbruker |
+| `SetDialogLabel` | Set label on single dialog | Sette label på enkeltdialog |
+| `BulkSetLabelsServiceOwnerWithEndUser` | Bulk set labels via service owner API with end user ID | Bulk label setting tjenesteeier m/sluttbruker-id |
 | `SearchDialogsEndUser` | End user search dialogs | Sluttbrukersøk |
-| `SetDialogLabel` | Set label on dialog | Sette label på dialog |
-| `BulkSetLabelsServiceOwner` | Bulk set labels via service owner API | Bulk label setting tjenesteeier |
 | `BulkSetLabelsEndUser` | Bulk set labels via end user API | Bulk label setting sluttbruker |
 
 ## Endpoint Annotation
@@ -72,7 +73,7 @@ public class CreateDialogEndpoint : Endpoint<CreateDialogCommand, CreateDialogRe
 
 ## Metadata Structure
 
-The system captures three key pieces of metadata for each transaction:
+The system captures three key pieces of metadata for each transaction (emitted as metric tags `token_org`, `service_org`, and `service_resource`):
 
 ### 1. `tokenOrg` (Organization from JWT Token)
 - **Source**: `"urn:altinn:org"` claim from the JWT token
@@ -125,6 +126,10 @@ _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, Cost
 // End user operations without organization context
 _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.NotApplicable);
 _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, CostManagementMetadataKeys.NotApplicable);
+
+// Bulk operations across multiple organizations
+_applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.BulkOperation);
+_applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, CostManagementMetadataKeys.BulkOperation);
 ```
 
 ## Metrics Schema
@@ -218,9 +223,16 @@ metrics.AddMeter("Dialogporten.CostManagement");
 The middleware reads endpoint metadata to determine transaction types:
 
 ```csharp
+// Get the endpoint type metadata (FastEndpoints pattern)
 var endpoint = context.GetEndpoint();
-var costTrackedAttribute = endpoint?.Metadata.GetMetadata<CostTrackedAttribute>();
-var transactionType = costTrackedAttribute?.TransactionType;
+var endpointTypeMetadata = endpoint?.Metadata.GetMetadata<EndpointTypeMetadata>();
+
+// Use reflection to find the CostTrackedAttribute on the endpoint class
+var costTrackedAttr = endpointTypeMetadata?.EndpointType?
+    .GetCustomAttribute<CostTrackedAttribute>();
+
+// Determine transaction type (supports query parameter variants)
+var transactionType = costTrackedAttr?.GetTransactionType(context);
 ```
 
 ### JWT Claims Extraction

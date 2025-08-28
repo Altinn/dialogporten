@@ -99,10 +99,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new EntityDeleted<DialogEntity>(request.Id);
         }
 
-        // Add metadata for cost management
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
-
         // Ensure transmissions have a UUIDv7 ID, needed for the transmission hierarchy validation.
         foreach (var transmission in request.Dto.Transmissions)
         {
@@ -174,6 +170,10 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             _domainContext.Pop();
             return forbiddenResult;
         }
+
+        // Add metadata for cost management after authorization
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
 
         var serviceResourceInformation = await _resourceRegistry.GetResourceInformation(dialog.ServiceResource, cancellationToken);
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);

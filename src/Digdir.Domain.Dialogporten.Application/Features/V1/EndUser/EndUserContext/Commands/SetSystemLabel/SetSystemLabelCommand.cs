@@ -60,15 +60,15 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        // Add metadata for cost management
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
-
         var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
         if (!authorizationResult.HasAccessToMainResource())
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
+
+        // Add metadata for cost management after authorization
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
 
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 

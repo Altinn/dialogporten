@@ -60,6 +60,27 @@ public sealed class CostManagementBackgroundService : BackgroundService
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Cost management background service stopping");
+
+        // Best-effort drain pending items (bounded by cancellation).
+        while (_reader.TryRead(out var transaction) && !cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                _transactionRecorder.RecordTransaction(
+                    transaction.TransactionType,
+                    transaction.HttpStatusCode,
+                    transaction.TokenOrg,
+                    transaction.ServiceOrg,
+                    transaction.ServiceResource);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex,
+                    "Failed to process transaction during shutdown: {TransactionType}, Status: {StatusCode}",
+                    transaction.TransactionType, transaction.HttpStatusCode);
+            }
+        }
+
         await base.StopAsync(cancellationToken);
     }
 }

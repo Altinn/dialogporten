@@ -358,7 +358,7 @@ resource backupPolicy 'Microsoft.DataProtection/backupVaults/backupPolicies@2023
             {
               taggingPriority: 99
               tagInfo: {
-                tagName: 'Weekly'
+                tagName: 'default'
               }
               criteria: [
                 {
@@ -402,10 +402,10 @@ resource backupPolicy 'Microsoft.DataProtection/backupVaults/backupPolicies@2023
   }
 }
 
-@description('This is the built-in PostgreSQL Backup And Export Operator role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#postgresql-backup-and-export-operator')
+@description('This is the built-in PostgreSQL Flexible Server Long-term Retention Backup Operator role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/storage#backup-operator')
 resource postgresBackupOperatorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   scope: subscription()
-  name: 'aaaa0a0a-bb1b-cc2c-dd3d-eeeeee4e4e4e'
+  name: '00c29273-979b-4161-815c-10b084fb9324'
 }
 
 // Variables to safely handle conditional backup vault properties

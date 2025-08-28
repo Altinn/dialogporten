@@ -6,14 +6,14 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 /// <summary>
 /// Implementation of IMetricsRecorder using .NET System.Diagnostics.Metrics
 /// </summary>
-public sealed class DotNetMetricsRecorder : IMetricsRecorder, IDisposable
+public sealed class DotNetMetricsRecorder : IMetricsRecorder
 {
     private readonly Meter _meter;
     private readonly Counter<long> _transactionCounter;
 
-    public DotNetMetricsRecorder()
+    public DotNetMetricsRecorder(Meter meter)
     {
-        _meter = new Meter("Dialogporten.CostManagement", "1.0.0");
+        _meter = meter ?? throw new ArgumentNullException(nameof(meter));
         _transactionCounter = _meter.CreateCounter<long>(
             CostManagementConstants.TransactionCounterName,
             description: CostManagementConstants.TransactionCounterDescription);
@@ -28,8 +28,4 @@ public sealed class DotNetMetricsRecorder : IMetricsRecorder, IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        _meter.Dispose();
-    }
 }

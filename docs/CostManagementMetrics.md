@@ -140,6 +140,7 @@ _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, Cost
 | Tag Name | Description | Example Values |
 |----------|-------------|----------------|
 | `transaction_type` | Type of transaction | `CreateDialog`, `GetDialogServiceOwner` |
+| `status` | Operation result | `success` (2xx responses), `failed` (4xx responses) |
 | `token_org` | Organization from JWT token | `"digdir"`, `"skatteetaten"` |
 | `service_org` | Organization from dialog entity | `"digdir"`, `"skatteetaten"`, `"unknown"`, `"search_operation"`, `"bulk_operation"`, `"not_applicable"` |
 | `service_resource` | Service resource from dialog entity | `"skjema/NAV/123"`, `"unknown"`, `"search_operation"`, `"bulk_operation"`, `"not_applicable"` |

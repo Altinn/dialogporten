@@ -94,7 +94,17 @@ static void BuildAndRun(string[] args)
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
-        .AddCostManagementMetrics(builder.Configuration)
+
+        // Register and validate CostManagement options (must be before AddCostManagementMetrics)
+        .AddOptions<CostManagementOptions>()
+        .Bind(builder.Configuration.GetSection(CostManagementOptions.SectionName))
+        .ValidateDataAnnotations()
+        .ValidateOnStart()
+        .Services
+
+        // Cost management services
+        .AddCostManagementMetrics()
+
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
 

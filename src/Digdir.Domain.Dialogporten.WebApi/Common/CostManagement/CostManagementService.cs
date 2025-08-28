@@ -21,12 +21,20 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
         CostManagementOptions options,
         Meter? meter = null)
     {
-        _writer = writer;
-        _reader = reader;
+        _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+        _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         _logger = logger;
         _queueCapacity = options.QueueCapacity;
 
-        // Set up monitoring if enabled
+        // Create dropped transactions counter whenever meter is available (independent of monitoring flag)
+        if (meter != null)
+        {
+            _droppedTransactionsCounter = meter.CreateCounter<long>(
+                "dialogporten_cost_dropped_transactions_total",
+                description: "Total number of cost management transactions dropped due to queue overflow");
+        }
+
+        // Set up queue monitoring gauges if explicitly enabled
         if (options.EnableQueueMonitoring && meter != null)
         {
             // Observable gauge for current queue depth - reported on-demand
@@ -38,10 +46,6 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
             meter.CreateObservableGauge("dialogporten_cost_queue_capacity",
                 () => _queueCapacity,
                 description: "Maximum capacity of the cost management queue");
-
-            _droppedTransactionsCounter = meter.CreateCounter<long>(
-                "dialogporten_cost_dropped_transactions_total",
-                description: "Total number of cost management transactions dropped due to queue overflow");
         }
     }
 
@@ -73,5 +77,17 @@ public sealed class CostManagementService : ICostManagementMetricsService, IDisp
     public void Dispose()
     {
         _writer.Complete();
+    }
+}
+
+/// <summary>
+/// No-operation implementation of ICostManagementMetricsService used when cost management is disabled.
+/// Provides a null object pattern to avoid null checks throughout the codebase.
+/// </summary>
+public sealed class NoOpCostManagementService : ICostManagementMetricsService
+{
+    public void QueueTransaction(TransactionType transactionType, int httpStatusCode, string? tokenOrg = null, string? serviceOrg = null, string? serviceResource = null)
+    {
+        // No-op: Do nothing when cost management is disabled
     }
 }

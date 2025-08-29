@@ -77,7 +77,6 @@ param postgresConfiguration {
   highAvailability: PostgresHighAvailabilityConfig?
   backupRetentionDays: int
   availabilityZone: string
-  longTermBackup: BackupPolicyConfig?
 }
 
 param deployerPrincipalName string
@@ -89,8 +88,6 @@ import { Sku as RedisSku } from '../modules/redis/main.bicep'
 param redisSku RedisSku
 @minLength(1)
 param redisVersion string
-
-import { BackupPolicyConfiguration as BackupPolicyConfig } from '../modules/postgreSql/create.bicep'
 
 var secrets = {
   dialogportenPgAdminPassword: dialogportenPgAdminPassword
@@ -239,7 +236,6 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     backupRetentionDays: postgresConfiguration.backupRetentionDays
     availabilityZone: postgresConfiguration.availabilityZone
     deployerPrincipalName: deployerPrincipalName
-    longTermBackupConfig: postgresConfiguration.?longTermBackup
     tags: tags
   }
 }

@@ -37,14 +37,14 @@ internal class PostgresCopyWriterCoordinator
         {
             var poolAwaiter = await poolAwaiterTask;
             await poolAwaiter.Pool.DisposeAsync();
-            // poolAwaiters.Remove(poolAwaiter);
+            poolAwaiters.Remove(poolAwaiter);
 
-            // // redistribute disposed connections
-            // connectionPerPool = _maxConnextions / EntityGeneratorExtensions.Generators.Count;
-            // foreach (var pool in poolAwaiters.Select(x => x.Pool))
-            // {
-            //     await pool.ScaleUp(connectionPerPool - pool.ConsumerCount);
-            // }
+            // redistribute disposed connections
+            connectionPerPool = _maxConnections / EntityGeneratorExtensions.Generators.Count;
+            foreach (var pool in poolAwaiters.Select(x => x.Pool))
+            {
+                await pool.ScaleTo(connectionPerPool);
+            }
         }
     }
 

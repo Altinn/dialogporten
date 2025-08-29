@@ -35,8 +35,8 @@ internal sealed class PostgresCopyWriter<T> : IAsyncDisposable, IDisposable wher
         var connection = await dataSource.OpenConnectionAsync();
         var writer = await connection.BeginTextImportAsync(CopyCommand);
         var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        csvWriter.Context.TypeConverterCache.AddConverter<Enum>(new EnumAsIntConverter());
-        csvWriter.Context.TypeConverterCache.AddConverter<DateTimeOffset?>(new DateTimeOffsetConverter());
+        csvWriter.Context.TypeConverterCache.AddConverter<Enum>(EnumAsIntConverter.Instance);
+        csvWriter.Context.TypeConverterCache.AddConverter<DateTimeOffset?>(DateTimeOffsetConverter.Instance);
         csvWriter.WriteHeader<T>();
         await csvWriter.NextRecordAsync();
         return new PostgresCopyWriter<T>(connection, csvWriter);
@@ -62,12 +62,16 @@ internal sealed class PostgresCopyWriter<T> : IAsyncDisposable, IDisposable wher
 
 internal sealed class EnumAsIntConverter : DefaultTypeConverter
 {
+    public static readonly EnumAsIntConverter Instance = new();
+    private EnumAsIntConverter() { }
     public override string? ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData) =>
         value is Enum enumValue ? $"{Convert.ToInt32(enumValue)}" : base.ConvertToString(value, row, memberMapData);
 }
 
 internal sealed class DateTimeOffsetConverter : DefaultTypeConverter
 {
+    public static readonly DateTimeOffsetConverter Instance = new();
+    private DateTimeOffsetConverter() { }
     public override string? ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData) =>
         value is DateTimeOffset offset ? offset.ToString("O") : base.ConvertToString(value, row, memberMapData);
 }

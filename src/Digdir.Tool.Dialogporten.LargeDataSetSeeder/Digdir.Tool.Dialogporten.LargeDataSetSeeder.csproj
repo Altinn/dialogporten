@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <PublishAot>true</PublishAot>
+        <PublishAot>false</PublishAot>
         <NoWarn>$(NoWarn);IL3050;IL2026</NoWarn>
     </PropertyGroup>
 

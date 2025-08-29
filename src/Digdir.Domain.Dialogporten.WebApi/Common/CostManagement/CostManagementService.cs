@@ -126,7 +126,7 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
         }
     }
 
-    private void ProcessSingleTransaction(TransactionRecord transaction)
+    private void ProcessSingleTransaction(TransactionRecord transaction, bool isDraining = false)
     {
         try
         {
@@ -139,9 +139,18 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex,
-                "Failed to process cost management transaction: {TransactionType}, Status: {StatusCode}",
-                transaction.TransactionType, transaction.HttpStatusCode);
+            if (isDraining)
+            {
+                _logger.LogWarning(ex,
+                    "Failed to process transaction during shutdown: {TransactionType}, Status: {StatusCode}",
+                    transaction.TransactionType, transaction.HttpStatusCode);
+            }
+            else
+            {
+                _logger.LogWarning(ex,
+                    "Failed to process cost management transaction: {TransactionType}, Status: {StatusCode}",
+                    transaction.TransactionType, transaction.HttpStatusCode);
+            }
         }
     }
 
@@ -149,21 +158,7 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
     {
         while (_reader.TryRead(out var transaction) && !cancellationToken.IsCancellationRequested)
         {
-            try
-            {
-                RecordTransaction(
-                    transaction.TransactionType,
-                    transaction.HttpStatusCode,
-                    transaction.TokenOrg,
-                    transaction.ServiceOrg,
-                    transaction.ServiceResource);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex,
-                    "Failed to process transaction during shutdown: {TransactionType}, Status: {StatusCode}",
-                    transaction.TransactionType, transaction.HttpStatusCode);
-            }
+            ProcessSingleTransaction(transaction, isDraining: true);
         }
     }
 

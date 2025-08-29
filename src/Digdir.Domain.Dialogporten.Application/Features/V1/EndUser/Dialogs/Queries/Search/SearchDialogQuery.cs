@@ -145,7 +145,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IApplicationContext _applicationContext;
 
-
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,

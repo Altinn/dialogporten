@@ -1,4 +1,6 @@
-namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.FileImport;
+
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 internal static class DialogTimestampExtensions
 {

@@ -35,11 +35,9 @@
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Application.Integration.Tests"/>
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests"/>
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.GraphQL"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Architecture.Tests"/>
+        <InternalsVisibleTo Include="Digdir.Tool.Dialogporten.LargeDataSetSeeder"/>
     </ItemGroup>
 
 </Project>

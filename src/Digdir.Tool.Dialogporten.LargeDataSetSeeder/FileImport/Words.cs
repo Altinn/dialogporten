@@ -1,4 +1,4 @@
-namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.FileImport;
 
 internal static class Words
 {

@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Http;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 

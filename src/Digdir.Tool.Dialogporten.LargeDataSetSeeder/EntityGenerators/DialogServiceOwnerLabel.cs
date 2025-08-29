@@ -1,3 +1,5 @@
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.FileImport;
+
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogServiceOwnerLabel(

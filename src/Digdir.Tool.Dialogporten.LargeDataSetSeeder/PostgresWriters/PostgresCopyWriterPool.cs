@@ -125,7 +125,7 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
         {
             _writer = writer;
             _completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _writerTask = writer.WriteRecords(data.WIthTaskCompletionSource(_completionSource));
+            _writerTask = Task.Run(async () => await writer.WriteRecords(data.WIthTaskCompletionSource(_completionSource)));
         }
 
         public async ValueTask DisposeAsync()

@@ -1,6 +1,6 @@
 using UUIDNext;
 
-namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 public static class DeterministicUuidV7
 {

@@ -4,10 +4,11 @@
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "TO_DATE": "1985-12-31",
-        "FROM_DATE": "2024-01-01",
-        "DIALOG_AMOUNT": "1000",
-        "CONN_STRING": "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;Command Timeout=0;"
+        "FromDate": "1985-12-31",
+        "ToDate": "2024-01-01",
+        "DialogAmount": "1000",
+        "MaxPostgresConnections": "100",
+        "ConnectionString": "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;Command Timeout=0;"
       }
     }
   }

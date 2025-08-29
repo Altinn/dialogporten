@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 #pragma warning disable IDE0072
 

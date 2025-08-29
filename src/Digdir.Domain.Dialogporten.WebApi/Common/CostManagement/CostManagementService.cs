@@ -69,8 +69,8 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
                 _logger.LogWarning("Failed to queue cost management transaction (queue unavailable or full). Transaction: {TransactionType}, Status: {StatusCode}",
                     transactionType, httpStatusCode);
 
-                // Track dropped transactions
-                _droppedTransactionsCounter?.Add(1, new TagList { { "reason", "enqueue_failed" } });
+                // Record dropped transaction metrics with detailed context
+                _droppedTransactionsCounter?.Add(1, BuildDroppedTransactionTags("enqueue_failed", transactionType, httpStatusCode, serviceOrg, tokenOrg));
             }
         }
         catch (Exception ex)
@@ -78,8 +78,8 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
             _logger.LogWarning(ex, "Exception while queuing cost management transaction: {TransactionType}, Status: {StatusCode}",
                 transactionType, httpStatusCode);
 
-            // Track dropped transactions due to exceptions
-            _droppedTransactionsCounter?.Add(1, new TagList { { "reason", "exception" } });
+            // Record dropped transaction metrics due to exceptions
+            _droppedTransactionsCounter?.Add(1, BuildDroppedTransactionTags("exception", transactionType, httpStatusCode, serviceOrg, tokenOrg));
         }
     }
 
@@ -114,8 +114,21 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
     {
         _logger.LogInformation("Cost management background service stopping");
 
+        try
+        {
+            // Seal the channel to prevent new transactions from being enqueued
+            _writer.Complete();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Exception while completing channel writer during shutdown");
+        }
+
+        // Stop the background processing loop
         await base.StopAsync(cancellationToken);
-        DrainRemainingTransactions(cancellationToken);
+
+        // Process any remaining transactions in the queue
+        await DrainRemainingTransactionsAsync(cancellationToken);
     }
 
     private async Task ProcessTransactionQueueAsync(CancellationToken stoppingToken)
@@ -154,12 +167,22 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
         }
     }
 
-    private void DrainRemainingTransactions(CancellationToken cancellationToken)
+    private Task DrainRemainingTransactionsAsync(CancellationToken cancellationToken)
     {
-        while (_reader.TryRead(out var transaction) && !cancellationToken.IsCancellationRequested)
+        try
         {
-            ProcessSingleTransaction(transaction, isDraining: true);
+            while (_reader.TryRead(out var transaction) && !cancellationToken.IsCancellationRequested)
+            {
+                ProcessSingleTransaction(transaction, isDraining: true);
+            }
+            _logger.LogInformation("Cost management background service shutdown complete");
         }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Exception while draining remaining transactions during shutdown");
+        }
+
+        return Task.CompletedTask;
     }
 
     private TagList BuildMetricTags(TransactionType transactionType, int httpStatusCode, string? tokenOrg, string? serviceOrg, string? serviceResource)
@@ -183,9 +206,29 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
     private static string NormalizeTag(string? value) =>
         string.IsNullOrWhiteSpace(value) ? CostManagementConstants.UnknownValue : value;
 
+    private static TagList BuildDroppedTransactionTags(string reason, TransactionType transactionType, int httpStatusCode, string? serviceOrg, string? tokenOrg)
+    {
+        return new TagList
+        {
+            { "reason", reason },
+            { "transaction_type", transactionType.ToString() },
+            { "status_class", $"{httpStatusCode / 100}xx" },
+            { "service_org", NormalizeTag(serviceOrg) },
+            { "token_org", NormalizeTag(tokenOrg) }
+        };
+    }
+
     public override void Dispose()
     {
-        _writer.Complete();
+        // Complete the channel writer to signal no more transactions will be enqueued
+        try
+        {
+            _writer.Complete();
+        }
+        catch (InvalidOperationException)
+        {
+            // Channel already completed - this is expected during normal shutdown
+        }
         base.Dispose();
     }
 }

@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.Search;
 
-[CostTracked(TransactionType.SearchDialogsServiceOwner, "enduserid", TransactionType.SearchDialogsServiceOwnerWithEndUser)]
+[CostTracked(TransactionType.SearchDialogsServiceOwner, nameof(SearchDialogQuery.EndUserId), TransactionType.SearchDialogsServiceOwnerWithEndUser)]
 public sealed class SearchDialogEndpoint : Endpoint<SearchDialogQuery, PaginatedList<DialogDto>>
 {
     private readonly ISender _sender;

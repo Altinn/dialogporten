@@ -59,10 +59,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        // Add metadata for cost management
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
-
         dialog.SeenLog = dialog.SeenLog
             .Where(x => x.CreatedAt >= dialog.ContentUpdatedAt).ToList();
 
@@ -105,6 +101,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             DecorateWithAuthorization(dialogDto, authorizationResult);
         }
+
+        // Add metadata for cost management after all validations and authorization checks
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
 
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,

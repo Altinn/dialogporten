@@ -106,10 +106,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        // Add metadata for cost management
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
-
         var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(
             dialog,
             cancellationToken: cancellationToken);
@@ -140,6 +136,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         {
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
+
+        // Add metadata for cost management after successful authorization
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
 
         // TODO: What if name lookup fails
         // https://github.com/altinn/dialogporten/issues/387

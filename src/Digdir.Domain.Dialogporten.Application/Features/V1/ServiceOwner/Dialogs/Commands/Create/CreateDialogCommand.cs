@@ -137,13 +137,13 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
 
+        // Add metadata for cost management (charge for all valid attempts to encourage proper API usage)
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
+        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
+
         _db.Dialogs.Add(dialog);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        // Add metadata for cost management after successful creation
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
 
         return saveResult.Match<CreateDialogResult>(
             success => new CreateDialogSuccess(dialog.Id, dialog.Revision),

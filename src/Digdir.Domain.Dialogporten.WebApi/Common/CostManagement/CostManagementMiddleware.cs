@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Library.Utils.AspNet;
 using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
@@ -136,10 +137,10 @@ public sealed class CostManagementMiddleware
             return null;
         }
 
-        // Check if this endpoint has a query parameter variant
+        // Check if this endpoint has a query parameter variant (case-insensitive)
         if (costTrackedAttr.HasVariant &&
             costTrackedAttr.QueryParameterVariant != null &&
-            context.Request.Query.ContainsKey(costTrackedAttr.QueryParameterVariant))
+            context.Request.Query.Keys.Any(key => string.Equals(key, costTrackedAttr.QueryParameterVariant, StringComparison.OrdinalIgnoreCase)))
         {
             return costTrackedAttr.VariantTransactionType;
         }
@@ -191,7 +192,7 @@ public static class CostManagementMiddlewareExtensions
         services.AddSingleton(provider => provider.GetRequiredService<System.Threading.Channels.Channel<TransactionRecord>>().Writer);
 
         // Register shared meter
-        services.AddSingleton(_ => new System.Diagnostics.Metrics.Meter("Dialogporten.CostManagement", "1.0.0"));
+        services.AddSingleton(_ => new System.Diagnostics.Metrics.Meter(TelemetryConstants.CostManagementMeterName, "1.0.0"));
 
         // Register cost management service
         services.AddSingleton<CostManagementService>(provider =>

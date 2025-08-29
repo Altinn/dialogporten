@@ -40,6 +40,6 @@ internal sealed class CostManagementMetricsService : ICostManagementTransactionR
         _metricsRecorder.RecordTransactionCounter(1, tags);
     }
 
-    private static string NormalizeTag(string? value) => 
+    private static string NormalizeTag(string? value) =>
         string.IsNullOrWhiteSpace(value) ? CostManagementConstants.UnknownValue : value;
 }

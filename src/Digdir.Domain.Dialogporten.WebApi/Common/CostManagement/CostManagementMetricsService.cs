@@ -32,12 +32,14 @@ internal sealed class CostManagementMetricsService : ICostManagementTransactionR
             { CostManagementConstants.StatusTag, status },
             { CostManagementConstants.HttpStatusCodeTag, httpStatusCode },
             { CostManagementConstants.EnvironmentTag, _environment },
-            { CostManagementConstants.TokenOrgTag, tokenOrg ?? CostManagementConstants.UnknownValue },
-            { CostManagementConstants.ServiceOrgTag, serviceOrg ?? CostManagementConstants.UnknownValue },
-            { CostManagementConstants.ServiceResourceTag, serviceResource ?? CostManagementConstants.UnknownValue }
+            { CostManagementConstants.TokenOrgTag, NormalizeTag(tokenOrg) },
+            { CostManagementConstants.ServiceOrgTag, NormalizeTag(serviceOrg) },
+            { CostManagementConstants.ServiceResourceTag, NormalizeTag(serviceResource) }
         };
 
         _metricsRecorder.RecordTransactionCounter(1, tags);
     }
 
+    private static string NormalizeTag(string? value) => 
+        string.IsNullOrWhiteSpace(value) ? CostManagementConstants.UnknownValue : value;
 }

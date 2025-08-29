@@ -13,15 +13,13 @@ The cost management metrics system tracks dialog transactions for billing and co
 1. **`[CostTracked]` Attribute**: Custom attribute that marks endpoints for cost tracking and specifies the transaction type
 2. **`CostManagementMiddleware`**: ASP.NET Core middleware that intercepts requests and queues transactions
 3. **`ICostManagementMetricsService`**: Service interface for queueing transaction metrics  
-4. **`CostManagementService`**: Implementation that queues transactions for background processing
-5. **`CostManagementBackgroundService`**: Background service that processes queued transactions
-6. **`CostManagementMetricsService`**: Internal service that emits .NET Meter metrics
-7. **`IApplicationContext`**: Scoped service for passing metadata from handlers to middleware
-8. **`TransactionRecord`**: Record type for queuing transaction data
-9. **`TransactionType`**: Enum defining all supported transaction types
-10. **`CostManagementOptions`**: Configuration options for queue capacity, monitoring, and feature toggles
-11. **`CostManagementConstants`**: Constants for metric names, tags, and status values
-12. **`CostManagementMetadataKeys`**: Constants for IApplicationContext metadata keys
+4. **`CostManagementService`**: Service that handles queueing, background processing, and metrics recording
+5. **`IApplicationContext`**: Scoped service for passing metadata from handlers to middleware
+6. **`TransactionRecord`**: Record type for queuing transaction data
+7. **`TransactionType`**: Enum defining all supported transaction types
+8. **`CostManagementOptions`**: Configuration options for queue capacity and feature toggles
+9. **`CostManagementConstants`**: Constants for metric names, tags, and status values
+10. **`CostManagementMetadataKeys`**: Constants for IApplicationContext metadata keys
 
 ### Data Flow (Async Queue-Based)
 
@@ -33,11 +31,10 @@ flowchart TD
     D --> E[Read serviceOrg and serviceResource from IApplicationContext]
     E --> F[Queue transaction via ICostManagementMetricsService]
     F --> G[Channel Queue]
-    G --> H[CostManagementBackgroundService]
-    H --> I[CostManagementMetricsService]
-    I --> J[.NET Meter]
-    J --> K[OTEL Collector]
-    K --> L[Prometheus/Azure Monitor]
+    G --> H[CostManagementService Background Processing]
+    H --> I[.NET Meter Counters]
+    I --> J[OTEL Collector]
+    J --> K[Prometheus/Azure Monitor]
 ```
 
 ## Transaction Types
@@ -152,14 +149,15 @@ _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, Cost
 | `http_status_code` | HTTP response status code | `200`, `201`, `400`, `404` |
 | `environment` | Environment name | `Development`, `Test`, `Production` |
 
-### Monitoring Metrics
+### System Monitoring Metrics
 
-Additional metrics for queue health monitoring:
+Additional metrics for operational monitoring:
 
 | Metric Name | Type | Description | 
 |-------------|------|-------------|
-| `dialogporten_cost_queue_depth` | Gauge | Current number of transactions waiting in queue |
 | `dialogporten_cost_dropped_transactions_total` | Counter | Total transactions dropped due to queue overflow |
+| `dialogporten_cost_queue_depth` | Observable Gauge | Current number of transactions waiting in queue |
+| `dialogporten_cost_queue_capacity` | Observable Gauge | Maximum capacity of the cost management queue |
 
 ## Implementation & Configuration
 
@@ -171,8 +169,7 @@ Cost management can be configured via `appsettings.json`:
 {
   "CostManagement": {
     "Enabled": true,
-    "QueueCapacity": 100000,
-    "EnableQueueMonitoring": true
+    "QueueCapacity": 100000
   }
 }
 ```
@@ -183,7 +180,6 @@ Cost management can be configured via `appsettings.json`:
 |----------|-------------|---------|-------------------|
 | `Enabled` | Whether cost tracking is enabled | `true` | `false` for development, `true` for production |
 | `QueueCapacity` | Maximum queued transactions | `100,000` | Dev: 1,000; Test: 10,000; Prod: 100,000-500,000 |
-| `EnableQueueMonitoring` | Whether to enable queue monitoring metrics | `true` | `true` for production monitoring |
 
 ### Queue Capacity Planning
 

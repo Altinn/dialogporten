@@ -56,7 +56,7 @@ public sealed class CostManagementMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Failed to extract organization short name from user claims for {Method} {Path}",
+            _logger.LogWarning(ex, "Exception during token organization extraction for cost tracking - {Method} {Path}",
                 context.Request.Method, context.Request.Path.Value);
         }
 
@@ -79,10 +79,10 @@ public sealed class CostManagementMiddleware
                 _logger.LogWarning("IApplicationContext not available for cost management metrics on {Method} {Path}",
                     context.Request.Method, context.Request.Path.Value);
             }
-            else if (serviceOrg == CostManagementConstants.UnknownValue || serviceResource == CostManagementConstants.UnknownValue)
+            else if (string.IsNullOrEmpty(serviceOrg) || string.IsNullOrEmpty(serviceResource))
             {
-                _logger.LogDebug("Unknown organization/resource for cost management on {Method} {Path}: serviceOrg={ServiceOrg}, serviceResource={ServiceResource}",
-                    context.Request.Method, context.Request.Path.Value, serviceOrg, serviceResource);
+                _logger.LogWarning("Missing service metadata from handler for cost tracking on {Method} {Path}: serviceOrg={ServiceOrg}, serviceResource={ServiceResource}",
+                    context.Request.Method, context.Request.Path.Value, serviceOrg ?? "null", serviceResource ?? "null");
             }
 
             // Only enqueue billable outcomes (2xx, 4xx)
@@ -193,31 +193,20 @@ public static class CostManagementMiddlewareExtensions
         // Register shared meter
         services.AddSingleton(_ => new System.Diagnostics.Metrics.Meter("Dialogporten.CostManagement", "1.0.0"));
 
-        // Register metrics recorder with shared meter
-        services.AddSingleton<IMetricsRecorder>(provider =>
-            new DotNetMetricsRecorder(provider.GetRequiredService<System.Diagnostics.Metrics.Meter>()));
-
-        // Register CostManagementMetricsService for background service
-        services.AddSingleton<CostManagementMetricsService>();
-        services.AddSingleton<ICostManagementTransactionRecorder>(provider =>
-            provider.GetRequiredService<CostManagementMetricsService>());
-
-        // Register background service
-        services.AddSingleton<CostManagementBackgroundService>();
-
-        // Register CostManagementService with proper factory
+        // Register cost management service
         services.AddSingleton<CostManagementService>(provider =>
         {
             var writer = provider.GetRequiredService<System.Threading.Channels.ChannelWriter<TransactionRecord>>();
             var reader = provider.GetRequiredService<System.Threading.Channels.ChannelReader<TransactionRecord>>();
             var logger = provider.GetRequiredService<ILogger<CostManagementService>>();
             var options = provider.GetRequiredService<IOptions<CostManagementOptions>>().Value;
+            var hostEnvironment = provider.GetRequiredService<IHostEnvironment>();
             var meter = provider.GetRequiredService<System.Diagnostics.Metrics.Meter>();
 
-            return new CostManagementService(writer, reader, logger, options, meter);
+            return new CostManagementService(writer, reader, logger, options, hostEnvironment, meter);
         });
 
-        // Register ICostManagementMetricsService with factory that handles enabled/disabled state
+        // Register service interface with enabled/disabled factory
         services.AddSingleton<ICostManagementMetricsService>(provider =>
         {
             var options = provider.GetRequiredService<IOptions<CostManagementOptions>>().Value;
@@ -226,12 +215,13 @@ public static class CostManagementMiddlewareExtensions
                 : new NoOpCostManagementService();
         });
 
-        // Register background service with factory that handles enabled/disabled state
+
+        // Register background service with enabled/disabled factory
         services.AddSingleton<IHostedService>(provider =>
         {
             var options = provider.GetRequiredService<IOptions<CostManagementOptions>>().Value;
             return options.Enabled
-                ? provider.GetRequiredService<CostManagementBackgroundService>()
+                ? provider.GetRequiredService<CostManagementService>()
                 : new NoOpHostedService();
         });
 

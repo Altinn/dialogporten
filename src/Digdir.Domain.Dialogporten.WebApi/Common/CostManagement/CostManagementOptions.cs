@@ -22,10 +22,6 @@ public sealed class CostManagementOptions
     [Range(100, 1_000_000)]
     public int QueueCapacity { get; set; } = 100_000;
 
-    /// <summary>
-    /// Whether to enable queue depth monitoring metrics
-    /// </summary>
-    public bool EnableQueueMonitoring { get; set; } = true;
 
     /// <summary>
     /// Whether cost tracking is enabled (allows disabling per environment)

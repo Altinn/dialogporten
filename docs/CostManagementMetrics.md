@@ -153,11 +153,21 @@ _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, Cost
 
 Additional metrics for operational monitoring:
 
-| Metric Name | Type | Description | 
-|-------------|------|-------------|
-| `dialogporten_cost_dropped_transactions_total` | Counter | Total transactions dropped due to queue overflow |
-| `dialogporten_cost_queue_depth` | Observable Gauge | Current number of transactions waiting in queue |
-| `dialogporten_cost_queue_capacity` | Observable Gauge | Maximum capacity of the cost management queue |
+| Metric Name | Type | Description | Tags |
+|-------------|------|-------------|------|
+| `dialogporten_cost_dropped_transactions_total` | Counter | Total transactions dropped due to queue overflow | `reason`, `transaction_type`, `status_class`, `service_org`, `token_org` |
+| `dialogporten_cost_queue_depth` | Observable Gauge | Current number of transactions waiting in queue | |
+| `dialogporten_cost_queue_capacity` | Observable Gauge | Maximum capacity of the cost management queue | |
+
+#### Dropped Transaction Tags
+
+The dropped transaction counter includes detailed tags for analysis:
+
+- **`reason`**: `"enqueue_failed"` (queue full) or `"exception"` (processing error)
+- **`transaction_type`**: Type of dropped transaction (e.g., `"CreateDialog"`)
+- **`status_class`**: HTTP status class (e.g., `"2xx"`, `"4xx"`)
+- **`service_org`**: Organization from dialog entity
+- **`token_org`**: Organization from JWT token
 
 ## Implementation & Configuration
 
@@ -198,9 +208,16 @@ For **high-traffic scenarios** (tax returns, deadlines):
 In `Program.cs`:
 
 ```csharp
+// Register and validate CostManagement options (must be before AddCostManagementMetrics)
+builder.Services
+    .AddOptions<CostManagementOptions>()
+    .Bind(builder.Configuration.GetSection(CostManagementOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 // Register services with configuration
 builder.Services.AddScoped<IApplicationContext, ApplicationContext>();
-builder.Services.AddCostManagementMetrics(builder.Configuration);
+builder.Services.AddCostManagementMetrics();
 
 // Add middleware
 app.UseCostManagementMetrics();
@@ -227,8 +244,14 @@ var endpointTypeMetadata = endpoint?.Metadata.GetMetadata<EndpointTypeMetadata>(
 var costTrackedAttr = endpointTypeMetadata?.EndpointType?
     .GetCustomAttribute<CostTrackedAttribute>();
 
-// Determine transaction type (supports query parameter variants)
-var transactionType = costTrackedAttr?.GetTransactionType(context);
+// Determine transaction type (supports case-insensitive query parameter variants)
+if (costTrackedAttr.HasVariant &&
+    costTrackedAttr.QueryParameterVariant != null &&
+    context.Request.Query.Keys.Any(key => 
+        string.Equals(key, costTrackedAttr.QueryParameterVariant, StringComparison.OrdinalIgnoreCase)))
+{
+    return costTrackedAttr.VariantTransactionType;
+}
 ```
 
 ### JWT Claims Extraction

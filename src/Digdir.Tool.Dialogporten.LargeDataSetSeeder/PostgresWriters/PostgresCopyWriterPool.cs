@@ -103,6 +103,13 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
         }
     }
 
+    // public async Task CompleteAndWaitAsync()
+    // {
+    //     _channel.Writer.Complete();
+    //     await _channel.Reader.Completion;
+    //     await Task.WhenAll(_consumers.Select(x => x.DisposeAsync().AsTask()));
+    // }
+    //
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;

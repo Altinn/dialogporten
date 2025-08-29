@@ -14,7 +14,7 @@ public record struct DialogTimestamp(
             .Select(x =>
             {
                 var timestamp = fromDate + (interval * x);
-                var dialogId = DeterministicUuidV7.Create<Dialog>(timestamp, Guid.Empty);
+                var dialogId = DeterministicUuidV7.Create<Dialog>(timestamp, Guid.Empty, x);
                 return new DialogTimestamp(timestamp, dialogId, x + 1);
             });
     }

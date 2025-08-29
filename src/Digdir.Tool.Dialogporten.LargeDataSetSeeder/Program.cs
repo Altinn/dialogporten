@@ -119,6 +119,46 @@ try
 
     await Task.WhenAll(tasks);
 
+    //// After Task.WhenAll(tasks)
+    // await localizationPool.DisposeAsync();
+    // await actorPool.DisposeAsync();
+    // await attachmentPool.DisposeAsync();
+    // await attachmentUrlPool.DisposeAsync();
+    // await dialogPool.DisposeAsync();
+    // await dialogActivityPool.DisposeAsync();
+    // await dialogContentPool.DisposeAsync();
+    // await dialogEndUserContextPool.DisposeAsync();
+    // await dialogEndUserContextSystemLabelPool.DisposeAsync();
+    // await dialogGuiActionPool.DisposeAsync();
+    // await dialogSearchTagPool.DisposeAsync();
+    // await dialogSeenLogPool.DisposeAsync();
+    // await dialogServiceOwnerContextPool.DisposeAsync();
+    // await dialogServiceOwnerLabelPool.DisposeAsync();
+    // await dialogTransmissionPool.DisposeAsync();
+    // await dialogTransmissionContentPool.DisposeAsync();
+    // await labelAssignmentLogPool.DisposeAsync();
+    // await localizationSetPool.DisposeAsync();
+
+    // // for each pool above, call public CompleteAndWaitAsync() on the pool object
+    // await localizationPool.CompleteAndWaitAsync();
+    // await actorPool.CompleteAndWaitAsync();
+    // await attachmentPool.CompleteAndWaitAsync();
+    // await attachmentUrlPool.CompleteAndWaitAsync();
+    // await dialogPool.CompleteAndWaitAsync();
+    // await dialogActivityPool.CompleteAndWaitAsync();
+    // await dialogContentPool.CompleteAndWaitAsync();
+    // await dialogEndUserContextPool.CompleteAndWaitAsync();
+    // await dialogEndUserContextSystemLabelPool.CompleteAndWaitAsync();
+    // await dialogGuiActionPool.CompleteAndWaitAsync();
+    // await dialogSearchTagPool.CompleteAndWaitAsync();
+    // await dialogSeenLogPool.CompleteAndWaitAsync();
+    // await dialogServiceOwnerContextPool.CompleteAndWaitAsync();
+    // await dialogServiceOwnerLabelPool.CompleteAndWaitAsync();
+    // await dialogTransmissionPool.CompleteAndWaitAsync();
+    // await dialogTransmissionContentPool.CompleteAndWaitAsync();
+    // await labelAssignmentLogPool.CompleteAndWaitAsync();
+    // await localizationSetPool.CompleteAndWaitAsync();
+
     // TODO: Start re-indexing command
     // Import create validator
     // Get dialog, map to create

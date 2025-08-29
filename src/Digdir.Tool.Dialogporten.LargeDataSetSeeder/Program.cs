@@ -58,30 +58,66 @@ try
 
     await GenerateActorNames(dataSource);
 
-    var lala = new PostgresCopyWriterCoordinator(dataSource);
-    await lala.Handle(startingDate, endDate, dialogAmount);
+    // var lala = new PostgresCopyWriterCoordinator(dataSource);
+    // await lala.Handle(startingDate, endDate, dialogAmount);
 
-    // CreateCopyTasks(new CopyTaskDto<Actor>(Actor.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<Attachment>(Attachment.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<AttachmentUrl>(AttachmentUrl.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<Dialog>(Dialog.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogActivity>(DialogActivity.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogContent>(DialogContent.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogEndUserContext>(DialogEndUserContext.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogEndUserContextSystemLabel>(DialogEndUserContextSystemLabel.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogGuiAction>(DialogGuiAction.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogSearchTag>(DialogSearchTag.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogSeenLog>(DialogSeenLog.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogServiceOwnerContext>(DialogServiceOwnerContext.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogServiceOwnerLabel>(DialogServiceOwnerLabel.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogTransmission>(DialogTransmission.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<DialogTransmissionContent>(DialogTransmissionContent.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<LabelAssignmentLog>(LabelAssignmentLog.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<Localization>(Localization.GenerateEntities, "temp"), tasks);
-    // CreateCopyTasks(new CopyTaskDto<LocalizationSet>(LocalizationSet.GenerateEntities, "temp"), tasks);
-    //
-    //
-    // await Task.WhenAll(tasks);
+    var tasks = new List<Task>();
+
+    await using var localizationPool = await PostgresCopyWriterPool<Localization>.Create(dataSource, 12);
+    tasks.Add(localizationPool.WriteAsync(Localization.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var actorPool = await PostgresCopyWriterPool<Actor>.Create(dataSource, 6);
+    tasks.Add(actorPool.WriteAsync(Actor.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var attachmentPool = await PostgresCopyWriterPool<Attachment>.Create(dataSource, 7);
+    tasks.Add(attachmentPool.WriteAsync(Attachment.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var attachmentUrlPool = await PostgresCopyWriterPool<AttachmentUrl>.Create(dataSource, 4);
+    tasks.Add(attachmentUrlPool.WriteAsync(AttachmentUrl.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogPool = await PostgresCopyWriterPool<Dialog>.Create(dataSource, 4);
+    tasks.Add(dialogPool.WriteAsync(Dialog.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogActivityPool = await PostgresCopyWriterPool<DialogActivity>.Create(dataSource, 4);
+    tasks.Add(dialogActivityPool.WriteAsync(DialogActivity.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogContentPool = await PostgresCopyWriterPool<DialogContent>.Create(dataSource, 4);
+    tasks.Add(dialogContentPool.WriteAsync(DialogContent.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogEndUserContextPool = await PostgresCopyWriterPool<DialogEndUserContext>.Create(dataSource, 4);
+    tasks.Add(dialogEndUserContextPool.WriteAsync(DialogEndUserContext.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogEndUserContextSystemLabelPool = await PostgresCopyWriterPool<DialogEndUserContextSystemLabel>.Create(dataSource, 4);
+    tasks.Add(dialogEndUserContextSystemLabelPool.WriteAsync(DialogEndUserContextSystemLabel.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogGuiActionPool = await PostgresCopyWriterPool<DialogGuiAction>.Create(dataSource, 4);
+    tasks.Add(dialogGuiActionPool.WriteAsync(DialogGuiAction.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogSearchTagPool = await PostgresCopyWriterPool<DialogSearchTag>.Create(dataSource, 4);
+    tasks.Add(dialogSearchTagPool.WriteAsync(DialogSearchTag.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogSeenLogPool = await PostgresCopyWriterPool<DialogSeenLog>.Create(dataSource, 4);
+    tasks.Add(dialogSeenLogPool.WriteAsync(DialogSeenLog.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogServiceOwnerContextPool = await PostgresCopyWriterPool<DialogServiceOwnerContext>.Create(dataSource, 4);
+    tasks.Add(dialogServiceOwnerContextPool.WriteAsync(DialogServiceOwnerContext.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogServiceOwnerLabelPool = await PostgresCopyWriterPool<DialogServiceOwnerLabel>.Create(dataSource, 4);
+    tasks.Add(dialogServiceOwnerLabelPool.WriteAsync(DialogServiceOwnerLabel.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogTransmissionPool = await PostgresCopyWriterPool<DialogTransmission>.Create(dataSource, 4);
+    tasks.Add(dialogTransmissionPool.WriteAsync(DialogTransmission.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var dialogTransmissionContentPool = await PostgresCopyWriterPool<DialogTransmissionContent>.Create(dataSource, 4);
+    tasks.Add(dialogTransmissionContentPool.WriteAsync(DialogTransmissionContent.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var labelAssignmentLogPool = await PostgresCopyWriterPool<LabelAssignmentLog>.Create(dataSource, 4);
+    tasks.Add(labelAssignmentLogPool.WriteAsync(LabelAssignmentLog.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await using var localizationSetPool = await PostgresCopyWriterPool<LocalizationSet>.Create(dataSource, 4);
+    tasks.Add(localizationSetPool.WriteAsync(LocalizationSet.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount))));
+
+    await Task.WhenAll(tasks);
 
     // TODO: Start re-indexing command
     // Import create validator

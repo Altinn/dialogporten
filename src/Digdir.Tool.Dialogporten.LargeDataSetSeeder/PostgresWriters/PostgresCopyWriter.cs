@@ -33,6 +33,12 @@ internal sealed class PostgresCopyWriter<T> : IAsyncDisposable, IDisposable wher
     public static async Task<PostgresCopyWriter<T>> Create(NpgsqlDataSource dataSource)
     {
         var connection = await dataSource.OpenConnectionAsync();
+        // Disable synchronous_commit for this connection
+        await using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = "SET synchronous_commit = OFF;";
+            await cmd.ExecuteNonQueryAsync();
+        }
         var writer = await connection.BeginTextImportAsync(CopyCommand);
         var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
         csvWriter.Context.TypeConverterCache.AddConverter<Enum>(EnumAsIntConverter.Instance);

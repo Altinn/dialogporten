@@ -82,9 +82,10 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
             return;
         }
 
-        await Task.WhenAll(Enumerable
-            .Range(0, Math.Abs(diff))
-            .Select(_ => scale()));
+        for (var i = 0; i < Math.Abs(diff); i++)
+        {
+            await scale();
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -92,6 +93,7 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
         if (_disposed) return;
         _channel.Writer.Complete();
         await _channel.Reader.Completion;
+        // await Task.Delay(1000);
         await Task.WhenAll(_workers.Select(x => x.DisposeAsync().AsTask()));
         _workers.Clear();
         _disposed = true;

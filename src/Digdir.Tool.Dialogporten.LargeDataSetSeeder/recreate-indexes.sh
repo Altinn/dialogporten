@@ -7,6 +7,8 @@ DB_USER="postgres"
 DB_PASSWORD="supersecret" # DO NOT COMMIT
 
 SQL_COMMAND=$(cat <<EOF
+SET maintenance_work_mem = '1GB';
+
 DO
 \$\$
 DECLARE
@@ -55,8 +57,21 @@ BEGIN
     RAISE NOTICE '============================================================';
     RAISE NOTICE 'Completed all % loops.', total_loops;
     RAISE NOTICE '============================================================';
+
+    RAISE NOTICE '============================================================';
+    RAISE NOTICE 'Starting ANALYZE on all tables to update statistics...';
+    RAISE NOTICE 'Timestamp: %', clock_timestamp();
+    RAISE NOTICE '============================================================';
+    
+    ANALYZE;
+    
+    RAISE NOTICE '============================================================';
+    RAISE NOTICE 'ANALYZE completed.';
+    RAISE NOTICE 'Timestamp: %', clock_timestamp();
+    RAISE NOTICE '============================================================';
 END;
 \$\$;
+
 EOF
 )
 

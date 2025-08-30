@@ -1,5 +1,8 @@
+using Bogus;
+using Bogus.Extensions.Norway;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
@@ -34,10 +37,12 @@ public sealed record Dialog(
 {
     public static IEnumerable<Dialog> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
+        var personFaker = new Person("nb_NO");
         foreach (var timestamp in timestamps)
         {
             var rng = timestamp.GetRng();
-            var party = rng.GetParty();
+            // TODO: rng.GetParty();
+            var party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}{personFaker.Fodselsnummer()}";
 
             var transmissions = DialogTransmission.GenerateEntities([timestamp]).ToList();
 

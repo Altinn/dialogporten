@@ -6,7 +6,10 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
 internal class PostgresCopyWriterCoordinator
 {
     private readonly NpgsqlDataSource _dataSource;
+    // ReSharper disable once NotAccessedField.Local
+#pragma warning disable IDE0052
     private readonly int _maxConnections;
+#pragma warning restore IDE0052
 
     public PostgresCopyWriterCoordinator(
         NpgsqlDataSource dataSource,
@@ -23,13 +26,13 @@ internal class PostgresCopyWriterCoordinator
         int dialogAmount)
     {
         var poolAwaiters = new List<PoolWriter>();
-        var connectionPerPool = _maxConnections / EntityGeneratorExtensions.Generators.Count;
+        var connectionPerPool = 1; //_maxConnections / EntityGeneratorExtensions.Generators.Count;
 
         foreach (var (targetType, generator) in EntityGeneratorExtensions.Generators)
         {
             var entityEnumerable = generator(DialogTimestamp.Generate(fromDate, toDate, dialogAmount));
             var writer = await PostgresCopyWriterPoolFactory.Create(targetType, _dataSource, initialConsumers: connectionPerPool);
-            var poolWriterTask = writer.WriteAsync(entityEnumerable);
+            var poolWriterTask = Task.Run(async () => await writer.WriteAsync(entityEnumerable));
             poolAwaiters.Add(new PoolWriter(poolWriterTask, writer));
         }
 
@@ -39,12 +42,12 @@ internal class PostgresCopyWriterCoordinator
             await poolAwaiter.Pool.DisposeAsync();
             poolAwaiters.Remove(poolAwaiter);
 
-            // redistribute disposed connections
-            connectionPerPool = _maxConnections / EntityGeneratorExtensions.Generators.Count;
-            foreach (var pool in poolAwaiters.Select(x => x.Pool))
-            {
-                await pool.ScaleTo(connectionPerPool);
-            }
+            // // redistribute disposed connections
+            // connectionPerPool = _maxConnections / EntityGeneratorExtensions.Generators.Count;
+            // foreach (var pool in poolAwaiters.Select(x => x.Pool))
+            // {
+            //     await pool.ScaleTo(connectionPerPool);
+            // }
         }
     }
 

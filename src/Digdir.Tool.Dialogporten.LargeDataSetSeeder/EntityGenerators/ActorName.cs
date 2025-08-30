@@ -1,34 +1,26 @@
+using Bogus;
+using Bogus.Extensions.Norway;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record ActorName(Guid Id, string ActorId, string Name, DateTimeOffset CreatedAt)
 {
-    public static readonly ActorName[] Values = GenerateEntities().ToArray();
+    public static readonly ActorName[] Values = GenerateEntities(2000).ToArray();
 
     public static Guid GetRandomId() =>
         Values[Random.Shared.Next(Values.Length)].Id;
 
-    private static IEnumerable<ActorName> GenerateEntities()
+    private static IEnumerable<ActorName> GenerateEntities(int count)
     {
-        // TODO: Kan vi fjerne Parties.List og kun ha Values i minnet?
-        var personUrns = File.ReadLines("./parties")
-            .Where(x => x.StartsWith(NorwegianPersonIdentifier.PrefixWithSeparator,
-                StringComparison.OrdinalIgnoreCase));
-        var personNames = File.ReadAllLines("./person_names");
-        var actorNameIds = new HashSet<Guid>();
-
-        foreach (var personUrn in personUrns)
-        {
-            var name = personNames[Random.Shared.Next(personNames.Length)] + " " +
-                       personNames[Random.Shared.Next(personNames.Length)];
-            var nextId = Guid.CreateVersion7();
-            while (!actorNameIds.Add(nextId))
-            {
-                nextId = Guid.CreateVersion7();
-            }
-            yield return new ActorName(Id: nextId, ActorId: personUrn, Name: name, CreatedAt: DateTimeOffset.UtcNow);
-        }
+        return new Faker<ActorName>("nb_NO")
+            .UseSeed(0123456789)
+            .CustomInstantiator(x => new ActorName(
+                Guid.CreateVersion7(),
+                $"{NorwegianPersonIdentifier.PrefixWithSeparator}{x.Person.Fodselsnummer()}",
+                x.Person.FullName,
+                DateTimeOffset.UtcNow))
+            .GenerateLazy(count);
     }
 }
 

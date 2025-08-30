@@ -1,4 +1,4 @@
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.FileImport;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
@@ -10,23 +10,23 @@ public sealed record Localization(
 {
     public static IEnumerable<Localization> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
+        var norwegianLorem = LanguageLorem.NorwegianLorem;
+        var englishLorem = LanguageLorem.EnglishLorem;
+
         foreach (var timestamp in timestamps)
         {
             foreach (var localizationSet in LocalizationSet.GenerateEntities([timestamp]))
             {
-                var english = $"{Words.English.GetRandomWord()} {Words.English.GetRandomWord()}";
-                var norwegian = $"{Words.Norwegian.GetRandomWord()} {Words.Norwegian.GetRandomWord()}";
-
                 yield return new(
                     LocalizationSetId: localizationSet.Id,
                     LanguageCode: "nb",
-                    Value: norwegian
+                    Value: norwegianLorem.Sentence()
                 );
 
                 yield return new(
                     LocalizationSetId: localizationSet.Id,
                     LanguageCode: "en",
-                    Value: english
+                    Value: englishLorem.Sentence()
                 );
             }
         }

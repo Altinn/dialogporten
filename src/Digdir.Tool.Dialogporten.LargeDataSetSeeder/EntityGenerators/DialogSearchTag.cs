@@ -1,5 +1,4 @@
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.FileImport;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
@@ -14,20 +13,20 @@ public sealed record DialogSearchTag(
     {
         foreach (var timestamp in timestamps)
         {
-            var searchTags = Words.GetBetweenZeroAndCountWords(count: 6);
+            var searchTags = LanguageLorem
+                .GetRandomWords(Random.Shared.Next(0, 7))
+                .Distinct()
+                .Select((x, i) => (x, i));
 
             foreach (var (searchTag, tieBreaker) in searchTags)
             {
-                yield return CreateSearchTag(timestamp, tieBreaker, searchTag);
+                yield return new(
+                    Id: timestamp.ToUuidV7<DialogSearchTag>(timestamp.DialogId, tieBreaker),
+                    Value: searchTag,
+                    CreatedAt: timestamp.Timestamp,
+                    DialogId: timestamp.DialogId
+                );
             }
         }
     }
-
-    private static DialogSearchTag CreateSearchTag(DialogTimestamp timestamp, int tieBreaker, string searchTag) =>
-        new(
-            Id: timestamp.ToUuidV7<DialogSearchTag>(timestamp.DialogId, tieBreaker),
-            Value: searchTag,
-            CreatedAt: timestamp.Timestamp,
-            DialogId: timestamp.DialogId
-        );
 }

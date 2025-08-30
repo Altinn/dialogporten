@@ -55,7 +55,10 @@ internal static class Sql
     // language=psql
     internal const string EnableAllIndexesConstraints =
         """
-        $$;
+        SET maintenance_work_mem = '1GB';
+        
+        DO
+        $$
         DECLARE
             x RECORD;
             loop_counter INTEGER := 0; -- Initialize loop counter
@@ -101,6 +104,18 @@ internal static class Sql
             -- Final log message
             RAISE NOTICE '============================================================';
             RAISE NOTICE 'Completed all % loops.', total_loops;
+            RAISE NOTICE '============================================================';
+        
+            RAISE NOTICE '============================================================';
+            RAISE NOTICE 'Starting ANALYZE on all tables to update statistics...';
+            RAISE NOTICE 'Timestamp: %', clock_timestamp();
+            RAISE NOTICE '============================================================';
+            
+            ANALYZE;
+            
+            RAISE NOTICE '============================================================';
+            RAISE NOTICE 'ANALYZE completed.';
+            RAISE NOTICE 'Timestamp: %', clock_timestamp();
             RAISE NOTICE '============================================================';
         END;
         $$;

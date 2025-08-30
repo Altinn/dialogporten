@@ -1,4 +1,4 @@
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.FileImport;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
@@ -10,19 +10,15 @@ public sealed record DialogServiceOwnerLabel(
 {
     public static IEnumerable<DialogServiceOwnerLabel> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        foreach (var timestamp in timestamps)
+        foreach (var context in DialogServiceOwnerContext.GenerateEntities(timestamps))
         {
-            foreach (var context in DialogServiceOwnerContext.GenerateEntities([timestamp]))
+            foreach (var serviceLabel in LanguageLorem.GetRandomWords(5).Distinct())
             {
-                var serviceOwnerLabels = Words.GetBetweenZeroAndCountWords(count: 5);
-                foreach (var (label, _) in serviceOwnerLabels)
-                {
-                    yield return new(
-                        DialogServiceOwnerContextId: context.DialogId,
-                        CreatedAt: timestamp.Timestamp,
-                        Value: label
-                    );
-                }
+                yield return new(
+                    DialogServiceOwnerContextId: context.DialogId,
+                    CreatedAt: context.CreatedAt,
+                    Value: serviceLabel
+                );
             }
         }
     }

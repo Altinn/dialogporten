@@ -40,11 +40,6 @@ internal sealed class PostgresCopyWriter<T> : IAsyncDisposable, IDisposable wher
             await cmd.ExecuteNonQueryAsync();
         }
 
-        // TODO: Consider using a staging table for better performance and to avoid WAL bottlenecks
-        // 1. Create unlogged staging table
-        // 2. Target staging table in COPY command
-        // 3. After import, move data from staging to main table in a transaction
-
         var writer = await connection.BeginTextImportAsync(CopyCommand);
         var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
         csvWriter.Context.TypeConverterCache.AddConverter<Enum>(EnumAsIntConverter.Instance);

@@ -55,7 +55,7 @@ internal static class Sql
     // language=psql
     internal const string EnableAllIndexesConstraints =
         """
-        SET maintenance_work_mem = '1GB';
+        SET maintenance_work_mem = '2GB';
         
         DO
         $$

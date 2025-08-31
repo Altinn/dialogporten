@@ -68,6 +68,12 @@ static async Task EnableDbConstraints(NpgsqlDataSource dataSource)
     await cmd.ExecuteNonQueryAsync();
 }
 
+static async Task GenerateDataUsingGenerators(NpgsqlDataSource npgsqlDataSource, DateTimeOffset dateTimeOffset, DateTimeOffset endDate1, int i)
+{
+    var entityGeneratorSeeder = new PostgresCopyWriterCoordinator(npgsqlDataSource);
+    await entityGeneratorSeeder.Handle(dateTimeOffset, endDate1, i);
+}
+
 static async Task GenerateDataUsingGeneratorsSafe(NpgsqlDataSource npgsqlDataSource, DateTimeOffset dateTimeOffset,
     DateTimeOffset endDate1, int i)
 {
@@ -139,10 +145,4 @@ static async Task GenerateDataUsingGeneratorsSafe(NpgsqlDataSource npgsqlDataSou
     {
         return Task.Run(async () => await task);
     }
-}
-
-static async Task GenerateDataUsingGenerators(NpgsqlDataSource npgsqlDataSource, DateTimeOffset dateTimeOffset, DateTimeOffset endDate1, int i)
-{
-    var entityGeneratorSeeder = new PostgresCopyWriterCoordinator(npgsqlDataSource);
-    await entityGeneratorSeeder.Handle(dateTimeOffset, endDate1, i);
 }

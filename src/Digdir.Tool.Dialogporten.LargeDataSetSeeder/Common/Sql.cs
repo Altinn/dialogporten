@@ -1,4 +1,4 @@
-namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 internal static class Sql
 {

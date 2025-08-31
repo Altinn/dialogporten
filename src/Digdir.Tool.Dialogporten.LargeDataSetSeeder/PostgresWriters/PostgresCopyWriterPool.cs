@@ -1,4 +1,5 @@
 using System.Threading.Channels;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 using Npgsql;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
@@ -93,7 +94,6 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
         if (_disposed) return;
         _channel.Writer.Complete();
         await _channel.Reader.Completion;
-        // await Task.Delay(1000);
         await Task.WhenAll(_workers.Select(x => x.DisposeAsync().AsTask()));
         _workers.Clear();
         _disposed = true;

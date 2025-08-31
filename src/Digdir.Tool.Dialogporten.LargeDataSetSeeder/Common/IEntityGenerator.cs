@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 internal interface IEntityGenerator<out T> where T : class
 {

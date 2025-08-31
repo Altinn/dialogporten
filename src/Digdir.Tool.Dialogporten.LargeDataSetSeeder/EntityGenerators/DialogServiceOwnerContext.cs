@@ -1,3 +1,5 @@
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
+
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record DialogServiceOwnerContext(

@@ -1,4 +1,4 @@
-namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 internal static class AsyncEnumerableExtensions
 {

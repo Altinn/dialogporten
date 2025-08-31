@@ -1,4 +1,4 @@
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
+using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 using Npgsql;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;

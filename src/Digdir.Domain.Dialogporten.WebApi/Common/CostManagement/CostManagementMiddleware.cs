@@ -114,23 +114,28 @@ public sealed class CostManagementMiddleware
 
     private static TransactionType? ResolveTransactionTypeFromEndpointMetadata(HttpContext context)
     {
-        // Try to get the endpoint metadata added by FastEndpoints configurator
         var endpoint = context.GetEndpoint();
         if (endpoint is null)
         {
             return null;
         }
 
-        var endpointTypeMetadata = endpoint.Metadata.GetMetadata<EndpointTypeMetadata>();
-        if (endpointTypeMetadata?.EndpointType is null)
-        {
-            return null;
-        }
+        CostTrackedAttribute? costTrackedAttr;
 
-        var costTrackedAttr = endpointTypeMetadata.EndpointType
-            .GetCustomAttributes(typeof(CostTrackedAttribute), inherit: false)
-            .OfType<CostTrackedAttribute>()
-            .FirstOrDefault();
+        // Try to get the endpoint metadata added by FastEndpoints configurator
+        var endpointTypeMetadata = endpoint.Metadata.GetMetadata<EndpointTypeMetadata>();
+        if (endpointTypeMetadata?.EndpointType is not null)
+        {
+            costTrackedAttr = endpointTypeMetadata.EndpointType
+                .GetCustomAttributes(typeof(CostTrackedAttribute), inherit: false)
+                .OfType<CostTrackedAttribute>()
+                .FirstOrDefault();
+        }
+        else
+        {
+            // For controller-based endpoints, get from action metadata
+            costTrackedAttr = endpoint.Metadata.GetMetadata<CostTrackedAttribute>();
+        }
 
         if (costTrackedAttr is null)
         {

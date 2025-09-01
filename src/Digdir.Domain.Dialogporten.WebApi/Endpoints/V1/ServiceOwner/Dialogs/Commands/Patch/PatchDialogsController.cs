@@ -1,6 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common;
+using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +24,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Co
 [Route("api/v1/serviceowner/dialogs")]
 [Tags(ServiceOwnerGroup.RoutePrefix)]
 [Authorize(Policy = DialogportenAuthorizationPolicy.ServiceProvider)]
+[CostTracked(TransactionType.UpdateDialog)]
 public sealed class PatchDialogsController : ControllerBase
 {
     private readonly ISender _sender;

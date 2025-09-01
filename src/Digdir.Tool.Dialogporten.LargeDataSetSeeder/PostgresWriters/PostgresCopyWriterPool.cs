@@ -7,6 +7,7 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
 internal interface IPostgresCopyWriterPool : IAsyncDisposable
 {
     int WorkerCount { get; }
+    Type Type { get; }
     Task ScaleTo(int workers);
     Task WriteAsync(object item, CancellationToken cancellationToken = default);
     Task WriteAsync(IEnumerable<object> items, CancellationToken cancellationToken = default);
@@ -14,12 +15,14 @@ internal interface IPostgresCopyWriterPool : IAsyncDisposable
 
 internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where T : class
 {
+    private static readonly Type Type = typeof(T);
     private readonly Channel<T> _channel;
     private readonly List<CopyWorker> _workers = [];
     private readonly NpgsqlDataSource _dataSource;
     private bool _disposed;
 
     public int WorkerCount => _workers.Count;
+    Type IPostgresCopyWriterPool.Type => Type;
 
     private PostgresCopyWriterPool(NpgsqlDataSource dataSource, int capacity = 10_000)
     {

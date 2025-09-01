@@ -71,6 +71,6 @@ static async Task EnableDbConstraints(NpgsqlDataSource dataSource)
 
 static async Task GenerateDataUsingGenerators(NpgsqlDataSource npgsqlDataSource, DateTimeOffset dateTimeOffset, DateTimeOffset endDate1, int i)
 {
-    var entityGeneratorSeeder = new PostgresCopyWriterCoordinator(npgsqlDataSource);
+    var entityGeneratorSeeder = new PostgresCopyWriterCoordinator(npgsqlDataSource, EvenTypeDistributor.Instance);
     await entityGeneratorSeeder.Handle(dateTimeOffset, endDate1, i);
 }

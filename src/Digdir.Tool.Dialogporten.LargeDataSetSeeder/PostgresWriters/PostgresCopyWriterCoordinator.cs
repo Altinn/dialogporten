@@ -7,10 +7,7 @@ internal class PostgresCopyWriterCoordinator
 {
     private readonly NpgsqlDataSource _dataSource;
     private readonly ITypeDistributor _typeDistributor;
-    // ReSharper disable once NotAccessedField.Local
-#pragma warning disable IDE0052
     private readonly int _maxConnections;
-#pragma warning restore IDE0052
 
     public PostgresCopyWriterCoordinator(
         NpgsqlDataSource dataSource,

@@ -37,12 +37,11 @@ public sealed record Dialog(
 {
     public static IEnumerable<Dialog> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
-        var personFaker = new Person("nb_NO");
         foreach (var timestamp in timestamps)
         {
             var rng = timestamp.GetRng();
             // TODO: rng.GetParty();
-            var party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}{personFaker.Fodselsnummer()}";
+            var party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}{new Person("nb_NO").Fodselsnummer()}";
 
             var transmissions = DialogTransmission.GenerateEntities([timestamp]).ToList();
 

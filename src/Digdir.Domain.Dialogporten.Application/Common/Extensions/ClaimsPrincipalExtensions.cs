@@ -127,7 +127,15 @@ public static class ClaimsPrincipalExtensions
             return false;
         }
 
-        return TryGetOrganizationNumberFromConsumerOrganization(JsonSerializer.Deserialize<ConsumerOrganization>(consumerClaim.Value), out orgNumber);
+        try
+        {
+            var consumer = JsonSerializer.Deserialize<ConsumerOrganization>(consumerClaim.Value);
+            return TryGetOrganizationNumberFromConsumerOrganization(consumer, out orgNumber);
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 
     public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
@@ -274,7 +282,12 @@ public static class ClaimsPrincipalExtensions
             return false;
         }
 
-        if (!consumerOrganization.Authority.Equals(AuthorityValue, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(consumerOrganization.Authority, AuthorityValue, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(consumerOrganization.Id))
         {
             return false;
         }

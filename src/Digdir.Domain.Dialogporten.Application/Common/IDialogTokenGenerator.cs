@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -5,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Application.Common;
@@ -47,7 +47,7 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
     {
         var claimsPrincipal = _user.GetPrincipal();
         var now = _clock.UtcNowOffset.ToUnixTimeSeconds();
-        var endUserPartyIdentifier = claimsPrincipal.GetEndUserPartyIdentifier()!;
+        var endUserPartyIdentifier = claimsPrincipal.GetEndUserPartyIdentifier();
 
         var claims = new Dictionary<string, object?>(15)
         {
@@ -66,7 +66,9 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         }
         else
         {
-            claims[DialogTokenClaimTypes.AuthenticatedParty] = endUserPartyIdentifier.FullId;
+            claims[DialogTokenClaimTypes.AuthenticatedParty] = endUserPartyIdentifier is not null
+                ? endUserPartyIdentifier.FullId
+                : throw new UnreachableException("Cannot create dialog token - missing end user claims.");
         }
 
         // If we have a supplier organization number from Maskinporten delegation ("supplier"), add it as a separate claim.

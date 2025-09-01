@@ -1,5 +1,69 @@
 # Changelog
 
+## [1.80.1](https://github.com/Altinn/dialogporten/compare/v1.80.0...v1.80.1) (2025-08-28)
+
+
+### Bug Fixes
+
+* **infra:** use correct role and tag ([#2692](https://github.com/Altinn/dialogporten/issues/2692)) ([407513a](https://github.com/Altinn/dialogporten/commit/407513aff3abf8a8cd442d5da13b226348b1795b)), closes [#2607](https://github.com/Altinn/dialogporten/issues/2607)
+
+## [1.80.0](https://github.com/Altinn/dialogporten/compare/v1.79.8...v1.80.0) (2025-08-28)
+
+
+### Features
+
+* **infra:** long term back of postgresql server in prod ([#2687](https://github.com/Altinn/dialogporten/issues/2687)) ([621b258](https://github.com/Altinn/dialogporten/commit/621b25872c8f4777b41aa9bf7aedfbc516687486))
+
+## [1.79.8](https://github.com/Altinn/dialogporten/compare/v1.79.7...v1.79.8) (2025-08-27)
+
+
+### Bug Fixes
+
+* **graphql:** ContentUpdatedBefore/After missing from search query ([#2690](https://github.com/Altinn/dialogporten/issues/2690)) ([5f58832](https://github.com/Altinn/dialogporten/commit/5f588325715a49ee67519ca3d0389f9b7660c24a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.6.2 ([#2684](https://github.com/Altinn/dialogporten/issues/2684)) ([8179361](https://github.com/Altinn/dialogporten/commit/8179361d5fd7032bd2489f2f5d25899897181af5))
+
+## [1.79.7](https://github.com/Altinn/dialogporten/compare/v1.79.6...v1.79.7) (2025-08-26)
+
+
+### Bug Fixes
+
+* **app:** Add tolerance when validating uuidv7 timestamps ([#2682](https://github.com/Altinn/dialogporten/issues/2682)) ([41e6b31](https://github.com/Altinn/dialogporten/commit/41e6b311cdeb2fcd9bf7b282061adcdf43c36b3c))
+
+## [1.79.6](https://github.com/Altinn/dialogporten/compare/v1.79.5...v1.79.6) (2025-08-24)
+
+
+### Bug Fixes
+
+* **release-please:** update new version of release please ([#2675](https://github.com/Altinn/dialogporten/issues/2675)) ([bee1cc4](https://github.com/Altinn/dialogporten/commit/bee1cc4aa963fd3acbdc4d5e755b784e418614b0))
+
+
+### Miscellaneous Chores
+
+* **deps:** update Azure.Identity to 1.15.0 ([#2679](https://github.com/Altinn/dialogporten/issues/2679)) ([995efe6](https://github.com/Altinn/dialogporten/commit/995efe6d2abecb79b27c21cc3781c48c7a776978))
+* **deps:** update dependency verify.xunit to 30.7.3 ([#2680](https://github.com/Altinn/dialogporten/issues/2680)) ([1793882](https://github.com/Altinn/dialogporten/commit/17938820bb56c3ae8686107d38057c6c7c288b89))
+* **deps:** update dependency xunit.runner.visualstudio to 3.1.4 ([#2677](https://github.com/Altinn/dialogporten/issues/2677)) ([c00c262](https://github.com/Altinn/dialogporten/commit/c00c262b1b492822f8062ba2d2c94e1310f439ee))
+* **deps:** update nginx docker tag to v1.29.1 ([#2678](https://github.com/Altinn/dialogporten/issues/2678)) ([146cc30](https://github.com/Altinn/dialogporten/commit/146cc309c4824b0cc5fc2f2c7861b391bd20fdd1))
+
+## [1.79.5](https://github.com/Altinn/dialogporten/compare/v1.79.4...v1.79.5) (2025-08-22)
+
+
+### Bug Fixes
+
+* **app:** Set ContentUpdatedAt to UpdatedAt on create ([#2672](https://github.com/Altinn/dialogporten/issues/2672)) ([2e99f22](https://github.com/Altinn/dialogporten/commit/2e99f22fa92a747d5f0d3a560d2f8491dffaa51d))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v4.3.0 ([#2665](https://github.com/Altinn/dialogporten/issues/2665)) ([d7b9db2](https://github.com/Altinn/dialogporten/commit/d7b9db21e5bf2ed1f1812c09689cd465a4089d6d))
+* **deps:** update dependency verify.xunit to 30.6.1 ([#2660](https://github.com/Altinn/dialogporten/issues/2660)) ([2c99f10](https://github.com/Altinn/dialogporten/commit/2c99f103323fdf09993ad00b5f9abaa90a7c0bfe))
+* **deps:** update dotnet monorepo ([#2659](https://github.com/Altinn/dialogporten/issues/2659)) ([bef3c78](https://github.com/Altinn/dialogporten/commit/bef3c787b99194074363fe67687681a5c99c1306))
+* **deps:** update jaegertracing/all-in-one docker tag to v1.72.0 ([#2661](https://github.com/Altinn/dialogporten/issues/2661)) ([7e7b307](https://github.com/Altinn/dialogporten/commit/7e7b3073b4ef96c5ed679f291b4edc56034bcf05))
+* **deps:** update step-security/harden-runner action to v2.13.0 ([#2662](https://github.com/Altinn/dialogporten/issues/2662)) ([713eb15](https://github.com/Altinn/dialogporten/commit/713eb15d4b27750879b8ace859afe6d5d4bb8bed))
+
 ## [1.79.4](https://github.com/Altinn/dialogporten/compare/v1.79.3...v1.79.4) (2025-08-15)
 
 

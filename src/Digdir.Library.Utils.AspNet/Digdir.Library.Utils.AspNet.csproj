@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Azure.Identity" Version="1.14.2"/>
+        <PackageReference Include="Azure.Identity" Version="1.15.0"/>
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0"/>
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
         <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0"/>
@@ -16,7 +16,7 @@
         <PackageReference Include="OpenTelemetry" Version="1.10.0"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.10.0"/>
         <PackageReference Include="Npgsql.OpenTelemetry" Version="9.0.3"/>
-        <PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.3.0"/>
+        <PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.4.0"/>
         <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0"/>
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0"/>
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>

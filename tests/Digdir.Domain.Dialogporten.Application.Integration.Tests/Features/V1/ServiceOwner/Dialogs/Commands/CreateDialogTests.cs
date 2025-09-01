@@ -44,8 +44,16 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
                 typeof(ValidationError));
 
-            Add("Validations for UUIDv7 with timestamp in the future",
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
                 IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(1)),
+                typeof(CreateDialogSuccess));
+
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(14)),
+                typeof(CreateDialogSuccess));
+
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(16)),
                 typeof(ValidationError));
 
             Add("Can create a dialog with a valid UUIDv7 format",
@@ -455,4 +463,23 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.AddTransmission(x =>
                     x.AuthorizationAttribute = authAttribute))
             .ExecuteAndAssert(expectedTye);
+
+    [Fact]
+    public Task Supplied_UpdatedAt_Should_Be_Used_For_ContentUpdatedAt() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.UpdatedAt = x.Dto.CreatedAt = DateTimeOffset.UtcNow.AddDays(-1))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ContentUpdatedAt.Should().Be(x.UpdatedAt));
+
+    [Fact]
+    public Task ContentUpdatedAt_Should_Default_To_Now_If_UpdatedAt_Not_Supplied() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                Assert.True(
+                    x.ContentUpdatedAt == x.UpdatedAt &&
+                    x.ContentUpdatedAt == x.CreatedAt));
 }

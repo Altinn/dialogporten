@@ -103,7 +103,7 @@ public sealed class DialogEntity :
     public void OnCreate(AggregateNode self, DateTimeOffset utcNow)
     {
         _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
-        ContentUpdatedAt = utcNow;
+        ContentUpdatedAt = UpdatedAt;
     }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)

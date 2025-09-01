@@ -6,14 +6,13 @@ namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
 public sealed record ActorName(Guid Id, string ActorId, string Name, DateTimeOffset CreatedAt)
 {
-    public static readonly ActorName[] Values = GenerateEntities(2000).ToArray();
+    public static readonly ActorName[] Values = GenerateEntities(100_000).ToArray();
 
     public static Guid GetRandomId() =>
         Values[Random.Shared.Next(Values.Length)].Id;
 
-    private static IEnumerable<ActorName> GenerateEntities(int count)
-    {
-        return new Faker<ActorName>("nb_NO")
+    private static IEnumerable<ActorName> GenerateEntities(int count) =>
+        new Faker<ActorName>("nb_NO")
             .UseSeed(0123456789)
             .CustomInstantiator(x => new ActorName(
                 Guid.CreateVersion7(),
@@ -21,6 +20,5 @@ public sealed record ActorName(Guid Id, string ActorId, string Name, DateTimeOff
                 x.Person.FullName,
                 DateTimeOffset.UtcNow))
             .GenerateLazy(count);
-    }
 }
 

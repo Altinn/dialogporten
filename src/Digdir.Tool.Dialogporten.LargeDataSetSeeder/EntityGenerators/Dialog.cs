@@ -37,12 +37,9 @@ public sealed record Dialog(
 {
     public static IEnumerable<Dialog> GenerateEntities(IEnumerable<DialogTimestamp> timestamps)
     {
+        using var parties = Parties().GetEnumerator();
         foreach (var timestamp in timestamps)
         {
-            var rng = timestamp.GetRng();
-            // TODO: rng.GetParty();
-            var party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}{new Person("nb_NO").Fodselsnummer()}";
-
             var transmissions = DialogTransmission.GenerateEntities([timestamp]).ToList();
 
             yield return new Dialog(
@@ -56,8 +53,8 @@ public sealed record Dialog(
                 Org: "ttd", // TODO: fancy pick from Dagfinns list?
                 ServiceResource: "service/resource", // TODO: fancy pick from service_resources file?
                 ServiceResourceType: "GenericAccessResource", // based on picked service resource?
-                Party: party,
-                Progress: rng.Next(0, 101),
+                Party: parties.GetNext(),
+                Progress: Random.Shared.Next(0, 101),
                 ExtendedStatus: null,
                 ExternalReference: null,
                 VisibleFrom: null,
@@ -77,5 +74,27 @@ public sealed record Dialog(
                 ContentUpdatedAt: timestamp.Timestamp
             );
         }
+    }
+
+    private static IEnumerable<string> Parties(Random? rng = null)
+    {
+        rng ??= Random.Shared;
+        var expDistrDialogAmount = Settings.DialogAmount_S!.Value / 2;
+        var minBase = Math.Min(150, expDistrDialogAmount / KnownParties.Values.Length);
+        using var expDispEnumerator = ExponentialDistribution
+            .NextExponentialIndicesWithBase(expDistrDialogAmount, minBase, KnownParties.Values.Length, 0.03, rng)
+            .GetEnumerator();
+        var count = 0;
+        while (true)
+        {
+            if (count++ % 2 == 0 && expDispEnumerator.MoveNext())
+            {
+                yield return KnownParties.Values[expDispEnumerator.Current].GetRandomPartyUrn(rng);
+                continue;
+            }
+
+            yield return $"{NorwegianPersonIdentifier.PrefixWithSeparator}{new Person("nb_NO", rng.Next()).Fodselsnummer()}";
+        }
+        // ReSharper disable once IteratorNeverReturns
     }
 }

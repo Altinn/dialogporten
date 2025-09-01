@@ -39,7 +39,7 @@ public static class ExponentialDistribution
         using var expEnumerable = NextExponentialIndicesForever(arraySize, lambda, rng).GetEnumerator();
         for (var i = 0; i < count; i++)
         {
-            yield return expEnumerable.EnumerateOrThrow();
+            yield return expEnumerable.GetNext();
         }
     }
 
@@ -74,7 +74,7 @@ public static class ExponentialDistribution
         {
             yield return i % distributeEveryNth == 0
                 ? distributionIndex++ % arraySize
-                : expEnumerable.EnumerateOrThrow();
+                : expEnumerable.GetNext();
         }
     }
 
@@ -96,11 +96,4 @@ public static class ExponentialDistribution
 
     private static double MaxCdf(int arraySize, double lambda) =>
         1 - Math.Exp(-lambda * arraySize);
-
-    private static int EnumerateOrThrow(this IEnumerator<int> enumerator)
-    {
-        if (!enumerator.MoveNext())
-            throw new InvalidOperationException("Enumerator has no more elements.");
-        return enumerator.Current;
-    }
 }

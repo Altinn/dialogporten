@@ -26,4 +26,14 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Architecture.Tests"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\tests\k6\tests\performancetest_data\endusers-yt01.csv">
+        <Link>endusers-yt01.csv</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="OrgsInYt01.csv">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 </Project>

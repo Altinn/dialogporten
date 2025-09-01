@@ -17,6 +17,7 @@ var settings = new ConfigurationBuilder()
     ?? throw new InvalidOperationException("Could not get settings from environment variables");
 settings.Validate();
 var (connectionString, _, dialogAmount, startingDate, endDate) = settings;
+Settings.DialogAmount_S = dialogAmount;
 
 await using var dataSource = NpgsqlDataSource.Create(connectionString);
 

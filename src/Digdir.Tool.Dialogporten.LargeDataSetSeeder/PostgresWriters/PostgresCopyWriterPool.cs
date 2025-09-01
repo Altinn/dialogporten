@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Threading.Channels;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 using Npgsql;
@@ -20,6 +21,7 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
     private readonly List<CopyWorker> _workers = [];
     private readonly NpgsqlDataSource _dataSource;
     private bool _disposed;
+    private long? _started;
 
     public int WorkerCount => _workers.Count;
     Type IPostgresCopyWriterPool.Type => Type;
@@ -37,6 +39,7 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
     {
         var pool = new PostgresCopyWriterPool<T>(dataSource, capacity);
         await pool.ScaleTo(Math.Max(1, initialWorkers));
+        pool._started = Stopwatch.GetTimestamp();
         return pool;
     }
 
@@ -98,6 +101,7 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
         _channel.Writer.Complete();
         await _channel.Reader.Completion;
         await Task.WhenAll(_workers.Select(x => x.DisposeAsync().AsTask()));
+        Console.WriteLine($"time taken for {typeof(T).Name} writer pool: {Stopwatch.GetElapsedTime(_started!.Value)}");
         _workers.Clear();
         _disposed = true;
     }

@@ -54,7 +54,7 @@ internal static partial class FluentValidationStringExtensions
         return ruleBuilder
             .MaximumLength(Constants.DefaultMaxStringLength)
             .Must(value => value is null || ValidAuthorizationAttributeRegex().IsMatch(value))
-            .WithMessage("'{PropertyName}' must be on format 'urn:altinn:{resourcetype}:{resourcename}' or " +
+            .WithMessage("'{PropertyName}' must be in the format 'urn:altinn:{resourcetype}:{resourcename}' or " +
                          "{resourcename} with valid names (letters, digits, '-' or '_', starting with a letter).");
     }
 

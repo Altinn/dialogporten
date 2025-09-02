@@ -41,7 +41,8 @@ public sealed record Dialog(
         foreach (var timestamp in timestamps)
         {
             var transmissions = DialogTransmission.GenerateEntities([timestamp]).ToList();
-
+            var party = parties.GetNext();
+            var resource = StaticStore.GetRandomResource(party);
             yield return new Dialog(
                 Id: timestamp.DialogId,
                 Revision: Guid.NewGuid(),
@@ -50,10 +51,10 @@ public sealed record Dialog(
                 UpdatedAt: timestamp.Timestamp,
                 Deleted: false,
                 DeletedAt: null,
-                Org: "ttd", // TODO: fancy pick from Dagfinns list?
-                ServiceResource: "service/resource", // TODO: fancy pick from service_resources file?
-                ServiceResourceType: "GenericAccessResource", // based on picked service resource?
-                Party: parties.GetNext(),
+                Org: resource.OrgCode,
+                ServiceResource: resource.Identifier,
+                ServiceResourceType: resource.Type,
+                Party: party,
                 Progress: Random.Shared.Next(0, 101),
                 ExtendedStatus: null,
                 ExternalReference: null,
@@ -79,7 +80,7 @@ public sealed record Dialog(
     private static IEnumerable<string> Parties(Random? rng = null)
     {
         rng ??= Random.Shared;
-        var expDistrDialogAmount = Settings.DialogAmount_S!.Value / 2;
+        var expDistrDialogAmount = StaticStore.DialogAmount!.Value / 2;
         var minBase = Math.Min(150, expDistrDialogAmount / KnownParties.Values.Length);
         using var expDispEnumerator = ExponentialDistribution
             .NextExponentialIndicesWithBase(expDistrDialogAmount, minBase, KnownParties.Values.Length, 0.03, rng)

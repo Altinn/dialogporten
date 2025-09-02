@@ -5,7 +5,8 @@ internal sealed record Settings(
     int MaxPostgresConnections,
     int DialogAmount,
     DateTimeOffset FromDate,
-    DateTimeOffset ToDate)
+    DateTimeOffset ToDate,
+    string AltinnPlatformBaseUrl)
 {
     public void Validate()
     {
@@ -14,6 +15,4 @@ internal sealed record Settings(
         if (FromDate >= ToDate) throw new ArgumentOutOfRangeException(nameof(FromDate), $"{nameof(FromDate)} must be earlier than {nameof(ToDate)}.");
         if (string.IsNullOrWhiteSpace(ConnectionString)) throw new ArgumentException("No connection string found", nameof(ConnectionString));
     }
-
-    public static int? DialogAmount_S;
 }

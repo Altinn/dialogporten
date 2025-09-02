@@ -1,7 +1,6 @@
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
 
-namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder;
+namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 public readonly record struct DialogTimestamp(
     DateTimeOffset Timestamp,

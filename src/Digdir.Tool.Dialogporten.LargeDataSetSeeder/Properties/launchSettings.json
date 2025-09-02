@@ -8,7 +8,8 @@
         "ToDate": "2024-01-01",
         "DialogAmount": "100000",
         "MaxPostgresConnections": "100",
-        "ConnectionString": "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;Command Timeout=0;"
+        "ConnectionString": "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;Command Timeout=0;",
+        "AltinnPlatformBaseUrl": "https://platform.yt01.altinn.cloud"
       }
     }
   }

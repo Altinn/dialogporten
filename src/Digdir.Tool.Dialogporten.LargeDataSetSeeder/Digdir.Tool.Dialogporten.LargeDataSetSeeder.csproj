@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <PublishAot>false</PublishAot>
         <NoWarn>$(NoWarn);IL3050;IL2026</NoWarn>
+        <UserSecretsId>a4302dd4-00bf-4b50-95ab-eddc5ede0720</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,6 +15,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.8" />
         <PackageReference Include="Npgsql" Version="9.0.3"/>
+        <PackageReference Include="Refit" Version="8.0.0" />
         <PackageReference Include="UUIDNext" Version="4.1.2"/>
     </ItemGroup>
 

@@ -482,4 +482,18 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 Assert.True(
                     x.ContentUpdatedAt == x.UpdatedAt &&
                     x.ContentUpdatedAt == x.CreatedAt));
+
+    [Fact]
+    public Task Create_Dialog_Should_Support_Party_Uuids()
+    {
+        var party = "urn:altinn:party:uuid:123e4567-e89b-12d3-a456-426614174000";
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.Party = party)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                Assert.True(
+                    x.Party == party));
+    }
 }

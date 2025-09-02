@@ -15,7 +15,6 @@ public static class FluentValidationPartyIdentifierExtensions
                                     && id is NorwegianPersonIdentifier or NorwegianOrganizationIdentifier or GenericPartyIdentifier
                                 ))
             .WithMessage(
-            .WithMessage(
                 $"'{{PropertyName}}' must be on format '{NorwegianOrganizationIdentifier.PrefixWithSeparator}{{norwegian org-nr}}', " +
                 $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}', or " +
                 $"'{GenericPartyIdentifier.PrefixWithSeparator}{{uuid}}' with valid values respectively.");

@@ -10,13 +10,13 @@ public static class FluentValidationPartyIdentifierExtensions
     {
         return ruleBuilder
             .Must(identifier => identifier is null
-                                || (
-                                    PartyIdentifier.TryParse(identifier, out var id)
-                                    && id is NorwegianPersonIdentifier or NorwegianOrganizationIdentifier or GenericPartyIdentifier
-                                ))
+                || (
+                    PartyIdentifier.TryParse(identifier, out var id)
+                    && id is NorwegianPersonIdentifier or NorwegianOrganizationIdentifier or GenericPartyIdentifier
+                ))
             .WithMessage(
                 $"'{{PropertyName}}' must be on format '{NorwegianOrganizationIdentifier.PrefixWithSeparator}{{norwegian org-nr}}', " +
-                $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}', or " +
-                $"'{GenericPartyIdentifier.PrefixWithSeparator}{{uuid}}' with valid values respectively.");
+                $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}' or " +
+                $"'{GenericPartyIdentifier.PrefixWithSeparator}{{uuid}}' with valid values.");
     }
 }

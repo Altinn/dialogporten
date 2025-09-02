@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <SelfContained>true</SelfContained>
+        <SelfContained>false</SelfContained>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,6 +17,11 @@
         <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0"/>
         <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.0.0"/>
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
+        <PackageReference Include="Azure.Monitor.Query" Version="1.5.0"/>
+        <PackageReference Include="Azure.Storage.Blobs" Version="12.22.1"/>
+        <PackageReference Include="Parquet.Net" Version="4.24.0"/>
+        <PackageReference Include="xunit" Version="2.9.2"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -27,6 +32,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.Infrastructure\Digdir.Domain.Dialogporten.Infrastructure.csproj"/>
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"/>
         <ProjectReference Include="..\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj"/>
     </ItemGroup>
 

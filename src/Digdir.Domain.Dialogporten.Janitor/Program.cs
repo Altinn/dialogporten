@@ -1,15 +1,20 @@
 using System.Globalization;
+using Azure.Identity;
+using Azure.Monitor.Query;
+using Azure.Storage.Blobs;
 using Cocona;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Janitor;
+using Digdir.Domain.Dialogporten.Janitor.Services;
 using Digdir.Library.Utils.AspNet;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Trace;
 using Serilog;
 
@@ -64,6 +69,30 @@ static void BuildAndRun(string[] args)
             .Build()
         .AddScoped<IUser, ConsoleUser>()
         .AddSingleton(TelemetryConfiguration.CreateDefault());
+
+    // Add metrics aggregation services
+    builder.Services
+        .AddOptions<MetricsAggregationOptions>()
+        .Bind(builder.Configuration.GetSection(MetricsAggregationOptions.SectionName))
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+
+    builder.Services.AddSingleton(provider =>
+    {
+        var credential = new DefaultAzureCredential();
+        return new LogsQueryClient(credential);
+    });
+
+    builder.Services.AddSingleton(provider =>
+    {
+        var options = provider.GetRequiredService<IOptions<MetricsAggregationOptions>>().Value;
+        return new BlobServiceClient(options.StorageConnectionString);
+    });
+
+    builder.Services.AddSingleton<AzureMonitorService>();
+    builder.Services.AddSingleton<MetricsAggregationService>();
+    builder.Services.AddSingleton<ParquetFileService>();
+    builder.Services.AddSingleton<AzureStorageService>();
 
     var app = builder.Build();
 

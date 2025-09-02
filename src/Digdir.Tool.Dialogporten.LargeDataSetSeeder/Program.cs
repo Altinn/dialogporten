@@ -1,4 +1,9 @@
 ﻿using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.HorizontalDataLoaders;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.Validators;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
@@ -13,11 +18,11 @@ using Refit;
 #pragma warning disable CS8321 // Local function is declared but never used
 
 var settings = new ConfigurationBuilder()
-   .AddEnvironmentVariables()
-   .AddUserSecrets<Program>()
-   .Build()
-   .Get<Settings>()
-    ?? throw new InvalidOperationException("Could not get settings from environment variables");
+                   .AddEnvironmentVariables()
+                   .AddUserSecrets<Program>()
+                   .Build()
+                   .Get<Settings>()
+               ?? throw new InvalidOperationException("Could not get settings from environment variables");
 settings.Validate();
 var (connectionString, _, dialogAmount, startingDate, endDate, altinnPlatformBaseUrl) = settings;
 StaticStore.DialogAmount = dialogAmount;
@@ -42,6 +47,9 @@ timestamp = Stopwatch.GetTimestamp();
 await EnableDbConstraints(dataSource);
 Console.WriteLine($"[EnablingDbConstraints] Time taken: {Stopwatch.GetElapsedTime(timestamp)}");
 
+// Scuffed validation
+await Scuffed(connectionString);
+
 return;
 
 static async Task EnsureFreshDb(string connectionString, string altinnPlatformBaseUrl)
@@ -56,7 +64,7 @@ static async Task EnsureFreshDb(string connectionString, string altinnPlatformBa
     db.SubjectResources.AddRange(subjectResources);
     await db.SaveChangesAsync();
 
-    // TODO: Oh god, does this really have to be here? 
+    // TODO: Oh god, does this really have to be here?
     using var httpClient = new HttpClient();
     httpClient.BaseAddress = new Uri(altinnPlatformBaseUrl);
     var refitClient = RestService.For<IResourceRegistry>(httpClient);
@@ -100,8 +108,72 @@ static async Task EnableDbConstraints(NpgsqlDataSource dataSource)
     await cmd.ExecuteNonQueryAsync();
 }
 
-static async Task GenerateDataUsingGenerators(NpgsqlDataSource npgsqlDataSource, DateTimeOffset dateTimeOffset, DateTimeOffset endDate1, int i)
+static async Task GenerateDataUsingGenerators(NpgsqlDataSource npgsqlDataSource, DateTimeOffset dateTimeOffset,
+    DateTimeOffset endDate1, int i)
 {
     var entityGeneratorSeeder = new PostgresCopyWriterCoordinator(npgsqlDataSource, EvenTypeDistributor.Instance);
     await entityGeneratorSeeder.Handle(dateTimeOffset, endDate1, i);
+}
+
+static async Task Scuffed(string connectionString)
+{
+    await using var db = new DialogDbContext(options: new DbContextOptionsBuilder<DialogDbContext>()
+        .UseNpgsql(connectionString: connectionString).Options);
+    var dialogIds = await db.Dialogs.Select(selector: d => d.Id).Take(count: 1000).ToListAsync();
+
+    var localizationValidator = new LocalizationDtosValidator();
+    var actorValidator = new ActorValidator();
+    var validator = new CreateDialogDtoValidator(
+        transmissionValidator: new CreateDialogDialogTransmissionDtoValidator(
+            actorValidator: actorValidator,
+            contentValidator: new CreateDialogDialogTransmissionContentDtoValidator(user: null)!,
+            attachmentValidator: new CreateDialogTransmissionAttachmentDtoValidator(
+                localizationsValidator: localizationValidator,
+                urlValidator: new CreateDialogTransmissionAttachmentUrlDtoValidator())),
+        attachmentValidator: new CreateDialogDialogAttachmentDtoValidator(
+            localizationsValidator: localizationValidator,
+            urlValidator: new CreateDialogDialogAttachmentUrlDtoValidator()),
+        guiActionValidator: new CreateDialogDialogGuiActionDtoValidator(
+            localizationsValidator: localizationValidator),
+        apiActionValidator: new CreateDialogDialogApiActionDtoValidator(
+            apiActionEndpointValidator: new CreateDialogDialogApiActionEndpointDtoValidator()),
+        activityValidator: new CreateDialogDialogActivityDtoValidator(
+            localizationsValidator: localizationValidator,
+            actorValidator: actorValidator),
+        searchTagValidator: new CreateDialogSearchTagDtoValidator(),
+        contentValidator: new CreateDialogContentDtoValidator(null),
+        serviceOwnerContextValidator: new CreateDialogServiceOwnerContextDtoValidator(
+            serviceOwnerLabelValidator: new CreateDialogServiceOwnerLabelDtoValidator())!);
+
+    foreach (var dialogId in dialogIds)
+    {
+        var dataLoader = new FullDialogAggregateDataLoader(dialogDbContext: db,
+            userResourceRegistry: ThroughThePowerOfScuff.Instance);
+        var dialog = await dataLoader.LoadDialogEntity(dialogId: dialogId, cancellationToken: CancellationToken.None);
+        var createDialog = dialog!.ToCreateDto();
+        var result = await validator.ValidateAsync(instance: createDialog);
+        if (!result.IsValid)
+        {
+            Console.WriteLine("fuqd dialog");
+            Console.WriteLine(string.Join(separator: ", ", values: result.Errors.Select(x => $"{x.PropertyName}: {x.ErrorMessage}")));
+            Console.WriteLine();
+        }
+    }
+}
+
+internal sealed class ThroughThePowerOfScuff : IUserResourceRegistry
+{
+    public static ThroughThePowerOfScuff Instance { get; } = new();
+
+    private ThroughThePowerOfScuff() { }
+
+    public Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken) =>
+        Task.FromResult(true);
+
+    public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyCollection<string>>([]);
+
+    public bool UserCanModifyResourceType(string serviceResourceType) => true;
+
+    public bool IsCurrentUserServiceOwnerAdmin() => true;
 }

@@ -38,7 +38,7 @@ internal static class DialogMapper
             VisibleFrom = dialog.VisibleFrom,
             IdempotentKey = dialog.IdempotentKey,
             Progress = dialog.Progress,
-            Status = (DialogStatusInput)dialog.Status.Id,
+            Status = (DialogStatusInput)dialog.StatusId,
             SystemLabel = dialog.EndUserContext.DialogEndUserContextSystemLabels
                 .Select(x => x.SystemLabelId)
                 .Single(SystemLabel.IsDefaultArchiveBinGroup),

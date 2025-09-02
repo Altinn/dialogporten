@@ -67,7 +67,7 @@ public sealed record Actor(
         return CreateActor(
             id: timestamp.ToUuidV7<Actor>(transmission.Id),
             timestamp: timestamp.Timestamp,
-            actorTypeId: actorNameId.HasValue ? ActorType.Values.ServiceOwner : ActorType.Values.PartyRepresentative,
+            actorTypeId: actorNameId.HasValue ? ActorType.Values.PartyRepresentative : ActorType.Values.ServiceOwner,
             discriminator: "DialogTransmissionSenderActor",
             transmissionId: transmission.Id,
             actorNameEntityId: actorNameId);

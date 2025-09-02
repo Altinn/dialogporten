@@ -117,9 +117,13 @@ static async Task GenerateDataUsingGenerators(NpgsqlDataSource npgsqlDataSource,
 
 static async Task Scuffed(string connectionString)
 {
+    var timestamp = Stopwatch.GetTimestamp();
+    Console.WriteLine("Starting scuffed validation...");
     await using var db = new DialogDbContext(options: new DbContextOptionsBuilder<DialogDbContext>()
         .UseNpgsql(connectionString: connectionString).Options);
+    Console.WriteLine($"[DbContext init] Time taken: {Stopwatch.GetElapsedTime(timestamp)}");
     var dialogIds = await db.Dialogs.Select(selector: d => d.Id).Take(count: 1000).ToListAsync();
+    Console.WriteLine($"[Fetch dialog ids] Time taken: {Stopwatch.GetElapsedTime(timestamp)}");
 
     var localizationValidator = new LocalizationDtosValidator();
     var actorValidator = new ActorValidator();
@@ -147,9 +151,13 @@ static async Task Scuffed(string connectionString)
 
     foreach (var dialogId in dialogIds)
     {
+        Console.WriteLine($"[Fetch dialog id] Id: {dialogId}");
         var dataLoader = new FullDialogAggregateDataLoader(dialogDbContext: db,
             userResourceRegistry: ThroughThePowerOfScuff.Instance);
+
         var dialog = await dataLoader.LoadDialogEntity(dialogId: dialogId, cancellationToken: CancellationToken.None);
+        Console.WriteLine($"[Load dialog aggregate] Time taken: {Stopwatch.GetElapsedTime(timestamp)}");
+
         var createDialog = dialog!.ToCreateDto();
         var result = await validator.ValidateAsync(instance: createDialog);
         if (!result.IsValid)
@@ -158,6 +166,11 @@ static async Task Scuffed(string connectionString)
             Console.WriteLine(string.Join(separator: ", ", values: result.Errors.Select(x => $"{x.PropertyName}: {x.ErrorMessage}")));
             Console.WriteLine();
         }
+        else
+        {
+            Console.WriteLine("al guud");
+        }
+        Console.WriteLine($"[Validate dialog dto] Time taken: {Stopwatch.GetElapsedTime(timestamp)}");
     }
 }
 

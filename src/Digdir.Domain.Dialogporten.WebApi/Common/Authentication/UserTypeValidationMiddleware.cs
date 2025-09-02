@@ -12,7 +12,7 @@ public sealed class UserTypeValidationMiddleware
     private readonly RequestDelegate _next;
     private static readonly Dictionary<string, List<UserType>> ValidUserTypesForPolicy = new()
     {
-        { Policy.EndUser, [UserType.Person, UserType.SystemUser] },
+        { Policy.EndUser, [UserType.Person, UserType.SystemUser, UserType.SelfIdentifiedUser] },
         { Policy.ServiceProvider, [UserType.ServiceOwner, UserType.ServiceOwnerOnBehalfOfPerson] },
         { Policy.ServiceProviderSearch, [UserType.ServiceOwner, UserType.ServiceOwnerOnBehalfOfPerson] },
         { Policy.ServiceProviderAdmin, [UserType.ServiceOwner] }

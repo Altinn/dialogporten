@@ -21,6 +21,7 @@ public sealed class UserId
     {
         UserIdType.Person or UserIdType.ServiceOwnerOnBehalfOfPerson => NorwegianPersonIdentifier.PrefixWithSeparator,
         UserIdType.SystemUser => SystemUserIdentifier.PrefixWithSeparator,
+        UserIdType.SelfIdentifiedUser => AltinnUserIdentifier.PrefixWithSeparator,
         UserIdType.ServiceOwner => NorwegianOrganizationIdentifier.PrefixWithSeparator,
         UserIdType.Unknown => string.Empty,
         _ => throw new UnreachableException("Unknown UserIdType")
@@ -64,6 +65,7 @@ public sealed class UserRegistry : IUserRegistry
         {
             UserIdType.Person or UserIdType.ServiceOwnerOnBehalfOfPerson => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
             UserIdType.SystemUser => "System User",// TODO: Implement when SystemUsers are introduced?
+            UserIdType.SelfIdentifiedUser => _user.GetPrincipal().TryGetClaimValue("urn:altinn:username", out var username) ? username : "Self-Identified User",
             UserIdType.Unknown => throw new UnreachableException(),
             UserIdType.ServiceOwner => throw new UnreachableException(),
             _ => throw new UnreachableException()

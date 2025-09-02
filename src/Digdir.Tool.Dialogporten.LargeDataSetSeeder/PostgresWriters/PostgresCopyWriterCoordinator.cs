@@ -56,23 +56,6 @@ internal class PostgresCopyWriterCoordinator
         }
     }
 
-    private static Dictionary<Type, int> GetScalingByType(int maxConnections, IEnumerable<Type> types)
-    {
-        var typeList = types.ToArray();
-        var result = new Dictionary<Type, int>();
-        var count = typeList.Length;
-        var baseShare = maxConnections / count;
-        var remainder = maxConnections % count;
-
-        for (var i = 0; i < count; i++)
-        {
-            var allocation = baseShare + (i < remainder ? 1 : 0);
-            result[typeList[i]] = allocation;
-        }
-
-        return result;
-    }
-
     private sealed class PoolWriter(Task poolWriterTask, IPostgresCopyWriterPool pool)
     {
         public IPostgresCopyWriterPool Pool => pool;

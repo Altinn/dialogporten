@@ -48,7 +48,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
-        const string apiUrl = "register/api/v1/parties/nameslookup";
+        const string apiUrl = "register/api/v1/dialogporten/parties/query";
 
         if (!TryParse(externalIdWithPrefix, out var nameLookup))
         {
@@ -61,7 +61,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             serializerOptions: SerializerOptions,
             cancellationToken: cancellationToken);
 
-        var name = nameLookupResult.PartyNames.FirstOrDefault()?.Name;
+        var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
         if (name is null)
         {
             // This is PII, but this is an error condition (probably due to missing Altinn profile)
@@ -81,8 +81,9 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
         nameLookup = partyIdentifier switch
         {
-            NorwegianPersonIdentifier personIdentifier => new() { Parties = [new() { Ssn = personIdentifier.Id }] },
-            NorwegianOrganizationIdentifier organizationIdentifier => new() { Parties = [new() { OrgNo = organizationIdentifier.Id }] },
+            NorwegianPersonIdentifier personIdentifier => new() { Data = [personIdentifier.FullId] },
+            NorwegianOrganizationIdentifier organizationIdentifier => new() { Data = [organizationIdentifier.FullId] },
+            GenericPartyIdentifier genericPartyIdentifier => new() { Data = [genericPartyIdentifier.FullId] },
             _ => null
         };
 
@@ -91,19 +92,17 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private sealed class NameLookup
     {
-        public List<NameLookupParty> Parties { get; set; } = null!;
+        public List<string> Data { get; set; } = null!;
     }
 
     private sealed class NameLookupResult
     {
-        public List<NameLookupParty> PartyNames { get; set; } = null!;
+        public List<NameLookupEntry> Data { get; set; } = null!;
     }
 
-    private sealed class NameLookupParty
+    private sealed class NameLookupEntry
     {
-        public string Ssn { get; set; } = null!;
-        public string OrgNo { get; set; } = null!;
-        public string? Name { get; set; }
+        public string? DisplayName { get; set; }
     }
 }
 

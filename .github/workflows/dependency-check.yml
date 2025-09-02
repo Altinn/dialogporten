@@ -1,0 +1,196 @@
+name: Dependency Check
+
+on:
+  schedule:
+    # Kjør hver mandag kl. 08:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+  push:
+    paths:
+      - '**/*.csproj'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'docker-compose*.yml'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  dependency-analysis:
+    name: Analyze Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+        
+    - name: Install dotnet-outdated tool
+      run: dotnet tool install -g dotnet-outdated-tool
+      
+    - name: Install PowerShell
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y powershell
+        
+    - name: Run dependency analysis
+      run: pwsh scripts/Update-Dependencies.ps1 -Validate
+      
+    - name: Check for outdated packages
+      id: outdated
+      run: |
+        # Kjør dotnet outdated på solution-nivå
+        dotnet outdated Digdir.Domain.Dialogporten.sln --output json > outdated.json || true
+        
+        # Sjekk om det finnes utdaterte pakker
+        if [ -s outdated.json ]; then
+          echo "has_outdated=true" >> $GITHUB_OUTPUT
+          echo "Utdaterte pakker funnet"
+        else
+          echo "has_outdated=false" >> $GITHUB_OUTPUT
+          echo "Alle pakker er oppdaterte"
+        fi
+        
+    - name: Upload outdated report
+      if: steps.outdated.outputs.has_outdated == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: outdated-packages-report
+        path: outdated.json
+        retention-days: 7
+        
+    - name: Check Docker image updates
+      id: docker_check
+      run: |
+        # Sjekk for oppdaterte Docker images
+        echo "Sjekker Docker images for oppdateringer..."
+        
+        # Les docker-compose filer og sjekk for oppdateringer
+        outdated_images=""
+        
+        # PostgreSQL
+        current_pg=$(grep "postgres:" docker-compose-db-redis.yml | head -1 | cut -d: -f3)
+        latest_pg=$(curl -s "https://registry.hub.docker.com/v2/repositories/library/postgres/tags/?page_size=100" | jq -r '.results[].name' | grep -E '^[0-9]+\.[0-9]+$' | sort -V | tail -1)
+        if [ "$current_pg" != "$latest_pg" ]; then
+          outdated_images="$outdated_images\n- postgres: $current_pg → $latest_pg"
+        fi
+        
+        # Redis
+        current_redis=$(grep "redis:" docker-compose-db-redis.yml | head -1 | cut -d: -f3)
+        echo "Current Redis: $current_redis"
+        
+        if [ -n "$outdated_images" ]; then
+          echo "has_docker_updates=true" >> $GITHUB_OUTPUT
+          echo "docker_updates<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$outdated_images" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "has_docker_updates=false" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Create/Update Issue for Outdated Dependencies
+      if: steps.outdated.outputs.has_outdated == 'true' || steps.docker_check.outputs.has_docker_updates == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Les outdated.json hvis den finnes
+          let nugetUpdates = '';
+          if (fs.existsSync('outdated.json')) {
+            const outdatedData = JSON.parse(fs.readFileSync('outdated.json', 'utf8'));
+            if (outdatedData.Projects && outdatedData.Projects.length > 0) {
+              nugetUpdates = '## 📦 NuGet-pakker som kan oppdateres\n\n';
+              for (const project of outdatedData.Projects) {
+                if (project.TargetFrameworks) {
+                  for (const framework of project.TargetFrameworks) {
+                    if (framework.Dependencies) {
+                      for (const dep of framework.Dependencies) {
+                        nugetUpdates += `- **${dep.Name}**: ${dep.ResolvedVersion} → ${dep.LatestVersion}\n`;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
+          const dockerUpdates = '${{ steps.docker_check.outputs.docker_updates }}' || '';
+          
+          const issueTitle = '🔄 Avhengighetsoppdateringer tilgjengelig';
+          const issueBody = `# Automatisk avhengighetsrapport
+          
+          Denne issue-en er automatisk generert av dependency-check workflowen.
+          
+          **Kjørt:** ${new Date().toISOString()}
+          **Workflow:** [${context.runId}](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+          
+          ${nugetUpdates}
+          
+          ${dockerUpdates ? '## 🐳 Docker images som kan oppdateres\n\n' + dockerUpdates : ''}
+          
+          ## 📋 Anbefalte handlinger
+          
+          1. **Gjennomgå oppdateringene** og vurder hvilke som bør prioriteres
+          2. **Test kritiske oppdateringer** i development-miljø først
+          3. **Oppdater Dependencies.md** etter at endringer er gjort
+          4. **Lukk denne issue-en** når alle relevante oppdateringer er håndtert
+          
+          ## 🔗 Nyttige lenker
+          
+          - [Dependency dokumentasjon](./docs/Dependencies.md)
+          - [Renovate Dashboard](https://app.renovatebot.com/dashboard)
+          - [Security Advisories](https://github.com/${context.repo.owner}/${context.repo.repo}/security/advisories)
+          
+          ---
+          
+          *Denne issue-en oppdateres automatisk hver mandag eller når avhengighetsfiler endres.*`;
+          
+          // Sjekk om det allerede finnes en åpen issue
+          const issues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: 'dependencies,automated'
+          });
+          
+          const existingIssue = issues.data.find(issue => issue.title === issueTitle);
+          
+          if (existingIssue) {
+            // Oppdater eksisterende issue
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: existingIssue.number,
+              body: issueBody
+            });
+            
+            console.log(`Oppdaterte eksisterende issue #${existingIssue.number}`);
+          } else {
+            // Opprett ny issue
+            const newIssue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['dependencies', 'automated', 'maintenance']
+            });
+            
+            console.log(`Opprettet ny issue #${newIssue.data.number}`);
+          }
+          
+    - name: Summary
+      run: |
+        echo "## 📊 Dependency Check Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Kategori | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| NuGet Packages | ${{ steps.outdated.outputs.has_outdated == 'true' && '⚠️ Oppdateringer tilgjengelig' || '✅ Oppdatert' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Docker Images | ${{ steps.docker_check.outputs.has_docker_updates == 'true' && '⚠️ Oppdateringer tilgjengelig' || '✅ Oppdatert' }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Se [Dependencies.md](./docs/Dependencies.md) for fullstendig oversikt." >> $GITHUB_STEP_SUMMARY

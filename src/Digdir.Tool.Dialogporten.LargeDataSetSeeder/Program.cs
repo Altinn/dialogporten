@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.HorizontalDataLoaders;
@@ -9,12 +8,10 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Infrastructure;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
-using Refit;
 
 #pragma warning disable CS8321 // Local function is declared but never used
 

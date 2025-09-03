@@ -88,6 +88,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new EntityNotFound<DialogEntity>(request.Id);
         }
 
+        if (dialog.Freeze && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            return new Forbidden("User cannot modify frozen dialog");
+        }
+
         if (dialog.Deleted)
         {
             // TODO: https://github.com/altinn/dialogporten/issues/1543
@@ -293,13 +298,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         dialog.FromPartyTransmissionsCount += (short)newDialogTransmissions
             .Count(x => x.TypeId
-                is DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction);
+                is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
 
         dialog.FromServiceOwnerTransmissionsCount += (short)newDialogTransmissions
             .Count(x => x.TypeId is not
-                (DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction));
+                (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
         var newAttachmentIds = newDialogTransmissions
             .SelectMany(x => x.Attachments)

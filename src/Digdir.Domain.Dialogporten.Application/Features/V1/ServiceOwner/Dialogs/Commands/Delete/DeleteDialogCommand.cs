@@ -55,6 +55,11 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
             return new EntityNotFound<DialogEntity>(request.Id);
         }
 
+        if (dialog.Freeze && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            return new Forbidden("User cannot modify frozen dialog");
+        }
+
         if (dialog.Deleted)
         {
             // TODO: https://github.com/altinn/dialogporten/issues/1543

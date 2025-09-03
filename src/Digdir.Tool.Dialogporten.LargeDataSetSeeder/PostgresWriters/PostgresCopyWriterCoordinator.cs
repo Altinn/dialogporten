@@ -34,17 +34,17 @@ internal class PostgresCopyWriterCoordinator
 
     private async Task<List<PoolWriter>> CreatePoolAwaiters(DateTimeOffset fromDate, DateTimeOffset toDate, int dialogAmount)
     {
-        var poolAwaiters = new List<PoolWriter>();
         var scalingByType = _typeDistributor.GetDistribution(_maxConnections, EntityGeneratorExtensions.Generators.Keys);
-        foreach (var (targetType, generator) in EntityGeneratorExtensions.Generators)
-        {
-            var entityEnumerable = generator(DialogTimestamp.Generate(fromDate, toDate, dialogAmount));
-            var writer = await PostgresCopyWriterPoolFactory.Create(targetType, _dataSource, scalingByType[targetType]);
-            var poolWriterTask = Task.Run(async () => await writer.WriteAsync(entityEnumerable));
-            poolAwaiters.Add(new PoolWriter(poolWriterTask, writer));
-        }
-
-        return poolAwaiters;
+        var poolWriters = await Task.WhenAll(EntityGeneratorExtensions.Generators
+            .Select(x => Task.Run(async () =>
+            {
+                var (targetType, generator) = x;
+                var entityEnumerable = generator(DialogTimestamp.Generate(fromDate, toDate, dialogAmount));
+                var writer = await PostgresCopyWriterPoolFactory.Create(targetType, _dataSource, scalingByType[targetType]);
+                var poolWriterTask = Task.Run(async () => await writer.WriteAsync(entityEnumerable));
+                return new PoolWriter(poolWriterTask, writer);
+            })));
+        return poolWriters.ToList();
     }
 
     private async Task RedistributeConnections(List<PoolWriter> poolAwaiters)

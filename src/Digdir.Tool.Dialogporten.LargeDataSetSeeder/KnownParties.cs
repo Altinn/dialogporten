@@ -9,13 +9,13 @@ internal static class KnownParties
     static KnownParties()
     {
         var knownSsns = File
-            .ReadLines("../../tests/k6/tests/performancetest_data/endusers-yt01.csv")
+            .ReadLines(Path.Combine(AppContext.BaseDirectory, "endusers-yt01.csv"))
             .Skip(1)
             .Select(line => line.Split(',')[0])
             .ToHashSet();
 
         Values = File
-            .ReadLines("./OrgsInYt01.csv")
+            .ReadLines(Path.Combine(AppContext.BaseDirectory, "./OrgsInYt01.csv"))
             .Skip(1)
             .Select(x =>
             {

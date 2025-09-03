@@ -2,7 +2,7 @@
 
 This documentation provides a complete overview of all dependencies that Dialogporten has, both internal and external, to ensure effective risk management and change management.
 
-*Last updated: 2025-09-03 10:52*
+*Last updated: 2025-09-03 13:32*
 
 ## 📋 Table of Contents
 
@@ -276,7 +276,7 @@ This documentation provides a complete overview of all dependencies that Dialogp
 | **coverlet.collector** | 6.0.4 |
 | **EntityFrameworkCore.Exceptions.PostgreSQL** | 8.1.3 |
 | **FastEndpoints.Swagger** | 5.35.0 |
-| **FluentAssertions** | [7.2.0, 8.0.0) |
+| **FluentAssertions** | 7.2.0 |
 | **FluentValidation.DependencyInjectionExtensions** | 12.0.0 |
 | **HotChocolate.AspNetCore** | 15.1.8 |
 | **HotChocolate.AspNetCore.Authorization** | 15.1.8 |
@@ -296,6 +296,7 @@ This documentation provides a complete overview of all dependencies that Dialogp
 | **Microsoft.AspNetCore.OpenApi** | 9.0.8 |
 | **Microsoft.Azure.AppConfiguration.AspNetCore** | 8.3.0 |
 | **Microsoft.Build** | 17.14.8 |
+| **Microsoft.DotNet.ILCompiler** | 9.0.8 |
 | **Microsoft.EntityFrameworkCore.Relational** | 9.0.8 |
 | **Microsoft.EntityFrameworkCore.Tools** | 9.0.8 |
 | **Microsoft.Extensions.Caching.StackExchangeRedis** | 9.0.8 |
@@ -312,6 +313,7 @@ This documentation provides a complete overview of all dependencies that Dialogp
 | **Microsoft.Extensions.Http** | 9.0.8 |
 | **Microsoft.Extensions.Http.Polly** | 9.0.8 |
 | **Microsoft.Extensions.Options.ConfigurationExtensions** | 9.0.8 |
+| **Microsoft.NET.ILLink.Tasks** | 9.0.8 |
 | **Microsoft.NET.Test.Sdk** | 17.14.1 |
 | **NetArchTest.Rules** | 1.3.2 |
 | **Npgsql** | 9.0.3 |
@@ -328,7 +330,6 @@ This documentation provides a complete overview of all dependencies that Dialogp
 | **Polly.Contrib.WaitAndRetry** | 1.1.1 |
 | **Refit** | 8.0.0 |
 | **Refit.HttpClientFactory** | 8.0.0 |
-| **Refitter.SourceGenerator** | 1.6.2 |
 | **Respawn** | 6.2.1 |
 | **Scrutor** | 6.1.0 |
 | **Serilog.AspNetCore** | 9.0.0 |
@@ -359,8 +360,8 @@ This documentation provides a complete overview of all dependencies that Dialogp
 | **grafana/loki** | 3.5.3 | docker-compose-otel.yml |
 | **jaegertracing/all-in-one** | 1.72.0 | docker-compose-otel.yml |
 | **nginx** | 1.29.1 | docker-compose.yml |
-| **otel/opentelemetry-collector-contrib** | 0.131.1 | docker-compose-otel.yml |
-| **postgres** | 16.8 | docker-compose-db-redis.yml |
+| **otel/opentelemetry-collector-contrib** | 0.133.0 | docker-compose-otel.yml |
+| **postgres** | 16.9 | docker-compose-db-redis.yml |
 | **prom/prometheus** | v3.5.0 | docker-compose-otel.yml |
 | **redis** | 6.0-alpine | docker-compose-db-redis.yml |
 | **redis/redisinsight** | latest | docker-compose-db-redis.yml |

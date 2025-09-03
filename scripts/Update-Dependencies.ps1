@@ -33,6 +33,75 @@ function Get-NuGetPackages {
     Write-Host "🔍 Scanning NuGet packages..." -ForegroundColor Green
     
     $packages = @{}
+    
+    # First, restore packages to ensure we have resolved versions
+    Write-Host "📦 Restoring packages to get resolved versions..." -ForegroundColor Yellow
+    try {
+        dotnet restore --verbosity quiet
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Package restore failed, falling back to .csproj parsing"
+            return Get-NuGetPackagesFromCsproj
+        }
+    }
+    catch {
+        Write-Warning "Package restore failed, falling back to .csproj parsing"
+        return Get-NuGetPackagesFromCsproj
+    }
+    
+    # Use dotnet list package to get resolved versions
+    Write-Host "🔍 Getting resolved package versions..." -ForegroundColor Yellow
+    try {
+        $packageListOutput = dotnet list package --include-transitive --format json 2>$null
+        if ($LASTEXITCODE -eq 0 -and $packageListOutput) {
+            $packageData = $packageListOutput | ConvertFrom-Json
+            
+            foreach ($project in $packageData.projects) {
+                if ($project.frameworks) {
+                    foreach ($framework in $project.frameworks) {
+                        if ($framework.topLevelPackages) {
+                            foreach ($pkg in $framework.topLevelPackages) {
+                                if ($pkg.id -and $pkg.resolvedVersion) {
+                                    if ($packages.ContainsKey($pkg.id)) {
+                                        # Package already exists - validate version consistency and add file
+                                        if ($packages[$pkg.id].Version -ne $pkg.resolvedVersion) {
+                                            Write-Warning "Version mismatch for $($pkg.id): $($packages[$pkg.id].Version) vs $($pkg.resolvedVersion)"
+                                        }
+                                        # Add file if not already present
+                                        if ($packages[$pkg.id].Files -notcontains $project.path) {
+                                            $packages[$pkg.id].Files += $project.path
+                                        }
+                                    }
+                                    else {
+                                        # First occurrence - initialize entry
+                                        $packages[$pkg.id] = @{
+                                            Version = $pkg.resolvedVersion
+                                            Files = @($project.path)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            Write-Warning "Failed to get resolved versions, falling back to .csproj parsing"
+            return Get-NuGetPackagesFromCsproj
+        }
+    }
+    catch {
+        Write-Warning "Failed to parse resolved versions, falling back to .csproj parsing"
+        return Get-NuGetPackagesFromCsproj
+    }
+    
+    return $packages
+}
+
+function Get-NuGetPackagesFromCsproj {
+    Write-Host "📄 Falling back to .csproj parsing..." -ForegroundColor Yellow
+    
+    $packages = @{}
     $csprojFiles = Get-ChildItem -Path "." -Recurse -Name "*.csproj"
     
     foreach ($file in $csprojFiles) {
@@ -43,9 +112,22 @@ function Get-NuGetPackages {
         if ($packageRefs) {
             foreach ($pkg in $packageRefs) {
                 if ($pkg.Include -and $pkg.Version) {
-                    $packages[$pkg.Include] = @{
-                        Version = $pkg.Version
-                        Files = @($file)
+                    if ($packages.ContainsKey($pkg.Include)) {
+                        # Package already exists - validate version consistency and add file
+                        if ($packages[$pkg.Include].Version -ne $pkg.Version) {
+                            Write-Warning "Version mismatch for $($pkg.Include): $($packages[$pkg.Include].Version) vs $($pkg.Version)"
+                        }
+                        # Add file if not already present
+                        if ($packages[$pkg.Include].Files -notcontains $file) {
+                            $packages[$pkg.Include].Files += $file
+                        }
+                    }
+                    else {
+                        # First occurrence - initialize entry
+                        $packages[$pkg.Include] = @{
+                            Version = $pkg.Version
+                            Files = @($file)
+                        }
                     }
                 }
             }
@@ -65,8 +147,8 @@ function Get-DockerImages {
         Write-Verbose "Processing: $file"
         $content = Get-Content $file -Raw
         
-        # Simple regex to find image lines
-        $imageMatches = [regex]::Matches($content, 'image:\s*([^\s\r\n]+)')
+        # Match image: field specifically, handling quotes and registry prefixes
+        $imageMatches = [regex]::Matches($content, '^\s*image:\s*[''"]?([^\s''"]+)[''"]?\s*$', [System.Text.RegularExpressions.RegexOptions]::Multiline)
         
         foreach ($match in $imageMatches) {
             $imageName = $match.Groups[1].Value
@@ -112,23 +194,32 @@ function Test-PackageUpdates {
         # Run dotnet outdated at solution level
         Write-Verbose "Checking updates for entire solution..."
         
-        # Run dotnet-outdated and let it create "json" file
-        $null = & dotnet-outdated "Digdir.Domain.Dialogporten.sln" --output json 2>$null
+        # Create temporary file for dotnet-outdated output
+        $tempFile = [IO.Path]::GetTempFileName()
         
-        # Check if "json" file was created
-        if (Test-Path "json") {
-            $jsonContent = Get-Content "json" -Raw -ErrorAction SilentlyContinue
-            if ($jsonContent -and $jsonContent.Trim().StartsWith("{")) {
-                try {
-                    $outdatedData = $jsonContent | ConvertFrom-Json
-                    Remove-Item "json" -Force -ErrorAction SilentlyContinue
-                    return $outdatedData
-                }
-                catch {
-                    Write-Verbose "Could not parse JSON: $($_.Exception.Message)"
+        try {
+            # Run dotnet-outdated and output to temporary file
+            $null = & dotnet-outdated "Digdir.Domain.Dialogporten.sln" --output $tempFile 2>$null
+            
+            # Check if temporary file was created and has content
+            if (Test-Path $tempFile) {
+                $jsonContent = Get-Content $tempFile -Raw -ErrorAction SilentlyContinue
+                if ($jsonContent -and $jsonContent.Trim().StartsWith("{")) {
+                    try {
+                        $outdatedData = $jsonContent | ConvertFrom-Json
+                        return $outdatedData
+                    }
+                    catch {
+                        Write-Verbose "Could not parse JSON: $($_.Exception.Message)"
+                    }
                 }
             }
-            Remove-Item "json" -Force -ErrorAction SilentlyContinue
+        }
+        finally {
+            # Always clean up the temporary file
+            if (Test-Path $tempFile) {
+                Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+            }
         }
         
         return @{}
@@ -159,9 +250,15 @@ function Update-DependenciesDoc {
     
     # Update timestamp
     $content = $content -replace '\*Last updated: .*\*', "*Last updated: $currentDate*"
+    if ($content -notmatch '\*Last updated: ') {
+        Write-Warning "Could not update timestamp - pattern not found"
+    }
     
     # Update .NET version
     $content = $content -replace '\| \.NET SDK \| [0-9\.]+ \|', "| .NET SDK | $DotNetVersion |"
+    if ($content -notmatch '\| \.NET SDK \|') {
+        Write-Warning "Could not update .NET SDK version - pattern not found"
+    }
     
     # Generate updated NuGet table
     $nugetTableHeader = @"
@@ -273,41 +370,49 @@ try {
     if ($Validate) {
         Write-Host "`n✅ Validation completed!" -ForegroundColor Green
         
-        # Check for potential updates
-        Write-Host "`n🔍 Checking for updates..." -ForegroundColor Yellow
-        $outdatedData = Test-PackageUpdates
+        # Validate documentation patterns
+        Write-Host "`n🔍 Validating documentation patterns..." -ForegroundColor Yellow
+        $docContent = Get-Content $OutputPath -Raw -ErrorAction SilentlyContinue
         
-        if ($outdatedData -and $outdatedData.Projects) {
-            $totalUpdates = 0
-            $majorUpdates = 0
-            $minorUpdates = 0
-            $patchUpdates = 0
+        if ($docContent) {
+            $validationIssues = @()
             
-            foreach ($project in $outdatedData.Projects) {
-                foreach ($framework in $project.TargetFrameworks) {
-                    foreach ($dep in $framework.Dependencies) {
-                        $totalUpdates++
-                        switch ($dep.UpgradeSeverity) {
-                            "Major" { $majorUpdates++ }
-                            "Minor" { $minorUpdates++ }
-                            "Patch" { $patchUpdates++ }
-                        }
-                    }
-                }
+            # Check for required patterns
+            if ($docContent -notmatch '\*Last updated: ') {
+                $validationIssues += "Missing timestamp pattern"
+            }
+            if ($docContent -notmatch '\| \.NET SDK \|') {
+                $validationIssues += "Missing .NET SDK table"
+            }
+            if ($docContent -notmatch '## 🤖 Auto-generated Dependencies') {
+                $validationIssues += "Missing auto-generated section"
             }
             
-            Write-Host "`n📊 AVAILABLE UPDATES:" -ForegroundColor Yellow
-            Write-Host "Total: $totalUpdates packages" -ForegroundColor White
-            Write-Host "  🔴 Major: $majorUpdates (possible breaking changes)" -ForegroundColor Red
-            Write-Host "  🟡 Minor: $minorUpdates (new features)" -ForegroundColor Yellow  
-            Write-Host "  🟢 Patch: $patchUpdates (bugfixes)" -ForegroundColor Green
-            
-            if ($majorUpdates -gt 0) {
-                Write-Host "`n⚠️  IMPORTANT: $majorUpdates major updates require extra testing!" -ForegroundColor Red
+            if ($validationIssues.Count -eq 0) {
+                Write-Host "✅ All documentation patterns found" -ForegroundColor Green
+            }
+            else {
+                Write-Host "❌ Documentation validation issues:" -ForegroundColor Red
+                foreach ($issue in $validationIssues) {
+                    Write-Host "  • $issue" -ForegroundColor Red
+                }
             }
         }
         else {
-            Write-Host "✅ All packages are up to date!" -ForegroundColor Green
+            Write-Host "❌ Could not read documentation file: $OutputPath" -ForegroundColor Red
+        }
+        
+        # Validate file aggregation
+        Write-Host "`n🔍 Validating file aggregation..." -ForegroundColor Yellow
+        $multiFilePackages = $nugetPackages.GetEnumerator() | Where-Object { $_.Value.Files.Count -gt 1 }
+        if ($multiFilePackages) {
+            Write-Host "✅ Found $($multiFilePackages.Count) packages used in multiple projects:" -ForegroundColor Green
+            foreach ($pkg in $multiFilePackages) {
+                Write-Host "  • $($pkg.Key): $($pkg.Value.Files.Count) files" -ForegroundColor White
+            }
+        }
+        else {
+            Write-Host "ℹ️  No packages found in multiple projects" -ForegroundColor Yellow
         }
     }
     else {

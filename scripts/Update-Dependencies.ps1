@@ -2,17 +2,17 @@
 
 <#
 .SYNOPSIS
-    Oppdaterer avhengighetsoversikten for Dialogporten
+    Updates the dependency overview for Dialogporten
 
 .DESCRIPTION
-    Dette scriptet scanner kodebasen og oppdaterer Dependencies.md med aktuelle versjoner
-    av alle avhengigheter, inkludert NuGet-pakker, Docker images og Azure-ressurser.
+    This script scans the codebase and updates Dependencies.md with current versions
+    of NuGet packages, Docker images, and .NET SDK versions.
 
 .PARAMETER OutputPath
-    Sti til Dependencies.md filen som skal oppdateres. Standard: docs/Dependencies.md
+    Path to the Dependencies.md file to be updated. Default: docs/Dependencies.md
 
 .PARAMETER Validate
-    Kun valider eksisterende avhengigheter uten å oppdatere dokumentasjon
+    Only validate existing dependencies without updating documentation
 
 .EXAMPLE
     .\scripts\Update-Dependencies.ps1
@@ -28,15 +28,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Funksjoner for å hente avhengighetsinformasjon
+# Functions for retrieving dependency information
 function Get-NuGetPackages {
-    Write-Host "🔍 Skanner NuGet-pakker..." -ForegroundColor Green
+    Write-Host "🔍 Scanning NuGet packages..." -ForegroundColor Green
     
     $packages = @{}
     $csprojFiles = Get-ChildItem -Path "." -Recurse -Name "*.csproj"
     
     foreach ($file in $csprojFiles) {
-        Write-Verbose "Prosesserer: $file"
+        Write-Verbose "Processing: $file"
         [xml]$proj = Get-Content $file
         
         $packageRefs = $proj.Project.ItemGroup.PackageReference
@@ -56,21 +56,21 @@ function Get-NuGetPackages {
 }
 
 function Get-DockerImages {
-    Write-Host "🐳 Skanner Docker images..." -ForegroundColor Green
+    Write-Host "🐳 Scanning Docker images..." -ForegroundColor Green
     
     $images = @{}
     $composeFiles = Get-ChildItem -Path "." -Name "docker-compose*.yml"
     
     foreach ($file in $composeFiles) {
-        Write-Verbose "Prosesserer: $file"
+        Write-Verbose "Processing: $file"
         $content = Get-Content $file -Raw
         
-        # Enkel regex for å finne image-linjer
+        # Simple regex to find image lines
         $imageMatches = [regex]::Matches($content, 'image:\s*([^\s\r\n]+)')
         
         foreach ($match in $imageMatches) {
             $imageName = $match.Groups[1].Value
-            if ($imageName -notlike "*dialogporten*") {  # Skip egne images
+            if ($imageName -notlike "*dialogporten*") {  # Skip our own images
                 $parts = $imageName -split ":"
                 $name = $parts[0]
                 $version = if ($parts.Count -gt 1) { $parts[1] } else { "latest" }
@@ -87,7 +87,7 @@ function Get-DockerImages {
 }
 
 function Get-DotNetVersion {
-    Write-Host "⚙️ Sjekker .NET versjon..." -ForegroundColor Green
+    Write-Host "⚙️ Checking .NET version..." -ForegroundColor Green
     
     $globalJson = "global.json"
     if (Test-Path $globalJson) {
@@ -99,23 +99,23 @@ function Get-DotNetVersion {
 }
 
 function Test-PackageUpdates {
-    Write-Host "🔄 Sjekker for oppdateringer..." -ForegroundColor Green
+    Write-Host "🔄 Checking for updates..." -ForegroundColor Green
     
     try {
-        # Sjekk om dotnet outdated er installert
+        # Check if dotnet outdated is installed
         $outdatedTool = dotnet tool list -g | Select-String "dotnet-outdated-tool"
         if (-not $outdatedTool) {
-            Write-Warning "dotnet-outdated-tool er ikke installert. Installer med: dotnet tool install -g dotnet-outdated-tool"
+            Write-Warning "dotnet-outdated-tool is not installed. Install with: dotnet tool install -g dotnet-outdated-tool"
             return @{}
         }
         
-        # Kjør dotnet outdated på solution-nivå
-        Write-Verbose "Sjekker oppdateringer for hele solution..."
+        # Run dotnet outdated at solution level
+        Write-Verbose "Checking updates for entire solution..."
         
-        # Kjør dotnet-outdated og la den lage "json" fil
+        # Run dotnet-outdated and let it create "json" file
         $null = & dotnet-outdated "Digdir.Domain.Dialogporten.sln" --output json 2>$null
         
-        # Sjekk om "json" filen ble opprettet
+        # Check if "json" file was created
         if (Test-Path "json") {
             $jsonContent = Get-Content "json" -Raw -ErrorAction SilentlyContinue
             if ($jsonContent -and $jsonContent.Trim().StartsWith("{")) {
@@ -125,7 +125,7 @@ function Test-PackageUpdates {
                     return $outdatedData
                 }
                 catch {
-                    Write-Verbose "Kunne ikke parse JSON: $($_.Exception.Message)"
+                    Write-Verbose "Could not parse JSON: $($_.Exception.Message)"
                 }
             }
             Remove-Item "json" -Force -ErrorAction SilentlyContinue
@@ -134,7 +134,7 @@ function Test-PackageUpdates {
         return @{}
     }
     catch {
-        Write-Warning "Kunne ikke sjekke for oppdateringer: $($_.Exception.Message)"
+        Write-Warning "Could not check for updates: $($_.Exception.Message)"
         return @{}
     }
 }
@@ -147,49 +147,48 @@ function Update-DependenciesDoc {
         [string]$FilePath
     )
     
-    Write-Host "📝 Oppdaterer Dependencies.md..." -ForegroundColor Green
+    Write-Host "📝 Updating Dependencies.md..." -ForegroundColor Green
     
     if (-not (Test-Path $FilePath)) {
-        Write-Error "Dependencies.md finnes ikke på: $FilePath"
+        Write-Error "Dependencies.md not found at: $FilePath"
         return
     }
     
     $content = Get-Content $FilePath -Raw
     $currentDate = Get-Date -Format "yyyy-MM-dd HH:mm"
     
-    # Oppdater timestamp
-    $content = $content -replace '\*Sist oppdatert: .*\*', "*Sist oppdatert: $currentDate*"
+    # Update timestamp
+    $content = $content -replace '\*Last updated: .*\*', "*Last updated: $currentDate*"
     
-    # Oppdater .NET versjon
+    # Update .NET version
     $content = $content -replace '\| \.NET SDK \| [0-9\.]+ \|', "| .NET SDK | $DotNetVersion |"
     
-    # Generer oppdatert NuGet-tabell
+    # Generate updated NuGet table
     $nugetTableHeader = @"
-### Automatisk oppdatert NuGet-oversikt
+### Automatically Updated NuGet Overview
 
-*Generert automatisk fra alle .csproj filer*
+*Generated automatically from all .csproj files*
 
-| Pakke | Versjon | Antall filer |
-|-------|---------|--------------|
+| Package | Version |
+|---------|---------|
 "@
     
     $nugetRows = @()
     foreach ($pkg in ($NuGetPackages.GetEnumerator() | Sort-Object Key)) {
-        $fileCount = if ($pkg.Value.Files) { $pkg.Value.Files.Count } else { 1 }
-        $nugetRows += "| **$($pkg.Key)** | $($pkg.Value.Version) | $fileCount |"
+        $nugetRows += "| **$($pkg.Key)** | $($pkg.Value.Version) |"
     }
     
     $nugetTable = $nugetTableHeader + "`n" + ($nugetRows -join "`n")
     
-    # Generer Docker images tabell
+    # Generate Docker images table
     $dockerTableHeader = @"
 
-### Automatisk oppdatert Docker-oversikt
+### Automatically Updated Docker Overview
 
-*Generert fra docker-compose filer*
+*Generated from docker-compose files*
 
-| Image | Versjon | Fil |
-|-------|---------|-----|
+| Image | Version | File |
+|-------|---------|------|
 "@
     
     $dockerRows = @()
@@ -199,12 +198,12 @@ function Update-DependenciesDoc {
     
     $dockerTable = $dockerTableHeader + "`n" + ($dockerRows -join "`n")
     
-    # Finn eller lag seksjonen for automatisk genererte tabeller
-    $autoSectionPattern = '## 🤖 Automatisk genererte avhengigheter[\s\S]*?(?=##|$)'
+    # Find or create section for automatically generated tables
+    $autoSectionPattern = '## 🤖 [^#]*[\s\S]*?(?=---\s*\*This document is automatically generated|\z)'
     $newAutoSection = @"
-## 🤖 Automatisk genererte avhengigheter
+## 🤖 Auto-generated Dependencies
 
-*Denne seksjonen oppdateres automatisk av Update-Dependencies.ps1*
+*This section is automatically updated by Update-Dependencies.ps1*
 
 $nugetTable
 
@@ -215,12 +214,12 @@ $dockerTable
     if ($content -match $autoSectionPattern) {
         $content = $content -replace $autoSectionPattern, $newAutoSection
     } else {
-        # Legg til seksjonen før den siste linjen
-        $content = $content -replace '(\*Dette dokumentet er automatisk generert.*\*)', "$newAutoSection`n`$1"
+        # Add section before the last line
+        $content = $content -replace '(\*This document is automatically generated.*\*)', "$newAutoSection`n`$1"
     }
     
     Set-Content -Path $FilePath -Value $content -Encoding UTF8
-    Write-Host "✅ Dependencies.md oppdatert med $(($NuGetPackages.Count)) NuGet-pakker og $(($DockerImages.Count)) Docker images!" -ForegroundColor Green
+    Write-Host "✅ Dependencies.md updated with $(($NuGetPackages.Count)) NuGet packages and $(($DockerImages.Count)) Docker images!" -ForegroundColor Green
 }
 
 function Show-DependencySummary {
@@ -230,13 +229,13 @@ function Show-DependencySummary {
         [string]$DotNetVersion
     )
     
-    Write-Host "`n📊 AVHENGIGHETSSAMMENDRAG" -ForegroundColor Cyan
-    Write-Host "=========================" -ForegroundColor Cyan
-    Write-Host ".NET SDK Versjon: $DotNetVersion" -ForegroundColor White
-    Write-Host "NuGet-pakker: $($NuGetPackages.Count)" -ForegroundColor White
+    Write-Host "`n📊 DEPENDENCY SUMMARY" -ForegroundColor Cyan
+    Write-Host "=====================" -ForegroundColor Cyan
+    Write-Host ".NET SDK Version: $DotNetVersion" -ForegroundColor White
+    Write-Host "NuGet packages: $($NuGetPackages.Count)" -ForegroundColor White
     Write-Host "Docker images: $($DockerImages.Count)" -ForegroundColor White
     
-    Write-Host "`n🔝 MEST BRUKTE NUGET-PAKKER:" -ForegroundColor Yellow
+    Write-Host "`n🔝 MOST USED NUGET PACKAGES:" -ForegroundColor Yellow
     $topPackages = $NuGetPackages.GetEnumerator() | 
         Where-Object { $_.Key -like "Microsoft.*" -or $_.Key -like "System.*" } |
         Sort-Object Key |
@@ -252,30 +251,30 @@ function Show-DependencySummary {
     }
 }
 
-# Hovedlogikk
+# Main logic
 try {
-    Write-Host "🚀 Starter avhengighetsanalyse for Dialogporten..." -ForegroundColor Magenta
+    Write-Host "🚀 Starting dependency analysis for Dialogporten..." -ForegroundColor Magenta
     Write-Host "=================================================" -ForegroundColor Magenta
     
-    # Sjekk at vi er i riktig katalog
+    # Check that we are in the correct directory
     if (-not (Test-Path "Digdir.Domain.Dialogporten.sln")) {
-        Write-Error "Dette scriptet må kjøres fra rot-katalogen til Dialogporten-repositoryet"
+        Write-Error "This script must be run from the root directory of the Dialogporten repository"
         exit 1
     }
     
-    # Samle inn avhengighetsinformasjon
+    # Collect dependency information
     $nugetPackages = Get-NuGetPackages
     $dockerImages = Get-DockerImages
     $dotnetVersion = Get-DotNetVersion
     
-    # Vis sammendrag
+    # Show summary
     Show-DependencySummary -NuGetPackages $nugetPackages -DockerImages $dockerImages -DotNetVersion $dotnetVersion
     
     if ($Validate) {
-        Write-Host "`n✅ Validering fullført!" -ForegroundColor Green
+        Write-Host "`n✅ Validation completed!" -ForegroundColor Green
         
-        # Sjekk for potensielle oppdateringer
-        Write-Host "`n🔍 Sjekker for oppdateringer..." -ForegroundColor Yellow
+        # Check for potential updates
+        Write-Host "`n🔍 Checking for updates..." -ForegroundColor Yellow
         $outdatedData = Test-PackageUpdates
         
         if ($outdatedData -and $outdatedData.Projects) {
@@ -297,29 +296,29 @@ try {
                 }
             }
             
-            Write-Host "`n📊 TILGJENGELIGE OPPDATERINGER:" -ForegroundColor Yellow
-            Write-Host "Total: $totalUpdates pakker" -ForegroundColor White
-            Write-Host "  🔴 Major: $majorUpdates (mulige breaking changes)" -ForegroundColor Red
-            Write-Host "  🟡 Minor: $minorUpdates (nye features)" -ForegroundColor Yellow  
+            Write-Host "`n📊 AVAILABLE UPDATES:" -ForegroundColor Yellow
+            Write-Host "Total: $totalUpdates packages" -ForegroundColor White
+            Write-Host "  🔴 Major: $majorUpdates (possible breaking changes)" -ForegroundColor Red
+            Write-Host "  🟡 Minor: $minorUpdates (new features)" -ForegroundColor Yellow  
             Write-Host "  🟢 Patch: $patchUpdates (bugfixes)" -ForegroundColor Green
             
             if ($majorUpdates -gt 0) {
-                Write-Host "`n⚠️  VIKTIG: $majorUpdates major oppdateringer krever ekstra testing!" -ForegroundColor Red
+                Write-Host "`n⚠️  IMPORTANT: $majorUpdates major updates require extra testing!" -ForegroundColor Red
             }
         }
         else {
-            Write-Host "✅ Alle pakker er oppdaterte!" -ForegroundColor Green
+            Write-Host "✅ All packages are up to date!" -ForegroundColor Green
         }
     }
     else {
-        # Oppdater dokumentasjon
+        # Update documentation
         Update-DependenciesDoc -NuGetPackages $nugetPackages -DockerImages $dockerImages -DotNetVersion $dotnetVersion -FilePath $OutputPath
     }
     
-    Write-Host "`n🎉 Ferdig!" -ForegroundColor Green
+    Write-Host "`n🎉 Done!" -ForegroundColor Green
 }
 catch {
-    Write-Error "Feil under kjøring: $($_.Exception.Message)"
+    Write-Error "Error during execution: $($_.Exception.Message)"
     Write-Error $_.ScriptStackTrace
     exit 1
 }

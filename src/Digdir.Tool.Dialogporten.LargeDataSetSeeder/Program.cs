@@ -22,7 +22,7 @@ var settings = new ConfigurationBuilder()
                    .Get<Settings>()
                ?? throw new InvalidOperationException("Could not get settings from environment variables");
 settings.Validate();
-var (connectionString, _, dialogAmount, startingDate, endDate, altinnPlatformBaseUrl) = settings;
+var (connectionString, dialogAmount, startingDate, endDate, altinnPlatformBaseUrl) = settings;
 
 await using var dataSource = NpgsqlDataSource.Create(connectionString);
 

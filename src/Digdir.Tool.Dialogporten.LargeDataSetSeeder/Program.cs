@@ -98,7 +98,7 @@ static async Task EnableDbConstraints(NpgsqlDataSource dataSource)
         Console.WriteLine($"[EnableDbConstraints] Executed script in {Stopwatch.GetElapsedTime(timestamp)}: {createScript}");
     }
 
-    Console.WriteLine($"[EnablingDbConstraints] Time taken: {Stopwatch.GetElapsedTime(outerTimestamp)}");
+    Console.WriteLine($"[EnableDbConstraints] Total time taken: {Stopwatch.GetElapsedTime(outerTimestamp)}");
 }
 
 static async Task GenerateDataUsingGenerators(NpgsqlDataSource npgsqlDataSource, DateTimeOffset dateTimeOffset,

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Freeze;
 
-public class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialogRequest>
+public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialogRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
 

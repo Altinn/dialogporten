@@ -50,7 +50,6 @@ public sealed record Actor(
         CreateActor(
             id: timestamp.ToUuidV7<Actor>(labelAssignmentLog.Id),
             timestamp: timestamp.Timestamp,
-            actorTypeId: ActorType.Values.PartyRepresentative,
             discriminator: "LabelAssignmentLogActor",
             labelAssignmentLogId: labelAssignmentLog.Id,
             actorNameEntityId: ActorName.GetRandomId());
@@ -67,7 +66,6 @@ public sealed record Actor(
         return CreateActor(
             id: timestamp.ToUuidV7<Actor>(transmission.Id),
             timestamp: timestamp.Timestamp,
-            actorTypeId: actorNameId.HasValue ? ActorType.Values.PartyRepresentative : ActorType.Values.ServiceOwner,
             discriminator: "DialogTransmissionSenderActor",
             transmissionId: transmission.Id,
             actorNameEntityId: actorNameId);
@@ -77,7 +75,6 @@ public sealed record Actor(
         CreateActor(
             id: timestamp.ToUuidV7<Actor>(seenLog.Id),
             timestamp: timestamp.Timestamp,
-            actorTypeId: ActorType.Values.PartyRepresentative,
             discriminator: "DialogSeenLogSeenByActor",
             dialogSeenLogId: seenLog.Id,
             actorNameEntityId: ActorName.GetRandomId());
@@ -87,16 +84,15 @@ public sealed record Actor(
         Guid? actorNameId = activity.TypeId switch
         {
             DialogActivityType.Values.DialogCreated or
-                DialogActivityType.Values.DialogDeleted or
-                DialogActivityType.Values.DialogRestored or
-                DialogActivityType.Values.Information => null,
+            DialogActivityType.Values.DialogDeleted or
+            DialogActivityType.Values.DialogRestored or
+            DialogActivityType.Values.Information => null,
             _ => ActorName.GetRandomId()
         };
 
         return CreateActor(
             id: timestamp.ToUuidV7<Actor>(activity.Id),
             timestamp: timestamp.Timestamp,
-            actorTypeId: actorNameId.HasValue ? ActorType.Values.ServiceOwner : ActorType.Values.PartyRepresentative,
             discriminator: "DialogActivityPerformedByActor",
             activityId: activity.Id,
             actorNameEntityId: actorNameId);
@@ -105,7 +101,6 @@ public sealed record Actor(
     private static Actor CreateActor(
         Guid id,
         DateTimeOffset timestamp,
-        ActorType.Values actorTypeId,
         string discriminator,
         Guid? transmissionId = null,
         Guid? dialogSeenLogId = null,
@@ -116,7 +111,7 @@ public sealed record Actor(
         Id: id,
         CreatedAt: timestamp,
         UpdatedAt: timestamp,
-        ActorTypeId: actorTypeId,
+        ActorTypeId: actorNameEntityId.HasValue ? ActorType.Values.PartyRepresentative : ActorType.Values.ServiceOwner,
         Discriminator: discriminator,
         TransmissionId: transmissionId,
         DialogSeenLogId: dialogSeenLogId,

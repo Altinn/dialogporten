@@ -28,6 +28,7 @@ public sealed class FullDialogAggregateDataLoader
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
         var dialogEntity = await _dialogDbContext.Dialogs
+            .AsSplitQuery()
             .Include(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
                 .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.SearchTags.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))

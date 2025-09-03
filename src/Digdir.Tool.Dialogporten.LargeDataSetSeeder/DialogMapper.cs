@@ -112,7 +112,7 @@ internal static class DialogMapper
         new()
         {
             ActorId = actor.ActorNameEntity?.ActorId,
-            ActorName = actor.ActorNameEntity?.Name,
+            ActorName = null, // cannot set name and id, so we leave name null
             ActorType = actor.ActorTypeId
         };
 

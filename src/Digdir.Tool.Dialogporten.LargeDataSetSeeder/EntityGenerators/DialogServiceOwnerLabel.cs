@@ -12,7 +12,7 @@ public sealed record DialogServiceOwnerLabel(
     {
         foreach (var context in DialogServiceOwnerContext.GenerateEntities(timestamps))
         {
-            foreach (var serviceLabel in LanguageLorem.GetRandomWords(5).Distinct())
+            foreach (var serviceLabel in StaticStore.GetRandomWords(5))
             {
                 yield return new(
                     DialogServiceOwnerContextId: context.DialogId,

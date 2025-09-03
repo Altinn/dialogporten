@@ -13,9 +13,8 @@ public sealed record DialogSearchTag(
     {
         foreach (var timestamp in timestamps)
         {
-            var searchTags = LanguageLorem
+            var searchTags = StaticStore
                 .GetRandomWords(Random.Shared.Next(0, 7))
-                .Distinct()
                 .Select((x, i) => (x, i));
 
             foreach (var (searchTag, tieBreaker) in searchTags)

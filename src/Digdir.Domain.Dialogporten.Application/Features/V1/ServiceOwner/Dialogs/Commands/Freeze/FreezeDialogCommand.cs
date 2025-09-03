@@ -57,12 +57,12 @@ internal sealed class FreezeDialogCommandHandler(
             return new Forbidden($"User cannot modify resource type {dialog.ServiceResourceType}.");
         }
 
-        if (dialog.Freeze)
+        if (dialog.Frozen)
         {
             return new Success();
         }
 
-        dialog.Freeze = true;
+        dialog.Frozen = true;
         _db.Dialogs.Update(dialog);
 
         var saveResult = await _unitOfWork

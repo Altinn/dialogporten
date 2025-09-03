@@ -69,7 +69,7 @@ public sealed class DialogEntity :
     /// <summary>
     ///  Indicates whether the dialog can be updated/deleted by the service owner 
     /// </summary>
-    public bool Freeze { get; set; }
+    public bool Frozen { get; set; }
 
 
     // === Dependent relationships ===

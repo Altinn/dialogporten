@@ -11,7 +11,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "Freeze",
+                name: "Frozen",
                 table: "Dialog",
                 type: "boolean",
                 nullable: false,
@@ -22,7 +22,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Freeze",
+                name: "Frozen",
                 table: "Dialog");
         }
     }

@@ -898,14 +898,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<bool>("Freeze")
-                        .HasColumnType("boolean");
-
                     b.Property<short>("FromPartyTransmissionsCount")
                         .HasColumnType("smallint");
 
                     b.Property<short>("FromServiceOwnerTransmissionsCount")
                         .HasColumnType("smallint");
+
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("HasUnopenedContent")
                         .HasColumnType("boolean");

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20250902122704_AddFreezeFlag")]
+    [Migration("20250903082432_AddFreezeFlag")]
     partial class AddFreezeFlag
     {
         /// <inheritdoc />
@@ -901,14 +901,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<bool>("Freeze")
-                        .HasColumnType("boolean");
-
                     b.Property<short>("FromPartyTransmissionsCount")
                         .HasColumnType("smallint");
 
                     b.Property<short>("FromServiceOwnerTransmissionsCount")
                         .HasColumnType("smallint");
+
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("HasUnopenedContent")
                         .HasColumnType("boolean");

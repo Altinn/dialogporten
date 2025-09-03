@@ -55,7 +55,7 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
             return new EntityNotFound<DialogEntity>(request.Id);
         }
 
-        if (dialog.Freeze && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        if (dialog.Frozen && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
             return new Forbidden("User cannot modify frozen dialog");
         }

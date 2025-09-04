@@ -51,6 +51,7 @@ static void BuildAndRun(string[] args)
     builder.Host.UseDefaultServiceProvider(options => options.ValidateScopes = false);
 
     builder.Configuration
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
         .AddUserSecrets<Program>()
         .AddLocalConfiguration(builder.Environment);
     builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -74,6 +75,13 @@ static void BuildAndRun(string[] args)
     builder.Services
         .AddOptions<MetricsAggregationOptions>()
         .Bind(builder.Configuration.GetSection(MetricsAggregationOptions.SectionName))
+        .PostConfigure(options =>
+        {
+            if (builder.Environment.IsDevelopment())
+            {
+                options.Environments = ["Development"];
+            }
+        })
         .ValidateDataAnnotations()
         .ValidateOnStart();
 
@@ -86,10 +94,16 @@ static void BuildAndRun(string[] args)
     builder.Services.AddSingleton(provider =>
     {
         var options = provider.GetRequiredService<IOptions<MetricsAggregationOptions>>().Value;
-        return new BlobServiceClient(options.StorageConnectionString);
+        if (!options.SkipUpload && !string.IsNullOrEmpty(options.StorageConnectionString) && options.StorageConnectionString != "not-needed-for-local")
+        {
+            return new BlobServiceClient(options.StorageConnectionString);
+        }
+        return new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;");
     });
 
+    builder.Services.AddHttpClient<PrometheusService>();
     builder.Services.AddSingleton<AzureMonitorService>();
+    builder.Services.AddSingleton<PrometheusService>();
     builder.Services.AddSingleton<MetricsAggregationService>();
     builder.Services.AddSingleton<ParquetFileService>();
     builder.Services.AddSingleton<AzureStorageService>();

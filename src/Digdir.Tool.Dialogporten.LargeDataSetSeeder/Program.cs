@@ -90,10 +90,22 @@ static async Task EnableDbConstraints(NpgsqlDataSource dataSource)
     {
         Console.WriteLine($"[EnableDbConstraints] Loop {index + 1} of {createScripts.Count}:");
         var timestamp = Stopwatch.GetTimestamp();
-        await using var cmd = dataSource.CreateCommand(createScript);
+        var extendedCreateScript = $"""
+                   BEGIN;
+                   SET LOCAL maintenance_work_mem = '2GB';
+                   {createScript}
+                   COMMIT;
+                   """;
+        await using var cmd = dataSource.CreateCommand(extendedCreateScript);
         await cmd.ExecuteNonQueryAsync();
         Console.WriteLine($"[EnableDbConstraints] Executed script in {Stopwatch.GetElapsedTime(timestamp)}: {createScript}");
     }
+
+    Console.WriteLine("[EnableDbConstraints] Starting ANALYZE on all tables to update statistics...");
+    var analyzeTimestamp = Stopwatch.GetTimestamp();
+    await using var analyzeCmd = dataSource.CreateCommand("ANALYZE;");
+    await analyzeCmd.ExecuteNonQueryAsync();
+    Console.WriteLine($"[EnableDbConstraints] ANALYZE completed in {Stopwatch.GetElapsedTime(analyzeTimestamp)}");
 
     Console.WriteLine($"[EnableDbConstraints] Total time taken: {Stopwatch.GetElapsedTime(outerTimestamp)}");
 }

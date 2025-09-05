@@ -31,43 +31,9 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
                 x.RemoveAll<IServiceResourceAuthorizer>();
                 x.AddSingleton<IServiceResourceAuthorizer, TestServiceResourceAuthorizer>();
                 x.Decorate<IUserResourceRegistry, TestUserResourceRegistry>();
-                // x.ConfigureServicesAnyWaysBecauseYouCantStopMe(x => );
             })
             .UpdateDialog(x => x.Dto.Progress = 98)
             .ExecuteAndAssert<Forbidden>();
-
-    [Fact]
-    public async Task Freeze_Dialog_Boring()
-    {
-        Guid? dialogId = null;
-        await FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IServiceResourceAuthorizer>();
-                x.AddSingleton<IServiceResourceAuthorizer, TestServiceResourceAuthorizer>();
-            })
-            .CreateSimpleDialog(x => x.Dto.ServiceResource = "urn:altinn:resource:SuperKulTest")
-            .SendCommand((_, ctx) =>
-            {
-                dialogId = ctx.GetDialogId();
-                return new FreezeDialogCommand
-                {
-                    Id = dialogId.Value
-                };
-            })
-            .ExecuteAndAssert<Success>();
-
-
-        // Application.ConfigureServicesAnyWaysBecauseYouCantStopMe(x => x.Decorate<IUserResourceRegistry, TestUserResourceRegistry>());
-
-        await FlowBuilder.For(Application)
-            .SendCommand(ctx =>
-            {
-                ctx.Bag["DialogId"] = dialogId!.Value;
-                return new GetDialogQuery() { DialogId = ctx.GetDialogId() };
-            })
-            .UpdateDialog(x => x.Dto.Progress = 98)
-            .ExecuteAndAssert<Forbidden>();
-    }
 }
 
 internal sealed class TestUserResourceRegistry(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry

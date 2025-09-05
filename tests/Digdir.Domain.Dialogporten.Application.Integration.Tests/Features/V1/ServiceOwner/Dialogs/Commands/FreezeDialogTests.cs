@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using OneOf;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
@@ -19,20 +20,18 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
 {
     [Fact]
     public Task Freeze_Dialog() =>
-        FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IServiceResourceAuthorizer>();
-                x.AddSingleton<IServiceResourceAuthorizer, TestServiceResourceAuthorizer>();
-            })
+        FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.ServiceResource = "urn:altinn:resource:SuperKulTest")
             .SendCommand((_, ctx) => new FreezeDialogCommand
             {
                 Id = ctx.GetDialogId()
             })
-            .AssertSuccess()
-            .ConfigThingy(x =>
+            .ConfigureServices(x =>
             {
-                x.ConfigureServicesAnyWaysBecauseYouCantStopMe(x => x.Decorate<IUserResourceRegistry, TestUserResourceRegistry>());
+                x.RemoveAll<IServiceResourceAuthorizer>();
+                x.AddSingleton<IServiceResourceAuthorizer, TestServiceResourceAuthorizer>();
+                x.Decorate<IUserResourceRegistry, TestUserResourceRegistry>();
+                // x.ConfigureServicesAnyWaysBecauseYouCantStopMe(x => );
             })
             .UpdateDialog(x => x.Dto.Progress = 98)
             .ExecuteAndAssert<Forbidden>();
@@ -58,7 +57,7 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
             .ExecuteAndAssert<Success>();
 
 
-        Application.ConfigureServicesAnyWaysBecauseYouCantStopMe(x => x.Decorate<IUserResourceRegistry, TestUserResourceRegistry>());
+        // Application.ConfigureServicesAnyWaysBecauseYouCantStopMe(x => x.Decorate<IUserResourceRegistry, TestUserResourceRegistry>());
 
         await FlowBuilder.For(Application)
             .SendCommand(ctx =>

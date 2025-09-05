@@ -18,6 +18,7 @@ public interface IFlowStep<out TIn> : IFlowStep
 public interface IFlowStep
 {
     IFlowExecutor<TOut> SendCommand<TOut>(Func<FlowContext, IRequest<TOut>> commandSelector);
+    IFlowStep Do(Action<FlowContext> action);
     FlowContext Context { get; }
 }
 

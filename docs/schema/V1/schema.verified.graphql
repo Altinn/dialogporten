@@ -475,6 +475,8 @@ input SearchDialogInput {
   externalReference: String
   "Filter by status"
   status: [DialogStatus!]
+  "Filter by process"
+  process: String
   "Filter by system label"
   systemLabel: [SystemLabel!]
   "Whether to exclude API-only dialogs from the results. Defaults to false."

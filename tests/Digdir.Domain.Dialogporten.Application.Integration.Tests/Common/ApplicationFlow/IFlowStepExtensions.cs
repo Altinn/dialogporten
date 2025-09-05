@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwn
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
@@ -132,11 +133,19 @@ public static class IFlowStepExtensions
                 modify?.Invoke(command);
                 return command;
             });
-    public static IFlowStep ConfigThingy(this IFlowStep step, Action<DialogApplication> configuration)
-    {
-        configuration(step.Context.Application);
-        return step;
-    }
+
+    public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
+        step.Do(x =>
+        {
+            x.Application.ConfigureServices(configure);
+        });
+
+    public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
+        step.Select(x =>
+        {
+            step.Context.Application.ConfigureServices(configure);
+            return x;
+        });
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()

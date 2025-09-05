@@ -87,7 +87,8 @@ internal static class Commands
 
                     if (config.SkipUpload)
                     {
-                        logger.LogInformation("Skipping upload. Generated {FileName} with {RecordCount} records ({FileSize} bytes)",
+                        await File.WriteAllBytesAsync(fileName, parquetData, ctx.CancellationToken);
+                        logger.LogInformation("Saved parquet file locally as {FileName} with {RecordCount} records ({FileSize} bytes)",
                             fileName, aggregatedRecords.Count, parquetData.Length);
                     }
                     else

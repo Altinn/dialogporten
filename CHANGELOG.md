@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.80.3](https://github.com/Altinn/dialogporten/compare/v1.80.2...v1.80.3) (2025-09-05)
+
+
+### Bug Fixes
+
+* **graphql:** Add missing Process filter on search ([#2706](https://github.com/Altinn/dialogporten/issues/2706)) ([c3af05c](https://github.com/Altinn/dialogporten/commit/c3af05c72e0da5ff00c056c4e5cfdf7703d4497c))
+
 ## [1.80.2](https://github.com/Altinn/dialogporten/compare/v1.80.1...v1.80.2) (2025-09-03)
 
 

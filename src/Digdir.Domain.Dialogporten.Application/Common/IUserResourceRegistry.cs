@@ -33,7 +33,7 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
 
     public async Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken)
     {
-        if (!_user.TryGetOrganizationNumber(out var orgNumber))
+        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var orgNumber))
         {
             throw new UnreachableException();
         }

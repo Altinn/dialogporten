@@ -22,7 +22,7 @@ public sealed class UserOrganizationRegistry : IUserOrganizationRegistry
 
     public async Task<string?> GetCurrentUserOrgShortName(CancellationToken cancellationToken)
     {
-        if (!_user.TryGetOrganizationNumber(out var orgNumber))
+        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var orgNumber))
         {
             return null;
         }

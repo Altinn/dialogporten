@@ -44,15 +44,15 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
 
         // Create dropped transactions counter for operational monitoring
         _droppedTransactionsCounter = meter.CreateCounter<long>(
-            "dialogporten_cost_dropped_transactions_total",
+            "cost_dropped_transactions_total",
             description: "Total number of cost management transactions dropped due to queue overflow");
 
         // Set up queue monitoring gauges for operational visibility
-        meter.CreateObservableGauge("dialogporten_cost_queue_depth",
+        meter.CreateObservableGauge("cost_queue_depth",
             () => _reader.CanCount ? _reader.Count : 0,
             description: "Current number of transactions waiting in the cost management queue");
 
-        meter.CreateObservableGauge("dialogporten_cost_queue_capacity",
+        meter.CreateObservableGauge("cost_queue_capacity",
             () => _queueCapacity,
             description: "Maximum capacity of the cost management queue");
     }

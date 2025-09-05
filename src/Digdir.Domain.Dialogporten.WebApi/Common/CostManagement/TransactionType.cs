@@ -74,7 +74,7 @@ public static class CostManagementConstants
     /// <summary>
     /// The name of the counter metric for transactions
     /// </summary>
-    public const string TransactionCounterName = "dialogporten_transactions_total";
+    public const string TransactionCounterName = "transactions_total";
 
     /// <summary>
     /// Description of the transaction counter metric

@@ -114,7 +114,7 @@ static async Task GenerateDataUsingGenerators(NpgsqlDataSource npgsqlDataSource,
     DateTimeOffset endDate1, int i)
 {
     var timestamp = Stopwatch.GetTimestamp();
-    var entityGeneratorSeeder = new PostgresCopyWriterCoordinator(npgsqlDataSource, new ConstantTypeDistributor(1));
+    var entityGeneratorSeeder = new PostgresCopyWriterCoordinator(npgsqlDataSource, new ConstantWorkerPoolBalancer(1));
     await entityGeneratorSeeder.Handle(dateTimeOffset, endDate1, i);
     Console.WriteLine($"[GenerateDataUsingGenerators] Time taken: {Stopwatch.GetElapsedTime(timestamp)}");
 }

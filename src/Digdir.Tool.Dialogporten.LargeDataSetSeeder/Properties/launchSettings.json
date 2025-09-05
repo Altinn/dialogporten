@@ -6,7 +6,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "FromDate": "1985-12-31",
         "ToDate": "2024-01-01",
-        "DialogAmount": "1000000",
+        "DialogAmount": "100000",
         "ConnectionString": "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;Command Timeout=86400;",
         "AltinnPlatformBaseUrl": "https://platform.yt01.altinn.cloud"
       }

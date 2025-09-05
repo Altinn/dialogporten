@@ -26,25 +26,18 @@ public sealed partial class FreezeDialogResult : OneOfBase<Success, EntityNotFou
 internal sealed class FreezeDialogCommandHandler(
     IDialogDbContext db,
     IUnitOfWork unitOfWork,
-    IUserResourceRegistry userResourceRegistry,
-    IUser user
+    IUserResourceRegistry userResourceRegistry
 ) : IRequestHandler<FreezeDialogCommand, FreezeDialogResult>
 {
-    [SuppressMessage("Style", "IDE0052:Remove unread private members")]
-    private readonly IUser _user = user ?? throw new ArgumentNullException(nameof(user));
     private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
     private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     private readonly IUserResourceRegistry _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
 
     public async Task<FreezeDialogResult> Handle(FreezeDialogCommand request, CancellationToken cancellationToken)
     {
-
-        var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-
         if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
-            // Amund: husk
-            return new Forbidden($".");
+            return new Forbidden("Only ServiceOwner admin can freeze dialogs.");
         }
         var dialog = await _db.Dialogs
             .IgnoreQueryFilters()

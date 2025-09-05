@@ -17,12 +17,16 @@ export default function () {
     });
 
     describe('Perform dialog freeze', () => {
-        const r = freezeSO('dialogs/' + dialogId);
+
+        let adminScope = {
+            scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search digdir:dialogporten.serviceprovider.admin"
+        };
+        const r = freezeSO('dialogs/' + dialogId, null , adminScope);
         console.log(r); 
         expectStatusFor(r).to.equal(204);
     });
 
-    describe('Try updated frozen Dialog', () => {
+    describe('Try updated frozen Dialog without admin', () => {
         const patchDocument = [
             {
                 "op": "replace",
@@ -32,6 +36,22 @@ export default function () {
         ];
         const r = patchSO('dialogs/' + dialogId, patchDocument);
         expectStatusFor(r).to.equal(403)
+    });
+
+
+    describe('Try updated frozen Dialog as admin', () => {
+        const patchDocument = [
+            {
+                "op": "replace",
+                "path": "/progress",
+                "value": 98
+            }
+        ];
+        let adminScope = {
+            scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search digdir:dialogporten.serviceprovider.admin",
+        };
+        const r = patchSO('dialogs/' + dialogId, patchDocument, null, adminScope);
+        expectStatusFor(r).to.equal(204)
     });
 
     describe('Clean up dialogs', () => {

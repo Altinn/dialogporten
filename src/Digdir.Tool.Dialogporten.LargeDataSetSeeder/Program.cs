@@ -93,7 +93,7 @@ static async Task EnableDbConstraints(NpgsqlDataSource dataSource)
         var extendedCreateScript = $"""
                    BEGIN;
                    SET LOCAL maintenance_work_mem = '2GB';
-                   {createScript}
+                   {createScript};
                    COMMIT;
                    """;
         await using var cmd = dataSource.CreateCommand(extendedCreateScript);

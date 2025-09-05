@@ -19,7 +19,7 @@ internal class PostgresCopyWriterCoordinator
     public async Task Handle(DateTimeOffset fromDate, DateTimeOffset toDate, int dialogAmount)
     {
         var poolAwaiters = await CreatePoolAwaiters(fromDate, toDate, dialogAmount);
-        await foreach (var poolAwaiterTask in Task.WhenEach(poolAwaiters.Select(x => x.WaitAndReturnPool()).ToList()))
+        await foreach (var poolAwaiterTask in Task.WhenEach(poolAwaiters.Select(x => x.WaitAndReturnPool())))
         {
             var poolAwaiter = await poolAwaiterTask;
             await poolAwaiter.Pool.DisposeAsync();
@@ -45,11 +45,11 @@ internal class PostgresCopyWriterCoordinator
 
     private async Task RedistributeConnections(List<PoolWriter> poolAwaiters)
     {
-        var scalingByType = _typeDistributor.GetDistribution(EntityGeneratorExtensions.Generators.Keys);
-        foreach (var pool in poolAwaiters.Select(x => x.Pool))
-        {
-            await pool.ScaleTo(scalingByType[pool.Type]);
-        }
+        var scalingByType = _typeDistributor
+            .GetDistribution(poolAwaiters.Select(x => x.Pool.Type));
+        await Task.WhenAll(poolAwaiters
+            .Select(x => x.Pool)
+            .Select(x => x.ScaleTo(scalingByType[x.Type])));
     }
 
     private sealed class PoolWriter(Task poolWriterTask, IPostgresCopyWriterPool pool)

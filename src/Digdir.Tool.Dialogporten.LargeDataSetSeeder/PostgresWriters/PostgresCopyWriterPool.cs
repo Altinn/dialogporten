@@ -1,6 +1,6 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
-using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 using Npgsql;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
@@ -106,11 +106,11 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
         _disposed = true;
     }
 
-    private async Task ScaleUp()
+    private Task ScaleUp()
     {
         EnsureNotDisposed();
-        var writer = await PostgresCopyWriter<T>.Create(_dataSource);
-        _workers.Add(new CopyWorker(writer, _channel.Reader.ReadAllAsync()));
+        _workers.Add(new CopyWorker(_dataSource, _channel.Reader));
+        return Task.CompletedTask;
     }
 
     private async Task ScaleDown()
@@ -126,25 +126,50 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
 
     private sealed class CopyWorker : IAsyncDisposable
     {
-        private readonly PostgresCopyWriter<T> _writer;
-        private readonly TaskCompletionSource _completionSource;
+        private const int CopyBatchSize = 10_000_000;
         private readonly Task _writerTask;
+        private readonly CancellationTokenSource _cancellationSource;
 
-        public CopyWorker(PostgresCopyWriter<T> writer, IAsyncEnumerable<T> data)
+        public CopyWorker(NpgsqlDataSource dataSource, ChannelReader<T> reader)
         {
-            _writer = writer;
-            _completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-            _writerTask = Task.Run(async () => await writer.WriteRecords(data.WithTaskCompletionSource(_completionSource)));
+            _cancellationSource = new CancellationTokenSource();
+            _writerTask = Task.Run(async () =>
+            {
+                try
+                {
+                    await using var enumerator = reader
+                        .ReadAllAsync(_cancellationSource.Token)
+                        .GetAsyncEnumerator(_cancellationSource.Token);
+                    while (!_cancellationSource.IsCancellationRequested && !reader.Completion.IsCompleted)
+                    {
+                        await using var writer = await PostgresCopyWriter<T>.Create(dataSource);
+                        var batch = GetGracefulBatchAsync(enumerator, CopyBatchSize, _cancellationSource.Token);
+                        await writer.WriteRecords(batch);
+                        Console.WriteLine($"{DateTimeOffset.UtcNow:O}: Wrote batch of up to {CopyBatchSize} records to {typeof(T).Name}");
+                    }
+                }
+                catch (OperationCanceledException) { /* Ignore cancellation */ }
+            });
         }
 
         public async ValueTask DisposeAsync()
         {
-            // Signal it to finish gracefully
-            _completionSource.TrySetResult();
-            // Wait for postgres writing to complete
+            await _cancellationSource.CancelAsync();
             await _writerTask;
-            // Dispose the writer
-            await _writer.DisposeAsync();
+            _cancellationSource.Dispose();
+        }
+
+        private static async IAsyncEnumerable<T> GetGracefulBatchAsync(
+            IAsyncEnumerator<T> enumerator,
+            int batchSize,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            var count = 0;
+            while (count++ < batchSize && !cancellationToken.IsCancellationRequested)
+            {
+                if (!await enumerator.MoveNextAsync()) yield break;
+                yield return enumerator.Current;
+            }
         }
     }
 }

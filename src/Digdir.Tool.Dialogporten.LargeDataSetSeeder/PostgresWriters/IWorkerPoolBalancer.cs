@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.PostgresWriters;
 
 internal interface IWorkerPool
@@ -9,7 +11,7 @@ internal interface IWorkerPool
 
 internal interface IWorkerPoolBalancer
 {
-    Dictionary<IWorkerPool, int> CalculateBalanceByType(IEnumerable<IWorkerPool> types);
+    ReadOnlyDictionary<IWorkerPool, int> CalculateBalanceByType(IEnumerable<IWorkerPool> workerPools);
 }
 
 internal sealed class EvenWorkerPoolBalancer : IWorkerPoolBalancer
@@ -22,27 +24,27 @@ internal sealed class EvenWorkerPoolBalancer : IWorkerPoolBalancer
         _maxConnections = maxConnections;
     }
 
-    public Dictionary<IWorkerPool, int> CalculateBalanceByType(IEnumerable<IWorkerPool> types)
+    public ReadOnlyDictionary<IWorkerPool, int> CalculateBalanceByType(IEnumerable<IWorkerPool> workerPools)
     {
-        var workerPools = types.ToArray();
+        var wp = workerPools.ToArray();
         var result = new Dictionary<IWorkerPool, int>();
-        var count = workerPools.Length;
+        var count = wp.Length;
         var baseShare = _maxConnections / count;
         var remainder = _maxConnections % count;
 
         for (var i = 0; i < count; i++)
         {
-            var workerPool = workerPools[i];
+            var workerPool = wp[i];
             var allocation = baseShare + (i < remainder ? 1 : 0);
             result[workerPool] = allocation;
         }
 
-        return result;
+        return result.AsReadOnly();
     }
 }
 
 internal sealed class ConstantWorkerPoolBalancer(int constant) : IWorkerPoolBalancer
 {
-    public Dictionary<IWorkerPool, int> CalculateBalanceByType(IEnumerable<IWorkerPool> types) =>
-        types.ToDictionary(x => x, _ => constant);
+    public ReadOnlyDictionary<IWorkerPool, int> CalculateBalanceByType(IEnumerable<IWorkerPool> workerPools) =>
+        workerPools.ToDictionary(x => x, _ => constant).AsReadOnly();
 }

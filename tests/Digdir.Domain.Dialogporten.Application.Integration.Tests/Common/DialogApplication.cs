@@ -36,6 +36,7 @@ public class DialogApplication : IAsyncLifetime
     private IMapper? _mapper;
     private Respawner _respawner = null!;
     private ServiceProvider _rootProvider = null!;
+    private IServiceCollection _rootCollection = null!;
     private ServiceProvider _fixtureRootProvider = null!;
     private readonly List<object> _publishedEvents = [];
 
@@ -80,9 +81,16 @@ public class DialogApplication : IAsyncLifetime
 
         var serviceCollection = BuildServiceCollection();
         configure(serviceCollection);
+        _rootCollection = serviceCollection;
         _rootProvider = serviceCollection.BuildServiceProvider();
     }
 
+    public void ConfigureServicesAnyWaysBecauseYouCantStopMe(Action<IServiceCollection> configure)
+    {
+        var serviceCollection = _rootCollection;
+        configure(serviceCollection);
+        _rootProvider = serviceCollection.BuildServiceProvider();
+    }
     private IServiceCollection BuildServiceCollection()
     {
         var serviceCollection = new ServiceCollection();

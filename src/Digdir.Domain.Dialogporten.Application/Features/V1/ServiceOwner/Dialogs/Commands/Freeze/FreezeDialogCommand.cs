@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,9 +26,12 @@ public sealed partial class FreezeDialogResult : OneOfBase<Success, EntityNotFou
 internal sealed class FreezeDialogCommandHandler(
     IDialogDbContext db,
     IUnitOfWork unitOfWork,
-    IUserResourceRegistry userResourceRegistry
+    IUserResourceRegistry userResourceRegistry,
+    IUser user
 ) : IRequestHandler<FreezeDialogCommand, FreezeDialogResult>
 {
+    [SuppressMessage("Style", "IDE0052:Remove unread private members")]
+    private readonly IUser _user = user ?? throw new ArgumentNullException(nameof(user));
     private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
     private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     private readonly IUserResourceRegistry _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
@@ -36,8 +41,12 @@ internal sealed class FreezeDialogCommandHandler(
 
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
+        if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            // Amund: husk
+            return new Forbidden($".");
+        }
         var dialog = await _db.Dialogs
-            .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
@@ -52,18 +61,12 @@ internal sealed class FreezeDialogCommandHandler(
         //     return new EntityDeleted<DialogEntity>(request.Id);
         // }
 
-        if (!_userResourceRegistry.UserCanModifyResourceType(dialog.ServiceResourceType))
-        {
-            return new Forbidden($"User cannot modify resource type {dialog.ServiceResourceType}.");
-        }
-
         if (dialog.Frozen)
         {
             return new Success();
         }
 
         dialog.Frozen = true;
-        _db.Dialogs.Update(dialog);
 
         var saveResult = await _unitOfWork
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)

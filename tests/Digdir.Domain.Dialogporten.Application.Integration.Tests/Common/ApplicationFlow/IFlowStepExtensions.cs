@@ -118,6 +118,7 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+
     public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<CreateDialogResult> step,
         Action<PurgeDialogCommand>? modify = null) =>
         step.AssertResult<CreateDialogSuccess>()
@@ -131,6 +132,11 @@ public static class IFlowStepExtensions
                 modify?.Invoke(command);
                 return command;
             });
+    public static IFlowStep ConfigThingy(this IFlowStep step, Action<DialogApplication> configuration)
+    {
+        configuration(step.Context.Application);
+        return step;
+    }
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()

@@ -30,11 +30,6 @@ public class ParquetFileService
         );
 
         using var memoryStream = new MemoryStream();
-#pragma warning disable CA2016 // ParquetWriter.CreateAsync doesn't support cancellation tokens
-        using var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream);
-#pragma warning restore CA2016
-
-        var rowGroup = parquetWriter.CreateRowGroup();
 
         // Extract data arrays
         var environments = records.Select(r => r.Environment).ToArray();
@@ -45,14 +40,21 @@ public class ParquetFileService
         var counts = records.Select(r => r.Count).ToArray();
         var relativeResourceUsage = records.Select(r => r.RelativeResourceUsage).ToArray();
 
-        // Write columns
-        await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[0], environments), cancellationToken);
-        await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[1], services), cancellationToken);
-        await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[2], serviceOwnerCodes), cancellationToken);
-        await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[3], transactionTypes), cancellationToken);
-        await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[4], failedFlags), cancellationToken);
-        await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[5], counts), cancellationToken);
-        await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[6], relativeResourceUsage), cancellationToken);
+#pragma warning disable CA2016 // ParquetWriter.CreateAsync doesn't support cancellation tokens
+        using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream))
+        {
+            using var rowGroup = parquetWriter.CreateRowGroup();
+
+            // Write columns
+            await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[0], environments), cancellationToken);
+            await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[1], services), cancellationToken);
+            await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[2], serviceOwnerCodes), cancellationToken);
+            await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[3], transactionTypes), cancellationToken);
+            await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[4], failedFlags), cancellationToken);
+            await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[5], counts), cancellationToken);
+            await rowGroup.WriteColumnAsync(new DataColumn(schema.DataFields[6], relativeResourceUsage), cancellationToken);
+        }
+#pragma warning restore CA2016
 
         _logger.LogInformation("Generated Parquet file with {FileSize} bytes", memoryStream.Length);
         return memoryStream.ToArray();

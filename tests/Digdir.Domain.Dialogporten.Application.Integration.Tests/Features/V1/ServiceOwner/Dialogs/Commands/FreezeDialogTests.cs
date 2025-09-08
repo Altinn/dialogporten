@@ -1,16 +1,14 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Freeze;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Microsoft.Azure.Amqp.Framing;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using OneOf;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
@@ -34,6 +32,29 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
             })
             .UpdateDialog(x => x.Dto.Progress = 98)
             .ExecuteAndAssert<Forbidden>();
+
+
+    [Fact]
+    public async Task FreezeDialogCommand_Should_Return_New_Revision()
+    {
+        Guid? originalRevision = null;
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.ServiceResource = "urn:altinn:resource:SuperKulTest")
+            .AssertResult<CreateDialogSuccess>(x =>
+            {
+                x.Revision.Should().NotBeEmpty();
+                originalRevision = x.Revision;
+            })
+            .SendCommand((_, ctx) => new FreezeDialogCommand
+            {
+                Id = ctx.GetDialogId()
+            })
+            .ExecuteAndAssert<FreezeDialogSuccess>(x =>
+            {
+                x.Revision.Should().NotBeEmpty();
+                x.Revision.Should().NotBe(originalRevision!.Value);
+            });
+    }
 }
 
 internal sealed class TestUserResourceRegistry(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry

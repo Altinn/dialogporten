@@ -7398,7 +7398,16 @@
         ],
         "responses": {
           "204": {
-            "description": "The dialog aggregate was frozen successfully."
+            "description": "The dialog aggregate was frozen successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the dialog",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "content": {

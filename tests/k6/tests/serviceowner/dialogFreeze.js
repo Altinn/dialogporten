@@ -23,8 +23,8 @@ export default function () {
         };
         const r = freezeSO('dialogs/' + dialogId, null , adminScope);
         console.log(r); 
-        expectStatusFor(r).to.equal(204);
-    });
+    expectStatusFor(r).to.equal(204);
+});
 
     describe('Try updated frozen Dialog without admin', () => {
         const patchDocument = [

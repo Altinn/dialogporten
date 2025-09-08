@@ -21,7 +21,7 @@ public sealed class FreezeDialogCommand : IRequest<FreezeDialogResult>
 }
 
 [GenerateOneOf]
-public sealed partial class FreezeDialogResult : OneOfBase<FreezeDialogSuccess, EntityNotFound, Forbidden, ConcurrencyError>;
+public sealed partial class FreezeDialogResult : OneOfBase<FreezeDialogSuccess, EntityNotFound, EntityDeleted, Forbidden, ConcurrencyError>;
 
 public sealed record FreezeDialogSuccess(Guid Revision);
 
@@ -50,11 +50,10 @@ internal sealed class FreezeDialogCommandHandler(
             return new EntityNotFound<DialogEntity>(request.Id);
         }
 
-        // Amund: Skal du kunne freeze slettet dialoger?
-        // if (dialog.Deleted)
-        // {
-        //     return new EntityDeleted<DialogEntity>(request.Id);
-        // }
+        if (dialog.Deleted)
+        {
+            return new EntityDeleted<DialogEntity>(request.Id);
+        }
 
         if (dialog.Frozen)
         {

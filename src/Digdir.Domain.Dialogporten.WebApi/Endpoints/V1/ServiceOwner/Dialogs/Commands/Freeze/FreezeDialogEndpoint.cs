@@ -24,6 +24,7 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
             StatusCodes.Status404NotFound,
+            StatusCodes.Status410Gone,
             StatusCodes.Status412PreconditionFailed));
     }
     public override async Task HandleAsync(FreezeDialogRequest req, CancellationToken ct)
@@ -42,6 +43,7 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
                 return SendNoContentAsync(ct);
             },
             entityNotFound => this.NotFoundAsync(entityNotFound, ct),
+            deleted => this.GoneAsync(deleted, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             concurrencyError => this.PreconditionFailed(ct));
     }

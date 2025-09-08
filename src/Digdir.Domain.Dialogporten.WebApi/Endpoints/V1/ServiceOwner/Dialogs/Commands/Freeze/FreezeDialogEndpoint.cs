@@ -36,7 +36,11 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
 
         var result = await _sender.Send(command, ct);
         await result.Match(
-            success => SendNoContentAsync(ct),
+            success =>
+            {
+                HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
+                return SendNoContentAsync(ct);
+            },
             entityNotFound => this.NotFoundAsync(entityNotFound, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             concurrencyError => this.PreconditionFailed(ct));

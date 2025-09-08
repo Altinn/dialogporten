@@ -21,7 +21,9 @@ public sealed class FreezeDialogCommand : IRequest<FreezeDialogResult>
 }
 
 [GenerateOneOf]
-public sealed partial class FreezeDialogResult : OneOfBase<Success, EntityNotFound, Forbidden, ConcurrencyError>;
+public sealed partial class FreezeDialogResult : OneOfBase<FreezeDialogSuccess, EntityNotFound, Forbidden, ConcurrencyError>;
+
+public sealed record FreezeDialogSuccess(Guid Revision);
 
 internal sealed class FreezeDialogCommandHandler(
     IDialogDbContext db,
@@ -56,7 +58,7 @@ internal sealed class FreezeDialogCommandHandler(
 
         if (dialog.Frozen)
         {
-            return new Success();
+            return new FreezeDialogSuccess(dialog.Revision);
         }
 
         dialog.Frozen = true;
@@ -66,7 +68,7 @@ internal sealed class FreezeDialogCommandHandler(
             .SaveChangesAsync(cancellationToken);
 
         return saveResult.Match<FreezeDialogResult>(
-            success => new Success(),
+            success => new FreezeDialogSuccess(dialog.Revision),
             domainError => throw new UnreachableException("Should never get a domain error when freezing a dialog"),
             concurrencyError => concurrencyError);
     }

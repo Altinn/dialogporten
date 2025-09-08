@@ -23,8 +23,7 @@ internal static partial class FluentValidationStringExtensions
 
     public static IRuleBuilderOptions<T, string?> IsValidHttpsUrl<T>(this IRuleBuilder<T, string?> ruleBuilder) =>
         ruleBuilder
-            .Must(x => x is null ||
-                       (Uri.TryCreate(x, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps))
+            .Must(x => x is null || (Uri.TryCreate(x, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps))
             .WithMessage("'{PropertyName}' is not a well-formatted HTTPS URL.");
 
     public static IRuleBuilderOptions<T, Uri?> IsValidHttpsUrl<T>(this IRuleBuilder<T, Uri?> ruleBuilder) =>

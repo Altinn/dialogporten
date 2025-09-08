@@ -164,6 +164,9 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Filter by status")]
     public List<DialogStatus>? Status { get; init; }
 
+    [GraphQLDescription("Filter by process")]
+    public string? Process { get; init; }
+
     [GraphQLDescription("Filter by system label")]
     public List<SystemLabel>? SystemLabel { get; init; }
 

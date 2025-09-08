@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.80.3](https://github.com/Altinn/dialogporten/compare/v1.80.2...v1.80.3) (2025-09-05)
+
+
+### Bug Fixes
+
+* **graphql:** Add missing Process filter on search ([#2706](https://github.com/Altinn/dialogporten/issues/2706)) ([c3af05c](https://github.com/Altinn/dialogporten/commit/c3af05c72e0da5ff00c056c4e5cfdf7703d4497c))
+
+## [1.80.2](https://github.com/Altinn/dialogporten/compare/v1.80.1...v1.80.2) (2025-09-03)
+
+
+### Bug Fixes
+
+* **infra:** revert long term backup for postgresql ([#2694](https://github.com/Altinn/dialogporten/issues/2694)) ([441b25d](https://github.com/Altinn/dialogporten/commit/441b25d677e5169c530452700d8478836bb1f0fa)), closes [#2607](https://github.com/Altinn/dialogporten/issues/2607)
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v5 ([#2702](https://github.com/Altinn/dialogporten/issues/2702)) ([c82484d](https://github.com/Altinn/dialogporten/commit/c82484d935a6f5f0b253dbb72a64bf8c53223d11))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.133.0 ([#2700](https://github.com/Altinn/dialogporten/issues/2700)) ([c4f03e6](https://github.com/Altinn/dialogporten/commit/c4f03e6f7491b80dba3b7fe40f8e1c3a06dc8606))
+* **deps:** update postgres docker tag to v16.9 ([#2701](https://github.com/Altinn/dialogporten/issues/2701)) ([5ae9939](https://github.com/Altinn/dialogporten/commit/5ae9939f257d37d0b5a02fdda7fae45c9c7c1e17))
+
 ## [1.80.1](https://github.com/Altinn/dialogporten/compare/v1.80.0...v1.80.1) (2025-08-28)
 
 

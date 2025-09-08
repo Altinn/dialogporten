@@ -7435,6 +7435,9 @@
             },
             "description": "The given dialog ID was not found."
           },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
+          },
           "412": {
             "content": {
               "application/problem\u002Bjson": {

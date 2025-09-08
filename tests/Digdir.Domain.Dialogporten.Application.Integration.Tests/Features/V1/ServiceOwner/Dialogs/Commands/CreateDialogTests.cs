@@ -229,16 +229,12 @@ public class CreateDialogTests : ApplicationCollectionFixture
                     <table>
                       <thead>
                         <tr>
-                          <th>table</th>
-                          <th>thead</th>
-                          <th>th</th>
+                          <th>table head</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
                           <td>tr</td>
-                          <td>td</td>
-                          <td>tbody</td>
                         </tr>
                       </tbody>
                     </table>

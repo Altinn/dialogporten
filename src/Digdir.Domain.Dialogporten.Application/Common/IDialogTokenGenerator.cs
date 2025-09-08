@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -41,30 +42,50 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         _compactJwsGenerator = compactJwsGenerator ?? throw new ArgumentNullException(nameof(compactJwsGenerator));
     }
 
-    public string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult, string issuerVersion)
+    public string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult,
+        string issuerVersion)
     {
         var claimsPrincipal = _user.GetPrincipal();
         var now = _clock.UtcNowOffset.ToUnixTimeSeconds();
+        var endUserPartyIdentifier = claimsPrincipal.GetEndUserPartyIdentifier();
 
-        var claims = new Dictionary<string, object?>
+        var claims = new Dictionary<string, object?>(15)
         {
-            { DialogTokenClaimTypes.JwtId, Guid.NewGuid() },
-            { DialogTokenClaimTypes.AuthenticatedParty, GetAuthenticatedParty() },
-            { DialogTokenClaimTypes.AuthenticationLevel, claimsPrincipal.GetAuthenticationLevel() },
-            { DialogTokenClaimTypes.DialogParty, dialog.Party },
-            { DialogTokenClaimTypes.ServiceResource, dialog.ServiceResource },
-            { DialogTokenClaimTypes.DialogId, dialog.Id },
-            { DialogTokenClaimTypes.Actions, GetAuthorizedActions(authorizationResult) },
-            { DialogTokenClaimTypes.Issuer, _applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + issuerVersion },
-            { DialogTokenClaimTypes.IssuedAt, now },
-            { DialogTokenClaimTypes.NotBefore, now },
-            { DialogTokenClaimTypes.Expires, now + (long)_tokenLifetime.TotalSeconds }
+            [DialogTokenClaimTypes.JwtId] = Guid.NewGuid()
         };
 
+        // If we have authenticated a system user, we want the consumer organization number as the authenticated party
+        // and adding the system user identifier as a separate claim along with the system user's organization.
+        if (endUserPartyIdentifier is SystemUserIdentifier
+            && claimsPrincipal.TryGetConsumerOrgNumber(out var consumerOrgNumber)
+            && claimsPrincipal.TryGetSystemUserOrgNumber(out var systemUserOrgNumber))
+        {
+            claims[DialogTokenClaimTypes.AuthenticatedParty] = NorwegianOrganizationIdentifier.PrefixWithSeparator + consumerOrgNumber;
+            claims[DialogTokenClaimTypes.SystemUserId] = endUserPartyIdentifier.FullId;
+            claims[DialogTokenClaimTypes.SystemUserOrg] = NorwegianOrganizationIdentifier.PrefixWithSeparator + systemUserOrgNumber;
+        }
+        else
+        {
+            claims[DialogTokenClaimTypes.AuthenticatedParty] = endUserPartyIdentifier is not null
+                ? endUserPartyIdentifier.FullId
+                : throw new UnreachableException("Cannot create dialog token - missing end user claims.");
+        }
+
+        // If we have a supplier organization number from Maskinporten delegation ("supplier"), add it as a separate claim.
         if (claimsPrincipal.TryGetSupplierOrgNumber(out var supplierOrgNumber))
         {
-            claims.Add(DialogTokenClaimTypes.SupplierParty, NorwegianOrganizationIdentifier.PrefixWithSeparator + supplierOrgNumber);
+            claims[DialogTokenClaimTypes.SupplierParty] = NorwegianOrganizationIdentifier.PrefixWithSeparator + supplierOrgNumber;
         }
+
+        claims[DialogTokenClaimTypes.AuthenticationLevel] = claimsPrincipal.GetAuthenticationLevel();
+        claims[DialogTokenClaimTypes.DialogParty] = dialog.Party;
+        claims[DialogTokenClaimTypes.ServiceResource] = dialog.ServiceResource;
+        claims[DialogTokenClaimTypes.DialogId] = dialog.Id;
+        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(authorizationResult);
+        claims[DialogTokenClaimTypes.Issuer] = _applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + issuerVersion;
+        claims[DialogTokenClaimTypes.IssuedAt] = now;
+        claims[DialogTokenClaimTypes.NotBefore] = now;
+        claims[DialogTokenClaimTypes.Expires] = now + (long)_tokenLifetime.TotalSeconds;
 
         return _compactJwsGenerator.GetCompactJws(claims);
     }
@@ -93,21 +114,6 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
 
         return actions.ToString();
     }
-
-    private string GetAuthenticatedParty()
-    {
-        if (_user.TryGetPid(out var pid))
-        {
-            return NorwegianPersonIdentifier.PrefixWithSeparator + pid;
-        }
-
-        if (_user.TryGetOrganizationNumber(out var orgNumber))
-        {
-            return NorwegianOrganizationIdentifier.PrefixWithSeparator + orgNumber;
-        }
-
-        throw new InvalidOperationException("User must have either pid or org number");
-    }
 }
 
 public static class DialogTokenClaimTypes
@@ -121,6 +127,8 @@ public static class DialogTokenClaimTypes
     public const string AuthenticatedParty = "c";
     public const string DialogParty = "p";
     public const string SupplierParty = "u";
+    public const string SystemUserId = "y";
+    public const string SystemUserOrg = "o";
     public const string ServiceResource = "s";
     public const string DialogId = "i";
     public const string Actions = "a";

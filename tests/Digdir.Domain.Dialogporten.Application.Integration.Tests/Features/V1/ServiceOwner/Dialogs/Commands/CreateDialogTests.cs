@@ -219,6 +219,33 @@ public class CreateDialogTests : ApplicationCollectionFixture
         }]
     };
 
+    private static ContentValueDto CreateTableHtml() => new()
+    {
+        MediaType = MediaTypes.LegacyHtml,
+        Value = [new()
+        {
+            LanguageCode = "nb",
+            Value = """
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>table</th>
+                          <th>thead</th>
+                          <th>th</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>tr</td>
+                          <td>td</td>
+                          <td>tbody</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    """
+        }]
+    };
+
     private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>
     {
         public HtmlContentTestData()
@@ -231,6 +258,11 @@ public class CreateDialogTests : ApplicationCollectionFixture
             Add("Can create dialog with HTML content with valid html scope",
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
                 x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                typeof(CreateDialogSuccess));
+
+            Add("Can create HTML content with table tag with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateTableHtml(),
                 typeof(CreateDialogSuccess));
 
             Add("Cannot create dialog with forbidden HTML tags: iframe",

@@ -125,7 +125,7 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
 
     private sealed class CopyWorker : IAsyncDisposable
     {
-        private const int CopyBatchSize = 10_000_000;
+        private const int CopyBatchSize = int.MaxValue;
         private readonly Task _writerTask;
         private readonly CancellationTokenSource _cancellationSource;
 
@@ -144,7 +144,6 @@ internal sealed class PostgresCopyWriterPool<T> : IPostgresCopyWriterPool where 
                         await using var writer = await PostgresCopyWriter<T>.Create(dataSource);
                         var batch = GetGracefulBatchAsync(enumerator, CopyBatchSize, _cancellationSource.Token);
                         await writer.WriteRecords(batch);
-                        Console.WriteLine($"{DateTimeOffset.UtcNow:O}: Wrote batch of up to {CopyBatchSize} records to {typeof(T).Name}");
                     }
                 }
                 catch (OperationCanceledException) { /* Ignore cancellation */ }

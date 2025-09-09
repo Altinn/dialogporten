@@ -29,6 +29,11 @@ internal sealed class EvenWorkerPoolBalancer : IWorkerPoolBalancer
         var wp = workerPools.ToArray();
         var result = new Dictionary<IWorkerPool, int>();
         var count = wp.Length;
+        if (count == 0)
+        {
+            return new ReadOnlyDictionary<IWorkerPool, int>(result);
+        }
+
         var baseShare = _maxConnections / count;
         var remainder = _maxConnections % count;
 

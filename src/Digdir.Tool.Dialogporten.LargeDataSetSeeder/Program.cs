@@ -51,7 +51,7 @@ static async Task EnsureFreshDb(string connectionString)
         .AsNoTracking()
         .ToListAsync();
     await db.Database.EnsureDeletedAsync();
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
     db.SubjectResources.AddRange(subjectResources);
     await db.SaveChangesAsync();
 }

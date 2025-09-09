@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.80.5](https://github.com/Altinn/dialogporten/compare/v1.80.4...v1.80.5) (2025-09-09)
+
+
+### Miscellaneous Chores
+
+* **graphql:** Revert HotChocolate upgrade ([#2727](https://github.com/Altinn/dialogporten/issues/2727)) ([092360b](https://github.com/Altinn/dialogporten/commit/092360be8314face2e6b9fd4553f974d63914730))
+
 ## [1.80.4](https://github.com/Altinn/dialogporten/compare/v1.80.3...v1.80.4) (2025-09-09)
 
 

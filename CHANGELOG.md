@@ -9,7 +9,6 @@
 * **deps:** update actions/setup-dotnet action to v5 ([#2733](https://github.com/Altinn/dialogporten/issues/2733)) ([b854ce3](https://github.com/Altinn/dialogporten/commit/b854ce38f54b7878eee7b026b7d6028ade001993))
 * **deps:** update dependency uuidnext to 4.2.0 ([#2732](https://github.com/Altinn/dialogporten/issues/2732)) ([07bfcaf](https://github.com/Altinn/dialogporten/commit/07bfcafbb85ed494894e234afcef29b318cebbf4))
 * **deps:** update dotnet monorepo ([#2730](https://github.com/Altinn/dialogporten/issues/2730)) ([c831441](https://github.com/Altinn/dialogporten/commit/c831441e0db41e80b116a2ae2d5abf9c14fb9bf7))
-* **deps:** update hotchocolate monorepo to 15.1.10 ([#2731](https://github.com/Altinn/dialogporten/issues/2731)) ([c748cda](https://github.com/Altinn/dialogporten/commit/c748cdab89a5bb42248be7a4326487c092648af1))
 
 ## [1.80.5](https://github.com/Altinn/dialogporten/compare/v1.80.4...v1.80.5) (2025-09-09)
 

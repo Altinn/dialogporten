@@ -26,7 +26,7 @@ public class PrometheusService
         var endTimestamp = new DateTimeOffset(targetDate.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds();
 
         var query = "dialogporten_transactions_total";
-        var prometheusUrl = $"{_options.PrometheusBaseUrl}/api/v1/query_range?query={Uri.EscapeDataString(query)}&start={startTimestamp}&end={endTimestamp}&step=3600";
+        var prometheusUrl = $"{_options.PrometheusBaseUrl}/api/v1/query_range?query={Uri.EscapeDataString(query)}&start={startTimestamp}&end={endTimestamp}&step=60";
 
         _logger.LogInformation("Querying Prometheus for {Environment} from {StartTime} to {EndTime}",
             environment, DateTimeOffset.FromUnixTimeSeconds(startTimestamp), DateTimeOffset.FromUnixTimeSeconds(endTimestamp));
@@ -66,12 +66,29 @@ public class PrometheusService
                 var httpStatusCode = metric.TryGetProperty("http_status_code", out var hsc) ? hsc.GetString() ?? "unknown" : "unknown";
 
                 long totalCount = 0;
-                foreach (var value in values.EnumerateArray())
+                var valuesList = values.EnumerateArray().ToList();
+
+                // For counter metrics, we want the difference between last and first values
+                if (valuesList.Count >= 2)
                 {
-                    if (value.GetArrayLength() >= 2 &&
-                        long.TryParse(value[1].GetString(), System.Globalization.CultureInfo.InvariantCulture, out var count))
+                    var firstValue = valuesList.First();
+                    var lastValue = valuesList.Last();
+
+                    if (firstValue.GetArrayLength() >= 2 && lastValue.GetArrayLength() >= 2 &&
+                        long.TryParse(firstValue[1].GetString(), System.Globalization.CultureInfo.InvariantCulture, out var startCount) &&
+                        long.TryParse(lastValue[1].GetString(), System.Globalization.CultureInfo.InvariantCulture, out var endCount))
                     {
-                        totalCount += count;
+                        totalCount = Math.Max(0, endCount - startCount); // Ensure non-negative in case of counter resets
+                    }
+                }
+                else if (valuesList.Count == 1)
+                {
+                    // If only one data point, use that value as the count for the period
+                    var singleValue = valuesList.First();
+                    if (singleValue.GetArrayLength() >= 2 &&
+                        long.TryParse(singleValue[1].GetString(), System.Globalization.CultureInfo.InvariantCulture, out var count))
+                    {
+                        totalCount = count;
                     }
                 }
 

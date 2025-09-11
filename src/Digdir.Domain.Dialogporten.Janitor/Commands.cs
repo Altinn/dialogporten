@@ -47,7 +47,7 @@ internal static class Commands
                 [FromService] CoconaAppContext ctx,
                 [FromService] IHostEnvironment hostEnvironment,
                 [FromService] AzureMonitorService azureMonitorService,
-                [FromService] PrometheusService prometheusService,
+                [FromService] OpenTelemetryMetricsService openTelemetryMetricsService,
                 [FromService] MetricsAggregationService aggregationService,
                 [FromService] ParquetFileService parquetService,
                 [FromService] AzureStorageService storageService,
@@ -74,9 +74,7 @@ internal static class Commands
                     {
                         logger.LogInformation("Querying metrics for environment {Environment}", environment);
 
-                        var records = config.UsePrometheus
-                            ? await prometheusService.QueryCostMetricsAsync(date, environment, ctx.CancellationToken)
-                            : await azureMonitorService.QueryCostMetricsAsync(date, environment, ctx.CancellationToken);
+                        var records = await openTelemetryMetricsService.QueryCostMetricsAsync(date, environment, ctx.CancellationToken);
 
                         allRecords.AddRange(records);
                     }

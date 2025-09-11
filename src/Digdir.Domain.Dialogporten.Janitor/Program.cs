@@ -52,6 +52,7 @@ static void BuildAndRun(string[] args)
 
     builder.Configuration
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddJsonFile("cost-coefficients.json", optional: false, reloadOnChange: true)
         .AddUserSecrets<Program>()
         .AddLocalConfiguration(builder.Environment);
     builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -85,6 +86,13 @@ static void BuildAndRun(string[] args)
         .ValidateDataAnnotations()
         .ValidateOnStart();
 
+    // Add cost coefficients configuration
+    builder.Services
+        .AddOptions<CostCoefficientsOptions>()
+        .Bind(builder.Configuration.GetSection(CostCoefficientsOptions.SectionName))
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+
     builder.Services.AddSingleton(provider =>
     {
         var credential = new DefaultAzureCredential();
@@ -102,8 +110,11 @@ static void BuildAndRun(string[] args)
     });
 
     builder.Services.AddHttpClient<PrometheusService>();
+    builder.Services.AddHttpClient<OpenTelemetryMetricsService>();
     builder.Services.AddSingleton<AzureMonitorService>();
     builder.Services.AddSingleton<PrometheusService>();
+    builder.Services.AddSingleton<OpenTelemetryMetricsService>();
+    builder.Services.AddSingleton<CostCoefficients>();
     builder.Services.AddSingleton<MetricsAggregationService>();
     builder.Services.AddSingleton<ParquetFileService>();
     builder.Services.AddSingleton<AzureStorageService>();

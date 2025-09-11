@@ -17,6 +17,7 @@ public sealed class Subscriptions
     {
         ArgumentNullException.ThrowIfNull(dialogId);
         ArgumentNullException.ThrowIfNull(eventMessage);
+
         return eventMessage;
     }
 }

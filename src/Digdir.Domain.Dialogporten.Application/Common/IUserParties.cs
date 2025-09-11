@@ -21,10 +21,11 @@ public sealed class UserParties : IUserParties
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public Task<AuthorizedPartiesResult> GetUserParties(CancellationToken cancellationToken = default) =>
-        _user.TryGetPid(out var pid) &&
-        NorwegianPersonIdentifier.TryParse(NorwegianPersonIdentifier.PrefixWithSeparator + pid,
-            out var partyIdentifier)
+    public Task<AuthorizedPartiesResult> GetUserParties(CancellationToken cancellationToken = default)
+    {
+        var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifier();
+        return partyIdentifier != null
             ? _altinnAuthorization.GetAuthorizedParties(partyIdentifier, cancellationToken: cancellationToken)
             : Task.FromResult(new AuthorizedPartiesResult());
+    }
 }

@@ -187,7 +187,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
     {
-        if (!_user.TryGetOrganizationNumber(out var organizationNumber))
+        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
         {
             _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
             return;

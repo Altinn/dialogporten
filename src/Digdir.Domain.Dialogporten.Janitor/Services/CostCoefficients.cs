@@ -1,26 +1,35 @@
+using Microsoft.Extensions.Options;
+
 namespace Digdir.Domain.Dialogporten.Janitor.Services;
 
-public static class CostCoefficients
+public class CostCoefficients
 {
-    public static readonly Dictionary<TransactionType, decimal> Coefficients = new()
-    {
-        { TransactionType.CreateDialog, 1.5m },
-        { TransactionType.UpdateDialog, 1.2m },
-        { TransactionType.SoftDeleteDialog, 1.0m },
-        { TransactionType.HardDeleteDialog, 1.0m },
-        { TransactionType.GetDialogServiceOwner, 1.0m },
-        { TransactionType.GetDialogEndUser, 1.0m },
-        { TransactionType.SearchDialogsServiceOwner, 2.0m },
-        { TransactionType.SearchDialogsServiceOwnerWithEndUser, 2.2m },
-        { TransactionType.SearchDialogsEndUser, 2.5m },
-        { TransactionType.SetDialogLabel, 1.0m },
-        { TransactionType.BulkSetLabelsServiceOwnerWithEndUser, 3.0m },
-        { TransactionType.BulkSetLabelsEndUser, 3.5m }
-    };
+    private readonly CostCoefficientsOptions _options;
+    private readonly Dictionary<TransactionType, decimal> _coefficients;
 
-    public static decimal GetCoefficient(TransactionType transactionType)
+    public CostCoefficients(IOptions<CostCoefficientsOptions> options)
     {
-        return Coefficients.TryGetValue(transactionType, out var coefficient) ? coefficient : 1.0m;
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _coefficients = new Dictionary<TransactionType, decimal>
+        {
+            { TransactionType.CreateDialog, _options.CreateDialog },
+            { TransactionType.UpdateDialog, _options.UpdateDialog },
+            { TransactionType.SoftDeleteDialog, _options.SoftDeleteDialog },
+            { TransactionType.HardDeleteDialog, _options.HardDeleteDialog },
+            { TransactionType.GetDialogServiceOwner, _options.GetDialogServiceOwner },
+            { TransactionType.GetDialogEndUser, _options.GetDialogEndUser },
+            { TransactionType.SearchDialogsServiceOwner, _options.SearchDialogsServiceOwner },
+            { TransactionType.SearchDialogsServiceOwnerWithEndUser, _options.SearchDialogsServiceOwnerWithEndUser },
+            { TransactionType.SearchDialogsEndUser, _options.SearchDialogsEndUser },
+            { TransactionType.SetDialogLabel, _options.SetDialogLabel },
+            { TransactionType.BulkSetLabelsServiceOwnerWithEndUser, _options.BulkSetLabelsServiceOwnerWithEndUser },
+            { TransactionType.BulkSetLabelsEndUser, _options.BulkSetLabelsEndUser }
+        };
+    }
+
+    public decimal GetCoefficient(TransactionType transactionType)
+    {
+        return _coefficients.TryGetValue(transactionType, out var coefficient) ? coefficient : 1.0m;
     }
 
     public static string GetNorwegianName(TransactionType transactionType)

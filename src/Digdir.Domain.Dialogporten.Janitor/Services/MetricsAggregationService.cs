@@ -5,10 +5,12 @@ namespace Digdir.Domain.Dialogporten.Janitor.Services;
 public class MetricsAggregationService
 {
     private readonly ILogger<MetricsAggregationService> _logger;
+    private readonly CostCoefficients _costCoefficients;
 
-    public MetricsAggregationService(ILogger<MetricsAggregationService> logger)
+    public MetricsAggregationService(ILogger<MetricsAggregationService> logger, CostCoefficients costCoefficients)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _costCoefficients = costCoefficients ?? throw new ArgumentNullException(nameof(costCoefficients));
     }
 
     public List<AggregatedMetricsRecord> AggregateMetrics(List<MetricsRecord> rawMetrics)
@@ -32,7 +34,7 @@ public class MetricsAggregationService
                 TransactionType = CostCoefficients.GetNorwegianName(ParseTransactionType(group.Key.TransactionType)),
                 Failed = group.Key.Failed ? "Yes" : "No",
                 Count = group.Sum(r => r.Count),
-                RelativeResourceUsage = group.Sum(r => r.Count * CostCoefficients.GetCoefficient(ParseTransactionType(group.Key.TransactionType)))
+                RelativeResourceUsage = group.Sum(r => r.Count * _costCoefficients.GetCoefficient(ParseTransactionType(group.Key.TransactionType)))
             })
             .OrderBy(r => r.Environment)
             .ThenBy(r => r.ServiceOwnerCode)

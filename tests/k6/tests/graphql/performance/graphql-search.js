@@ -43,6 +43,5 @@ export default function(data) {
     const endUser = randomItem(Object.keys(data));
     var label = graphql_enduser_search
     const token = data[endUser];
-    const searchParams = { party: `urn:altinn:person:identifier-no:${endUser}` };
-    graphqlSearch(endUser, searchParams, token, traceCalls, label);
+    graphqlSearch(endUser, token, traceCalls, label);
 }

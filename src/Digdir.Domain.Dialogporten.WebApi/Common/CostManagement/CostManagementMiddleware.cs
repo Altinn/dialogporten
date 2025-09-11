@@ -221,6 +221,7 @@ public static class CostManagementMiddlewareExtensions
                 : new NoOpCostManagementService();
         });
 
+        services.AddHostedService<CostManagementService>();
 
         // Register background service with enabled/disabled factory
         services.AddSingleton<IHostedService>(provider =>

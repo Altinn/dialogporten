@@ -1,14 +1,13 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Threading.Channels;
-using Microsoft.Extensions.Hosting;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 
 /// <summary>
 /// Cost management service that handles queueing, background processing, and metrics recording
 /// </summary>
-public sealed class CostManagementService : BackgroundService, ICostManagementMetricsService, ICostManagementTransactionRecorder
+public sealed class CostManagementService : BackgroundService, ICostManagementMetricsService
 {
     private readonly ChannelWriter<TransactionRecord> _writer;
     private readonly ChannelReader<TransactionRecord> _reader;
@@ -61,33 +60,13 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
     public void QueueTransaction(TransactionType transactionType, int httpStatusCode, string? tokenOrg = null, string? serviceOrg = null, string? serviceResource = null)
     {
         var transaction = new TransactionRecord(transactionType, httpStatusCode, tokenOrg, serviceOrg, serviceResource);
+        if (_writer.TryWrite(transaction)) return;
 
-        try
-        {
-            if (!_writer.TryWrite(transaction))
-            {
-                _logger.LogWarning("Failed to queue cost management transaction (queue unavailable or full). Transaction: {TransactionType}, Status: {StatusCode}",
-                    transactionType, httpStatusCode);
+        _logger.LogWarning("Failed to queue cost management transaction (queue unavailable or full). Transaction: {TransactionType}, Status: {StatusCode}",
+            transactionType, httpStatusCode);
 
-                // Record dropped transaction metrics with detailed context
-                _droppedTransactionsCounter?.Add(1, BuildDroppedTransactionTags("enqueue_failed", transactionType, httpStatusCode, serviceOrg, tokenOrg));
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Exception while queuing cost management transaction: {TransactionType}, Status: {StatusCode}",
-                transactionType, httpStatusCode);
-
-            // Record dropped transaction metrics due to exceptions
-            _droppedTransactionsCounter?.Add(1, BuildDroppedTransactionTags("exception", transactionType, httpStatusCode, serviceOrg, tokenOrg));
-        }
-    }
-
-    // ICostManagementTransactionRecorder implementation (internal processing)
-    public void RecordTransaction(TransactionType transactionType, int httpStatusCode, string? tokenOrg = null, string? serviceOrg = null, string? serviceResource = null)
-    {
-        var tags = BuildMetricTags(transactionType, httpStatusCode, tokenOrg, serviceOrg, serviceResource);
-        _transactionCounter.Add(1, tags);
+        // Record dropped transaction metrics with detailed context
+        _droppedTransactionsCounter?.Add(1, BuildDroppedTransactionTags("enqueue_failed", transactionType, httpStatusCode, serviceOrg, tokenOrg));
     }
 
     // Background processing
@@ -97,15 +76,12 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
 
         try
         {
-            await ProcessTransactionQueueAsync(stoppingToken);
+            await ProcessTransactionQueueAsync();
         }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Cost management background service is shutting down");
-        }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error in cost management background service");
+            _logger.LogCritical(ex, "Unexpected error in cost management background service");
         }
     }
 
@@ -113,76 +89,20 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Cost management background service stopping");
-
-        try
-        {
-            // Seal the channel to prevent new transactions from being enqueued
-            _writer.Complete();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Exception while completing channel writer during shutdown");
-        }
-
+        _writer.TryComplete();
+        await _reader.Completion;
         // Stop the background processing loop
         await base.StopAsync(cancellationToken);
-
-        // Process any remaining transactions in the queue
-        await DrainRemainingTransactionsAsync(cancellationToken);
     }
 
-    private async Task ProcessTransactionQueueAsync(CancellationToken stoppingToken)
+    private async Task ProcessTransactionQueueAsync()
     {
-        await foreach (var transaction in _reader.ReadAllAsync(stoppingToken))
+        await foreach (var transaction in _reader.ReadAllAsync())
         {
-            ProcessSingleTransaction(transaction);
+            var (transactionType, httpStatusCode, tokenOrg, serviceOrg, serviceResource) = transaction;
+            var tags = BuildMetricTags(transactionType, httpStatusCode, tokenOrg, serviceOrg, serviceResource);
+            _transactionCounter.Add(1, tags);
         }
-    }
-
-    private void ProcessSingleTransaction(TransactionRecord transaction, bool isDraining = false)
-    {
-        try
-        {
-            RecordTransaction(
-                transaction.TransactionType,
-                transaction.HttpStatusCode,
-                transaction.TokenOrg,
-                transaction.ServiceOrg,
-                transaction.ServiceResource);
-        }
-        catch (Exception ex)
-        {
-            if (isDraining)
-            {
-                _logger.LogWarning(ex,
-                    "Failed to process transaction during shutdown: {TransactionType}, Status: {StatusCode}",
-                    transaction.TransactionType, transaction.HttpStatusCode);
-            }
-            else
-            {
-                _logger.LogWarning(ex,
-                    "Failed to process cost management transaction: {TransactionType}, Status: {StatusCode}",
-                    transaction.TransactionType, transaction.HttpStatusCode);
-            }
-        }
-    }
-
-    private Task DrainRemainingTransactionsAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            while (_reader.TryRead(out var transaction) && !cancellationToken.IsCancellationRequested)
-            {
-                ProcessSingleTransaction(transaction, isDraining: true);
-            }
-            _logger.LogInformation("Cost management background service shutdown complete");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Exception while draining remaining transactions during shutdown");
-        }
-
-        return Task.CompletedTask;
     }
 
     private TagList BuildMetricTags(TransactionType transactionType, int httpStatusCode, string? tokenOrg, string? serviceOrg, string? serviceResource)
@@ -221,14 +141,8 @@ public sealed class CostManagementService : BackgroundService, ICostManagementMe
     public override void Dispose()
     {
         // Complete the channel writer to signal no more transactions will be enqueued
-        try
-        {
-            _writer.Complete();
-        }
-        catch (InvalidOperationException)
-        {
-            // Channel already completed - this is expected during normal shutdown
-        }
+        _writer.TryComplete();
+        _reader.Completion.GetAwaiter().GetResult();
         base.Dispose();
     }
 }

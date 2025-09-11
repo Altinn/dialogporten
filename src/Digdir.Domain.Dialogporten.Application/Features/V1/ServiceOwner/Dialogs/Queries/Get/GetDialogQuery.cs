@@ -2,6 +2,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -9,11 +10,12 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
-public sealed class GetDialogQuery : IRequest<GetDialogResult>
+public sealed class GetDialogQuery : IRequest<GetDialogResult>, IDialogIdQuery
 {
     public Guid DialogId { get; set; }
 
@@ -170,4 +172,21 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             }
         }
     }
+}
+
+internal sealed class DialogQueryOwner(IDialogDbContext db) : IRequestOwner<IDialogIdQuery>
+{
+    public async Task<(string? ServiceResource, string? OwnerOrg)> GetOwnerInformation(IDialogIdQuery request, CancellationToken cancellationToken)
+    {
+        var lala = await db.Dialogs
+            .Where(x => request.DialogId == x.Id)
+            .Select(x => new {x.ServiceResource, x.Org})
+            .FirstOrDefaultAsync(cancellationToken);
+        return (lala?.ServiceResource, lala?.Org);
+    }
+}
+
+public interface IDialogIdQuery
+{
+    Guid DialogId { get; }
 }

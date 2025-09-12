@@ -22,7 +22,6 @@ export default function () {
             scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search digdir:dialogporten.serviceprovider.admin"
         };
         const r = freezeSO('dialogs/' + dialogId, null , adminScope);
-        console.log(r); 
     expectStatusFor(r).to.equal(204);
 });
 
@@ -57,7 +56,6 @@ export default function () {
     describe('Clean up dialogs', () => {
         for (const x in dialogIds) {
             let r = purgeSO('dialogs/' + dialogIds[x]);
-            console.log(r)
             expectStatusFor(r).to.equal(204);
         }
     });

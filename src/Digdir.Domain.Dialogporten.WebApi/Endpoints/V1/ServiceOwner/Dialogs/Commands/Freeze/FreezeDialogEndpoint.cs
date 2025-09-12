@@ -23,6 +23,7 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
             .ProducesOneOf(
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
+            StatusCodes.Status403Forbidden,
             StatusCodes.Status404NotFound,
             StatusCodes.Status410Gone,
             StatusCodes.Status412PreconditionFailed));

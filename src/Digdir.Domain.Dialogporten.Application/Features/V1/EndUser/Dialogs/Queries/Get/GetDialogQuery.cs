@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Localizations;
 using FastEndpoints;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,10 +21,10 @@ public sealed class GetDialogQuery : IRequest<GetDialogResult>
     public Guid DialogId { get; set; }
 
     [FromHeader("Accept-Language")]
-    public List<AcceptedLanguage> AcceptedLanguages { get; set; } = [];
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null;
 }
 
-public sealed record AcceptedLanguage(string LanguageCode, float Weight);
+public sealed record AcceptedLanguage(string LanguageCode, int Weight);
 
 [GenerateOneOf]
 public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, EntityDeleted, Forbidden>;
@@ -153,6 +154,14 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             userId: currentUserInformation.UserId.ExternalIdWithPrefix
         );
 
+        if (request.AcceptedLanguages is not null)
+        {
+            foreach (var dialogContent in dialog.Content)
+            {
+                dialogContent.Value.Localizations = Pruniprun(dialogContent.Value.Localizations, request.AcceptedLanguages);
+            }
+        }
+
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
             .DisableVersionableFilter()
@@ -208,6 +217,31 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         return logDto;
     }
 
+    private static List<Localization> Pruniprun(List<Localization> localizations, List<AcceptedLanguage> acceptedLanguages)
+    {
+        var orderByDescending = acceptedLanguages.OrderByDescending(x => x.Weight);
+        Localization? localization = null;
+        foreach (var acceptedLanguage in orderByDescending)
+        {
+            localization = localizations.FirstOrDefault(x => x.LanguageCode == acceptedLanguage.LanguageCode);
+            if (localization is not null)
+            {
+                return [localization];
+            }
+        }
+
+        // Fallbacks
+        if (acceptedLanguages.Select(x => x.LanguageCode).Any(x => x is "sv" or "db"))
+        {
+            localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "nb");
+        }
+
+        localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "en");
+        localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "nb");
+
+        return localization is not null ? [localization] : localizations;
+    }
+
     private static void DecorateWithAuthorization(DialogDto dto,
         DialogDetailsAuthorizationResult authorizationResult)
     {
@@ -216,7 +250,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var apiAction in dto.ApiActions.Where(a => a.Action == action))
             {
                 if ((apiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
+                 || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
                 {
                     apiAction.IsAuthorized = true;
                 }
@@ -225,7 +259,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var guiAction in dto.GuiActions.Where(a => a.Action == action))
             {
                 if ((guiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
+                 || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
                 {
                     guiAction.IsAuthorized = true;
                 }

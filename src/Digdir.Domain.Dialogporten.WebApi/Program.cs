@@ -206,7 +206,7 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
-            x.Binding.ValueParserFor<AcceptedLanguage>(AcceptedLanguageParser.Parse);
+            x.Binding.ValueParserFor<List<AcceptedLanguage>>(AcceptedLanguageParser.Parse);
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>

@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Infrastructure;
@@ -86,6 +87,15 @@ internal static class StaticStore
             .AsNoTracking()
             .Where(x => x.Subject == "urn:altinn:rolecode:dagl" || x.Subject == "urn:altinn:rolecode:priv")
             .ToListAsync();
+
+        if (subjectResources.Count == 0)
+        {
+            throw new InvalidOperationException(
+                $"No {nameof(SubjectResource)} found in db. " +
+                $"Seed the {nameof(SubjectResource)} table before running this tool. " +
+                $"There needs to be at least one entry for each of " +
+                $"the subjects 'urn:altinn:rolecode:dagl' and 'urn:altinn:rolecode:priv'.");
+        }
 
         using var httpClient = new HttpClient();
         httpClient.BaseAddress = new Uri(altinnPlatformBaseUrl1);

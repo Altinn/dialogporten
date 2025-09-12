@@ -1,86 +1,111 @@
-
-
-export function getGraphqlParty(inputs) {
-    let inputStr  = "";
-    const notListElements = ["createdAfter", "createdBefore", "updatedAfter", "updatedBefore", "dueAfter", "dueBefore", "search"];
-    for (var key in inputs) {
-        if (inputStr.length > 0) {
-            inputStr += ", ";
-        }
-        if (notListElements.includes(key)) {
-            inputStr += `${key}: "${inputs[key]}" `
-        }
-        else {
-            inputStr += `${key}:  [ "${inputs[key]}" ] `
-        }
-    }
-
-    return `
-        query getAllDialogsForParties {
-            searchDialogs(input: { ${inputStr} }) {
-            items {
-                id
-                party
-                org
-                progress
-                guiAttachmentCount
-                status
-                createdAt
-                updatedAt
-                extendedStatus
-                seenSinceLastUpdate {
-                    id
-                    seenAt
-                    seenBy {
-                        actorType
-                        actorId
-                        actorName
+const getAllDialogsForPartyQuery = {
+  query: `query getAllDialogsForParties(
+                   $partyURIs: [String!], 
+                   $search: String, 
+                   $org: [String!], 
+                   $status: [DialogStatus!], 
+                   $continuationToken: String, 
+                   $limit: Int, 
+                   $label: [SystemLabel!], 
+                   $createdAfter: DateTime, 
+                   $createdBefore: DateTime, 
+                   $updatedAfter: DateTime, 
+                   $updatedBefore: DateTime) 
+                   {
+                       searchDialogs(
+                          input: {
+                            party: $partyURIs, 
+                            search: $search, 
+                            org: $org, 
+                            status: $status, 
+                            continuationToken: $continuationToken, 
+                            orderBy: {
+                              createdAt: null, 
+                              updatedAt: null, 
+                              dueAt: null, 
+                              contentUpdatedAt: DESC
+                            }, 
+                            systemLabel: $label, 
+                            createdAfter: $createdAfter, 
+                            createdBefore: $createdBefore, 
+                            updatedAfter: $updatedAfter, 
+                            updatedBefore: $updatedBefore, 
+                            limit: $limit, 
+                            excludeApiOnly: true
+                          }
+                        ) {
+                            items {
+                                ...SearchDialogFields
+                                }
+                            hasNextPage
+                            continuationToken  
+                          }
                     }
-                    isCurrentEndUser
-                }
-                latestActivity {
-                    description {
-                        value
-                        languageCode
-                    }
-                    performedBy {
-                        actorType
-                        actorId
-                        actorName
-                    }
-                }
-                content {
-                    title {
-                        mediaType
-                        value {
-                            value
-                            languageCode
+                          
+                    fragment SearchDialogFields on SearchDialog {
+                      id
+                      party
+                      org
+                      progress
+                      guiAttachmentCount
+                      status
+                      createdAt
+                      updatedAt
+                      dueAt
+                      contentUpdatedAt
+                      hasUnopenedContent
+                      extendedStatus
+                      seenSinceLastContentUpdate {
+                        ...SeenLogFields
+                      }  
+                      fromServiceOwnerTransmissionsCount
+                      fromPartyTransmissionsCount
+                      content {
+                        title {
+                          ...DialogContentFields
                         }
+                        summary {
+                          ...DialogContentFields
+                        }
+                        senderName {
+                          ...DialogContentFields
+                        }
+                        extendedStatus {
+                          ...DialogContentFields
+                        }
+                      }
+                      endUserContext {
+                        systemLabels
+                      }
                     }
-                    summary {
-                        mediaType
-                        value {
-                            value
-                        languageCode
+                      
+                    fragment SeenLogFields on SeenLog {
+                      id
+                      seenAt
+                      seenBy {
+                        actorType
+                        actorId
+                        actorName
+                      }
+                      isCurrentEndUser
                     }
-                }
-                senderName {
-                    mediaType
-                    value {
+                    
+                    fragment DialogContentFields on ContentValue {
+                      mediaType
+                      value {
                         value
                         languageCode
-                    }
-                }
-                extendedStatus {
-                    mediaType
-                    value {
-                        value
-                        languageCode
-                    }
-                }
-            }
-            systemLabel
-          }
-        }
-    }`
+                      }
+                  }`,
+  variables: { 
+    partyURIs: [], 
+    limit: 100,
+    label: ["DEFAULT"],
+    status: ["NOT_APPLICABLE", "IN_PROGRESS", "AWAITING", "REQUIRES_ATTENTION", "COMPLETED"] },
+};
+
+export function getGraphqlParty(enduser) {
+    let request = JSON.parse(JSON.stringify(getAllDialogsForPartyQuery));
+    request.variables.partyURIs.push(`urn:altinn:person:identifier-no:${enduser}`);
+    return request;
 }

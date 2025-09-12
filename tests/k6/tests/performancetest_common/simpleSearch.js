@@ -49,9 +49,9 @@ function retrieveDialogContent(response, paramsWithToken, getFunction = getEU) {
     getContentChain(dialogId, paramsWithToken, 'get transmissions', 'get transmission', '/transmissions/', getFunction);
 }
 
-function log(items, traceCalls, enduser) {
+function log(items, traceCalls, enduser, duration = null) {
     if (items?.length && traceCalls) {
-        console.log("Found " + items.length + " dialogs" + " for enduser " + enduser.ssn);
+        console.log("Found " + items.length + " dialogs" + " for enduser " + enduser + (duration ? (" in " + duration + " ms") : ""));  
     }
 }
 
@@ -151,7 +151,7 @@ export function getUrl(url, paramsWithToken, getFunction = getEU) {
  * @param {Object} enduser - The enduser object containing the token.
  * @returns {void}
  */
-export function graphqlSearch(enduser, searchParams, token,  traceCalls, label) {
+export function graphqlSearch(enduser, token,  traceCalls, label) {
     if (token == null) {
         token = getPersonalToken({ ssn: enduser, scopes: "digdir:dialogporten" });
     }
@@ -169,10 +169,13 @@ export function graphqlSearch(enduser, searchParams, token,  traceCalls, label) 
         paramsWithToken.tags.enduser = enduser.ssn;
     }
     describe('Perform graphql dialog list', () => {
-        let r = postGQ(getGraphqlParty(searchParams), paramsWithToken);
+        let r = postGQ(getGraphqlParty(enduser), paramsWithToken);
+        if (r.status !== 200) {
+            console.log('GraphQL query failed with status ' + r.status + ' for enduser ' + enduser + ' with response: ' + r.body);
+        }
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
-        log(r.json().data.searchDialogs.items, traceCalls, enduser);
+        log(r.json().data.searchDialogs.items, traceCalls, enduser, r.timings.duration);
     });
 }
 

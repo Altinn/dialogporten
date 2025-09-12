@@ -16,6 +16,7 @@ internal static class Constants
         internal const string Deleted = "The dialog {0} was deleted successfully.";
         internal const string Restored = "The dialog {0} was restored successfully.";
         internal const string Updated = "The dialog {0} was updated successfully.";
+        internal const string Frozen = "The dialog {0} was frozen successfully.";
         internal const string ValidationError = "Validation error occurred. See problem details for a list of errors.";
         internal const string DomainError = "Domain error occurred. See problem details for a list of errors.";
         internal const string ServiceOwnerAuthenticationFailure = "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"{0}\".";

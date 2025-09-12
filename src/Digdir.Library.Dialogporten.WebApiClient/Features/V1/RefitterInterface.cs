@@ -1075,9 +1075,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Freezes a dialog</summary>
         /// <remarks>
-        /// Freezes a given dialog
-        /// 
-        /// the dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen
+        /// Freezes a given dialog.
+        /// The dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen
         /// </remarks>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:

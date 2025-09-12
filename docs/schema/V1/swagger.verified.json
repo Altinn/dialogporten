@@ -7374,7 +7374,7 @@
     },
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze": {
       "post": {
-        "description": "Freezes a given dialog\n\nthe dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen",
+        "description": "Freezes a given dialog.\nThe dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen",
         "operationId": "V1ServiceOwnerDialogsCommandsFreeze_FreezeDialog",
         "parameters": [
           {

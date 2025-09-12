@@ -1,6 +1,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -29,6 +30,7 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
+        var applicationContextSub = Substitute.For<IApplicationContext>();
 
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
@@ -42,7 +44,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub);
+            resourceRegistrySub, serviceAuthorizationSub, applicationContextSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);
@@ -67,6 +69,7 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
+        var applicationContextSub = Substitute.For<IApplicationContext>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         serviceAuthorizationSub
@@ -79,7 +82,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub);
+            resourceRegistrySub, serviceAuthorizationSub, applicationContextSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);

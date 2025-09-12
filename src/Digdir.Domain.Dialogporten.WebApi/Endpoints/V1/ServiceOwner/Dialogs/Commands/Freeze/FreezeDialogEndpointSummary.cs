@@ -11,9 +11,8 @@ public sealed class FreezeDialogEndpointSummary : Summary<FreezeDialogEndpoint>
     {
         Summary = "Freezes a dialog";
         Description = """
-                      Freezes a given dialog
-
-                      the dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen
+                      Freezes a given dialog.
+                      The dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen
                       """;
         ResponseHeaders = [HttpResponseHeaderExamples.NewDialogETagHeader(StatusCodes.Status204NoContent)];
         Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Frozen.FormatInvariant("aggregate");

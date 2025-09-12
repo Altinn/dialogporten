@@ -174,9 +174,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     }
 }
 
-internal sealed class DialogQueryOwner(IDialogDbContext db) : IRequestOwner<IDialogIdQuery>
+internal sealed class DialogQueryResolver(IDialogDbContext db) : IServiceResourceResolver<IDialogIdQuery>
 {
-    public async Task<(string? ServiceResource, string? OwnerOrg)> GetOwnerInformation(IDialogIdQuery request, CancellationToken cancellationToken)
+    public async Task<(string? ServiceResource, string? OwnerOrg)> Resolve(IDialogIdQuery request, CancellationToken cancellationToken)
     {
         var lala = await db.Dialogs
             .Where(x => request.DialogId == x.Id)

@@ -54,12 +54,15 @@ internal sealed class FeatureMetricDeliveryContext : IFeatureMetricDeliveryConte
 {
     private readonly List<FeatureMetricRecord> _records = [];
 
-    internal void Record(FeatureMetricRecord record)
-    {
-        _records.Add(record);
-    }
+    internal void Record(FeatureMetricRecord record) => _records.Add(record);
 
-    public void Ack(string presentationTag)
+    public void Ack(string presentationTag) => RecordMetrics(success: true);
+
+    public void Nack(string presentationTag) => RecordMetrics(success: false);
+
+    public void Abandon() => _records.Clear();
+
+    private void RecordMetrics(bool success)
     {
         // PresentationTag                                          TransactionName     Count
         // "PUT api/v1/serviceowner/dialogs/{ID}"                   Get                 55
@@ -67,31 +70,38 @@ internal sealed class FeatureMetricDeliveryContext : IFeatureMetricDeliveryConte
         // "POST api/v1/serviceowner/dialogs/{ID}/transmissions"    Get                 105
         // "POST api/v1/serviceowner/dialogs/{ID}/transmissions"    Update              105
 
+        // StatusTag: 2,
+        // PresentationTag: 40,
+        // FeatureTypeTag: 50,
+        // EnvironmentTag: 1,
+        // TokenOrgTag: 100,
+        // ServiceOrgTag: N/A,
+        // ServiceResourceTag: 2000
+        // Total cardinality: 2 * 40 * 50 * 1 * 100 * N/A * 2000 = 800 million (worst case, ignoring ServiceOrgTag)
         var records = _records.ToArray();
         _records.Clear();
         foreach (var record in records)
         {
-            var tagList = record.ToTagList();
-            tagList.Add(FeatureMetricConstants.StatusTag, true);
+            var tagList = ToTagList(record);
+            tagList.Add(FeatureMetricConstants.StatusTag, success);
             tagList.Add(FeatureMetricConstants.PresentationTag, true);
             Instrumentation.TransactionCounter.Add(1, tagList);
         }
     }
 
-    public void Nack(string presentationTag)
+    private static TagList ToTagList(FeatureMetricRecord record)
     {
-        var records = _records.ToArray();
-        _records.Clear();
-        foreach (var record in records)
+        const string unknown = "unknown";
+        var (featureType, environment, tokenOrg, serviceOrg, serviceResource) = record;
+        return new TagList
         {
-            var tagList = record.ToTagList();
-            tagList.Add(FeatureMetricConstants.StatusTag, true);
-            tagList.Add(FeatureMetricConstants.PresentationTag, true);
-            Instrumentation.TransactionCounter.Add(1, tagList);
-        }
+            { FeatureMetricConstants.FeatureTypeTag, featureType },
+            { FeatureMetricConstants.EnvironmentTag, environment },
+            { FeatureMetricConstants.TokenOrgTag, tokenOrg ?? unknown },
+            { FeatureMetricConstants.ServiceOrgTag, serviceOrg ?? unknown },
+            { FeatureMetricConstants.ServiceResourceTag, serviceResource ?? unknown }
+        };
     }
-
-    public void Abandon() => _records.Clear();
 }
 
 internal sealed record FeatureMetricRecord(
@@ -106,21 +116,7 @@ internal static class Instrumentation
     private static readonly Meter Meter = new("Digdir.Domain.Dialogporten.Application");
     public static readonly Counter<long> TransactionCounter = Meter.CreateCounter<long>(
         "cost_transactions_total",
-        description: "Total number of cost management transactions processed");
-
-    internal static TagList ToTagList(this FeatureMetricRecord record)
-    {
-        const string unknown = "unknown";
-        var (transactionType, environment, tokenOrg, serviceOrg, serviceResource) = record;
-        return new TagList
-        {
-            { FeatureMetricConstants.TransactionTypeTag, transactionType },
-            { FeatureMetricConstants.EnvironmentTag, environment },
-            { FeatureMetricConstants.TokenOrgTag, tokenOrg ?? unknown },
-            { FeatureMetricConstants.ServiceOrgTag, serviceOrg ?? unknown },
-            { FeatureMetricConstants.ServiceResourceTag, serviceResource ?? unknown }
-        };
-    }
+        FeatureMetricConstants.TransactionCounterDescription);
 }
 
 internal static class FeatureMetricConstants
@@ -133,7 +129,7 @@ internal static class FeatureMetricConstants
     /// <summary>
     /// Description of the transaction counter metric
     /// </summary>
-    public const string TransactionCounterDescription = "Total number of dialog transactions for cost management";
+    public const string TransactionCounterDescription = "Total number of feature metrics";
 
     /// <summary>
     /// Tag name for transaction type

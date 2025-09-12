@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.80.4](https://github.com/Altinn/dialogporten/compare/v1.80.3...v1.80.4) (2025-09-09)
+
+
+### Bug Fixes
+
+* Add system user support for parties, add system user claims ([#2696](https://github.com/Altinn/dialogporten/issues/2696)) ([b04025b](https://github.com/Altinn/dialogporten/commit/b04025b72be29f2bcbe323ff8828cb0880b1b7f0))
+* **app:** Add validation for HTML content ([#2721](https://github.com/Altinn/dialogporten/issues/2721)) ([8a2e380](https://github.com/Altinn/dialogporten/commit/8a2e38054537bd21df8b84b2cfa676fe3519e8f5))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/github-script action to v7.1.0 ([#2711](https://github.com/Altinn/dialogporten/issues/2711)) ([dc923a1](https://github.com/Altinn/dialogporten/commit/dc923a12763bf47269b94ae8555196292b2880fb))
+* **deps:** update dependency testcontainers.postgresql to 4.7.0 ([#2712](https://github.com/Altinn/dialogporten/issues/2712)) ([75a44c7](https://github.com/Altinn/dialogporten/commit/75a44c70706b5afdc8344083c08a50a5b5276e41))
+* **deps:** update dependency verify.xunit to 30.10.0 ([#2713](https://github.com/Altinn/dialogporten/issues/2713)) ([e209b8a](https://github.com/Altinn/dialogporten/commit/e209b8a142e0a1e1211ef0a337848007e46b2f26))
+* **deps:** update hotchocolate monorepo to 15.1.9 ([#2710](https://github.com/Altinn/dialogporten/issues/2710)) ([933d145](https://github.com/Altinn/dialogporten/commit/933d1451020b1117ecbc675aa56b4e29e7f3cda8))
+* **deps:** upgrade Azure CLI to version 2.77.0 ([#2724](https://github.com/Altinn/dialogporten/issues/2724)) ([5b5ad2f](https://github.com/Altinn/dialogporten/commit/5b5ad2f3fc42ba09e81649c0e429610039757a47))
+
 ## [1.80.3](https://github.com/Altinn/dialogporten/compare/v1.80.2...v1.80.3) (2025-09-05)
 
 

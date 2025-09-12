@@ -44,6 +44,10 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
         RuleFor(x => x.Value)
             .NotEmpty()
             .SetValidator(_ => new LocalizationDtosValidator(contentType.MaxLength));
+
+        RuleForEach(x => x.Value)
+            .ContainsValidHtml()
+            .When(x => x.MediaType is MediaTypes.LegacyHtml);
     }
 
     public ContentValueDtoValidator(DialogContentType contentType, IUser? user = null)
@@ -74,6 +78,10 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
         RuleFor(x => x.Value)
             .NotEmpty()
             .SetValidator(_ => new LocalizationDtosValidator(contentType.MaxLength));
+
+        RuleForEach(x => x.Value)
+            .ContainsValidHtml()
+            .When(x => x.MediaType is MediaTypes.LegacyHtml);
     }
 
     [SuppressMessage("Style", "IDE0072:Add missing cases")]

@@ -57,7 +57,4 @@ public sealed class FreezeDialogRequest
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchDialogRevision { get; init; }
-
-    [HideFromDocs]
-    public bool? IsSilentUpdate { get; init; }
 }

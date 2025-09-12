@@ -3,27 +3,26 @@ using System.Diagnostics.Metrics;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
-internal sealed class OtelFeatureMetricDeliveryContext : IFeatureMetricDeliveryContext, IFeatureMetricRecorder
+internal sealed class OtelFeatureMetricDeliveryContext : IFeatureMetricDeliveryContext
 {
     private static readonly Counter<long> TransactionCounter = Instrumentation.Meter.CreateCounter<long>(
         "cost_transactions_total",
         FeatureMetricConstants.TransactionCounterDescription);
 
-    private readonly List<FeatureMetricRecord> _records = [];
+    private readonly IFeatureMetricRecorder _recorder;
 
-    public void Record(FeatureMetricRecord record) => _records.Add(record);
+    public OtelFeatureMetricDeliveryContext(IFeatureMetricRecorder recorder)
+    {
+        _recorder = recorder ?? throw new ArgumentNullException(nameof(recorder));
+    }
 
     public void Ack(string presentationTag) => RecordMetrics(success: true);
 
     public void Nack(string presentationTag) => RecordMetrics(success: false);
 
-    public void Abandon() => _records.Clear();
-
     private void RecordMetrics(bool success)
     {
-        var records = _records.ToArray();
-        _records.Clear();
-        foreach (var record in records)
+        foreach (var record in _recorder.Records)
         {
             var tagList = ToTagList(record);
             tagList.Add(FeatureMetricConstants.StatusTag, success);
@@ -46,7 +45,6 @@ internal sealed class OtelFeatureMetricDeliveryContext : IFeatureMetricDeliveryC
         };
     }
 }
-
 
 internal static class FeatureMetricConstants
 {

@@ -10,7 +10,7 @@ param resources = {
     memory: '4Gi'
 }
 
-param otelTraceSamplerRatio = '0.0'
+param otelTraceSamplerRatio = '1'
 
 // Use dedicated workload profile
 param workloadProfileName = 'Dedicated-D8'

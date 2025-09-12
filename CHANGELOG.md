@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.80.6](https://github.com/Altinn/dialogporten/compare/v1.80.5...v1.80.6) (2025-09-10)
+
+
+### Miscellaneous Chores
+
+* **apps:** adjust sampling rate in yt01 to 100% ([#2737](https://github.com/Altinn/dialogporten/issues/2737)) ([bb63ebc](https://github.com/Altinn/dialogporten/commit/bb63ebcdeb7f58edd71ed4e19514e6692298cefa))
+* **deps:** update actions/setup-dotnet action to v5 ([#2733](https://github.com/Altinn/dialogporten/issues/2733)) ([b854ce3](https://github.com/Altinn/dialogporten/commit/b854ce38f54b7878eee7b026b7d6028ade001993))
+* **deps:** update dependency uuidnext to 4.2.0 ([#2732](https://github.com/Altinn/dialogporten/issues/2732)) ([07bfcaf](https://github.com/Altinn/dialogporten/commit/07bfcafbb85ed494894e234afcef29b318cebbf4))
+* **deps:** update dotnet monorepo ([#2730](https://github.com/Altinn/dialogporten/issues/2730)) ([c831441](https://github.com/Altinn/dialogporten/commit/c831441e0db41e80b116a2ae2d5abf9c14fb9bf7))
+
+## [1.80.5](https://github.com/Altinn/dialogporten/compare/v1.80.4...v1.80.5) (2025-09-09)
+
+
+### Miscellaneous Chores
+
+* **graphql:** Revert HotChocolate upgrade ([#2727](https://github.com/Altinn/dialogporten/issues/2727)) ([092360b](https://github.com/Altinn/dialogporten/commit/092360be8314face2e6b9fd4553f974d63914730))
+
 ## [1.80.4](https://github.com/Altinn/dialogporten/compare/v1.80.3...v1.80.4) (2025-09-09)
 
 

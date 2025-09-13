@@ -4,7 +4,6 @@ using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 using FastEndpoints;
 using MediatR;
 using ServiceOwnerLabelDto =
@@ -13,7 +12,6 @@ using ServiceOwnerLabelDto =
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.ServiceOwnerContext.Commands.CreateServiceOwnerLabel;
 
-[CostTracked(TransactionType.SetDialogLabel)]
 public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwnerLabelRequest>
 {
     private readonly ISender _sender;

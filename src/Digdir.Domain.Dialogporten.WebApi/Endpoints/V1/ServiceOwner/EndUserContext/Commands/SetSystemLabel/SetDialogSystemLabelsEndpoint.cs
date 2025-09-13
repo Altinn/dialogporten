@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserCon
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
@@ -10,7 +9,6 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabel;
 
-[CostTracked(TransactionType.SetDialogLabel)]
 public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<SetDialogSystemLabelRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));

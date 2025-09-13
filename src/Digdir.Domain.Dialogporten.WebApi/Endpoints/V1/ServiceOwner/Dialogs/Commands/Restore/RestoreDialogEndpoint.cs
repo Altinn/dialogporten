@@ -1,7 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
@@ -9,7 +8,6 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Restore;
 
-[CostTracked(TransactionType.UpdateDialog)]
 public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
 {
     private readonly ISender _sender;

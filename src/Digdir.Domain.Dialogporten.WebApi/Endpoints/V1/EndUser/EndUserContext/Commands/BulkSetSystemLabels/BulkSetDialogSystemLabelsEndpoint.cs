@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
@@ -8,7 +7,6 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
-[CostTracked(TransactionType.BulkSetLabelsEndUser)]
 public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkSetDialogSystemLabelsRequest>
 {
     private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));

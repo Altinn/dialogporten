@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using MediatR;
@@ -82,5 +83,14 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
             _logger.LogError(e, "Failed to sync subject-resources. Rolling back transaction.");
             throw;
         }
+    }
+}
+
+internal sealed class SyncSubjectMapCommandResolver : IServiceResourceResolver<SyncSubjectMapCommand>
+{
+    public Task<ServiceResourceInformation?> Resolve(SyncSubjectMapCommand request, CancellationToken cancellationToken)
+    {
+        // System administration commands don't have associated service resources
+        return Task.FromResult<ServiceResourceInformation?>(null);
     }
 }

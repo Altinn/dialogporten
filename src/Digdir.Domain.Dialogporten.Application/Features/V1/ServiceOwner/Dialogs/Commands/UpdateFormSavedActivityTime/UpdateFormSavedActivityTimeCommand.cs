@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -11,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 
-public sealed class UpdateFormSavedActivityTimeCommand : IRequest<UpdateFormSavedActivityTimeResult>, ISilentUpdater
+public sealed class UpdateFormSavedActivityTimeCommand : IRequest<UpdateFormSavedActivityTimeResult>, ISilentUpdater, IDialogIdQuery
 {
     public Guid DialogId { get; set; }
 

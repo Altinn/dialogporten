@@ -1,7 +1,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
-using Digdir.Domain.Dialogporten.Application.Common.Context;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -12,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 
-public sealed class UpdateDialogServiceOwnerContextCommand : IRequest<UpdateDialogServiceOwnerContextResult>
+public sealed class UpdateDialogServiceOwnerContextCommand : IRequest<UpdateDialogServiceOwnerContextResult>, IDialogIdQuery
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchServiceOwnerContextRevision { get; set; }
@@ -31,18 +31,15 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDataLoaderContext _dataLoaderContext;
     private readonly IMapper _mapper;
-    private readonly IApplicationContext _applicationContext;
 
     public UpdateDialogServiceOwnerContextCommandHandler(
         IUnitOfWork unitOfWork,
         IDataLoaderContext dataLoaderContext,
-        IMapper mapper,
-        IApplicationContext applicationContext)
+        IMapper mapper)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public async Task<UpdateDialogServiceOwnerContextResult> Handle(UpdateDialogServiceOwnerContextCommand request,
@@ -55,9 +52,6 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        // Add metadata for cost management
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, serviceOwnerContext.Dialog.Org);
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, serviceOwnerContext.Dialog.ServiceResource);
 
         serviceOwnerContext.ServiceOwnerLabels
             .Merge(request.Dto.ServiceOwnerLabels,

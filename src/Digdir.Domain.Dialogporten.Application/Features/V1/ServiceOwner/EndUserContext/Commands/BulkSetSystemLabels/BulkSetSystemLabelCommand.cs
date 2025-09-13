@@ -1,5 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Context;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -27,20 +27,17 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
-    private readonly IApplicationContext _applicationContext;
 
     public BulkSetSystemLabelCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
         IUserRegistry userRegistry,
-        IAltinnAuthorization altinnAuthorization,
-        IApplicationContext applicationContext)
+        IAltinnAuthorization altinnAuthorization)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public async Task<BulkSetSystemLabelResult> Handle(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
@@ -61,18 +58,6 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new Forbidden().WithInvalidDialogIds(missing);
         }
 
-        // Add cost management metadata (unique values or BulkOperation)
-        if (dialogs.Count > 0)
-        {
-            var distinctOrgs = dialogs.Select(d => d.Org).Where(o => !string.IsNullOrEmpty(o)).Distinct().ToArray();
-            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg,
-                distinctOrgs.Length == 1 ? distinctOrgs[0] : CostManagementMetadataKeys.BulkOperation);
-
-            var distinctResources = dialogs.Select(d => d.ServiceResource).Where(r => !string.IsNullOrEmpty(r)).Distinct().ToArray();
-            _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource,
-                distinctResources.Length == 1 ? distinctResources[0] : CostManagementMetadataKeys.BulkOperation);
-        }
-
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -91,5 +76,14 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             _ => new BulkSetSystemLabelSuccess(),
             domainError => domainError,
             concurrencyError => concurrencyError);
+    }
+}
+
+internal sealed class BulkSetSystemLabelCommandResolver : IServiceResourceResolver<BulkSetSystemLabelCommand>
+{
+    public Task<ServiceResourceInformation?> Resolve(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
+    {
+        // For bulk operations with mixed entities, we can't attribute to specific org/resource
+        return Task.FromResult<ServiceResourceInformation?>(null);
     }
 }

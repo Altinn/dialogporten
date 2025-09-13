@@ -1,5 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Context;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -29,20 +29,17 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
-    private readonly IApplicationContext _applicationContext;
 
     public BulkSetSystemLabelCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
         IUserRegistry userRegistry,
-        IAltinnAuthorization altinnAuthorization,
-        IApplicationContext applicationContext)
+        IAltinnAuthorization altinnAuthorization)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
     }
 
     public async Task<BulkSetSystemLabelResult> Handle(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
@@ -83,10 +80,6 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
                 request.Dto.RemoveLabels, ct),
             cancellationToken: cancellationToken);
 
-        // Add metadata for cost management
-        // For bulk operations, we can't attribute to specific org/resource since results may vary
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, CostManagementMetadataKeys.BulkOperation);
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, CostManagementMetadataKeys.BulkOperation);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
         return saveResult.Match<BulkSetSystemLabelResult>(
@@ -129,5 +122,14 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             entity.EndUserContext.UpdateSystemLabels(addLabels, removeLabels, userInfo.UserId.ExternalIdWithPrefix);
             _unitOfWork.EnableConcurrencyCheck(entity.EndUserContext, dto.EndUserContextRevision);
         }
+    }
+}
+
+internal sealed class BulkSetSystemLabelCommandResolver : IServiceResourceResolver<BulkSetSystemLabelCommand>
+{
+    public Task<ServiceResourceInformation?> Resolve(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
+    {
+        // For bulk operations with mixed entities, we can't attribute to specific org/resource
+        return Task.FromResult<ServiceResourceInformation?>(null);
     }
 }

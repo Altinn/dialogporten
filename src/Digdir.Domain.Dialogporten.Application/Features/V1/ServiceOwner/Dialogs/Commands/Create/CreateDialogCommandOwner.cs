@@ -6,9 +6,9 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 internal sealed class CreateDialogCommandResolver(IResourceRegistry resourceRegistry) : IServiceResourceResolver<CreateDialogCommand>
 {
-    public async Task<(string? ServiceResource, string? OwnerOrg)> Resolve(CreateDialogCommand command, CancellationToken cancellationToken)
+    public async Task<ServiceResourceInformation?> Resolve(CreateDialogCommand command, CancellationToken cancellationToken)
     {
         var serviceResourceInformation = await resourceRegistry.GetResourceInformation(command.Dto.ServiceResource, cancellationToken);
-        return (command.Dto.ServiceResource, serviceResourceInformation?.OwnOrgShortName);
+        return serviceResourceInformation;
     }
 }

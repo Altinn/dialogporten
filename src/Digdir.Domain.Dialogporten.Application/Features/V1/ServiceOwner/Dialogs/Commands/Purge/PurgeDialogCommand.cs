@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
-using Digdir.Domain.Dialogporten.Application.Common.Context;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -13,7 +13,7 @@ using OneOf;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
-public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>, ISilentUpdater
+public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>, ISilentUpdater, IDialogIdQuery
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
@@ -28,18 +28,15 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
     private readonly IDialogDbContext _db;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserResourceRegistry _userResourceRegistry;
-    private readonly IApplicationContext _applicationContext;
 
     public PurgeDialogCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
-        IUserResourceRegistry userResourceRegistry,
-        IApplicationContext applicationContext)
+        IUserResourceRegistry userResourceRegistry)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _applicationContext = applicationContext;
     }
 
     public async Task<PurgeDialogResult> Handle(PurgeDialogCommand request, CancellationToken cancellationToken)
@@ -58,8 +55,6 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceOrg, dialog.Org);
-        _applicationContext.AddMetadata(CostManagementMetadataKeys.ServiceResource, dialog.ServiceResource);
 
         if (!_userResourceRegistry.UserCanModifyResourceType(dialog.ServiceResourceType))
         {

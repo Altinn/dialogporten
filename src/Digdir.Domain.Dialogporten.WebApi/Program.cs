@@ -12,7 +12,7 @@ using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.CostManagement;
+using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
@@ -94,16 +94,6 @@ static void BuildAndRun(string[] args)
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
-
-        // Register and validate CostManagement options (must be before AddCostManagementMetrics)
-        .AddOptions<CostManagementOptions>()
-        .Bind(builder.Configuration.GetSection(CostManagementOptions.SectionName))
-        .ValidateDataAnnotations()
-        .ValidateOnStart()
-        .Services
-
-        // Cost management services
-        .AddCostManagementMetrics()
 
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
@@ -222,7 +212,6 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
         })
-        .UseCostManagementMetrics()
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>
         {
@@ -251,6 +240,8 @@ static void BuildAndRun(string[] args)
             var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
         });
+
+    app.UseFeatureMetrics();
 
     app.Run();
 }

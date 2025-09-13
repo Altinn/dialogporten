@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using MediatR.NotificationPublishers;
 
@@ -68,7 +69,22 @@ public static class ApplicationExtensions
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DataLoaderBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>));
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>))
+            .AddScoped(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
+            .AddScoped<FeatureMetricRecorder>()
+            .AddServiceResourceResolvers(thisAssembly);
+
+        var otelEndpoint = configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+        if (string.IsNullOrEmpty(otelEndpoint) || !Uri.IsWellFormedUriString(otelEndpoint, UriKind.Absolute))
+        {
+            // No OpenTelemetry endpoint configured - use console logging
+            services.AddScoped<IFeatureMetricDeliveryContext, LoggingFeatureMetricDeliveryContext>();
+        }
+        else
+        {
+            // OpenTelemetry endpoint configured - use OpenTelemetry logging
+            services.AddScoped<IFeatureMetricDeliveryContext, OtelFeatureMetricLoggingDeliveryContext>();
+        }
 
         if (!environment.IsDevelopment())
         {
@@ -93,6 +109,30 @@ public static class ApplicationExtensions
 
         services.Decorate<ICompactJwsGenerator, LocalDevelopmentCompactJwsGeneratorDecorator>(
             predicate: localDeveloperSettings.UseLocalDevelopmentCompactJwsGenerator);
+
+        return services;
+    }
+
+    private static IServiceCollection AddServiceResourceResolvers(this IServiceCollection services, Assembly assembly)
+    {
+        var serviceResourceResolverType = typeof(IServiceResourceResolver<>);
+
+        var implementations = assembly.GetTypes()
+            .Where(type => type is { IsClass: true, IsAbstract: false, IsInterface: false })
+            .Where(type => type.GetInterfaces()
+                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == serviceResourceResolverType))
+            .ToList();
+
+        foreach (var implementation in implementations)
+        {
+            var serviceInterface = implementation.GetInterfaces()
+                .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == serviceResourceResolverType);
+
+            if (serviceInterface != null)
+            {
+                services.AddTransient(serviceInterface, implementation);
+            }
+        }
 
         return services;
     }

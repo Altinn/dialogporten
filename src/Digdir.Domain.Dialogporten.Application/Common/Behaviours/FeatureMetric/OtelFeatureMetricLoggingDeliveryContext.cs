@@ -3,17 +3,17 @@ using Microsoft.Extensions.Logging;
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
 /// <summary>
-/// Console-based delivery context for local development and debugging.
-/// Uses structured logging for feature metrics with immediate console visibility.
+/// OpenTelemetry-based delivery context that logs feature metrics as structured logs using ILogger.
+/// This approach uses Serilog → OpenTelemetry sink to get data into Loki/Grafana.
 /// </summary>
-internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetricDeliveryContext
+internal sealed partial class OtelFeatureMetricLoggingDeliveryContext : IFeatureMetricDeliveryContext
 {
     private readonly FeatureMetricRecorder _recorder;
-    private readonly ILogger<LoggingFeatureMetricDeliveryContext> _logger;
+    private readonly ILogger<OtelFeatureMetricLoggingDeliveryContext> _logger;
 
-    public LoggingFeatureMetricDeliveryContext(
+    public OtelFeatureMetricLoggingDeliveryContext(
         FeatureMetricRecorder recorder,
-        ILogger<LoggingFeatureMetricDeliveryContext> logger)
+        ILogger<OtelFeatureMetricLoggingDeliveryContext> logger)
     {
         _recorder = recorder ?? throw new ArgumentNullException(nameof(recorder));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -70,4 +70,3 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         string correlationId,
         bool success);
 }
-

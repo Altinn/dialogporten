@@ -44,7 +44,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub, applicationContextSub);
+            resourceRegistrySub, serviceAuthorizationSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);
@@ -82,7 +82,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub, applicationContextSub);
+            resourceRegistrySub, serviceAuthorizationSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);

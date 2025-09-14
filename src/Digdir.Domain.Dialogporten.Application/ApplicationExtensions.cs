@@ -8,11 +8,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
+using System.Reflection.Metadata;
+using AutoMapper.Internal;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using MediatR.NotificationPublishers;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application;
 
@@ -72,7 +75,7 @@ public static class ApplicationExtensions
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>))
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
             .AddScoped<FeatureMetricRecorder>()
-            .AddServiceResourceResolvers(thisAssembly);
+            .AddServiceResourceResolvers();
 
         var otelEndpoint = configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
         if (string.IsNullOrEmpty(otelEndpoint) || !Uri.IsWellFormedUriString(otelEndpoint, UriKind.Absolute))
@@ -113,25 +116,22 @@ public static class ApplicationExtensions
         return services;
     }
 
-    private static IServiceCollection AddServiceResourceResolvers(this IServiceCollection services, Assembly assembly)
+    private static IServiceCollection AddServiceResourceResolvers(
+        this IServiceCollection services,
+        params IEnumerable<Assembly> assemblies)
     {
-        var serviceResourceResolverType = typeof(IServiceResourceResolver<>);
+        var openResolverType = typeof(IServiceResourceResolver<>);
+        var implementations = assemblies
+            .DefaultIfEmpty(Assembly.GetCallingAssembly())
+            .SelectMany(x => x.GetTypes())
+            .Where(type => type is { IsAbstract: false, IsInterface: false })
+            .SelectMany(x => x.GetInterfaces()
+                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == openResolverType),
+                (x, y) => (Implementation: x, Interface: y));
 
-        var implementations = assembly.GetTypes()
-            .Where(type => type is { IsClass: true, IsAbstract: false, IsInterface: false })
-            .Where(type => type.GetInterfaces()
-                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == serviceResourceResolverType))
-            .ToList();
-
-        foreach (var implementation in implementations)
+        foreach (var (implementation, @interface) in implementations)
         {
-            var serviceInterface = implementation.GetInterfaces()
-                .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == serviceResourceResolverType);
-
-            if (serviceInterface != null)
-            {
-                services.AddTransient(serviceInterface, implementation);
-            }
+            services.TryAddTransient(@interface, implementation);
         }
 
         return services;

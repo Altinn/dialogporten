@@ -73,19 +73,8 @@ public static class ApplicationExtensions
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>))
             .AddScoped<FeatureMetricRecorder>()
+            .AddTransient<IFeatureMetricDeliveryContext, LoggingFeatureMetricDeliveryContext>()
             .AddServiceResourceResolvers();
-
-        var otelEndpoint = configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-        if (string.IsNullOrEmpty(otelEndpoint) || !Uri.IsWellFormedUriString(otelEndpoint, UriKind.Absolute))
-        {
-            // No OpenTelemetry endpoint configured - use console logging
-            services.AddScoped<IFeatureMetricDeliveryContext, LoggingFeatureMetricDeliveryContext>();
-        }
-        else
-        {
-            // OpenTelemetry endpoint configured - use OpenTelemetry logging
-            services.AddScoped<IFeatureMetricDeliveryContext, OtelFeatureMetricLoggingDeliveryContext>();
-        }
 
         if (!environment.IsDevelopment())
         {

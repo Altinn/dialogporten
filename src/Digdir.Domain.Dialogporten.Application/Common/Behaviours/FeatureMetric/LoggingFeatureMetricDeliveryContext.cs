@@ -2,10 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
-/// <summary>
-/// Console-based delivery context for local development and debugging.
-/// Uses structured logging for feature metrics with immediate console visibility.
-/// </summary>
 internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetricDeliveryContext
 {
     private readonly FeatureMetricRecorder _recorder;

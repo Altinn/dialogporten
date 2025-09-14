@@ -13,7 +13,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
-public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>
+public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>, IDoNotCareAboutServiceResource
 {
     public BulkSetSystemLabelDto Dto { get; set; } = new();
 }
@@ -122,14 +122,5 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             entity.EndUserContext.UpdateSystemLabels(addLabels, removeLabels, userInfo.UserId.ExternalIdWithPrefix);
             _unitOfWork.EnableConcurrencyCheck(entity.EndUserContext, dto.EndUserContextRevision);
         }
-    }
-}
-
-internal sealed class BulkSetSystemLabelCommandResolver : IServiceResourceResolver<BulkSetSystemLabelCommand>
-{
-    public Task<ServiceResourceInformation?> Resolve(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
-    {
-        // For bulk operations with mixed entities, we can't attribute to specific org/resource
-        return Task.FromResult<ServiceResourceInformation?>(null);
     }
 }

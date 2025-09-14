@@ -1,10 +1,12 @@
-﻿using MediatR;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using MediatR;
 using Microsoft.Extensions.Options;
 using Constants = Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.WellKnown.OauthAuthorizationServer.Queries.Get;
 
-public sealed class GetOauthAuthorizationServerQuery : IRequest<GetOauthAuthorizationServerDto>;
+public sealed class GetOauthAuthorizationServerQuery : IRequest<GetOauthAuthorizationServerDto>,
+    IDoNotCareAboutServiceResource;
 
 internal sealed class GetOauthAuthorizationServerQueryHandler : IRequestHandler<GetOauthAuthorizationServerQuery, GetOauthAuthorizationServerDto>
 {

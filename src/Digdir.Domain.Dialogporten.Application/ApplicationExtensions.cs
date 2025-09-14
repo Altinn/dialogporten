@@ -67,11 +67,11 @@ public static class ApplicationExtensions
             .AddTransient<IUserParties, UserParties>()
             .AddTransient<IClock, Clock>()
             .AddDataLoaders()
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DataLoaderBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>))
-            .AddScoped(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
             .AddScoped<FeatureMetricRecorder>()
             .AddServiceResourceResolvers();
 
@@ -120,25 +120,47 @@ public static class ApplicationExtensions
     {
         var openResolverType = typeof(IServiceResourceResolver<>);
 
+        // Get all non-abstract, non-interface types from the provided assemblies (or the calling assembly if none are provided)
         var concreteTypes = assemblies
             .DefaultIfEmpty(Assembly.GetCallingAssembly())
             .SelectMany(assembly => assembly.DefinedTypes)
             .Where(type => type is { IsAbstract: false, IsInterface: false })
             .ToList();
 
+        // Find all types that implement IServiceResourceResolver<T> and map them to their corresponding T
         var resolverMaps = concreteTypes
             .SelectMany(x => x.GetInterfaces()
                     .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == openResolverType),
                 (c, i) => new { Implementation = c, Interface = i, Inner = i.GetGenericArguments()[0] })
             .ToList();
 
-        foreach (var requestType in concreteTypes.Where(x => x.IsAssignableTo(typeof(IBaseRequest))))
+        // For each type that implements IBaseRequest, find the corresponding resolver implementation
+        // based on the mapping created above
+        var requestResolverMap = concreteTypes
+            .Where(x => x.IsAssignableTo(typeof(IBaseRequest)))
+            .Select(x => (Request: x, Resolver: resolverMaps
+                .FirstOrDefault(m => x.IsAssignableTo(m.Inner))
+                ?.Implementation))
+            .ToList();
+
+        // If any request types do not have a corresponding resolver, throw an exception
+        // to ensure all requests are properly handled
+        var errorMessage = string.Join(Environment.NewLine, requestResolverMap
+            .Where(x => x.Resolver is null)
+            .Select(x => $"- {x.Request.FullName}"));
+        if (errorMessage != string.Empty)
         {
-            var resolverMap = resolverMaps
-                .FirstOrDefault(x => requestType.IsAssignableTo(x.Inner))
-                ?? throw new InvalidOperationException(
-                    $"No service resource resolver found for request type {requestType.FullName}.");
-            services.TryAddTransient(openResolverType.MakeGenericType(requestType), resolverMap.Implementation);
+            throw new InvalidOperationException(
+                $"All requests are expected to have an associated {nameof(IServiceResourceResolver<object>)}. Could " +
+                $"not find resolvers for the following requests. If a request cannot be associated with a service " +
+                $"resource or tracking service resource information is irrelevant for the request, mark the it " +
+                $"with {nameof(IDoNotCareAboutServiceResource)}.{Environment.NewLine}{errorMessage}");
+        }
+
+        // Register each request type with its corresponding resolver implementation
+        foreach (var (request, resolver) in requestResolverMap)
+        {
+            services.TryAddTransient(openResolverType.MakeGenericType(request), resolver!);
         }
 
         return services;

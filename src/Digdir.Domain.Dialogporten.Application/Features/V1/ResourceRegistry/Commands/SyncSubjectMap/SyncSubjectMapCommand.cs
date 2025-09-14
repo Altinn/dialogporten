@@ -8,7 +8,7 @@ using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 
-public sealed class SyncSubjectMapCommand : IRequest<SyncSubjectMapResult>
+public sealed class SyncSubjectMapCommand : IRequest<SyncSubjectMapResult>, IDoNotCareAboutServiceResource
 {
     public DateTimeOffset? Since { get; set; }
     public int? BatchSize { get; set; }
@@ -83,14 +83,5 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
             _logger.LogError(e, "Failed to sync subject-resources. Rolling back transaction.");
             throw;
         }
-    }
-}
-
-internal sealed class SyncSubjectMapCommandResolver : IServiceResourceResolver<SyncSubjectMapCommand>
-{
-    public Task<ServiceResourceInformation?> Resolve(SyncSubjectMapCommand request, CancellationToken cancellationToken)
-    {
-        // System administration commands don't have associated service resources
-        return Task.FromResult<ServiceResourceInformation?>(null);
     }
 }

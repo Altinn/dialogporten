@@ -15,27 +15,30 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public void Ack(string presentationTag) => LogMetrics(success: true);
+    public void Ack(string presentationTag, params IEnumerable<KeyValuePair<string, string>> additionalTags) =>
+        LogMetrics(success: true, presentationTag, additionalTags.ToList());
 
-    public void Nack(string presentationTag) => LogMetrics(success: false);
+    public void Nack(string presentationTag, params IEnumerable<KeyValuePair<string, string>> additionalTags) =>
+        LogMetrics(success: false, presentationTag, additionalTags.ToList());
 
-    private void LogMetrics(bool success)
+    private void LogMetrics(bool success, string presentationTag, List<KeyValuePair<string, string>> additionalTags)
     {
+        if (string.IsNullOrWhiteSpace(presentationTag))
+        {
+            throw new ArgumentException("Value cannot be null or whitespace.", nameof(presentationTag));
+        }
+
         foreach (var record in _recorder.Records)
         {
-            var (featureType, environment, tokenOrg, serviceOrg, serviceResource, httpStatusCode, presentationTag, audience, correlationId) = record;
-
             LogFeatureMetric(_logger,
-                featureType,
-                environment,
-                tokenOrg ?? FeatureMetricConstants.UnknownValue,
-                serviceOrg ?? FeatureMetricConstants.UnknownValue,
-                serviceResource ?? FeatureMetricConstants.UnknownValue,
-                httpStatusCode,
-                presentationTag ?? FeatureMetricConstants.UnknownValue,
-                audience ?? FeatureMetricConstants.UnknownValue,
-                correlationId ?? FeatureMetricConstants.UnknownValue,
-                success);
+                record.FeatureName,
+                record.Environment,
+                record.PerformerOrg,
+                record.OwnerOrg,
+                record.ServiceResource,
+                presentationTag,
+                success,
+                additionalTags);
         }
     }
 
@@ -48,11 +51,9 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                   "TokenOrg={TokenOrg}, " +
                   "ServiceOrg={ServiceOrg}, " +
                   "ServiceResource={ServiceResource}, " +
-                  "HttpStatusCode={HttpStatusCode}, " +
                   "PresentationTag={PresentationTag}, " +
-                  "Audience={Audience}, " +
-                  "CorrelationId={CorrelationId}, " +
-                  "Success={Success}")]
+                  "Success={Success}, " +
+                  "AdditionalTags={@AdditionalTags}")]
     private static partial void LogFeatureMetric(
         ILogger logger,
         string featureType,
@@ -60,10 +61,8 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         string tokenOrg,
         string serviceOrg,
         string serviceResource,
-        int? httpStatusCode,
         string presentationTag,
-        string audience,
-        string correlationId,
-        bool success);
+        bool success,
+        IEnumerable<KeyValuePair<string, string>> additionalTags);
 }
 

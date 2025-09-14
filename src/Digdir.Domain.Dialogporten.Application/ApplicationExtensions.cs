@@ -72,8 +72,8 @@ public static class ApplicationExtensions
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>))
-            .AddScoped<FeatureMetricRecorder>()
             .AddTransient<IFeatureMetricDeliveryContext, LoggingFeatureMetricDeliveryContext>()
+            .AddScoped<FeatureMetricRecorder>()
             .AddServiceResourceResolvers();
 
         if (!environment.IsDevelopment())
@@ -109,7 +109,8 @@ public static class ApplicationExtensions
     {
         var openResolverType = typeof(IServiceResourceResolver<>);
 
-        // Get all non-abstract, non-interface types from the provided assemblies (or the calling assembly if none are provided)
+        // Get all non-abstract, non-interface types from the provided assemblies (or the calling assembly
+        // if none are provided)
         var concreteTypes = assemblies
             .DefaultIfEmpty(Assembly.GetCallingAssembly())
             .SelectMany(assembly => assembly.DefinedTypes)
@@ -120,7 +121,7 @@ public static class ApplicationExtensions
         var resolverMaps = concreteTypes
             .SelectMany(x => x.GetInterfaces()
                     .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == openResolverType),
-                (c, i) => new { Implementation = c, Interface = i, Inner = i.GetGenericArguments()[0] })
+                (c, i) => new { Implementation = c, Inner = i.GetGenericArguments()[0] })
             .ToList();
 
         // For each type that implements IBaseRequest, find the corresponding resolver implementation

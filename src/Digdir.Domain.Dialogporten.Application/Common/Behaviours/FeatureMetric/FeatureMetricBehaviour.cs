@@ -22,34 +22,14 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        var name = typeof(TRequest).Name;
-        var environment = hostEnvironment?.EnvironmentName ?? "Unknown";
-        var audience = DetermineAudience(typeof(TRequest));
         _user.GetPrincipal().TryGetOrganizationShortName(out var performingOrg);
         var resource = await _serviceResourceResolver.Resolve(request, cancellationToken);
-        _featureMetricRecorder.Record(new(name, environment, performingOrg, resource?.OwnOrgShortName, resource?.ResourceId, null, null, audience));
+        _featureMetricRecorder.Record(new(
+            FeatureName: typeof(TRequest).FullName!,
+            Environment: hostEnvironment?.EnvironmentName,
+            PerformerOrg: performingOrg,
+            OwnerOrg: resource?.OwnOrgShortName,
+            ServiceResource: resource?.ResourceId));
         return await next(cancellationToken);
-    }
-
-    private static string? DetermineAudience(Type requestType)
-    {
-        var namespaceName = requestType.Namespace;
-        if (namespaceName is null)
-        {
-            return null;
-        }
-
-        // Check if the namespace contains ServiceOwner or EndUser
-        if (namespaceName.Contains(".ServiceOwner.", StringComparison.OrdinalIgnoreCase))
-        {
-            return "ServiceOwner";
-        }
-
-        if (namespaceName.Contains(".EndUser.", StringComparison.OrdinalIgnoreCase))
-        {
-            return "EndUser";
-        }
-
-        return null;
     }
 }

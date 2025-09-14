@@ -8,8 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
-using System.Reflection.Metadata;
-using AutoMapper.Internal;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -121,17 +119,26 @@ public static class ApplicationExtensions
         params IEnumerable<Assembly> assemblies)
     {
         var openResolverType = typeof(IServiceResourceResolver<>);
-        var implementations = assemblies
+
+        var concreteTypes = assemblies
             .DefaultIfEmpty(Assembly.GetCallingAssembly())
-            .SelectMany(x => x.GetTypes())
+            .SelectMany(assembly => assembly.DefinedTypes)
             .Where(type => type is { IsAbstract: false, IsInterface: false })
+            .ToList();
+
+        var resolverMaps = concreteTypes
             .SelectMany(x => x.GetInterfaces()
                     .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == openResolverType),
-                (x, y) => (Implementation: x, Interface: y));
+                (c, i) => new { Implementation = c, Interface = i, Inner = i.GetGenericArguments()[0] })
+            .ToList();
 
-        foreach (var (implementation, @interface) in implementations)
+        foreach (var requestType in concreteTypes.Where(x => x.IsAssignableTo(typeof(IBaseRequest))))
         {
-            services.TryAddTransient(@interface, implementation);
+            var resolverMap = resolverMaps
+                .FirstOrDefault(x => requestType.IsAssignableTo(x.Inner))
+                ?? throw new InvalidOperationException(
+                    $"No service resource resolver found for request type {requestType.FullName}.");
+            services.TryAddTransient(openResolverType.MakeGenericType(requestType), resolverMap.Implementation);
         }
 
         return services;

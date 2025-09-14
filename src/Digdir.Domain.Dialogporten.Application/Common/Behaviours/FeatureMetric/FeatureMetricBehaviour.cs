@@ -1,8 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -10,15 +8,14 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric
 internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
     IUser user,
     FeatureMetricRecorder featureMetricRecorder,
-    IServiceProvider serviceProvider,
+    IServiceResourceResolver<TRequest>? serviceResourceResolver = null,
     IHostEnvironment? hostEnvironment = null) // Optional for now to fix tests
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     private readonly FeatureMetricRecorder _featureMetricRecorder = featureMetricRecorder ?? throw new ArgumentNullException(nameof(featureMetricRecorder));
-    private readonly IHostEnvironment? _hostEnvironment = hostEnvironment;
     private readonly IUser _user = user ?? throw new ArgumentNullException(nameof(user));
-    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly IServiceResourceResolver<TRequest> _serviceResourceResolver = serviceResourceResolver ?? NullResourceResolver<TRequest>.Instance;
 
     public async Task<TResponse> Handle(
         TRequest request,
@@ -26,31 +23,10 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
         CancellationToken cancellationToken)
     {
         var name = typeof(TRequest).Name;
-        var environment = _hostEnvironment?.EnvironmentName ?? "Unknown";
+        var environment = hostEnvironment?.EnvironmentName ?? "Unknown";
         var audience = DetermineAudience(typeof(TRequest));
         _user.GetPrincipal().TryGetOrganizationShortName(out var performingOrg);
-
-        ServiceResourceInformation? resource = null;
-
-        // Check if the request implements IDialogIdQuery and use the generic resolver
-        if (request is IDialogIdQuery)
-        {
-            var dialogResolver = _serviceProvider.GetService<IServiceResourceResolver<IDialogIdQuery>>();
-            if (dialogResolver != null)
-            {
-                resource = await dialogResolver.Resolve((IDialogIdQuery)request, cancellationToken);
-            }
-        }
-        else
-        {
-            // Try to get a specific resolver for this request type
-            var specificResolver = _serviceProvider.GetService<IServiceResourceResolver<TRequest>>();
-            if (specificResolver != null)
-            {
-                resource = await specificResolver.Resolve(request, cancellationToken);
-            }
-        }
-
+        var resource = await _serviceResourceResolver.Resolve(request, cancellationToken);
         _featureMetricRecorder.Record(new(name, environment, performingOrg, resource?.OwnOrgShortName, resource?.ResourceId, null, null, audience));
         return await next(cancellationToken);
     }

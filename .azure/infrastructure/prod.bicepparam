@@ -63,7 +63,7 @@ param postgresConfiguration = {
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
 
 param redisSku = {
-  name: 'Basic'
+  name: 'Standard'
   family: 'C'
   capacity: 1
 }

@@ -32,13 +32,30 @@ permissions:
   contents: read
 
 jobs:
+  get-staging-versions:
+    name: Get Latest Deployed Version Info from GitHub (Staging)
+    uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
+    with:
+      environment: staging
+    secrets:
+      GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+
+  get-prod-versions:
+    name: Get Latest Deployed Version Info from GitHub (Production)
+    uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
+    with:
+      environment: prod
+    secrets:
+      GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+
   compare-deployments:
     name: Compare Staging and Production Deployments
+    needs: [get-staging-versions, get-prod-versions]
     runs-on: ubuntu-latest
     outputs:
       should_notify: ${{ steps.check-thresholds.outputs.should_notify }}
-      staging_version: ${{ steps.get-staging-version.outputs.version }}
-      prod_version: ${{ steps.get-prod-version.outputs.version }}
+      staging_version: ${{ steps.extract-versions.outputs.staging_version }}
+      prod_version: ${{ steps.extract-versions.outputs.prod_version }}
       days_since_prod_deploy: ${{ steps.calculate-lag.outputs.days_since_prod_deploy }}
       release_count_diff: ${{ steps.calculate-lag.outputs.release_count_diff }}
       compare_url: ${{ steps.generate-compare-url.outputs.url }}
@@ -52,41 +69,47 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Staging Version
-        id: get-staging-version
+      - name: Extract Version Information
+        id: extract-versions
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get staging version from GitHub environment variables
-          staging_version=$(gh variable get LATEST_DEPLOYED_APPS_VERSION --env staging || echo "")
-          if [ -z "$staging_version" ]; then
-            echo "Warning: No staging version found"
+          # Extract versions from the SHA outputs by looking up the corresponding tags
+          staging_sha="${{ needs.get-staging-versions.outputs.apps_version_sha }}"
+          prod_sha="${{ needs.get-prod-versions.outputs.apps_version_sha }}"
+          
+          if [ -n "$staging_sha" ]; then
+            staging_version=$(git tag --points-at "$staging_sha" | grep '^v' | sed 's/^v//' | head -1)
+            if [ -z "$staging_version" ]; then
+              # Fallback: find the closest tag
+              staging_version=$(git describe --tags --exact-match "$staging_sha" 2>/dev/null | sed 's/^v//' || echo "unknown")
+            fi
+          else
             staging_version="unknown"
           fi
-          echo "version=$staging_version" >> $GITHUB_OUTPUT
-          echo "Staging version: $staging_version"
-
-      - name: Get Production Version
-        id: get-prod-version
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Get production version from GitHub environment variables
-          prod_version=$(gh variable get LATEST_DEPLOYED_APPS_VERSION --env prod || echo "")
-          if [ -z "$prod_version" ]; then
-            echo "Warning: No production version found"
+          
+          if [ -n "$prod_sha" ]; then
+            prod_version=$(git tag --points-at "$prod_sha" | grep '^v' | sed 's/^v//' | head -1)
+            if [ -z "$prod_version" ]; then
+              # Fallback: find the closest tag
+              prod_version=$(git describe --tags --exact-match "$prod_sha" 2>/dev/null | sed 's/^v//' || echo "unknown")
+            fi
+          else
             prod_version="unknown"
           fi
-          echo "version=$prod_version" >> $GITHUB_OUTPUT
-          echo "Production version: $prod_version"
+          
+          echo "staging_version=$staging_version" >> $GITHUB_OUTPUT
+          echo "prod_version=$prod_version" >> $GITHUB_OUTPUT
+          echo "Staging version: $staging_version (SHA: $staging_sha)"
+          echo "Production version: $prod_version (SHA: $prod_sha)"
 
       - name: Calculate Deployment Lag
         id: calculate-lag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          staging_version="${{ steps.get-staging-version.outputs.version }}"
-          prod_version="${{ steps.get-prod-version.outputs.version }}"
+          staging_version="${{ steps.extract-versions.outputs.staging_version }}"
+          prod_version="${{ steps.extract-versions.outputs.prod_version }}"
           
           if [ "$staging_version" = "unknown" ] || [ "$prod_version" = "unknown" ]; then
             echo "days_since_prod_deploy=0" >> $GITHUB_OUTPUT
@@ -133,8 +156,8 @@ jobs:
       - name: Generate Compare URL
         id: generate-compare-url
         run: |
-          staging_version="${{ steps.get-staging-version.outputs.version }}"
-          prod_version="${{ steps.get-prod-version.outputs.version }}"
+          staging_version="${{ steps.extract-versions.outputs.staging_version }}"
+          prod_version="${{ steps.extract-versions.outputs.prod_version }}"
           
           if [ "$staging_version" != "unknown" ] && [ "$prod_version" != "unknown" ] && [ "$staging_version" != "$prod_version" ]; then
             compare_url="https://github.com/${{ github.repository }}/compare/v$prod_version...v$staging_version"

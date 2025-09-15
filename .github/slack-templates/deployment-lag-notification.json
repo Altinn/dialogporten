@@ -1,5 +1,5 @@
 {
-    "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+    "channel": "${{ env.CHANNEL_ID }}",
     "text": "${{ env.EMOJI }} Production Deployment Lag Alert - Production (v${{ env.PROD_VERSION }}) is behind Staging (v${{ env.STAGING_VERSION }}) by ${{ env.RELEASE_COUNT_DIFF }} releases and ${{ env.DAYS_SINCE_PROD_DEPLOY }} days",
     "attachments": [
         {

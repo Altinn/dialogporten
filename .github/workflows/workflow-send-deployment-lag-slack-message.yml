@@ -63,18 +63,16 @@ jobs:
           fi
           
           # Format commits for Slack display (limit to 10 most recent)
+          # Use a simpler format to avoid JSON escaping issues
           formatted_commits=$(echo "$commits_json" | jq -r '
-            .[0:10] | map("• `" + .sha + "` " + .message + " (_" + .author + "_)") | join("\n")
+            .[0:10] | map("• " + .sha + " " + .message + " (" + .author + ")") | join("\\n")
           ')
           
           # Add truncation notice if there are more than 10 commits
           commit_count=$(echo "$commits_json" | jq length)
           if [ "$commit_count" -gt 10 ]; then
-            formatted_commits="$formatted_commits\n_... and $((commit_count - 10)) more commits_"
+            formatted_commits="$formatted_commits\\n... and $((commit_count - 10)) more commits"
           fi
-          
-          # Escape for GitHub output
-          formatted_commits=$(echo "$formatted_commits" | sed ':a;N;$!ba;s/\n/\\n/g')
           
           echo "formatted_commits=$formatted_commits" >> $GITHUB_OUTPUT
 
@@ -130,6 +128,18 @@ jobs:
           echo "emoji=$emoji" >> $GITHUB_OUTPUT
           echo "severity=$severity" >> $GITHUB_OUTPUT
 
+      - name: Debug Slack payload
+        run: |
+          echo "=== Debugging Slack Notification ==="
+          echo "Channel ID: ${{ secrets.SLACK_CHANNEL_ID }}"
+          echo "Staging Version: ${{ inputs.staging_version }}"
+          echo "Production Version: ${{ inputs.prod_version }}"
+          echo "Formatted Commits Length: ${#FORMATTED_COMMITS}"
+          echo "Author Tags: ${{ steps.format-authors.outputs.author_tags }}"
+          echo "Compare URL: ${{ inputs.compare_url }}"
+        env:
+          FORMATTED_COMMITS: ${{ steps.format-commits.outputs.formatted_commits }}
+
       - name: Send Slack notification
         uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
         with:
@@ -139,6 +149,7 @@ jobs:
           payload-file-path: "./.github/slack-templates/deployment-lag-notification.json"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
           STAGING_VERSION: ${{ inputs.staging_version }}
           PROD_VERSION: ${{ inputs.prod_version }}
           DAYS_SINCE_PROD_DEPLOY: ${{ inputs.days_since_prod_deploy }}

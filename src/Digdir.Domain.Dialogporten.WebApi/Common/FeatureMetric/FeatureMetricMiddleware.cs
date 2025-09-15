@@ -12,8 +12,19 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next)
     public async Task InvokeAsync(HttpContext context)
     {
         var deliveryContext = context.RequestServices.GetRequiredService<IFeatureMetricDeliveryContext>();
-        await _next(context);
-        // TODO: what about server errors? Should we ignore them?
+        try
+        {
+            await _next(context);
+        }
+        catch (Exception)
+        {
+            deliveryContext.Ack(GeneratePresentationTag(context),
+                new("StatusCode", "5**"),
+                new("CorrelationId", context.TraceIdentifier),
+                new("Status", "error"));
+            throw;
+        }
+
         deliveryContext.Ack(GeneratePresentationTag(context),
             new("StatusCode", context.Response.StatusCode),
             new("CorrelationId", context.TraceIdentifier),

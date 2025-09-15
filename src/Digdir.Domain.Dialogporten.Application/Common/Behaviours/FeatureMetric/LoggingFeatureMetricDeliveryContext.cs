@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -6,13 +7,16 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
 {
     private readonly FeatureMetricRecorder _recorder;
     private readonly ILogger<LoggingFeatureMetricDeliveryContext> _logger;
+    private readonly IHostEnvironment? _hostEnvironment;
 
     public LoggingFeatureMetricDeliveryContext(
         FeatureMetricRecorder recorder,
-        ILogger<LoggingFeatureMetricDeliveryContext> logger)
+        ILogger<LoggingFeatureMetricDeliveryContext> logger,
+        IHostEnvironment? hostEnvironment = null)
     {
         _recorder = recorder ?? throw new ArgumentNullException(nameof(recorder));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _hostEnvironment = hostEnvironment;
     }
 
     public void Ack(string presentationTag, params IEnumerable<KeyValuePair<string, object>> additionalTags)
@@ -23,7 +27,9 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         }
 
         var additionalTagsDic = new Dictionary<string, object>(additionalTags);
-        foreach (var record in _recorder.Records)
+        foreach (var record in _recorder.Records.DefaultIfEmpty(new(
+             FeatureName: "NoFeatureRecorded",
+             Environment: _hostEnvironment?.EnvironmentName)))
         {
             LogFeatureMetric(_logger,
                 record.FeatureName,

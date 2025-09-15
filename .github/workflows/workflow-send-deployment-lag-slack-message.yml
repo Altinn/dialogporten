@@ -62,16 +62,29 @@ jobs:
             exit 0
           fi
           
-          # Format commits for Slack display (limit to 10 most recent)
-          # Use a simpler format to avoid JSON escaping issues
-          formatted_commits=$(echo "$commits_json" | jq -r '
-            .[0:10] | map("• " + .sha + " " + .message + " (" + .author + ")") | join("\\n")
+          # Filter out bot commits and format for Slack display (limit to 10 most recent)
+          filtered_commits=$(echo "$commits_json" | jq -r '
+            map(select(.author_username != "dialogporten-bot" and .author != "Dialogporten Automation Bot")) | .[0:10]
           ')
           
-          # Add truncation notice if there are more than 10 commits
-          commit_count=$(echo "$commits_json" | jq length)
-          if [ "$commit_count" -gt 10 ]; then
-            formatted_commits="$formatted_commits\\n... and $((commit_count - 10)) more commits"
+          formatted_commits=$(echo "$filtered_commits" | jq -r '
+            map("• `" + .sha + "` " + .message + " (_" + .author + "_)") | join("\n")
+          ')
+          
+          # Add truncation notice if there are more commits after filtering
+          total_commit_count=$(echo "$commits_json" | jq length)
+          filtered_commit_count=$(echo "$filtered_commits" | jq length)
+          bot_commits_filtered=$((total_commit_count - filtered_commit_count))
+          
+          if [ "$filtered_commit_count" -eq 10 ] && [ "$total_commit_count" -gt 10 ]; then
+            remaining_commits=$((total_commit_count - 10))
+            if [ "$bot_commits_filtered" -gt 0 ]; then
+              formatted_commits="$formatted_commits\n_... and $remaining_commits more commits (filtered out $bot_commits_filtered bot commits)_"
+            else
+              formatted_commits="$formatted_commits\n_... and $remaining_commits more commits_"
+            fi
+          elif [ "$bot_commits_filtered" -gt 0 ] && [ "$filtered_commit_count" -lt 10 ]; then
+            formatted_commits="$formatted_commits\n_($bot_commits_filtered bot commits filtered out)_"
           fi
           
           echo "formatted_commits=$formatted_commits" >> $GITHUB_OUTPUT
@@ -109,19 +122,19 @@ jobs:
           days_since_prod_deploy=${{ inputs.days_since_prod_deploy }}
           release_count_diff=${{ inputs.release_count_diff }}
           
-          # Determine color and emoji based on severity
-          if [ "$days_since_prod_deploy" -ge 7 ] || [ "$release_count_diff" -ge 5 ]; then
-            color="#FF0000"  # Red for high severity
-            emoji=":rotating_light:"
-            severity="HIGH"
-          elif [ "$days_since_prod_deploy" -ge 5 ] || [ "$release_count_diff" -ge 4 ]; then
-            color="#FFA500"  # Orange for medium severity
-            emoji=":warning:"
-            severity="MEDIUM"
-          else
-            color="#FFFF00"  # Yellow for low severity
+          # Determine color and emoji based on severity (more moderate approach)
+          if [ "$days_since_prod_deploy" -ge 14 ] || [ "$release_count_diff" -ge 8 ]; then
+            color="#FF6B6B"  # Soft red for high severity
+            emoji=":point_right:"
+            severity="Attention needed"
+          elif [ "$days_since_prod_deploy" -ge 7 ] || [ "$release_count_diff" -ge 5 ]; then
+            color="#FFB347"  # Soft orange for medium severity
             emoji=":information_source:"
-            severity="LOW"
+            severity="Worth noting"
+          else
+            color="#87CEEB"  # Soft blue for low severity
+            emoji=":information_source:"
+            severity="FYI"
           fi
           
           echo "color=$color" >> $GITHUB_OUTPUT

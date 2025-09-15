@@ -26,7 +26,8 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
             throw new ArgumentException("Value cannot be null or whitespace.", nameof(presentationTag));
         }
 
-        var additionalTagsDic = new Dictionary<string, object>(additionalTags);
+        var additionalTagsDic = additionalTags as Dictionary<string, object>
+                                ?? new Dictionary<string, object>(additionalTags);
         foreach (var record in _recorder.Records.DefaultIfEmpty(new(
              FeatureName: "NoFeatureRecorded",
              Environment: _hostEnvironment?.EnvironmentName)))

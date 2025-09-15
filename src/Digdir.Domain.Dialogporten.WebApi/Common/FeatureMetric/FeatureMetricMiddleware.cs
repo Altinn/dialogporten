@@ -34,12 +34,47 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next)
 
     private static bool IsSuccessStatusCode(int statusCode) => statusCode is >= 200 and < 300;
 
-    private static string GeneratePresentationTag(HttpContext context) =>
-        // Generate a presentation tag containing relevant context information
-        // TODO: need raw route path here, not the processed one
-        // E.g., GET_api_v1_messages_{messageId}_attachments_{attachmentId}
-        // instead of GET_api_v1_messages_123_attachments_456
-        $"{context.Request.Method}_{context.Request.Path.Value?.Replace("/", "_").Trim('_')}";
+    private static string GeneratePresentationTag(HttpContext context)
+    {
+        var method = context.Request.Method;
+        var endpoint = context.GetEndpoint();
+
+        // Get the route template from endpoint metadata
+        var template = GetRouteTemplate(endpoint);
+        if (!string.IsNullOrEmpty(template))
+        {
+            return $"{method}_{template.Trim('/')}";
+        }
+
+        // Fallback: Use actual path if template not available
+        var path = context.Request.Path.Value?.Trim('/') ?? "";
+        return $"{method}_{path}";
+    }
+
+    private static string? GetRouteTemplate(Microsoft.AspNetCore.Http.Endpoint? endpoint)
+    {
+        if (endpoint == null) return null;
+
+        // Try RouteEndpoint first
+        if (endpoint is Microsoft.AspNetCore.Routing.RouteEndpoint routeEndpoint)
+        {
+            return routeEndpoint.RoutePattern.RawText;
+        }
+
+        // Try to get route template from endpoint display name
+        var displayName = endpoint.DisplayName;
+        if (!string.IsNullOrEmpty(displayName) && displayName.Contains(' '))
+        {
+            // Display name format is usually "HTTP method route" (e.g., "GET api/v1/dialogs/{dialogId}")
+            var parts = displayName.Split(' ', 2);
+            if (parts.Length == 2)
+            {
+                return parts[1];
+            }
+        }
+
+        return null;
+    }
 }
 
 /// <summary>

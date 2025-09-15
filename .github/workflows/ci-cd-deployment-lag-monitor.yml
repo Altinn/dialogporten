@@ -7,6 +7,9 @@ on:
   schedule:
     # Run weekdays at 12pm Norway time (11am UTC)
     - cron: '0 11 * * 1-5'
+  push:
+    branches:
+      - chore/slack-notification-on-stale-releases
   workflow_dispatch:
     inputs:
       days_threshold:
@@ -145,9 +148,10 @@ jobs:
       - name: Check Thresholds
         id: check-thresholds
         run: |
-          days_threshold=${{ inputs.days_threshold || 3 }}
-          releases_threshold=${{ inputs.releases_threshold || 3 }}
-          force_notification=${{ inputs.force_notification || false }}
+          # Set defaults for push events (inputs are only available for workflow_dispatch)
+          days_threshold=${{ inputs.days_threshold || 1 }}
+          releases_threshold=${{ inputs.releases_threshold || 1 }}
+          force_notification=${{ inputs.force_notification || true }}
           
           days_since_prod_deploy=${{ steps.calculate-lag.outputs.days_since_prod_deploy }}
           release_count_diff=${{ steps.calculate-lag.outputs.release_count_diff }}

@@ -21,6 +21,9 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.Property(x => x.Party)
             .UseCollation("C");
 
+        builder.HasIndex(x => new { x.ServiceResource, x.Party })
+            .IncludeProperties(x => x.Id);
+
         builder.HasIndex(x => x.Org);
         builder.Property(x => x.Org)
             .UseCollation("C");

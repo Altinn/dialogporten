@@ -11,6 +11,7 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next)
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // TODO: Analyze token to extract user and org info for feature metrics - do not log SSNs
         var deliveryContext = context.RequestServices.GetRequiredService<IFeatureMetricDeliveryContext>();
         try
         {

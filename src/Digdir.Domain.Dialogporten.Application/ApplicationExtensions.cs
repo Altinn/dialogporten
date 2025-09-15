@@ -129,7 +129,7 @@ public static class ApplicationExtensions
         var requestResolverMap = concreteTypes
             .Where(x => x.IsAssignableTo(typeof(IBaseRequest)))
             .Select(x => (Request: x, Resolver: resolverMaps
-                .FirstOrDefault(m => x.IsAssignableTo(m.Inner))
+                .SingleOrDefault(m => x.IsAssignableTo(m.Inner))
                 ?.Implementation))
             .ToList();
 
@@ -143,7 +143,7 @@ public static class ApplicationExtensions
             throw new InvalidOperationException(
                 $"All requests are expected to have an associated {nameof(IServiceResourceResolver<object>)}. Could " +
                 $"not find resolvers for the following requests. If a request cannot be associated with a service " +
-                $"resource or tracking service resource information is irrelevant for the request, mark the it " +
+                $"resource or tracking service resource information is irrelevant for the request, mark it " +
                 $"with {nameof(IDoNotCareAboutServiceResource)}.{Environment.NewLine}{errorMessage}");
         }
 

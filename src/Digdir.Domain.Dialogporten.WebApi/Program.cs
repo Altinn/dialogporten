@@ -239,9 +239,8 @@ static void BuildAndRun(string[] args)
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
             var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
-        });
-
-    app.UseFeatureMetrics();
+        })
+        .UseFeatureMetrics();
 
     app.Run();
 }

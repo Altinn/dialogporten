@@ -8,14 +8,14 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric
 internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
     IUser user,
     FeatureMetricRecorder featureMetricRecorder,
-    IServiceResourceResolver<TRequest>? serviceResourceResolver = null,
+    IServiceResourceResolver<TRequest> serviceResourceResolver,
     IHostEnvironment? hostEnvironment = null) // Optional for now to fix tests
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     private readonly FeatureMetricRecorder _featureMetricRecorder = featureMetricRecorder ?? throw new ArgumentNullException(nameof(featureMetricRecorder));
     private readonly IUser _user = user ?? throw new ArgumentNullException(nameof(user));
-    private readonly IServiceResourceResolver<TRequest> _serviceResourceResolver = serviceResourceResolver ?? NullResourceResolver<TRequest>.Instance;
+    private readonly IServiceResourceResolver<TRequest> _serviceResourceResolver = serviceResourceResolver ?? throw new ArgumentNullException(nameof(serviceResourceResolver));
 
     public async Task<TResponse> Handle(
         TRequest request,

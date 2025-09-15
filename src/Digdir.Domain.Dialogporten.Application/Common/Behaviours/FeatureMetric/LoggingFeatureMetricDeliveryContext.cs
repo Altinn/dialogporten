@@ -15,21 +15,14 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public void Ack(string presentationTag, params IEnumerable<KeyValuePair<string, string>> additionalTags) =>
-        LogMetrics(success: true, presentationTag, additionalTags);
-
-    public void Nack(string presentationTag, params IEnumerable<KeyValuePair<string, string>> additionalTags) =>
-        LogMetrics(success: false, presentationTag, additionalTags);
-
-    private void LogMetrics(bool success, string presentationTag, IEnumerable<KeyValuePair<string, string>> additionalTags)
+    public void Ack(string presentationTag, params IEnumerable<KeyValuePair<string, object>> additionalTags)
     {
         if (string.IsNullOrWhiteSpace(presentationTag))
         {
             throw new ArgumentException("Value cannot be null or whitespace.", nameof(presentationTag));
         }
 
-        var add = new Dictionary<string, string>(additionalTags);
-
+        var additionalTagsDic = new Dictionary<string, object>(additionalTags);
         foreach (var record in _recorder.Records)
         {
             LogFeatureMetric(_logger,
@@ -39,8 +32,7 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                 record.OwnerOrg,
                 record.ServiceResource,
                 presentationTag,
-                success,
-                add);
+                additionalTagsDic);
         }
     }
 
@@ -54,8 +46,7 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                   "ServiceOrg={ServiceOrg}, " +
                   "ServiceResource={ServiceResource}, " +
                   "PresentationTag={PresentationTag}, " +
-                  "Success={Success}, " +
-                  "AdditionalTags={AdditionalTags}")]
+                  "AdditionalTags={@AdditionalTags}")]
     private static partial void LogFeatureMetric(
         ILogger logger,
         string featureType,
@@ -64,7 +55,6 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         string serviceOrg,
         string serviceResource,
         string presentationTag,
-        bool success,
-        Dictionary<string, string> additionalTags);
+        Dictionary<string, object> additionalTags);
 }
 

@@ -1,5 +1,3 @@
-using System.Drawing;
-using System.Globalization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
@@ -16,18 +14,10 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next)
         var deliveryContext = context.RequestServices.GetRequiredService<IFeatureMetricDeliveryContext>();
         await _next(context);
         // TODO: what about server errors? Should we ignore them?
-        var presentationTag = GeneratePresentationTag(context);
-        if (!IsSuccessStatusCode(context.Response.StatusCode))
-        {
-            deliveryContext.Nack(presentationTag,
-                new("StatusCode", context.Response.StatusCode.ToString(CultureInfo.InvariantCulture)),
-                new("CorrelationId", context.TraceIdentifier));
-            return;
-        }
-
-        deliveryContext.Ack(presentationTag,
-            new("StatusCode", context.Response.StatusCode.ToString(CultureInfo.InvariantCulture)),
-            new("CorrelationId", context.TraceIdentifier));
+        deliveryContext.Ack(GeneratePresentationTag(context),
+            new("StatusCode", context.Response.StatusCode),
+            new("CorrelationId", context.TraceIdentifier),
+            new("Status", IsSuccessStatusCode(context.Response.StatusCode) ? "success" : "failure"));
     }
 
     private static bool IsSuccessStatusCode(int statusCode) => statusCode is >= 200 and < 300;
@@ -35,6 +25,8 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next)
     private static string GeneratePresentationTag(HttpContext context) =>
         // Generate a presentation tag containing relevant context information
         // TODO: need raw route path here, not the processed one
+        // E.g., GET_api_v1_messages_{messageId}_attachments_{attachmentId}
+        // instead of GET_api_v1_messages_123_attachments_456
         $"{context.Request.Method}_{context.Request.Path.Value?.Replace("/", "_").Trim('_')}";
 }
 

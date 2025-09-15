@@ -9,6 +9,15 @@ internal interface IServiceResourceResolver<in TRequest>
 }
 
 /// <summary>
+/// Simple cache interface for dialog service resource caching
+/// </summary>
+public interface IDialogServiceResourceCache
+{
+    Task<string?> GetAsync(string key, CancellationToken cancellationToken);
+    Task SetAsync(string key, string value, TimeSpan ttl, CancellationToken cancellationToken);
+}
+
+/// <summary>
 /// Marker interface for queries that operate on a specific dialog by ID
 /// </summary>
 public interface IDialogIdQuery
@@ -22,18 +31,35 @@ public interface IDialogIdQuery
 /// <summary>
 /// Generic resolver for any IDialogIdQuery that can resolve service resource information from dialog ID
 /// </summary>
-internal sealed class DialogQueryResolver(IDialogDbContext db, IResourceRegistry resourceRegistry) : IServiceResourceResolver<IDialogIdQuery>
+internal sealed class DialogQueryResolver(IDialogDbContext db, IResourceRegistry resourceRegistry, IDialogServiceResourceCache cache) : IServiceResourceResolver<IDialogIdQuery>
 {
+    private static readonly string CacheKeyPrefix = "dialog-service-resource:";
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
+
     public async Task<ServiceResourceInformation?> Resolve(IDialogIdQuery request, CancellationToken cancellationToken)
     {
-        // TODO: Cache results?
+        var cacheKey = $"{CacheKeyPrefix}{request.DialogId}";
+
+        // Try cache first
+        var cachedServiceResource = await cache.GetAsync(cacheKey, cancellationToken);
+        if (cachedServiceResource != null)
+        {
+            return await resourceRegistry.GetResourceInformation(cachedServiceResource, cancellationToken);
+        }
+
+        // Cache miss - hit database
         var serviceResource = await db.Dialogs
             .Where(x => request.DialogId == x.Id)
             .Select(x => x.ServiceResource)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return serviceResource is null ? null
-            : await resourceRegistry.GetResourceInformation(serviceResource, cancellationToken);
+        if (serviceResource != null)
+        {
+            await cache.SetAsync(cacheKey, serviceResource, CacheTtl, cancellationToken);
+            return await resourceRegistry.GetResourceInformation(serviceResource, cancellationToken);
+        }
+
+        return null;
     }
 }
 

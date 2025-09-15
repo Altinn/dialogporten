@@ -64,12 +64,24 @@ jobs:
           
           # Filter out bot commits and format for Slack display (limit to 10 most recent)
           filtered_commits=$(echo "$commits_json" | jq -r '
-            map(select(.author_username != "dialogporten-bot" and .author != "Dialogporten Automation Bot")) | .[0:10]
+            map(select(.author_username != "dialogporten-bot" and .author != "Dialogporten Automation Bot" and .author_username != "renovate[bot]")) | .[0:10]
           ')
           
-          formatted_commits=$(echo "$filtered_commits" | jq -r '
-            map("• `" + .sha + "` " + .message + " (_" + .author + "_)") | join("\n")
-          ')
+          # Format commits one by one to avoid escaping issues
+          formatted_commits=""
+          while IFS= read -r commit; do
+            if [ -n "$commit" ]; then
+              sha=$(echo "$commit" | jq -r '.sha')
+              message=$(echo "$commit" | jq -r '.message')
+              author=$(echo "$commit" | jq -r '.author')
+              
+              if [ -n "$formatted_commits" ]; then
+                formatted_commits="$formatted_commits"$'\n'"• \`$sha\` $message (_${author}_)"
+              else
+                formatted_commits="• \`$sha\` $message (_${author}_)"
+              fi
+            fi
+          done < <(echo "$filtered_commits" | jq -c '.[]')
           
           # Add truncation notice if there are more commits after filtering
           total_commit_count=$(echo "$commits_json" | jq length)
@@ -79,12 +91,12 @@ jobs:
           if [ "$filtered_commit_count" -eq 10 ] && [ "$total_commit_count" -gt 10 ]; then
             remaining_commits=$((total_commit_count - 10))
             if [ "$bot_commits_filtered" -gt 0 ]; then
-              formatted_commits="$formatted_commits\n_... and $remaining_commits more commits (filtered out $bot_commits_filtered bot commits)_"
+              formatted_commits="$formatted_commits"$'\n'"_... and $remaining_commits more commits (filtered out $bot_commits_filtered bot commits)_"
             else
-              formatted_commits="$formatted_commits\n_... and $remaining_commits more commits_"
+              formatted_commits="$formatted_commits"$'\n'"_... and $remaining_commits more commits_"
             fi
           elif [ "$bot_commits_filtered" -gt 0 ] && [ "$filtered_commit_count" -lt 10 ]; then
-            formatted_commits="$formatted_commits\n_($bot_commits_filtered bot commits filtered out)_"
+            formatted_commits="$formatted_commits"$'\n'"_($bot_commits_filtered bot commits filtered out)_"
           fi
           
           echo "formatted_commits=$formatted_commits" >> $GITHUB_OUTPUT

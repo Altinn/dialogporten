@@ -1,45 +1,45 @@
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
-/// <summary>
-/// Console-based delivery context for local development and debugging.
-/// Uses structured logging for feature metrics with immediate console visibility.
-/// </summary>
 internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetricDeliveryContext
 {
     private readonly FeatureMetricRecorder _recorder;
     private readonly ILogger<LoggingFeatureMetricDeliveryContext> _logger;
+    private readonly IHostEnvironment? _hostEnvironment;
 
     public LoggingFeatureMetricDeliveryContext(
         FeatureMetricRecorder recorder,
-        ILogger<LoggingFeatureMetricDeliveryContext> logger)
+        ILogger<LoggingFeatureMetricDeliveryContext> logger,
+        IHostEnvironment? hostEnvironment = null)
     {
         _recorder = recorder ?? throw new ArgumentNullException(nameof(recorder));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _hostEnvironment = hostEnvironment;
     }
 
-    public void Ack(string presentationTag) => LogMetrics(success: true);
-
-    public void Nack(string presentationTag) => LogMetrics(success: false);
-
-    private void LogMetrics(bool success)
+    public void Ack(string presentationTag, params IEnumerable<KeyValuePair<string, object>> additionalTags)
     {
-        foreach (var record in _recorder.Records)
+        if (string.IsNullOrWhiteSpace(presentationTag))
         {
-            var (featureType, environment, tokenOrg, serviceOrg, serviceResource, httpStatusCode, presentationTag, audience, correlationId) = record;
+            throw new ArgumentException("Value cannot be null or whitespace.", nameof(presentationTag));
+        }
 
+        var additionalTagsDic = additionalTags as Dictionary<string, object>
+                                ?? new Dictionary<string, object>(additionalTags);
+        foreach (var record in _recorder.Records.DefaultIfEmpty(new(
+             FeatureName: "NoFeatureRecorded",
+             Environment: _hostEnvironment?.EnvironmentName)))
+        {
             LogFeatureMetric(_logger,
-                featureType,
-                environment,
-                tokenOrg ?? FeatureMetricConstants.UnknownValue,
-                serviceOrg ?? FeatureMetricConstants.UnknownValue,
-                serviceResource ?? FeatureMetricConstants.UnknownValue,
-                httpStatusCode,
-                presentationTag ?? FeatureMetricConstants.UnknownValue,
-                audience ?? FeatureMetricConstants.UnknownValue,
-                correlationId ?? FeatureMetricConstants.UnknownValue,
-                success);
+                record.FeatureName,
+                record.Environment,
+                record.PerformerOrg,
+                record.OwnerOrg,
+                record.ServiceResource,
+                presentationTag,
+                additionalTagsDic);
         }
     }
 
@@ -52,11 +52,8 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                   "TokenOrg={TokenOrg}, " +
                   "ServiceOrg={ServiceOrg}, " +
                   "ServiceResource={ServiceResource}, " +
-                  "HttpStatusCode={HttpStatusCode}, " +
                   "PresentationTag={PresentationTag}, " +
-                  "Audience={Audience}, " +
-                  "CorrelationId={CorrelationId}, " +
-                  "Success={Success}")]
+                  "AdditionalTags={@AdditionalTags}")]
     private static partial void LogFeatureMetric(
         ILogger logger,
         string featureType,
@@ -64,10 +61,7 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         string tokenOrg,
         string serviceOrg,
         string serviceResource,
-        int? httpStatusCode,
         string presentationTag,
-        string audience,
-        string correlationId,
-        bool success);
+        Dictionary<string, object> additionalTags);
 }
 

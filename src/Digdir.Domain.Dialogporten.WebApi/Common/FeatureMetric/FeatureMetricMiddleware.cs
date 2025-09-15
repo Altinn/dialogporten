@@ -5,74 +5,41 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 /// <summary>
 /// Middleware to handle feature metric delivery acknowledgments based on HTTP response status codes
 /// </summary>
-public sealed class FeatureMetricMiddleware
+public sealed class FeatureMetricMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<FeatureMetricMiddleware> _logger;
-
-    public FeatureMetricMiddleware(
-        RequestDelegate next,
-        ILogger<FeatureMetricMiddleware> logger)
-    {
-        _next = next ?? throw new ArgumentNullException(nameof(next));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Process the request first
-        await _next(context);
-
-        // After processing, handle feature metric acknowledgment
+        // TODO: Analyze token to extract user and org info for feature metrics - do not log SSNs
+        var deliveryContext = context.RequestServices.GetRequiredService<IFeatureMetricDeliveryContext>();
         try
         {
-            var deliveryContext = context.RequestServices.GetService<IFeatureMetricDeliveryContext>();
-            // NOTE: This violates clean architecture by accessing the concrete FeatureMetricRecorder class
-            // from the presentation layer. This is a pragmatic solution due to middleware execution timing
-            // constraints - middleware runs before MediatR behaviors, so we need direct access to update
-            // the same instance that the behavior will populate. A proper interface-based solution might be
-            // possible, but I've not found a way yet.
-            var recorder = context.RequestServices.GetService<FeatureMetricRecorder>();
-
-            if (deliveryContext == null || recorder == null)
-            {
-                return;
-            }
-
-            var statusCode = context.Response.StatusCode;
-            var presentationTag = GeneratePresentationTag(context);
-            var correlationId = context.TraceIdentifier;
-
-            // Update all recorded metrics with HTTP status code, presentation tag, and correlation ID
-            recorder.UpdateRecord(statusCode, presentationTag, correlationId);
-
-            // Determine success/failure based on HTTP status code
-            if (IsSuccessStatusCode(statusCode))
-            {
-                deliveryContext.Ack(presentationTag);
-            }
-            else
-            {
-                deliveryContext.Nack(presentationTag);
-            }
+            await _next(context);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogWarning(ex,
-                "Failed to acknowledge feature metrics for {Method} {Path}. Status: {StatusCode}",
-                context.Request.Method,
-                context.Request.Path.Value,
-                context.Response.StatusCode);
+            deliveryContext.Ack(GeneratePresentationTag(context),
+                new("StatusCode", "5**"),
+                new("CorrelationId", context.TraceIdentifier),
+                new("Status", "error"));
+            throw;
         }
+
+        deliveryContext.Ack(GeneratePresentationTag(context),
+            new("StatusCode", context.Response.StatusCode),
+            new("CorrelationId", context.TraceIdentifier),
+            new("Status", IsSuccessStatusCode(context.Response.StatusCode) ? "success" : "failure"));
     }
 
     private static bool IsSuccessStatusCode(int statusCode) => statusCode is >= 200 and < 300;
 
-    private static string GeneratePresentationTag(HttpContext context)
-    {
+    private static string GeneratePresentationTag(HttpContext context) =>
         // Generate a presentation tag containing relevant context information
-        return $"{context.Request.Method}_{context.Request.Path.Value?.Replace("/", "_")?.Trim('_')}";
-    }
+        // TODO: need raw route path here, not the processed one
+        // E.g., GET_api_v1_messages_{messageId}_attachments_{attachmentId}
+        // instead of GET_api_v1_messages_123_attachments_456
+        $"{context.Request.Method}_{context.Request.Path.Value?.Replace("/", "_").Trim('_')}";
 }
 
 /// <summary>

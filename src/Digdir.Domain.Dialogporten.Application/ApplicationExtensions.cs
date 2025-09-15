@@ -13,6 +13,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using MediatR.NotificationPublishers;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application;
 
@@ -66,25 +67,14 @@ public static class ApplicationExtensions
             .AddTransient<IUserParties, UserParties>()
             .AddTransient<IClock, Clock>()
             .AddDataLoaders()
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DataLoaderBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>))
-            .AddScoped(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
+            .AddTransient<IFeatureMetricDeliveryContext, LoggingFeatureMetricDeliveryContext>()
             .AddScoped<FeatureMetricRecorder>()
-            .AddServiceResourceResolvers(thisAssembly);
-
-        var otelEndpoint = configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-        if (string.IsNullOrEmpty(otelEndpoint) || !Uri.IsWellFormedUriString(otelEndpoint, UriKind.Absolute))
-        {
-            // No OpenTelemetry endpoint configured - use console logging
-            services.AddScoped<IFeatureMetricDeliveryContext, LoggingFeatureMetricDeliveryContext>();
-        }
-        else
-        {
-            // OpenTelemetry endpoint configured - use OpenTelemetry logging
-            services.AddScoped<IFeatureMetricDeliveryContext, OtelFeatureMetricLoggingDeliveryContext>();
-        }
+            .AddServiceResourceResolvers();
 
         if (!environment.IsDevelopment())
         {
@@ -113,25 +103,54 @@ public static class ApplicationExtensions
         return services;
     }
 
-    private static IServiceCollection AddServiceResourceResolvers(this IServiceCollection services, Assembly assembly)
+    private static IServiceCollection AddServiceResourceResolvers(
+        this IServiceCollection services,
+        params IEnumerable<Assembly> assemblies)
     {
-        var serviceResourceResolverType = typeof(IServiceResourceResolver<>);
+        var openResolverType = typeof(IServiceResourceResolver<>);
 
-        var implementations = assembly.GetTypes()
-            .Where(type => type is { IsClass: true, IsAbstract: false, IsInterface: false })
-            .Where(type => type.GetInterfaces()
-                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == serviceResourceResolverType))
+        // Get all non-abstract, non-interface types from the provided assemblies (or the calling assembly
+        // if none are provided)
+        var concreteTypes = assemblies
+            .DefaultIfEmpty(Assembly.GetCallingAssembly())
+            .SelectMany(assembly => assembly.DefinedTypes)
+            .Where(type => type is { IsAbstract: false, IsInterface: false })
             .ToList();
 
-        foreach (var implementation in implementations)
-        {
-            var serviceInterface = implementation.GetInterfaces()
-                .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == serviceResourceResolverType);
+        // Find all types that implement IServiceResourceResolver<T> and map them to their corresponding T
+        var resolverMaps = concreteTypes
+            .SelectMany(x => x.GetInterfaces()
+                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == openResolverType),
+                (c, i) => new { Implementation = c, Inner = i.GetGenericArguments()[0] })
+            .ToList();
 
-            if (serviceInterface != null)
-            {
-                services.AddTransient(serviceInterface, implementation);
-            }
+        // For each type that implements IBaseRequest, find the corresponding resolver implementation
+        // based on the mapping created above
+        var requestResolverMap = concreteTypes
+            .Where(x => x.IsAssignableTo(typeof(IBaseRequest)))
+            .Select(x => (Request: x, Resolver: resolverMaps
+                .SingleOrDefault(m => x.IsAssignableTo(m.Inner))
+                ?.Implementation))
+            .ToList();
+
+        // If any request types do not have a corresponding resolver, throw an exception
+        // to ensure all requests are properly handled
+        var errorMessage = string.Join(Environment.NewLine, requestResolverMap
+            .Where(x => x.Resolver is null)
+            .Select(x => $"- {x.Request.FullName}"));
+        if (errorMessage != string.Empty)
+        {
+            throw new InvalidOperationException(
+                $"All requests are expected to have an associated {nameof(IServiceResourceResolver<object>)}. Could " +
+                $"not find resolvers for the following requests. If a request cannot be associated with a service " +
+                $"resource or tracking service resource information is irrelevant for the request, mark it " +
+                $"with {nameof(IDoNotCareAboutServiceResource)}.{Environment.NewLine}{errorMessage}");
+        }
+
+        // Register each request type with its corresponding resolver implementation
+        foreach (var (request, resolver) in requestResolverMap)
+        {
+            services.TryAddTransient(openResolverType.MakeGenericType(request), resolver!);
         }
 
         return services;

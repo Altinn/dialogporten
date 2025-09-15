@@ -20,7 +20,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
-public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>, IRequest<SearchDialogResult>
+public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>, IRequest<SearchDialogResult>, IDoNotCareAboutServiceResource
 {
     private string? _searchLanguageCode;
 
@@ -278,19 +278,5 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
 
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
-    }
-}
-
-internal sealed class SearchDialogQueryResolver : IServiceResourceResolver<SearchDialogQuery>
-{
-    public Task<ServiceResourceInformation?> Resolve(SearchDialogQuery request, CancellationToken cancellationToken)
-    {
-        // Search operations cannot be attributed to a specific service resource
-        // since they may return results from multiple resources
-        return Task.FromResult<ServiceResourceInformation?>(new ServiceResourceInformation(
-            FeatureMetricConstants.UnknownValue,
-            "search",
-            string.Empty,
-            FeatureMetricConstants.UnknownValue));
     }
 }

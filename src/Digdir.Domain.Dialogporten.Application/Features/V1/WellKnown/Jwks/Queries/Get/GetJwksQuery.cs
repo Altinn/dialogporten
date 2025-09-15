@@ -1,9 +1,10 @@
-﻿using MediatR;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.WellKnown.Jwks.Queries.Get;
 
-public sealed class GetJwksQuery : IRequest<GetJwksDto>;
+public sealed class GetJwksQuery : IRequest<GetJwksDto>, IDoNotCareAboutServiceResource;
 
 internal sealed class GetJwksQueryHandler : IRequestHandler<GetJwksQuery, GetJwksDto>
 {

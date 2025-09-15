@@ -49,6 +49,25 @@
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
+                        "text": "*Recent Changes:*\n${{ env.FORMATTED_COMMITS }}"
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Contributors:* ${{ env.AUTHOR_TAGS }}"
+                    }
+                }
+            ]
+        },
+        {
+            "color": "${{ env.COLOR }}",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
                         "text": ":point_right: *Consider deploying the latest staging version to production*"
                     }
                 },
@@ -81,23 +100,6 @@
                             "url": "${{ env.RUN_URL }}"
                         }
                     ]
-                },
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Recent Changes:*\n${{ env.FORMATTED_COMMITS }}"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Contributors:* ${{ env.AUTHOR_TAGS }}"
-                    }
                 }
             ]
         }

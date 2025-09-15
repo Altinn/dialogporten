@@ -67,19 +67,26 @@ jobs:
             map(select(.author_username != "dialogporten-bot" and .author != "Dialogporten Automation Bot" and .author_username != "renovate[bot]")) | .[0:10]
           ')
           
-          # Format commits one by one to avoid escaping issues
+          # Format commits using a simpler approach that GitHub Actions can handle
           formatted_commits=""
+          commit_count=0
+          
           while IFS= read -r commit; do
-            if [ -n "$commit" ]; then
+            if [ -n "$commit" ] && [ "$commit_count" -lt 10 ]; then
               sha=$(echo "$commit" | jq -r '.sha')
               message=$(echo "$commit" | jq -r '.message')
               author=$(echo "$commit" | jq -r '.author')
               
+              # Escape special characters for GitHub Actions
+              message=$(echo "$message" | sed 's/`/\\`/g' | sed "s/'/\\'/g")
+              author=$(echo "$author" | sed "s/'/\\'/g")
+              
               if [ -n "$formatted_commits" ]; then
-                formatted_commits="$formatted_commits"$'\n'"• \`$sha\` $message (_${author}_)"
+                formatted_commits="$formatted_commits\\n• \`$sha\` $message (_${author}_)"
               else
                 formatted_commits="• \`$sha\` $message (_${author}_)"
               fi
+              commit_count=$((commit_count + 1))
             fi
           done < <(echo "$filtered_commits" | jq -c '.[]')
           
@@ -91,15 +98,20 @@ jobs:
           if [ "$filtered_commit_count" -eq 10 ] && [ "$total_commit_count" -gt 10 ]; then
             remaining_commits=$((total_commit_count - 10))
             if [ "$bot_commits_filtered" -gt 0 ]; then
-              formatted_commits="$formatted_commits"$'\n'"_... and $remaining_commits more commits (filtered out $bot_commits_filtered bot commits)_"
+              formatted_commits="$formatted_commits\\n_... and $remaining_commits more commits (filtered out $bot_commits_filtered bot commits)_"
             else
-              formatted_commits="$formatted_commits"$'\n'"_... and $remaining_commits more commits_"
+              formatted_commits="$formatted_commits\\n_... and $remaining_commits more commits_"
             fi
-          elif [ "$bot_commits_filtered" -gt 0 ] && [ "$filtered_commit_count" -lt 10 ]; then
-            formatted_commits="$formatted_commits"$'\n'"_($bot_commits_filtered bot commits filtered out)_"
+          elif [ "$bot_commits_filtered" -gt 0 ] && [ "$commit_count" -lt 10 ]; then
+            formatted_commits="$formatted_commits\\n_($bot_commits_filtered bot commits filtered out)_"
           fi
           
-          echo "formatted_commits=$formatted_commits" >> $GITHUB_OUTPUT
+          # Use GitHub Actions multiline output format
+          {
+            echo "formatted_commits<<EOF"
+            echo -e "$formatted_commits"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Format author tags
         id: format-authors

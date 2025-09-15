@@ -1,0 +1,153 @@
+name: Send Deployment Lag Slack Message
+
+on:
+  workflow_call:
+    inputs:
+      staging_version:
+        required: true
+        type: string
+        description: "Version deployed to staging"
+      prod_version:
+        required: true
+        type: string
+        description: "Version deployed to production"
+      days_since_prod_deploy:
+        required: true
+        type: string
+        description: "Days since last production deployment"
+      release_count_diff:
+        required: true
+        type: string
+        description: "Number of releases between staging and production"
+      compare_url:
+        required: false
+        type: string
+        description: "GitHub compare URL between versions"
+      commits_json:
+        required: false
+        type: string
+        description: "JSON array of commits between versions"
+      commit_authors:
+        required: false
+        type: string
+        description: "Comma-separated list of commit authors"
+    secrets:
+      SLACK_BOT_TOKEN:
+        required: true
+      SLACK_CHANNEL_ID:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  send-slack-message:
+    name: Send Deployment Lag Slack Message
+    runs-on: ubuntu-latest
+    steps:
+      - uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Format commit details
+        id: format-commits
+        run: |
+          commits_json='${{ inputs.commits_json }}'
+          
+          if [ "$commits_json" = "" ] || [ "$commits_json" = "[]" ]; then
+            echo "formatted_commits=No commits found" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Format commits for Slack display (limit to 10 most recent)
+          formatted_commits=$(echo "$commits_json" | jq -r '
+            .[0:10] | map("• `" + .sha + "` " + .message + " (_" + .author + "_)") | join("\n")
+          ')
+          
+          # Add truncation notice if there are more than 10 commits
+          commit_count=$(echo "$commits_json" | jq length)
+          if [ "$commit_count" -gt 10 ]; then
+            formatted_commits="$formatted_commits\n_... and $((commit_count - 10)) more commits_"
+          fi
+          
+          # Escape for GitHub output
+          formatted_commits=$(echo "$formatted_commits" | sed ':a;N;$!ba;s/\n/\\n/g')
+          
+          echo "formatted_commits=$formatted_commits" >> $GITHUB_OUTPUT
+
+      - name: Format author tags
+        id: format-authors
+        run: |
+          commit_authors="${{ inputs.commit_authors }}"
+          
+          if [ -z "$commit_authors" ]; then
+            echo "author_tags=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Convert comma-separated authors to Slack mentions
+          # Note: This is a basic implementation. For production, you might want to maintain
+          # a mapping file from GitHub usernames to Slack user IDs
+          author_tags=""
+          IFS=',' read -ra AUTHORS <<< "$commit_authors"
+          for author in "${AUTHORS[@]}"; do
+            if [ -n "$author" ]; then
+              if [ -z "$author_tags" ]; then
+                author_tags="@$author"
+              else
+                author_tags="$author_tags, @$author"
+              fi
+            fi
+          done
+          
+          echo "author_tags=$author_tags" >> $GITHUB_OUTPUT
+
+      - name: Determine notification severity
+        id: determine-severity
+        run: |
+          days_since_prod_deploy=${{ inputs.days_since_prod_deploy }}
+          release_count_diff=${{ inputs.release_count_diff }}
+          
+          # Determine color and emoji based on severity
+          if [ "$days_since_prod_deploy" -ge 7 ] || [ "$release_count_diff" -ge 5 ]; then
+            color="#FF0000"  # Red for high severity
+            emoji=":rotating_light:"
+            severity="HIGH"
+          elif [ "$days_since_prod_deploy" -ge 5 ] || [ "$release_count_diff" -ge 4 ]; then
+            color="#FFA500"  # Orange for medium severity
+            emoji=":warning:"
+            severity="MEDIUM"
+          else
+            color="#FFFF00"  # Yellow for low severity
+            emoji=":information_source:"
+            severity="LOW"
+          fi
+          
+          echo "color=$color" >> $GITHUB_OUTPUT
+          echo "emoji=$emoji" >> $GITHUB_OUTPUT
+          echo "severity=$severity" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload-templated: true
+          payload-file-path: "./.github/slack-templates/deployment-lag-notification.json"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          STAGING_VERSION: ${{ inputs.staging_version }}
+          PROD_VERSION: ${{ inputs.prod_version }}
+          DAYS_SINCE_PROD_DEPLOY: ${{ inputs.days_since_prod_deploy }}
+          RELEASE_COUNT_DIFF: ${{ inputs.release_count_diff }}
+          COMPARE_URL: ${{ inputs.compare_url }}
+          FORMATTED_COMMITS: ${{ steps.format-commits.outputs.formatted_commits }}
+          AUTHOR_TAGS: ${{ steps.format-authors.outputs.author_tags }}
+          COLOR: ${{ steps.determine-severity.outputs.color }}
+          EMOJI: ${{ steps.determine-severity.outputs.emoji }}
+          SEVERITY: ${{ steps.determine-severity.outputs.severity }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PROD_WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/workflows/ci-cd-prod.yml

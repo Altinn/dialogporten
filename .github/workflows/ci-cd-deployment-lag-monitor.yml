@@ -1,0 +1,240 @@
+# Monitors deployment lag between staging and production environments
+# Sends Slack notifications when production is lagging behind staging
+name: CI/CD Deployment Lag Monitor
+run-name: CI/CD Deployment Lag Monitor ${{ github.event_name == 'workflow_dispatch' && format('(Manual)') || format('(Scheduled)') }}
+
+on:
+  schedule:
+    # Run weekdays at 12pm Norway time (11am UTC)
+    - cron: '0 11 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      days_threshold:
+        description: "Days threshold for production lag warning (default: 3)"
+        required: false
+        type: number
+        default: 3
+      releases_threshold:
+        description: "Release count threshold for staging/prod diff warning (default: 3)"
+        required: false
+        type: number
+        default: 3
+      force_notification:
+        description: "Send notification regardless of thresholds"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  compare-deployments:
+    name: Compare Staging and Production Deployments
+    runs-on: ubuntu-latest
+    outputs:
+      should_notify: ${{ steps.check-thresholds.outputs.should_notify }}
+      staging_version: ${{ steps.get-staging-version.outputs.version }}
+      prod_version: ${{ steps.get-prod-version.outputs.version }}
+      days_since_prod_deploy: ${{ steps.calculate-lag.outputs.days_since_prod_deploy }}
+      release_count_diff: ${{ steps.calculate-lag.outputs.release_count_diff }}
+      compare_url: ${{ steps.generate-compare-url.outputs.url }}
+    steps:
+      - uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Get Staging Version
+        id: get-staging-version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get staging version from GitHub environment variables
+          staging_version=$(gh variable get LATEST_DEPLOYED_APPS_VERSION --env staging || echo "")
+          if [ -z "$staging_version" ]; then
+            echo "Warning: No staging version found"
+            staging_version="unknown"
+          fi
+          echo "version=$staging_version" >> $GITHUB_OUTPUT
+          echo "Staging version: $staging_version"
+
+      - name: Get Production Version
+        id: get-prod-version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get production version from GitHub environment variables
+          prod_version=$(gh variable get LATEST_DEPLOYED_APPS_VERSION --env prod || echo "")
+          if [ -z "$prod_version" ]; then
+            echo "Warning: No production version found"
+            prod_version="unknown"
+          fi
+          echo "version=$prod_version" >> $GITHUB_OUTPUT
+          echo "Production version: $prod_version"
+
+      - name: Calculate Deployment Lag
+        id: calculate-lag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          staging_version="${{ steps.get-staging-version.outputs.version }}"
+          prod_version="${{ steps.get-prod-version.outputs.version }}"
+          
+          if [ "$staging_version" = "unknown" ] || [ "$prod_version" = "unknown" ]; then
+            echo "days_since_prod_deploy=0" >> $GITHUB_OUTPUT
+            echo "release_count_diff=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Get production release date
+          prod_release_date=$(gh api repos/${{ github.repository }}/releases/tags/v$prod_version --jq '.published_at' 2>/dev/null || echo "")
+          
+          if [ -n "$prod_release_date" ]; then
+            # Calculate days since production deployment
+            prod_timestamp=$(date -d "$prod_release_date" +%s)
+            current_timestamp=$(date +%s)
+            days_since_prod_deploy=$(( (current_timestamp - prod_timestamp) / 86400 ))
+          else
+            days_since_prod_deploy=0
+          fi
+          
+          # Count releases between production and staging
+          if [ "$staging_version" != "$prod_version" ]; then
+            # Get all releases and count those between prod and staging
+            releases=$(gh api repos/${{ github.repository }}/releases --paginate --jq '.[].tag_name' | sed 's/^v//')
+            
+            # Find positions of staging and prod versions
+            staging_pos=$(echo "$releases" | grep -n "^$staging_version$" | cut -d: -f1)
+            prod_pos=$(echo "$releases" | grep -n "^$prod_version$" | cut -d: -f1)
+            
+            if [ -n "$staging_pos" ] && [ -n "$prod_pos" ] && [ "$staging_pos" -lt "$prod_pos" ]; then
+              release_count_diff=$((prod_pos - staging_pos))
+            else
+              release_count_diff=0
+            fi
+          else
+            release_count_diff=0
+          fi
+          
+          echo "days_since_prod_deploy=$days_since_prod_deploy" >> $GITHUB_OUTPUT
+          echo "release_count_diff=$release_count_diff" >> $GITHUB_OUTPUT
+          
+          echo "Days since prod deploy: $days_since_prod_deploy"
+          echo "Release count difference: $release_count_diff"
+
+      - name: Generate Compare URL
+        id: generate-compare-url
+        run: |
+          staging_version="${{ steps.get-staging-version.outputs.version }}"
+          prod_version="${{ steps.get-prod-version.outputs.version }}"
+          
+          if [ "$staging_version" != "unknown" ] && [ "$prod_version" != "unknown" ] && [ "$staging_version" != "$prod_version" ]; then
+            compare_url="https://github.com/${{ github.repository }}/compare/v$prod_version...v$staging_version"
+          else
+            compare_url=""
+          fi
+          
+          echo "url=$compare_url" >> $GITHUB_OUTPUT
+          echo "Compare URL: $compare_url"
+
+      - name: Check Thresholds
+        id: check-thresholds
+        run: |
+          days_threshold=${{ inputs.days_threshold || 3 }}
+          releases_threshold=${{ inputs.releases_threshold || 3 }}
+          force_notification=${{ inputs.force_notification || false }}
+          
+          days_since_prod_deploy=${{ steps.calculate-lag.outputs.days_since_prod_deploy }}
+          release_count_diff=${{ steps.calculate-lag.outputs.release_count_diff }}
+          
+          should_notify=false
+          
+          if [ "$force_notification" = "true" ]; then
+            should_notify=true
+            echo "Forced notification enabled"
+          elif [ "$days_since_prod_deploy" -ge "$days_threshold" ] && [ "$release_count_diff" -gt 0 ]; then
+            should_notify=true
+            echo "Threshold met: $days_since_prod_deploy days >= $days_threshold days threshold"
+          elif [ "$release_count_diff" -ge "$releases_threshold" ]; then
+            should_notify=true
+            echo "Threshold met: $release_count_diff releases >= $releases_threshold releases threshold"
+          else
+            echo "No thresholds met. Days: $days_since_prod_deploy (threshold: $days_threshold), Releases: $release_count_diff (threshold: $releases_threshold)"
+          fi
+          
+          echo "should_notify=$should_notify" >> $GITHUB_OUTPUT
+
+  get-commit-details:
+    name: Get Commit Details Between Releases
+    needs: [compare-deployments]
+    if: needs.compare-deployments.outputs.should_notify == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      commits_json: ${{ steps.get-commits.outputs.commits_json }}
+      commit_authors: ${{ steps.get-commits.outputs.commit_authors }}
+    steps:
+      - uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Get Commits Between Releases
+        id: get-commits
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          staging_version="${{ needs.compare-deployments.outputs.staging_version }}"
+          prod_version="${{ needs.compare-deployments.outputs.prod_version }}"
+          
+          if [ "$staging_version" = "unknown" ] || [ "$prod_version" = "unknown" ] || [ "$staging_version" = "$prod_version" ]; then
+            echo "commits_json=[]" >> $GITHUB_OUTPUT
+            echo "commit_authors=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Get commits between production and staging
+          commits_json=$(gh api repos/${{ github.repository }}/compare/v$prod_version...v$staging_version --jq '.commits | map({
+            sha: .sha[0:7],
+            message: .commit.message | split("\n")[0],
+            author: .commit.author.name,
+            author_username: .author.login // .commit.author.name,
+            date: .commit.author.date
+          })')
+          
+          # Extract unique authors for tagging
+          commit_authors=$(echo "$commits_json" | jq -r '.[].author_username' | sort -u | tr '\n' ',' | sed 's/,$//')
+          
+          # Escape JSON for GitHub output
+          commits_json_escaped=$(echo "$commits_json" | jq -c .)
+          
+          echo "commits_json=$commits_json_escaped" >> $GITHUB_OUTPUT
+          echo "commit_authors=$commit_authors" >> $GITHUB_OUTPUT
+          
+          echo "Found $(echo "$commits_json" | jq length) commits"
+          echo "Authors: $commit_authors"
+
+  send-slack-notification:
+    name: Send Slack Notification
+    needs: [compare-deployments, get-commit-details]
+    if: needs.compare-deployments.outputs.should_notify == 'true'
+    uses: ./.github/workflows/workflow-send-deployment-lag-slack-message.yml
+    with:
+      staging_version: ${{ needs.compare-deployments.outputs.staging_version }}
+      prod_version: ${{ needs.compare-deployments.outputs.prod_version }}
+      days_since_prod_deploy: ${{ needs.compare-deployments.outputs.days_since_prod_deploy }}
+      release_count_diff: ${{ needs.compare-deployments.outputs.release_count_diff }}
+      compare_url: ${{ needs.compare-deployments.outputs.compare_url }}
+      commits_json: ${{ needs.get-commit-details.outputs.commits_json }}
+      commit_authors: ${{ needs.get-commit-details.outputs.commit_authors }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_RELEASES }}

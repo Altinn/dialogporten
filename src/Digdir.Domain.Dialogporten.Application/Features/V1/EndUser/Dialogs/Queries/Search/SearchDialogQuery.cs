@@ -260,7 +260,6 @@ public static class SearchSquile
     public const string Sql =
         """
         -- TODO: CREATE INDEX IF NOT EXISTS idx_dialog_service_party ON "Dialog" ("ServiceResource", "Party") INCLUDE ("Id");
-
         WITH partyResourceAccess AS (
             SELECT DISTINCT s.service, p.party
             FROM jsonb_to_recordset(@partyResources::jsonb) AS x(parties text[], services text[])
@@ -273,7 +272,7 @@ public static class SearchSquile
             INNER JOIN partyResourceAccess c 
                 ON d."ServiceResource" = c.service AND d."Party" = c.party
         )
-        SELECT d."Id"
+        SELECT d."Id", d."Org"
         FROM "Dialog" d
         INNER JOIN accessibleDialogs a ON d."Id" = a."Id" 
         WHERE d."Deleted" = false
@@ -295,6 +294,9 @@ public static class SearchSquile
             AND (@dueBefore IS NULL OR d."DueAt" <= @dueBefore)
             AND (@process IS NULL OR d."Process" = @process) -- It's ILike in the code - is that correct?
             AND (@excludeApiOnly IS NULL OR @excludeApiOnly = false OR @excludeApiOnly = true AND d."IsApiOnly" = false)
-            
+            -- TODO: Add filter for search across localizations and search tags
+            -- TODO: Add filter for system labels
+            -- TODO: Add pagination parameters
+            -- TODO: Can we consider minimum auth level here as well? 
         """;
 }

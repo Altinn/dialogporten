@@ -7,9 +7,6 @@ on:
   schedule:
     # Run weekdays at 12pm Norway time (11am UTC)
     - cron: '0 11 * * 1-5'
-  push:
-    branches:
-      - chore/slack-notification-on-stale-releases
   workflow_dispatch:
     inputs:
       days_threshold:

@@ -53,7 +53,7 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                   "ServiceOrg={ServiceOrg}, " +
                   "ServiceResource={ServiceResource}, " +
                   "PresentationTag={PresentationTag}, " +
-                  "AdditionalTags={@AdditionalTags}")]
+                  "AdditionalTags={AdditionalTags}")]
     private static partial void LogFeatureMetric(
         ILogger logger,
         string featureType,
@@ -64,4 +64,3 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         string presentationTag,
         Dictionary<string, object> additionalTags);
 }
-

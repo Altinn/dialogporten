@@ -49,14 +49,7 @@
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "*Recent Changes:*\n${{ env.FORMATTED_COMMITS }}"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Contributors:* ${{ env.AUTHOR_TAGS }}"
+                        "text": "*Recent Changes:*\n${{ env.FORMATTED_COMMITS }}\n\n*Contributors:* ${{ env.AUTHOR_TAGS }}"
                     }
                 }
             ]

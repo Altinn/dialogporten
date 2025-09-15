@@ -7,7 +7,6 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Localizations;
 using FastEndpoints;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,7 @@ public sealed class GetDialogQuery : IRequest<GetDialogResult>
 {
     public Guid DialogId { get; set; }
 
-    [FromHeader("Accept-Language")]
+    [FromHeader("Accept-Language", isRequired: false)]
     public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null;
 }
 
@@ -154,13 +153,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             userId: currentUserInformation.UserId.ExternalIdWithPrefix
         );
 
-        if (request.AcceptedLanguages is not null)
-        {
-            foreach (var dialogContent in dialog.Content)
-            {
-                dialogContent.Value.Localizations = Pruniprun(dialogContent.Value.Localizations, request.AcceptedLanguages);
-            }
-        }
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
@@ -173,6 +165,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             concurrencyError => throw new UnreachableException("Should not get concurrencyError when updating SeenAt."));
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
+
+        dialogDto.FilterLocalizations(request.AcceptedLanguages);
 
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
@@ -217,30 +211,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         return logDto;
     }
 
-    private static List<Localization> Pruniprun(List<Localization> localizations, List<AcceptedLanguage> acceptedLanguages)
-    {
-        var orderByDescending = acceptedLanguages.OrderByDescending(x => x.Weight);
-        Localization? localization = null;
-        foreach (var acceptedLanguage in orderByDescending)
-        {
-            localization = localizations.FirstOrDefault(x => x.LanguageCode == acceptedLanguage.LanguageCode);
-            if (localization is not null)
-            {
-                return [localization];
-            }
-        }
-
-        // Fallbacks
-        if (acceptedLanguages.Select(x => x.LanguageCode).Any(x => x is "sv" or "db"))
-        {
-            localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "nb");
-        }
-
-        localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "en");
-        localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "nb");
-
-        return localization is not null ? [localization] : localizations;
-    }
 
     private static void DecorateWithAuthorization(DialogDto dto,
         DialogDetailsAuthorizationResult authorizationResult)

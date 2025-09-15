@@ -479,6 +479,19 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogsQueriesGet_AcceptedLanguage": {
+        "additionalProperties": false,
+        "properties": {
+          "languageCode": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogsQueriesGet_Content": {
         "additionalProperties": false,
         "properties": {
@@ -1038,6 +1051,19 @@
             "example": "urn:dialogporten:unauthorized\nhttps://someendpoint.com/gui/some-service-instance-id",
             "format": "uri",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -5883,6 +5909,19 @@
               "format": "guid",
               "type": "string"
             }
+          },
+          {
+            "explode": true,
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
           }
         ],
         "responses": {

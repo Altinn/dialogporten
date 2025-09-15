@@ -2,14 +2,6 @@ using System.Collections.ObjectModel;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
-/// <summary>
-/// Value used when organization or service resource cannot be determined
-/// </summary>
-internal static class FeatureMetricConstants
-{
-    public const string UnknownValue = "unknown";
-}
-
 internal sealed class FeatureMetricRecorder
 {
     private readonly List<FeatureMetricRecord> _records = [];
@@ -19,13 +11,14 @@ internal sealed class FeatureMetricRecorder
 
 internal sealed record FeatureMetricRecord(
     string FeatureName,
-    string? Environment = FeatureMetricConstants.UnknownValue,
-    string? PerformerOrg = FeatureMetricConstants.UnknownValue,
-    string? OwnerOrg = FeatureMetricConstants.UnknownValue,
-    string? ServiceResource = FeatureMetricConstants.UnknownValue)
+    string? Environment = FeatureMetricRecord.UnknownValue,
+    string? PerformerOrg = FeatureMetricRecord.UnknownValue,
+    string? OwnerOrg = FeatureMetricRecord.UnknownValue,
+    string? ServiceResource = FeatureMetricRecord.UnknownValue)
 {
-    public string Environment { get; } = Environment ?? FeatureMetricConstants.UnknownValue;
-    public string PerformerOrg { get; } = PerformerOrg ?? FeatureMetricConstants.UnknownValue;
-    public string OwnerOrg { get; } = OwnerOrg ?? FeatureMetricConstants.UnknownValue;
-    public string ServiceResource { get; } = ServiceResource ?? FeatureMetricConstants.UnknownValue;
+    private const string UnknownValue = "unknown";
+    public string Environment { get; } = Environment ?? UnknownValue;
+    public string PerformerOrg { get; } = PerformerOrg ?? UnknownValue;
+    public string OwnerOrg { get; } = OwnerOrg ?? UnknownValue;
+    public string ServiceResource { get; } = ServiceResource ?? UnknownValue;
 }

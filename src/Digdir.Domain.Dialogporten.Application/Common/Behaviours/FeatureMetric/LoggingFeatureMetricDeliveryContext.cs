@@ -16,17 +16,19 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
     }
 
     public void Ack(string presentationTag, params IEnumerable<KeyValuePair<string, string>> additionalTags) =>
-        LogMetrics(success: true, presentationTag, additionalTags.ToList());
+        LogMetrics(success: true, presentationTag, additionalTags);
 
     public void Nack(string presentationTag, params IEnumerable<KeyValuePair<string, string>> additionalTags) =>
-        LogMetrics(success: false, presentationTag, additionalTags.ToList());
+        LogMetrics(success: false, presentationTag, additionalTags);
 
-    private void LogMetrics(bool success, string presentationTag, List<KeyValuePair<string, string>> additionalTags)
+    private void LogMetrics(bool success, string presentationTag, IEnumerable<KeyValuePair<string, string>> additionalTags)
     {
         if (string.IsNullOrWhiteSpace(presentationTag))
         {
             throw new ArgumentException("Value cannot be null or whitespace.", nameof(presentationTag));
         }
+
+        var add = new Dictionary<string, string>(additionalTags);
 
         foreach (var record in _recorder.Records)
         {
@@ -38,7 +40,7 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                 record.ServiceResource,
                 presentationTag,
                 success,
-                additionalTags);
+                add);
         }
     }
 
@@ -53,7 +55,7 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                   "ServiceResource={ServiceResource}, " +
                   "PresentationTag={PresentationTag}, " +
                   "Success={Success}, " +
-                  "AdditionalTags={@AdditionalTags}")]
+                  "AdditionalTags={AdditionalTags}")]
     private static partial void LogFeatureMetric(
         ILogger logger,
         string featureType,
@@ -63,6 +65,6 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         string serviceResource,
         string presentationTag,
         bool success,
-        IEnumerable<KeyValuePair<string, string>> additionalTags);
+        Dictionary<string, string> additionalTags);
 }
 

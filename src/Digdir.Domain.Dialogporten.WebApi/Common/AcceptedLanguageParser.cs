@@ -10,40 +10,46 @@ public static class AcceptedLanguageParser
     public static ParseResult Parse(StringValues input)
     {
         var headerString = input.First();
-        if (headerString is null)
-        {
-            return new(false, new());
-        }
+        return headerString is null ? new(false, new()) : ParseFromSpan(headerString);
+    }
 
+    private static ParseResult ParseFromSpan(ReadOnlySpan<char> headerSpan)
+    {
         List<AcceptedLanguage> acceptedLanguages = [];
-        foreach (var lang in headerString.Split(','))
+        var range = headerSpan.Split(',');
+        while (range.MoveNext())
         {
-            var valueParts = lang.Trim().Split(";");
-            if (valueParts.Length != 2)
+
+            var langParts = headerSpan[range.Current]; // 0
+            var langPartsEnumerator = langParts.Split(";");
+
+            if (!langPartsEnumerator.MoveNext())
             {
-                acceptedLanguages.Add(new AcceptedLanguage(lang, 100));
-                continue;
+                return new(false, new());
             }
 
-            var langCode = valueParts[0];
-            var weightString = valueParts[1];
-            if (string.IsNullOrWhiteSpace(weightString))
-            {
-                acceptedLanguages.Add(new AcceptedLanguage(langCode, 1));
-                continue;
-            }
+            var langCode = langParts[langPartsEnumerator.Current];
 
             var weight = 100;
-            if (float.TryParse(valueParts[1].Split("=")[1], CultureInfo.InvariantCulture, out var f1))
+            if (langPartsEnumerator.MoveNext())
             {
-                // Amund: 0.20000000000003, nei takk. 200 istedet :D
-                weight = (int)(f1 * 100);
+                var weightSpan = langParts[langPartsEnumerator.Current];
+                var weightSpanEnumerator = weightSpan.Split("=");
+
+                if (!weightSpanEnumerator.MoveNext() || !weightSpanEnumerator.MoveNext() || weightSpan[weightSpanEnumerator.Current] is "q")
+                {
+                    return new(false, new());
+                }
+
+                if (float.TryParse(weightSpan[weightSpanEnumerator.Current].Trim(), CultureInfo.InvariantCulture, out var weightFloat))
+                {
+                    // 0.20000000000003 => 20
+                    weight = (int)(weightFloat * 100);
+                }
             }
 
-            acceptedLanguages.Add(new AcceptedLanguage(langCode, weight));
+            acceptedLanguages.Add(new AcceptedLanguage(langCode.Trim().ToString(), weight));
         }
-
         return new(true, acceptedLanguages);
-
     }
 }

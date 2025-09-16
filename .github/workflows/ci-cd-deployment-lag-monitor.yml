@@ -1,32 +1,19 @@
 # Monitors deployment lag between staging and production environments
 # Sends Slack notifications when production is lagging behind staging
 name: CI/CD Deployment Lag Monitor
-run-name: CI/CD Deployment Lag Monitor ${{ github.event_name == 'workflow_dispatch' && format('(Manual)') || format('(Scheduled)') }}
+run-name: CI/CD Deployment Lag Monitor (Scheduled)
 
 on:
   schedule:
     # Run weekdays at 12pm Norway time (11am UTC)
     - cron: '0 11 * * 1-5'
-  workflow_dispatch:
-    inputs:
-      days_threshold:
-        description: "Days threshold for production lag warning (default: 3)"
-        required: false
-        type: number
-        default: 3
-      releases_threshold:
-        description: "Release count threshold for staging/prod diff warning (default: 3)"
-        required: false
-        type: number
-        default: 3
-      force_notification:
-        description: "Send notification regardless of thresholds"
-        required: false
-        type: boolean
-        default: false
 
 permissions:
   contents: read
+
+env:
+  DEFAULT_DAYS_THRESHOLD: 3
+  DEFAULT_RELEASES_THRESHOLD: 3
 
 jobs:
   get-staging-versions:
@@ -168,20 +155,16 @@ jobs:
       - name: Check Thresholds
         id: check-thresholds
         run: |
-          # Set defaults for push events (inputs are only available for workflow_dispatch)
-          days_threshold=${{ inputs.days_threshold || 1 }}
-          releases_threshold=${{ inputs.releases_threshold || 1 }}
-          force_notification=${{ inputs.force_notification || true }}
+          # Use environment variable defaults
+          days_threshold=${{ env.DEFAULT_DAYS_THRESHOLD }}
+          releases_threshold=${{ env.DEFAULT_RELEASES_THRESHOLD }}
           
           days_since_prod_deploy=${{ steps.calculate-lag.outputs.days_since_prod_deploy }}
           release_count_diff=${{ steps.calculate-lag.outputs.release_count_diff }}
           
           should_notify=false
           
-          if [ "$force_notification" = "true" ]; then
-            should_notify=true
-            echo "Forced notification enabled"
-          elif [ "$days_since_prod_deploy" -ge "$days_threshold" ] && [ "$release_count_diff" -gt 0 ]; then
+          if [ "$days_since_prod_deploy" -ge "$days_threshold" ] && [ "$release_count_diff" -gt 0 ]; then
             should_notify=true
             echo "Threshold met: $days_since_prod_deploy days >= $days_threshold days threshold"
           elif [ "$release_count_diff" -ge "$releases_threshold" ]; then

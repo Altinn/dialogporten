@@ -1,8 +1,11 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetActivity;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 
-internal static class DialogExtensions
+internal static class DialogDtoExtensions
 {
 
     public static void FilterLocalizations(this DialogDto dialog, List<AcceptedLanguage>? acceptedLanguages)
@@ -56,6 +59,22 @@ internal static class DialogExtensions
         }
     }
 
+    public static void FilterLocalizations(this TransmissionDto transmission, List<AcceptedLanguage>? acceptedLanguages)
+    {
+        // Transmission content localizations
+        transmission.Content.Summary?.Value.PruneLocalizations(acceptedLanguages);
+        transmission.Content.Title.Value.PruneLocalizations(acceptedLanguages);
+        transmission.Content.ContentReference?.Value.PruneLocalizations(acceptedLanguages);
+
+        // Transmission attachment display name localizations
+        foreach (var attachment in transmission.Attachments)
+        {
+            attachment.DisplayName.PruneLocalizations(acceptedLanguages);
+        }
+    }
+
+    public static void FilterLocalizations(this ActivityDto activity, List<AcceptedLanguage>? acceptedLanguages) =>
+        activity.Description.PruneLocalizations(acceptedLanguages);
 
     private static void PruneLocalizations(this List<LocalizationDto>? localizations, List<AcceptedLanguage>? acceptedLanguages)
     {

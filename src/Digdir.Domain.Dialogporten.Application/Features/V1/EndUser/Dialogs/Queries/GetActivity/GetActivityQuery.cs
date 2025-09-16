@@ -3,8 +3,12 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using FastEndpoints;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -15,6 +19,9 @@ public sealed class GetActivityQuery : IRequest<GetActivityResult>
 {
     public Guid DialogId { get; set; }
     public Guid ActivityId { get; set; }
+
+    [FromHeader("Accept-Language", isRequired: false)]
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null;
 }
 
 [GenerateOneOf]
@@ -41,10 +48,10 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
     {
         var dialog = await _dbContext.Dialogs
             .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-                .ThenInclude(x => x.PerformedBy)
-                .ThenInclude(x => x.ActorNameEntity)
+            .ThenInclude(x => x.PerformedBy)
+            .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-                .ThenInclude(x => x.Description!.Localizations)
+            .ThenInclude(x => x.Description!.Localizations)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                 cancellationToken: cancellationToken);
@@ -81,6 +88,8 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
             return new EntityNotFound<DialogActivity>(request.ActivityId);
         }
 
-        return _mapper.Map<ActivityDto>(activity);
+        var dto = _mapper.Map<ActivityDto>(activity);
+        dto.FilterLocalizations(request.AcceptedLanguages);
+        return dto;
     }
 }

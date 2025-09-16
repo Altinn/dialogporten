@@ -3,8 +3,12 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using FastEndpoints;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -15,6 +19,9 @@ public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>
 {
     public Guid DialogId { get; set; }
     public Guid TransmissionId { get; set; }
+
+    [FromHeader("Accept-Language", isRequired: false)]
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null;
 }
 
 [GenerateOneOf]
@@ -38,17 +45,17 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
     {
         var dialog = await _dbContext.Dialogs
             .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-                .ThenInclude(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
+            .ThenInclude(x => x.Content)
+            .ThenInclude(x => x.Value.Localizations)
             .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-                .ThenInclude(x => x.Attachments)
-                .ThenInclude(x => x.DisplayName!.Localizations)
+            .ThenInclude(x => x.Attachments)
+            .ThenInclude(x => x.DisplayName!.Localizations)
             .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-                .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+            .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+            .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
             .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Sender)
-                .ThenInclude(x => x.ActorNameEntity)
+            .ThenInclude(x => x.Sender)
+            .ThenInclude(x => x.ActorNameEntity)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                 cancellationToken: cancellationToken);
@@ -85,6 +92,8 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         }
 
         var dto = _mapper.Map<TransmissionDto>(transmission);
+        dto.FilterLocalizations(request.AcceptedLanguages);
+
         dto.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
 
         if (dto.IsAuthorized) return dto;

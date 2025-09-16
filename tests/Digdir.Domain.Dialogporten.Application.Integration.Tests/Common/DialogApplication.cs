@@ -1,7 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -122,6 +124,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
+            .AddScoped<IDialogServiceResourceCache, TestDialogServiceResourceCache>()
             .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
             .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();
     }
@@ -274,5 +277,32 @@ public class DialogApplication : IAsyncLifetime
             .Select(x => new Table(x.GetTableName()!))
             .ToList()
             .AsReadOnly();
+    }
+}
+
+/// <summary>
+/// Simple in-memory implementation of IDialogServiceResourceCache for integration tests.
+/// </summary>
+internal sealed class TestDialogServiceResourceCache : IDialogServiceResourceCache
+{
+    private readonly ConcurrentDictionary<string, (string Value, DateTimeOffset ExpiresAt)> _cache = new();
+
+    public Task<string?> GetAsync(string key, CancellationToken cancellationToken)
+    {
+        if (_cache.TryGetValue(key, out var entry) && entry.ExpiresAt > DateTimeOffset.UtcNow)
+        {
+            return Task.FromResult<string?>(entry.Value);
+        }
+
+        // Remove expired entry
+        _cache.TryRemove(key, out _);
+
+        return Task.FromResult<string?>(null);
+    }
+
+    public Task SetAsync(string key, string value, TimeSpan ttl, CancellationToken cancellationToken)
+    {
+        _cache[key] = (value, DateTimeOffset.UtcNow.Add(ttl));
+        return Task.CompletedTask;
     }
 }

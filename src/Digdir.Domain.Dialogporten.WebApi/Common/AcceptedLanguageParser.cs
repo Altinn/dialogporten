@@ -37,11 +37,15 @@ public static class AcceptedLanguageParser
                 var weightSpan = langParts[langPartsEnumerator.Current];
                 var weightSpanEnumerator = weightSpan.Split("=");
 
-                if (!weightSpanEnumerator.MoveNext() || !weightSpanEnumerator.MoveNext() || weightSpan[weightSpanEnumerator.Current] is "q")
+                if (!weightSpanEnumerator.MoveNext() || weightSpan[weightSpanEnumerator.Current] is not "q")
                 {
                     return new(false, new());
                 }
 
+                if (!weightSpanEnumerator.MoveNext())
+                {
+                    return new(false, new());
+                }
                 if (float.TryParse(weightSpan[weightSpanEnumerator.Current].Trim(), CultureInfo.InvariantCulture, out var weightFloat))
                 {
                     // 0.20000000000003 => 20

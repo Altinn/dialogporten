@@ -453,6 +453,19 @@
         },
         "type": "object"
       },
+      "V1EndUserCommon_AcceptedLanguage": {
+        "additionalProperties": false,
+        "properties": {
+          "languageCode": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserCommonActors_Actor": {
         "additionalProperties": false,
         "properties": {
@@ -475,19 +488,6 @@
                 "$ref": "#/components/schemas/Actors_ActorType"
               }
             ]
-          }
-        },
-        "type": "object"
-      },
-      "V1EndUserDialogsQueriesGet_AcceptedLanguage": {
-        "additionalProperties": false,
-        "properties": {
-          "languageCode": {
-            "type": "string"
-          },
-          "weight": {
-            "format": "int32",
-            "type": "integer"
           }
         },
         "type": "object"
@@ -1060,7 +1060,7 @@
         "properties": {
           "acceptedLanguages": {
             "items": {
-              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
             },
             "nullable": true,
             "type": "array"
@@ -1303,7 +1303,7 @@
         "properties": {
           "acceptedLanguages": {
             "items": {
-              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
             },
             "nullable": true,
             "type": "array"
@@ -1504,7 +1504,7 @@
         "properties": {
           "acceptedLanguages": {
             "items": {
-              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
             },
             "nullable": true,
             "type": "array"
@@ -5942,7 +5942,7 @@
             "name": "accept-Language",
             "schema": {
               "items": {
-                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
               },
               "nullable": true,
               "type": "array"
@@ -6079,7 +6079,7 @@
             "name": "accept-Language",
             "schema": {
               "items": {
-                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
               },
               "nullable": true,
               "type": "array"
@@ -6518,7 +6518,7 @@
             "name": "accept-Language",
             "schema": {
               "items": {
-                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
               },
               "nullable": true,
               "type": "array"

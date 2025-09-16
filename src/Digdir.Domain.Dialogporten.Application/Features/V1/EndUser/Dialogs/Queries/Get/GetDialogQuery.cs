@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using FastEndpoints;
@@ -24,8 +25,6 @@ public sealed class GetDialogQuery : IRequest<GetDialogResult>
     [FromHeader("Accept-Language", isRequired: false)]
     public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null;
 }
-
-public sealed record AcceptedLanguage(string LanguageCode, int Weight);
 
 [GenerateOneOf]
 public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, EntityDeleted, Forbidden>;

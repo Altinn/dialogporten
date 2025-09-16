@@ -1,4 +1,5 @@
 using System.Globalization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using FastEndpoints;
 using Microsoft.Extensions.Primitives;

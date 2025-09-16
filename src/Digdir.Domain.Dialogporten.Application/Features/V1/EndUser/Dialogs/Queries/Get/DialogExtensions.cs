@@ -57,8 +57,12 @@ internal static class DialogExtensions
     }
 
 
-    private static void PruneLocalizations(this List<LocalizationDto> localizations, List<AcceptedLanguage> acceptedLanguages)
+    private static void PruneLocalizations(this List<LocalizationDto>? localizations, List<AcceptedLanguage>? acceptedLanguages)
     {
+        if (localizations is null || acceptedLanguages is null)
+        {
+            return;
+        }
         var orderByDescending = acceptedLanguages.OrderByDescending(x => x.Weight);
         LocalizationDto? localization = null;
         foreach (var acceptedLanguage in orderByDescending)
@@ -73,7 +77,7 @@ internal static class DialogExtensions
         }
 
         // Fallbacks
-        if (acceptedLanguages.Select(x => x.LanguageCode).Any(x => x is "sv" or "db"))
+        if (acceptedLanguages.Select(x => x.LanguageCode).Any(x => x is "sv" or "da"))
         {
             localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "nb");
         }

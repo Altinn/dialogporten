@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.80.7](https://github.com/Altinn/dialogporten/compare/v1.80.6...v1.80.7) (2025-09-16)
+
+
+### Miscellaneous Chores
+
+* **infra:** upgrade SKU for redis to Standard in production ([#2744](https://github.com/Altinn/dialogporten/issues/2744)) ([053ff2d](https://github.com/Altinn/dialogporten/commit/053ff2d4db5faa49910dd47fd505ed03b48538d5))
+* **performance:** rewrite graphql test ([#2740](https://github.com/Altinn/dialogporten/issues/2740)) ([0f64ef2](https://github.com/Altinn/dialogporten/commit/0f64ef207db54868662c93eaea00d69f008be23b))
+
 ## [1.80.6](https://github.com/Altinn/dialogporten/compare/v1.80.5...v1.80.6) (2025-09-10)
 
 

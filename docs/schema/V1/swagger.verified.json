@@ -1298,6 +1298,19 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogsQueriesGetActivity_ActivityQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogsQueriesGetSeenLog_SeenLog": {
         "additionalProperties": false,
         "properties": {
@@ -1482,6 +1495,19 @@
                 "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetTransmission_TransmissionQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -6046,6 +6072,19 @@
               "format": "guid",
               "type": "string"
             }
+          },
+          {
+            "explode": true,
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
           }
         ],
         "responses": {
@@ -6472,6 +6511,19 @@
               "format": "guid",
               "type": "string"
             }
+          },
+          {
+            "explode": true,
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_AcceptedLanguage"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
           }
         ],
         "responses": {

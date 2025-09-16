@@ -127,7 +127,7 @@ export function deleteEU(url, params = null, tokenOptions = null) {
 }
 
 export function postGQ(body, params = null) {
-    body = JSON.stringify({ query: body })
+    body = JSON.stringify(body)
     params = extend(true, {}, params, { headers: { 'Content-Type': 'application/json' }});
     return http.post(baseUrlGraphql, body, params);
 }

@@ -28,8 +28,8 @@ Uses GitHub environment variables (`LATEST_DEPLOYED_APPS_VERSION`) set by deploy
 2. Staging is ≥ `releases_threshold` releases ahead
 
 **Severity levels:**
-- 🚨 **HIGH**: ≥7 days OR ≥5 releases behind
-- ⚠️ **MEDIUM**: ≥5 days OR ≥4 releases behind  
+- 🚨 **HIGH**: ≥14 days OR ≥8 releases behind
+- ⚠️ **MEDIUM**: ≥7 days OR ≥5 releases behind  
 - ℹ️ **LOW**: Below medium thresholds
 
 ## Slack Notifications

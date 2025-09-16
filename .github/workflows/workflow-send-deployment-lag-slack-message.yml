@@ -54,8 +54,10 @@ jobs:
 
       - name: Format commit details
         id: format-commits
+        env:
+          COMMITS_JSON: ${{ inputs.commits_json }}
         run: |
-          commits_json='${{ inputs.commits_json }}'
+          commits_json="$COMMITS_JSON"
           
           if [ "$commits_json" = "" ] || [ "$commits_json" = "[]" ]; then
             echo "formatted_commits=No commits found" >> $GITHUB_OUTPUT
@@ -115,8 +117,10 @@ jobs:
 
       - name: Format author tags
         id: format-authors
+        env:
+          COMMIT_AUTHORS: ${{ inputs.commit_authors }}
         run: |
-          commit_authors="${{ inputs.commit_authors }}"
+          commit_authors="$COMMIT_AUTHORS"
           
           if [ -z "$commit_authors" ]; then
             echo "author_tags=" >> $GITHUB_OUTPUT
@@ -164,18 +168,6 @@ jobs:
           echo "color=$color" >> $GITHUB_OUTPUT
           echo "emoji=$emoji" >> $GITHUB_OUTPUT
           echo "severity=$severity" >> $GITHUB_OUTPUT
-
-      - name: Debug Slack payload
-        run: |
-          echo "=== Debugging Slack Notification ==="
-          echo "Channel ID: ${{ secrets.SLACK_CHANNEL_ID }}"
-          echo "Staging Version: ${{ inputs.staging_version }}"
-          echo "Production Version: ${{ inputs.prod_version }}"
-          echo "Formatted Commits Length: ${#FORMATTED_COMMITS}"
-          echo "Author Tags: ${{ steps.format-authors.outputs.author_tags }}"
-          echo "Compare URL: ${{ inputs.compare_url }}"
-        env:
-          FORMATTED_COMMITS: ${{ steps.format-commits.outputs.formatted_commits }}
 
       - name: Send Slack notification
         uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1

@@ -166,9 +166,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
             concurrencyError => throw new UnreachableException("Should not get concurrencyError when updating SeenAt."));
 
+        dialog.FilterLocalizations(request.AcceptedLanguages);
+
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 
-        dialogDto.FilterLocalizations(request.AcceptedLanguages);
 
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,

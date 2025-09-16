@@ -91,8 +91,8 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
             return new EntityNotFound<DialogTransmission>(request.TransmissionId);
         }
 
+        transmission.FilterLocalizations(request.AcceptedLanguages);
         var dto = _mapper.Map<TransmissionDto>(transmission);
-        dto.FilterLocalizations(request.AcceptedLanguages);
 
         dto.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
 

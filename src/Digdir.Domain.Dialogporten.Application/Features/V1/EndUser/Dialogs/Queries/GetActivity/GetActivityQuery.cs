@@ -88,8 +88,7 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
             return new EntityNotFound<DialogActivity>(request.ActivityId);
         }
 
-        var dto = _mapper.Map<ActivityDto>(activity);
-        dto.FilterLocalizations(request.AcceptedLanguages);
-        return dto;
+        activity.FilterLocalizations(request.AcceptedLanguages);
+        return _mapper.Map<ActivityDto>(activity);
     }
 }

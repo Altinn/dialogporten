@@ -85,7 +85,7 @@ internal static class StaticStore
         var remaining = length;
         while (remaining > 0)
         {
-            var word = rng.Next(0,5) == 0
+            var word = 20.PercentOfTheTime()
                 ? FrequentWords[rng.Next(0, FrequentWords.Length)].AsSpan()
                 : _norwegianWords[rng.Next(0, _norwegianWords.Length)].AsSpan();
             if (word.Length > remaining) break;

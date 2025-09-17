@@ -177,7 +177,8 @@ public static class InfrastructureExtensions
         })
         .ConfigureFusionCache(nameof(IFeatureMetricServiceResourceCache), new()
         {
-            Duration = TimeSpan.FromMinutes(5)
+            Duration = TimeSpan.FromMinutes(5),
+            IsFailSafeEnabled = false  // Disable fail-safe for simple DB lookups
         });
 
         if (environment.IsEnvironment("yt01"))

@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
@@ -13,8 +14,7 @@ internal interface IFeatureMetricServiceResourceResolver<in TRequest>
 /// </summary>
 public interface IFeatureMetricServiceResourceCache
 {
-    Task<string?> GetAsync(string key, CancellationToken cancellationToken);
-    Task SetAsync(string key, string value, TimeSpan ttl, CancellationToken cancellationToken);
+    Task<ServiceResourceInformation?> GetServiceResource(Guid dialogId, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -31,35 +31,11 @@ public interface IFeatureMetricServiceResourceThroughDialogIdRequest
 /// <summary>
 /// Generic resolver for any IFeatureMetricsServiceResourceThroughDialogIdRequest that can resolve service resource information from dialog ID
 /// </summary>
-internal sealed class FeatureMetricServiceResourceThroughDialogIdRequestResolver(IDialogDbContext db, IResourceRegistry resourceRegistry, IFeatureMetricServiceResourceCache cache) : IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceThroughDialogIdRequest>
+internal sealed class FeatureMetricServiceResourceThroughDialogIdRequestResolver(IFeatureMetricServiceResourceCache cache) : IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceThroughDialogIdRequest>
 {
-    private static readonly string CacheKeyPrefix = "feature-metrics-service-resource:";
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
-
     public async Task<ServiceResourceInformation?> Resolve(IFeatureMetricServiceResourceThroughDialogIdRequest request, CancellationToken cancellationToken)
     {
-        var cacheKey = $"{CacheKeyPrefix}{request.DialogId}";
-
-        // Try cache first
-        var cachedServiceResource = await cache.GetAsync(cacheKey, cancellationToken);
-        if (cachedServiceResource != null)
-        {
-            return await resourceRegistry.GetResourceInformation(cachedServiceResource, cancellationToken);
-        }
-
-        // Cache miss - hit database
-        var serviceResource = await db.Dialogs
-            .Where(x => request.DialogId == x.Id)
-            .Select(x => x.ServiceResource)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (serviceResource != null)
-        {
-            await cache.SetAsync(cacheKey, serviceResource, CacheTtl, cancellationToken);
-            return await resourceRegistry.GetResourceInformation(serviceResource, cancellationToken);
-        }
-
-        return null;
+        return await cache.GetServiceResource(request.DialogId, cancellationToken);
     }
 }
 

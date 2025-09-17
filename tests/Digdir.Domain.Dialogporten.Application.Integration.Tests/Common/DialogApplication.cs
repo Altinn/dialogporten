@@ -281,28 +281,87 @@ public class DialogApplication : IAsyncLifetime
 }
 
 /// <summary>
-/// Simple in-memory implementation of IDialogServiceResourceCache for integration tests.
+/// In-memory implementation of IFeatureMetricServiceResourceCache for integration tests.
+/// Simulates caching behavior with configurable responses and call tracking.
 /// </summary>
 internal sealed class TestFeatureMetricServiceResourceCache : IFeatureMetricServiceResourceCache
 {
-    private readonly ConcurrentDictionary<string, (string Value, DateTimeOffset ExpiresAt)> _cache = new();
+    private readonly Dictionary<Guid, ServiceResourceInformation?> _cache = new();
+    private readonly Dictionary<Guid, int> _callCounts = new();
+    private readonly bool _simulateDbFailure;
+    private readonly bool _simulateSlowResponse;
 
-    public Task<string?> GetAsync(string key, CancellationToken cancellationToken)
+    public TestFeatureMetricServiceResourceCache(bool simulateDbFailure = false, bool simulateSlowResponse = false)
     {
-        if (_cache.TryGetValue(key, out var entry) && entry.ExpiresAt > DateTimeOffset.UtcNow)
-        {
-            return Task.FromResult<string?>(entry.Value);
-        }
-
-        // Remove expired entry
-        _cache.TryRemove(key, out _);
-
-        return Task.FromResult<string?>(null);
+        _simulateDbFailure = simulateDbFailure;
+        _simulateSlowResponse = simulateSlowResponse;
     }
 
-    public Task SetAsync(string key, string value, TimeSpan ttl, CancellationToken cancellationToken)
+    public async Task<ServiceResourceInformation?> GetServiceResource(Guid dialogId, CancellationToken cancellationToken)
     {
-        _cache[key] = (value, DateTimeOffset.UtcNow.Add(ttl));
-        return Task.CompletedTask;
+        // Track calls for testing
+        _callCounts[dialogId] = _callCounts.GetValueOrDefault(dialogId, 0) + 1;
+
+        // Simulate slow response
+        if (_simulateSlowResponse)
+        {
+            await Task.Delay(100, cancellationToken);
+        }
+
+        // Simulate database failure
+        if (_simulateDbFailure)
+        {
+            throw new InvalidOperationException("Simulated database failure");
+        }
+
+        // Return cached value if available
+        if (_cache.TryGetValue(dialogId, out var cachedValue))
+        {
+            return cachedValue;
+        }
+
+        // Simulate database lookup and cache the result
+        var result = CreateTestServiceResource(dialogId);
+        _cache[dialogId] = result;
+        return result;
+    }
+
+    /// <summary>
+    /// Manually set a cache entry for testing specific scenarios
+    /// </summary>
+    public void SetCacheEntry(Guid dialogId, ServiceResourceInformation? value)
+    {
+        _cache[dialogId] = value;
+    }
+
+    /// <summary>
+    /// Clear all cached entries
+    /// </summary>
+    public void ClearCache()
+    {
+        _cache.Clear();
+        _callCounts.Clear();
+    }
+
+    /// <summary>
+    /// Get the number of times GetServiceResource was called for a specific dialog
+    /// </summary>
+    public int GetCallCount(Guid dialogId) => _callCounts.GetValueOrDefault(dialogId, 0);
+
+    /// <summary>
+    /// Check if a dialog ID is cached
+    /// </summary>
+    public bool IsCached(Guid dialogId) => _cache.ContainsKey(dialogId);
+
+    private static ServiceResourceInformation CreateTestServiceResource(Guid dialogId)
+    {
+        // Create more realistic test data based on dialog ID patterns
+        var dialogIdString = dialogId.ToString("N")[..8]; // First 8 chars of GUID
+
+        return new ServiceResourceInformation(
+            $"urn:altinn:resource:test-service-{dialogIdString}",
+            "test-resource-type",
+            "123456789",
+            "TESTORG");
     }
 }

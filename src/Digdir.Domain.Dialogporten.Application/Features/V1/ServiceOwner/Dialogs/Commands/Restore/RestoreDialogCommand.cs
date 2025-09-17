@@ -13,7 +13,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 
-public sealed class RestoreDialogCommand : IRequest<RestoreDialogResult>, ISilentUpdater, IDialogIdQuery
+public sealed class RestoreDialogCommand : IRequest<RestoreDialogResult>, ISilentUpdater, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }

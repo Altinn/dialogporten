@@ -12,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 
-public sealed class UpdateFormSavedActivityTimeCommand : IRequest<UpdateFormSavedActivityTimeResult>, ISilentUpdater, IDialogIdQuery
+public sealed class UpdateFormSavedActivityTimeCommand : IRequest<UpdateFormSavedActivityTimeResult>, ISilentUpdater, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 

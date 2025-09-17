@@ -9,7 +9,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.NotificationCondition;
 
-public sealed class NotificationConditionQuery : IRequest<NotificationConditionResult>, IDialogIdQuery
+public sealed class NotificationConditionQuery : IRequest<NotificationConditionResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public NotificationConditionType ConditionType { get; set; }

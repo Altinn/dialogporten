@@ -28,14 +28,14 @@ using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Co
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater, IDialogIdQuery
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
     public bool IsSilentUpdate { get; set; }
 
-    Guid IDialogIdQuery.DialogId => Id;
+    Guid IFeatureMetricsServiceResourceThroughDialogIdRequest.DialogId => Id;
 }
 
 [GenerateOneOf]

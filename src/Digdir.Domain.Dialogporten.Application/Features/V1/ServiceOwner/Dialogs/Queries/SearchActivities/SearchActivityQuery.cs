@@ -11,7 +11,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchActivities;
 
-public sealed class SearchActivityQuery : IRequest<SearchActivityResult>, IDialogIdQuery
+public sealed class SearchActivityQuery : IRequest<SearchActivityResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }

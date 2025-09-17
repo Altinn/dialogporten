@@ -124,7 +124,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
-            .AddScoped<IDialogServiceResourceCache, TestDialogServiceResourceCache>()
+            .AddScoped<IFeatureMetricsServiceResourceCache, TestFeatureMetricsServiceResourceCache>()
             .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
             .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();
     }
@@ -283,7 +283,7 @@ public class DialogApplication : IAsyncLifetime
 /// <summary>
 /// Simple in-memory implementation of IDialogServiceResourceCache for integration tests.
 /// </summary>
-internal sealed class TestDialogServiceResourceCache : IDialogServiceResourceCache
+internal sealed class TestFeatureMetricsServiceResourceCache : IFeatureMetricsServiceResourceCache
 {
     private readonly ConcurrentDictionary<string, (string Value, DateTimeOffset ExpiresAt)> _cache = new();
 

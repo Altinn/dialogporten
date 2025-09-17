@@ -13,13 +13,13 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 
-public sealed class DeleteDialogCommand : IRequest<DeleteDialogResult>, ISilentUpdater, IDialogIdQuery
+public sealed class DeleteDialogCommand : IRequest<DeleteDialogResult>, ISilentUpdater, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public bool IsSilentUpdate { get; set; }
 
-    Guid IDialogIdQuery.DialogId => Id;
+    Guid IFeatureMetricsServiceResourceThroughDialogIdRequest.DialogId => Id;
 }
 
 [GenerateOneOf]

@@ -6,7 +6,7 @@ using Constants = Digdir.Domain.Dialogporten.Application.Features.V1.Common.Auth
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.WellKnown.OauthAuthorizationServer.Queries.Get;
 
 public sealed class GetOauthAuthorizationServerQuery : IRequest<GetOauthAuthorizationServerDto>,
-    IDoNotCareAboutServiceResource;
+    IFeatureMetricsServiceResourceIgnoreRequest;
 
 internal sealed class GetOauthAuthorizationServerQueryHandler : IRequestHandler<GetOauthAuthorizationServerQuery, GetOauthAuthorizationServerDto>
 {

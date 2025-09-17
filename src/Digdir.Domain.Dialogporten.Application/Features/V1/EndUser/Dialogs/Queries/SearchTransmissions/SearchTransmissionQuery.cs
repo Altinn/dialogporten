@@ -11,7 +11,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchTransmissions;
 
-public sealed class SearchTransmissionQuery : IRequest<SearchTransmissionResult>, IDialogIdQuery
+public sealed class SearchTransmissionQuery : IRequest<SearchTransmissionResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }

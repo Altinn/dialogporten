@@ -8,7 +8,7 @@ using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 
-public sealed class SyncPolicyCommand : IRequest<SyncPolicyResult>, IDoNotCareAboutServiceResource
+public sealed class SyncPolicyCommand : IRequest<SyncPolicyResult>, IFeatureMetricsServiceResourceIgnoreRequest
 {
     public DateTimeOffset? Since { get; set; }
     public int? NumberOfConcurrentRequests { get; set; }

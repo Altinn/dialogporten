@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Queries.GetParties;
 
-public sealed class GetPartiesQuery : IRequest<PartiesDto>, IDoNotCareAboutServiceResource;
+public sealed class GetPartiesQuery : IRequest<PartiesDto>, IFeatureMetricsServiceResourceIgnoreRequest;
 
 internal sealed class GetPartiesQueryHandler : IRequestHandler<GetPartiesQuery, PartiesDto>
 {

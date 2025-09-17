@@ -12,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels;
 
-public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IDialogIdQuery
+public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public string EndUserId { get; set; } = null!; // // See ServiceOwnerOnBehalfOfPersonMiddleware

@@ -11,7 +11,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 
-public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IDialogIdQuery
+public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchEndUserContextRevision { get; set; }

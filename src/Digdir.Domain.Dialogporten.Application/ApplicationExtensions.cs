@@ -107,7 +107,7 @@ public static class ApplicationExtensions
         this IServiceCollection services,
         params IEnumerable<Assembly> assemblies)
     {
-        var openResolverType = typeof(IServiceResourceResolver<>);
+        var openResolverType = typeof(IFeatureMetricsServiceResourceResolver<>);
 
         // Get all non-abstract, non-interface types from the provided assemblies (or the calling assembly
         // if none are provided)
@@ -117,7 +117,7 @@ public static class ApplicationExtensions
             .Where(type => type is { IsAbstract: false, IsInterface: false })
             .ToList();
 
-        // Find all types that implement IServiceResourceResolver<T> and map them to their corresponding T
+        // Find all types that implement IFeatureMetricsServiceResourceResolver<T> and map them to their corresponding T
         var resolverMaps = concreteTypes
             .SelectMany(x => x.GetInterfaces()
                     .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == openResolverType),
@@ -141,10 +141,10 @@ public static class ApplicationExtensions
         if (errorMessage != string.Empty)
         {
             throw new InvalidOperationException(
-                $"All requests are expected to have an associated {nameof(IServiceResourceResolver<object>)}. Could " +
+                $"All requests are expected to have an associated {nameof(IFeatureMetricsServiceResourceResolver<object>)}. Could " +
                 $"not find resolvers for the following requests. If a request cannot be associated with a service " +
                 $"resource or tracking service resource information is irrelevant for the request, mark it " +
-                $"with {nameof(IDoNotCareAboutServiceResource)}.{Environment.NewLine}{errorMessage}");
+                $"with {nameof(IFeatureMetricsServiceResourceIgnoreRequest)}.{Environment.NewLine}{errorMessage}");
         }
 
         // Register each request type with its corresponding resolver implementation
@@ -152,7 +152,7 @@ public static class ApplicationExtensions
         {
             services.TryAddTransient(openResolverType.MakeGenericType(request), resolver!);
         }
-
+        
         return services;
     }
 }

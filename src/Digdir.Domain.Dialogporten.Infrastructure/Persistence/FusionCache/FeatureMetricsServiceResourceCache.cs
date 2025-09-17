@@ -6,9 +6,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 /// <summary>
 /// FusionCache implementation of IDialogServiceResourceCache for dialog service resource caching
 /// </summary>
-internal sealed class DialogServiceResourceCache(IFusionCacheProvider cacheProvider) : IDialogServiceResourceCache
+internal sealed class FeatureMetricsServiceResourceCache(IFusionCacheProvider cacheProvider) : IFeatureMetricsServiceResourceCache
 {
-    private readonly IFusionCache _cache = cacheProvider.GetCache(nameof(IDialogServiceResourceCache)) ??
+    private readonly IFusionCache _cache = cacheProvider.GetCache(nameof(IFeatureMetricsServiceResourceCache)) ??
         throw new ArgumentNullException(nameof(cacheProvider));
 
     public async Task<string?> GetAsync(string key, CancellationToken cancellationToken)

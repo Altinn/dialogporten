@@ -16,7 +16,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
-public sealed class GetDialogQuery : IRequest<GetDialogResult>, IDialogIdQuery
+public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 

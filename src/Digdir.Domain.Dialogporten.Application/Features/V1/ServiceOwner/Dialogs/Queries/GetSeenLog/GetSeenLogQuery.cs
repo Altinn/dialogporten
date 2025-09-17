@@ -11,7 +11,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetSeenLog;
 
-public sealed class GetSeenLogQuery : IRequest<GetSeenLogResult>, IDialogIdQuery
+public sealed class GetSeenLogQuery : IRequest<GetSeenLogResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid SeenLogId { get; set; }

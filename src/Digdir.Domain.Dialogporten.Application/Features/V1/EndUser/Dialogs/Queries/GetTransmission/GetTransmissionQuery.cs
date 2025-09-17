@@ -12,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission;
 
-public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>, IDialogIdQuery
+public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid TransmissionId { get; set; }

@@ -12,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
 
-public sealed class SearchSeenLogQuery : IRequest<SearchSeenLogResult>, IDialogIdQuery
+public sealed class SearchSeenLogQuery : IRequest<SearchSeenLogResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.WellKnown.Jwks.Queries.Get;
 
-public sealed class GetJwksQuery : IRequest<GetJwksDto>, IDoNotCareAboutServiceResource;
+public sealed class GetJwksQuery : IRequest<GetJwksDto>, IFeatureMetricsServiceResourceIgnoreRequest;
 
 internal sealed class GetJwksQueryHandler : IRequestHandler<GetJwksQuery, GetJwksDto>
 {

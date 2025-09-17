@@ -28,20 +28,34 @@ await using var dataSource = NpgsqlDataSource.Create(connectionString);
 
 await StaticStore.Init(connectionString, altinnPlatformBaseUrl, dialogAmount);
 
-await EnsureFreshDb(connectionString);
+foreach (var x in DialogSearch.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount)))
+{
+    Console.WriteLine(x.SearchValue);
+}
 
-await DisableDbConstraints(dataSource);
+// await SeedSearchTables(dataSource, startingDate, endDate, dialogAmount);
 
-await GenerateActorNames(dataSource);
-
-// Seed everything else
-await GenerateDataUsingGenerators(dataSource, startingDate, endDate, dialogAmount);
-
-await EnableDbConstraints(dataSource);
-
-await ScuffedValidation(connectionString);
+// await EnsureFreshDb(connectionString);
+//
+// await DisableDbConstraints(dataSource);
+//
+// await GenerateActorNames(dataSource);
+//
+// // Seed everything else
+// await GenerateDataUsingGenerators(dataSource, startingDate, endDate, dialogAmount);
+//
+// await EnableDbConstraints(dataSource);
+//
+// await ScuffedValidation(connectionString);
 
 return;
+
+static async Task SeedSearchTables(NpgsqlDataSource dataSource, DateTimeOffset fromDate,
+    DateTimeOffset toDate, int dialogAmount)
+{
+    await using var pool = await PostgresCopyWriterPool<DialogSearch>.Create(dataSource);
+    await pool.WriteAsync(DialogSearch.GenerateEntities(DialogTimestamp.Generate(fromDate, toDate, dialogAmount)));
+}
 
 static async Task EnsureFreshDb(string connectionString)
 {

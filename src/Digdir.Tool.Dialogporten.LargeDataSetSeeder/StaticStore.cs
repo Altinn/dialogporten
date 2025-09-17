@@ -61,6 +61,27 @@ internal static class StaticStore
         return distinctWords.ToArray();
     }
 
+    public static string GetRandomSentence(int minLength, int maxLength, Random? rng = null)
+    {
+        ValidateInitialized();
+        rng ??= Random.Shared;
+        ReadOnlySpan<char> giveMeSomeSpace = " ";
+        var length = rng.Next(minLength, maxLength);
+        Span<char> result = stackalloc char[length];
+        var remaining = length;
+        while (remaining > 0)
+        {
+            var index = rng.Next(0, _norwegianWords.Length);
+            if (_norwegianWords[index].Length > remaining) break;
+            _norwegianWords[index].AsSpan().CopyTo(result[^remaining..]);
+            remaining -= _norwegianWords[index].Length;
+            if (giveMeSomeSpace.Length > remaining) break;
+            giveMeSomeSpace.CopyTo(result[^remaining..]);
+            remaining -= giveMeSomeSpace.Length;
+        }
+        return result[..(length - remaining)].ToString();
+    }
+
     public static async Task Init(string connectionString, string altinnPlatformBaseUrl, int dialogAmount)
     {
         var (dagls, privs) = await GetDaglsAndPrivs(connectionString, altinnPlatformBaseUrl);

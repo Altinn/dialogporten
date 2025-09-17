@@ -8,7 +8,10 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidat
 
 internal static partial class FluentValidationStringExtensions
 {
-    private static readonly string[] AllowedTags = ["p", "a", "br", "em", "strong", "ul", "ol", "li"];
+    private static readonly string[] AllowedTags = [
+        "p", "a", "br", "em", "strong", "ul",
+        "ol", "li", "table", "thead",
+        "tbody", "tr", "td", "th"];
 
     private static readonly string ContainsValidHtmlError =
         "Value contains unsupported HTML. The following tags are supported: " +

@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Localizations;
+﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
+using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -16,5 +17,14 @@ internal sealed class LocalizationConfiguration : IEntityTypeConfiguration<Local
             .HasMethod(Constants.Gin)
             .HasOperators(Constants.GinTrgmOps);
 
+    }
+}
+
+internal sealed class LocalizationSetConfiguration : IEntityTypeConfiguration<LocalizationSet>
+{
+    public void Configure(EntityTypeBuilder<LocalizationSet> builder)
+    {
+        builder.HasDiscriminator<string>("Discriminator")
+            .HasValue<DialogGuiActionPrompt>
     }
 }

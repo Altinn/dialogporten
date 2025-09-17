@@ -13,10 +13,10 @@ public interface IResourceRegistry
 public sealed record ServiceResourceInformation(string ResourceId, string ResourceType, string OwnerOrgNumber, string OwnOrgShortName)
 {
     public static readonly ServiceResourceInformation Empty = new(string.Empty, string.Empty, string.Empty, string.Empty);
-    public string ResourceType { get; } = ResourceType.ToLowerInvariant();
-    public string OwnerOrgNumber { get; } = OwnerOrgNumber.ToLowerInvariant();
-    public string OwnOrgShortName { get; } = OwnOrgShortName.ToLowerInvariant();
-    public string ResourceId { get; } = ResourceId.ToLowerInvariant();
+    public string ResourceType { get; } = ResourceType?.ToLowerInvariant() ?? string.Empty;
+    public string OwnerOrgNumber { get; } = OwnerOrgNumber?.ToLowerInvariant() ?? string.Empty;
+    public string OwnOrgShortName { get; } = OwnOrgShortName?.ToLowerInvariant() ?? string.Empty;
+    public string ResourceId { get; } = ResourceId?.ToLowerInvariant() ?? string.Empty;
 }
 
 

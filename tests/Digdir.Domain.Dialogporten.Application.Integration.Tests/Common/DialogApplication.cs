@@ -1,4 +1,3 @@
-﻿using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using AutoMapper;
@@ -258,6 +257,8 @@ public class DialogApplication : IAsyncLifetime
 
     public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
 
+    public ServiceProvider GetServiceProvider() => _rootProvider;
+
     public async Task<List<T>> GetDbEntities<T>() where T : class
     {
         using var scope = _rootProvider.CreateScope();
@@ -281,87 +282,45 @@ public class DialogApplication : IAsyncLifetime
 }
 
 /// <summary>
-/// In-memory implementation of IFeatureMetricServiceResourceCache for integration tests.
-/// Simulates caching behavior with configurable responses and call tracking.
+/// Test implementation that mimics the real FeatureMetricServiceResourceCache behavior
+/// by querying the database and using the ResourceRegistry, but with simple in-memory caching.
 /// </summary>
 internal sealed class TestFeatureMetricServiceResourceCache : IFeatureMetricServiceResourceCache
 {
     private readonly Dictionary<Guid, ServiceResourceInformation?> _cache = new();
-    private readonly Dictionary<Guid, int> _callCounts = new();
-    private readonly bool _simulateDbFailure;
-    private readonly bool _simulateSlowResponse;
+    private readonly IDialogDbContext _db;
+    private readonly IResourceRegistry _resourceRegistry;
 
-    public TestFeatureMetricServiceResourceCache(bool simulateDbFailure = false, bool simulateSlowResponse = false)
+    public TestFeatureMetricServiceResourceCache(IDialogDbContext db, IResourceRegistry resourceRegistry)
     {
-        _simulateDbFailure = simulateDbFailure;
-        _simulateSlowResponse = simulateSlowResponse;
+        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
     }
 
     public async Task<ServiceResourceInformation?> GetServiceResource(Guid dialogId, CancellationToken cancellationToken)
     {
-        // Track calls for testing
-        _callCounts[dialogId] = _callCounts.GetValueOrDefault(dialogId, 0) + 1;
-
-        // Simulate slow response
-        if (_simulateSlowResponse)
+        if (_cache.TryGetValue(dialogId, out var cached))
         {
-            await Task.Delay(100, cancellationToken);
+            return cached;
         }
 
-        // Simulate database failure
-        if (_simulateDbFailure)
+        var serviceResource = await GetServiceResourceFromDb(dialogId, cancellationToken);
+        if (serviceResource != null)
         {
-            throw new InvalidOperationException("Simulated database failure");
+            var result = await _resourceRegistry.GetResourceInformation(serviceResource, cancellationToken);
+            _cache[dialogId] = result;
+            return result;
         }
 
-        // Return cached value if available
-        if (_cache.TryGetValue(dialogId, out var cachedValue))
-        {
-            return cachedValue;
-        }
-
-        // Simulate database lookup and cache the result
-        var result = CreateTestServiceResource(dialogId);
-        _cache[dialogId] = result;
-        return result;
+        _cache[dialogId] = null;
+        return null;
     }
 
-    /// <summary>
-    /// Manually set a cache entry for testing specific scenarios
-    /// </summary>
-    public void SetCacheEntry(Guid dialogId, ServiceResourceInformation? value)
+    private async Task<string?> GetServiceResourceFromDb(Guid dialogId, CancellationToken cancellationToken)
     {
-        _cache[dialogId] = value;
-    }
-
-    /// <summary>
-    /// Clear all cached entries
-    /// </summary>
-    public void ClearCache()
-    {
-        _cache.Clear();
-        _callCounts.Clear();
-    }
-
-    /// <summary>
-    /// Get the number of times GetServiceResource was called for a specific dialog
-    /// </summary>
-    public int GetCallCount(Guid dialogId) => _callCounts.GetValueOrDefault(dialogId, 0);
-
-    /// <summary>
-    /// Check if a dialog ID is cached
-    /// </summary>
-    public bool IsCached(Guid dialogId) => _cache.ContainsKey(dialogId);
-
-    private static ServiceResourceInformation CreateTestServiceResource(Guid dialogId)
-    {
-        // Create more realistic test data based on dialog ID patterns
-        var dialogIdString = dialogId.ToString("N")[..8]; // First 8 chars of GUID
-
-        return new ServiceResourceInformation(
-            $"urn:altinn:resource:test-service-{dialogIdString}",
-            "test-resource-type",
-            "123456789",
-            "TESTORG");
+        return await _db.Dialogs
+            .Where(x => x.Id == dialogId)
+            .Select(x => x.ServiceResource)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

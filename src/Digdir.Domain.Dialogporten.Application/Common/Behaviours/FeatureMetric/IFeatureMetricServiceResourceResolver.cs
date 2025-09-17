@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
-internal interface IFeatureMetricsServiceResourceResolver<in TRequest>
+internal interface IFeatureMetricServiceResourceResolver<in TRequest>
 {
     Task<ServiceResourceInformation?> Resolve(TRequest request, CancellationToken cancellationToken);
 }
@@ -11,7 +11,7 @@ internal interface IFeatureMetricsServiceResourceResolver<in TRequest>
 /// <summary>
 /// Simple cache interface for dialog service resource caching
 /// </summary>
-public interface IFeatureMetricsServiceResourceCache
+public interface IFeatureMetricServiceResourceCache
 {
     Task<string?> GetAsync(string key, CancellationToken cancellationToken);
     Task SetAsync(string key, string value, TimeSpan ttl, CancellationToken cancellationToken);
@@ -20,7 +20,7 @@ public interface IFeatureMetricsServiceResourceCache
 /// <summary>
 /// Marker interface for requests that operate on a specific dialog by ID
 /// </summary>
-public interface IFeatureMetricsServiceResourceThroughDialogIdRequest
+public interface IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     /// <summary>
     /// The ID of the dialog being requested
@@ -31,12 +31,12 @@ public interface IFeatureMetricsServiceResourceThroughDialogIdRequest
 /// <summary>
 /// Generic resolver for any IFeatureMetricsServiceResourceThroughDialogIdRequest that can resolve service resource information from dialog ID
 /// </summary>
-internal sealed class FeatureMetricsServiceResourceThroughDialogIdRequestResolver(IDialogDbContext db, IResourceRegistry resourceRegistry, IFeatureMetricsServiceResourceCache cache) : IFeatureMetricsServiceResourceResolver<IFeatureMetricsServiceResourceThroughDialogIdRequest>
+internal sealed class FeatureMetricServiceResourceThroughDialogIdRequestResolver(IDialogDbContext db, IResourceRegistry resourceRegistry, IFeatureMetricServiceResourceCache cache) : IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceThroughDialogIdRequest>
 {
     private static readonly string CacheKeyPrefix = "feature-metrics-service-resource:";
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
-    public async Task<ServiceResourceInformation?> Resolve(IFeatureMetricsServiceResourceThroughDialogIdRequest request, CancellationToken cancellationToken)
+    public async Task<ServiceResourceInformation?> Resolve(IFeatureMetricServiceResourceThroughDialogIdRequest request, CancellationToken cancellationToken)
     {
         var cacheKey = $"{CacheKeyPrefix}{request.DialogId}";
 
@@ -63,25 +63,25 @@ internal sealed class FeatureMetricsServiceResourceThroughDialogIdRequestResolve
     }
 }
 
-internal interface IFeatureMetricsServiceResourceRequest
+internal interface IFeatureMetricServiceResourceRequest
 {
     string ServiceResource { get; }
 }
 
-internal sealed class FeatureMetricsServiceResourceRequestResolver(IResourceRegistry resourceRegistry) :
-    IFeatureMetricsServiceResourceResolver<IFeatureMetricsServiceResourceRequest>
+internal sealed class FeatureMetricServiceResourceRequestResolver(IResourceRegistry resourceRegistry) :
+    IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceRequest>
 {
-    public Task<ServiceResourceInformation?> Resolve(IFeatureMetricsServiceResourceRequest request, CancellationToken cancellationToken) =>
+    public Task<ServiceResourceInformation?> Resolve(IFeatureMetricServiceResourceRequest request, CancellationToken cancellationToken) =>
         resourceRegistry.GetResourceInformation(request.ServiceResource, cancellationToken);
 }
 
-internal interface IFeatureMetricsServiceResourceIgnoreRequest;
+internal interface IFeatureMetricServiceResourceIgnoreRequest;
 
-internal sealed class FeatureMetricsServiceResourceIgnoreRequestResolver :
-    IFeatureMetricsServiceResourceResolver<IFeatureMetricsServiceResourceIgnoreRequest>
+internal sealed class FeatureMetricServiceResourceIgnoreRequestResolver :
+    IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceIgnoreRequest>
 {
     public Task<ServiceResourceInformation?> Resolve(
-        IFeatureMetricsServiceResourceIgnoreRequest request,
+        IFeatureMetricServiceResourceIgnoreRequest request,
         CancellationToken cancellationToken) =>
         Task.FromResult<ServiceResourceInformation?>(null);
 }

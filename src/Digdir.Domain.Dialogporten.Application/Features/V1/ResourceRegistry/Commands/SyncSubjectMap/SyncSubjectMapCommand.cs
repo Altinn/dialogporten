@@ -8,7 +8,7 @@ using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 
-public sealed class SyncSubjectMapCommand : IRequest<SyncSubjectMapResult>, IFeatureMetricsServiceResourceIgnoreRequest
+public sealed class SyncSubjectMapCommand : IRequest<SyncSubjectMapResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     public DateTimeOffset? Since { get; set; }
     public int? BatchSize { get; set; }

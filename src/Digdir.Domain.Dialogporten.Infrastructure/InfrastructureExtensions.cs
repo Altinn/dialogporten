@@ -108,7 +108,7 @@ public static class InfrastructureExtensions
             .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>))
 
             // Feature Metrics
-            .AddScoped<IFeatureMetricsServiceResourceCache, FeatureMetricsServiceResourceCache>();
+            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
 
         services.AddFusionCacheNeueccMessagePackSerializer();
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
@@ -175,7 +175,7 @@ public static class InfrastructureExtensions
         {
             Duration = TimeSpan.FromMinutes(20)
         })
-        .ConfigureFusionCache(nameof(IFeatureMetricsServiceResourceCache), new()
+        .ConfigureFusionCache(nameof(IFeatureMetricServiceResourceCache), new()
         {
             Duration = TimeSpan.FromMinutes(5)
         });

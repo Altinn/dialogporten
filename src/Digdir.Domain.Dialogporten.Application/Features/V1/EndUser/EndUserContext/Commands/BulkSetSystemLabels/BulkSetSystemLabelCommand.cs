@@ -13,7 +13,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
-public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>, IFeatureMetricsServiceResourceIgnoreRequest
+public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     public BulkSetSystemLabelDto Dto { get; set; } = new();
 }

@@ -12,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 
-public sealed class UpdateDialogServiceOwnerContextCommand : IRequest<UpdateDialogServiceOwnerContextResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
+public sealed class UpdateDialogServiceOwnerContextCommand : IRequest<UpdateDialogServiceOwnerContextResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchServiceOwnerContextRevision { get; set; }

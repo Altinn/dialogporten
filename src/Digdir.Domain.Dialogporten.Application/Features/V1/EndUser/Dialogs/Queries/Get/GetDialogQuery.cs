@@ -15,7 +15,7 @@ using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authoriza
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 
-public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
+public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }

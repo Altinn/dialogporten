@@ -10,7 +10,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 
-public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>, IFeatureMetricsServiceResourceIgnoreRequest
+public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     public string EndUserId { get; set; } = null!; // See ServiceOwnerOnBehalfOfPersonMiddleware
     public BulkSetSystemLabelDto Dto { get; set; } = new();

@@ -25,11 +25,11 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
-public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater, IFeatureMetricsServiceResourceRequest
+public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater, IFeatureMetricServiceResourceRequest
 {
     public bool IsSilentUpdate { get; set; }
     public CreateDialogDto Dto { get; set; } = null!;
-    string IFeatureMetricsServiceResourceRequest.ServiceResource => Dto.ServiceResource;
+    string IFeatureMetricServiceResourceRequest.ServiceResource => Dto.ServiceResource;
 }
 
 public sealed record CreateDialogSuccess(Guid DialogId, Guid Revision);

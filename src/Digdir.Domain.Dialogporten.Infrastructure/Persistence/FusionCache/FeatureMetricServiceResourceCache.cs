@@ -4,11 +4,11 @@ using ZiggyCreatures.Caching.Fusion;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 
 /// <summary>
-/// FusionCache implementation of IDialogServiceResourceCache for dialog service resource caching
+/// FusionCache implementation of IFeatureMetricServiceResourceCache for dialog service resource caching
 /// </summary>
-internal sealed class FeatureMetricsServiceResourceCache(IFusionCacheProvider cacheProvider) : IFeatureMetricsServiceResourceCache
+internal sealed class FeatureMetricServiceResourceCache(IFusionCacheProvider cacheProvider) : IFeatureMetricServiceResourceCache
 {
-    private readonly IFusionCache _cache = cacheProvider.GetCache(nameof(IFeatureMetricsServiceResourceCache)) ??
+    private readonly IFusionCache _cache = cacheProvider.GetCache(nameof(IFeatureMetricServiceResourceCache)) ??
         throw new ArgumentNullException(nameof(cacheProvider));
 
     public async Task<string?> GetAsync(string key, CancellationToken cancellationToken)

@@ -12,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetActivity;
 
-public sealed class GetActivityQuery : IRequest<GetActivityResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
+public sealed class GetActivityQuery : IRequest<GetActivityResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid ActivityId { get; set; }

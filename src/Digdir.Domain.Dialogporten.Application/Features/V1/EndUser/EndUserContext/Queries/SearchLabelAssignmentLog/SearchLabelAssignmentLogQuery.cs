@@ -11,7 +11,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 
-public sealed class SearchLabelAssignmentLogQuery : IRequest<SearchLabelAssignmentLogResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
+public sealed class SearchLabelAssignmentLogQuery : IRequest<SearchLabelAssignmentLogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }

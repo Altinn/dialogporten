@@ -10,7 +10,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Queries.GetServiceOwnerLabels;
 
-public sealed class GetServiceOwnerLabelsQuery : IRequest<GetServiceOwnerLabelsResult>, IFeatureMetricsServiceResourceThroughDialogIdRequest
+public sealed class GetServiceOwnerLabelsQuery : IRequest<GetServiceOwnerLabelsResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }

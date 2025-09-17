@@ -28,12 +28,7 @@ await using var dataSource = NpgsqlDataSource.Create(connectionString);
 
 await StaticStore.Init(connectionString, altinnPlatformBaseUrl, dialogAmount);
 
-foreach (var x in DialogSearch.GenerateEntities(DialogTimestamp.Generate(startingDate, endDate, dialogAmount)))
-{
-    Console.WriteLine(x.SearchValue);
-}
-
-// await SeedSearchTables(dataSource, startingDate, endDate, dialogAmount);
+await SeedSearchTables(dataSource, startingDate, endDate, dialogAmount);
 
 // await EnsureFreshDb(connectionString);
 //

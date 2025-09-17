@@ -17,6 +17,20 @@ internal static class StaticStore
     private static string[]? _englishWords;
     private static bool _isInitialized;
 
+    public static readonly string[] FrequentWords =
+    [
+        "og", "i", "det", "på", "som", "er", "en", "til", "å", "han", "av",
+        "for", "med", "at", "var", "de", "ikke", "den", "har", "jeg", "om",
+        "et", "men", "så", "seg", "hun", "hadde", "fra", "vi", "du", "kan",
+        "da", "ble", "ut", "skal", "vil", "ham", "etter", "over", "ved", "også",
+        "bare", "eller", "sa", "nå", "dette", "noe", "være", "meg", "mot", "opp",
+        "der", "når", "inn", "dem", "kunne", "andre", "blir", "alle", "noen", "sin",
+        "ha", "år", "henne", "må", "selv", "sier", "få", "kom", "denne", "enn",
+        "to", "hans", "bli", "ville", "før", "vært", "skulle", "går", "her", "slik",
+        "gikk", "mer", "hva", "igjen", "fikk", "man", "alt", "mange", "ingen", "får",
+        "oss", "hvor", "under", "siden", "hele", "dag", "gang", "sammen", "ned"
+    ];
+
     public static int? DialogAmount { get; private set; }
 
     [MemberNotNull(nameof(_daglResources), nameof(_privResources), nameof(_norwegianWords), nameof(_englishWords), nameof(DialogAmount))]
@@ -71,10 +85,12 @@ internal static class StaticStore
         var remaining = length;
         while (remaining > 0)
         {
-            var index = rng.Next(0, _norwegianWords.Length);
-            if (_norwegianWords[index].Length > remaining) break;
-            _norwegianWords[index].AsSpan().CopyTo(result[^remaining..]);
-            remaining -= _norwegianWords[index].Length;
+            var word = rng.Next(0,5) == 0
+                ? FrequentWords[rng.Next(0, FrequentWords.Length)].AsSpan()
+                : _norwegianWords[rng.Next(0, _norwegianWords.Length)].AsSpan();
+            if (word.Length > remaining) break;
+            word.CopyTo(result[^remaining..]);
+            remaining -= word.Length;
             if (giveMeSomeSpace.Length > remaining) break;
             giveMeSomeSpace.CopyTo(result[^remaining..]);
             remaining -= giveMeSomeSpace.Length;

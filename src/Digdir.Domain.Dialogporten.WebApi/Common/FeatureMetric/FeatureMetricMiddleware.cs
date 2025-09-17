@@ -19,14 +19,14 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next)
         }
         catch (Exception)
         {
-            deliveryContext.Ack(GeneratePresentationTag(context),
+            deliveryContext.ReportOutcome(GeneratePresentationTag(context),
                 new("StatusCode", "5**"),
                 new("CorrelationId", context.TraceIdentifier),
                 new("Status", "error"));
             throw;
         }
 
-        deliveryContext.Ack(GeneratePresentationTag(context),
+        deliveryContext.ReportOutcome(GeneratePresentationTag(context),
             new("StatusCode", context.Response.StatusCode),
             new("CorrelationId", context.TraceIdentifier),
             new("Status", IsSuccessStatusCode(context.Response.StatusCode) ? "success" : "failure"));

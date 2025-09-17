@@ -19,7 +19,7 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         _hostEnvironment = hostEnvironment;
     }
 
-    public void Ack(string presentationTag, params IEnumerable<KeyValuePair<string, object>> additionalTags)
+    public void ReportOutcome(string presentationTag, params IEnumerable<KeyValuePair<string, object>> additionalTags)
     {
         if (string.IsNullOrWhiteSpace(presentationTag))
         {

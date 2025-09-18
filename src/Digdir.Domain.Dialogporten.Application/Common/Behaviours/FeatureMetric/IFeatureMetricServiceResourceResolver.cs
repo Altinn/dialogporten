@@ -4,13 +4,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
+/// <summary>
+/// Resolves service resource information for feature metric tracking based on request type
+/// </summary>
+/// <typeparam name="TRequest">The type of request to resolve service resource information for</typeparam>
 internal interface IFeatureMetricServiceResourceResolver<in TRequest>
 {
     Task<ServiceResourceInformation?> Resolve(TRequest request, CancellationToken cancellationToken);
 }
 
 /// <summary>
-/// Simple cache interface for dialog service resource caching
+/// Cache interface for dialog service resource information used in feature metric tracking
 /// </summary>
 public interface IFeatureMetricServiceResourceCache
 {
@@ -29,7 +33,8 @@ public interface IFeatureMetricServiceResourceThroughDialogIdRequest
 }
 
 /// <summary>
-/// Generic resolver for any IFeatureMetricsServiceResourceThroughDialogIdRequest that can resolve service resource information from dialog ID
+/// Resolver for requests that have a DialogId property.
+/// Looks up service resource information by first finding the dialog, then extracting its service resource.
 /// </summary>
 internal sealed class FeatureMetricServiceResourceThroughDialogIdRequestResolver(IFeatureMetricServiceResourceCache cache) : IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceThroughDialogIdRequest>
 {
@@ -39,11 +44,22 @@ internal sealed class FeatureMetricServiceResourceThroughDialogIdRequestResolver
     }
 }
 
+/// <summary>
+/// Marker interface for requests that have a ServiceResource property but no DialogId.
+/// Used by the feature metrics system to directly resolve service resource information.
+/// </summary>
 internal interface IFeatureMetricServiceResourceRequest
 {
+    /// <summary>
+    /// The service resource identifier
+    /// </summary>
     string ServiceResource { get; }
 }
 
+/// <summary>
+/// Resolver for requests that have a ServiceResource property.
+/// Directly looks up service resource information from the resource registry.
+/// </summary>
 internal sealed class FeatureMetricServiceResourceRequestResolver(IResourceRegistry resourceRegistry) :
     IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceRequest>
 {
@@ -51,8 +67,16 @@ internal sealed class FeatureMetricServiceResourceRequestResolver(IResourceRegis
         resourceRegistry.GetResourceInformation(request.ServiceResource, cancellationToken);
 }
 
+/// <summary>
+/// Marker interface for requests that should not be tracked by the feature metrics system.
+/// Used for requests where service resource tracking is not applicable or desired.
+/// </summary>
 internal interface IFeatureMetricServiceResourceIgnoreRequest;
 
+/// <summary>
+/// Resolver for requests that should not be tracked by the feature metrics system.
+/// Always returns null to indicate no service resource information should be collected.
+/// </summary>
 internal sealed class FeatureMetricServiceResourceIgnoreRequestResolver :
     IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceIgnoreRequest>
 {

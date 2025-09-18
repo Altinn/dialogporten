@@ -61,7 +61,6 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-
         var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
         if (!authorizationResult.HasAccessToMainResource())
         {

@@ -276,7 +276,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             }
         }
 
-
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }
 }

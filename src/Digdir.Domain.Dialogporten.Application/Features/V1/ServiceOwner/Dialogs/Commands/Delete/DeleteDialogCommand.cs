@@ -65,7 +65,6 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
             return new EntityDeleted<DialogEntity>(request.Id);
         }
 
-
         if (!_userResourceRegistry.UserCanModifyResourceType(dialog.ServiceResourceType))
         {
             return new Forbidden($"User cannot modify resource type {dialog.ServiceResourceType}.");

@@ -6,7 +6,7 @@ using ZiggyCreatures.Caching.Fusion;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 
 /// <summary>
-/// FusionCache implementation of IFeatureMetricServiceResourceCache for dialog service resource caching
+/// FusionCache implementation of IFeatureMetricServiceResourceCache for feature metric service resource caching
 /// </summary>
 internal sealed class FeatureMetricServiceResourceCache(
     IFusionCacheProvider cacheProvider,

@@ -55,7 +55,6 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-
         if (!_userResourceRegistry.UserCanModifyResourceType(dialog.ServiceResourceType))
         {
             return new Forbidden($"User cannot modify resource type {dialog.ServiceResourceType}.");

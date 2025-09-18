@@ -87,8 +87,7 @@ public static class OpenTelemetryExtensions
             .WithMetrics(metrics =>
             {
                 metrics.AddRuntimeInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddMeter(TelemetryConstants.CostManagementMeterName); // Add cost management metrics
+                    .AddHttpClientInstrumentation();
 
                 var appInsightsConnectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
                 if (!string.IsNullOrEmpty(appInsightsConnectionString))

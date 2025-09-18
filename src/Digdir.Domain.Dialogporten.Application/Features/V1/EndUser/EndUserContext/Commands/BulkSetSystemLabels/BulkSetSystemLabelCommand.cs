@@ -80,7 +80,6 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
                 request.Dto.RemoveLabels, ct),
             cancellationToken: cancellationToken);
 
-
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
         return saveResult.Match<BulkSetSystemLabelResult>(
             _ => new BulkSetSystemLabelSuccess(),

@@ -52,7 +52,6 @@ internal sealed class RestoreDialogCommandHandler : IRequestHandler<RestoreDialo
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-
         if (!dialog.Deleted)
         {
             return new RestoreDialogSuccess(dialog.Revision);

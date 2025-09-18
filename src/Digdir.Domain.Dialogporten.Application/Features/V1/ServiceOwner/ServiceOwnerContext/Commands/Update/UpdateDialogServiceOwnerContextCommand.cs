@@ -1,5 +1,4 @@
 using AutoMapper;
-using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
@@ -34,8 +33,7 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
 
     public UpdateDialogServiceOwnerContextCommandHandler(
         IUnitOfWork unitOfWork,
-        IDataLoaderContext dataLoaderContext,
-        IMapper mapper)
+        IDataLoaderContext dataLoaderContext, IMapper mapper)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
@@ -51,7 +49,6 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
-
 
         serviceOwnerContext.ServiceOwnerLabels
             .Merge(request.Dto.ServiceOwnerLabels,

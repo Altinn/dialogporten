@@ -251,8 +251,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 dialog.Content.SetNonSensitiveContent();
             }
         }
-
-
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }
 }

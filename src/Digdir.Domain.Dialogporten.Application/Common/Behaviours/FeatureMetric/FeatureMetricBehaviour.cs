@@ -9,7 +9,7 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
     IUser user,
     FeatureMetricRecorder featureMetricRecorder,
     IFeatureMetricServiceResourceResolver<TRequest> featureMetricServiceResourceResolver,
-    IHostEnvironment? hostEnvironment = null) // Optional for now to fix tests
+    IHostEnvironment? hostEnvironment = null)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {

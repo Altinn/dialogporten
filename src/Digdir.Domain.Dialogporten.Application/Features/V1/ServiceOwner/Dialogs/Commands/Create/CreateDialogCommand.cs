@@ -135,11 +135,9 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
 
-
         _db.Dialogs.Add(dialog);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
-
         return saveResult.Match<CreateDialogResult>(
             success => new CreateDialogSuccess(dialog.Id, dialog.Revision),
             domainError => domainError,

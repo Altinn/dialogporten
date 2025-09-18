@@ -94,7 +94,6 @@ static void BuildAndRun(string[] args)
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
-
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
 
@@ -191,14 +190,10 @@ static void BuildAndRun(string[] args)
             x.Endpoints.Configurator = endpointDefinition =>
             {
                 endpointDefinition.Description(routeHandlerBuilder
-                    => routeHandlerBuilder.Add(endpointBuilder =>
-                    {
-                        endpointBuilder.Metadata.Add(
+                    => routeHandlerBuilder.Add(endpointBuilder
+                        => endpointBuilder.Metadata.Add(
                             new EndpointNameMetadata(
-                                TypeNameConverter.ToShortName(endpointDefinition.EndpointType)));
-                        // Add the concrete endpoint type to the ASP.NET endpoint metadata
-                        endpointBuilder.Metadata.Add(new EndpointTypeMetadata(endpointDefinition.EndpointType));
-                    }));
+                                TypeNameConverter.ToShortName(endpointDefinition.EndpointType)))));
             };
             x.Serializer.Options.RespectNullableAnnotations = true;
             x.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

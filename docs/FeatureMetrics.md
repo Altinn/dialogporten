@@ -1,323 +1,196 @@
-# Feature Metrics Tracking System
+# Feature Metrics System
 
-This document describes the implementation of the Feature Metrics tracking system in Dialogporten for comprehensive transaction monitoring and cost management.
+The Feature Metrics system tracks usage of application features to enable cost management, performance monitoring, and business intelligence. It automatically captures metrics for all MediatR requests and HTTP endpoints.
 
 ## Overview
 
-The Feature Metrics system automatically tracks all transactions across the application layer, providing detailed logging for cost management, auditing, and operational monitoring. FeatureMetrics captures every MediatR request with full context including HTTP status codes, correlation IDs, and resource information.
+The system consists of several components that work together to collect, process, and deliver feature usage metrics:
+
+1. **Collection Layer** - Captures feature usage data
+2. **Processing Layer** - Resolves service resource information
+3. **Delivery Layer** - Sends metrics to monitoring systems
+4. **Caching Layer** - Optimizes performance for resource lookups
 
 ## Architecture
 
-### Components
-
-1. **`FeatureMetricBehaviour`**: MediatR pipeline behavior that automatically records all requests
-2. **`FeatureMetricMiddleware`**: HTTP middleware that adds presentation layer context (status codes, correlation IDs)
-3. **`FeatureMetricRecorder`**: Thread-safe service that manages metric records and updates
-4. **`FeatureMetricRecord`**: Immutable record containing all transaction metadata
-5. **`IFeatureMetricDeliveryContext`**: Interface for different logging delivery mechanisms
-6. **`LoggingFeatureMetricDeliveryContext`**: Console-based logging for development
-7. **`OtelFeatureMetricLoggingDeliveryContext`**: OpenTelemetry-based logging for production
-8. **`IDialogIdQuery`**: Marker interface for dialog-based operations
-9. **`IServiceResourceResolver<T>`**: Interface for resolving service resource information
-10. **`FeatureMetricConstants`**: Constants for unknown values and fallbacks
-
-### Data Flow
-
 ```mermaid
-flowchart TD
+graph TB
     A[HTTP Request] --> B[FeatureMetricMiddleware]
     B --> C[MediatR Pipeline]
     C --> D[FeatureMetricBehaviour]
-    D --> E[Record Initial Metric]
+    D --> E[Service Resource Resolver]
     E --> F[FeatureMetricRecorder]
-    F --> G[Business Logic Execution]
-    G --> H[HTTP Response]
-    H --> I[FeatureMetricMiddleware Updates Record]
-    I --> J[Add HTTP Status Code & Correlation ID]
-    J --> K[IFeatureMetricDeliveryContext]
-    K --> L{Environment}
-    L -->|Development| M[Console Logging]
-    L -->|Production| N[OpenTelemetry → Loki]
+    F --> G[Delivery Context]
+    G --> H[OpenTelemetry/Logging]
+    
+    I[Cache Layer] --> E
+    J[Resource Registry] --> I
+    K[Database] --> J
 ```
 
-## Automatic Coverage
+## Components
 
-The system automatically tracks **all MediatR requests** without requiring explicit annotations:
+### 1. Collection Layer
 
-### Covered Operations
-- ✅ **Dialog Operations**: Create, Update, Delete, Restore, Purge
-- ✅ **Query Operations**: Get, Search (both ServiceOwner and EndUser)
-- ✅ **Label Operations**: Set, BulkSet (both ServiceOwner and EndUser)
-- ✅ **Activity Operations**: GetActivity, SearchActivities
-- ✅ **Transmission Operations**: GetTransmission, SearchTransmissions
-- ✅ **Seen Log Operations**: GetSeenLog, SearchSeenLogs
-- ✅ **Resource Registry Operations**: SyncSubjectMap
-- ✅ **Service Owner Context Operations**: Update, GetLabels
+#### FeatureMetricBehaviour
+- **Location**: `src/Digdir.Domain.Dialogporten.Application/Common/Behaviours/FeatureMetric/FeatureMetricBehaviour.cs`
+- **Purpose**: MediatR pipeline behavior that captures feature usage for each request
+- **Data Collected**:
+  - Feature name (request type)
+  - Environment
+  - Performer organization
+  - Owner organization
+  - Service resource ID
 
-### HTTP Status Code Coverage
-- ✅ **2xx Success**: All successful operations
-- ✅ **4xx Client Errors**: Validation failures, not found, etc.
-- ✅ **5xx Server Errors**: Internal errors, exceptions
+#### FeatureMetricMiddleware
+- **Location**: `src/Digdir.Domain.Dialogporten.WebApi/Common/FeatureMetric/FeatureMetricMiddleware.cs`
+- **Purpose**: HTTP middleware that captures endpoint-level metrics
+- **Data Collected**:
+  - Presentation tag (HTTP method + route)
+  - HTTP status code
+  - Correlation ID
+  - Success/failure status
 
-## Data Structure
+### 2. Processing Layer
 
-### FeatureMetricRecord
+#### Service Resource Resolvers
+The system uses different resolvers based on request type:
 
+- **`IFeatureMetricServiceResourceThroughDialogIdRequest`** - For requests with DialogId
+- **`IFeatureMetricServiceResourceRequest`** - For requests with no DialogId but with ServiceResource property
+- **`IFeatureMetricServiceResourceIgnoreRequest`** - For requests that don't need tracking
+
+#### Caching
+- **Cache Type**: FusionCache with Redis + Memory cache
+- **Configuration**: 5-minute duration
+- **Purpose**: Optimizes service resource lookups
+
+### 3. Delivery Layer
+
+#### Delivery Contexts
+Two delivery mechanisms based on environment:
+
+**Development (Console Logging)**:
+- Uses `LoggingFeatureMetricDeliveryContext`
+- Outputs structured logs to console
+- Immediate visibility for debugging
+
+**Production (OpenTelemetry)**:
+- Uses `OtelFeatureMetricLoggingDeliveryContext`
+- Sends metrics to OpenTelemetry collector
+- Integrates with monitoring infrastructure
+
+### 4. Data Model
+
+#### FeatureMetricRecord
 ```csharp
 public sealed record FeatureMetricRecord(
-    string FeatureName,           // MediatR request type name
-    string Environment,           // Environment name (Development, Production, etc.)
-    string? PerformerOrg,         // Organization from JWT token
-    string? OwnerOrg,             // Organization owning the service
-    string? ServiceResource,      // Specific service resource identifier
-    int? HttpStatusCode,          // HTTP response status code
-    string? PresentationTag,      // HTTP method + path for grouping
-    string? Audience,             // "ServiceOwner" or "EndUser"
-    string? CorrelationId         // Unique ID per HTTP request
-);
+    string FeatureName,           // Full type name of the request
+    string? Environment,          // Environment name (dev/staging/prod)
+    string? PerformerOrg,        // Organization performing the action
+    string? OwnerOrg,            // Organization owning the resource
+    string? ServiceResource)     // Resource being accessed
 ```
 
-### Example Record
-
-```
-FeatureType=UpdateDialogCommand
-Environment=Development
-TokenOrg=digdir
-ServiceOrg=ttd
-ServiceResource=urn:altinn:resource:super-simple-service
-HttpStatusCode=204
-PresentationTag=PATCH_api_v1_serviceowner_dialogs_01993436-4f89-726d-bf75-9c8dd4775b0c
-Audience=ServiceOwner
-CorrelationId=0HNFIV981U5ND:00000001
-Success=True
-```
-
-## Resource Resolution
-
-The system uses two approaches for determining service resource information:
-
-### 1. IDialogIdQuery Interface
-
-For operations that work with a specific dialog:
-
-```csharp
-public interface IDialogIdQuery
-{
-    Guid DialogId { get; }
-}
-```
-
-**Used by**: GetDialogQuery, UpdateDialogCommand, DeleteDialogCommand, etc.
-
-### 2. IServiceResourceResolver<T> Interface
-
-For operations that need custom resource resolution:
-
-```csharp
-public interface IServiceResourceResolver<TRequest>
-{
-    Task<ServiceResourceInformation?> Resolve(TRequest request, CancellationToken cancellationToken);
-}
-```
-
-**Used by**: Search operations, bulk operations, special cases
-
-### 3. Search Operations
-
-Search operations use a sentinel value since they affect multiple dialogs:
-
-```csharp
-// In search resolvers
-return new ServiceResourceInformation("search_operation", "search_operation");
-```
-
-### 4. Bulk Operations
-
-Bulk operations also use a sentinel value since they affect multiple dialogs:
-
-```csharp
-// In bulk operation resolvers (e.g., BulkSetSystemLabelCommand)
-return new ServiceResourceInformation("bulk_operation", "bulk_operation");
-```
-
-**Used by**: BulkSetSystemLabelCommand (both ServiceOwner and EndUser variants)
-
-## Correlation and Grouping
-
-### Correlation IDs
-
-Each HTTP request gets a unique correlation ID using `HttpContext.TraceIdentifier`:
-
-- **Format**: `{ActivityId}:{SequenceNumber}` (e.g., `0HNFIV981U5ND:00000001`)
-- **Purpose**: Groups all MediatR operations from the same HTTP request
-- **Cost Management**: Enables accurate counting of endpoint calls
-
-### Presentation Tags
-
-Generated from HTTP method and path for endpoint identification:
-
-- **Format**: `{METHOD}_{path_with_underscores}` 
-- **Example**: `PATCH_api_v1_serviceowner_dialogs_01993436-4f89-726d-bf75-9c8dd4775b0c`
-- **Purpose**: Identifies which endpoint triggered the operations
-
-### Example: PATCH Dialog Endpoint
-
-A single PATCH call generates multiple correlated records:
-
-```
-GetDialogQuery    → CorrelationId=abc123, PresentationTag=PATCH_...
-UpdateDialogCommand → CorrelationId=abc123, PresentationTag=PATCH_...
-```
-
-**Cost Management Query**:
-```sql
-SELECT COUNT(DISTINCT CorrelationId) as EndpointCalls
-FROM FeatureMetrics 
-WHERE PresentationTag LIKE 'PATCH_%'
-```
-
-## Logging and Delivery
-
-### Environment-Based Delivery
-
-The system automatically selects the appropriate delivery mechanism:
-
-```csharp
-var otelEndpoint = configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-if (string.IsNullOrEmpty(otelEndpoint)) {
-    // Development: Console logging
-    services.AddScoped<IFeatureMetricDeliveryContext, LoggingFeatureMetricDeliveryContext>();
-} else {
-    // Production: OpenTelemetry logging
-    services.AddScoped<IFeatureMetricDeliveryContext, OtelFeatureMetricLoggingDeliveryContext>();
-}
-```
-
-### Structured Logging
-
-Both delivery contexts use `[LoggerMessage]` attributes for efficient, structured logging:
-
-```csharp
-[LoggerMessage(
-    EventId = 1000,
-    Level = LogLevel.Information,
-    Message = "Feature Metric Recorded: " +
-              "FeatureType={FeatureType}, Environment={Environment}, " +
-              "TokenOrg={TokenOrg}, ServiceOrg={ServiceOrg}, " +
-              "ServiceResource={ServiceResource}, HttpStatusCode={HttpStatusCode}, " +
-              "PresentationTag={PresentationTag}, Audience={Audience}, " +
-              "CorrelationId={CorrelationId}, Success={Success}")]
-private static partial void LogFeatureMetric(...);
-```
-
-### Log Destinations
-
-- **Development**: Console output with immediate visibility
-- **Production**: Structured logging through OpenTelemetry
+#### Presentation Tags
+Format: `{HTTP_METHOD}_{route_template}`
+Examples:
+- `GET_api_v1_dialogs_{dialogId}`
+- `POST_api_v1_serviceowner_dialogs`
+- `PATCH_api_v1_enduser_dialogs_{dialogId}`
 
 ## Configuration
 
 ### Service Registration
-
 ```csharp
 // In ApplicationExtensions.cs
 services
     .AddScoped(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
     .AddScoped<FeatureMetricRecorder>()
-    .AddServiceResourceResolvers(thisAssembly); // Auto-registers all resolvers
+    .AddServiceResourceResolvers(thisAssembly);
 ```
 
 ### Middleware Registration
-
 ```csharp
 // In Program.cs - must be after all endpoint processing
 app.UseFeatureMetrics();
 ```
 
-### Environment Configuration
-
-```json
+### Cache Configuration
+```csharp
+// In InfrastructureExtensions.cs
+.ConfigureFusionCache(nameof(IFeatureMetricServiceResourceCache), new()
 {
-  "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317"
-}
+    Duration = TimeSpan.FromMinutes(5)
+});
 ```
 
-## Cost Management Usage
+## Usage Patterns
 
-### Counting Endpoint Calls
-
-```sql
--- Count unique endpoint calls (one per HTTP request)
-SELECT COUNT(DISTINCT CorrelationId) as TransactionCount
-FROM FeatureMetrics 
-WHERE PresentationTag LIKE 'PATCH_%'
-```
-
-### Grouping Operations by Request
-
-```sql
--- See all operations per endpoint call
-SELECT CorrelationId, COUNT(*) as OperationsPerCall
-FROM FeatureMetrics 
-GROUP BY CorrelationId
-```
-
-### Filtering by Success/Failure
-
-```sql
--- Count successful vs failed operations
-SELECT 
-    CASE WHEN HttpStatusCode BETWEEN 200 AND 299 THEN 'Success' ELSE 'Failed' END as Status,
-    COUNT(*) as Count
-FROM FeatureMetrics 
-GROUP BY Status
-```
-
-## Thread Safety
-
-The system uses thread-safe operations with `System.Threading.Lock`:
+### Adding New Requests
+All MediatR requests must implement one of the feature metric interfaces:
 
 ```csharp
-private readonly Lock _lock = new();
-
-public void UpdateRecord(int httpStatusCode, string presentationTag, string correlationId)
+// For requests with DialogId
+public sealed class GetDialogQuery : IRequest<DialogDto>, 
+    IFeatureMetricServiceResourceThroughDialogIdRequest
 {
-    lock (_lock)
-    {
-        var newRecords = _records.Select(r => r with
-        {
-            HttpStatusCode = httpStatusCode,
-            PresentationTag = presentationTag,
-            CorrelationId = correlationId
-        }).ToList();
-        _records = newRecords;
-    }
+    public Guid DialogId { get; set; }
+}
+
+// For requests with no DialogId but with ServiceResource property
+public sealed class SearchDialogQuery : IRequest<SearchResult>, 
+    IFeatureMetricServiceResourceRequest
+{
+    public string ServiceResource { get; set; }
+}
+
+// For requests that don't need tracking
+public sealed class GetJwksQuery : IRequest<JwksDto>, 
+    IFeatureMetricServiceResourceIgnoreRequest
+{
 }
 ```
 
-## Architectural Notes
+### Service Resource Resolution
+The system automatically resolves service resource information:
 
-### Clean Architecture Violation
+1. **Through DialogId**: Looks up dialog → service resource → organization info
+2. **Direct ServiceResource**: Uses resource registry to get organization info
+3. **Ignore**: Skips resource resolution entirely
 
-The `FeatureMetricMiddleware` directly accesses the concrete `FeatureMetricRecorder` class, violating clean architecture principles. This is a pragmatic solution due to:
+## Monitoring and Observability
 
-- **Middleware execution timing**: Middleware runs before MediatR behaviors
-- **Instance sharing**: Need to update the same instance that the behavior populates
-- **Alternative complexity**: Proper interface-based solution would require significant architectural changes
+### Metrics Collected
+- **Feature Usage**: Which features are being used and how often
+- **Organization Attribution**: Which organizations are using which resources
+- **Performance**: Success/failure rates per feature
+- **Correlation**: Grouping operations by HTTP request
 
-### Performance Considerations
+### Query Examples
 
-- **Automatic recording**: All MediatR requests are recorded (no opt-in required)
-- **Efficient logging**: Uses `[LoggerMessage]` for compile-time optimization
-- **Thread-safe**: Minimal locking overhead with immutable record updates
-- **Memory efficient**: Records are immutable and can be garbage collected immediately after logging
+#### Count Endpoint Calls
+```sql
+SELECT COUNT(DISTINCT CorrelationId) as EndpointCalls
+FROM FeatureMetrics 
+WHERE PresentationTag LIKE 'GET_%'
+```
 
-## Key Features
+#### Feature Usage by Organization
+```sql
+SELECT PerformerOrg, COUNT(*) as UsageCount
+FROM FeatureMetrics 
+WHERE FeatureName = 'GetDialogQuery'
+GROUP BY PerformerOrg
+```
 
-### Comprehensive Coverage
-- ✅ Automatic coverage of all MediatR requests
-- ✅ HTTP status code inclusion (including 5xx server errors)
-- ✅ Correlation ID grouping for accurate endpoint call counting
-- ✅ Audience classification (ServiceOwner/EndUser)
-- ✅ Structured logging with OpenTelemetry integration
-- ✅ Thread-safe immutable record updates
+#### Success Rate by Feature
+```sql
+SELECT 
+    FeatureName,
+    COUNT(CASE WHEN Status = 'success' THEN 1 END) as SuccessCount,
+    COUNT(*) as TotalCount,
+    (COUNT(CASE WHEN Status = 'success' THEN 1 END) * 100.0 / COUNT(*)) as SuccessRate
+FROM FeatureMetrics 
+GROUP BY FeatureName
+```

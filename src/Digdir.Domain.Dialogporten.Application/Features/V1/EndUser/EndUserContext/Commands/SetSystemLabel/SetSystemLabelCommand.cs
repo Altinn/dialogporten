@@ -64,7 +64,6 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
         dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, currentUserInformation.UserId.ExternalIdWithPrefix);

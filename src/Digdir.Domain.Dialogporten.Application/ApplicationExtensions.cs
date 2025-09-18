@@ -135,16 +135,20 @@ public static class ApplicationExtensions
 
         // If any request types do not have a corresponding resolver, throw an exception
         // to ensure all requests are properly handled
-        var errorMessage = string.Join(Environment.NewLine, requestResolverMap
+        var missingResolvers = requestResolverMap
             .Where(x => x.Resolver is null)
-            .Select(x => $"- {x.Request.FullName}"));
-        if (errorMessage != string.Empty)
+            .Select(x => x.Request.FullName)
+            .ToList();
+
+        if (missingResolvers is { Count: > 0 })
         {
+            var requestList = string.Join(Environment.NewLine, missingResolvers.Select(x => $"  • {x}"));
             throw new InvalidOperationException(
-                $"All requests are expected to have an associated {nameof(IFeatureMetricServiceResourceResolver<object>)}. Could " +
-                $"not find resolvers for the following requests. If a request cannot be associated with a service " +
-                $"resource or tracking service resource information is irrelevant for the request, mark it " +
-                $"with {nameof(IFeatureMetricServiceResourceIgnoreRequest)}.{Environment.NewLine}{errorMessage}");
+                $"Missing feature metric resolvers for {missingResolvers.Count} request type(s):{Environment.NewLine}{requestList}{Environment.NewLine}{Environment.NewLine}" +
+                $"To fix this, implement one of these interfaces on each request:{Environment.NewLine}" +
+                $"  • {nameof(IFeatureMetricServiceResourceThroughDialogIdRequest)} - for requests with DialogId{Environment.NewLine}" +
+                $"  • {nameof(IFeatureMetricServiceResourceRequest)} - for requests with no DialogId but with ServiceResource property{Environment.NewLine}" +
+                $"  • {nameof(IFeatureMetricServiceResourceIgnoreRequest)} - for requests that don't need feature metrics");
         }
 
         // Register each request type with its corresponding resolver implementation

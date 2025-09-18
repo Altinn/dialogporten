@@ -245,7 +245,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 formattedServiceOwnerLabels!
                     .All(formattedLabel =>
                         x.ServiceOwnerContext.ServiceOwnerLabels
-                            .Any(l => EF.Functions.ILike(l.Value, formattedLabel))))
+                            .Any(l => EF.Functions.Like(l.Value, formattedLabel))))
             .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
             .Where(x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()

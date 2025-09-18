@@ -96,6 +96,7 @@ static void BuildAndRun(string[] args)
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
+        .Configure<FeatureMetricOptions>(builder.Configuration.GetSection("FeatureMetrics"))
 
         // Clean architecture projects
         .AddApplication(builder.Configuration, builder.Environment)

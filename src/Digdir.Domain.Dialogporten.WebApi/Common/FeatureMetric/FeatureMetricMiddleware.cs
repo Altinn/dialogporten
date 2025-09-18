@@ -1,16 +1,25 @@
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 
 /// <summary>
 /// Middleware to handle feature metric delivery acknowledgments based on HTTP response status codes
 /// </summary>
-public sealed class FeatureMetricMiddleware(RequestDelegate next)
+public sealed class FeatureMetricMiddleware(RequestDelegate next, IOptions<FeatureMetricOptions> options)
 {
     private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
+    private readonly FeatureMetricOptions _options = options.Value;
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Skip feature metric tracking for health check endpoints
+        if (ShouldSkipFeatureMetrics(context))
+        {
+            await _next(context);
+            return;
+        }
+
         // TODO: Analyze token to extract user and org info for feature metrics - do not log SSNs
         var deliveryContext = context.RequestServices.GetRequiredService<IFeatureMetricDeliveryContext>();
         try
@@ -33,6 +42,18 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next)
     }
 
     private static bool IsSuccessStatusCode(int statusCode) => statusCode is >= 200 and < 300;
+
+    private bool ShouldSkipFeatureMetrics(HttpContext context)
+    {
+        var path = context.Request.Path.Value;
+        if (string.IsNullOrEmpty(path))
+        {
+            return false;
+        }
+
+        return _options.ExcludedPathPrefixes.Any(excludedPath =>
+            path.StartsWith(excludedPath, StringComparison.OrdinalIgnoreCase));
+    }
 
     private static string GeneratePresentationTag(HttpContext context)
     {

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using FluentValidation;

@@ -34,6 +34,7 @@ using ZiggyCreatures.Caching.Fusion.NullObjects;
 using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using MassTransit;
 using MediatR;
 
@@ -104,7 +105,10 @@ public static class InfrastructureExtensions
             .AddHttpClients(infrastructureSettings)
 
             // Decorators
-            .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>));
+            .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>))
+
+            // Feature Metrics
+            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
 
         services.AddFusionCacheNeueccMessagePackSerializer();
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
@@ -170,6 +174,10 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(nameof(SubjectResource), new()
         {
             Duration = TimeSpan.FromMinutes(20)
+        })
+        .ConfigureFusionCache(nameof(IFeatureMetricServiceResourceCache), new()
+        {
+            Duration = TimeSpan.FromMinutes(5)
         });
 
         if (environment.IsEnvironment("yt01"))

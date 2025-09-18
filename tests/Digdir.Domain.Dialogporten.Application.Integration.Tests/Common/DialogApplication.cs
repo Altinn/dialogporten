@@ -1,7 +1,8 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -122,6 +123,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
+            .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
             .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();
     }
@@ -255,6 +257,8 @@ public class DialogApplication : IAsyncLifetime
 
     public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
 
+    public ServiceProvider GetServiceProvider() => _rootProvider;
+
     public async Task<List<T>> GetDbEntities<T>() where T : class
     {
         using var scope = _rootProvider.CreateScope();
@@ -274,5 +278,49 @@ public class DialogApplication : IAsyncLifetime
             .Select(x => new Table(x.GetTableName()!))
             .ToList()
             .AsReadOnly();
+    }
+}
+
+/// <summary>
+/// Test implementation that mimics the real FeatureMetricServiceResourceCache behavior
+/// by querying the database and using the ResourceRegistry, but with simple in-memory caching.
+/// </summary>
+internal sealed class TestFeatureMetricServiceResourceCache : IFeatureMetricServiceResourceCache
+{
+    private readonly Dictionary<Guid, ServiceResourceInformation?> _cache = new();
+    private readonly IDialogDbContext _db;
+    private readonly IResourceRegistry _resourceRegistry;
+
+    public TestFeatureMetricServiceResourceCache(IDialogDbContext db, IResourceRegistry resourceRegistry)
+    {
+        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+    }
+
+    public async Task<ServiceResourceInformation?> GetServiceResource(Guid dialogId, CancellationToken cancellationToken)
+    {
+        if (_cache.TryGetValue(dialogId, out var cached))
+        {
+            return cached;
+        }
+
+        var serviceResource = await GetServiceResourceFromDb(dialogId, cancellationToken);
+        if (serviceResource != null)
+        {
+            var result = await _resourceRegistry.GetResourceInformation(serviceResource, cancellationToken);
+            _cache[dialogId] = result;
+            return result;
+        }
+
+        _cache[dialogId] = null;
+        return null;
+    }
+
+    private async Task<string?> GetServiceResourceFromDb(Guid dialogId, CancellationToken cancellationToken)
+    {
+        return await _db.Dialogs
+            .Where(x => x.Id == dialogId)
+            .Select(x => x.ServiceResource)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

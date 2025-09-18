@@ -36,6 +36,7 @@ internal sealed class IntegrationTestUser : IUser
             new Claim("acr", Constants.IdportenLoaHigh),
             new Claim(ClaimTypes.NameIdentifier, "integration-test-user"),
             new Claim("pid", DefaultPid),
+            new Claim("urn:altinn:org", "ttd"),
             new Claim("consumer",
                 """
                 {

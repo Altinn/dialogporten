@@ -23,6 +23,7 @@ public static class ClaimsPrincipalExtensions
     private const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
+    private const string AltinnOrgClaim = "urn:altinn:org";
     private const string ScopeClaim = "scope";
     private const char ScopeClaimSeparator = ' ';
     private const string PidClaim = "pid";
@@ -46,6 +47,12 @@ public static class ClaimsPrincipalExtensions
 
     public static bool TryGetPid(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? pid)
         => claimsPrincipal.FindFirst(PidClaim).TryGetPid(out pid);
+
+    public static bool TryGetOrganizationShortName(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgShortName)
+    {
+        orgShortName = claimsPrincipal.FindFirst(AltinnOrgClaim)?.Value;
+        return orgShortName is not null;
+    }
 
     public static bool TryGetPid(this Claim? pidClaim, [NotNullWhen(true)] out string? pid)
     {

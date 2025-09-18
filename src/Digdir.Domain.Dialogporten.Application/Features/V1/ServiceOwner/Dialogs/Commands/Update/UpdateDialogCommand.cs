@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -27,12 +28,14 @@ using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Co
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
     public bool IsSilentUpdate { get; set; }
+
+    Guid IFeatureMetricServiceResourceThroughDialogIdRequest.DialogId => Id;
 }
 
 [GenerateOneOf]

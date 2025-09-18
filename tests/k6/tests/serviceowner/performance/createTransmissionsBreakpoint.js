@@ -3,7 +3,7 @@ import { serviceOwners, endUsersPart, validateTestData } from '../../performance
 import { randomItem } from '../../../common/k6-utils.js';
 
 const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
-const numberOfTransmissions = (__ENV.numberOfTransmissions ?? '10');
+const numberOfTransmissions = (__ENV.numberOfTransmissions ?? '2');
 const maxTransmissionsInThread = (__ENV.maxTransmissionsInThread ?? '100');
 const testid = (__ENV.TESTID ?? 'createTransmissions');
 const stages_duration = (__ENV.stages_duration ?? '1m');

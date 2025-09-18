@@ -100,13 +100,16 @@ export function purgeSO(url, params = null, tokenOptions = null) {
     return http.request('POST', baseUrlServiceOwner + url + "/actions/purge", {}, getServiceOwnerRequestParams(params, tokenOptions));
 }
 
+export function freezeSO(url, params = null, tokenOptions = null) {
+    return http.request('POST', baseUrlServiceOwner + url + "/actions/freeze", {}, getServiceOwnerRequestParams(params, tokenOptions));
+}
+
 export function getEU(url, params = null, tokenOptions = null) {
     return http.get(baseUrlEndUser + url, getEnduserRequestParams(params, tokenOptions))
 }
 
 export function postEU(url, body, params = null, tokenOptions = null) {
     body = maybeStringifyBody(body);
-    params = extend(true, {}, params, { headers: { 'Content-Type': 'application/json' }});
     return http.post(baseUrlEndUser + url, body, getEnduserRequestParams(params, tokenOptions));
 }
 

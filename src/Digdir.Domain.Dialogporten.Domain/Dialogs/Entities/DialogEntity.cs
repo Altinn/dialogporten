@@ -66,6 +66,11 @@ public sealed class DialogEntity :
     /// </summary>
     public bool HasUnopenedContent { get; set; }
 
+    /// <summary>
+    ///  Indicates whether the dialog can be updated/deleted by the service owner 
+    /// </summary>
+    public bool Frozen { get; set; }
+
 
     // === Dependent relationships ===
     public DialogStatus.Values StatusId { get; set; }

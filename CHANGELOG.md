@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.81.0](https://github.com/Altinn/dialogporten/compare/v1.80.7...v1.81.0) (2025-09-19)
+
+
+### Features
+
+* **app:** Implement feature metric tracking ([#2745](https://github.com/Altinn/dialogporten/issues/2745)) ([1d91943](https://github.com/Altinn/dialogporten/commit/1d91943ff93594d98a4f1bb71f969b0908c56fb4))
+
+
+### Miscellaneous Chores
+
+* add Slack notification on stale prod deployments ([#2746](https://github.com/Altinn/dialogporten/issues/2746)) ([ed925fd](https://github.com/Altinn/dialogporten/commit/ed925fd2d706ff0ec4ff823ca3b869d3cd58a933))
+* **app:** Add configurable exclusions for feature metric tracking ([#2753](https://github.com/Altinn/dialogporten/issues/2753)) ([cbd8f95](https://github.com/Altinn/dialogporten/commit/cbd8f95fd3826b70ea804bb2a782355e323b8076))
+* **deps:** update grafana/loki docker tag to v3.5.4 ([#2748](https://github.com/Altinn/dialogporten/issues/2748)) ([af999df](https://github.com/Altinn/dialogporten/commit/af999df0a86e3db75107707f9c7c04cb86d293aa))
+
 ## [1.80.7](https://github.com/Altinn/dialogporten/compare/v1.80.6...v1.80.7) (2025-09-16)
 
 

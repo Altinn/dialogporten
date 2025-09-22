@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.81.1](https://github.com/Altinn/dialogporten/compare/v1.81.0...v1.81.1) (2025-09-22)
+
+
+### Bug Fixes
+
+* Remove fail safe period on FeatureMetricServiceResourceCache ([#2761](https://github.com/Altinn/dialogporten/issues/2761)) ([cd13cec](https://github.com/Altinn/dialogporten/commit/cd13cecb21aee3e318ffb00260c5231e537b1f68))
+
 ## [1.81.0](https://github.com/Altinn/dialogporten/compare/v1.80.7...v1.81.0) (2025-09-22)
 
 

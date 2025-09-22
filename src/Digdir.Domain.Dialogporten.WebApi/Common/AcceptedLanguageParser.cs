@@ -37,7 +37,7 @@ public static class AcceptedLanguageParser
                 var weightSpan = langParts[langPartsEnumerator.Current];
                 var weightSpanEnumerator = weightSpan.Split("=");
 
-                if (!weightSpanEnumerator.MoveNext() || weightSpan[weightSpanEnumerator.Current] is not "q")
+                if (!weightSpanEnumerator.MoveNext() && weightSpan[weightSpanEnumerator.Current] is not "q")
                 {
                     return new(false, new());
                 }
@@ -46,11 +46,15 @@ public static class AcceptedLanguageParser
                 {
                     return new(false, new());
                 }
-                if (float.TryParse(weightSpan[weightSpanEnumerator.Current].Trim(), CultureInfo.InvariantCulture, out var weightFloat))
+
+                if (!float.TryParse(weightSpan[weightSpanEnumerator.Current].Trim(), CultureInfo.InvariantCulture, out var weightFloat)
+                 && weightFloat is < 0 or > 1)
                 {
-                    // 0.20000000000003 => 20
-                    weight = (int)(weightFloat * 100);
+                    return new(false, new());
                 }
+
+                // 0.20000000000003 => 20
+                weight = (int)(weightFloat * 100);
             }
 
             acceptedLanguages.Add(new AcceptedLanguage(langCode.Trim().ToString(), weight));

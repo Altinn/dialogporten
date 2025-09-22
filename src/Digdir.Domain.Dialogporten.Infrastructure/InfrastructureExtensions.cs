@@ -177,6 +177,7 @@ public static class InfrastructureExtensions
         })
         .ConfigureFusionCache(nameof(IFeatureMetricServiceResourceCache), new()
         {
+            IsFailSafeEnabled = false,
             Duration = TimeSpan.FromMinutes(5)
         });
 

@@ -19,7 +19,8 @@ public class LanguageCodeTests(DialogApplication application) : ApplicationColle
             Add(CreateTitleWithLanguageCode("en_US"), true);
             Add(CreateTitleWithLanguageCode("no"), false);
             Add(CreateTitleWithLanguageCode("invalid"), false);
-            Add(CreateTitleWithLanguageCode("nb_invalid"), false);
+            // We ignore region codes, so this should be valid
+            Add(CreateTitleWithLanguageCode("nb_ignore_region_code"), true);
             Add(CreateTitleWithLanguageCode(string.Empty), false);
         }
     }

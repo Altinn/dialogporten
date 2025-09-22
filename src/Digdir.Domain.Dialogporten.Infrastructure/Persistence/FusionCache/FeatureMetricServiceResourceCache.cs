@@ -26,7 +26,7 @@ internal sealed class FeatureMetricServiceResourceCache(
 
         return await _cache.GetOrSetAsync<ServiceResourceInformation?>(
             cacheKey,
-            async (ctx, ct) =>
+            async (_, ct) =>
             {
                 var serviceResource = await GetServiceResourceFromDb(dialogId, ct);
                 if (serviceResource != null)
@@ -34,19 +34,15 @@ internal sealed class FeatureMetricServiceResourceCache(
                     // Convert to ServiceResourceInformation
                     return await _resourceRegistry.GetResourceInformation(serviceResource, ct);
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             },
             token: cancellationToken);
     }
 
-    private async Task<string?> GetServiceResourceFromDb(Guid dialogId, CancellationToken cancellationToken)
-    {
-        return await _db.Dialogs
+    private async Task<string?> GetServiceResourceFromDb(Guid dialogId, CancellationToken cancellationToken) =>
+        await _db.Dialogs
             .Where(x => dialogId == x.Id)
             .Select(x => x.ServiceResource)
             .FirstOrDefaultAsync(cancellationToken);
-    }
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.81.2](https://github.com/Altinn/dialogporten/compare/v1.81.1...v1.81.2) (2025-09-23)
+
+
+### Bug Fixes
+
+* **cache:** Refactor FeatureMetricServiceResourceCache to use IServiceScopeFactory for database context ([#2765](https://github.com/Altinn/dialogporten/issues/2765)) ([9ed0d36](https://github.com/Altinn/dialogporten/commit/9ed0d36d7dd6ac49f66d103498e8cc7822f55880))
+
 ## [1.81.1](https://github.com/Altinn/dialogporten/compare/v1.81.0...v1.81.1) (2025-09-22)
 
 

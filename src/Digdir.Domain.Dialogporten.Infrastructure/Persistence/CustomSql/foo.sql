@@ -1,30 +1,3 @@
-DELETE FROM "Dialog"
-WHERE "Id" = '01964495-683f-76c3-8682-51b2b78b64e5';
-
-select count(*) from "Dialog";
-
-select * from "Dialog";
-
-SELECT
-    n.nspname AS schema,
-    c.relname AS table_name,
-    pg_size_pretty(pg_total_relation_size(c.oid)) AS total_size,
-    pg_size_pretty(pg_relation_size(c.oid))       AS table_size,
-    pg_size_pretty(pg_indexes_size(c.oid))        AS index_size,
-    pg_size_pretty(
-        pg_total_relation_size(c.oid)
-            - pg_relation_size(c.oid)
-            - pg_indexes_size(c.oid)
-    ) AS toast_size
-FROM pg_class c
-         JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE c.relkind = 'r'  -- 'r' = ordinary table
-  AND n.nspname NOT IN ('pg_catalog', 'information_schema')
-ORDER BY pg_total_relation_size(c.oid) DESC;
-
-cret tabl pls search hack
-
--- SET enable_seqscan = ON;
 WITH relevantLocalizationSet AS (
     SELECT DISTINCT l."LocalizationSetId"
     FROM "Localization" l
@@ -76,154 +49,6 @@ FROM "Dialog" d
          INNER JOIN relevantMap m ON d."Id" = m.dialogId
 LIMIT 10000;
 
-analyse;
-
-
-
-
-alter table public."LocalizationSet"
-    add constraint "FK_LocalizationSet_DialogTransmissionContent_TransmissionConte~"
-        foreign key ("TransmissionContentId") references public."DialogTransmissionContent"
-            on delete cascade;
-
-alter table public."DialogTransmissionContent"
-    add constraint "PK_DialogTransmissionContent"
-        primary key ("Id");
-
-create unique index PK_DialogTransmissionContent
-    on public."DialogTransmissionContent" ("Id")
-    include ("TransmissionId");
-
-alter table public."DialogTransmissionContent"
-    add constraint "PK_DialogTransmissionContent"
-        primary key using  index PK_DialogTransmissionContent;
-
-
-
-
-
-
-create unique index PK_DialogTransmission
-    on public."DialogTransmission" ("Id")
-    include ("DialogId");
-
-alter table public."DialogTransmission"
-    add constraint "PK_DialogTransmission"
-        primary key using  index PK_DialogTransmission;
-
-
-alter table public."DialogTransmissionContent"
-    add constraint "FK_DialogTransmissionContent_DialogTransmission_TransmissionId"
-        foreign key ("TransmissionId") references public."DialogTransmission"
-            on delete cascade;
-
-alter table public."DialogTransmission"
-    add constraint "FK_DialogTransmission_DialogTransmission_RelatedTransmissionId"
-        foreign key ("RelatedTransmissionId") references public."DialogTransmission"
-            on delete set null;
-
-alter table public."Actor"
-    add constraint "FK_Actor_DialogTransmission_TransmissionId"
-        foreign key ("TransmissionId") references public."DialogTransmission"
-            on delete cascade;
-
-alter table public."Attachment"
-    add constraint "FK_Attachment_DialogTransmission_TransmissionId"
-        foreign key ("TransmissionId") references public."DialogTransmission"
-            on delete cascade;
-
-alter table public."DialogActivity"
-    add constraint "FK_DialogActivity_DialogTransmission_TransmissionId"
-        foreign key ("TransmissionId") references public."DialogTransmission"
-            on delete set null;
-
-
-
-
-
-
-
-select count(*) from "Dialog";
-
--- CREATE INDEX IX_Localization_Value_SetId
---     ON "Localization" USING gin (("Value" gin_trgm_ops), "LocalizationSetId");
-
-CREATE INDEX IX_Localization_SetId
-    ON "Localization" ("LocalizationSetId");
-
--- remove the above index
-drop index IX_Localization_SetId;
-
-
-drop index IX_LocalizationSet_GuiActionId;
-drop index IX_LocalizationSet_DialogGuiActionPrompt_GuiActionId;
-drop index IX_LocalizationSet_ActivityId;
-drop index IX_LocalizationSet_AttachmentId;
-drop index IX_LocalizationSet_DialogContentId;
-drop index IX_LocalizationSet_TransmissionContentId;
-
-
-CREATE UNIQUE INDEX IX_LocalizationSet_GuiActionId
-    ON "LocalizationSet" ("GuiActionId")
-    INCLUDE ("Id")
-    WHERE "GuiActionId" IS NOT NULL;
-
-CREATE UNIQUE INDEX IX_LocalizationSet_DialogGuiActionPrompt_GuiActionId
-    ON "LocalizationSet" ("DialogGuiActionPrompt_GuiActionId")
-    INCLUDE ("Id")
-    WHERE "DialogGuiActionPrompt_GuiActionId" IS NOT NULL;
-
-CREATE UNIQUE INDEX IX_LocalizationSet_ActivityId
-    ON "LocalizationSet" ("ActivityId")
-    INCLUDE ("Id")
-    WHERE "ActivityId" IS NOT NULL;
-
-CREATE UNIQUE INDEX IX_LocalizationSet_AttachmentId
-    ON "LocalizationSet" ("AttachmentId")
-    INCLUDE ("Id")
-    WHERE "AttachmentId" IS NOT NULL;
-
-CREATE UNIQUE INDEX IX_LocalizationSet_DialogContentId
-    ON "LocalizationSet" ("DialogContentId")
-    INCLUDE ("Id")
-    WHERE "DialogContentId" IS NOT NULL;
-
-CREATE UNIQUE INDEX IX_LocalizationSet_TransmissionContentId
-    ON "LocalizationSet" ("TransmissionContentId")
-    INCLUDE ("Id")
-    WHERE "TransmissionContentId" IS NOT NULL;
-
-
-
-
--- CREATE INDEX IX_LocalizationSet_DialogGuiActionPrompt_GuiActionId
---     ON "LocalizationSet" ("DialogGuiActionPrompt_GuiActionId")
---     INCLUDE ("Id");
---
--- -- For DialogActivity join
--- CREATE INDEX IX_LocalizationSet_ActivityId
---     ON "LocalizationSet" ("ActivityId")
---     INCLUDE ("Id");
---
--- -- For Attachment join
--- CREATE INDEX IX_LocalizationSet_AttachmentId
---     ON "LocalizationSet" ("AttachmentId")
---     INCLUDE ("Id");
---
--- -- For DialogContent join
--- CREATE INDEX IX_LocalizationSet_DialogContentId
---     ON "LocalizationSet" ("DialogContentId")
---     INCLUDE ("Id");
---
--- -- For TransmissionContent join
--- CREATE INDEX IX_LocalizationSet_TransmissionContentId
---     ON "LocalizationSet" ("TransmissionContentId")
---     INCLUDE ("Id");
-
-
--- nytt schema, content search
--- dialogId, concat all content gin index
-
 -- 1️⃣ Create the table without constraints
 CREATE TABLE "DialogSearch" (
     "DialogId" UUID NOT NULL,
@@ -251,7 +76,15 @@ CREATE INDEX dialog_search_searchvalue_gin
 create index pgweb_idx on "DialogSearch" using gin (to_tsvector('norwegian', "SearchValue"));
 
 
-
+-- TODO:
+-- 1. Create dialog search table with vector column and GIN index with fastupdate=off
+-- 2. Create Create/Update handler to update dialog search table
+-- 3. Update EF configuration files to include new indexes
+    -- create index idx_dialog_service_party on "Dialog" ("ServiceResource", "Party") include ("Id");
+    -- create index idx_dialogSearch_searchVector on "DialogSearch" using gin ("SearchVector") with (fastupdate = off);
+-- 4. Finnish search query
+-- 5. Use the search query from the application
+-- 6. Create the job to update the dialog search table for existing dialogs
 
 
 
@@ -309,7 +142,7 @@ SELECT d."Id", d."Org"
 FROM input, "Dialog" d
 INNER JOIN accessibleDialogs a ON d."Id" = a."Id"
 LEFT JOIN "DialogSearch" ds ON ds."DialogId" = d."Id"
-LEFT JOIN "DialogSearchTag" dst on d."Id" = dst."DialogId"
+LEFT JOIN "DialogSearchTag" dst on d."Id" = dst."DialogId" -- TODO: No many relationship here! 
 LEFT JOIN systemLabelsByDialog l on l."Id" = d."Id"
 WHERE d."Deleted" = false
   AND (d."VisibleFrom" IS NULL or d."VisibleFrom" < input.now)
@@ -330,21 +163,8 @@ WHERE d."Deleted" = false
   AND (input.dueBefore IS NULL OR d."DueAt" <= input.dueBefore)
   AND (input.process IS NULL OR d."Process" = input.process) -- It's ILike in the code - is that correct?
   AND (input.excludeApiOnly IS NULL OR input.excludeApiOnly = false OR input.excludeApiOnly = true AND d."IsApiOnly" = false)
-  AND (input.search IS NULL OR ds."SearchValue" ILIKE '%' || input.search || '%' OR dst."Value" = input.search)
+  AND (input.search IS NULL OR dst."Value" = input.search)
+  AND (input.search IS NULL OR ds."SearchVector" @@ websearch_to_tsquery(input.search))
   AND (input.systemLabel IS NULL OR input.systemLabel <@ l.labels);
 -- TODO: Add pagination parameters
 -- TODO: Can we consider minimum auth level here as well?
-
-
-
-select * from "DialogSearch" where "DialogId" ='00faafbf-f166-7f66-9467-6a0e2d3a4a64'
-
-
-
-SELECT "Party", count(*)
-FROM "Dialog"
---WHERE "Party" like 'urn:altinn:person:identifier-no:%'
-GROUP BY "Party"
-HAVING count(*) > 50
-ORDER BY count(*) desc
-limit 20

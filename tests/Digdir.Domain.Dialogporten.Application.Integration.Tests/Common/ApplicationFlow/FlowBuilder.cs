@@ -17,6 +17,12 @@ public static class FlowBuilder
 
 public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
 {
+    public IFlowStep Do(Action<FlowContext> action)
+    {
+        action.Invoke(Context);
+        return this;
+    }
+
     public FlowContext Context { get; }
 
     public FlowStep(FlowContext context)

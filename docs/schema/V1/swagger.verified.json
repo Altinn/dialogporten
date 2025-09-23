@@ -7372,6 +7372,96 @@
         ]
       }
     },
+    "/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze": {
+      "post": {
+        "description": "Freezes a given dialog.\nThe dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen",
+        "operationId": "V1ServiceOwnerDialogsCommandsFreeze_FreezeDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The dialog aggregate was frozen successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the dialog",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Unauthorized to freeze the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Freezes a dialog",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/purge": {
       "post": {
         "description": "Deletes a given dialog (hard delete).\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.",

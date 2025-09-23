@@ -169,6 +169,13 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         {
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
+        
+        var lala = await _db.Dialogs
+            .FromSql("SQL HERE") 
+            .AsNoTracking()
+            .Include(x => x.Content).ThenInclude(x => x.Value.Localizations)
+            .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
+            .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
         var paginatedList = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)

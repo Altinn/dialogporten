@@ -246,6 +246,17 @@ CREATE INDEX dialog_search_searchvalue_gin
     ON "DialogSearch"
         USING gin ("SearchValue" gin_trgm_ops);
 
+-- CREATE INDEX pgweb_idx ON pgweb USING GIN (to_tsvector('english', body));
+-- the above, but for searchvalue on dialogsearch
+create index pgweb_idx on "DialogSearch" using gin (to_tsvector('norwegian', "SearchValue"));
+
+
+
+
+
+
+
+
 WITH input AS (
     SELECT NOW() now
         ,null::text[] org

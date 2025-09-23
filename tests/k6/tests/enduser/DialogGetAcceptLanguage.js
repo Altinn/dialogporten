@@ -50,7 +50,7 @@ export default function () {
         dialogId = r.json();
     });
 
-    describe('Perform dialog get with nb header', () => {
+    describe('Perform dialog get with nb accept-language', () => {
         let header = createAcceptLanguageHeader("nb");
         let r = getEU('dialogs/' + dialogId, header);
         expectStatusFor(r).to.equal(200);
@@ -67,7 +67,15 @@ export default function () {
 
     });
 
-    describe('Perform dialog get with sv header', () => {
+
+    describe('Perform dialog get with invalid accept-language', () => {
+        let header = createAcceptLanguageHeader("it;a=1.0, nb");
+        let r = getEU('dialogs/' + dialogId, header);
+        expectStatusFor(r).to.equal(400);
+        console.log(r.json())
+    });
+
+    describe('Perform dialog get with sv accept-language', () => {
         let header = createAcceptLanguageHeader("sv");
         let r = getEU('dialogs/' + dialogId, header);
         expectStatusFor(r).to.equal(200);
@@ -83,7 +91,7 @@ export default function () {
 
     });
 
-    describe('Perform dialog get with da header', () => {
+    describe('Perform dialog get with da accept-language', () => {
         let header = createAcceptLanguageHeader("da");
         let r = getEU('dialogs/' + dialogId, header);
         expectStatusFor(r).to.equal(200);
@@ -100,7 +108,7 @@ export default function () {
     });
 
 
-    describe('Perform dialog get with * header', () => {
+    describe('Perform dialog get with * accept-language', () => {
         let header = createAcceptLanguageHeader("*");
         let r = getEU('dialogs/' + dialogId, header);
         expectStatusFor(r).to.equal(200);
@@ -116,7 +124,7 @@ export default function () {
     });
 
 
-    describe('Perform dialog get with it header', () => {
+    describe('Perform dialog get with it accept-language', () => {
         let header = createAcceptLanguageHeader("it");
         let r = getEU('dialogs/' + dialogId, header);
         expectStatusFor(r).to.equal(200);

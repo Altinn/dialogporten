@@ -5,12 +5,10 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FastEndpoints;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -21,9 +19,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 public sealed class GetDialogQuery : IRequest<GetDialogResult>
 {
     public Guid DialogId { get; set; }
-
-    [FromHeader("Accept-Language", isRequired: false)]
-    public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null;
+    public List<AcceptedLanguage>? AcceptedLanguage { get; set; } = null!;
 }
 
 [GenerateOneOf]
@@ -165,7 +161,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
             concurrencyError => throw new UnreachableException("Should not get concurrencyError when updating SeenAt."));
 
-        dialog.FilterLocalizations(request.AcceptedLanguages);
+        dialog.FilterLocalizations(request.AcceptedLanguage);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 

@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
@@ -7,7 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.Get;
 
-public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
+public sealed class GetDialogEndpoint : Endpoint<GetDialogRequest, DialogDto>
 {
     private readonly ISender _sender;
 
@@ -27,9 +28,15 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
             StatusCodes.Status404NotFound));
     }
 
-    public override async Task HandleAsync(GetDialogQuery req, CancellationToken ct)
+    public override async Task HandleAsync(GetDialogRequest req, CancellationToken ct)
     {
-        var result = await _sender.Send(req, ct);
+        var query = new GetDialogQuery()
+        {
+            DialogId = req.DialogId,
+            AcceptedLanguage = req.AcceptedLanguages?.AcceptedLanguage
+        };
+
+        var result = await _sender.Send(query, ct);
         await result.Match(
             dto =>
             {
@@ -40,4 +47,12 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
             deleted => this.GoneAsync(deleted, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct));
     }
+}
+
+public sealed class GetDialogRequest
+{
+    public Guid DialogId { get; set; }
+
+    [FromHeader("Accept-Language", isRequired: false)]
+    public AcceptedLanguages? AcceptedLanguages { get; set; } = null;
 }

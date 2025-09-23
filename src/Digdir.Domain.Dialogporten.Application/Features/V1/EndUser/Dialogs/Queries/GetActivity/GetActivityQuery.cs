@@ -3,13 +3,10 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using FastEndpoints;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -21,8 +18,7 @@ public sealed class GetActivityQuery : IRequest<GetActivityResult>
     public Guid DialogId { get; set; }
     public Guid ActivityId { get; set; }
 
-    [FromHeader("Accept-Language", isRequired: false)]
-    public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null;
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null!;
 }
 
 [GenerateOneOf]

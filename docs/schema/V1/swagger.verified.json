@@ -466,6 +466,19 @@
         },
         "type": "object"
       },
+      "V1EndUserCommon_AcceptedLanguages": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguage": {
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserCommonActors_Actor": {
         "additionalProperties": false,
         "properties": {
@@ -1055,15 +1068,16 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogsQueriesGet_DialogQuery": {
+      "V1EndUserDialogsQueriesGet_DialogRequest": {
         "additionalProperties": false,
         "properties": {
           "acceptedLanguages": {
-            "items": {
-              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
-            },
             "nullable": true,
-            "type": "array"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
           }
         },
         "type": "object"
@@ -1298,15 +1312,16 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogsQueriesGetActivity_ActivityQuery": {
+      "V1EndUserDialogsQueriesGetActivity_ActivityRequest": {
         "additionalProperties": false,
         "properties": {
           "acceptedLanguages": {
-            "items": {
-              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
-            },
             "nullable": true,
-            "type": "array"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
           }
         },
         "type": "object"
@@ -1499,15 +1514,16 @@
         },
         "type": "object"
       },
-      "V1EndUserDialogsQueriesGetTransmission_TransmissionQuery": {
+      "V1EndUserDialogsQueriesGetTransmission_TransmissionRequest": {
         "additionalProperties": false,
         "properties": {
           "acceptedLanguages": {
-            "items": {
-              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
-            },
             "nullable": true,
-            "type": "array"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
           }
         },
         "type": "object"
@@ -5937,17 +5953,16 @@
             }
           },
           {
-            "explode": true,
             "in": "header",
             "name": "accept-Language",
             "schema": {
-              "items": {
-                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
-              },
               "nullable": true,
-              "type": "array"
-            },
-            "style": "form"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -6074,17 +6089,16 @@
             }
           },
           {
-            "explode": true,
             "in": "header",
             "name": "accept-Language",
             "schema": {
-              "items": {
-                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
-              },
               "nullable": true,
-              "type": "array"
-            },
-            "style": "form"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -6513,17 +6527,16 @@
             }
           },
           {
-            "explode": true,
             "in": "header",
             "name": "accept-Language",
             "schema": {
-              "items": {
-                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
-              },
               "nullable": true,
-              "type": "array"
-            },
-            "style": "form"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
           }
         ],
         "responses": {

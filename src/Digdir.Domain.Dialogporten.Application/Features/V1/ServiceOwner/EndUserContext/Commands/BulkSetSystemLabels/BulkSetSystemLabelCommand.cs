@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -9,7 +10,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 
-public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>
+public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     public string EndUserId { get; set; } = null!; // See ServiceOwnerOnBehalfOfPersonMiddleware
     public BulkSetSystemLabelDto Dto { get; set; } = new();

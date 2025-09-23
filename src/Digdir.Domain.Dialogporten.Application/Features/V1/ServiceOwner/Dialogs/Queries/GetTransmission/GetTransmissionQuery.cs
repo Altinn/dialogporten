@@ -1,5 +1,6 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -11,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission;
 
-public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>
+public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid TransmissionId { get; set; }

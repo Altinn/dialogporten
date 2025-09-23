@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
@@ -16,7 +17,7 @@ using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authoriza
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 
-public sealed class GetDialogQuery : IRequest<GetDialogResult>
+public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public List<AcceptedLanguage>? AcceptedLanguage { get; set; } = null!;
@@ -209,7 +210,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         return logDto;
     }
 
-
     private static void DecorateWithAuthorization(DialogDto dto,
         DialogDetailsAuthorizationResult authorizationResult)
     {
@@ -218,7 +218,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var apiAction in dto.ApiActions.Where(a => a.Action == action))
             {
                 if ((apiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                 || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
+                    || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
                 {
                     apiAction.IsAuthorized = true;
                 }
@@ -227,7 +227,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var guiAction in dto.GuiActions.Where(a => a.Action == action))
             {
                 if ((guiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                 || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
+                    || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
                 {
                     guiAction.IsAuthorized = true;
                 }

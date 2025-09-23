@@ -39,7 +39,7 @@ services:
 
   # Loki for log aggregation
   loki:
-    image: grafana/loki:3.5.3
+    image: grafana/loki:3.5.5
     ports:
       - "3100:3100"
     volumes:

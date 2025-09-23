@@ -1,5 +1,6 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -10,7 +11,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 
-public sealed class SearchLabelAssignmentLogQuery : IRequest<SearchLabelAssignmentLogResult>
+public sealed class SearchLabelAssignmentLogQuery : IRequest<SearchLabelAssignmentLogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }

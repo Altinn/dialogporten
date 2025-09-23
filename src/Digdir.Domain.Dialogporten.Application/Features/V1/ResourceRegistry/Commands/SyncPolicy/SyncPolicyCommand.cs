@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using MediatR;
@@ -7,7 +8,7 @@ using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 
-public sealed class SyncPolicyCommand : IRequest<SyncPolicyResult>
+public sealed class SyncPolicyCommand : IRequest<SyncPolicyResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     public DateTimeOffset? Since { get; set; }
     public int? NumberOfConcurrentRequests { get; set; }

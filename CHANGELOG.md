@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.81.2](https://github.com/Altinn/dialogporten/compare/v1.81.1...v1.81.2) (2025-09-23)
+
+
+### Bug Fixes
+
+* **cache:** Refactor FeatureMetricServiceResourceCache to use IServiceScopeFactory for database context ([#2765](https://github.com/Altinn/dialogporten/issues/2765)) ([9ed0d36](https://github.com/Altinn/dialogporten/commit/9ed0d36d7dd6ac49f66d103498e8cc7822f55880))
+
+## [1.81.1](https://github.com/Altinn/dialogporten/compare/v1.81.0...v1.81.1) (2025-09-22)
+
+
+### Bug Fixes
+
+* Remove fail safe period on FeatureMetricServiceResourceCache ([#2761](https://github.com/Altinn/dialogporten/issues/2761)) ([cd13cec](https://github.com/Altinn/dialogporten/commit/cd13cecb21aee3e318ffb00260c5231e537b1f68))
+
+## [1.81.0](https://github.com/Altinn/dialogporten/compare/v1.80.7...v1.81.0) (2025-09-22)
+
+
+### Features
+
+* **app:** Add table support for legacy HTML ([#2723](https://github.com/Altinn/dialogporten/issues/2723)) ([fb82f0c](https://github.com/Altinn/dialogporten/commit/fb82f0c2f414195438b30262f6fd5b5cb367c66c))
+* **app:** Implement feature metric tracking ([#2745](https://github.com/Altinn/dialogporten/issues/2745)) ([1d91943](https://github.com/Altinn/dialogporten/commit/1d91943ff93594d98a4f1bb71f969b0908c56fb4))
+
+
+### Bug Fixes
+
+* Use static list of language codes ([#2751](https://github.com/Altinn/dialogporten/issues/2751)) ([c2adb95](https://github.com/Altinn/dialogporten/commit/c2adb957a9c7b53f872013cdcc3ccdc550a766bb))
+
+
+### Miscellaneous Chores
+
+* add Slack notification on stale prod deployments ([#2746](https://github.com/Altinn/dialogporten/issues/2746)) ([ed925fd](https://github.com/Altinn/dialogporten/commit/ed925fd2d706ff0ec4ff823ca3b869d3cd58a933))
+* **app:** Add configurable exclusions for feature metric tracking ([#2753](https://github.com/Altinn/dialogporten/issues/2753)) ([cbd8f95](https://github.com/Altinn/dialogporten/commit/cbd8f95fd3826b70ea804bb2a782355e323b8076))
+* **deps:** update azure azure-sdk-for-net monorepo ([#2758](https://github.com/Altinn/dialogporten/issues/2758)) ([f804309](https://github.com/Altinn/dialogporten/commit/f804309719c515883355074c748660b5aa77e179))
+* **deps:** update grafana/loki docker tag to v3.5.4 ([#2748](https://github.com/Altinn/dialogporten/issues/2748)) ([af999df](https://github.com/Altinn/dialogporten/commit/af999df0a86e3db75107707f9c7c04cb86d293aa))
+* **deps:** update grafana/loki docker tag to v3.5.5 ([#2755](https://github.com/Altinn/dialogporten/issues/2755)) ([e8f5404](https://github.com/Altinn/dialogporten/commit/e8f54044b8200fbc7b22d07d24d97b1e944f5807))
+* **deps:** update microsoft dependencies to 9.0.9 ([#2756](https://github.com/Altinn/dialogporten/issues/2756)) ([bc3bfe9](https://github.com/Altinn/dialogporten/commit/bc3bfe980b5f5505ae2c5a8c02f0cf1f031d4189))
+* **deps:** update step-security/harden-runner action to v2.13.1 ([#2757](https://github.com/Altinn/dialogporten/issues/2757)) ([3b52980](https://github.com/Altinn/dialogporten/commit/3b52980af9c250cad513a6caa5996bb731702c36))
+
 ## [1.80.7](https://github.com/Altinn/dialogporten/compare/v1.80.6...v1.80.7) (2025-09-16)
 
 

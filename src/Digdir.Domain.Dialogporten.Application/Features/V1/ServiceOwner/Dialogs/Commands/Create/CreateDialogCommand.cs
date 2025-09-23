@@ -3,6 +3,7 @@ using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -24,10 +25,11 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
-public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater
+public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater, IFeatureMetricServiceResourceRequest
 {
     public bool IsSilentUpdate { get; set; }
     public CreateDialogDto Dto { get; set; } = null!;
+    string IFeatureMetricServiceResourceRequest.ServiceResource => Dto.ServiceResource;
 }
 
 public sealed record CreateDialogSuccess(Guid DialogId, Guid Revision);

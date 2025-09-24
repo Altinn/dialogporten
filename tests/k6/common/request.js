@@ -110,6 +110,7 @@ export function getEU(url, params = null, tokenOptions = null) {
 
 export function postEU(url, body, params = null, tokenOptions = null) {
     body = maybeStringifyBody(body);
+    params = extend(true, {}, params, { headers: { 'Content-Type': 'application/json' }});
     return http.post(baseUrlEndUser + url, body, getEnduserRequestParams(params, tokenOptions));
 }
 

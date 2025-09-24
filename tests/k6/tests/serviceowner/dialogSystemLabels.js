@@ -8,14 +8,36 @@ import {
     purgeSO,
     uuidv4
 } from '../../common/testimports.js'
+import { defaultServiceOwnerOrgNo } from '../../common/config.js'
 import { default as dialogToInsert } from './testdata/01-create-dialog.js'
 import { getDefaultEnduserSsn, getDefaultServiceOwnerOrgNo } from '../../common/token.js'
 
 export default function () {
     let dialogId = null;
     let dialogIdNotAuthorized = null;
+    const accessibleDialogs = [];
     const enduserId = 'urn:altinn:person:identifier-no:' + getDefaultEnduserSsn();
 
+    describe('Create dialogs to bulk update', () => {
+        for (let i = 0; i < 2; i++) {
+            let d = dialogToInsert();
+            const r = postSO('dialogs', d, null);
+            expectStatusFor(r).to.equal(201);
+            accessibleDialogs.push(r.json());
+        }
+    });
+
+    describe('Bulk set labels for accessible dialogs SO', () => {
+        const body = { dialogs: accessibleDialogs.map(id => ({ dialogId: id })), systemLabels: ['Bin'] }
+        const r = postSO(`dialogs/endusercontext/systemlabels/actions/bulkset?enduserId=${enduserId}`, body);
+        expectStatusFor(r).to.equal(204);
+        accessibleDialogs.forEach(id => {
+            const r2 = getSO('dialogs/' + id);
+            expectStatusFor(r2).to.equal(200);
+            expect(r2.json().endUserContext.systemLabels).to.be.an('array').that.includes('Bin');
+        });
+    });
+    
     describe('Create dialogs', () => {
         let r = postSO('dialogs', dialogToInsert());
         expectStatusFor(r).to.equal(201);

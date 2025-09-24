@@ -32,7 +32,7 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
     {
         var command = new FreezeDialogCommand
         {
-            Id = req.DialogId,
+            DialogId = req.DialogId,
             IfMatchDialogRevision = req.IfMatchDialogRevision,
         };
 

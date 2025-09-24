@@ -22,7 +22,7 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
             .CreateSimpleDialog(x => x.Dto.ServiceResource = "urn:altinn:resource:SuperKulTest")
             .SendCommand((_, ctx) => new FreezeDialogCommand
             {
-                Id = ctx.GetDialogId()
+                DialogId = ctx.GetDialogId()
             })
             .ConfigureServices(x =>
             {
@@ -47,7 +47,7 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
             })
             .SendCommand((_, ctx) => new FreezeDialogCommand
             {
-                Id = ctx.GetDialogId()
+                DialogId = ctx.GetDialogId()
             })
             .ExecuteAndAssert<FreezeDialogSuccess>(x =>
             {

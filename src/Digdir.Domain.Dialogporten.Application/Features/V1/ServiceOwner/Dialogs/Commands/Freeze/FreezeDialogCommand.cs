@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -9,9 +10,9 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Freeze;
 
-public sealed class FreezeDialogCommand : IRequest<FreezeDialogResult>
+public sealed class FreezeDialogCommand : IRequest<FreezeDialogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
-    public Guid Id { get; set; }
+    public Guid DialogId { get; set; }
 
     public Guid? IfMatchDialogRevision { get; set; }
 }
@@ -39,16 +40,16 @@ internal sealed class FreezeDialogCommandHandler(
         }
         var dialog = await _db.Dialogs
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);
 
         if (dialog == null)
         {
-            return new EntityNotFound<DialogEntity>(request.Id);
+            return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
         if (dialog.Deleted)
         {
-            return new EntityDeleted<DialogEntity>(request.Id);
+            return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
         if (dialog.Frozen)

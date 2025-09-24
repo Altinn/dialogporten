@@ -112,6 +112,7 @@ jobs:
       version: ${{ inputs.version }}
       path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
       source: 'https://api.nuget.org/v3/index.json'
+      ref: "refs/tags/v${{ inputs.version }}"
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 

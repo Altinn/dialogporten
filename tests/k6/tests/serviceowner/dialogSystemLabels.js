@@ -69,8 +69,6 @@ export default function () {
         let body = {
             'systemLabels': ['Bin', 'Archive']
         }
-        console.log(enduserId)
-        console.log(body)
         let r = putSO(`dialogs/${dialogId}/endusercontext/systemlabels?enduserId=${enduserId}`, body);
         expectStatusFor(r).to.equal(204);
     });

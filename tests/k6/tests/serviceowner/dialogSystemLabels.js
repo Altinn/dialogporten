@@ -27,7 +27,6 @@ export default function () {
         }
     });
 
-
     describe('Bulk set labels for accessible dialogs SO', () => {
         const body = { dialogs: accessibleDialogs.map(id => ({ dialogId: id })), systemLabels: ['Bin'] }
         const r = postSO(`dialogs/endusercontext/systemlabels/actions/bulkset?enduserId=${enduserId}`, body);

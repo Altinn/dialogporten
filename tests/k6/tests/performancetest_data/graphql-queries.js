@@ -1,6 +1,7 @@
-const getAllDialogsForPartyQuery = {
+export const getAllDialogsForPartyQuery = {
   query: `query getAllDialogsForParties(
                    $partyURIs: [String!], 
+                   $serviceResource: [String!],
                    $search: String, 
                    $org: [String!], 
                    $status: [DialogStatus!], 
@@ -15,7 +16,8 @@ const getAllDialogsForPartyQuery = {
                        searchDialogs(
                           input: {
                             party: $partyURIs, 
-                            search: $search, 
+                            search: $search,
+                            serviceResource: $serviceResource, 
                             org: $org, 
                             status: $status, 
                             continuationToken: $continuationToken, 
@@ -97,15 +99,11 @@ const getAllDialogsForPartyQuery = {
                         languageCode
                       }
                   }`,
-  variables: { 
-    partyURIs: [], 
-    limit: 100,
-    label: ["DEFAULT"],
-    status: ["NOT_APPLICABLE", "IN_PROGRESS", "AWAITING", "REQUIRES_ATTENTION", "COMPLETED"] },
+  variables: {},
 };
 
-export function getGraphqlParty(enduser) {
-    let request = JSON.parse(JSON.stringify(getAllDialogsForPartyQuery));
-    request.variables.partyURIs.push(`urn:altinn:person:identifier-no:${enduser}`);
-    return request;
+export function getGraphqlRequestBodyForAllDialogsForParty(variables) {
+  let request = JSON.parse(JSON.stringify(getAllDialogsForPartyQuery));
+  request.variables = {...request.variables, ...variables};
+  return request;
 }

@@ -36,7 +36,7 @@ export default function () {
 
     describe('Perform simple dialog list', () => {
         // Arrange
-        let count = 10
+        let count = 10;
         let dialogIds = createDialogs(count);
 
         // Assert
@@ -56,11 +56,10 @@ export default function () {
         // Arrange
         let titleToSearchFor = uuidv4();
         let dialogIds = createDialogs(5, (dialog, index) => {
-                if (index == 3) {
-                    setTitle(dialog, titleToSearchFor);
-                }
+            if (index == 3) {
+                setTitle(dialog, titleToSearchFor);
             }
-        );
+        });
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + titleToSearchFor);
@@ -79,11 +78,10 @@ export default function () {
         // Arrange
         let additionalInfoToSearchFor = uuidv4();
         let dialogIds = createDialogs(5, (dialog, index) => {
-                if (index == 3) {
-                    setAdditionalInfo(dialog, additionalInfoToSearchFor);
-                }
+            if (index == 3) {
+                setAdditionalInfo(dialog, additionalInfoToSearchFor);
             }
-        );
+        });
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + additionalInfoToSearchFor);
@@ -105,7 +103,7 @@ export default function () {
             if (index == 3) {
                 setSenderName(dialog, senderNameToSearchFor);
             }
-        })
+        });
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + senderNameToSearchFor);
@@ -117,7 +115,7 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
+        });
     });
 
     describe('Filter by extended status', () => {
@@ -129,10 +127,9 @@ export default function () {
                 setExtendedStatus(dialog, extendedStatusToSearchFor);
             }
             if (index == 2) {
-
                 setExtendedStatus(dialog, secondExtendedStatusToSearchFor);
             }
-        })
+        });
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ExtendedStatus=' + extendedStatusToSearchFor + "&ExtendedStatus=" + secondExtendedStatusToSearchFor);
@@ -144,7 +141,7 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
+        });
     });
 
     describe('List with limit', () => {
@@ -172,7 +169,7 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
+        });
     });
 
     describe('List with custom orderBy', () => {
@@ -220,7 +217,7 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
+        });
     });
 
     describe('List with party filter', () => {
@@ -243,7 +240,7 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
+        });
     });
 
     describe('List with resource filter', () => {
@@ -253,7 +250,7 @@ export default function () {
             if (index == 1) {
                 setServiceResource(dialog, auxResource);
             }
-        })
+        });
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + auxResource);
@@ -266,7 +263,7 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
+        });
     });
 
     describe('List with invalid process', () => {
@@ -283,8 +280,8 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
-    })
+        });
+    });
 
     describe('List with process', () => {
         // Arrange
@@ -302,7 +299,7 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
+        });
     })
 
     describe('List with enduserid', () => {
@@ -312,7 +309,7 @@ export default function () {
             if (index == 1) {
                 setServiceResource(dialog, auxResource);
             }
-        })
+        });
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&EndUserId=' + endUserId + '&ServiceResource=' + auxResource);
@@ -344,8 +341,8 @@ export default function () {
         dialogIds.forEach((d) => {
             let r = purgeSO("dialogs/" + d);
             expect(r.status, 'response status').to.equal(204);
-        })
-    })
+        });
+    });
 }
 
 function createDialogs(count, modify) {

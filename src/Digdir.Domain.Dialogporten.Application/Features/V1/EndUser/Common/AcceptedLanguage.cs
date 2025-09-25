@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Digdir.Domain.Dialogporten.Domain.Localizations;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 
@@ -27,7 +28,6 @@ public sealed record AcceptedLanguages(List<AcceptedLanguage>? AcceptedLanguage)
         var range = headerSpan.Split(',');
         while (range.MoveNext())
         {
-
             var langParts = headerSpan[range.Current];
             var langPartsEnumerator = langParts.Split(";");
 
@@ -64,10 +64,23 @@ public sealed record AcceptedLanguages(List<AcceptedLanguage>? AcceptedLanguage)
                 weight = (int)(weightFloat * 100);
             }
 
-            internalAcceptedLanguages.Add(new AcceptedLanguage(langCode.Trim().ToString(), weight));
+            // Normalize to base language code (e.g., en-US/en_US => en)
+            var normalized = Localization.NormalizeCultureCode(langCode.Trim().ToString());
+            if (string.IsNullOrEmpty(normalized))
+            {
+                continue;
+            }
+
+            internalAcceptedLanguages.Add(new AcceptedLanguage(normalized, weight));
         }
 
-        acceptedLanguages = new AcceptedLanguages(internalAcceptedLanguages);
+        // Distinct by language code, keep the highest weight per language
+        var deduped = internalAcceptedLanguages
+            .GroupBy(x => x.LanguageCode, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.OrderByDescending(a => a.Weight).First())
+            .ToList();
+
+        acceptedLanguages = new AcceptedLanguages(deduped);
         return true;
     }
 }

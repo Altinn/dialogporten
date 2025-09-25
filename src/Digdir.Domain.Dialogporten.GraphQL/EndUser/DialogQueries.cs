@@ -21,7 +21,6 @@ public partial class Queries
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine(acceptLanguage);
         var request = new GetDialogQuery
         {
             DialogId = dialogId,

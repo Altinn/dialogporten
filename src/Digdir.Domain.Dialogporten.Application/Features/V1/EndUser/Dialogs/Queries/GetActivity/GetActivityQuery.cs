@@ -19,7 +19,7 @@ public sealed class GetActivityQuery : IRequest<GetActivityResult>, IFeatureMetr
     public Guid DialogId { get; set; }
     public Guid ActivityId { get; set; }
 
-    public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null!;
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]

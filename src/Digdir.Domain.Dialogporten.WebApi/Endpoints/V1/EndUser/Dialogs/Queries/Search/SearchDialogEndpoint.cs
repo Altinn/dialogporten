@@ -53,6 +53,9 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
             ExcludeApiOnly = req.ExcludeApiOnly,
             Search = req.Search,
             SearchLanguageCode = req.SearchLanguageCode,
+            OrderBy = req.OrderBy,
+            Limit = req.Limit,
+            ContinuationToken = req.ContinuationToken,
             AcceptedLanguage = req.AcceptedLanguages?.AcceptedLanguage
         };
 
@@ -64,7 +67,7 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
     }
 }
 
-public sealed class SearchDialogRequest
+public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
 {
     private readonly string? _searchLanguageCode;
 

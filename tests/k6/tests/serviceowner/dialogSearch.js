@@ -29,10 +29,10 @@ import {notValidEnduserId} from '../../common/config.js';
 
 export default function () {
 
-    let defaultResource = "urn:altinn:resource:ttd-dialogporten-automated-tests";
-    let endUserId = "urn:altinn:person:identifier-no:" + getDefaultEnduserSsn();
-    let updatedAfter = (new Date()).toISOString(); // We use this on all tests to avoid clashing with unrelated dialogs
-    let defaultFilter = "?UpdatedAfter=" + updatedAfter;
+    const defaultResource = "urn:altinn:resource:ttd-dialogporten-automated-tests";
+    const endUserId = "urn:altinn:person:identifier-no:" + getDefaultEnduserSsn();
+    const updatedAfter = (new Date()).toISOString(); // We use this on all tests to avoid clashing with unrelated dialogs
+    const defaultFilter = "?UpdatedAfter=" + updatedAfter;
 
     describe('Perform simple dialog list', () => {
         // Arrange

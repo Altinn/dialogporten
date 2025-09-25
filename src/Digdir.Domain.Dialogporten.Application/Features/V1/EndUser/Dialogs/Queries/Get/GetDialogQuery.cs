@@ -20,7 +20,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
-    public List<AcceptedLanguage>? AcceptedLanguage { get; set; } = null!;
+    public List<AcceptedLanguage>? AcceptedLanguage { get; set; }
 }
 
 [GenerateOneOf]
@@ -165,7 +165,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialog.FilterLocalizations(request.AcceptedLanguage);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
-
 
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,

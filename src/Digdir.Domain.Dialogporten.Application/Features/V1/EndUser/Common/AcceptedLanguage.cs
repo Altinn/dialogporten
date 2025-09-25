@@ -10,11 +10,13 @@ public sealed record AcceptedLanguages(List<AcceptedLanguage>? AcceptedLanguage)
     public static bool TryParse(string? value, out AcceptedLanguages acceptedLanguages)
     {
         acceptedLanguages = new AcceptedLanguages([]);
+
         if (TryParseFromSpan(value, out var temp))
         {
             acceptedLanguages = temp;
             return true;
         }
+
         return false;
     }
 
@@ -64,6 +66,7 @@ public sealed record AcceptedLanguages(List<AcceptedLanguage>? AcceptedLanguage)
 
             internalAcceptedLanguages.Add(new AcceptedLanguage(langCode.Trim().ToString(), weight));
         }
+
         acceptedLanguages = new AcceptedLanguages(internalAcceptedLanguages);
         return true;
     }

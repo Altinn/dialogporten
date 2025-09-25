@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetActivity;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -51,6 +52,6 @@ public sealed class GetActivityRequest
 
     public Guid ActivityId { get; set; }
 
-    [FromHeader("Accept-Language", isRequired: false)]
+    [FromHeader(Constants.AcceptLanguage, isRequired: false)]
     public AcceptedLanguages? AcceptedLanguages { get; set; } = null;
 }

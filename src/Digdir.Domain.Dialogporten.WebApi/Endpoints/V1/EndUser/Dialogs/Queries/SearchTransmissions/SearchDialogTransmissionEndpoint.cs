@@ -1,4 +1,6 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchTransmissions;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -7,7 +9,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.SearchTransmissions;
 
-public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissionQuery, List<TransmissionDto>>
+public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissionRequest, List<TransmissionDto>>
 {
     private readonly ISender _sender;
 
@@ -28,13 +30,27 @@ public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissi
             StatusCodes.Status404NotFound));
     }
 
-    public override async Task HandleAsync(SearchTransmissionQuery req, CancellationToken ct)
+    public override async Task HandleAsync(SearchTransmissionRequest req, CancellationToken ct)
     {
-        var result = await _sender.Send(req, ct);
+        var query = new SearchTransmissionQuery
+        {
+            DialogId = req.DialogId,
+            AcceptedLanguage = req.AcceptedLanguages?.AcceptedLanguage
+        };
+
+        var result = await _sender.Send(query, ct);
         await result.Match(
             dto => SendOkAsync(dto, ct),
             notFound => this.NotFoundAsync(notFound, ct),
             deleted => this.GoneAsync(deleted, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct));
     }
+}
+
+public sealed class SearchTransmissionRequest
+{
+    public Guid DialogId { get; set; }
+
+    [FromHeader(Constants.AcceptLanguage, isRequired: false)]
+    public AcceptedLanguages? AcceptedLanguages { get; set; } = null;
 }

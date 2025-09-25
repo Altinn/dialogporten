@@ -9,6 +9,8 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -120,6 +122,11 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
         get => _searchLanguageCode;
         init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
     }
+
+    /// <summary>
+    /// Accepted languages for localization filtering, sorted by preference
+    /// </summary>
+    public List<AcceptedLanguage>? AcceptedLanguage { get; set; }
 }
 
 public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<IntermediateDialogDto>
@@ -206,6 +213,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
+        paginatedList.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguage));
+
         foreach (var dialog in paginatedList.Items)
         {
             // This filtering cannot be done in AutoMapper using ProjectTo
@@ -251,6 +260,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 dialog.Content.SetNonSensitiveContent();
             }
         }
+
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }
 }

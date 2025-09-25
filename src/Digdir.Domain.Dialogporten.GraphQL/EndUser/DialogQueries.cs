@@ -2,11 +2,13 @@ using AppAny.HotChocolate.FluentValidation;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 using MediatR;
+using static Digdir.Domain.Dialogporten.GraphQL.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser;
 
@@ -16,9 +18,15 @@ public partial class Queries
         [Service] ISender mediator,
         [Service] IMapper mapper,
         [Argument] Guid dialogId,
+        [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
         CancellationToken cancellationToken)
     {
-        var request = new GetDialogQuery { DialogId = dialogId };
+        var request = new GetDialogQuery
+        {
+            DialogId = dialogId,
+            AcceptedLanguage = acceptLanguage?.AcceptedLanguage
+        };
+
         var result = await mediator.Send(request, cancellationToken);
         return result.Match(
             dialog => new DialogByIdPayload { Dialog = mapper.Map<Dialog>(dialog) },
@@ -46,9 +54,11 @@ public partial class Queries
         [Service] IMapper mapper,
         [UseFluentValidation, UseValidator<SearchDialogInputValidator>]
         SearchDialogInput input,
+        [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
         CancellationToken cancellationToken)
     {
         var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
+        searchDialogQuery.AcceptedLanguage = acceptLanguage?.AcceptedLanguage;
 
         if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(
                 input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)

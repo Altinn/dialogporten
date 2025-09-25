@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -30,7 +31,7 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogRequest, DialogDto>
 
     public override async Task HandleAsync(GetDialogRequest req, CancellationToken ct)
     {
-        var query = new GetDialogQuery()
+        var query = new GetDialogQuery
         {
             DialogId = req.DialogId,
             AcceptedLanguage = req.AcceptedLanguages?.AcceptedLanguage
@@ -53,6 +54,6 @@ public sealed class GetDialogRequest
 {
     public Guid DialogId { get; set; }
 
-    [FromHeader("Accept-Language", isRequired: false)]
+    [FromHeader(Constants.AcceptLanguage, isRequired: false)]
     public AcceptedLanguages? AcceptedLanguages { get; set; } = null;
 }

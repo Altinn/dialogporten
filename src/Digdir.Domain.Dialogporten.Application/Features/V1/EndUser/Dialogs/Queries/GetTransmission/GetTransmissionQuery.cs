@@ -18,7 +18,7 @@ public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>, IFea
 {
     public Guid DialogId { get; set; }
     public Guid TransmissionId { get; set; }
-    public List<AcceptedLanguage>? AcceptedLanguages { get; set; } = null!;
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]

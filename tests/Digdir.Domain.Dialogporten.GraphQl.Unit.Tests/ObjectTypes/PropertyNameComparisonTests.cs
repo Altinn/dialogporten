@@ -46,7 +46,7 @@ public class PropertyNameComparisonTests
         public PropertyNameComparisonTestsData()
         {
             // ====== Input ======
-            Add(typeof(SearchDialogQuery), typeof(SearchDialogInput), null);
+            Add(typeof(SearchDialogQuery), typeof(SearchDialogInput), IgnoreAcceptedLanguage);
 
             // ====== Dtos =======
             Add(typeof(DialogActivityDto), typeof(Activity), null);
@@ -101,6 +101,10 @@ public class PropertyNameComparisonTests
         return value!.OutputInList
                && ExcludeNonSensitiveContentTypes(name);
     }
+
+    private static bool IgnoreAcceptedLanguage(string name) =>
+        !name.Equals(nameof(SearchDialogQuery.AcceptedLanguage),
+            StringComparison.OrdinalIgnoreCase);
 
     private static bool ExcludeNonSensitiveContentTypes(string name) =>
         !name.Equals(nameof(DialogContentType.Values.NonSensitiveTitle), StringComparison.OrdinalIgnoreCase)

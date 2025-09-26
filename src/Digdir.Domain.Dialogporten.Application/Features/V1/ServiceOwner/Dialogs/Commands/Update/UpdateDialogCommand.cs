@@ -98,6 +98,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new EntityDeleted<DialogEntity>(request.Id);
         }
 
+        if (dialog.Frozen && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            return new Forbidden("User cannot modify frozen dialog");
+        }
+
         // Ensure transmissions have a UUIDv7 ID, needed for the transmission hierarchy validation.
         foreach (var transmission in request.Dto.Transmissions)
         {
@@ -296,13 +301,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         dialog.FromPartyTransmissionsCount += (short)newDialogTransmissions
             .Count(x => x.TypeId
-                is DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction);
+                is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
 
         dialog.FromServiceOwnerTransmissionsCount += (short)newDialogTransmissions
             .Count(x => x.TypeId is not
-                (DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction));
+                (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
         var newAttachmentIds = newDialogTransmissions
             .SelectMany(x => x.Attachments)

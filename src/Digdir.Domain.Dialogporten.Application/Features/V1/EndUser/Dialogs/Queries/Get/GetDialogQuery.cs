@@ -20,7 +20,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
-    public List<AcceptedLanguage>? AcceptedLanguage { get; set; }
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
@@ -161,7 +161,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
             concurrencyError => throw new UnreachableException("Should not get concurrencyError when updating SeenAt."));
 
-        dialog.FilterLocalizations(request.AcceptedLanguage);
+        dialog.FilterLocalizations(request.AcceptedLanguages);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 

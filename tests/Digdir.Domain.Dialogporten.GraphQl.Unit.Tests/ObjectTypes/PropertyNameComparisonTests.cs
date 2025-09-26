@@ -103,7 +103,7 @@ public class PropertyNameComparisonTests
     }
 
     private static bool IgnoreAcceptedLanguage(string name) =>
-        !name.Equals(nameof(SearchDialogQuery.AcceptedLanguage),
+        !name.Equals(nameof(SearchDialogQuery.AcceptedLanguages),
             StringComparison.OrdinalIgnoreCase);
 
     private static bool ExcludeNonSensitiveContentTypes(string name) =>

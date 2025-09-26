@@ -16,7 +16,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 public sealed class SearchActivityQuery : IRequest<SearchActivityResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
-    public List<AcceptedLanguage>? AcceptedLanguage { get; set; }
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
@@ -71,7 +71,7 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        dialog.FilterLocalizations(request.AcceptedLanguage);
+        dialog.FilterLocalizations(request.AcceptedLanguages);
 
         return _mapper.Map<List<ActivityDto>>(dialog.Activities);
     }

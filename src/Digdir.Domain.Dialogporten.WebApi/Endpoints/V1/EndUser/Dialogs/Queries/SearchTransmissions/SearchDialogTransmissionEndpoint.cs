@@ -35,7 +35,7 @@ public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissi
         var query = new SearchTransmissionQuery
         {
             DialogId = req.DialogId,
-            AcceptedLanguage = req.AcceptedLanguages?.AcceptedLanguage
+            AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
         };
 
         var result = await _sender.Send(query, ct);

@@ -56,7 +56,7 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
             OrderBy = req.OrderBy,
             Limit = req.Limit,
             ContinuationToken = req.ContinuationToken,
-            AcceptedLanguage = req.AcceptedLanguages?.AcceptedLanguage
+            AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
         };
 
         var result = await _sender.Send(query, ct);

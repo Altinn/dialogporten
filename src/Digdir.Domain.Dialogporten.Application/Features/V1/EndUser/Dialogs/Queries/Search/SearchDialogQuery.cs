@@ -126,7 +126,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Accepted languages for localization filtering, sorted by preference
     /// </summary>
-    public List<AcceptedLanguage>? AcceptedLanguage { get; set; }
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<IntermediateDialogDto>
@@ -213,7 +213,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
-        paginatedList.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguage));
+        paginatedList.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguages));
 
         foreach (var dialog in paginatedList.Items)
         {

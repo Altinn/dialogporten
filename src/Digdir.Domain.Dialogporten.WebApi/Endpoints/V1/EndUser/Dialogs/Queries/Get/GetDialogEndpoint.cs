@@ -34,7 +34,7 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogRequest, DialogDto>
         var query = new GetDialogQuery
         {
             DialogId = req.DialogId,
-            AcceptedLanguage = req.AcceptedLanguages?.AcceptedLanguage
+            AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
         };
 
         var result = await _sender.Send(query, ct);

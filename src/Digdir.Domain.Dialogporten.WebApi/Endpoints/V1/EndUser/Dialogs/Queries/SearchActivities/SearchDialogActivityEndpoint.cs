@@ -34,7 +34,7 @@ public sealed class SearchDialogActivityEndpoint : Endpoint<SearchActivityReques
         var query = new SearchActivityQuery
         {
             DialogId = req.DialogId,
-            AcceptedLanguage = req.AcceptedLanguages?.AcceptedLanguage
+            AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
         };
 
         var result = await _sender.Send(query, ct);

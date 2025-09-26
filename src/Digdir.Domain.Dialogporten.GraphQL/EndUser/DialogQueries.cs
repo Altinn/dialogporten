@@ -24,7 +24,7 @@ public partial class Queries
         var request = new GetDialogQuery
         {
             DialogId = dialogId,
-            AcceptedLanguage = acceptLanguage?.AcceptedLanguage
+            AcceptedLanguages = acceptLanguage?.AcceptedLanguage
         };
 
         var result = await mediator.Send(request, cancellationToken);
@@ -58,7 +58,7 @@ public partial class Queries
         CancellationToken cancellationToken)
     {
         var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
-        searchDialogQuery.AcceptedLanguage = acceptLanguage?.AcceptedLanguage;
+        searchDialogQuery.AcceptedLanguages = acceptLanguage?.AcceptedLanguage;
 
         if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(
                 input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)

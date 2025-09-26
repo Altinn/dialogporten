@@ -16,7 +16,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 public sealed class SearchTransmissionQuery : IRequest<SearchTransmissionResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
-    public List<AcceptedLanguage>? AcceptedLanguage { get; set; }
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
@@ -79,7 +79,7 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        dialog.FilterLocalizations(request.AcceptedLanguage);
+        dialog.FilterLocalizations(request.AcceptedLanguages);
 
         var dto = _mapper.Map<List<TransmissionDto>>(dialog.Transmissions);
 

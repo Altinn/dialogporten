@@ -17,7 +17,7 @@ public sealed record DialogServiceOwnerLabel(
                 yield return new(
                     DialogServiceOwnerContextId: context.DialogId,
                     CreatedAt: context.CreatedAt,
-                    Value: serviceLabel
+                    Value: serviceLabel.ToLower()
                 );
             }
         }

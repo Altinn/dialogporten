@@ -15,6 +15,7 @@ internal static class StaticStore
     private static Resource[]? _daglResources;
     private static string[]? _norwegianWords;
     private static string[]? _englishWords;
+    private static string[]? _spanishWords;
     private static bool _isInitialized;
 
     public static readonly string[] FrequentWords =
@@ -75,19 +76,21 @@ internal static class StaticStore
         return distinctWords.ToArray();
     }
 
-    public static string GetRandomSentence(int minLength, int maxLength, Random? rng = null)
+    public static string GetRandomNorwegianSentence(int length, Random? rng = null) => GetRandomSentence(length, _norwegianWords!, rng);
+    public static string GetRandomEnglishSentence(int length, Random? rng = null) => GetRandomSentence(length, _englishWords!, rng);
+    public static string GetRandomSpanishSentence(int length, Random? rng = null) => GetRandomSentence(length, _spanishWords!, rng);
+    private static string GetRandomSentence(int length, string[] words, Random? rng = null)
     {
         ValidateInitialized();
         rng ??= Random.Shared;
         ReadOnlySpan<char> giveMeSomeSpace = " ";
-        var length = rng.Next(minLength, maxLength);
         Span<char> result = stackalloc char[length];
         var remaining = length;
         while (remaining > 0)
         {
             var word = 20.PercentOfTheTime()
                 ? FrequentWords[rng.Next(0, FrequentWords.Length)].AsSpan()
-                : _norwegianWords[rng.Next(0, _norwegianWords.Length)].AsSpan();
+                : words[rng.Next(0, words.Length)].AsSpan();
             if (word.Length > remaining) break;
             word.CopyTo(result[^remaining..]);
             remaining -= word.Length;
@@ -101,7 +104,7 @@ internal static class StaticStore
     public static async Task Init(string connectionString, string altinnPlatformBaseUrl, int dialogAmount)
     {
         var (dagls, privs) = await GetDaglsAndPrivs(connectionString, altinnPlatformBaseUrl);
-        var (norwegianWords, englishWords) = await FetchWordLists();
+        var (norwegianWords, englishWords, spanishWords) = await FetchWordLists();
         _daglResources = dagls.ToArray();
         _privResources = privs.ToArray();
         _norwegianWords = norwegianWords
@@ -109,6 +112,10 @@ internal static class StaticStore
             .Where(x => x.Length > 3) // Filter out short words
             .ToArray();
         _englishWords = englishWords
+            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(x => x.Length > 3) // Filter out short words
+            .ToArray();
+        _spanishWords = spanishWords
             .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(x => x.Length > 3) // Filter out short words
             .ToArray();
@@ -155,14 +162,15 @@ internal static class StaticStore
             });
     }
 
-    private static async Task<(string norwegianWords, string englishWords)> FetchWordLists()
+    private static async Task<(string norwegianWords, string englishWords, string spanishWords)> FetchWordLists()
     {
         using var httpClient = new HttpClient();
         httpClient.BaseAddress = new Uri("https://github.com");
         var refitClient = RestService.For<IGithubClient>(httpClient);
         var wordLists = await Task.WhenAll(
             refitClient.GetNorwegianWordList(),
-            refitClient.GetEnglishWordList());
-        return (wordLists[0], wordLists[1]);
+            refitClient.GetEnglishWordList(),
+            refitClient.GetSpanishWordList());
+        return (wordLists[0], wordLists[1], wordLists[2]);
     }
 }

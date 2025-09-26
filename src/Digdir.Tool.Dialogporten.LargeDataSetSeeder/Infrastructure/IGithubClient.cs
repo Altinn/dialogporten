@@ -9,4 +9,7 @@ public interface IGithubClient
 
     [Get("/dwyl/english-words/raw/refs/heads/master/words.txt")]
     Task<string> GetEnglishWordList();
+
+    [Get("/xavier-hernandez/spanish-wordlist/raw/refs/heads/main/text/spanish_words.txt")]
+    Task<string> GetSpanishWordList();
 }

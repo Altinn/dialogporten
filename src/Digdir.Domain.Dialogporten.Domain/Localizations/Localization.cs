@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace Digdir.Domain.Dialogporten.Domain.Localizations;
+﻿namespace Digdir.Domain.Dialogporten.Domain.Localizations;
 
 public sealed class Localization
 {

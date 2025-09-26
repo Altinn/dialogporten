@@ -4,6 +4,8 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 public sealed class SearchTransmissionQuery : IRequest<SearchTransmissionResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
@@ -75,6 +78,8 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
         {
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
+
+        dialog.FilterLocalizations(request.AcceptedLanguages);
 
         var dto = _mapper.Map<List<TransmissionDto>>(dialog.Transmissions);
 

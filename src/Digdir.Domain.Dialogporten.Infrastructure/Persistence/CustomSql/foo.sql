@@ -164,7 +164,7 @@ WHERE d."Deleted" = false
   AND (input.process IS NULL OR d."Process" = input.process) -- It's ILike in the code - is that correct?
   AND (input.excludeApiOnly IS NULL OR input.excludeApiOnly = false OR input.excludeApiOnly = true AND d."IsApiOnly" = false)
   AND (input.search IS NULL OR dst."Value" = input.search)
-  AND (input.search IS NULL OR ds."SearchVector" @@ websearch_to_tsquery(input.search))
+  AND (input.search IS NULL OR ds.search @@ websearch_to_tsquery(input.search))
   AND (input.systemLabel IS NULL OR input.systemLabel <@ l.labels);
 -- TODO: Add pagination parameters
 -- TODO: Can we consider minimum auth level here as well?

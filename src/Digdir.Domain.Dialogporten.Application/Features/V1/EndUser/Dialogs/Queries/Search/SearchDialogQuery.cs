@@ -142,19 +142,22 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
+    private readonly IDialogRepository _dialogRepository;
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
-        IAltinnAuthorization altinnAuthorization)
+        IAltinnAuthorization altinnAuthorization,
+        IDialogRepository dialogRepository)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        _dialogRepository = dialogRepository ?? throw new ArgumentNullException(nameof(dialogRepository));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -169,13 +172,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         {
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
-        
-        var lala = await _db.Dialogs
-            .FromSql("SQL HERE") 
-            .AsNoTracking()
-            .Include(x => x.Content).ThenInclude(x => x.Value.Localizations)
-            .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
-            .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
+
+        var dialogIds = await _dialogRepository.GetRelevantGuids(request, authorizedResources, cancellationToken);
 
         var paginatedList = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
@@ -261,49 +259,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     }
 }
 
-public static class SearchSquile
+public interface IDialogRepository
 {
-    // language=SQL
-    public const string Sql =
-        """
-        -- TODO: CREATE INDEX IF NOT EXISTS idx_dialog_service_party ON "Dialog" ("ServiceResource", "Party") INCLUDE ("Id");
-        WITH partyResourceAccess AS (
-            SELECT DISTINCT s.service, p.party
-            FROM jsonb_to_recordset(@partyResources::jsonb) AS x(parties text[], services text[])
-            CROSS JOIN LATERAL unnest(x.services) AS s(service)
-            CROSS JOIN LATERAL unnest(x.parties) AS p(party)
-        ),
-        accessibleDialogs AS (
-            SELECT DISTINCT d."Id"
-            FROM "Dialog" d
-            INNER JOIN partyResourceAccess c 
-                ON d."ServiceResource" = c.service AND d."Party" = c.party
-        )
-        SELECT d."Id", d."Org"
-        FROM "Dialog" d
-        INNER JOIN accessibleDialogs a ON d."Id" = a."Id" 
-        WHERE d."Deleted" = false
-            AND (d."VisibleFrom" IS NULL or d."VisibleFrom" < @now)
-            AND (d."ExpiresAt" IS NULL or d."ExpiresAt" > @now)
-            AND (@org IS NULL OR d."Org" = ANY(@org))
-            AND (@serviceResource IS NULL OR d."ServiceResource" = ANY(@serviceResource))
-            AND (@party IS NULL OR d."Party" = ANY(@party))
-            AND (@extendedStatus IS NULL OR d."ExtendedStatus" = ANY(@extendedStatus))
-            AND (@externalReference IS NULL OR d."ExternalReference" = @externalReference)
-            AND (@status IS NULL OR d."StatusId" = ANY(@status))
-            AND (@createdAfter IS NULL OR @createdAfter <= d."CreatedAt")
-            AND (@createdBefore IS NULL OR d."CreatedAt" <= @createdBefore)
-            AND (@updatedAfter IS NULL OR @updatedAfter <= d."UpdatedAt")
-            AND (@updatedBefore IS NULL OR d."UpdatedAt" <= @updatedBefore)
-            AND (@contentUpdatedAfter IS NULL OR @contentUpdatedAfter <= d."ContentUpdatedAt")
-            AND (@contentUpdatedBefore IS NULL OR d."ContentUpdatedAt" <= @contentUpdatedBefore)
-            AND (@dueAfter IS NULL OR  @dueAfter <= d."DueAt")
-            AND (@dueBefore IS NULL OR d."DueAt" <= @dueBefore)
-            AND (@process IS NULL OR d."Process" = @process) -- It's ILike in the code - is that correct?
-            AND (@excludeApiOnly IS NULL OR @excludeApiOnly = false OR @excludeApiOnly = true AND d."IsApiOnly" = false)
-            -- TODO: Add filter for search across localizations and search tags
-            -- TODO: Add filter for system labels
-            -- TODO: Add pagination parameters
-            -- TODO: Can we consider minimum auth level here as well? 
-        """;
+    Task<List<Guid>> GetRelevantGuids(SearchDialogQuery query, DialogSearchAuthorizationResult authorizedResources, CancellationToken cancellationToken);
 }

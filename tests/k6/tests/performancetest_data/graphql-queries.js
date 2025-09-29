@@ -146,6 +146,52 @@ const partiesQuery = {
         }`,
 }
 
+const searchAutoComplete = {
+  query: `query getSearchAutocompleteDialogs($partyURIs: [String!], $search: String, $org: [String!], $status: [DialogStatus!], $createdAfter: DateTime, $createdBefore: DateTime) {
+    searchDialogs(
+      input: {party: $partyURIs, search: $search, org: $org, status: $status, orderBy: {createdAt: null, updatedAt: null, dueAt: null, contentUpdatedAt: DESC}, createdAfter: $createdAfter, createdBefore: $createdBefore, excludeApiOnly: true}
+    ) {
+      items {
+        ...SearchAutocompleteDialogFields
+      }
+    }
+  }
+  
+  fragment SearchAutocompleteDialogFields on SearchDialog {
+    id
+    seenSinceLastContentUpdate {
+      ...SeenLogFields
+    }
+    content {
+      title {
+        ...DialogContentFields
+      }
+      summary {
+        ...DialogContentFields
+      }
+    }
+  }
+  
+  fragment SeenLogFields on SeenLog {
+    id
+    seenAt
+    seenBy {
+      actorType
+      actorId
+      actorName
+    }
+    isCurrentEndUser
+  }
+  
+  fragment DialogContentFields on ContentValue {
+    mediaType
+    value {
+      value
+      languageCode
+    }
+  }`
+}
+
 
 export function getGraphqlRequestBodyForAllDialogsForParty(variables) {
   let request = JSON.parse(JSON.stringify(getAllDialogsForPartyQuery));
@@ -161,5 +207,11 @@ export function getGraphqlRequestBodyForAllDialogsForCount(variables) {
 
 export function getPartiesRequestBody() {
   let request = JSON.parse(JSON.stringify(partiesQuery));
+  return request;
+}
+
+export function getSearchAutoCompleteRequestBody(variables) {
+  let request = JSON.parse(JSON.stringify(searchAutoComplete));
+  request.variables = {...request.variables, ...variables};
   return request;
 }

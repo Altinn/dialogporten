@@ -7,14 +7,15 @@ import { getEndUserTokens } from '../../../common/token.js';
 import { 
   getGraphqlRequestBodyForAllDialogsForParty, 
   getGraphqlRequestBodyForAllDialogsForCount,
-  getPartiesRequestBody
+  getPartiesRequestBody,
+  getSearchAutoCompleteRequestBody,
 } from '../../performancetest_data/graphql-queries.js';
 import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
 import { postGQ } from '../../../common/request.js';
 
 const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
-const defaultNumberOfEndUsers = (__ENV.NUMBER_OF_ENDUSERS ?? 2799);; // Max number of endusers from altinn-testtools now.
+const defaultNumberOfEndUsers = (__ENV.NUMBER_OF_ENDUSERS ?? 2799); // Max number of endusers from altinn-testtools now.
 const breakpoint = (__ENV.BREAKPOINT ?? 'false') === 'true';
 const abort_on_fail = (__ENV.ABORT_ON_FAIL ?? 'false') === 'true';
 const stages_duration = __ENV.stages_duration ?? '5m';
@@ -180,6 +181,10 @@ export function createBody(endUser, type) {
       return createBodyForAllDialogsForCount(endUser);
     case "getParties":
       return createBodyForParties();
+    case "getAllDialogsForPartyFts":
+      return createBodyForAllDialogsForPartyFts(endUser);
+    case "getAllDialogsForPartyAutoCompleteFts":
+      return createBodyForAllDialogsForPartyAutoCompleteFts(endUser);
     default:
       return createBodyForAllDialogsForParty(endUser);
   }
@@ -189,8 +194,14 @@ export function createBodyForMultiParties(parties, type) {
   switch (type) {
     case "getAllDialogsForParties":
       return createBodyForAllDialogsForParties(parties);
+    case "getAllDialogsForPartiesFts":
+      return createBodyForAllDialogsForPartiesFts(parties);
+    case "getAllDialogsForParties":
+      return createBodyForAllDialogsForParties(parties);
     case "getAllDialogsForPartiesForCount":
       return createBodyForAllDialogsForPartiesForCount(parties);
+    case "getAllDialogsForPartiesAutoCompleteFts":
+      return createBodyForAllDialogsForPartiesFts(parties);
     default:
       return createBodyForAllDialogsForParties(parties);
   }
@@ -202,6 +213,15 @@ function createBodyForAllDialogsForParties(parties) {
     limit: 100,
     label: ["DEFAULT"],
     status: ["NOT_APPLICABLE", "IN_PROGRESS", "AWAITING", "REQUIRES_ATTENTION", "COMPLETED"]
+  }
+  return getGraphqlRequestBodyForAllDialogsForParty(variables);
+}
+
+function createBodyForAllDialogsForPartiesFts(parties) {
+  const variables = {
+    partyURIs: [...parties],
+    limit: 100,
+    search: "officia"
   }
   return getGraphqlRequestBodyForAllDialogsForParty(variables);
 }
@@ -222,6 +242,33 @@ function createBodyForAllDialogsForParty(endUser) {
     status: ["NOT_APPLICABLE", "IN_PROGRESS", "AWAITING", "REQUIRES_ATTENTION", "COMPLETED"]
   }
   return getGraphqlRequestBodyForAllDialogsForParty(variables);
+}
+
+function createBodyForAllDialogsForPartyFts(endUser) {
+  const variables = {
+    partyURIs: [`urn:altinn:person:identifier-no:${endUser}`],
+    limit: 100,
+    search: "test"
+  }
+  return getGraphqlRequestBodyForAllDialogsForParty(variables);
+}
+
+export function createBodyForAllDialogsForPartyAutoCompleteFts(endUser, term) {
+  const variables = {
+    partyURIs: [`urn:altinn:person:identifier-no:${endUser}`],
+    limit: 100,
+    search: term
+  }
+  return getSearchAutoCompleteRequestBody(variables);
+}
+
+export function createBodyForAllDialogsForPartiesAutoCompleteFts(parties, term) {
+  const variables = {
+    partyURIs: [...parties],
+    limit: 100,
+    search: term
+  }
+  return getSearchAutoCompleteRequestBody(variables);
 }
 
 function createBodyForAllDialogsForCount(endUser) {

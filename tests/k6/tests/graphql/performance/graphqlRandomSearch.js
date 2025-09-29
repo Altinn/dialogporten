@@ -99,7 +99,7 @@ export default function(data) {
         let r = postGQ(getGraphqlRequestBodyForAllDialogsForParty(searchParams), paramsWithToken);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
-        log(r.json().data.searchDialogs.items, traceCalls, endUser, r.timings.duration);
+        log(r.json().data?.searchDialogs?.items, traceCalls, endUser, r.timings.duration);
     });
 }
 

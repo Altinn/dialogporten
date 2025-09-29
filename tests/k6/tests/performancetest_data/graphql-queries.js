@@ -1,4 +1,4 @@
-export const getAllDialogsForPartyQuery = {
+const getAllDialogsForPartyQuery = {
   query: `query getAllDialogsForParties(
                    $partyURIs: [String!], 
                    $serviceResource: [String!],
@@ -40,7 +40,8 @@ export const getAllDialogsForPartyQuery = {
                                 ...SearchDialogFields
                                 }
                             hasNextPage
-                            continuationToken  
+                            continuationToken 
+                            errors { message }
                           }
                     }
                           
@@ -102,8 +103,63 @@ export const getAllDialogsForPartyQuery = {
   variables: {},
 };
 
+const getAllDialogsForCountQuery = {
+  query: `query getAllDialogsForCount($partyURIs: [String!], $search: String, $org: [String!], $status: [DialogStatus!], $label: [SystemLabel!], $createdAfter: DateTime, $createdBefore: DateTime, $updatedAfter: DateTime, $updatedBefore: DateTime, $limit: Int) {\n  searchDialogs(\n    input: {party: $partyURIs, search: $search, org: $org, status: $status, orderBy: {createdAt: null, updatedAt: null, dueAt: null, contentUpdatedAt: DESC}, systemLabel: $label, createdAfter: $createdAfter, createdBefore: $createdBefore, updatedAfter: $updatedAfter, updatedBefore: $updatedBefore, limit: $limit, excludeApiOnly: true}\n  ) {\n    items {\n      ...CountableDialogFields\n    }\n    hasNextPage\n errors { message }  }\n}\n\nfragment CountableDialogFields on SearchDialog {\n  id\n  org\n  party\n  updatedAt\n  status\n  endUserContext {\n    systemLabels\n  }\n  seenSinceLastContentUpdate {\n    isCurrentEndUser\n  }\n}`,
+  variables: {},
+};
+
+const partiesQuery = {
+  query: `
+        query parties {
+            parties {
+            ...partyFields
+                subParties {
+                ...subPartyFields
+                }
+            }
+        }
+            
+        fragment partyFields on AuthorizedParty {
+            party
+            hasOnlyAccessToSubParties
+            partyType
+            subParties {
+                ...subPartyFields
+                }
+            isAccessManager
+            isMainAdministrator
+            name
+            isCurrentEndUser
+            isDeleted
+            partyUuid
+        }
+            
+        fragment subPartyFields on AuthorizedSubParty {
+            party
+            partyType
+            isAccessManager
+            isMainAdministrator
+            name
+            isCurrentEndUser
+            isDeleted
+            partyUuid
+        }`,
+}
+
+
 export function getGraphqlRequestBodyForAllDialogsForParty(variables) {
   let request = JSON.parse(JSON.stringify(getAllDialogsForPartyQuery));
   request.variables = {...request.variables, ...variables};
+  return request;
+}
+
+export function getGraphqlRequestBodyForAllDialogsForCount(variables) {
+  let request = JSON.parse(JSON.stringify(getAllDialogsForCountQuery));
+  request.variables = {...request.variables, ...variables};
+  return request;
+}
+
+export function getPartiesRequestBody() {
+  let request = JSON.parse(JSON.stringify(partiesQuery));
   return request;
 }

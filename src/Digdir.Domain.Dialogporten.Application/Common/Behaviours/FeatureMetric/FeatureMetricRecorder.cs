@@ -11,6 +11,7 @@ internal sealed class FeatureMetricRecorder
 
 internal sealed record FeatureMetricRecord(
     string FeatureName,
+    bool HasAdminScope = false,
     string? Environment = FeatureMetricRecord.UnknownValue,
     string? PerformerOrg = FeatureMetricRecord.UnknownValue,
     string? OwnerOrg = FeatureMetricRecord.UnknownValue,

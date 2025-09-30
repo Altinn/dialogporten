@@ -23,6 +23,7 @@ public partial class Queries
         return result.Match(
             dialog => new DialogByIdPayload { Dialog = mapper.Map<Dialog>(dialog) },
             notFound => new DialogByIdPayload { Errors = [new DialogByIdNotFound { Message = notFound.Message }] },
+            notVisible => new DialogByIdPayload { Errors = [new DialogByIdNotFound { Message = notVisible.Message }] },
             deleted => new DialogByIdPayload { Errors = [new DialogByIdDeleted { Message = deleted.Message }] },
             forbidden =>
             {

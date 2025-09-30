@@ -27,7 +27,14 @@ internal sealed class FeatureMetricServiceResourceCache(
 
         var serviceResource = await _cache.GetOrSetAsync<string?>(
             cacheKey,
-            (_, ct) => GetServiceResourceFromDb(dialogId, ct),
+            async (ctx, ct) =>
+            {
+                var serviceResource = await GetServiceResourceFromDb(dialogId, ct);
+                if (serviceResource is not null) return serviceResource;
+                ctx.Options.SetDuration(TimeSpan.Zero);
+                ctx.Options.IsFailSafeEnabled = false;
+                return serviceResource;
+            },
             token: cancellationToken);
 
         return serviceResource is not null

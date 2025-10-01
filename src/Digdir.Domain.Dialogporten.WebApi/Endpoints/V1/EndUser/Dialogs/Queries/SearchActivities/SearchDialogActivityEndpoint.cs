@@ -1,4 +1,6 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchActivities;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -7,7 +9,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.SearchActivities;
 
-public sealed class SearchDialogActivityEndpoint : Endpoint<SearchActivityQuery, List<ActivityDto>>
+public sealed class SearchDialogActivityEndpoint : Endpoint<SearchActivityRequest, List<ActivityDto>>
 {
     private readonly ISender _sender;
 
@@ -27,13 +29,27 @@ public sealed class SearchDialogActivityEndpoint : Endpoint<SearchActivityQuery,
             StatusCodes.Status404NotFound));
     }
 
-    public override async Task HandleAsync(SearchActivityQuery req, CancellationToken ct)
+    public override async Task HandleAsync(SearchActivityRequest req, CancellationToken ct)
     {
-        var result = await _sender.Send(req, ct);
+        var query = new SearchActivityQuery
+        {
+            DialogId = req.DialogId,
+            AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
+        };
+
+        var result = await _sender.Send(query, ct);
         await result.Match(
             dto => SendOkAsync(dto, ct),
             notFound => this.NotFoundAsync(notFound, ct),
             deleted => this.GoneAsync(deleted, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct));
     }
+}
+
+public sealed class SearchActivityRequest
+{
+    public Guid DialogId { get; set; }
+
+    [FromHeader(Constants.AcceptLanguage, isRequired: false)]
+    public AcceptedLanguages? AcceptedLanguages { get; set; } = null;
 }

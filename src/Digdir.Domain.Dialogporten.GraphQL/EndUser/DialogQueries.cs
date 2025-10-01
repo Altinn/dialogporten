@@ -15,6 +15,7 @@ public partial class Queries
     public async Task<DialogByIdPayload> GetDialogById(
         [Service] ISender mediator,
         [Service] IMapper mapper,
+        [Service] IHttpContextAccessor httpContextAccessor,
         [Argument] Guid dialogId,
         CancellationToken cancellationToken)
     {
@@ -23,16 +24,24 @@ public partial class Queries
         return result.Match(
             dialog => new DialogByIdPayload { Dialog = mapper.Map<Dialog>(dialog) },
             notFound => new DialogByIdPayload { Errors = [new DialogByIdNotFound { Message = notFound.Message }] },
-            notVisible => new DialogByIdPayload
+            notVisible =>
             {
-                Errors =
-                [
-                    new DialogByIdNotVisible()
-                    {
-                        Message = notVisible.Message,
-                        VisibleFrom = notVisible.VisibleFrom
-                    }
-                ]
+                if (httpContextAccessor.HttpContext != null)
+                {
+                    httpContextAccessor.HttpContext.Response.Headers.Expires = notVisible.VisibleFrom.ToString("R");
+                }
+
+                return new DialogByIdPayload
+                {
+                    Errors =
+                    [
+                        new DialogByIdNotVisible()
+                        {
+                            Message = notVisible.Message,
+                            VisibleFrom = notVisible.VisibleFrom
+                        }
+                    ]
+                };
             },
             deleted => new DialogByIdPayload { Errors = [new DialogByIdDeleted { Message = deleted.Message }] },
             forbidden =>

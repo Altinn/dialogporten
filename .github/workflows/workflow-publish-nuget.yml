@@ -15,6 +15,11 @@ on:
         description: "Nuget Source"
         required: true
         type: string
+      ref:
+        description: "The branch or tag ref to publish. Using default checkout ref if not provided."
+        required: false
+        default: ${{ github.ref }}
+        type: string
     secrets:
       NUGET_API_KEY:
         required: true
@@ -34,6 +39,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0

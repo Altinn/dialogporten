@@ -9,7 +9,7 @@
         <PackageReference Include="HotChocolate.Diagnostics" Version="15.1.8"/>
         <PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.8"/>
         <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.8"/>
-        <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.3.0" />
+        <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.4.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0"/>
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
     </ItemGroup>

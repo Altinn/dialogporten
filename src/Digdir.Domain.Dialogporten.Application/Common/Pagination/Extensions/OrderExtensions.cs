@@ -6,12 +6,12 @@ using System.Linq.Expressions;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 
-internal static class OrderExtensions
+public static class OrderExtensions
 {
     public static OrderSet<TOrderDefinition, TTarget> DefaultIfNull<TOrderDefinition, TTarget>(this OrderSet<TOrderDefinition, TTarget>? orderSet)
         where TOrderDefinition : IOrderDefinition<TTarget> => orderSet ?? OrderSet<TOrderDefinition, TTarget>.Default;
 
-    public static IQueryable<T> ApplyOrder<T>(this IQueryable<T> query, IOrderSet<T> orderSet)
+    internal static IQueryable<T> ApplyOrder<T>(this IQueryable<T> query, IOrderSet<T> orderSet)
     {
         var first = true;
 
@@ -43,7 +43,7 @@ internal static class OrderExtensions
         };
     }
 
-    public static IQueryable<T> ApplyCondition<T>(this IQueryable<T> query, IOrderSet<T> orderSet, IContinuationTokenSet? continuationTokenSet)
+    internal static IQueryable<T> ApplyCondition<T>(this IQueryable<T> query, IOrderSet<T> orderSet, IContinuationTokenSet? continuationTokenSet)
     {
         if (continuationTokenSet is null)
         {

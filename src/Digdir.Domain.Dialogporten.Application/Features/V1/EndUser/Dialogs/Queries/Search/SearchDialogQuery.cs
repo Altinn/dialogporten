@@ -261,5 +261,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
 public interface IDialogRepository
 {
-    Task<List<Guid>> GetRelevantGuids(SearchDialogQuery query, DialogSearchAuthorizationResult authorizedResources, CancellationToken cancellationToken);
+    Task<PaginatedList<Guid>> GetRelevantGuids(SearchDialogQuery query,
+        DialogSearchAuthorizationResult authorizedResources,
+        CancellationToken cancellationToken);
 }

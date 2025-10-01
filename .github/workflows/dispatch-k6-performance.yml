@@ -57,6 +57,12 @@ on:
           - 'tests/k6/tests/enduser/performance/enduserRandomSearch.js'
           - 'tests/k6/tests/graphql/performance/graphqlRandomSearch.js'
           - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduser.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForParties.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduserFTS.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForPartiesFTS.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForParties.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduserAutoCompleteFTS.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForPartiesAutoCompleteFTS.js'
 
 run-name: ${{ inputs.tag }} ${{ inputs.vus }}/${{ inputs.duration }}/${{ inputs.parallelism }}
 

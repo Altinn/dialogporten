@@ -3,7 +3,7 @@
  * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduserAutoCompleteFTS.js --vus 1 --iterations 1 -e env=yt01
  */
 
-import { getOptions, _setup, log, createBodyForAllDialogsForPartyAutoCompleteFts } from './graphqlCommonFunctions.js';
+import { getOptions, _setup, log, createBodyForAllDialogsForEnduserAutoCompleteFts } from './graphqlCommonFunctions.js';
 import { getEndUserTokens } from '../../../common/token.js';
 import { randomItem } from '../../../common/k6-utils.js';
 import { expect, expectStatusFor } from "../../../common/testimports.js";
@@ -56,7 +56,7 @@ export default function(data) {
 function search(endUser, paramsWithToken, term) { 
   
   describe('Perform graphql dialog list', () => {
-    let r = postGQ(createBodyForAllDialogsForPartyAutoCompleteFts(endUser, term), paramsWithToken);
+    let r = postGQ(createBodyForAllDialogsForEnduserAutoCompleteFts(endUser, term), paramsWithToken);
     expectStatusFor(r).to.equal(200);
     expect(r, 'response').to.have.validJsonBody();
     log(r.json(), endUser, r.timings.duration);

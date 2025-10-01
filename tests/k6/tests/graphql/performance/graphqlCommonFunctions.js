@@ -174,16 +174,16 @@ function getPartiesFromResponse(json, all) {
 
 export function createBody(endUser, type) {
   switch (type) {
-    case "getAllDialogsForParty":
-      return createBodyForAllDialogsForParty(endUser);
-    case "getAllDialogsForCount":
-      return createBodyForAllDialogsForCount(endUser);
+    case "getAllDialogsForEnduser":
+      return createBodyForAllDialogsForEnduser(endUser);
+    case "getAllDialogsForEnduserCount":
+      return createBodyForAllDialogsForEnduserCount(endUser);
     case "getParties":
       return createBodyForParties();
-    case "getAllDialogsForPartyFts":
-      return createBodyForAllDialogsForPartyFts(endUser);
+    case "getAllDialogsForEnduserFts":
+      return createBodyForAllDialogsForEnduserFts(endUser);
     default:
-      return createBodyForAllDialogsForParty(endUser);
+      return createBodyForAllDialogsForEnduser(endUser);
   }
 }
 
@@ -194,6 +194,7 @@ export function createBodyForMultiParties(parties, type) {
     case "getAllDialogsForPartiesFts":
       return createBodyForAllDialogsForPartiesFts(parties);
     case "getAllDialogsForPartiesForCount":
+    case "getAllDialogsForPartyForCount":
       return createBodyForAllDialogsForPartiesForCount(parties);
     default:
       return createBodyForAllDialogsForParties(parties);
@@ -227,7 +228,7 @@ function createBodyForAllDialogsForPartiesForCount(parties, all) {
   return getGraphqlRequestBodyForAllDialogsForCount(variables);
 }
 
-function createBodyForAllDialogsForParty(endUser) {
+function createBodyForAllDialogsForEnduser(endUser) {
   const variables = {
     partyURIs: [`urn:altinn:person:identifier-no:${endUser}`],
     limit: 100,
@@ -237,7 +238,7 @@ function createBodyForAllDialogsForParty(endUser) {
   return getGraphqlRequestBodyForAllDialogsForParty(variables);
 }
 
-function createBodyForAllDialogsForPartyFts(endUser) {
+function createBodyForAllDialogsForEnduserFts(endUser) {
   const variables = {
     partyURIs: [`urn:altinn:person:identifier-no:${endUser}`],
     limit: 100,
@@ -246,7 +247,7 @@ function createBodyForAllDialogsForPartyFts(endUser) {
   return getGraphqlRequestBodyForAllDialogsForParty(variables);
 }
 
-export function createBodyForAllDialogsForPartyAutoCompleteFts(endUser, term) {
+export function createBodyForAllDialogsForEnduserAutoCompleteFts(endUser, term) {
   const variables = {
     partyURIs: [`urn:altinn:person:identifier-no:${endUser}`],
     limit: 100,
@@ -264,7 +265,7 @@ export function createBodyForAllDialogsForPartiesAutoCompleteFts(parties, term) 
   return getSearchAutoCompleteRequestBody(variables);
 }
 
-function createBodyForAllDialogsForCount(endUser) {
+function createBodyForAllDialogsForEnduserCount(endUser) {
   const variables = {
     partyURIs: [`urn:altinn:person:identifier-no:${endUser}`],
     limit: 1000,

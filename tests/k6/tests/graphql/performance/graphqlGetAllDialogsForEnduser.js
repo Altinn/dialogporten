@@ -5,8 +5,8 @@
 
 import { _default, getOptions, _setup } from './graphqlCommonFunctions.js';
 
-const label = "graphql-getall-dialogs-for-party";
-const queryType = "getAllDialogsForParty"
+const label = "graphql-getall-dialogs-for-enduser";
+const queryType = "getAllDialogsForEnduser"
 
 export const options = getOptions([label]);
 export function setup() { return _setup(label, queryType); }

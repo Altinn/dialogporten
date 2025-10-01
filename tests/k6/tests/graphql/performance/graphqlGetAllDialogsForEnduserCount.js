@@ -4,8 +4,8 @@
  */
 import { _default, getOptions, _setup } from './graphqlCommonFunctions.js';
 
-const label = "graphql-getall-dialogs-for-count";
-const queryType = "getAllDialogsForCount";
+const label = "graphql-getall-dialogs-for-enduser-count";
+const queryType = "getAllDialogsForEnduserCount";
 const labels = [label];
 
 export const options = getOptions(labels);

@@ -1,6 +1,5 @@
 /**
- * The performance test for GraphQL search.
- * Run: k6 run tests/k6/tests/graphql/performance/graphql-search.js --vus 1 --iterations 1 -e env=yt01
+ * Common functions for GraphQL performance tests.
  */
 import { randomItem } from '../../../common/k6-utils.js';
 import { getEndUserTokens } from '../../../common/token.js';

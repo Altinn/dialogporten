@@ -1,6 +1,6 @@
 /**
  * The performance test for GraphQL search.
- * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetAllDialogsForParty.js --vus 1 --iterations 1 -e env=yt01
+ * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduserAutoCompleteFTS.js --vus 1 --iterations 1 -e env=yt01
  */
 
 import { getOptions, _setup, log, createBodyForAllDialogsForPartyAutoCompleteFts } from './graphqlCommonFunctions.js';

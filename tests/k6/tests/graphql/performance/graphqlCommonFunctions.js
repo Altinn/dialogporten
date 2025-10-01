@@ -183,8 +183,6 @@ export function createBody(endUser, type) {
       return createBodyForParties();
     case "getAllDialogsForPartyFts":
       return createBodyForAllDialogsForPartyFts(endUser);
-    case "getAllDialogsForPartyAutoCompleteFts":
-      return createBodyForAllDialogsForPartyAutoCompleteFts(endUser);
     default:
       return createBodyForAllDialogsForParty(endUser);
   }
@@ -196,12 +194,8 @@ export function createBodyForMultiParties(parties, type) {
       return createBodyForAllDialogsForParties(parties);
     case "getAllDialogsForPartiesFts":
       return createBodyForAllDialogsForPartiesFts(parties);
-    case "getAllDialogsForParties":
-      return createBodyForAllDialogsForParties(parties);
     case "getAllDialogsForPartiesForCount":
       return createBodyForAllDialogsForPartiesForCount(parties);
-    case "getAllDialogsForPartiesAutoCompleteFts":
-      return createBodyForAllDialogsForPartiesFts(parties);
     default:
       return createBodyForAllDialogsForParties(parties);
   }

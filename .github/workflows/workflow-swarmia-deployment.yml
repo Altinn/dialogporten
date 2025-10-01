@@ -28,14 +28,21 @@ jobs:
     - name: Send deployment to Swarmia
       run: |
         JSON_STRING=$( jq --null-input --compact-output \
-          --arg version "${{ inputs.version }}" \
-          --arg appName "${{ inputs.app-name }}" \
-          --arg environment "${{ inputs.environment }}" \
-          --arg commitSha "${{ github.sha }}" \
-          --arg repositoryFullName "${{ github.repository }}" \
+          --arg version "$VERSION" \
+          --arg appName "$APP_NAME" \
+          --arg environment "$ENVIRONMENT" \
+          --arg commitSha "$COMMIT_SHA" \
+          --arg repositoryFullName "$REPOSITORY_FULL_NAME" \
           '{"version": $version, "appName": $appName, "environment": $environment, "commitSha": $commitSha, "repositoryFullName": $repositoryFullName}' )
 
-        curl -H "Authorization: ${{ secrets.token }}" \
+        curl -H "Authorization: ${SWARMIA_TOKEN}" \
           -H "Content-Type: application/json" \
           -d "$JSON_STRING" \
           https://hook.swarmia.com/deployments
+      env:
+        VERSION: ${{ inputs.version }}
+        APP_NAME: ${{ inputs.app-name }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        COMMIT_SHA: ${{ github.sha }}
+        REPOSITORY_FULL_NAME: ${{ github.repository }}
+        SWARMIA_TOKEN: ${{ secrets.token }}

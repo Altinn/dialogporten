@@ -37,6 +37,7 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
                 return SendOkAsync(dto, ct);
             },
             notFound => this.NotFoundAsync(notFound, ct),
+            notVisible => this.NotVisibleAsync(notVisible, ct),
             deleted => this.GoneAsync(deleted, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct));
     }

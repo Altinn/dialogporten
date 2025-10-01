@@ -8,6 +8,6 @@ import { _default, getOptions, _setup } from './graphqlCommonFunctions.js';
 const label = "graphql-get-parties";
 const queryType = "getParties"
 
-export const options = getOptions(label);
+export const options = getOptions([label]);
 export function setup() { return _setup(label, queryType); }
 export default function (data) { _default(data); }

@@ -56,7 +56,9 @@ function get_query_params(endUser) {
 function get_filter_value(filter, label, endUser) {
     switch (filter) {
         case "serviceResource": return ["urn:altinn:resource:" +randomItem(resources)];
-        case "party": return ["urn:altinn:person:identifier-no:" +endUser];
+        case "party":
+        case "partyURIs": 
+          return ["urn:altinn:person:identifier-no:" +endUser];
         case "status": return ["NOT_APPLICABLE", "IN_PROGRESS", "AWAITING", "REQUIRES_ATTENTION", "COMPLETED"] ;
         case "createdAfter": return new Date(Date.now() - 7*24*60*60*1000).toISOString();
         case "createdBefore": return new Date(Date.now() - 7*24*60*60*1000).toISOString();

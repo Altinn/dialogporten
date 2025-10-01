@@ -34,6 +34,7 @@ public static class ServiceCollectionExtensions
             .AddType<BulkSetSystemLabelConcurrencyError>()
             .AddType<SearchDialogOrderByParsingError>()
             .AddType<SearchDialogContinuationTokenParsingError>()
+            .AddType<DialogByIdNotVisible>()
             .AddMaxExecutionDepthRule(12)
             .AddInstrumentation()
             .InitializeOnStartup()

@@ -242,6 +242,11 @@ type DialogByIdNotFound implements DialogByIdError {
   message: String!
 }
 
+type DialogByIdNotVisible implements DialogByIdError {
+  message: String!
+  visibleFrom: DateTime!
+}
+
 type DialogByIdPayload {
   dialog: Dialog
   errors: [DialogByIdError!]!

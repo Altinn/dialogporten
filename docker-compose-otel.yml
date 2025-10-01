@@ -54,7 +54,7 @@ services:
 
   # Grafana for metrics visualization
   grafana:
-    image: grafana/grafana:11.6.3
+    image: grafana/grafana:11.6.6
     ports:
       - "3000:3000"
     environment:

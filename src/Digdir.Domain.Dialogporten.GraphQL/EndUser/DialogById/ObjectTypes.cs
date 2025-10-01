@@ -23,7 +23,6 @@ public sealed class DialogByIdNotVisible : IDialogByIdError
 {
     public string Message { get; set; } = null!;
     public DateTimeOffset VisibleFrom { get; set; }
-
 }
 
 public sealed class DialogByIdForbidden : IDialogByIdError

@@ -23,7 +23,7 @@ public static class ClaimsPrincipalExtensions
     private const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
-    private const string AltinnOrgClaim = "urn:altinn:org";
+    public const string AltinnOrgClaim = "urn:altinn:org";
     private const string ScopeClaim = "scope";
     private const char ScopeClaimSeparator = ' ';
     private const string PidClaim = "pid";

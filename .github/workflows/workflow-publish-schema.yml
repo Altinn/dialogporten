@@ -49,15 +49,17 @@ jobs:
       - name: Check if version exists on NPM
         id: check-published-version
         run: |
-          if npm view "${{ env.PACKAGE_NAME }}@${{ inputs.version }}" > /dev/null 2>&1; then
+          if npm view "${PACKAGE_NAME}@${VERSION}" > /dev/null 2>&1; then
             echo "version-exists=true" >> $GITHUB_OUTPUT
-            echo "Version ${{ inputs.version }} already exists"
+            echo "Version ${VERSION} already exists"
           else
             echo "version-exists=false" >> $GITHUB_OUTPUT
-            echo "Version ${{ inputs.version }} does not exist"
+            echo "Version ${VERSION} does not exist"
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PACKAGE_NAME: ${{ env.PACKAGE_NAME }}
+          VERSION: ${{ inputs.version }}
 
   publish-schema-to-npm:
     runs-on: ubuntu-latest
@@ -79,8 +81,10 @@ jobs:
 
       - name: Update package version
         run: |
-          jq '.version = "${{ inputs.version }}"' package.json > temp.json
+          jq --arg version "$VERSION" '.version = $version' package.json > temp.json
           mv temp.json package.json
+        env:
+          VERSION: ${{ inputs.version }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Publish package

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.83.1](https://github.com/Altinn/dialogporten/compare/v1.83.0...v1.83.1) (2025-10-02)
+
+
+### Bug Fixes
+
+* **janitor:** Add claims to ConsoleUser ([#2807](https://github.com/Altinn/dialogporten/issues/2807)) ([f342a64](https://github.com/Altinn/dialogporten/commit/f342a641716284abd5f75faaa3b1422a1955c97d))
+
 ## [1.83.0](https://github.com/Altinn/dialogporten/compare/v1.82.0...v1.83.0) (2025-10-02)
 
 

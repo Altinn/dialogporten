@@ -42,8 +42,7 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
     }
 }
 
-public sealed class
-    SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
+public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
 {
     private readonly string? _searchLanguageCode;
 

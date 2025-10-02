@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.83.0](https://github.com/Altinn/dialogporten/compare/v1.82.0...v1.83.0) (2025-10-02)
+
+
+### Features
+
+* **web-api:** Add hint in details response that a dialog is not yet visible ([#2802](https://github.com/Altinn/dialogporten/issues/2802)) ([85cf00f](https://github.com/Altinn/dialogporten/commit/85cf00f4b5d03c822ba731fb5704781a4d207902))
+
+
+### Bug Fixes
+
+* **app:** prevents caching of serviceResource if result from DB is null ([#2792](https://github.com/Altinn/dialogporten/issues/2792)) ([15685cd](https://github.com/Altinn/dialogporten/commit/15685cd03cf186c76e800888814a7693c45161c7))
+* **graphql:** Add missing SetSystemLabel errors to schema ([#2805](https://github.com/Altinn/dialogporten/issues/2805)) ([e11e170](https://github.com/Altinn/dialogporten/commit/e11e1705b7280d26caa07c72b688d853cbc2a279))
+
+
+### Miscellaneous Chores
+
+* **app:** Add admin scope tracking to feature metrics ([#2794](https://github.com/Altinn/dialogporten/issues/2794)) ([bdd8ea6](https://github.com/Altinn/dialogporten/commit/bdd8ea66d940d95d51055c1b4a93083d06909886))
+* **ci:** Refactor GitHub workflows to use environment variables for inputs and secrets ([#2803](https://github.com/Altinn/dialogporten/issues/2803)) ([415c3d7](https://github.com/Altinn/dialogporten/commit/415c3d709f52d246f0497c722bed5e224257a5f3))
+* **deps:** update azure/cli action to v2.2.0 ([#2798](https://github.com/Altinn/dialogporten/issues/2798)) ([fa863be](https://github.com/Altinn/dialogporten/commit/fa863bed67265628464e4cae2464772eea6abd54))
+* **deps:** update dependency refitter.sourcegenerator to 1.6.4 ([#2796](https://github.com/Altinn/dialogporten/issues/2796)) ([9c8d3af](https://github.com/Altinn/dialogporten/commit/9c8d3af7514f9a9d45f20f5298b81ba345801ae2))
+* **deps:** update dotnet monorepo ([#2795](https://github.com/Altinn/dialogporten/issues/2795)) ([b2dac78](https://github.com/Altinn/dialogporten/commit/b2dac78c7ec10c518142ad704b7a7577deb871f7))
+
 ## [1.82.0](https://github.com/Altinn/dialogporten/compare/v1.81.2...v1.82.0) (2025-09-30)
 
 

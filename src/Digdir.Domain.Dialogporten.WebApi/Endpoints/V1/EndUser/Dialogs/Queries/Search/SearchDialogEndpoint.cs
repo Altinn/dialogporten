@@ -32,34 +32,9 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
 
     public override async Task HandleAsync(SearchDialogRequest req, CancellationToken ct)
     {
-        var query = new SearchDialogQuery
-        {
-            Org = req.Org,
-            ServiceResource = req.ServiceResource,
-            Party = req.Party,
-            ExtendedStatus = req.ExtendedStatus,
-            ExternalReference = req.ExternalReference,
-            Status = req.Status,
-            CreatedAfter = req.CreatedAfter,
-            CreatedBefore = req.CreatedBefore,
-            UpdatedAfter = req.UpdatedAfter,
-            UpdatedBefore = req.UpdatedBefore,
-            ContentUpdatedAfter = req.ContentUpdatedAfter,
-            ContentUpdatedBefore = req.ContentUpdatedBefore,
-            DueAfter = req.DueAfter,
-            DueBefore = req.DueBefore,
-            Process = req.Process,
-            SystemLabel = req.SystemLabel,
-            ExcludeApiOnly = req.ExcludeApiOnly,
-            Search = req.Search,
-            SearchLanguageCode = req.SearchLanguageCode,
-            OrderBy = req.OrderBy,
-            Limit = req.Limit,
-            ContinuationToken = req.ContinuationToken,
-            AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
-        };
-
+        var query = req.ToSearchDialogQuery();
         var result = await _sender.Send(query, ct);
+
         await result.Match(
             paginatedDto => SendOkAsync(paginatedDto, ct),
             validationError => this.BadRequestAsync(validationError, ct),
@@ -67,7 +42,8 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
     }
 }
 
-public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
+public sealed class
+    SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
 {
     private readonly string? _searchLanguageCode;
 

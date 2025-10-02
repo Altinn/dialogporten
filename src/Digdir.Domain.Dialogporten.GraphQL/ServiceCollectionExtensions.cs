@@ -10,22 +10,21 @@ namespace Digdir.Domain.Dialogporten.GraphQL;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDialogportenGraphQl(this IServiceCollection services)
-    => services
-            .AddGraphQLServer()
-            .ModifyCostOptions(o => o.ApplyCostDefaults = false)
-            // This assumes that subscriptions have been set up by the infrastructure
-            .AddSubscriptionType<Subscriptions>()
-            .AddAuthorization()
-            .RegisterDbContextFactory<DialogDbContext>()
-            .AddFluentValidation()
-            .AddQueryType<Queries>()
-            .AddMutationType<Mutations>()
-            .AddErrorTypes()
-            .AddMaxExecutionDepthRule(12)
-            .AddInstrumentation()
-            .InitializeOnStartup()
-            .Services;
+    public static IServiceCollection AddDialogportenGraphQl(this IServiceCollection services) => services
+        .AddGraphQLServer()
+        .ModifyCostOptions(o => o.ApplyCostDefaults = false)
+        // This assumes that subscriptions have been set up by the infrastructure
+        .AddSubscriptionType<Subscriptions>()
+        .AddAuthorization()
+        .RegisterDbContextFactory<DialogDbContext>()
+        .AddFluentValidation()
+        .AddQueryType<Queries>()
+        .AddMutationType<Mutations>()
+        .AddErrorTypes()
+        .AddMaxExecutionDepthRule(12)
+        .AddInstrumentation()
+        .InitializeOnStartup()
+        .Services;
 }
 
 internal static class IRequestExecutorBuilderExtensions

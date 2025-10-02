@@ -11,7 +11,7 @@ public sealed class ConsoleUser : IUser
     {
         var claims = new[]
         {
-            new Claim("scope", AuthorizationScope.ServiceOwnerAdminScope),
+            new Claim(ClaimsPrincipalExtensions.ScopeClaim, AuthorizationScope.ServiceOwnerAdminScope),
             new Claim(ClaimsPrincipalExtensions.AltinnOrgClaim, "digdir")
         };
         var identity = new ClaimsIdentity(claims);

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.83.2](https://github.com/Altinn/dialogporten/compare/v1.83.1...v1.83.2) (2025-10-02)
+
+
+### Miscellaneous Chores
+
+* **otel:** Disable tracing of successful SQL statements ([#2810](https://github.com/Altinn/dialogporten/issues/2810)) ([7961cfa](https://github.com/Altinn/dialogporten/commit/7961cfa482bf9d85e346f53bf749d27f2918af39))
+
 ## [1.83.1](https://github.com/Altinn/dialogporten/compare/v1.83.0...v1.83.1) (2025-10-02)
 
 

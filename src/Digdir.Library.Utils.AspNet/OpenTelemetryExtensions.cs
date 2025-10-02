@@ -52,7 +52,7 @@ public static class OpenTelemetryExtensions
                     tracing.SetSampler(new AlwaysOnSampler());
                 }
 
-                tracing.AddProcessor(new PostgresExceptionFilter());
+                tracing.AddProcessor(new PostgresFilter());
 
                 tracing
                     .AddHttpClientInstrumentation(o =>

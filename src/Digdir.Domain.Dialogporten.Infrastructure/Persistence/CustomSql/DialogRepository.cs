@@ -1,46 +1,22 @@
 using System.Text.Json;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.CustomSql;
 
-internal sealed class DialogRepository : IDialogRepository
+internal sealed class DialogRepository(DialogDbContext db, IClock clock) : IDialogRepository
 {
-    private readonly DialogDbContext _db;
+    private readonly DialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
+    private readonly IClock _clock = clock ?? throw new ArgumentNullException(nameof(clock));
 
-    public DialogRepository(DialogDbContext db)
+    public IQueryable<DialogEntity> GetRelevantGuids(SearchDialogQuery2 query, DialogSearchAuthorizationResult authorizedResources)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-    }
-
-    public async Task<PaginatedList<Guid>> GetRelevantGuids(SearchDialogQuery query, DialogSearchAuthorizationResult authorizedResources, CancellationToken cancellationToken)
-    {
-        var systemLabels = query.SystemLabel;
-        var now = DateTimeOffset.UtcNow;
-        var org = query.Org;
-        var serviceResource = query.ServiceResource;
-        var party = query.Party;
-        var extendedStatus = query.ExtendedStatus;
-        var externalReference = query.ExternalReference;
-        var status = query.Status;
-        var createdAfter = query.CreatedAfter;
-        var createdBefore = query.CreatedBefore;
-        var updatedAfter = query.UpdatedAfter;
-        var updatedBefore = query.UpdatedBefore;
-        var contentUpdatedAfter = query.ContentUpdatedAfter;
-        var contentUpdatedBefore = query.ContentUpdatedBefore;
-        var dueAfter = query.DueAfter;
-        var dueBefore = query.DueBefore;
-        var process = query.Process;
-        var excludeApiOnly = query.ExcludeApiOnly;
-        var search = query.Search;
-        var systemLabel = query.SystemLabel;
-
-        var tagSearch = search?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var now = _clock.UtcNowOffset;
+        var tagSearch = query.Search?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var partiesAndServices = JsonSerializer.Serialize(authorizedResources.ResourcesByParties
             .Select(x => (party: x.Key, services: x.Value))
             .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
@@ -52,9 +28,9 @@ internal sealed class DialogRepository : IDialogRepository
 
         // TODO: CREATE INDEX idx_dst_dialogid ON "DialogSearchTag"("DialogId");
         // TODO: CREATE INDEX indexNameHere ON "Dialog"("Party", "ServiceResource") INCLUDING ("Id");
-        var queryBuilder = new FormattableStringBuilder();
-        //language=PostgreSQL
-        queryBuilder.Append(
+        var queryBuilder = new FormattableStringBuilder()
+            //language=PostgreSQL
+            .Append(
                 $"""
                  WITH partyResourceAccess AS (
                      SELECT DISTINCT s.service, p.party
@@ -65,57 +41,52 @@ internal sealed class DialogRepository : IDialogRepository
                      SELECT DISTINCT d."Id"
                      FROM "Dialog" d
                      INNER JOIN partyResourceAccess c ON d."ServiceResource" = c.service AND d."Party" = c.party)
-                 ,systemLabelsByDialog AS (
-                     SELECT d."Id", array_agg(dsl."SystemLabelId") labels
-                     FROM "Dialog" d
-                     INNER JOIN "DialogEndUserContext" dec on d."Id" = dec."DialogId"
+                 ,searchTag AS (
+                     SELECT dst."DialogId"
+                     FROM "DialogSearchTag" dst
+                     WHERE dst."Value" = ANY({tagSearch}::text[])
+                     GROUP BY dst."DialogId"
+                     HAVING COUNT(DISTINCT dst."Value") = cardinality({tagSearch}::text[]))
+                 ,systemLabel AS (
+                     SELECT dec."DialogId"
+                     FROM "DialogEndUserContext" dec
                      INNER JOIN "DialogEndUserContextSystemLabel" dsl on dsl."DialogEndUserContextId" = dec."Id"
-                     WHERE {systemLabels}::int[] is not null AND dsl."SystemLabelId" = ANY({systemLabels}::int[])
-                     GROUP BY d."Id")
-                 ,searchTagsByDialog AS (
-                     SELECT d."Id", array_agg(dst."Value") tags
-                     FROM "Dialog" d
-                     INNER JOIN "DialogSearchTag" dst on d."Id" = dst."DialogId"
-                     WHERE {tagSearch}::text[] is not null AND dst."Value" = ANY({tagSearch}::text[])
-                     GROUP BY d."Id"
+                     WHERE dsl."SystemLabelId" = ANY({query.SystemLabel}::int[])
+                     GROUP BY dec."DialogId"
+                     HAVING COUNT(DISTINCT dsl."SystemLabelId") = cardinality({query.SystemLabel}::int[])
                  )
-                 SELECT d."Id"
+                 SELECT d.*
                  FROM "Dialog" d
                  INNER JOIN accessibleDialogs a ON d."Id" = a."Id"
                  LEFT JOIN "DialogSearch" ds ON ds."DialogId" = d."Id"
-                 LEFT JOIN searchTagsByDialog t on d."Id" = t."Id"
-                 LEFT JOIN systemLabelsByDialog l on l."Id" = d."Id"
-                 WHERE d."Deleted" = false
-                     AND (d."VisibleFrom" IS NULL or d."VisibleFrom" < {now})
-                     AND (d."ExpiresAt" IS NULL or d."ExpiresAt" > {now})
-                 """)
-            .AppendIf(org is not null, $""" AND d."Org" = ANY({org}) """)
-            .AppendIf(serviceResource is not null, $""" AND d."ServiceResource" = ANY({serviceResource}) """)
-            .AppendIf(party is not null, $""" AND d."Party" = ANY({party}) """)
-            .AppendIf(extendedStatus is not null, $""" AND d."ExtendedStatus" = ANY({extendedStatus}) """)
-            .AppendIf(externalReference is not null, $""" AND d."ExternalReference" = {externalReference} """)
-            .AppendIf(status is not null, $""" AND d."StatusId" = ANY({status}) """)
-            .AppendIf(createdAfter is not null, $""" AND {createdAfter} <= d."CreatedAt" """)
-            .AppendIf(createdBefore is not null, $""" AND d."CreatedAt" <= {createdBefore} """)
-            .AppendIf(updatedAfter is not null, $""" AND {updatedAfter} <= d."UpdatedAt" """)
-            .AppendIf(updatedBefore is not null, $""" AND d."UpdatedAt" <= {updatedBefore} """)
-            .AppendIf(contentUpdatedAfter is not null, $""" AND {contentUpdatedAfter} <= d."ContentUpdatedAt" """)
-            .AppendIf(contentUpdatedBefore is not null, $""" AND d."ContentUpdatedAt" <= {contentUpdatedBefore} """)
-            .AppendIf(dueAfter is not null, $""" AND {dueAfter} <= d."DueAt" """)
-            .AppendIf(dueBefore is not null, $""" AND d."DueAt" <= {dueBefore} """)
-            .AppendIf(process is not null, $""" AND d."Process" = {process} """)
-            .AppendIf(excludeApiOnly is not null, $""" AND ({excludeApiOnly} = false OR {excludeApiOnly} = true AND d."IsApiOnly" = false) """)
-            .AppendIf(search is not null, $""" AND ds.search @@ websearch_to_tsquery({search}) """)
-            .AppendIf(search is not null, $""" AND {tagSearch} <@ t.tags """)
-            .AppendIf(systemLabel is not null, $""" AND {systemLabel} <@ l.labels """)
-            .ApplyPaginationCondition(query.OrderBy.DefaultIfNull(), query.ContinuationToken)
-            .ApplyPaginationOrder(query.OrderBy.DefaultIfNull())
-            .ApplyPaginationLimit(query.Limit!.Value + 1);
+                """)
+            // Only join if we need to filter on system labels or tags
+            .AppendIf(query.SystemLabel is not null, """ INNER JOIN systemLabel l on l."DialogId" = d."Id" """)
+            .AppendIf(tagSearch is not null, """ INNER JOIN searchTag t on t."DialogId" = d."Id" """)
+            .Append(
+                $"""
+                WHERE d."Deleted" = false
+                    AND (d."VisibleFrom" IS NULL or d."VisibleFrom" < {now})
+                    AND (d."ExpiresAt" IS NULL or d."ExpiresAt" > {now})
+                """)
+            .AppendIf(query.Org is not null, $""" AND d."Org" = ANY({query.Org}) """)
+            .AppendIf(query.ServiceResource is not null, $""" AND d."ServiceResource" = ANY({query.ServiceResource}) """)
+            .AppendIf(query.Party is not null, $""" AND d."Party" = ANY({query.Party}) """)
+            .AppendIf(query.ExtendedStatus is not null, $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}) """)
+            .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference} """)
+            .AppendIf(query.Status is not null, $""" AND d."StatusId" = ANY({query.Status}) """)
+            .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter} <= d."CreatedAt" """)
+            .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore} """)
+            .AppendIf(query.UpdatedAfter is not null, $""" AND {query.UpdatedAfter} <= d."UpdatedAt" """)
+            .AppendIf(query.UpdatedBefore is not null, $""" AND d."UpdatedAt" <= {query.UpdatedBefore} """)
+            .AppendIf(query.ContentUpdatedAfter is not null, $""" AND {query.ContentUpdatedAfter} <= d."ContentUpdatedAt" """)
+            .AppendIf(query.ContentUpdatedBefore is not null, $""" AND d."ContentUpdatedAt" <= {query.ContentUpdatedBefore} """)
+            .AppendIf(query.DueAfter is not null, $""" AND {query.DueAfter} <= d."DueAt" """)
+            .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore} """)
+            .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process} """)
+            .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly} = false OR {query.ExcludeApiOnly} = true AND d."IsApiOnly" = false) """)
+            .AppendIf(query.Search is not null, $""" AND ds.search @@ websearch_to_tsquery({query.Search}) """);
 
-        var items = await _db.Database
-            .SqlQuery<Guid>(queryBuilder.ToFormattableString())
-            .ToListAsync(cancellationToken);
-
-        return new PaginatedList<Guid>(items, false, null, query.OrderBy.DefaultIfNull().GetOrderString());
+        return _db.Dialogs.FromSql(queryBuilder.ToFormattableString());
     }
 }

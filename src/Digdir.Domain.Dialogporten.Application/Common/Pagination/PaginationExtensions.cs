@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Pagination;
 
-internal static class PaginationExtensions
+public static class PaginationExtensions
 {
     public static Task<PaginatedList<TTarget>> ToPaginatedListAsync<TOrderDefinition, TTarget>
         (this IQueryable<TTarget> queryable,

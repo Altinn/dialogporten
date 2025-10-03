@@ -23,6 +23,16 @@ public sealed class FormattableStringBuilder
         return this;
     }
 
+    public FormattableStringBuilder AppendIf(bool condition, string value)
+    {
+        if (condition)
+        {
+            _format.Append(value.Replace("{", "{{").Replace("}", "}}"));
+        }
+
+        return this;
+    }
+
     public FormattableStringBuilder Append(
         [InterpolatedStringHandlerArgument("")]
         ref FormattableStringHandler handler) => this;

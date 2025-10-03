@@ -1,9 +1,9 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -139,7 +139,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 {
     private readonly IDialogDbContext _db;
     private readonly IMapper _mapper;
-    private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogRepository _dialogRepository;
@@ -147,14 +146,12 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
-        IClock clock,
         IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization,
         IDialogRepository dialogRepository)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _dialogRepository = dialogRepository ?? throw new ArgumentNullException(nameof(dialogRepository));
@@ -162,7 +159,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
-        var searchExpression = Expressions.LocalizedSearchExpression(request.Search, request.SearchLanguageCode);
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
             request.Party ?? [],
             request.ServiceResource ?? [],
@@ -173,42 +169,47 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
-        var dialogIds = await _dialogRepository.GetRelevantGuids(request, authorizedResources, cancellationToken);
-
-        var paginatedList = await _db.Dialogs
-            .PrefilterAuthorizedDialogs(authorizedResources)
+        var paginatedList = await _dialogRepository
+            .GetRelevantGuids(MapIt(request), authorizedResources)
             .AsNoTracking()
-            .Include(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
-            .WhereIf(!request.Org.IsNullOrEmpty(), x => request.Org!.Contains(x.Org))
-            .WhereIf(!request.ServiceResource.IsNullOrEmpty(), x => request.ServiceResource!.Contains(x.ServiceResource))
-            .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
-            .WhereIf(!request.ExtendedStatus.IsNullOrEmpty(), x => x.ExtendedStatus != null && request.ExtendedStatus!.Contains(x.ExtendedStatus))
-            .WhereIf(!string.IsNullOrWhiteSpace(request.ExternalReference),
-                x => x.ExternalReference != null && request.ExternalReference == x.ExternalReference)
-            .WhereIf(!request.Status.IsNullOrEmpty(), x => request.Status!.Contains(x.StatusId))
-            .WhereIf(request.CreatedAfter.HasValue, x => request.CreatedAfter <= x.CreatedAt)
-            .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
-            .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
-            .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
-            .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
-            .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
-            .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
-            .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
-            .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
-            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
-                request.SystemLabel!.All(label =>
-                    x.EndUserContext.DialogEndUserContextSystemLabels
-                        .Any(sl => sl.SystemLabelId == label)))
-            .WhereIf(request.Search is not null, x =>
-                x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
-                x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
-            )
-            .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
-            .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
-            .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
+            .Include(x => x.Content).ThenInclude(x => x.Value.Localizations)
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
             .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
+
+        // var paginatedList = await _db.Dialogs
+        //     .PrefilterAuthorizedDialogs(authorizedResources)
+        //     .AsNoTracking()
+        //     .Include(x => x.Content)
+        //         .ThenInclude(x => x.Value.Localizations)
+        //     .WhereIf(!request.Org.IsNullOrEmpty(), x => request.Org!.Contains(x.Org))
+        //     .WhereIf(!request.ServiceResource.IsNullOrEmpty(), x => request.ServiceResource!.Contains(x.ServiceResource))
+        //     .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
+        //     .WhereIf(!request.ExtendedStatus.IsNullOrEmpty(), x => x.ExtendedStatus != null && request.ExtendedStatus!.Contains(x.ExtendedStatus))
+        //     .WhereIf(!string.IsNullOrWhiteSpace(request.ExternalReference),
+        //         x => x.ExternalReference != null && request.ExternalReference == x.ExternalReference)
+        //     .WhereIf(!request.Status.IsNullOrEmpty(), x => request.Status!.Contains(x.StatusId))
+        //     .WhereIf(request.CreatedAfter.HasValue, x => request.CreatedAfter <= x.CreatedAt)
+        //     .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
+        //     .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
+        //     .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
+        //     .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
+        //     .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
+        //     .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
+        //     .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
+        //     .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
+        //     .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
+        //         request.SystemLabel!.All(label =>
+        //             x.EndUserContext.DialogEndUserContextSystemLabels
+        //                 .Any(sl => sl.SystemLabelId == label)))
+        //     .WhereIf(request.Search is not null, x =>
+        //         x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
+        //         x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
+        //     )
+        //     .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
+        //     .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
+        //     .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
+        //     .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
+        //     .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
         foreach (var dialog in paginatedList.Items)
         {
@@ -257,11 +258,35 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         }
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }
-}
 
-public interface IDialogRepository
-{
-    Task<PaginatedList<Guid>> GetRelevantGuids(SearchDialogQuery query,
-        DialogSearchAuthorizationResult authorizedResources,
-        CancellationToken cancellationToken);
+    private static SearchDialogQuery2 MapIt(SearchDialogQuery request)
+    {
+        return new SearchDialogQuery2
+        {
+            Org = request.Org,
+            ServiceResource = request.ServiceResource,
+            Party = request.Party,
+            ExtendedStatus = request.ExtendedStatus,
+            ExternalReference = request.ExternalReference,
+            Status = request.Status,
+            CreatedAfter = request.CreatedAfter,
+            CreatedBefore = request.CreatedBefore,
+            UpdatedAfter = request.UpdatedAfter,
+            UpdatedBefore = request.UpdatedBefore,
+            ContentUpdatedAfter = request.ContentUpdatedAfter,
+            ContentUpdatedBefore = request.ContentUpdatedBefore,
+            DueAfter = request.DueAfter,
+            DueBefore = request.DueBefore,
+            Process = request.Process,
+            SystemLabel = request.SystemLabel,
+            ExcludeApiOnly = request.ExcludeApiOnly,
+            Search = request.Search,
+            SearchLanguageCode = request.SearchLanguageCode,
+            // Pagination/ordering (inherited from SortablePaginationParameter)
+            Limit = request.Limit,
+            ContinuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition2, DialogEntity>
+                .TryParse(request.ContinuationToken?.Raw, out var ct) ? ct : null,
+            OrderBy = OrderSet<SearchDialogQueryOrderDefinition2, DialogEntity>.Default
+        };
+    }
 }

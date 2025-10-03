@@ -1,6 +1,6 @@
 ﻿namespace Digdir.Domain.Dialogporten.Application.Common;
 
-internal interface IClock
+public interface IClock
 {
     DateTimeOffset UtcNowOffset { get; }
     DateTimeOffset NowOffset { get; }

@@ -53,6 +53,7 @@ public static class OpenTelemetryExtensions
                 }
 
                 tracing.AddProcessor(new PostgresFilter());
+                tracing.AddProcessor(new HealthCheckFilter());
 
                 tracing
                     .AddHttpClientInstrumentation(o =>
@@ -172,7 +173,6 @@ public static class OpenTelemetryExtensions
         return builder.AddAspNetCoreInstrumentation(opts =>
         {
             opts.RecordException = true;
-            opts.Filter = httpContext => !httpContext.Request.Path.StartsWithSegments("/health");
         });
     }
 }

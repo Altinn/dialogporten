@@ -32,7 +32,7 @@ public class CreateTests : TestBed<AuthorizedE2EFixture>
     public async Task Can_Create_Simple_Dialog()
     {
         var createDialogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogsCreateDialog(
+            .V1ServiceOwnerDialogsCommandsCreateDialog(
                 new V1ServiceOwnerDialogsCommandsCreate_Dialog(),
                 CancellationToken.None);
 

@@ -35,7 +35,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var getDialogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogsGetDialog(dialogId, null!, CancellationToken.None);
+            .V1ServiceOwnerDialogsQueriesGetDialog(dialogId, null!, CancellationToken.None);
 
         getDialogResponse.IsSuccessful.Should().BeFalse();
         getDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -48,7 +48,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var transmissionId = Guid.NewGuid();
 
         var getTransmissionResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogTransmissionsGetDialogTransmission(dialogId, transmissionId,
+            .V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(dialogId, transmissionId,
                 CancellationToken.None);
 
         getTransmissionResponse.IsSuccessful.Should().BeFalse();
@@ -58,7 +58,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
     [ConditionalSkipFact]
     public async Task Get_Transmission_With_Valid_DialogId_And_InvalidTransmissionId_Should_Return_NotFound()
     {
-        var createDialogResult = await _serviceownerApi.V1ServiceOwnerDialogsCreateDialog(
+        var createDialogResult = await _serviceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
             new V1ServiceOwnerDialogsCommandsCreate_Dialog
             {
                 ServiceResource = "urn:altinn:resource:super-simple-service",
@@ -83,7 +83,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var transmissionId = Guid.NewGuid();
 
         var getTransmissionResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogTransmissionsGetDialogTransmission(dialogId, transmissionId,
+            .V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(dialogId, transmissionId,
                 CancellationToken.None);
 
         getTransmissionResponse.IsSuccessful.Should().BeFalse();
@@ -96,7 +96,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var searchTransmissionResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogTransmissionsSearchDialogTransmission(dialogId, CancellationToken.None);
+            .V1ServiceOwnerDialogsQueriesSearchTransmissionsDialogTransmission(dialogId, CancellationToken.None);
 
         searchTransmissionResponse.IsSuccessful.Should().BeFalse();
         searchTransmissionResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -109,7 +109,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var activityId = Guid.NewGuid();
 
         var getActivityResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogActivitiesGetDialogActivity(dialogId, activityId, CancellationToken.None);
+            .V1ServiceOwnerDialogsQueriesGetActivityDialogActivity(dialogId, activityId, CancellationToken.None);
 
         getActivityResponse.IsSuccessful.Should().BeFalse();
         getActivityResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -121,7 +121,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var searchActivityResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogActivitiesSearchDialogActivity(dialogId, CancellationToken.None);
+            .V1ServiceOwnerDialogsQueriesSearchActivitiesDialogActivity(dialogId, CancellationToken.None);
 
         searchActivityResponse.IsSuccessful.Should().BeFalse();
         searchActivityResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -134,7 +134,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var seenLogId = Guid.NewGuid();
 
         var getSeenLogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogSeenLogsGetDialogSeenLog(dialogId, seenLogId, CancellationToken.None);
+            .V1ServiceOwnerDialogsQueriesGetSeenLogDialogSeenLog(dialogId, seenLogId, CancellationToken.None);
 
         getSeenLogResponse.IsSuccessful.Should().BeFalse();
         getSeenLogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -181,7 +181,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         };
 
         var updateDialogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogsUpdateDialog(dialogId, updateDialogRequest, null, CancellationToken.None);
+            .V1ServiceOwnerDialogsCommandsUpdateDialog(dialogId, updateDialogRequest, null, CancellationToken.None);
 
         updateDialogResponse.IsSuccessful.Should().BeFalse();
         updateDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -193,7 +193,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var purgeDialogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogsPurgeDialog(dialogId, null, CancellationToken.None);
+            .V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, null, CancellationToken.None);
 
         purgeDialogResponse.IsSuccessful.Should().BeFalse();
         purgeDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -205,7 +205,7 @@ public class NotFoundTests : TestBed<AuthorizedE2EFixture>
         var dialogId = Guid.NewGuid();
 
         var deleteDialogResponse = await _serviceownerApi
-            .V1ServiceOwnerDialogsDeleteDialog(dialogId, null, CancellationToken.None);
+            .V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null, CancellationToken.None);
 
         deleteDialogResponse.IsSuccessful.Should().BeFalse();
         deleteDialogResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);

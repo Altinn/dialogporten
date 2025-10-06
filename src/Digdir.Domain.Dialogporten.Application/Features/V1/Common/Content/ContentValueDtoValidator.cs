@@ -44,7 +44,6 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
 
         RuleFor(x => x.Value)
             .NotEmpty()
-            .When(_ => user!.GetPrincipal().HasScope(CorrespondenceScope))
             .SetValidator(_ =>
             {
                 var maxLength = user!.GetPrincipal().HasScope(CorrespondenceScope)

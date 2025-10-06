@@ -17,6 +17,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 // The validator is manually created in the Create and Update validators
 internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueDto>, IIgnoreOnAssemblyScan
 {
+    private const string CorrespondenceScope = "altinn.dialogporten.correspondence";
     public ContentValueDtoValidator(DialogTransmissionContentType contentType, IUser? user = null)
     {
         var allowedMediaTypes = GetAllowedMediaTypes(contentType, user);
@@ -43,7 +44,14 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
 
         RuleFor(x => x.Value)
             .NotEmpty()
-            .SetValidator(_ => new LocalizationDtosValidator(contentType.MaxLength));
+            .When(_ => user!.GetPrincipal().HasScope(CorrespondenceScope))
+            .SetValidator(_ =>
+            {
+                var maxLength = user!.GetPrincipal().HasScope(CorrespondenceScope)
+                    ? contentType.CorrespondenceMaxLength
+                    : contentType.MaxLength;
+                return new LocalizationDtosValidator(maxLength);
+            });
 
         RuleForEach(x => x.Value)
             .ContainsValidHtml()
@@ -77,7 +85,13 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
 
         RuleFor(x => x.Value)
             .NotEmpty()
-            .SetValidator(_ => new LocalizationDtosValidator(contentType.MaxLength));
+            .SetValidator(_ =>
+            {
+                var maxLength = user!.GetPrincipal().HasScope(CorrespondenceScope)
+                    ? contentType.CorrespondenceMaxLength
+                    : contentType.MaxLength;
+                return new LocalizationDtosValidator(maxLength);
+            });
 
         RuleForEach(x => x.Value)
             .ContainsValidHtml()

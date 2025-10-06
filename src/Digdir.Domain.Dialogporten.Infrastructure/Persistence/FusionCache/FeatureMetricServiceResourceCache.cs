@@ -96,7 +96,7 @@ internal sealed class LockPool
             // If we won the race to add, we own the lock
             if (ReferenceEquals(winnerSource, mySource))
             {
-                return new LockPoolReleaser(this, key);
+                return new LockPoolReleaser(this, key, mySource);
             }
 
             // Otherwise, wait until the current holder releases the lock, or we get canceled
@@ -111,17 +111,20 @@ internal sealed class LockPool
     /// </summary>
     public sealed class LockPoolReleaser : IDisposable
     {
-        private LockPool? _pool;
+        private readonly LockPool _pool;
         private readonly string _key;
+        private readonly TaskCompletionSource _mySource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LockPoolReleaser"/> class.
         /// </summary>
         /// <param name="pool">The <see cref="LockPool"/> that created this releaser.</param>
         /// <param name="key">The key associated with the acquired lock.</param>
-        public LockPoolReleaser(LockPool pool, string key)
+        /// <param name="mySource"></param>
+        public LockPoolReleaser(LockPool pool, string key, TaskCompletionSource mySource)
         {
             _key = key;
+            _mySource = mySource;
             _pool = pool;
         }
 
@@ -130,12 +133,11 @@ internal sealed class LockPool
         /// </summary>
         public void Dispose()
         {
-            if (_pool?._locks.TryRemove(_key, out var source) == true)
+            if (_pool._locks.TryGetValue(_key, out var source) && ReferenceEquals(source, _mySource))
             {
-                source.TrySetResult();
+                _pool._locks.TryRemove(_key, out _);
+                _mySource.TrySetResult();
             }
-
-            _pool = null;
         }
     }
 }

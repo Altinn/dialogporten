@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.83.3](https://github.com/Altinn/dialogporten/compare/v1.83.2...v1.83.3) (2025-10-06)
+
+
+### Bug Fixes
+
+* **app:** Attempt to not cache null in FeatureMetricServiceResourceCache ([#2818](https://github.com/Altinn/dialogporten/issues/2818)) ([607f501](https://github.com/Altinn/dialogporten/commit/607f5017d00179c2d17cdaaf282a9e483150bb3c))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency bogus to 35.6.4 ([#2813](https://github.com/Altinn/dialogporten/issues/2813)) ([48b3876](https://github.com/Altinn/dialogporten/commit/48b3876f89bce71d34fc175fb38bd8786fdd60a0))
+* **deps:** update dependency verify.xunit to 30.19.1 ([#2816](https://github.com/Altinn/dialogporten/issues/2816)) ([9ae8243](https://github.com/Altinn/dialogporten/commit/9ae8243a3cc896f8568e629d77d7e1f6b7a5efe6))
+* **deps:** update dependency xunit.runner.visualstudio to 3.1.5 ([#2814](https://github.com/Altinn/dialogporten/issues/2814)) ([98162ff](https://github.com/Altinn/dialogporten/commit/98162ffcaa33a2cb9e511043896d812bc521ff0b))
+* **deps:** update masstransit monorepo to 8.5.3 ([#2815](https://github.com/Altinn/dialogporten/issues/2815)) ([f76e055](https://github.com/Altinn/dialogporten/commit/f76e055943315f2e41e569607edb38ea21c99681))
+* **otel:** Disable health check tracing ([#2812](https://github.com/Altinn/dialogporten/issues/2812)) ([a9183b0](https://github.com/Altinn/dialogporten/commit/a9183b08c7a509ec22a4ff94b7bd3e6da6f430aa))
+
 ## [1.83.2](https://github.com/Altinn/dialogporten/compare/v1.83.1...v1.83.2) (2025-10-02)
 
 

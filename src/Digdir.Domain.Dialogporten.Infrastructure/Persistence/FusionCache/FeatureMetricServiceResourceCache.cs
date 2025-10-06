@@ -36,7 +36,7 @@ internal sealed class FeatureMetricServiceResourceCache(
         }
 
         // Lock to prevent cache stampede
-        using var @lock = await LockPool.Lock(cacheKey, cancellationToken);
+        using var @lock = await LockPool.Lock(cacheKey, cancellationToken: cancellationToken);
 
         // Check cache again after acquiring lock
         serviceResource = await _cache.GetOrDefaultAsync<string?>(cacheKey, token: cancellationToken);
@@ -74,6 +74,7 @@ internal sealed class LockPool
     /// Acquires an asynchronous lock associated with the specified <paramref name="key"/>.
     /// </summary>
     /// <param name="key">The key that identifies the lock to acquire.</param>
+    /// <param name="timeout"></param>
     /// <param name="cancellationToken">
     /// A token that can be used to cancel the lock request before it is granted.
     /// </param>
@@ -84,12 +85,14 @@ internal sealed class LockPool
     /// <exception cref="OperationCanceledException">
     /// Thrown if the operation is canceled via the provided <paramref name="cancellationToken"/>.
     /// </exception>
-    public async Task<LockPoolReleaser> Lock(string key, CancellationToken cancellationToken)
+    public async Task<LockPoolReleaser> Lock(string key, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
         var mySource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        await using var tokenRegistration = cancellationToken.Register(() => mySource.TrySetCanceled(cancellationToken));
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        if (timeout.HasValue) cts.CancelAfter(timeout.Value);
+        await using var tokenRegistration = cts.Token.Register((_, ct) => mySource.TrySetCanceled(ct), null);
 
-        while (!cancellationToken.IsCancellationRequested)
+        while (!cts.Token.IsCancellationRequested)
         {
             var winnerSource = _locks.GetOrAdd(key, mySource);
 
@@ -103,13 +106,13 @@ internal sealed class LockPool
             await Task.WhenAny(winnerSource.Task, mySource.Task);
         }
 
-        throw new OperationCanceledException(cancellationToken);
+        throw new OperationCanceledException(cts.Token);
     }
 
     /// <summary>
     /// Represents a handle that releases a key lock when disposed.
     /// </summary>
-    public sealed class LockPoolReleaser : IDisposable
+    internal sealed class LockPoolReleaser : IDisposable
     {
         private readonly LockPool _pool;
         private readonly string _key;

@@ -242,6 +242,11 @@ type DialogByIdNotFound implements DialogByIdError {
   message: String!
 }
 
+type DialogByIdNotVisible implements DialogByIdError {
+  message: String!
+  visibleFrom: DateTime!
+}
+
 type DialogByIdPayload {
   dialog: Dialog
   errors: [DialogByIdError!]!
@@ -401,13 +406,33 @@ type SeenLog {
   isCurrentEndUser: Boolean!
 }
 
+type SetSystemLabelConcurrencyError implements SetSystemLabelError {
+  message: String!
+}
+
+type SetSystemLabelDomainError implements SetSystemLabelError {
+  message: String!
+}
+
+type SetSystemLabelEntityDeleted implements SetSystemLabelError {
+  message: String!
+}
+
 type SetSystemLabelEntityNotFound implements SetSystemLabelError {
+  message: String!
+}
+
+type SetSystemLabelForbidden implements SetSystemLabelError {
   message: String!
 }
 
 type SetSystemLabelPayload {
   success: Boolean!
   errors: [SetSystemLabelError!]!
+}
+
+type SetSystemLabelValidationError implements SetSystemLabelError {
+  message: String!
 }
 
 type Subscriptions {

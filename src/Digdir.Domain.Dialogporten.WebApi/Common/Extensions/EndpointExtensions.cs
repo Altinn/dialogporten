@@ -26,6 +26,15 @@ public static class EndpointExtensions
             StatusCodes.Status404NotFound,
             cancellation: cancellationToken);
 
+    public static Task NotVisibleAsync(this IEndpoint ep, EntityNotVisible notVisible, CancellationToken cancellationToken = default)
+    {
+        ep.HttpContext.Response.Headers.Expires = notVisible.VisibleFrom.ToString("r");
+        return ep.HttpContext.Response.SendErrorsAsync(
+            notVisible.ToValidationResults(),
+            StatusCodes.Status404NotFound,
+            cancellation: cancellationToken);
+    }
+
     public static Task GoneAsync(this IEndpoint ep, EntityDeleted deleted, CancellationToken cancellationToken = default)
         => ep.HttpContext.Response.SendErrorsAsync(
             deleted.ToValidationResults(),

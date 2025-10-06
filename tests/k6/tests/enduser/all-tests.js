@@ -4,6 +4,7 @@ import { default as dialogBulkSystemLabels } from './dialogBulkSystemLabels.js';
 import { default as dialogDetails } from './dialogDetails.js';
 import { default as dialogSearch } from './dialogSearch.js';
 import { default as dialogSystemLabelLog } from './dialogSystemLabelLog.js';
+import { default as dialogVisibleFrom } from './dialogVisibleFrom.js';
 import { default as parties } from './parties.js';
 
 export default function() {
@@ -12,5 +13,6 @@ export default function() {
   dialogDetails();
   dialogSearch();
   dialogSystemLabelLog();
+  dialogVisibleFrom();
   parties();
 }

@@ -77,16 +77,26 @@ jobs:
           }
 
           {
-            echo "INFRA_EMOJI=$(determine_emoji "${{ inputs.infra_status }}")"
-            echo "APPS_EMOJI=$(determine_emoji "${{ inputs.apps_status }}")"
-            echo "E2E_TESTS_EMOJI=$(determine_emoji "${{ inputs.e2e_tests_status }}")"
-            echo "SCHEMA_NPM_EMOJI=$(determine_emoji "${{ inputs.schema_npm_status }}")"
-            echo "PUBLISH_EMOJI=$(determine_emoji "${{ inputs.publish_status }}")"
-            echo "BUILD_AND_TEST_EMOJI=$(determine_emoji "${{ inputs.build_and_test_status }}")"
-            echo "PERFORMANCE_TESTS_EMOJI=$(determine_emoji "${{ inputs.performance_tests_status }}")"
-            echo "RELEASE_PLEASE_EMOJI=$(determine_emoji "${{ inputs.release_please_status }}")"
-            echo "NOTIFY_RELEASE_CREATED_EMOJI=$(determine_emoji "${{ inputs.notify_release_created_status }}")"
+            echo "INFRA_EMOJI=$(determine_emoji "$INFRA_STATUS")"
+            echo "APPS_EMOJI=$(determine_emoji "$APPS_STATUS")"
+            echo "E2E_TESTS_EMOJI=$(determine_emoji "$E2E_TESTS_STATUS")"
+            echo "SCHEMA_NPM_EMOJI=$(determine_emoji "$SCHEMA_NPM_STATUS")"
+            echo "PUBLISH_EMOJI=$(determine_emoji "$PUBLISH_STATUS")"
+            echo "BUILD_AND_TEST_EMOJI=$(determine_emoji "$BUILD_AND_TEST_STATUS")"
+            echo "PERFORMANCE_TESTS_EMOJI=$(determine_emoji "$PERFORMANCE_TESTS_STATUS")"
+            echo "RELEASE_PLEASE_EMOJI=$(determine_emoji "$RELEASE_PLEASE_STATUS")"
+            echo "NOTIFY_RELEASE_CREATED_EMOJI=$(determine_emoji "$NOTIFY_RELEASE_CREATED_STATUS")"
           } >> "$GITHUB_OUTPUT"
+        env:
+          INFRA_STATUS: ${{ inputs.infra_status }}
+          APPS_STATUS: ${{ inputs.apps_status }}
+          E2E_TESTS_STATUS: ${{ inputs.e2e_tests_status }}
+          SCHEMA_NPM_STATUS: ${{ inputs.schema_npm_status }}
+          PUBLISH_STATUS: ${{ inputs.publish_status }}
+          BUILD_AND_TEST_STATUS: ${{ inputs.build_and_test_status }}
+          PERFORMANCE_TESTS_STATUS: ${{ inputs.performance_tests_status }}
+          RELEASE_PLEASE_STATUS: ${{ inputs.release_please_status }}
+          NOTIFY_RELEASE_CREATED_STATUS: ${{ inputs.notify_release_created_status }}
 
       - name: Send GitHub slack message
         id: slack

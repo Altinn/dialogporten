@@ -17,6 +17,7 @@ public partial class Queries
     public async Task<DialogByIdPayload> GetDialogById(
         [Service] ISender mediator,
         [Service] IMapper mapper,
+        [Service] IHttpContextAccessor httpContextAccessor,
         [Argument] Guid dialogId,
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
         CancellationToken cancellationToken)
@@ -31,6 +32,25 @@ public partial class Queries
         return result.Match(
             dialog => new DialogByIdPayload { Dialog = mapper.Map<Dialog>(dialog) },
             notFound => new DialogByIdPayload { Errors = [new DialogByIdNotFound { Message = notFound.Message }] },
+            notVisible =>
+            {
+                if (httpContextAccessor.HttpContext != null)
+                {
+                    httpContextAccessor.HttpContext.Response.Headers.Expires = notVisible.VisibleFrom.ToString("R");
+                }
+
+                return new DialogByIdPayload
+                {
+                    Errors =
+                    [
+                        new DialogByIdNotVisible()
+                        {
+                            Message = notVisible.Message,
+                            VisibleFrom = notVisible.VisibleFrom
+                        }
+                    ]
+                };
+            },
             deleted => new DialogByIdPayload { Errors = [new DialogByIdDeleted { Message = deleted.Message }] },
             forbidden =>
             {
@@ -52,16 +72,15 @@ public partial class Queries
     public async Task<SearchDialogsPayload> SearchDialogs(
         [Service] ISender mediator,
         [Service] IMapper mapper,
-        [UseFluentValidation, UseValidator<SearchDialogInputValidator>]
-        SearchDialogInput input,
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
+        [UseFluentValidation, UseValidator<SearchDialogInputValidator>] SearchDialogInput input,
         CancellationToken cancellationToken)
     {
         var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
         searchDialogQuery.AcceptedLanguages = acceptLanguage?.AcceptedLanguage;
 
         if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(
-                input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)
+            input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)
         {
             return new SearchDialogsPayload
             {

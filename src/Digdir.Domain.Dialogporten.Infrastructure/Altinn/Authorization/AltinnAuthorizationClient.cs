@@ -205,6 +205,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         var authorizedPartiesDto = await SendAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken);
         if (authorizedPartiesDto is null || authorizedPartiesDto.Count == 0)
         {
+            _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.Type, authorizedPartiesRequest.Value);
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
         }
 

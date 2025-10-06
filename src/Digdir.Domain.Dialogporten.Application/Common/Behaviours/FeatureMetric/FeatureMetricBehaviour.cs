@@ -24,16 +24,19 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
         CancellationToken cancellationToken)
     {
         var principal = _user.GetPrincipal();
-        principal.TryGetOrganizationShortName(out var performingOrg);
+        principal.TryGetConsumerOrgNumber(out var performingOrgNr);
+
         var hasAdminScope = principal.HasScope(AuthorizationScope.ServiceOwnerAdminScope);
         var resource = await _featureMetricServiceResourceResolver.Resolve(request, cancellationToken);
+
         _featureMetricRecorder.Record(new(
             FeatureName: typeof(TRequest).FullName!,
             HasAdminScope: hasAdminScope,
             Environment: hostEnvironment?.EnvironmentName,
-            PerformerOrg: performingOrg,
+            PerformerOrg: performingOrgNr,
             OwnerOrg: resource?.OwnOrgShortName,
             ServiceResource: resource?.ResourceId));
+
         return await next(cancellationToken);
     }
 }

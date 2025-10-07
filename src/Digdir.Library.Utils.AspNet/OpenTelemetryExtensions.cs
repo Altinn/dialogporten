@@ -47,10 +47,7 @@ public static class OpenTelemetryExtensions
             })
             .WithTracing(tracing =>
             {
-                if (environment.IsDevelopment())
-                {
-                    tracing.SetSampler(new AlwaysOnSampler());
-                }
+                tracing.SetSampler(new AlwaysOnSampler());
 
                 tracing.AddProcessor(new PostgresFilter());
                 tracing.AddProcessor(new HealthCheckFilter());

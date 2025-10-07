@@ -109,11 +109,7 @@ static void BuildAndRun(string[] args)
         return new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;");
     });
 
-    builder.Services.AddHttpClient<PrometheusService>();
-    builder.Services.AddHttpClient<OpenTelemetryMetricsService>();
-    builder.Services.AddSingleton<AzureMonitorService>();
-    builder.Services.AddSingleton<PrometheusService>();
-    builder.Services.AddSingleton<OpenTelemetryMetricsService>();
+    builder.Services.AddSingleton<ApplicationInsightsService>();
     builder.Services.AddSingleton<CostCoefficients>();
     builder.Services.AddSingleton<MetricsAggregationService>();
     builder.Services.AddSingleton<ParquetFileService>();

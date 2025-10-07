@@ -46,14 +46,14 @@ internal static class Commands
         app.AddCommand("aggregate-metrics", async (
                 [FromService] CoconaAppContext ctx,
                 [FromService] IHostEnvironment hostEnvironment,
-                [FromService] AzureMonitorService azureMonitorService,
-                [FromService] OpenTelemetryMetricsService openTelemetryMetricsService,
+                [FromService] ApplicationInsightsService applicationInsightsService,
                 [FromService] MetricsAggregationService aggregationService,
                 [FromService] ParquetFileService parquetService,
                 [FromService] AzureStorageService storageService,
                 [FromService] ILogger<CoconaApp> logger,
                 [FromService] IOptions<MetricsAggregationOptions> options,
-                [Option('d')] DateOnly? targetDate)
+                [Option('d')] DateOnly? targetDate,
+                [Option('e', Description = "Environment(s) to query. Can be specified multiple times (e.g., -e TT02 -e PROD)")] string[]? environments)
             =>
             {
                 try
@@ -61,27 +61,36 @@ internal static class Commands
                     var date = targetDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
                     var config = options.Value;
 
-                    logger.LogInformation("Environment: {Environment}", hostEnvironment.EnvironmentName);
-                    logger.LogInformation("Configuration - UsePrometheus: {UsePrometheus}, SkipUpload: {SkipUpload}, Environments: [{Environments}]",
-                        config.UsePrometheus, config.SkipUpload, string.Join(", ", config.Environments));
+                    logger.LogInformation("Host Environment: {Environment}", hostEnvironment.EnvironmentName);
+
+                    // Use environment parameter if provided, otherwise use config
+                    var targetEnvironments = environments != null && environments.Length > 0
+                        ? environments.ToList()
+                        : config.Environments;
+
+                    logger.LogInformation("Configuration - SkipUpload: {SkipUpload}, Target Environments: [{Environments}]",
+                        config.SkipUpload, string.Join(", ", targetEnvironments));
                     logger.LogInformation("Starting metrics aggregation for date {Date}",
                         date);
 
-                    var allRecords = new List<MetricsRecord>();
-                    var environments = config.Environments;
+                    var allRecords = new List<FeatureMetricRecord>();
 
-                    foreach (var environment in environments)
+                    foreach (var env in targetEnvironments)
                     {
-                        logger.LogInformation("Querying metrics for environment {Environment}", environment);
+                        logger.LogInformation("Querying feature metrics from Application Insights for environment {Environment}", env);
 
-                        var records = await openTelemetryMetricsService.QueryCostMetricsAsync(date, environment, ctx.CancellationToken);
+                        var records = await applicationInsightsService.QueryFeatureMetricsAsync(date, env, ctx.CancellationToken);
 
                         allRecords.AddRange(records);
                     }
 
-                    var aggregatedRecords = aggregationService.AggregateMetrics(allRecords);
+                    var aggregatedRecords = aggregationService.AggregateFeatureMetrics(allRecords);
                     var parquetData = await parquetService.GenerateParquetFileAsync(aggregatedRecords, ctx.CancellationToken);
-                    var fileName = ParquetFileService.GetFileName(date);
+
+                    // Include environment(s) in filename when saving locally
+                    var fileName = config.SkipUpload
+                        ? ParquetFileService.GetFileName(date, targetEnvironments)
+                        : ParquetFileService.GetFileName(date);
 
                     if (config.SkipUpload)
                     {

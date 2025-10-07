@@ -20,29 +20,30 @@ public class ParquetFileService
         _logger.LogInformation("Generating Parquet file for {RecordCount} aggregated records", records.Count);
 
         var schema = new ParquetSchema(
-            new DataField<string>("Environment"),
-            new DataField<string>("Service"),
-            new DataField<string>("ServiceOwnerCode"),
-            new DataField<string>("TransactionType"),
-            new DataField<string>("Failed"),
-            new DataField<long>("Count"),
-            new DataField<decimal>("RelativeResourceUsage")
+            new DataField<string>("Miljø"),
+            new DataField<string>("Tjeneste"),
+            new DataField<string>("Tjenesteeierkode"),
+            new DataField<string>("Transaksjonstype"),
+            new DataField<string>("Feilet"),
+            new DataField<long>("Antall"),
+            new DataField<decimal>("RelativRessursbruk")
         );
 
         using var memoryStream = new MemoryStream();
 
         // Extract data arrays
-        var environments = records.Select(r => r.Environment).ToArray();
-        var services = records.Select(r => r.Service).ToArray();
-        var serviceOwnerCodes = records.Select(r => r.ServiceOwnerCode).ToArray();
-        var transactionTypes = records.Select(r => r.TransactionType).ToArray();
-        var failedFlags = records.Select(r => r.Failed).ToArray();
-        var counts = records.Select(r => r.Count).ToArray();
-        var relativeResourceUsage = records.Select(r => r.RelativeResourceUsage).ToArray();
+        var environments = records.Select(r => r.Miljø).ToArray();
+        var services = records.Select(r => r.Tjeneste).ToArray();
+        var serviceOwnerCodes = records.Select(r => r.Tjenesteeierkode).ToArray();
+        var transactionTypes = records.Select(r => r.Transaksjonstype).ToArray();
+        var failedFlags = records.Select(r => r.Feilet).ToArray();
+        var counts = records.Select(r => r.Antall).ToArray();
+        var relativeResourceUsage = records.Select(r => r.RelativRessursbruk).ToArray();
 
 #pragma warning disable CA2016 // ParquetWriter.CreateAsync doesn't support cancellation tokens
         using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream))
         {
+            parquetWriter.CompressionMethod = CompressionMethod.Snappy;
             using var rowGroup = parquetWriter.CreateRowGroup();
 
             // Write columns
@@ -63,5 +64,11 @@ public class ParquetFileService
     public static string GetFileName(DateOnly targetDate)
     {
         return $"Dialogporten_metrics_{targetDate:yyyy-MM-dd}.parquet";
+    }
+
+    public static string GetFileName(DateOnly targetDate, List<string> environments)
+    {
+        var envString = string.Join("-", environments);
+        return $"Dialogporten_metrics_{envString}_{targetDate:yyyy-MM-dd}.parquet";
     }
 }

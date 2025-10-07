@@ -13,9 +13,9 @@ public class MetricsAggregationService
         _costCoefficients = costCoefficients ?? throw new ArgumentNullException(nameof(costCoefficients));
     }
 
-    public List<AggregatedMetricsRecord> AggregateMetrics(List<MetricsRecord> rawMetrics)
+    public List<AggregatedMetricsRecord> AggregateFeatureMetrics(List<FeatureMetricRecord> rawMetrics)
     {
-        _logger.LogInformation("Aggregating {RecordCount} raw metrics records", rawMetrics.Count);
+        _logger.LogInformation("Aggregating {RecordCount} raw feature metric records", rawMetrics.Count);
 
         var aggregated = rawMetrics
             .GroupBy(r => new
@@ -23,47 +23,37 @@ public class MetricsAggregationService
                 r.Environment,
                 r.ServiceOrg,
                 r.ServiceResource,
-                r.TransactionType,
-                Failed = r.Status == "failed"
+                TransactionType = TransactionTypeMapper.MapFeatureTypeToTransactionType(r.FeatureType, r.PresentationTag),
+                Failed = r.Status is "failure" or "error"
             })
             .Select(group => new AggregatedMetricsRecord
             {
-                Environment = group.Key.Environment,
-                Service = group.Key.ServiceResource,
-                ServiceOwnerCode = group.Key.ServiceOrg,
-                TransactionType = CostCoefficients.GetNorwegianName(ParseTransactionType(group.Key.TransactionType)),
-                Failed = group.Key.Failed ? "Yes" : "No",
-                Count = group.Sum(r => r.Count),
-                RelativeResourceUsage = group.Sum(r => r.Count * _costCoefficients.GetCoefficient(ParseTransactionType(group.Key.TransactionType)))
+                Miljø = group.Key.Environment,
+                Tjeneste = group.Key.ServiceResource,
+                Tjenesteeierkode = group.Key.ServiceOrg,
+                Transaksjonstype = CostCoefficients.GetNorwegianName(group.Key.TransactionType),
+                Feilet = group.Key.Failed ? "Yes" : "No",
+                Antall = group.Sum(r => r.Count),
+                RelativRessursbruk = group.Sum(r => r.Count * _costCoefficients.GetCoefficient(group.Key.TransactionType))
             })
-            .OrderBy(r => r.Environment)
-            .ThenBy(r => r.ServiceOwnerCode)
-            .ThenBy(r => r.Service)
-            .ThenBy(r => r.TransactionType)
+            .OrderBy(r => r.Miljø)
+            .ThenBy(r => r.Tjenesteeierkode)
+            .ThenBy(r => r.Tjeneste)
+            .ThenBy(r => r.Transaksjonstype)
             .ToList();
 
         _logger.LogInformation("Aggregated into {AggregatedCount} records", aggregated.Count);
         return aggregated;
     }
-
-    private static TransactionType ParseTransactionType(string transactionTypeString)
-    {
-        if (Enum.TryParse<TransactionType>(transactionTypeString, true, out var parsed))
-        {
-            return parsed;
-        }
-
-        return TransactionType.CreateDialog; // Default fallback
-    }
 }
 
 public class AggregatedMetricsRecord
 {
-    public string Environment { get; set; } = string.Empty;
-    public string Service { get; set; } = string.Empty;
-    public string ServiceOwnerCode { get; set; } = string.Empty;
-    public string TransactionType { get; set; } = string.Empty;
-    public string Failed { get; set; } = string.Empty;
-    public long Count { get; set; }
-    public decimal RelativeResourceUsage { get; set; }
+    public string Miljø { get; set; } = string.Empty;
+    public string Tjeneste { get; set; } = string.Empty;
+    public string Tjenesteeierkode { get; set; } = string.Empty;
+    public string Transaksjonstype { get; set; } = string.Empty;
+    public string Feilet { get; set; } = string.Empty;
+    public long Antall { get; set; }
+    public decimal RelativRessursbruk { get; set; }
 }

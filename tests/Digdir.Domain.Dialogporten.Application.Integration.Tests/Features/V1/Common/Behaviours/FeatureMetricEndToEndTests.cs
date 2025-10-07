@@ -62,7 +62,6 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
         metric.FeatureName.Should().Be("Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.CreateDialogCommand");
         metric.PerformerOrg.Should().NotBeNullOrEmpty();
         metric.ServiceResource.Should().NotBeNullOrEmpty();
-        metric.OwnerOrg.Should().NotBeNullOrEmpty();
     }
 
 
@@ -98,7 +97,6 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
         var metric = metrics[0];
         metric.Environment.Should().NotBeNullOrEmpty();
         metric.PerformerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
-        metric.OwnerOrg.Should().Be("ttd");
         metric.ServiceResource.Should().NotBeNullOrEmpty();
     }
 

@@ -34,7 +34,6 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
             HasAdminScope: hasAdminScope,
             Environment: hostEnvironment?.EnvironmentName,
             PerformerOrg: performingOrgNr,
-            OwnerOrg: resource?.OwnOrgShortName,
             ServiceResource: resource?.ResourceId));
 
         return await next(cancellationToken);

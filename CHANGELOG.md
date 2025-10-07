@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.84.0](https://github.com/Altinn/dialogporten/compare/v1.83.3...v1.84.0) (2025-10-07)
+
+
+### Features
+
+* add support for accept-language header ([#2747](https://github.com/Altinn/dialogporten/issues/2747)) ([4da9a05](https://github.com/Altinn/dialogporten/commit/4da9a05dbbea88ded9e0f187c463c29878dc15fd))
+
+
+### Bug Fixes
+
+* **app:** Use org consumer claim for feature metrics ([#2823](https://github.com/Altinn/dialogporten/issues/2823)) ([e13c2d1](https://github.com/Altinn/dialogporten/commit/e13c2d19401d2fe10de6622e87c04717b45ac346))
+
+
+### Miscellaneous Chores
+
+* **deps:** Update OpenTelemetry ([#2820](https://github.com/Altinn/dialogporten/issues/2820)) ([7af97bb](https://github.com/Altinn/dialogporten/commit/7af97bb5d37fcfb7bbbf8c13bedd765db0a50b75))
+
 ## [1.83.3](https://github.com/Altinn/dialogporten/compare/v1.83.2...v1.83.3) (2025-10-06)
 
 

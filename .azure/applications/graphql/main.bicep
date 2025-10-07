@@ -91,14 +91,6 @@ var containerAppEnvVars = [
     name: 'AZURE_CLIENT_ID'
     value: managedIdentity.properties.clientId
   }
-  {
-    name: 'OTEL_TRACES_SAMPLER'
-    value: 'parentbased_traceidratio'
-  }
-  {
-    name: 'OTEL_TRACES_SAMPLER_ARG'
-    value: otelTraceSamplerRatio
-  }
 ]
 
 @description('Minimum number of replicas')

@@ -45,10 +45,6 @@ param appConfigurationName string
 @secure()
 param environmentKeyVaultName string
 
-@description('The ratio of traces to sample (between 0.0 and 1.0). Lower values reduce logging volume.')
-@minLength(1)
-param otelTraceSamplerRatio string
-
 @description('The workload profile name to use, defaults to "Consumption"')
 param workloadProfileName string = 'Consumption'
 

@@ -16,7 +16,7 @@ public class ContentValueDtoValidatorTests
     [InlineData(false, 255, true)]
     public void Validate_ContentValueDto_With_CorrespondenceScope(bool correspondenceScope, int length, bool expected)
     {
-        var user = new ValidatorTestUser(correspondenceScope ? [new Claim("scope", "altinn.dialogporten.correspondence")] : []);
+        var user = new ValidatorTestUser(correspondenceScope ? [new Claim("scope", AuthorizationScope.CorrespondenceScope)] : []);
         var dialogContentType = new DialogContentType(DialogContentType.Values.Title).MapValue(DialogContentType.Values.Title);
 
         var validator = new ContentValueDtoValidator(dialogContentType, user);

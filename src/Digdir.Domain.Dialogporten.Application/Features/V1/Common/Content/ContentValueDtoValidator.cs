@@ -18,7 +18,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 // The validator is manually created in the Create and Update validators
 internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueDto>, IIgnoreOnAssemblyScan
 {
-    private const string CorrespondenceScope = "altinn.dialogporten.correspondence";
     public ContentValueDtoValidator(DialogTransmissionContentType contentType, IUser? user = null)
     {
         var allowedMediaTypes = GetAllowedMediaTypes(contentType, user);
@@ -51,7 +50,7 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
                 // TODO: Remove after A2 correspondence has been discontinued, as the new
                 // correspondence API has the same limitations as Dialogporten
                 var maxLength = Constants.DefaultMaxStringLength == contentType.MaxLength
-                 && (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
+                 && (user?.GetPrincipal().HasScope(AuthorizationScope.CorrespondenceScope) ?? false)
                         ? Constants.CorrespondenceMaxStringLength
                         : contentType.MaxLength;
                 return new LocalizationDtosValidator(maxLength);
@@ -92,7 +91,7 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
             .SetValidator(_ =>
             {
                 var maxLength = Constants.DefaultMaxStringLength == contentType.MaxLength
-                 && (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
+                 && (user?.GetPrincipal().HasScope(AuthorizationScope.CorrespondenceScope) ?? false)
                         ? Constants.CorrespondenceMaxStringLength
                         : contentType.MaxLength;
                 return new LocalizationDtosValidator(maxLength);

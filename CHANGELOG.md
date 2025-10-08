@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.85.0](https://github.com/Altinn/dialogporten/compare/v1.84.0...v1.85.0) (2025-10-08)
+
+
+### Features
+
+* **app:** increase max content length to 512 for correspondence  ([#2822](https://github.com/Altinn/dialogporten/issues/2822)) ([3d103e3](https://github.com/Altinn/dialogporten/commit/3d103e32c2b9c5b3c36de73aece69aa0a79edca2))
+
+
+### Miscellaneous Chores
+
+* **deps:** update docker/login-action action to v3.6.0 ([#2829](https://github.com/Altinn/dialogporten/issues/2829)) ([ad03258](https://github.com/Altinn/dialogporten/commit/ad032586cacc8a459f0962261da01b003eb18da2))
+
 ## [1.84.0](https://github.com/Altinn/dialogporten/compare/v1.83.3...v1.84.0) (2025-10-07)
 
 

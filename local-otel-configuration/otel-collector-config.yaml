@@ -27,6 +27,12 @@ exporters:
     sampling_thereafter: 200
   otlphttp:
     endpoint: "http://loki:3100/otlp"
+  file:
+    path: "/tmp/traces.json"
+    rotation:
+      max_megabytes: 100
+      max_days: 3
+      max_backups: 3
 
 extensions:
   health_check:
@@ -43,7 +49,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp, debug]
+      exporters: [otlp, debug, file]
     metrics:
       receivers: [otlp]
       processors: [batch]

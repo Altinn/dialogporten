@@ -17,7 +17,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
@@ -768,9 +768,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<int>("CorrespondenceMaxLength")
-                        .HasColumnType("integer");
-
                     b.Property<int>("MaxLength")
                         .HasColumnType("integer");
 
@@ -794,7 +791,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 1,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            CorrespondenceMaxLength = 512,
                             MaxLength = 255,
                             Name = "Title",
                             OutputInList = true,
@@ -804,7 +800,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 2,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            CorrespondenceMaxLength = 512,
                             MaxLength = 255,
                             Name = "SenderName",
                             OutputInList = true,
@@ -814,7 +809,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 3,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            CorrespondenceMaxLength = 512,
                             MaxLength = 255,
                             Name = "Summary",
                             OutputInList = true,
@@ -824,7 +818,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 4,
                             AllowedMediaTypes = new[] { "text/plain", "text/markdown" },
-                            CorrespondenceMaxLength = 1023,
                             MaxLength = 1023,
                             Name = "AdditionalInfo",
                             OutputInList = false,
@@ -834,7 +827,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 5,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            CorrespondenceMaxLength = 20,
                             MaxLength = 20,
                             Name = "ExtendedStatus",
                             OutputInList = true,
@@ -844,7 +836,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 6,
                             AllowedMediaTypes = new[] { "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown" },
-                            CorrespondenceMaxLength = 1023,
                             MaxLength = 1023,
                             Name = "MainContentReference",
                             OutputInList = false,
@@ -854,7 +845,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 7,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            CorrespondenceMaxLength = 512,
                             MaxLength = 255,
                             Name = "NonSensitiveTitle",
                             OutputInList = true,
@@ -864,7 +854,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 8,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            CorrespondenceMaxLength = 512,
                             MaxLength = 255,
                             Name = "NonSensitiveSummary",
                             OutputInList = true,
@@ -1216,9 +1205,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<int>("CorrespondenceMaxLength")
-                        .HasColumnType("integer");
-
                     b.Property<int>("MaxLength")
                         .HasColumnType("integer");
 
@@ -1239,7 +1225,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 1,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            CorrespondenceMaxLength = 512,
                             MaxLength = 255,
                             Name = "Title",
                             Required = true
@@ -1248,7 +1233,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 2,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            CorrespondenceMaxLength = 512,
                             MaxLength = 255,
                             Name = "Summary",
                             Required = false
@@ -1257,7 +1241,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 3,
                             AllowedMediaTypes = new[] { "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown" },
-                            CorrespondenceMaxLength = 1023,
                             MaxLength = 1023,
                             Name = "ContentReference",
                             Required = false

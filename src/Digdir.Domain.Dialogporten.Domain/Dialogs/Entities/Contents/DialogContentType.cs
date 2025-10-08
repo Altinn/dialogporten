@@ -23,8 +23,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
 
     public int MaxLength { get; private init; }
 
-    public int CorrespondenceMaxLength { get; private init; }
-
     public string[] AllowedMediaTypes { get; private init; } = [];
 
     public override DialogContentType MapValue(Values id) => id switch
@@ -33,7 +31,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         {
             Required = true,
             MaxLength = Constants.DefaultMaxStringLength,
-            CorrespondenceMaxLength = Constants.CorrespondenceMaxStringLength,
             OutputInList = true,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },
@@ -41,7 +38,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         {
             Required = false,
             MaxLength = Constants.DefaultMaxStringLength,
-            CorrespondenceMaxLength = Constants.CorrespondenceMaxStringLength,
             OutputInList = true,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },
@@ -49,7 +45,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         {
             Required = false,
             MaxLength = Constants.DefaultMaxStringLength,
-            CorrespondenceMaxLength = Constants.CorrespondenceMaxStringLength,
             OutputInList = true,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },
@@ -57,7 +52,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         {
             Required = false,
             MaxLength = 1023,
-            CorrespondenceMaxLength = 1023,
             OutputInList = false,
             AllowedMediaTypes = [MediaTypes.PlainText, MediaTypes.Markdown]
         },
@@ -65,7 +59,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         {
             Required = false,
             MaxLength = 20,
-            CorrespondenceMaxLength = 20,
             OutputInList = true,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },
@@ -73,7 +66,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         {
             Required = false,
             MaxLength = 1023,
-            CorrespondenceMaxLength = 1023,
             OutputInList = false,
             AllowedMediaTypes = [MediaTypes.EmbeddableMarkdown]
         },
@@ -81,7 +73,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         {
             Required = false,
             MaxLength = Constants.DefaultMaxStringLength,
-            CorrespondenceMaxLength = Constants.CorrespondenceMaxStringLength,
             OutputInList = true,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },
@@ -89,7 +80,6 @@ public sealed class DialogContentType : AbstractLookupEntity<DialogContentType, 
         {
             Required = false,
             MaxLength = Constants.DefaultMaxStringLength,
-            CorrespondenceMaxLength = Constants.CorrespondenceMaxStringLength,
             OutputInList = true,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },

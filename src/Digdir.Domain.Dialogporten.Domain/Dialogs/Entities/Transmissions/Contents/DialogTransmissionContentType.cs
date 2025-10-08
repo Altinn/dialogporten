@@ -16,8 +16,6 @@ public sealed class DialogTransmissionContentType : AbstractLookupEntity<DialogT
     public bool Required { get; private init; }
     public int MaxLength { get; private init; }
 
-    public int CorrespondenceMaxLength { get; private init; }
-
     public string[] AllowedMediaTypes { get; private init; } = [];
 
     public override DialogTransmissionContentType MapValue(Values id) => id switch
@@ -26,21 +24,18 @@ public sealed class DialogTransmissionContentType : AbstractLookupEntity<DialogT
         {
             Required = true,
             MaxLength = Constants.DefaultMaxStringLength,
-            CorrespondenceMaxLength = Constants.CorrespondenceMaxStringLength,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },
         Values.Summary => new(id)
         {
             Required = false,
             MaxLength = Constants.DefaultMaxStringLength,
-            CorrespondenceMaxLength = Constants.CorrespondenceMaxStringLength,
             AllowedMediaTypes = [MediaTypes.PlainText]
         },
         Values.ContentReference => new(id)
         {
             Required = false,
             MaxLength = 1023,
-            CorrespondenceMaxLength = 1023,
             AllowedMediaTypes = [MediaTypes.EmbeddableMarkdown]
         },
         _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)

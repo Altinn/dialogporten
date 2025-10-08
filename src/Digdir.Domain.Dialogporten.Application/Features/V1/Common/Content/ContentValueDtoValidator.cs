@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using FluentValidation;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 
@@ -46,9 +47,10 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
             .NotEmpty()
             .SetValidator(_ =>
             {
-                var maxLength = user!.GetPrincipal().HasScope(CorrespondenceScope)
-                    ? contentType.CorrespondenceMaxLength
-                    : contentType.MaxLength;
+                var maxLength = (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
+                 && Constants.DefaultMaxStringLength == contentType.MaxLength
+                        ? Constants.CorrespondenceMaxStringLength
+                        : contentType.MaxLength;
                 return new LocalizationDtosValidator(maxLength);
             });
 
@@ -86,9 +88,10 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
             .NotEmpty()
             .SetValidator(_ =>
             {
-                var maxLength = user!.GetPrincipal().HasScope(CorrespondenceScope)
-                    ? contentType.CorrespondenceMaxLength
-                    : contentType.MaxLength;
+                var maxLength = (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
+                 && Constants.DefaultMaxStringLength == contentType.MaxLength
+                        ? Constants.CorrespondenceMaxStringLength
+                        : contentType.MaxLength;
                 return new LocalizationDtosValidator(maxLength);
             });
 

@@ -30,45 +30,7 @@ public class FeatureMetricBehaviourTests : ApplicationCollectionFixture
     }
 
     [Fact]
-    public async Task CreateDialog_ShouldRecordFeatureMetric()
-    {
-        // Arrange
-        var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var command = new CreateDialogCommand
-        {
-            Dto = new CreateDialogDto
-            {
-                Id = expectedDialogId,
-                ServiceResource = "urn:altinn:resource:test-service",
-                Party = "urn:altinn:organization:identifier-no:912345678",
-                Content = new Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ContentDto
-                {
-                    Title = new ContentValueDto
-                    {
-                        Value = [new LocalizationDto { LanguageCode = "nb", Value = "Test Dialog" }],
-                        MediaType = "text/plain"
-                    }
-                }
-            }
-        };
-
-        // Act - Execute command directly within the same scope to capture metrics
-        var metrics = await ExecuteCommandAndGetMetrics(command);
-
-        // Assert
-        metrics.Should().HaveCount(1);
-
-        var metric = metrics[0];
-        metric.FeatureName.Should().Be("Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.CreateDialogCommand");
-        metric.CallerOrg.Should().NotBeNullOrEmpty();
-        metric.OwnerOrg.Should().NotBeNullOrEmpty();
-        metric.ServiceResource.Should().NotBeNullOrEmpty();
-    }
-
-
-
-    [Fact]
-    public async Task FeatureMetric_ShouldIncludeAllRequiredFields()
+    public async Task CreateDialog_Should_Include_All_Required_Fields()
     {
         // Arrange
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
@@ -96,6 +58,7 @@ public class FeatureMetricBehaviourTests : ApplicationCollectionFixture
         // Assert
         metrics.Should().HaveCount(1);
         var metric = metrics[0];
+        metric.FeatureName.Should().Be(typeof(CreateDialogCommand).FullName);
         metric.Environment.Should().NotBeNullOrEmpty();
         metric.CallerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
         metric.OwnerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");

@@ -11,42 +11,28 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
     {
         builder.ToTable("Dialog");
 
-        builder.HasIndex(x => x.ServiceResource);
-        builder.Property(x => x.ServiceResource)
-            .HasMaxLength(DefaultMaxStringLength);
-        builder.Property(x => x.ServiceResource)
-            .UseCollation("C");
-
-        builder.HasIndex(x => x.Party);
-        builder.Property(x => x.Party)
-            .UseCollation("C");
-
-        builder.HasIndex(x => x.Org);
-        builder.Property(x => x.Org)
-            .UseCollation("C");
-        builder.HasIndex(x => new { x.Org, x.IdempotentKey })
-            .IsUnique()
-            .HasFilter($"\"{nameof(DialogEntity.IdempotentKey)}\" is not null");
-
-        builder.Property(x => x.IdempotentKey)
-            .HasMaxLength(36);
-
-        builder.Property(x => x.ContentUpdatedAt)
-            .HasDefaultValueSql("current_timestamp at time zone 'utc'");
-
         builder.HasIndex(x => x.CreatedAt);
         builder.HasIndex(x => x.UpdatedAt);
         builder.HasIndex(x => x.DueAt);
         builder.HasIndex(x => x.VisibleFrom);
         builder.HasIndex(x => x.ContentUpdatedAt);
-
         builder.HasIndex(x => x.ExtendedStatus);
         builder.HasIndex(x => x.ExternalReference);
-
         builder.HasIndex(x => x.Process);
-
         builder.HasIndex(x => x.IsApiOnly);
-        builder.Property(x => x.IsApiOnly)
-            .HasDefaultValue(false);
+        builder.HasIndex(x => x.ServiceResource);
+        builder.HasIndex(x => x.Party);
+        builder.HasIndex(x => x.Org);
+        builder.HasIndex(x => new { x.Org, x.IdempotentKey }).IsUnique()
+            .HasFilter($"\"{nameof(DialogEntity.IdempotentKey)}\" is not null");
+        builder.HasIndex(x => new { x.ServiceResource, x.Party }).IncludeProperties(x => x.Id);
+
+        builder.Property(x => x.Org).UseCollation("C");
+        builder.Property(x => x.Party).UseCollation("C");
+        builder.Property(x => x.ServiceResource).HasMaxLength(DefaultMaxStringLength);
+        builder.Property(x => x.ServiceResource).UseCollation("C");
+        builder.Property(x => x.IdempotentKey).HasMaxLength(36);
+        builder.Property(x => x.ContentUpdatedAt).HasDefaultValueSql("current_timestamp at time zone 'utc'");
+        builder.Property(x => x.IsApiOnly).HasDefaultValue(false);
     }
 }

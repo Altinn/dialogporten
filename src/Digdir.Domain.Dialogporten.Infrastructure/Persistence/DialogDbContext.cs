@@ -17,6 +17,8 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
@@ -28,6 +30,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DialogDbContext(DbContextOptions<DialogDbContext> options) : base(options) { }
 
     public DbSet<DialogEntity> Dialogs => Set<DialogEntity>();
+    public DbSet<DialogSearch> DialogSearches => Set<DialogSearch>();
     public DbSet<DialogStatus> DialogStatuses => Set<DialogStatus>();
     public DbSet<DialogActivity> DialogActivities => Set<DialogActivity>();
     public DbSet<DialogActivityType> DialogActivityTypes => Set<DialogActivityType>();

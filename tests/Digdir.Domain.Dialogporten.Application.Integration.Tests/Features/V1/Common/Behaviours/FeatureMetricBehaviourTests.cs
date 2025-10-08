@@ -12,9 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Behaviours;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
+public class FeatureMetricBehaviourTests : ApplicationCollectionFixture
 {
-    public FeatureMetricEndToEndTests(DialogApplication application) : base(application) { }
+    public FeatureMetricBehaviourTests(DialogApplication application) : base(application) { }
 
     private async Task<List<FeatureMetricRecord>> ExecuteCommandAndGetMetrics<T>(IRequest<T> command)
     {
@@ -179,4 +179,3 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
     }
 
 }
-

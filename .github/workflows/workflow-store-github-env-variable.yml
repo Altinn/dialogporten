@@ -35,8 +35,12 @@ jobs:
       - name: Set GitHub variable
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          VARIABLE_NAME: ${{ inputs.variable_name }}
+          VARIABLE_VALUE: ${{ inputs.variable_value }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          REPOSITORY: ${{ github.repository }}
         run: |
-          gh variable set ${{ inputs.variable_name }} \
-            --body "${{ inputs.variable_value }}" \
-            --env ${{ inputs.environment }} \
-            --repo ${{ github.repository }}
+          gh variable set "${VARIABLE_NAME}" \
+            --body "${VARIABLE_VALUE}" \
+            --env "${ENVIRONMENT}" \
+            --repo "${REPOSITORY}"

@@ -147,8 +147,8 @@ jobs:
       - name: Determine notification severity
         id: determine-severity
         run: |
-          days_since_prod_deploy=${{ inputs.days_since_prod_deploy }}
-          release_count_diff=${{ inputs.release_count_diff }}
+          days_since_prod_deploy="$DAYS_SINCE_PROD_DEPLOY"
+          release_count_diff="$RELEASE_COUNT_DIFF"
           
           # Determine color and emoji based on severity (more moderate approach)
           if [ "$days_since_prod_deploy" -ge 14 ] || [ "$release_count_diff" -ge 8 ]; then
@@ -168,6 +168,9 @@ jobs:
           echo "color=$color" >> $GITHUB_OUTPUT
           echo "emoji=$emoji" >> $GITHUB_OUTPUT
           echo "severity=$severity" >> $GITHUB_OUTPUT
+        env:
+          DAYS_SINCE_PROD_DEPLOY: ${{ inputs.days_since_prod_deploy }}
+          RELEASE_COUNT_DIFF: ${{ inputs.release_count_diff }}
 
       - name: Send Slack notification
         uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1

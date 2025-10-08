@@ -1,34 +1,32 @@
-import { randomItem, uuidv4, URL} from '../../../common/k6-utils.js';
+import { randomItem, uuidv4 } from '../../../common/k6-utils.js';
 import { getEndUserTokens } from '../../../common/token.js';
 import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
-import { getGraphqlParty } from '../../performancetest_data/graphql-search.js';
+import { getGraphqlRequestBodyForAllDialogsForParty } from '../../performancetest_data/graphql-queries.js';
 import { postGQ } from '../../../common/request.js';
 import { texts, texts_no_hit, resources } from '../../performancetest_common/readTestdata.js';
+import { log } from '../../performancetest_common/simpleSearch.js';
 
 const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
 const defaultNumberOfEndUsers = (__ENV.NUMBER_OF_ENDUSERS ?? 2799); // Max number of endusers from altinn-testtools now.
-
-// Available enduser filters:
-// org, party, serviceResource, extendedStatus, externalReference, status, createdAfter, createdBefore, updatedAfter, updatedBefore, dueAfter, dueBefore, Search, searchLanguageCode, orderBy, limit
 
 const filter_combos = [
     {label: "serviceresource", filters: ["serviceResource"]},
     {label: "createdafter", filters: ["createdAfter"]},
     {label: "serviceresource-createdafter", filters: ["serviceResource", "createdAfter"]},
     {label: "serviceresource-createdbefore", filters: ["serviceResource", "createdBefore"]},
-    {label: "party-createdafter", filters: ["party", "createdAfter"]},
-    {label: "party-createdbefore", filters: ["party", "createdBefore"]},
+    {label: "party-createdafter", filters: ["partyURIs", "createdAfter"]},
+    {label: "party-createdbefore", filters: ["partyURIs", "createdBefore"]},
     {label: "search-serviceresource-createdafter", filters: ["search", "serviceResource", "createdAfter"]},
     {label: "search-serviceresource-createdbefore", filters: ["search", "serviceResource", "createdBefore"]},
     {label: "search-serviceresource-createdafter-nohit", filters: ["search", "serviceResource", "createdAfter"]},
     {label: "search-serviceresource", filters: ["search", "serviceResource"]},
-    {label: "search-party-createdafter", filters: ["search", "party", "createdAfter"]},
-    {label: "search-party-createdbefore", filters: ["search", "party", "createdBefore"]},
-    {label: "search-party-createdafter-nohit", filters: ["search", "party", "createdAfter"]},
-    {label: "search-party-createdbefore-nohit", filters: ["search", "party", "createdBefore"]},
-    {label: "search-party", filters: ["search", "party"]},
-    {label: "search-party-nohit", filters: ["search", "party"]},
+    {label: "search-party-createdafter", filters: ["search", "partyURIs", "createdAfter"]},
+    {label: "search-party-createdbefore", filters: ["search", "partyURIs", "createdBefore"]},
+    {label: "search-party-createdafter-nohit", filters: ["search", "partyURIs", "createdAfter"]},
+    {label: "search-party-createdbefore-nohit", filters: ["search", "partyURIs", "createdBefore"]},
+    {label: "search-party", filters: ["search", "partyURIs"]},
+    {label: "search-party-nohit", filters: ["search", "partyURIs"]},
     {label: "party", filters: ["party"]}
 ];
 
@@ -57,14 +55,15 @@ function get_query_params(endUser) {
 
 function get_filter_value(filter, label, endUser) {
     switch (filter) {
-        case "serviceResource": return "urn:altinn:resource:" +randomItem(resources);
-        case "party": return "urn:altinn:person:identifier-no:" +endUser;
-        case "status": return "NotApplicable";
-        case "deleted": return "Exclude";
+        case "serviceResource": return ["urn:altinn:resource:" +randomItem(resources)];
+        case "party":
+        case "partyURIs": 
+          return ["urn:altinn:person:identifier-no:" +endUser];
+        case "status": return ["NOT_APPLICABLE", "IN_PROGRESS", "AWAITING", "REQUIRES_ATTENTION", "COMPLETED"] ;
         case "createdAfter": return new Date(Date.now() - 7*24*60*60*1000).toISOString();
         case "createdBefore": return new Date(Date.now() - 7*24*60*60*1000).toISOString();
         case "search": return label.includes("nohit") ? randomItem(texts_no_hit) : randomItem(texts);
-        default: return "urn:altinn:resource:" +randomItem(resources);
+        default: return ["urn:altinn:resource:" +randomItem(resources)];
     }
 }
 
@@ -99,8 +98,11 @@ export default function(data) {
     }
 
     describe('Perform graphql dialog list', () => {
-        let r = postGQ(getGraphqlParty(searchParams), paramsWithToken);
+        let r = postGQ(getGraphqlRequestBodyForAllDialogsForParty(searchParams), paramsWithToken);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
+        log(r.json().data?.searchDialogs?.items, traceCalls, endUser, r.timings.duration);
     });
 }
+
+

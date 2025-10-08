@@ -34,9 +34,9 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         {
             LogFeatureMetric(_logger,
                 record.FeatureName,
+                record.HasAdminScope,
                 record.Environment,
                 record.PerformerOrg,
-                record.OwnerOrg,
                 record.ServiceResource,
                 presentationTag,
                 additionalTagsDic);
@@ -48,18 +48,18 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         Level = LogLevel.Information,
         Message = "Feature Metric Recorded: " +
                   "FeatureType={FeatureType}, " +
+                  "HasAdminScope={HasAdminScope}, " +
                   "Environment={Environment}, " +
-                  "TokenOrg={TokenOrg}, " +
-                  "ServiceOrg={ServiceOrg}, " +
+                  "PerformerOrg={PerformerOrg}, " +
                   "ServiceResource={ServiceResource}, " +
                   "PresentationTag={PresentationTag}, " +
                   "AdditionalTags={AdditionalTags}")]
     private static partial void LogFeatureMetric(
         ILogger logger,
         string featureType,
+        bool hasAdminScope,
         string environment,
-        string tokenOrg,
-        string serviceOrg,
+        string performerOrg,
         string serviceResource,
         string presentationTag,
         Dictionary<string, object> additionalTags);

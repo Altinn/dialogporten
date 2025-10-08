@@ -2,6 +2,7 @@
 
 internal static class Constants
 {
+    internal const string AcceptLanguage = "Accept-Language";
     internal const string IfMatch = "If-Match";
     internal const string ETag = "Etag";
     internal const string Authorization = "Authorization";

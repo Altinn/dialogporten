@@ -1,5 +1,7 @@
-import { default as run, setup as _setup } from "./graphql-search.js";
-import { labels } from "./graphql-search.js";
+import { _default, _setup } from "./graphqlCommonFunctions.js";
+
+const label = "graphql-getall-dialogs-for-party";
+const queryType = "getAllDialogsForParty"
 
 const numberOfEndUsers = 200; // Remove when altinn-testtools bulk get of endusers/tokens is fast
 export const options = {
@@ -10,11 +12,10 @@ export const options = {
     thresholds: {}
 };
 
-for (var label of labels) {
-    options.thresholds[`http_req_duration{name:${label}}`] = ["p(95)<500"];
-    options.thresholds[`http_reqs{name:${label}}`] = [];
-}
 
-export function setup() { return _setup(numberOfEndUsers); }
-export default function (data) { run(data); }
+options.thresholds[`http_req_duration{name:${label}}`] = ["p(95)<500"];
+options.thresholds[`http_reqs{name:${label}}`] = [];
 
+
+export function setup() { return _setup(label, queryType, numberOfEndUsers); }
+export default function (data) { _default(data); }

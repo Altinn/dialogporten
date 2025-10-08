@@ -8,7 +8,8 @@
       "launchUrl": "graphql",
       "applicationUrl": "http://localhost:5181",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc"
       }
     }
   }

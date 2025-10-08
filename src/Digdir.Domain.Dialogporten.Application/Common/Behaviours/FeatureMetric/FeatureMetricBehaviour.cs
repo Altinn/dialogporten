@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using MediatR;
@@ -22,14 +23,19 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        _user.GetPrincipal().TryGetOrganizationShortName(out var performingOrg);
+        var principal = _user.GetPrincipal();
+        principal.TryGetConsumerOrgNumber(out var performingOrgNr);
+
+        var hasAdminScope = principal.HasScope(AuthorizationScope.ServiceOwnerAdminScope);
         var resource = await _featureMetricServiceResourceResolver.Resolve(request, cancellationToken);
+
         _featureMetricRecorder.Record(new(
             FeatureName: typeof(TRequest).FullName!,
+            HasAdminScope: hasAdminScope,
             Environment: hostEnvironment?.EnvironmentName,
-            PerformerOrg: performingOrg,
-            OwnerOrg: resource?.OwnOrgShortName,
+            PerformerOrg: performingOrgNr,
             ServiceResource: resource?.ResourceId));
+
         return await next(cancellationToken);
     }
 }

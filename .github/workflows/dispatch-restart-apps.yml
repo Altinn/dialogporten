@@ -38,9 +38,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP_NAME }}"
-          ENVIRONMENT="${{ inputs.environment }}"
-
           APPS=(
             "dp-be-${ENVIRONMENT}-webapi-so-ca"
             "dp-be-${ENVIRONMENT}-webapi-eu-ca"
@@ -71,6 +68,9 @@ jobs:
               echo "⚠️ No active revision found for $APP"
             fi
           done
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          ENVIRONMENT: ${{ inputs.environment }}
 
       - name: Logout from Azure
         if: ${{ failure() || success() }}

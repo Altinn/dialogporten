@@ -34,7 +34,7 @@
         <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="Refit" Version="8.0.0"/>
         <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0"/>
-        <PackageReference Include="Refitter.SourceGenerator" Version="1.6.2" Condition="$(Configuration)=='Release'">
+        <PackageReference Include="Refitter.SourceGenerator" Version="1.6.4" Condition="$(Configuration)=='Release'">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

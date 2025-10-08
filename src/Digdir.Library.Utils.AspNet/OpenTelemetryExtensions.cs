@@ -47,12 +47,10 @@ public static class OpenTelemetryExtensions
             })
             .WithTracing(tracing =>
             {
-                if (environment.IsDevelopment())
-                {
-                    tracing.SetSampler(new AlwaysOnSampler());
-                }
+                tracing.SetSampler(new AlwaysOnSampler());
 
-                tracing.AddProcessor(new PostgresExceptionFilter());
+                tracing.AddProcessor(new PostgresFilter());
+                tracing.AddProcessor(new HealthCheckFilter());
 
                 tracing
                     .AddHttpClientInstrumentation(o =>
@@ -172,7 +170,6 @@ public static class OpenTelemetryExtensions
         return builder.AddAspNetCoreInstrumentation(opts =>
         {
             opts.RecordException = true;
-            opts.Filter = httpContext => !httpContext.Request.Path.StartsWithSegments("/health");
         });
     }
 }

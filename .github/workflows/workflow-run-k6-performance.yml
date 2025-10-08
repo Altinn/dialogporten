@@ -86,11 +86,17 @@ jobs:
       uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2 # v1.1.0
     - name: Run K6 tests (${{ inputs.testSuitePath }})
       run: |
-        echo "Running k6 test suite ${{ inputs.testSuitePath }} with ${{ inputs.vus }} VUs for ${{ inputs.duration }} on ${{ inputs.parallelism }} parallelism"
-        k6configName=$(basename "${{ inputs.testSuitePath }}" .js)
+        echo "Running k6 test suite ${TEST_SUITE_PATH} with ${VUS} VUs for ${DURATION} on ${PARALLELISM} parallelism"
+        k6configName=$(basename "${TEST_SUITE_PATH}" .js)
         k6configName="k6-${k6configName}"
-        ./tests/k6/tests/scripts/run-test-in-k8s.sh -f ${{ inputs.testSuitePath }} -c $k6configName -n $k6configName -v ${{ inputs.vus }} -d ${{ inputs.duration }} -p ${{ inputs.parallelism }} -a ${{ inputs.abortOnFail }} -b ${{ inputs.breakpoint }}
+        ./tests/k6/tests/scripts/run-test-in-k8s.sh -f "${TEST_SUITE_PATH}" -c "$k6configName" -n "$k6configName" -v "${VUS}" -d "${DURATION}" -p "${PARALLELISM}" -a "${ABORT_ON_FAIL}" -b "${BREAKPOINT}"
       env:
         API_ENVIRONMENT: ${{ inputs.environment }}
         API_VERSION: ${{ inputs.apiVersion }}
         NUMBER_OF_ENDUSERS: ${{ inputs.numberOfEndUsers }}
+        TEST_SUITE_PATH: ${{ inputs.testSuitePath }}
+        VUS: ${{ inputs.vus }}
+        DURATION: ${{ inputs.duration }}
+        PARALLELISM: ${{ inputs.parallelism }}
+        ABORT_ON_FAIL: ${{ inputs.abortOnFail }}
+        BREAKPOINT: ${{ inputs.breakpoint }}

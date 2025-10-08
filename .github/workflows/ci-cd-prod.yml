@@ -26,12 +26,14 @@ jobs:
     steps:
       - name: Check if tag exists
         run: |
-          if ! gh api repos/${{ github.repository }}/git/refs/tags/v${{ inputs.version }} &>/dev/null; then
-            echo "::error::Version ${{ inputs.version }} does not exist as a tag"
+          if ! gh api "repos/${REPOSITORY}/git/refs/tags/v${VERSION}" &>/dev/null; then
+            echo "::error::Version ${VERSION} does not exist as a tag"
             exit 1
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          VERSION: ${{ inputs.version }}
 
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub

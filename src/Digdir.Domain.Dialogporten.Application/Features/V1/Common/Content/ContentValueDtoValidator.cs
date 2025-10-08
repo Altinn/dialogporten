@@ -47,8 +47,8 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
             .NotEmpty()
             .SetValidator(_ =>
             {
-                var maxLength = (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
-                 && Constants.DefaultMaxStringLength == contentType.MaxLength
+                var maxLength = Constants.DefaultMaxStringLength == contentType.MaxLength
+                 && (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
                         ? Constants.CorrespondenceMaxStringLength
                         : contentType.MaxLength;
                 return new LocalizationDtosValidator(maxLength);
@@ -88,8 +88,8 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
             .NotEmpty()
             .SetValidator(_ =>
             {
-                var maxLength = (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
-                 && Constants.DefaultMaxStringLength == contentType.MaxLength
+                var maxLength = Constants.DefaultMaxStringLength == contentType.MaxLength
+                 && (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
                         ? Constants.CorrespondenceMaxStringLength
                         : contentType.MaxLength;
                 return new LocalizationDtosValidator(maxLength);

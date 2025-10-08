@@ -13,11 +13,13 @@ internal sealed record FeatureMetricRecord(
     string FeatureName,
     bool HasAdminScope = false,
     string? Environment = FeatureMetricRecord.UnknownValue,
-    string? PerformerOrg = FeatureMetricRecord.UnknownValue,
+    string? CallerOrg = FeatureMetricRecord.UnknownValue,
+    string? OwnerOrg = FeatureMetricRecord.UnknownValue,
     string? ServiceResource = FeatureMetricRecord.UnknownValue)
 {
     private const string UnknownValue = "unknown";
     public string Environment { get; } = Environment ?? UnknownValue;
-    public string PerformerOrg { get; } = PerformerOrg ?? UnknownValue;
+    public string CallerOrg { get; } = CallerOrg ?? UnknownValue;
+    public string OwnerOrg { get; } = OwnerOrg ?? UnknownValue;
     public string ServiceResource { get; } = ServiceResource ?? UnknownValue;
 }

@@ -36,7 +36,8 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                 record.FeatureName,
                 record.HasAdminScope,
                 record.Environment,
-                record.PerformerOrg,
+                record.CallerOrg,
+                record.OwnerOrg,
                 record.ServiceResource,
                 presentationTag,
                 additionalTagsDic);
@@ -50,7 +51,8 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
                   "FeatureType={FeatureType}, " +
                   "HasAdminScope={HasAdminScope}, " +
                   "Environment={Environment}, " +
-                  "PerformerOrg={PerformerOrg}, " +
+                  "CallerOrg={CallerOrg}, " +
+                  "OwnerOrg={OwnerOrg}, " +
                   "ServiceResource={ServiceResource}, " +
                   "PresentationTag={PresentationTag}, " +
                   "AdditionalTags={AdditionalTags}")]
@@ -59,7 +61,8 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         string featureType,
         bool hasAdminScope,
         string environment,
-        string performerOrg,
+        string callerOrg,
+        string ownerOrg,
         string serviceResource,
         string presentationTag,
         Dictionary<string, object> additionalTags);

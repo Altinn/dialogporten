@@ -60,7 +60,8 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
 
         var metric = metrics[0];
         metric.FeatureName.Should().Be("Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.CreateDialogCommand");
-        metric.PerformerOrg.Should().NotBeNullOrEmpty();
+        metric.CallerOrg.Should().NotBeNullOrEmpty();
+        metric.OwnerOrg.Should().NotBeNullOrEmpty();
         metric.ServiceResource.Should().NotBeNullOrEmpty();
     }
 
@@ -96,7 +97,8 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
         metrics.Should().HaveCount(1);
         var metric = metrics[0];
         metric.Environment.Should().NotBeNullOrEmpty();
-        metric.PerformerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
+        metric.CallerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
+        metric.OwnerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
         metric.ServiceResource.Should().NotBeNullOrEmpty();
     }
 
@@ -161,9 +163,12 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
         metrics.Should().HaveCount(4); // 2x CreateDialog + 2x GetDialog
 
 
-        // All metrics should have valid service resources
+        // All metrics should have valid service resources and owner orgs
         var serviceResources = metrics.Select(m => m.ServiceResource).ToList();
         serviceResources.Should().AllSatisfy(sr => sr.Should().NotBeNullOrEmpty());
+
+        var ownerOrgs = metrics.Select(m => m.OwnerOrg).ToList();
+        ownerOrgs.Should().AllSatisfy(owner => owner.Should().NotBeNullOrEmpty());
 
         // Different dialogs should have different service resources
         var createDialogMetrics = metrics.Where(m => m.FeatureName.Contains("CreateDialog")).ToList();

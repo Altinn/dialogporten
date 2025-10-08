@@ -188,13 +188,13 @@ export default function () {
         });
 
         // Update single dialog
-        let penultimateDialogId = dialogIds[0];
-        let penultimateDialog = dialogToInsert();
-        penultimateDialog.id = penultimateDialogId;
-        setProcess(penultimateDialog, "urn:test:process:1");
-        setTitle(penultimateDialog, titleForUpdatedItem);
+        let firstDialogId = dialogIds[0];
+        let firstDialog = dialogToInsert();
+        firstDialog.id = firstDialogId;
+        setProcess(firstDialog, "urn:test:process:1");
+        setTitle(firstDialog, titleForUpdatedItem);
 
-        let post = putSO("dialogs/" + penultimateDialogId, penultimateDialog);
+        let post = putSO("dialogs/" + firstDialogId, firstDialog);
         expectStatusFor(post).to.equal(204);
 
         // Assert

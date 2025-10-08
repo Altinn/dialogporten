@@ -12,9 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Behaviours;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
+public class FeatureMetricBehaviourTests : ApplicationCollectionFixture
 {
-    public FeatureMetricEndToEndTests(DialogApplication application) : base(application) { }
+    public FeatureMetricBehaviourTests(DialogApplication application) : base(application) { }
 
     private async Task<List<FeatureMetricRecord>> ExecuteCommandAndGetMetrics<T>(IRequest<T> command)
     {
@@ -30,44 +30,7 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
     }
 
     [Fact]
-    public async Task CreateDialog_ShouldRecordFeatureMetric()
-    {
-        // Arrange
-        var expectedDialogId = IdentifiableExtensions.CreateVersion7();
-        var command = new CreateDialogCommand
-        {
-            Dto = new CreateDialogDto
-            {
-                Id = expectedDialogId,
-                ServiceResource = "urn:altinn:resource:test-service",
-                Party = "urn:altinn:organization:identifier-no:912345678",
-                Content = new Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ContentDto
-                {
-                    Title = new ContentValueDto
-                    {
-                        Value = [new LocalizationDto { LanguageCode = "nb", Value = "Test Dialog" }],
-                        MediaType = "text/plain"
-                    }
-                }
-            }
-        };
-
-        // Act - Execute command directly within the same scope to capture metrics
-        var metrics = await ExecuteCommandAndGetMetrics(command);
-
-        // Assert
-        metrics.Should().HaveCount(1);
-
-        var metric = metrics[0];
-        metric.FeatureName.Should().Be("Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.CreateDialogCommand");
-        metric.PerformerOrg.Should().NotBeNullOrEmpty();
-        metric.ServiceResource.Should().NotBeNullOrEmpty();
-    }
-
-
-
-    [Fact]
-    public async Task FeatureMetric_ShouldIncludeAllRequiredFields()
+    public async Task CreateDialog_Should_Include_All_Required_Fields()
     {
         // Arrange
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
@@ -95,8 +58,10 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
         // Assert
         metrics.Should().HaveCount(1);
         var metric = metrics[0];
+        metric.FeatureName.Should().Be(typeof(CreateDialogCommand).FullName);
         metric.Environment.Should().NotBeNullOrEmpty();
-        metric.PerformerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
+        metric.CallerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
+        metric.OwnerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
         metric.ServiceResource.Should().NotBeNullOrEmpty();
     }
 
@@ -161,9 +126,12 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
         metrics.Should().HaveCount(4); // 2x CreateDialog + 2x GetDialog
 
 
-        // All metrics should have valid service resources
+        // All metrics should have valid service resources and owner orgs
         var serviceResources = metrics.Select(m => m.ServiceResource).ToList();
         serviceResources.Should().AllSatisfy(sr => sr.Should().NotBeNullOrEmpty());
+
+        var ownerOrgs = metrics.Select(m => m.OwnerOrg).ToList();
+        ownerOrgs.Should().AllSatisfy(owner => owner.Should().NotBeNullOrEmpty());
 
         // Different dialogs should have different service resources
         var createDialogMetrics = metrics.Where(m => m.FeatureName.Contains("CreateDialog")).ToList();
@@ -174,4 +142,3 @@ public class FeatureMetricEndToEndTests : ApplicationCollectionFixture
     }
 
 }
-

@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using FluentValidation;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 
@@ -17,6 +18,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 // The validator is manually created in the Create and Update validators
 internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueDto>, IIgnoreOnAssemblyScan
 {
+    private const string CorrespondenceScope = "altinn.dialogporten.correspondence";
     public ContentValueDtoValidator(DialogTransmissionContentType contentType, IUser? user = null)
     {
         var allowedMediaTypes = GetAllowedMediaTypes(contentType, user);
@@ -43,7 +45,17 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
 
         RuleFor(x => x.Value)
             .NotEmpty()
-            .SetValidator(_ => new LocalizationDtosValidator(contentType.MaxLength));
+            .SetValidator(_ =>
+            {
+                // Workaround for https://github.com/Altinn/altinn-correspondence/issues/1418
+                // TODO: Remove after A2 correspondence has been discontinued, as the new
+                // correspondence API has the same limitations as Dialogporten
+                var maxLength = Constants.DefaultMaxStringLength == contentType.MaxLength
+                 && (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
+                        ? Constants.CorrespondenceMaxStringLength
+                        : contentType.MaxLength;
+                return new LocalizationDtosValidator(maxLength);
+            });
 
         RuleForEach(x => x.Value)
             .ContainsValidHtml()
@@ -77,7 +89,14 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
 
         RuleFor(x => x.Value)
             .NotEmpty()
-            .SetValidator(_ => new LocalizationDtosValidator(contentType.MaxLength));
+            .SetValidator(_ =>
+            {
+                var maxLength = Constants.DefaultMaxStringLength == contentType.MaxLength
+                 && (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
+                        ? Constants.CorrespondenceMaxStringLength
+                        : contentType.MaxLength;
+                return new LocalizationDtosValidator(maxLength);
+            });
 
         RuleForEach(x => x.Value)
             .ContainsValidHtml()

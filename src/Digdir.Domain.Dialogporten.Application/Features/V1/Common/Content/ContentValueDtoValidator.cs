@@ -47,6 +47,9 @@ internal sealed class ContentValueDtoValidator : AbstractValidator<ContentValueD
             .NotEmpty()
             .SetValidator(_ =>
             {
+                // Workaround for https://github.com/Altinn/altinn-correspondence/issues/1418
+                // TODO: Remove after A2 correspondence has been discontinued, as the new
+                // correspondence API has the same limitations as Dialogporten
                 var maxLength = Constants.DefaultMaxStringLength == contentType.MaxLength
                  && (user?.GetPrincipal().HasScope(CorrespondenceScope) ?? false)
                         ? Constants.CorrespondenceMaxStringLength

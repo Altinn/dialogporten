@@ -23,7 +23,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     DialogId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp at time zone 'utc'"),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     SearchVector = table.Column<NpgsqlTsVector>(type: "tsvector", nullable: false)
                 },
                 constraints: table =>

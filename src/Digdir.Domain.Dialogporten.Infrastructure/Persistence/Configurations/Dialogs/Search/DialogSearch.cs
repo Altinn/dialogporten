@@ -1,12 +1,11 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Library.Entity.Abstractions.Features.Updatable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NpgsqlTypes;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search;
 
-internal sealed class DialogSearch : IUpdateableEntity
+internal sealed class DialogSearch
 {
     public Guid DialogId { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }

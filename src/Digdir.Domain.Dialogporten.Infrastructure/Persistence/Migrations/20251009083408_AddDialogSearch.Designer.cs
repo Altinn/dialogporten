@@ -13,7 +13,7 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20251008085053_AddDialogSearch")]
+    [Migration("20251009083408_AddDialogSearch")]
     partial class AddDialogSearch
     {
         /// <inheritdoc />
@@ -1541,9 +1541,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("tsvector");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("DialogId");
 

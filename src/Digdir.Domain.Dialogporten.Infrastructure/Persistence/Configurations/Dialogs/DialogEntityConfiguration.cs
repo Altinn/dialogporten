@@ -1,7 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using static Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs;
 
@@ -29,7 +28,7 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
 
         builder.Property(x => x.Org).UseCollation("C");
         builder.Property(x => x.Party).UseCollation("C");
-        builder.Property(x => x.ServiceResource).HasMaxLength(DefaultMaxStringLength);
+        builder.Property(x => x.ServiceResource).HasMaxLength(Domain.Common.Constants.DefaultMaxStringLength);
         builder.Property(x => x.ServiceResource).UseCollation("C");
         builder.Property(x => x.IdempotentKey).HasMaxLength(36);
         builder.Property(x => x.ContentUpdatedAt).HasDefaultValueSql("current_timestamp at time zone 'utc'");

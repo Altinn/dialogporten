@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
 
@@ -15,9 +16,4 @@ internal sealed class DialogSearchIndexer(IDialogSearchRepository db) : INotific
 
     private async Task UpdateIndex(Guid dialogId, CancellationToken cancellationToken) =>
         await _db.UpsertFreeTextSearchIndex(dialogId, cancellationToken);
-}
-
-public interface IDialogSearchRepository
-{
-    Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken);
 }

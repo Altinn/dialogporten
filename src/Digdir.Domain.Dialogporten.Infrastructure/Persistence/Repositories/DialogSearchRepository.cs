@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.DialogSearch;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;

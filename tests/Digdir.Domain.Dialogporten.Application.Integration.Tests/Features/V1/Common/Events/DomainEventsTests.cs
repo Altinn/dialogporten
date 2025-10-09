@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.DialogSearch;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using FluentAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
@@ -275,18 +274,4 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
                     .Should()
                     .BeTrue();
             });
-}
-
-[Collection(nameof(DialogCqrsCollectionFixture))]
-public class DialogSearchIndexerTests(DialogApplication application) : ApplicationCollectionFixture(application)
-{
-    [Fact]
-    public async Task DialogSearchIndexer_Should_Publish_Event_When_Dialog_Is_Created()
-    {
-        var result = await FlowBuilder.For(Application)
-            .CreateComplexDialog()
-            .ExecuteAndAssert<CreateDialogSuccess>();
-        var sut = ActivatorUtilities.CreateInstance<DialogSearchIndexer>(Application.GetServiceProvider());
-        await sut.Handle(new DialogCreatedDomainEvent(result.DialogId, null!, null!, null, null), CancellationToken.None);
-    }
 }

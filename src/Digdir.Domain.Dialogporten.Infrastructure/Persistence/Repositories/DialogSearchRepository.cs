@@ -70,7 +70,7 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             GROUP BY d."Id"
         )
         INSERT INTO search."DialogSearch" ("DialogId", "UpdatedAt", "SearchVector")
-        SELECT dialogId, now(), document
+        SELECT dialogId, now(), coalesce(document,'')
         FROM aggregatedVectorizedDialogContent
         WHERE dialogId = {0}
         ON CONFLICT ("DialogId") DO UPDATE

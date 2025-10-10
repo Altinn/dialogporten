@@ -60,7 +60,7 @@ export default function() {
     }
     const url = new URL(baseUrlServiceOwner + 'dialogs' + `/${dialogWithTransmission.dialogId}` + '/actions/should-send-notification');    
     url.searchParams.append('conditionType', 'NotExists');
-    url.searchParams.append('activityType', 'DialogCreated'); 
+    url.searchParams.append('activityType', 'TransmissionOpened'); 
     url.searchParams.append('transmissionId', dialogWithTransmission.transmissionId);
 
     describe('Perform should send notification', () => {

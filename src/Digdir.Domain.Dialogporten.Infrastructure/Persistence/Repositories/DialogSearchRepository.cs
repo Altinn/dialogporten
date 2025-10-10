@@ -48,15 +48,24 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             INNER JOIN "LocalizationSet" dcls ON da."Id" = dcls."ActivityId"
             INNER JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
             
-            -- Attachment description (can be linked to dialog or transmission)
-            UNION ALL SELECT DISTINCT coalesce(a."DialogId", dt."DialogId") dialogId
-                ,'D' weight
-                ,l."LanguageCode" languageCode
-                ,l."Value" value
+            -- Attachment description (dialog-linked)
+            UNION ALL SELECT a."DialogId"
+                 ,'D'
+                 ,l."LanguageCode"
+                 ,l."Value"
             FROM "Attachment" a
-            LEFT JOIN "DialogTransmission" dt ON a."TransmissionId" = dt."Id"
-            INNER JOIN "LocalizationSet" dcls ON a."Id" = dcls."AttachmentId"
-            INNER JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
+            INNER JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
+            INNER JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
+            
+            -- Attachment description (transmission-linked)
+            UNION ALL SELECT dt."DialogId"
+                ,'D'
+                ,l."LanguageCode"
+                ,l."Value"
+            FROM "DialogTransmission" dt
+            INNER JOIN "Attachment" a ON a."TransmissionId" = dt."Id"
+            INNER JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
+            INNER JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
         ), aggregatedVectorizedDialogContent AS (
             SELECT d."Id" AS dialogId
                 ,string_agg(

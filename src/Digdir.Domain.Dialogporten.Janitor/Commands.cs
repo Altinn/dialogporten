@@ -1,7 +1,7 @@
 using Cocona;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
-using Digdir.Domain.Dialogporten.Janitor.Services;
+using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -43,7 +43,7 @@ internal static class Commands
                     validationError => -1);
             });
 
-        app.AddCommand("aggregate-metrics", async (
+        app.AddCommand("aggregate-cost-metrics", async (
                 [FromService] CoconaAppContext ctx,
                 [FromService] IHostEnvironment hostEnvironment,
                 [FromService] ApplicationInsightsService applicationInsightsService,
@@ -52,13 +52,13 @@ internal static class Commands
                 [FromService] AzureStorageService storageService,
                 [FromService] ILogger<CoconaApp> logger,
                 [FromService] IOptions<MetricsAggregationOptions> options,
-                [Option('d')] DateOnly? targetDate,
-                [Option('e', Description = "Environment(s) to query. Can be specified multiple times (e.g., -e TT02 -e PROD)")] string[]? environments)
+                [Option('d', Description = "Target date for metrics aggregation (format: YYYY-MM-DD or DD/MM/YYYY). Defaults to yesterday in Norwegian time.")] DateOnly? targetDate,
+                [Option('e', Description = "Environment(s) to query. Can be specified multiple times (e.g., -e staging -e prod). Defaults to staging and prod.")] string[]? environments)
             =>
             {
                 try
                 {
-                    var date = targetDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
+                    var date = targetDate ?? NorwegianTimeConverter.GetYesterday();
                     var config = options.Value;
 
                     logger.LogInformation("Host Environment: {Environment}", hostEnvironment.EnvironmentName);
@@ -70,7 +70,7 @@ internal static class Commands
 
                     logger.LogInformation("Configuration - SkipUpload: {SkipUpload}, Target Environments: [{Environments}]",
                         config.SkipUpload, string.Join(", ", targetEnvironments));
-                    logger.LogInformation("Starting metrics aggregation for date {Date}",
+                    logger.LogInformation("Starting metrics aggregation for date {Date:dd.MM.yyyy}",
                         date);
 
                     var allRecords = new List<FeatureMetricRecord>();
@@ -94,9 +94,10 @@ internal static class Commands
 
                     if (config.SkipUpload)
                     {
-                        await File.WriteAllBytesAsync(fileName, parquetData, ctx.CancellationToken);
-                        logger.LogInformation("Saved parquet file locally as {FileName} with {RecordCount} records ({FileSize} bytes)",
-                            fileName, aggregatedRecords.Count, parquetData.Length);
+                        var outputPath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+                        await File.WriteAllBytesAsync(outputPath, parquetData, ctx.CancellationToken);
+                        logger.LogInformation("Saved parquet file to {FilePath} with {RecordCount} records ({FileSize} bytes)",
+                            outputPath, aggregatedRecords.Count, parquetData.Length);
                     }
                     else
                     {

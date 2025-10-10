@@ -8,7 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Janitor;
-using Digdir.Domain.Dialogporten.Janitor.Services;
+using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using Digdir.Library.Utils.AspNet;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
@@ -52,7 +52,7 @@ static void BuildAndRun(string[] args)
 
     builder.Configuration
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-        .AddJsonFile("cost-coefficients.json", optional: false, reloadOnChange: true)
+        .AddJsonFile("CostManagementAggregation/cost-coefficients.json", optional: false, reloadOnChange: true)
         .AddUserSecrets<Program>()
         .AddLocalConfiguration(builder.Environment);
     builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -76,13 +76,6 @@ static void BuildAndRun(string[] args)
     builder.Services
         .AddOptions<MetricsAggregationOptions>()
         .Bind(builder.Configuration.GetSection(MetricsAggregationOptions.SectionName))
-        .PostConfigure(options =>
-        {
-            if (builder.Environment.IsDevelopment())
-            {
-                options.Environments = ["Development"];
-            }
-        })
         .ValidateDataAnnotations()
         .ValidateOnStart();
 

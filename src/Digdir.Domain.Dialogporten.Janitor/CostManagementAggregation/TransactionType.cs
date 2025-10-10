@@ -1,4 +1,4 @@
-namespace Digdir.Domain.Dialogporten.Janitor.Services;
+namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
 /// <summary>
 /// Transaction types for cost management metrics aggregation
@@ -24,7 +24,7 @@ public enum TransactionType
 /// </summary>
 public static class TransactionTypeMapper
 {
-    public static TransactionType MapFeatureTypeToTransactionType(string featureType, string presentationTag)
+    public static TransactionType? MapFeatureTypeToTransactionType(string featureType, string presentationTag)
     {
         // Handle Commands
         if (featureType.Contains("Commands.Create.CreateDialogCommand", StringComparison.Ordinal))
@@ -93,7 +93,7 @@ public static class TransactionTypeMapper
             return TransactionType.BulkSetLabelsEndUser;
         }
 
-        // Default fallback
-        return TransactionType.CreateDialog;
+        // No matching transaction type - this feature metric should not be included in cost aggregation
+        return null;
     }
 }

@@ -2,9 +2,9 @@ using Azure.Storage.Blobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Digdir.Domain.Dialogporten.Janitor.Services;
+namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
-public class AzureStorageService
+public sealed class AzureStorageService
 {
     private readonly BlobServiceClient _blobServiceClient;
     private readonly ILogger<AzureStorageService> _logger;

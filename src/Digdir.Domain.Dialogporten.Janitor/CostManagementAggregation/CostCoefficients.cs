@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Options;
 
-namespace Digdir.Domain.Dialogporten.Janitor.Services;
+namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
-public class CostCoefficients
+public sealed class CostCoefficients
 {
     private readonly CostCoefficientsOptions _options;
     private readonly Dictionary<TransactionType, decimal> _coefficients;
@@ -38,16 +38,16 @@ public class CostCoefficients
         {
             TransactionType.CreateDialog => "Opprette dialog",
             TransactionType.UpdateDialog => "Oppdatere dialog",
-            TransactionType.SoftDeleteDialog => "Softslette dialog",
-            TransactionType.HardDeleteDialog => "Hardslette dialog",
-            TransactionType.GetDialogServiceOwner => "Hente dialog tjenesteeier",
-            TransactionType.SearchDialogsServiceOwner => "Tjenesteeiersøk",
-            TransactionType.SearchDialogsServiceOwnerWithEndUser => "Tjenesteeiersøk m/sluttbruker-id",
-            TransactionType.GetDialogEndUser => "Hente dialog sluttbruker",
-            TransactionType.SetDialogLabel => "Sette label på enkeltdialog",
-            TransactionType.BulkSetLabelsServiceOwnerWithEndUser => "Bulk label setting tjenesteeier m/sluttbruker-id",
+            TransactionType.SoftDeleteDialog => "Slette dialog",
+            TransactionType.HardDeleteDialog => "Slette dialog",
+            TransactionType.GetDialogServiceOwner => "Hente dialog (tjenesteeier)",
+            TransactionType.SearchDialogsServiceOwner => "Tjenesteeiersøk (hente dialoger knyttet til én tjenesteeier)",
+            TransactionType.SearchDialogsServiceOwnerWithEndUser => "Tjenesteeiersøk m/sluttbruker-id (hente dialoger knyttet til én tjenesteeier basert på en oppgitt sluttbrukers tilganger)",
+            TransactionType.GetDialogEndUser => "Hente dialog (sluttbruker)",
+            TransactionType.SetDialogLabel => "Sette label på enkeltdialog (samme for tjenesteeier og sluttbruker)",
+            TransactionType.BulkSetLabelsServiceOwnerWithEndUser => "Sluttbruker som setter labels (aka flytter til arkiv/papirkurv) i bulk gjennom tjenesteeier-API m/sluttbruker-id",
             TransactionType.SearchDialogsEndUser => "Sluttbrukersøk",
-            TransactionType.BulkSetLabelsEndUser => "Bulk label setting sluttbruker",
+            TransactionType.BulkSetLabelsEndUser => "Sluttbruker som setter labels (aka flytter til arkiv/papirkurv) i bulk gjennom sluttbruker-API",
             _ => transactionType.ToString()
         };
     }

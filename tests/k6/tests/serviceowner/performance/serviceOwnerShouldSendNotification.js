@@ -1,3 +1,9 @@
+/**
+ * Performance test for Service Owner API - shouldSendNotification
+ * Run: k6 run tests/k6/tests/serviceowner/performance/serviceOwnerShouldSendNotification.js --vus 1 --iterations 1 -e env=yt01 
+ * Currently hard-coded to test for NotExists and TransmissionOpened to match skatt and skattekort
+ */
+
 import http from 'k6/http';
 import { dialogsWithTransmissions } from '../../performancetest_common/readTestdata.js';
 import { randomItem, uuidv4, URL} from '../../../common/k6-utils.js';
@@ -58,7 +64,8 @@ export default function() {
     if (traceCalls) {
         paramsWithToken.tags.traceparent = traceparent;
     }
-    const url = new URL(baseUrlServiceOwner + 'dialogs' + `/${dialogWithTransmission.dialogId}` + '/actions/should-send-notification');    
+    const url = new URL(baseUrlServiceOwner + 'dialogs' + `/${dialogWithTransmission.dialogId}` + '/actions/should-send-notification');
+    // Testing only for NotExists and TransmissionOpened for now, to match skatt and skattekort 
     url.searchParams.append('conditionType', 'NotExists');
     url.searchParams.append('activityType', 'TransmissionOpened'); 
     url.searchParams.append('transmissionId', dialogWithTransmission.transmissionId);

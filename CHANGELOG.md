@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.86.1](https://github.com/Altinn/dialogporten/compare/v1.86.0...v1.86.1) (2025-10-09)
+
+
+### Bug Fixes
+
+* **graphql:** add hot chocolate instrumentation ([#2844](https://github.com/Altinn/dialogporten/issues/2844)) ([4211608](https://github.com/Altinn/dialogporten/commit/42116088aa9717326d3077751755fbc4328412a1))
+
 ## [1.86.0](https://github.com/Altinn/dialogporten/compare/v1.85.0...v1.86.0) (2025-10-08)
 
 

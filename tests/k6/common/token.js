@@ -26,7 +26,8 @@ const encodedCredentials = encoding.b64encode(credentials);
 const tokenRequestOptions = {
   headers: {
     Authorization: `Basic ${encodedCredentials}`,
-  }
+  },
+  tags: {name: 'Token generator'},
 };
 
 let cachedTokens = {};

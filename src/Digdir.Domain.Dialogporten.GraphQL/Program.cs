@@ -101,6 +101,7 @@ static void BuildAndRun(string[] args)
             additionalTracing: x => x
                 .AddSource("Dialogporten.GraphQL")
                 .AddFusionCacheInstrumentation()
+                .AddHotChocolateInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
 
         // Add health checks with the well-known URLs

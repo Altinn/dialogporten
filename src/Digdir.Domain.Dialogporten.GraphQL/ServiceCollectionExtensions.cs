@@ -1,4 +1,5 @@
 using AppAny.HotChocolate.FluentValidation;
+using Digdir.Domain.Dialogporten.GraphQL.Common;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
@@ -10,6 +11,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDialogportenGraphQl(this IServiceCollection services) => services
         .AddGraphQLServer()
+        .AddHttpRequestInterceptor<AcceptLanguageHeaderInterceptor>()
         .ModifyCostOptions(o => o.ApplyCostDefaults = false)
         // This assumes that subscriptions have been set up by the infrastructure
         .AddSubscriptionType<Subscriptions>()

@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.86.0](https://github.com/Altinn/dialogporten/compare/v1.85.0...v1.86.0) (2025-10-08)
+
+
+### Features
+
+* **app:** add partyid to authorized parties result ([#2836](https://github.com/Altinn/dialogporten/issues/2836)) ([e05cd40](https://github.com/Altinn/dialogporten/commit/e05cd405e9d0c4a3c2020e7b1611ae53a1b7555f))
+
+
+### Miscellaneous Chores
+
+* **app:** Rename PerformerOrg to CallerOrg and add OwnerOrg to feature metrics ([#2833](https://github.com/Altinn/dialogporten/issues/2833)) ([dc549ec](https://github.com/Altinn/dialogporten/commit/dc549ec3bfaead4995f54fea84a03548fbccfaa3))
+* **app:** Update OpenTelemetry configurations and dependencies ([#2838](https://github.com/Altinn/dialogporten/issues/2838)) ([80c9dd2](https://github.com/Altinn/dialogporten/commit/80c9dd28554e232aeed50035628981e7ea4d6c14))
+
+## [1.85.0](https://github.com/Altinn/dialogporten/compare/v1.84.0...v1.85.0) (2025-10-08)
+
+
+### Features
+
+* **app:** increase max content length to 512 for correspondence  ([#2822](https://github.com/Altinn/dialogporten/issues/2822)) ([3d103e3](https://github.com/Altinn/dialogporten/commit/3d103e32c2b9c5b3c36de73aece69aa0a79edca2))
+
+
+### Miscellaneous Chores
+
+* **deps:** update docker/login-action action to v3.6.0 ([#2829](https://github.com/Altinn/dialogporten/issues/2829)) ([ad03258](https://github.com/Altinn/dialogporten/commit/ad032586cacc8a459f0962261da01b003eb18da2))
+
+## [1.84.0](https://github.com/Altinn/dialogporten/compare/v1.83.3...v1.84.0) (2025-10-07)
+
+
+### Features
+
+* add support for accept-language header ([#2747](https://github.com/Altinn/dialogporten/issues/2747)) ([4da9a05](https://github.com/Altinn/dialogporten/commit/4da9a05dbbea88ded9e0f187c463c29878dc15fd))
+
+
+### Bug Fixes
+
+* **app:** Use org consumer claim for feature metrics ([#2823](https://github.com/Altinn/dialogporten/issues/2823)) ([e13c2d1](https://github.com/Altinn/dialogporten/commit/e13c2d19401d2fe10de6622e87c04717b45ac346))
+
+
+### Miscellaneous Chores
+
+* **deps:** Update OpenTelemetry ([#2820](https://github.com/Altinn/dialogporten/issues/2820)) ([7af97bb](https://github.com/Altinn/dialogporten/commit/7af97bb5d37fcfb7bbbf8c13bedd765db0a50b75))
+
 ## [1.83.3](https://github.com/Altinn/dialogporten/compare/v1.83.2...v1.83.3) (2025-10-06)
 
 

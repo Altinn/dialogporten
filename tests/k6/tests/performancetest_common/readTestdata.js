@@ -28,6 +28,7 @@ if (!__ENV.API_ENVIRONMENT) {
 }
 const filenameEndusers = `../performancetest_data/endusers-${__ENV.API_ENVIRONMENT}.csv`;
 const filenameServiceowners = `../performancetest_data/serviceowners-${__ENV.API_ENVIRONMENT}.csv`;
+const filenameDialogsWithTransmissions = `../performancetest_data/dialogs-with-transmissions-${__ENV.API_ENVIRONMENT}.csv`;
 
 /**
  * SharedArray variable that stores the service owners data.
@@ -50,6 +51,10 @@ export const serviceOwners = new SharedArray('serviceOwners', function () {
  */
 export const endUsers = new SharedArray('endUsers', function () {
   return readCsv(filenameEndusers);
+});
+
+export const dialogsWithTransmissions = new SharedArray('dialogsWithTransmissions', function () {
+  return readCsv(filenameDialogsWithTransmissions);
 });
 
 export function endUsersPart(totalVus, vuId) {

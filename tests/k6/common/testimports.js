@@ -5,6 +5,7 @@ export { customConsole  } from './console.js';
 export { getServiceOwnerTokenFromGenerator, getEnduserTokenFromGenerator } from './token.js';
 export {
     getEU,
+    getSysEU,
     postEU,
     putEU,
     getSO,

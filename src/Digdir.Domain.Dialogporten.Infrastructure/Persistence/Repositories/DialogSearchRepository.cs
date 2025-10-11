@@ -1,89 +1,122 @@
 using System.Runtime.CompilerServices;
-using Digdir.Domain.Dialogporten.Application.Externals;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Digdir.Domain.Dialogporten.Application.Externals;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearchRepository
+internal sealed class DialogSearchRepository(IServiceScopeFactory scopeFactory) : IDialogSearchRepository
 {
-    private readonly DialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
+    // As DbContext is not thread safe, we create a new scope and DbContext instance for each operation,
+    // allowing the repository to be a singleton service (fewer allocations) and be used concurrently.
+    private readonly IServiceScopeFactory _scopeFactory =
+        scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 
-    public Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken) =>
-        _db.Database.ExecuteSqlAsync(FormattableStringFactory.Create(FreeTextSearchIndexerSql, dialogId), cancellationToken);
+    public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
 
-    //language=PostgreSQL
-    private const string FreeTextSearchIndexerSql =
-        """
-        WITH dialocContent AS (
-            -- Dialog Content
-            SELECT dc."DialogId" dialogId
-                ,CASE dc."TypeId"
-                    WHEN 1 THEN 'B' -- title
-                    ELSE 'D'
-                END weight
-                ,l."LanguageCode" languageCode
-                ,l."Value" value
-            FROM "DialogContent" dc
-            INNER JOIN "LocalizationSet" dcls ON dc."Id" = dcls."DialogContentId"
-            INNER JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
-            WHERE dc."MediaType" = 'text/plain'
-            
-            -- Transmission content
-            UNION ALL SELECT dt."DialogId"
-               ,'D' weight
-               ,l."LanguageCode" languageCode
-               ,l."Value" value
-            FROM "DialogTransmission" dt
-            INNER JOIN "DialogTransmissionContent" dtc ON dt."Id" = dtc."TransmissionId"
-            INNER JOIN "LocalizationSet" dcls ON dtc."Id" = dcls."TransmissionContentId"
-            INNER JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
-            WHERE dtc."MediaType" = 'text/plain'
-            
-            -- Activity description
-            UNION ALL SELECT da."DialogId"
-               ,'D' weight
-               ,l."LanguageCode" languageCode
-               ,l."Value" value
-            FROM "DialogActivity" da
-            INNER JOIN "LocalizationSet" dcls ON da."Id" = dcls."ActivityId"
-            INNER JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
-            
-            -- Attachment description (dialog-linked)
-            UNION ALL SELECT a."DialogId"
-                 ,'D'
-                 ,l."LanguageCode"
-                 ,l."Value"
-            FROM "Attachment" a
-            INNER JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
-            INNER JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
-            
-            -- Attachment description (transmission-linked)
-            UNION ALL SELECT dt."DialogId"
-                ,'D'
-                ,l."LanguageCode"
-                ,l."Value"
-            FROM "DialogTransmission" dt
-            INNER JOIN "Attachment" a ON a."TransmissionId" = dt."Id"
-            INNER JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
-            INNER JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
-        ), aggregatedVectorizedDialogContent AS (
-            SELECT d."Id" AS dialogId
-                ,string_agg(
-                    setweight(
-                        to_tsvector(COALESCE(isomap."TsConfigName", 'simple')::regconfig, value),
-                        weight::"char")::text,
-                    ' ')::tsvector AS document
-            FROM "Dialog" d -- ensure we get a row even if no content (only if dialog exists)
-            LEFT JOIN dialocContent dc ON d."Id" = dc.dialogId
-            LEFT JOIN search."Iso639TsVectorMap" isomap ON dc.languageCode = isomap."IsoCode"
-            GROUP BY d."Id"
-        )
-        INSERT INTO search."DialogSearch" ("DialogId", "UpdatedAt", "SearchVector")
-        SELECT dialogId, now(), coalesce(document,'')
-        FROM aggregatedVectorizedDialogContent
-        WHERE dialogId = {0}
-        ON CONFLICT ("DialogId") DO UPDATE
-        SET "UpdatedAt" = EXCLUDED."UpdatedAt",
-            "SearchVector" = EXCLUDED."SearchVector";
-        """;
+        var sql = FormattableStringFactory.Create(
+            "SELECT search.upsert_dialogsearch_one({0})",
+            dialogId);
+
+        await db.Database.ExecuteSqlAsync(sql, cancellationToken);
+    }
+
+    public async Task<int> SeedFullAsync(bool resetExisting, CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        var sql = FormattableStringFactory.Create(
+            "SELECT search.seed_dialogsearch_queue_full({0}) AS \"Value\"",
+            resetExisting);
+
+        return await db.Database.SqlQuery<int>(sql).SingleAsync(ct);
+    }
+
+    public async Task<int> SeedSinceAsync(DateTimeOffset since, bool resetMatching, CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        var utc = since.ToUniversalTime();
+        var sql = FormattableStringFactory.Create(
+            "SELECT search.seed_dialogsearch_queue_since({0}, {1}) AS \"Value\"",
+            utc, resetMatching);
+
+        return await db.Database.SqlQuery<int>(sql).SingleAsync(ct);
+    }
+
+    public async Task<int> SeedStaleAsync(bool resetMatching, CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        var sql = FormattableStringFactory.Create(
+            "SELECT search.seed_dialogsearch_queue_stale({0}) AS \"Value\"",
+            resetMatching);
+
+        return await db.Database.SqlQuery<int>(sql).SingleAsync(ct);
+    }
+
+    public async Task<int> WorkBatchAsync(int batchSize, long workMemBytes, bool staleFirst, CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        var sql = staleFirst
+            ? FormattableStringFactory.Create(
+                "SELECT search.rebuild_dialogsearch_once('stale_first', {0}, {1}) AS \"Value\"",
+                batchSize, workMemBytes)
+            : FormattableStringFactory.Create(
+                "SELECT search.rebuild_dialogsearch_once('standard', {0}, {1}) AS \"Value\"",
+                batchSize, workMemBytes);
+
+        return await db.Database.SqlQuery<int>(sql).SingleAsync(ct);
+    }
+
+    public async Task<DialogSearchReindexProgress> GetProgressAsync(CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        var progressSql = FormattableStringFactory.Create(
+            "SELECT total, pending, processing, done, failed FROM search.dialogsearch_rebuild_progress");
+        var progress = await db.Database.SqlQuery<ProgressRow>(progressSql).SingleAsync(ct);
+
+        var ratesSql = FormattableStringFactory.Create(
+            "SELECT dps_1m, dps_5m, dps_15m FROM search.dialogsearch_rates");
+        var rates = await db.Database.SqlQuery<RatesRow>(ratesSql).SingleAsync(ct);
+
+        return new DialogSearchReindexProgress(
+            Total: progress.total,
+            Pending: progress.pending,
+            Processing: progress.processing,
+            Done: progress.done,
+            Failed: progress.failed,
+            DialogsPerSec1m: rates.dps_1m ?? 0d,
+            DialogsPerSec5m: rates.dps_5m ?? 0d,
+            DialogsPerSec15m: rates.dps_15m ?? 0d
+        );
+    }
+
+#pragma warning disable IDE1006
+    private sealed class ProgressRow
+    {
+        public long total { get; init; }
+        public long pending { get; init; }
+        public long processing { get; init; }
+        public long done { get; init; }
+        public long failed { get; init; }
+    }
+
+    private sealed class RatesRow
+    {
+        public double? dps_1m { get; init; }
+        public double? dps_5m { get; init; }
+        public double? dps_15m { get; init; }
+    }
+#pragma warning restore IDE1006
 }

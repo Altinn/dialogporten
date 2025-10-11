@@ -37,6 +37,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.DialogSearch;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search;
+using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
 using MediatR;
 
@@ -93,7 +94,6 @@ public static class InfrastructureExtensions
             .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
-            .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient<Lazy<IPublishEndpoint>>(x =>
@@ -102,6 +102,7 @@ public static class InfrastructureExtensions
                 new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 
             // Singleton
+            .AddSingleton<IDialogSearchRepository, DialogSearchRepository>()
             .AddSingleton<INotificationProcessingContextFactory, NotificationProcessingContextFactory>()
 
             // HttpClient

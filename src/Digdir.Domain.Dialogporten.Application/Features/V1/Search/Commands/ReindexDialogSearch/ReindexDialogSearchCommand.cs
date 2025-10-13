@@ -13,7 +13,7 @@ public sealed class ReindexDialogSearchCommand : IRequest<ReindexDialogSearchRes
 {
     public bool Full { get; init; }
     public DateTimeOffset? Since { get; init; }
-    public bool StaleOnly { get; set; }
+    public bool StaleOnly { get; init; }
     public bool StaleFirst { get; init; }
     public bool Resume { get; init; }
     public int? BatchSize { get; init; }

@@ -1,7 +1,7 @@
 import http from "k6/http";
 import encoding from "k6/encoding";
 import { extend } from "./extend.js";
-import { defaultEndUserSsn, defaultServiceOwnerOrgNo, tokenGeneratorEnv } from "./config.js";
+import { defaultEndUserSsn, defaultServiceOwnerOrgNo, tokenGeneratorEnv, defaultSystemUserOrgNo, defaultSystemUserId} from "./config.js";
 
 let defaultTokenOptionsForServiceOwner = {
   scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search",
@@ -14,6 +14,12 @@ let defaultTokenOptionsForEndUser = {
     ssn: defaultEndUserSsn,
     orgNo: defaultServiceOwnerOrgNo // a organzation number for a party that the end user has access to
 };
+
+let defaultTokenOptionsForSystemUser = {
+    scopes: "digdir:dialogporten",
+    systemUserId: defaultSystemUserId,
+    systemUserOrg: defaultSystemUserOrgNo
+}
 
 const tokenUsername = __ENV.TOKEN_GENERATOR_USERNAME;
 const tokenPassword = __ENV.TOKEN_GENERATOR_PASSWORD;
@@ -34,7 +40,7 @@ let cachedTokens = {};
 let cachedTokensIssuedAt = {};
 
 function getCacheKey(tokenType, tokenOptions) {
-  return `${tokenType}|${tokenOptions.scopes}|${tokenOptions.orgName}|${tokenOptions.orgNo}|${tokenOptions.ssn}`;
+  return `${tokenType}|${tokenOptions.scopes}|${tokenOptions.orgName}|${tokenOptions.orgNo}|${tokenOptions.ssn}|${tokenOptions.systemUserId}|${tokenOptions.systemUserOrg}`;
 }
 
 export function fetchToken(url, tokenOptions, type) {
@@ -71,6 +77,12 @@ export function getEnduserTokenFromGenerator(tokenOptions = null) {
   let fullTokenOptions = extend({}, defaultTokenOptionsForEndUser, tokenOptions);
   const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&pid=${fullTokenOptions.ssn}&ttl=${tokenTtl}`;
   return fetchToken(url, fullTokenOptions, `end user (ssn:${fullTokenOptions.ssn}, tokenGeneratorEnv:${tokenGeneratorEnv})`);
+}
+
+export function getSystemUserTokenFromGenerator(tokenOptions = null) {
+    let fullTokenOptions = extend({}, defaultTokenOptionsForSystemUser, tokenOptions);
+    const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetSystemUserToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&systemUserId=${fullTokenOptions.systemUserId}&systemUserOrg=${fullTokenOptions.systemUserOrg}`;
+    return fetchToken(url, fullTokenOptions, `system user (System user ID:${fullTokenOptions.systemUserId}, tokenGeneratorEnv:${tokenGeneratorEnv})`);
 }
 
 export function getEndUserTokens(count, tokenOptions = null) {

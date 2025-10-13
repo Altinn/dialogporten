@@ -15,8 +15,5 @@ public sealed record DialogSearchReindexProgress(
     long Pending,
     long Processing,
     long Done,
-    long Failed,
-    double DialogsPerSec1m,
-    double DialogsPerSec5m,
-    double DialogsPerSec15m
+    long Failed
 );

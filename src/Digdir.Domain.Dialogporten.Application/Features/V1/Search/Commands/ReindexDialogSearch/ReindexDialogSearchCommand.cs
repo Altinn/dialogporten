@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
@@ -26,14 +27,14 @@ public sealed partial class ReindexDialogSearchResult : OneOfBase<Success, Valid
 
 internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<ReindexDialogSearchCommand, ReindexDialogSearchResult>
 {
-    private readonly IDialogSearchRepository _dialogSearchRepository;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<ReindexDialogSearchCommandHandler> _logger;
 
     public ReindexDialogSearchCommandHandler(
-        IDialogSearchRepository dialogSearchRepository,
+        IServiceScopeFactory scopeFactory,
         ILogger<ReindexDialogSearchCommandHandler> logger)
     {
-        _dialogSearchRepository = dialogSearchRepository ?? throw new ArgumentNullException(nameof(dialogSearchRepository));
+        _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -50,17 +51,28 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
             _logger.LogInformation("Resume requested: no seeding performed.");
         }
 
+        var baselineProgress = await WithRepositoryAsync((repo, token) => repo.GetProgressAsync(token), ct);
+        var baselineDone = baselineProgress.Done;
+        var startedAtUtc = DateTimeOffset.UtcNow;
+
         var workerTasks = CreateWorkerTasks(options, request.StaleFirst, ct);
 
         using var progressCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        var progressTask = StartProgressLoggerAsync(progressCts.Token);
+        var progressTask = StartProgressLoggerAsync(startedAtUtc, baselineDone, progressCts.Token);
 
         await Task.WhenAll(workerTasks);
         await progressCts.CancelAsync();
         await progressTask;
 
         var total = workerTasks.Sum(t => t.Result);
-        _logger.LogInformation("Reindex finished. Total processed by all workers: {Total}.", total);
+        var elapsed = DateTimeOffset.UtcNow - startedAtUtc;
+        var finalProgress = await WithRepositoryAsync((repo, token) => repo.GetProgressAsync(token), ct);
+        var processedSinceStart = Math.Max(0, finalProgress.Done - baselineDone);
+        var averageSpeed = elapsed.TotalSeconds > 0 ? processedSinceStart / elapsed.TotalSeconds : 0d;
+
+        _logger.LogInformation(
+            "Reindex finished. Total processed by all workers: {Total}. Average speed ~{AverageSpeed:F1} dialogs/s across {Elapsed}.",
+            total, averageSpeed, elapsed);
 
         return new ReindexDialogSearchResult(new Success());
     }
@@ -77,21 +89,24 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
     {
         if (request.Full)
         {
-            var count = await _dialogSearchRepository.SeedFullAsync(resetExisting: true, ct);
+            var count = await WithRepositoryAsync(
+                (repo, token) => repo.SeedFullAsync(resetExisting: true, token), ct);
             _logger.LogInformation("Seeded full rebuild queue with {Count} dialogs.", count);
             return;
         }
 
         if (request.Since.HasValue)
         {
-            var count = await _dialogSearchRepository.SeedSinceAsync(request.Since.Value, resetMatching: true, ct);
+            var count = await WithRepositoryAsync(
+                (repo, token) => repo.SeedSinceAsync(request.Since.Value, resetMatching: true, token), ct);
             _logger.LogInformation("Seeded since={Since:o} queue with {Count} dialogs.", request.Since, count);
             return;
         }
 
         if (request.StaleOnly)
         {
-            var count = await _dialogSearchRepository.SeedStaleAsync(resetMatching: true, ct);
+            var count = await WithRepositoryAsync(
+                (repo, token) => repo.SeedStaleAsync(resetMatching: true, token), ct);
             _logger.LogInformation("Seeded stale-only queue with {Count} dialogs.", count);
         }
     }
@@ -113,11 +128,14 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
     {
         long total = 0;
 
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IDialogSearchRepository>();
+
         try
         {
             while (!ct.IsCancellationRequested)
             {
-                var processed = await _dialogSearchRepository.WorkBatchAsync(
+                var processed = await repository.WorkBatchAsync(
                     options.BatchSize, options.WorkMemBytes, staleFirst, ct);
 
                 if (processed <= 0)
@@ -149,20 +167,23 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         return total;
     }
 
-    private Task StartProgressLoggerAsync(CancellationToken ct) =>
+    private Task StartProgressLoggerAsync(DateTimeOffset startedAtUtc, long baselineDone, CancellationToken ct) =>
         Task.Run(async () =>
         {
             try
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(30), ct);
-                    var p = await _dialogSearchRepository.GetProgressAsync(ct);
+                    await Task.Delay(TimeSpan.FromSeconds(30), ct); // log every 30 seconds
+                    var p = await WithRepositoryAsync((repo, token) => repo.GetProgressAsync(token), ct);
 
                     var pct = p.Total > 0 ? (double)p.Done / p.Total : 0.0;
+                    var elapsed = DateTimeOffset.UtcNow - startedAtUtc;
+                    var doneSinceStart = Math.Max(0, p.Done - baselineDone);
+                    var avgDps = elapsed.TotalSeconds > 0 ? doneSinceStart / elapsed.TotalSeconds : 0d;
                     _logger.LogInformation(
-                        "Progress: done={Done}/{Total} ({Pct:P2}) pending={Pending} failed={Failed} dps_5m~{Dps5m:F1}",
-                        p.Done, p.Total, pct, p.Pending, p.Failed, p.DialogsPerSec5m);
+                        "Progress: done={Done}/{Total} ({Pct:P2}) pending={Pending} failed={Failed} avg_dps={AvgDps:F1}",
+                        p.Done, p.Total, pct, p.Pending, p.Failed, avgDps);
                 }
             }
             catch (OperationCanceledException)
@@ -174,6 +195,15 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
                 _logger.LogError(ex, "Progress logger failed");
             }
         }, ct);
+
+    private async Task<T> WithRepositoryAsync<T>(
+        Func<IDialogSearchRepository, CancellationToken, Task<T>> action,
+        CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IDialogSearchRepository>();
+        return await action(repository, ct);
+    }
 
     private sealed record Options
     {

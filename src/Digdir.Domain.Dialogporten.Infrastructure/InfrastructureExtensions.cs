@@ -35,9 +35,6 @@ using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.DialogSearch;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search;
-using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
 using MediatR;
 
@@ -102,7 +99,6 @@ public static class InfrastructureExtensions
                 new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 
             // Singleton
-            .AddSingleton<IDialogSearchRepository, DialogSearchRepository>()
             .AddSingleton<INotificationProcessingContextFactory, NotificationProcessingContextFactory>()
 
             // HttpClient
@@ -112,7 +108,10 @@ public static class InfrastructureExtensions
             .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>))
 
             // Feature Metrics
-            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
+            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>()
+
+            // Repositories
+            .AddScoped<IDialogSearchRepository, DialogSearchRepository>();
 
         services.AddFusionCacheNeueccMessagePackSerializer();
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);

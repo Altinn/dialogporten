@@ -39,7 +39,7 @@ let cachedTokens = {};
 let cachedTokensIssuedAt = {};
 
 function getCacheKey(tokenType, tokenOptions) {
-  return `${tokenType}|${tokenOptions.scopes}|${tokenOptions.orgName}|${tokenOptions.orgNo}|${tokenOptions.ssn}`;
+  return `${tokenType}|${tokenOptions.scopes}|${tokenOptions.orgName}|${tokenOptions.orgNo}|${tokenOptions.ssn}|${tokenOptions.systemUserId}|${tokenOptions.systemUserOrg}`;
 }
 
 export function fetchToken(url, tokenOptions, type) {

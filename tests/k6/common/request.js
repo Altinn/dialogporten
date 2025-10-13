@@ -33,7 +33,6 @@ function getServiceOwnerRequestParams(params = null, tokenOptions = null) {
 }
 
 function getSystemUserRequestParams(params = null, tokenOptions = null) {
-
     params = params || {};
     const headers = params.headers || {};
     const hasOverridenAuthorizationHeader = headers.Authorization !== undefined;

@@ -9,7 +9,7 @@ DECLARE
   claimed_ids uuid[];
   processed   int := 0;
 BEGIN
-  PERFORM set_config('work_mem', work_mem_bytes::text, true); -- Tight loops benefit from elevated work_mem.
+  PERFORM set_config('work_mem', work_mem_bytes::text || 'B', true); -- Tight loops benefit from elevated work_mem.
 
   IF strategy = 'stale_first' THEN
     SELECT search."ClaimDialogsStaleFirst"(batch_size) INTO claimed_ids;

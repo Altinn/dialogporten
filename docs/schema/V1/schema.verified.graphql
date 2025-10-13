@@ -97,6 +97,7 @@ type AuthorizedParty {
   subParties: [AuthorizedSubParty!]
   party: String!
   partyUuid: UUID!
+  partyId: Int!
   name: String!
   partyType: String!
   isDeleted: Boolean!
@@ -109,6 +110,7 @@ type AuthorizedParty {
 type AuthorizedSubParty {
   party: String!
   partyUuid: UUID!
+  partyId: Int!
   name: String!
   partyType: String!
   isDeleted: Boolean!

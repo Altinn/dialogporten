@@ -7,6 +7,8 @@ receivers:
           allowed_origins: ["*"]
           allowed_headers: ["*"]
         include_metadata: true
+      grpc:
+        endpoint: 0.0.0.0:4317
 
 processors:
   batch:

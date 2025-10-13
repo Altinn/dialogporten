@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.86.1](https://github.com/Altinn/dialogporten/compare/v1.86.0...v1.86.1) (2025-10-09)
+
+
+### Bug Fixes
+
+* **graphql:** add hot chocolate instrumentation ([#2844](https://github.com/Altinn/dialogporten/issues/2844)) ([4211608](https://github.com/Altinn/dialogporten/commit/42116088aa9717326d3077751755fbc4328412a1))
+
+## [1.86.0](https://github.com/Altinn/dialogporten/compare/v1.85.0...v1.86.0) (2025-10-08)
+
+
+### Features
+
+* **app:** add partyid to authorized parties result ([#2836](https://github.com/Altinn/dialogporten/issues/2836)) ([e05cd40](https://github.com/Altinn/dialogporten/commit/e05cd405e9d0c4a3c2020e7b1611ae53a1b7555f))
+
+
+### Miscellaneous Chores
+
+* **app:** Rename PerformerOrg to CallerOrg and add OwnerOrg to feature metrics ([#2833](https://github.com/Altinn/dialogporten/issues/2833)) ([dc549ec](https://github.com/Altinn/dialogporten/commit/dc549ec3bfaead4995f54fea84a03548fbccfaa3))
+* **app:** Update OpenTelemetry configurations and dependencies ([#2838](https://github.com/Altinn/dialogporten/issues/2838)) ([80c9dd2](https://github.com/Altinn/dialogporten/commit/80c9dd28554e232aeed50035628981e7ea4d6c14))
+
 ## [1.85.0](https://github.com/Altinn/dialogporten/compare/v1.84.0...v1.85.0) (2025-10-08)
 
 

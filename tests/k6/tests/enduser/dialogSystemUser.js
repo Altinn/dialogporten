@@ -43,7 +43,7 @@ export default function () {
         let dialogId = r.json();
 
         // Assert
-        let getResponse = getSysEU(`dialogs/?&Search=${title}&Party=${defaultParty}`);
+        let getResponse = getSysEU(`dialogs/?Search=${title}&Party=${defaultParty}`);
         expectStatusFor(getResponse).to.equal(200);
         expect(getResponse, 'response').to.have.validJsonBody();
         expect(getResponse.json(), 'response json').to.not.have.property('items')

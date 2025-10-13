@@ -4,6 +4,14 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Search.Commands.Rei
 
 internal sealed class ReindexDialogSearchCommandValidator : AbstractValidator<ReindexDialogSearchCommand>
 {
+    /// <summary>
+    /// Configures validation rules for <see cref="ReindexDialogSearchCommand"/>.
+    /// </summary>
+    /// <remarks>
+    /// Enforces that exactly one of the operation flags is specified: Full, Since, Resume, or StaleOnly.
+    /// Validates optional numeric options when provided: BatchSize &gt; 0, Workers &gt; 0, ThrottleMs &gt;= 0, and WorkMemBytes &gt; 0.
+    /// If the flag rule fails, the message "Specify exactly one of: --full OR --since &lt;ts&gt; OR --resume OR --stale-only." is used.
+    /// </remarks>
     public ReindexDialogSearchCommandValidator()
     {
         RuleFor(x => x)

@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using Altinn.ApiClients.Maskinporten.Extensions;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
@@ -48,6 +48,10 @@ public static class InfrastructureExtensions
         IHostEnvironment environment)
         => new InfrastructureBuilder(services, configuration, environment);
 
+    /// <summary>
+    /// Registers and configures infrastructure-level services, caching, HTTP clients, repositories, health checks, and environment-specific overrides into the dependency-injection container using the provided builder context.
+    /// </summary>
+    /// <param name="builderContext">Context containing IServiceCollection, IConfiguration, IHostEnvironment, InfrastructureSettings and related values used to configure registrations and environment-specific overrides.</param>
     internal static void AddInfrastructure_Internal(InfrastructureBuilderContext builderContext)
     {
         ArgumentNullException.ThrowIfNull(builderContext);

@@ -1,4 +1,4 @@
-﻿using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Sql;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Sql;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,7 +8,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
     /// <inheritdoc />
     public partial class AddDialogSearchReindexInfra : Migration
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Applies database objects and functions to provision the DialogSearch reindex infrastructure.
+        /// </summary>
+        /// <remarks>
+        /// Loads and executes the migration SQL scripts that create the canonical views, rebuild queue table, observability views, seeder functions, upsert helper, claiming functions, and the worker orchestration used to rebuild and maintain the full-text search index for dialogs.
+        /// </remarks>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             /*

@@ -8,6 +8,11 @@ namespace Digdir.Domain.Dialogporten.Janitor;
 
 internal static class Commands
 {
+    /// <summary>
+    /// Registers janitor CLI commands for maintenance operations (syncing subject-resource mappings, syncing resource policy information, and reindexing dialog search) on the provided Cocona app.
+    /// </summary>
+    /// <param name="app">The Cocona application to which the janitor commands will be added.</param>
+    /// <returns>The same <see cref="CoconaApp"/> instance with the janitor commands registered.</returns>
     internal static CoconaApp AddJanitorCommands(this CoconaApp app)
     {
         app.AddCommand("sync-subject-resource-mappings", async (

@@ -86,6 +86,10 @@ public class DialogApplication : IAsyncLifetime
         _rootProvider = serviceCollection.BuildServiceProvider();
     }
 
+    /// <summary>
+    /// Builds and configures a service collection tailored for integration tests, registering application services, test substitutes, DbContext with interceptors, repositories, caches, and decorators.
+    /// </summary>
+    /// <returns>The configured <see cref="IServiceCollection"/>.</returns>
     private IServiceCollection BuildServiceCollection()
     {
         var serviceCollection = new ServiceCollection();

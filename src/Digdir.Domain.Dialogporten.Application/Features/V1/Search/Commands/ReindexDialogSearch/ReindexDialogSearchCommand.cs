@@ -30,6 +30,11 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<ReindexDialogSearchCommandHandler> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="ReindexDialogSearchCommandHandler"/> with the required dependency-injected services.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><c>scopeFactory</c> is null.</exception>
+    /// <exception cref="ArgumentNullException"><c>logger</c> is null.</exception>
     public ReindexDialogSearchCommandHandler(
         IServiceScopeFactory scopeFactory,
         ILogger<ReindexDialogSearchCommandHandler> logger)
@@ -38,6 +43,10 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    /// <summary>
+    /// Orchestrates a reindexing run for dialog search based on the provided command, including optional seeding, worker execution, and progress reporting.
+    /// </summary>
+    /// <returns>A ReindexDialogSearchResult containing a Success result when the reindexing run completes.</returns>
     public async Task<ReindexDialogSearchResult> Handle(ReindexDialogSearchCommand request, CancellationToken ct)
     {
         var options = BuildOptions(request);
@@ -77,6 +86,11 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         return new ReindexDialogSearchResult(new Success());
     }
 
+    /// <summary>
+    /// Create an Options instance from the command, applying sensible defaults for any unset fields.
+    /// </summary>
+    /// <param name="request">The reindex command containing optional configuration values.</param>
+    /// <returns>An <see cref="Options"/> populated with BatchSize (default 1000), Workers (at least 1), ThrottleMs (default 0), and WorkMemBytes (default 268435456).</returns>
     private static Options BuildOptions(ReindexDialogSearchCommand request) => new()
     {
         BatchSize = request.BatchSize ?? 1000,
@@ -85,6 +99,10 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         WorkMemBytes = request.WorkMemBytes ?? 268_435_456L // 256MB
     };
 
+    /// <summary>
+    /// Seeds the dialog search processing queue according to the command's reindexing options.
+    /// </summary>
+    /// <param name="request">Command that specifies the seeding mode: Full for a full rebuild, Since to seed dialogs updated since a timestamp, or StaleOnly to seed only stale dialogs.</param>
     private async Task SeedAsync(ReindexDialogSearchCommand request, CancellationToken ct)
     {
         if (request.Full)
@@ -111,6 +129,13 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         }
     }
 
+    /// <summary>
+    /// Creates and starts worker tasks that run the reindexing worker loop with the provided options.
+    /// </summary>
+    /// <param name="options">Execution configuration for each worker (batch size, worker count, throttling, memory limit).</param>
+    /// <param name="staleFirst">If true, workers prioritize processing stale records before others.</param>
+    /// <param name="ct">Cancellation token to observe for cooperative shutdown of the created tasks.</param>
+    /// <returns>A list of tasks, one per worker, each producing the total number of items processed by that worker.</returns>
     private List<Task<long>> CreateWorkerTasks(Options options, bool staleFirst, CancellationToken ct)
     {
         var tasks = new List<Task<long>>(options.Workers);
@@ -124,6 +149,14 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         return tasks;
     }
 
+    /// <summary>
+    /// Runs a single worker that repeatedly processes batches from the repository until there are no more items or the operation is cancelled.
+    /// </summary>
+    /// <param name="workerId">Identifier for the worker instance, used for logging.</param>
+    /// <param name="options">Processing options (batch size, worker throttle, memory limits).</param>
+    /// <param name="staleFirst">If true, prioritize processing stale items before fresh ones.</param>
+    /// <param name="ct">Token to observe for cancellation.</param>
+    /// <returns>The total number of items processed by this worker.</returns>
     private async Task<long> RunWorkerAsync(int workerId, Options options, bool staleFirst, CancellationToken ct)
     {
         long total = 0;
@@ -167,7 +200,12 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         return total;
     }
 
-    private Task StartProgressLoggerAsync(DateTimeOffset startedAtUtc, long baselineDone, CancellationToken ct) =>
+    /// <summary>
+        /// Periodically queries repository progress and logs live statistics (done, total, pending, failed and average dialogs per second) until cancelled.
+        /// </summary>
+        /// <param name="startedAtUtc">The UTC timestamp when processing started, used to compute elapsed time and average throughput.</param>
+        /// <param name="baselineDone">The baseline number of items already completed before this run; used to compute items processed since start.</param>
+        private Task StartProgressLoggerAsync(DateTimeOffset startedAtUtc, long baselineDone, CancellationToken ct) =>
         Task.Run(async () =>
         {
             try
@@ -196,6 +234,12 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
             }
         }, ct);
 
+    /// <summary>
+    /// Execute the provided asynchronous action with an IDialogSearchRepository resolved from a new dependency-injection scope.
+    /// </summary>
+    /// <param name="action">A function invoked with the scoped repository and the cancellation token; its returned value is propagated.</param>
+    /// <param name="ct">Cancellation token forwarded to the provided action.</param>
+    /// <returns>The result produced by the provided action.</returns>
     private async Task<T> WithRepositoryAsync<T>(
         Func<IDialogSearchRepository, CancellationToken, Task<T>> action,
         CancellationToken ct)

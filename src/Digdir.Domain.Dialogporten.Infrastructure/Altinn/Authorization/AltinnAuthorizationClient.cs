@@ -205,6 +205,8 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         CancellationToken cancellationToken)
     {
         var authorizedPartiesDto = await SendAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken);
+        // System users might have no rights whatsoever, which is not an error condition
+        // Other user types (persons, SI users) will always be able to represent themselves as a minimum 
         if (authorizedPartiesDto is null || (authorizedPartiesDto.Count == 0 && authorizedPartiesRequest.Type != SystemUserIdentifier.Prefix))
         {
             _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.Type, authorizedPartiesRequest.Value);

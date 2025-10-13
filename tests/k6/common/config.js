@@ -41,7 +41,8 @@ export const baseUrls = {
 if (__ENV.IS_DOCKER && __ENV.API_ENVIRONMENT == "localdev") {
     __ENV.API_ENVIRONMENT = "localdev_docker";
 }
-
+export const defaultSystemUserOrgNo = "999888777";
+export const defaultSystemUserId = "aaa88f01-d847-2973-9579-76f658b42caa";
 export const defaultEndUserOrgNo = "310923044"; // ÆRLIG UROKKELIG TIGER AS
 export const defaultEndUserSsn = "08844397713"; // UROMANTISK LITTERATUR, has "DAGL" for 310923044
 export const defaultServiceOwnerOrgNo = __ENV.API_ENVIRONMENT == "yt01" ? "713431400" : "991825827";

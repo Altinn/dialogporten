@@ -36,7 +36,7 @@ Below are the available commands (commands are always the first argument):
       *Optional*: Force a full reindex. Seeds **all dialogs** into the rebuild queue and rebuilds all search vectors.  
       *Cannot be combined with `--since`, `--resume`, or `--stale-only`.*
 
-    -`-s`, `--since`  
+    - `-s`, `--since`
       *Optional*: Reindex only dialogs updated since the given timestamp (`DateTimeOffset`, e.g., `2024-08-15T00:00:00Z`).  
       *Cannot be combined with `--full`, `--resume`, or `--stale-only`.*
 

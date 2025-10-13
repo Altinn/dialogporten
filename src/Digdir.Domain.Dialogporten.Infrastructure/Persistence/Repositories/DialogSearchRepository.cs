@@ -14,7 +14,7 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
     //language=PostgreSQL
     private const string FreeTextSearchIndexerSql =
         """
-        WITH dialocContent AS (
+        WITH dialogContent AS (
             -- Dialog Content
             SELECT dc."DialogId" dialogId
                 ,CASE dc."TypeId"
@@ -74,12 +74,12 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
                         weight::"char")::text,
                     ' ')::tsvector AS document
             FROM "Dialog" d -- ensure we get a row even if no content (only if dialog exists)
-            LEFT JOIN dialocContent dc ON d."Id" = dc.dialogId
+            LEFT JOIN dialogContent dc ON d."Id" = dc.dialogId
             LEFT JOIN search."Iso639TsVectorMap" isomap ON dc.languageCode = isomap."IsoCode"
             GROUP BY d."Id"
         )
         INSERT INTO search."DialogSearch" ("DialogId", "UpdatedAt", "SearchVector")
-        SELECT dialogId, now(), coalesce(document,'')
+        SELECT dialogId, now(), coalesce(document,''::tsvector)
         FROM aggregatedVectorizedDialogContent
         WHERE dialogId = {0}
         ON CONFLICT ("DialogId") DO UPDATE

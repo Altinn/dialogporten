@@ -192,8 +192,8 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
                     var doneSinceStart = Math.Max(0, p.Done - baselineDone);
                     var avgDps = elapsed.TotalSeconds > 0 ? doneSinceStart / elapsed.TotalSeconds : 0d;
                     _logger.LogInformation(
-                        "Progress: done={Done}/{Total} ({Pct:P2}) pending={Pending} avg_dps={AvgDps:F1}",
-                        p.Done, p.Total, pct, p.Pending, avgDps);
+                        "Progress: done={Done} pct={Pct:P2} total={Total} pending={Pending} avg_dps={AvgDps:F1}",
+                        p.Done, pct, p.Total, p.Pending, avgDps);
                 }
             }
             catch (OperationCanceledException)

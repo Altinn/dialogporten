@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -61,7 +60,7 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
     //language=PostgreSQL
     private const string FreeTextSearchIndexerSql =
         """
-        WITH dialocContent AS (
+        WITH dialogContent AS (
             -- Dialog Content
             SELECT dc."DialogId" dialogId
                 ,CASE dc."TypeId"
@@ -95,15 +94,24 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             INNER JOIN "LocalizationSet" dcls ON da."Id" = dcls."ActivityId"
             INNER JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
             
-            -- Attachment description (can be linked to dialog or transmission)
-            UNION ALL SELECT DISTINCT coalesce(a."DialogId", dt."DialogId") dialogId
-                ,'D' weight
-                ,l."LanguageCode" languageCode
-                ,l."Value" value
+            -- Attachment description (dialog-linked)
+            UNION ALL SELECT a."DialogId"
+                 ,'D'
+                 ,l."LanguageCode"
+                 ,l."Value"
             FROM "Attachment" a
-            LEFT JOIN "DialogTransmission" dt ON a."TransmissionId" = dt."Id"
-            INNER JOIN "LocalizationSet" dcls ON a."Id" = dcls."AttachmentId"
-            INNER JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
+            INNER JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
+            INNER JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
+            
+            -- Attachment description (transmission-linked)
+            UNION ALL SELECT dt."DialogId"
+                ,'D'
+                ,l."LanguageCode"
+                ,l."Value"
+            FROM "DialogTransmission" dt
+            INNER JOIN "Attachment" a ON a."TransmissionId" = dt."Id"
+            INNER JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
+            INNER JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
         ), aggregatedVectorizedDialogContent AS (
             SELECT d."Id" AS dialogId
                 ,string_agg(
@@ -112,12 +120,12 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
                         weight::"char")::text,
                     ' ')::tsvector AS document
             FROM "Dialog" d -- ensure we get a row even if no content (only if dialog exists)
-            LEFT JOIN dialocContent dc ON d."Id" = dc.dialogId
+            LEFT JOIN dialogContent dc ON d."Id" = dc.dialogId
             LEFT JOIN search."Iso639TsVectorMap" isomap ON dc.languageCode = isomap."IsoCode"
             GROUP BY d."Id"
         )
         INSERT INTO search."DialogSearch" ("DialogId", "UpdatedAt", "SearchVector")
-        SELECT dialogId, now(), coalesce(document,'')
+        SELECT dialogId, now(), coalesce(document,''::tsvector)
         FROM aggregatedVectorizedDialogContent
         WHERE dialogId = {0}
         ON CONFLICT ("DialogId") DO UPDATE
@@ -125,5 +133,3 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             "SearchVector" = EXCLUDED."SearchVector";
         """;
 }
-
-

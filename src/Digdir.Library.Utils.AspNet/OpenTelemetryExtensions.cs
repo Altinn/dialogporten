@@ -79,7 +79,7 @@ public static class OpenTelemetryExtensions
                     .AddNpgsql()
                     .AddOtlpExporter(options =>
                     {
-                        options.Endpoint = new Uri(endpoint, "/v1/traces");
+                        options.Endpoint = endpoint;
                         options.Protocol = otlpProtocol;
                     });
 
@@ -102,7 +102,7 @@ public static class OpenTelemetryExtensions
                 {
                     metrics.AddOtlpExporter(options =>
                     {
-                        options.Endpoint = new Uri(endpoint, "/v1/metrics");
+                        options.Endpoint = endpoint;
                         options.Protocol = otlpProtocol;
                     });
                 }

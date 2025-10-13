@@ -87,9 +87,9 @@ Two delivery mechanisms based on environment:
 public sealed record FeatureMetricRecord(
     string FeatureName,           // Full type name of the request
     string? Environment,          // Environment name (dev/staging/prod)
-    string? PerformerOrg,        // Organization performing the action
-    string? OwnerOrg,            // Organization owning the resource
-    string? ServiceResource)     // Resource being accessed
+    string? CallerOrg,            // Organization performing the action
+    string? OwnerOrg,             // Organization owning the resource
+    string? ServiceResource)      // Resource being accessed
 ```
 
 #### Presentation Tags
@@ -178,10 +178,10 @@ WHERE PresentationTag LIKE 'GET_%'
 
 #### Feature Usage by Organization
 ```sql
-SELECT PerformerOrg, COUNT(*) as UsageCount
-FROM FeatureMetrics 
+SELECT CallerOrg, COUNT(*) as UsageCount
+FROM FeatureMetrics
 WHERE FeatureName = 'GetDialogQuery'
-GROUP BY PerformerOrg
+GROUP BY CallerOrg
 ```
 
 #### Success Rate by Feature

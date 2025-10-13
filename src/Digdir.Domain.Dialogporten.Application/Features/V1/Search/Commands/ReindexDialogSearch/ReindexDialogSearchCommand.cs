@@ -66,6 +66,16 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
         var total = workerTasks.Sum(t => t.Result);
         var elapsed = DateTimeOffset.UtcNow - startedAtUtc;
+
+        if (ct.IsCancellationRequested)
+        {
+            var averageSpeedDuringRun = elapsed.TotalSeconds > 0 ? total / elapsed.TotalSeconds : 0d;
+            _logger.LogInformation(
+                "Reindex cancelled by user, rolling back blocks currently being processed. Processed {Total} dialogs (~{AverageSpeed:F1} dialogs/s across {Elapsed}).",
+                total, averageSpeedDuringRun, elapsed);
+            return new ReindexDialogSearchResult(new Success());
+        }
+
         var finalProgress = await WithRepositoryAsync((repo, token) => repo.GetProgressAsync(token), ct);
         var processedSinceStart = Math.Max(0, finalProgress.Done - baselineDone);
         var averageSpeed = elapsed.TotalSeconds > 0 ? processedSinceStart / elapsed.TotalSeconds : 0d;
@@ -160,7 +170,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Worker #{WorkerId} failed", workerId);
+            _logger.LogError(ex, "Worker #{WorkerId} failed: {Message}", workerId, ex.Message);
             throw;
         }
 
@@ -182,8 +192,8 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
                     var doneSinceStart = Math.Max(0, p.Done - baselineDone);
                     var avgDps = elapsed.TotalSeconds > 0 ? doneSinceStart / elapsed.TotalSeconds : 0d;
                     _logger.LogInformation(
-                        "Progress: done={Done}/{Total} ({Pct:P2}) pending={Pending} failed={Failed} avg_dps={AvgDps:F1}",
-                        p.Done, p.Total, pct, p.Pending, p.Failed, avgDps);
+                        "Progress: done={Done}/{Total} ({Pct:P2}) pending={Pending} avg_dps={AvgDps:F1}",
+                        p.Done, p.Total, pct, p.Pending, avgDps);
                 }
             }
             catch (OperationCanceledException)
@@ -192,7 +202,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Progress logger failed");
+                _logger.LogError(ex, "Progress logger failed: {Message}", ex.Message);
             }
         }, ct);
 

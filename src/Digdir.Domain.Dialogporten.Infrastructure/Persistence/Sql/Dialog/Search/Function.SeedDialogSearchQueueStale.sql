@@ -7,7 +7,7 @@ BEGIN
   IF reset_matching THEN
     -- Reset only the affected dialogs so retries pick up immediately without clearing the entire queue.
     UPDATE search."DialogSearchRebuildQueue" q
-       SET "Status" = 0, "Attempts" = 0, "LastError" = NULL, "UpdatedAt" = now()
+       SET "Status" = 0, "UpdatedAt" = now()
       WHERE q."DialogId" IN (
         SELECT d."Id"
         FROM "Dialog" d

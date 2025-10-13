@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -64,33 +63,24 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
     {
         var progressSql = FormattableStringFactory.Create(
             """
-            SELECT "Total" AS total,
-                   "Pending" AS pending,
-                   "Processing" AS processing,
-                   "Done" AS done,
-                   "Failed" AS failed
+            SELECT "Total", "Pending", "Processing", "Done"
             FROM search."DialogSearchRebuildProgress"
             """);
         var progress = await _db.Database.SqlQuery<ProgressRow>(progressSql).SingleAsync(ct);
 
         return new DialogSearchReindexProgress(
-            Total: progress.total,
-            Pending: progress.pending,
-            Processing: progress.processing,
-            Done: progress.done,
-            Failed: progress.failed
+            Total: progress.Total,
+            Pending: progress.Pending,
+            Processing: progress.Processing,
+            Done: progress.Done
         );
     }
 
-#pragma warning disable IDE1006
     private sealed class ProgressRow
     {
-        public long total { get; init; }
-        public long pending { get; init; }
-        public long processing { get; init; }
-        public long done { get; init; }
-        public long failed { get; init; }
+        public long Total { get; init; }
+        public long Pending { get; init; }
+        public long Processing { get; init; }
+        public long Done { get; init; }
     }
-
-#pragma warning restore IDE1006
 }

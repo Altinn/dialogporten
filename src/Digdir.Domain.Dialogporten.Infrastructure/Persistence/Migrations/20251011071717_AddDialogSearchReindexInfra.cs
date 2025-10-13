@@ -32,7 +32,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 "Dialog/Search/View.VDialogDocument.sql",
                 "Dialog/Search/Table.DialogSearchRebuildQueue.sql",
                 "Dialog/Search/View.DialogSearchRebuildProgress.sql",
-                "Dialog/Search/View.DialogSearchRebuildFailures.sql",
                 "Dialog/Search/Function.SeedDialogSearchQueueFull.sql",
                 "Dialog/Search/Function.SeedDialogSearchQueueSince.sql",
                 "Dialog/Search/Function.SeedDialogSearchQueueStale.sql",
@@ -56,7 +55,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 DROP FUNCTION IF EXISTS search."ClaimDialogsStaleFirst"(int);
                 DROP FUNCTION IF EXISTS search."ClaimDialogsStandard"(int);
                 DROP FUNCTION IF EXISTS search."UpsertDialogSearchOne"(uuid);
-                DROP VIEW IF EXISTS search."DialogSearchRebuildFailures";
                 DROP VIEW IF EXISTS search."DialogSearchRebuildProgress";
                 DROP VIEW IF EXISTS search."VDialogDocument";
                 DROP VIEW IF EXISTS search."VDialogContent";

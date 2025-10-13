@@ -2,9 +2,7 @@
 DROP TABLE IF EXISTS search."DialogSearchRebuildQueue";
 CREATE UNLOGGED TABLE search."DialogSearchRebuildQueue" (
   "DialogId"   uuid      PRIMARY KEY,
-  "Status"     smallint  NOT NULL DEFAULT 0,  -- 0=pending, 1=processing, 2=done, 3=failed
-  "Attempts"   integer   NOT NULL DEFAULT 0,
-  "LastError"  text,
+  "Status"     smallint  NOT NULL DEFAULT 0,  -- 0=pending, 1=processing, 2=done
   "UpdatedAt"  timestamptz NOT NULL DEFAULT now()
 );
 

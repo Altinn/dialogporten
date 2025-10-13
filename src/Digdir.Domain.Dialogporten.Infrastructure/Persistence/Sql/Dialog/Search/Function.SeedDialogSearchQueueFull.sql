@@ -7,7 +7,7 @@ BEGIN
   IF reset_existing THEN
     -- Resetting keeps existing queue entries but clears transient error state.
     UPDATE search."DialogSearchRebuildQueue"
-       SET "Status" = 0, "Attempts" = 0, "LastError" = NULL, "UpdatedAt" = now();
+       SET "Status" = 0, "UpdatedAt" = now();
   END IF;
 
   INSERT INTO search."DialogSearchRebuildQueue" ("DialogId")

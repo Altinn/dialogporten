@@ -7,7 +7,7 @@ BEGIN
   IF reset_matching THEN
     -- Clearing stale attempts allows partial runs to resume cleanly when re-seeding the same window.
     UPDATE search."DialogSearchRebuildQueue" q
-       SET "Status" = 0, "Attempts" = 0, "LastError" = NULL, "UpdatedAt" = now()
+       SET "Status" = 0, "UpdatedAt" = now()
       WHERE q."DialogId" IN (SELECT d."Id" FROM "Dialog" d WHERE d."UpdatedAt" >= since);
   END IF;
 

@@ -39,13 +39,5 @@ BEGIN
 
   RETURN processed;
 
-EXCEPTION WHEN OTHERS THEN
-  IF claimed_ids IS NOT NULL AND array_length(claimed_ids,1) IS NOT NULL THEN
-    UPDATE search."DialogSearchRebuildQueue"
-       SET "Status" = 0, "LastError" = SQLERRM, "UpdatedAt" = now()
-     WHERE "DialogId" = ANY (claimed_ids)
-       AND "Status" = 1;
-  END IF;
-  RAISE;
 END;
 $$;

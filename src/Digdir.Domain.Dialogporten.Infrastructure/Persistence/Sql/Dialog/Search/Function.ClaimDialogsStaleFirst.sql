@@ -16,7 +16,7 @@ RETURNS uuid[] LANGUAGE sql AS $$
   ),
   mark_processing AS (
     UPDATE search."DialogSearchRebuildQueue" q
-       SET "Status" = 1, "Attempts" = q."Attempts" + 1, "UpdatedAt" = now()
+       SET "Status" = 1, "UpdatedAt" = now()
      WHERE q."DialogId" IN (SELECT "DialogId" FROM to_claim)
     RETURNING q."DialogId"
   )

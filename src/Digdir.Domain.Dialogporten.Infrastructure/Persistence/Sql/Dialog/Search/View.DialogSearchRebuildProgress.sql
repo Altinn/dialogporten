@@ -5,7 +5,6 @@ SELECT
   count(*) FILTER (WHERE "Status" = 0)             AS "Pending",
   count(*) FILTER (WHERE "Status" = 1)             AS "Processing",
   count(*) FILTER (WHERE "Status" = 2)             AS "Done",
-  count(*) FILTER (WHERE "Status" = 3)             AS "Failed",
   (count(*) FILTER (WHERE "Status" = 2))::numeric
     / NULLIF(count(*), 0)                          AS "DoneRatio" -- Handy for log formatting and monitoring thresholds.
 FROM search."DialogSearchRebuildQueue";

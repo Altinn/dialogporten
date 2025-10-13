@@ -32,36 +32,36 @@ Below are the available commands (commands are always the first argument):
 
 * **Argument(s):**
 
-    * `-f`, `--full`  
+    - `-f`, `--full`  
       *Optional*: Force a full reindex. Seeds **all dialogs** into the rebuild queue and rebuilds all search vectors.  
       *Cannot be combined with `--since`, `--resume`, or `--stale-only`.*
 
-    * `-s`, `--since`  
+    -`-s`, `--since`  
       *Optional*: Reindex only dialogs updated since the given timestamp (`DateTimeOffset`, e.g., `2024-08-15T00:00:00Z`).  
       *Cannot be combined with `--full`, `--resume`, or `--stale-only`.*
 
-    * `-r`, `--resume`  
+    - `-r`, `--resume`  
       *Optional*: Resume a previously started reindexing job. Uses existing rebuild queue without reseeding.  
       *Cannot be combined with `--full`, `--since`, or `--stale-only`.*
 
-    * `-o`, `--stale-only`  
-      *Optional*: Reindex only **stale or missing dialogs** (dialogs not present in `search.DialogSearch` or where `Dialog.createdAt > DialogSearch.UpdatedAt`).  
+    - `-o`, `--stale-only`  
+      *Optional*: Reindex only **stale or missing dialogs** (dialogs not present in `search.DialogSearch` or where `Dialog.UpdatedAt > DialogSearch.UpdatedAt`).  
       *Cannot be combined with `--full`, `--since`, or `--resume`.*
 
-    * `--stale-first`  
+    - `--stale-first`  
       *Optional*: Prioritize reindexing stale or outdated dialogs **first** within each batch run.  
       This does **not** affect which dialogs are seeded—only the order in which they are processed.
 
-    * `-b`, `--batch-size`  
+    - `-b`, `--batch-size`  
       *Optional*: Batch size per worker (default: `1000`).
 
-    * `-w`, `--workers`  
+    - `-w`, `--workers`  
       *Optional*: Number of parallel workers (default: `1`).
 
-    * `--throttle-ms`  
+    - `--throttle-ms`  
       *Optional*: Delay (in milliseconds) between processing batches for each worker (default: `0`).
 
-    * `--work-mem-bytes`  
+    - `--work-mem-bytes`  
       *Optional*: PostgreSQL `work_mem` setting per worker in bytes (default: `268435456` ≈ 256 MB).
 
 * **Examples:**

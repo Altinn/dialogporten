@@ -44,9 +44,6 @@ export default function () {
 
         // Assert
         let getResponse = getSysEU(`dialogs/?Search=${title}&Party=${defaultParty}`);
-
-        console.log(JSON.stringify(getResponse.json(), null, 2));
-
         expectStatusFor(getResponse).to.equal(200);
         expect(getResponse, 'response').to.have.validJsonBody();
         expect(getResponse.json(), 'response json').to.not.have.property('items')

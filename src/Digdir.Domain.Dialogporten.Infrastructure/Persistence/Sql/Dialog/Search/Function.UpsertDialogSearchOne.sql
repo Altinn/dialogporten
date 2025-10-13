@@ -4,7 +4,7 @@ RETURNS void
 LANGUAGE sql
 AS $$
   INSERT INTO search."DialogSearch" ("DialogId","UpdatedAt","SearchVector")
-  SELECT "DialogId", now(), COALESCE("Document",'')
+  SELECT "DialogId", now(), COALESCE("Document",''::tsvector)
   FROM search."VDialogDocument"
   WHERE "DialogId" = p_dialog_id
   ON CONFLICT ("DialogId") DO UPDATE

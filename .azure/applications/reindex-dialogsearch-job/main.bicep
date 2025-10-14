@@ -115,7 +115,7 @@ module dialogsearchReindexJob '../../modules/containerAppJob/main.bicep' = {
     secrets: secrets
     tags: tags
     // We need a beefy container to run multiple reindexing workers
-    resources = {
+    resources: {
         cpu: 4
         memory: '8Gi'
     }

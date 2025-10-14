@@ -1,0 +1,215 @@
+name: Run reindex of dialogsearch
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      imageTag:
+        required: true
+        type: string
+      dryRun:
+        required: true
+        type: boolean
+      mode:
+        required: true
+        type: string
+      sinceTimestamp:
+        required: true
+        type: string
+      staleFirst:
+        required: false
+        default: false
+        type: boolean
+      batchSize:
+        required: true
+        type: number
+      workers:
+        required: true
+        type: number
+      throttleMs:
+        required: true
+        type: number
+      workMemBytes:
+        required: true
+        type: number
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_RESOURCE_GROUP_NAME:
+        required: true
+      AZURE_CONTAINER_APP_ENVIRONMENT_NAME:
+        required: true
+      AZURE_ENVIRONMENT_KEY_VAULT_NAME:
+        required: true
+      AZURE_APP_INSIGHTS_CONNECTION_STRING:
+        required: true
+
+jobs:
+  run-reindex-dialogsearch:
+    name: Run reindex of dialogsearch (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      JOB_NAME: dp-be-${{ inputs.environment }}-reindex-dialogsearch
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Dryrun deploy reindex dialogsearch job (${{ inputs.environment }})
+        if: ${{ inputs.dryRun }}
+        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        env:
+          IMAGE_TAG: ${{ inputs.imageTag }}
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+          AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+          AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
+        with:
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: whatIf
+          name: "reindex-dialogsearch-${{ inputs.environment }}-${{ github.run_id }}"
+          template-file: ./.azure/applications/reindex-dialogsearch-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/reindex-dialogsearch-job/${{ inputs.environment }}.bicepparam
+
+      - name: Deploy reindex dialogsearch job (${{ inputs.environment }})
+        if: ${{ !inputs.dryRun }}
+        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        env:
+          IMAGE_TAG: ${{ inputs.imageTag }}
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+          AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+          AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
+        with:
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: create
+          name: "reindex-dialogsearch-${{ inputs.environment }}-${{ github.run_id }}"
+          template-file: ./.azure/applications/reindex-dialogsearch-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/reindex-dialogsearch-job/${{ inputs.environment }}.bicepparam
+
+      - name: Ensure no reindex of dialogsearch execution is currently running
+        if: ${{ !inputs.dryRun }}
+        shell: bash
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+        run: |
+          set -euo pipefail
+
+          az extension add --name containerapp --allow-preview --upgrade -y
+
+          existing_execution="$(az containerapp job execution list \
+            --name "${JOB_NAME}" \
+            --resource-group "${RESOURCE_GROUP}" \
+            --query "[?properties.status=='Running' || properties.status=='Processing'] | [0].name" \
+            --output tsv || true)"
+
+          if [[ -n "${existing_execution}" ]]; then
+            echo "An execution is already running: ${existing_execution}"
+            exit 1
+          fi
+
+          echo "No active execution detected"
+
+      - name: Start reindex dialogsearch job
+        if: ${{ !inputs.dryRun }}
+        shell: bash
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          MODE: ${{ inputs.mode }}
+          SINCE_TIMESTAMP: ${{ inputs.sinceTimestamp }}
+          STALE_FIRST: ${{ inputs.staleFirst }}
+          BATCH_SIZE: ${{ inputs.batchSize }}
+          WORKERS: ${{ inputs.workers }}
+          THROTTLE_MS: ${{ inputs.throttleMs }}
+          WORK_MEM_BYTES: ${{ inputs.workMemBytes }}
+        run: |
+          set -euo pipefail
+
+          az extension add --name containerapp --allow-preview --upgrade -y
+
+          declare -a COMMAND_ARGS=("reindex-dialogsearch")
+
+          case "${MODE}" in
+            full)
+              COMMAND_ARGS+=("--full")
+              ;;
+            since)
+              COMMAND_ARGS+=("--since")
+              COMMAND_ARGS+=("${SINCE_TIMESTAMP}")
+              ;;
+            resume)
+              COMMAND_ARGS+=("--resume")
+              ;;
+            "stale-only")
+              COMMAND_ARGS+=("--stale-only")
+              ;;
+            *)
+              ;;
+          esac
+
+          if [[ "${STALE_FIRST}" == "true" ]]; then
+            COMMAND_ARGS+=("--stale-first")
+          fi
+
+          if [[ -n "${BATCH_SIZE// }" ]]; then
+            COMMAND_ARGS+=("--batch-size")
+            COMMAND_ARGS+=("${BATCH_SIZE}")
+          fi
+
+          if [[ -n "${WORKERS// }" ]]; then
+            COMMAND_ARGS+=("--workers")
+            COMMAND_ARGS+=("${WORKERS}")
+          fi
+
+          if [[ -n "${THROTTLE_MS// }" ]]; then
+            COMMAND_ARGS+=("--throttle-ms")
+            COMMAND_ARGS+=("${THROTTLE_MS}")
+          fi
+
+          if [[ -n "${WORK_MEM_BYTES// }" ]]; then
+            COMMAND_ARGS+=("--work-mem-bytes")
+            COMMAND_ARGS+=("${WORK_MEM_BYTES}")
+          fi
+
+          az containerapp job start \
+            --name "${JOB_NAME}" \
+            --resource-group "${RESOURCE_GROUP}" \
+            --args "${COMMAND_ARGS[@]}"
+
+          echo "Job ${JOB_NAME} started"
+
+          latest_execution="$(az containerapp job execution list \
+            --name "${JOB_NAME}" \
+            --resource-group "${RESOURCE_GROUP}" \
+            --query "sort_by(@, &properties.startTime)[-1].name" \
+            --output tsv || true)"
+
+          if [[ -n "${latest_execution}" ]]; then
+            echo "Latest execution: ${latest_execution}"
+          else
+            echo "Unable to determine execution id from Azure CLI output"
+          fi
+
+      - name: Logout from Azure
+        if: ${{ failure() || success() }}
+        run: az logout

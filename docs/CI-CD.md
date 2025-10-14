@@ -91,6 +91,11 @@ Available manual workflows for all environments:
 - `dispatch-k6-tests.yml`: Functional testing
 - `dispatch-k6-performance.yml`: Performance testing
 - `dispatch-k6-breakpoint.yml`: Breakpoint testing
+- `dispatch-deployment-lag-check.yml`: Deployment lag monitoring
+
+### 6. Automated Monitoring
+
+- `ci-cd-deployment-lag-monitor.yml`: Monitors deployment lag between staging and production environments. Runs weekdays at 12pm Norway time and sends Slack notifications when production is lagging behind staging. See [DeploymentLagMonitoring.md](DeploymentLagMonitoring.md) for detailed documentation.
 
 #### Using `dispatch-apps.yml`
 
@@ -120,7 +125,7 @@ The `dispatch-infrastructure.yml` workflow is used for deploying infrastructure 
 This workflow facilitates the deployment of infrastructure to the specified environment, using the version details provided.
 
 
-### 6. Version Management
+### 7. Version Management
 
 - Release-please manages versioning based on conventional commits
 - Versions are tracked in GitHub environment variables
@@ -132,7 +137,7 @@ This workflow facilitates the deployment of infrastructure to the specified envi
 
 `CHANGELOG.md` and `version.txt` are automatically updated and should not be changed manually.
 
-### 7. Visual Workflow
+### 8. Visual Workflow
 
 ![Deployment process](deploy-process.png)
 

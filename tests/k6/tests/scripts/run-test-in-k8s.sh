@@ -116,7 +116,7 @@ testid="${name}_$(date '+%Y%m%dT%H%M%S')"
 
 archive_args=""
 if $breakpoint; then
-    archive_args="-e stages_target=$vus -e stages_duration=$duration -e abort_on_fail=$abort_on_fail"
+    archive_args="-e stages_target=$vus -e stages_duration=$duration -e abort_on_fail=$abort_on_fail -e BREAKPOINT=true"
 fi
 # Create the k6 archive
 

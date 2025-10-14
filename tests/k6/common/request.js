@@ -1,6 +1,6 @@
 import { default as http } from 'k6/http';
 import { baseUrlEndUser, baseUrlGraphql, baseUrlServiceOwner } from './config.js'
-import { getServiceOwnerTokenFromGenerator, getEnduserTokenFromGenerator } from './token.js'
+import { getServiceOwnerTokenFromGenerator, getEnduserTokenFromGenerator, getSystemUserTokenFromGenerator } from './token.js'
 import { extend } from './extend.js'
 
 function resolveParams(defaultParams, params) {
@@ -32,6 +32,21 @@ function getServiceOwnerRequestParams(params = null, tokenOptions = null) {
     return resolveParams(defaultParams, params);
 }
 
+function getSystemUserRequestParams(params = null, tokenOptions = null) {
+    params = params || {};
+    const headers = params.headers || {};
+    const hasOverridenAuthorizationHeader = headers.Authorization !== undefined;
+
+    const defaultParams = {
+        headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'dialogporten-k6',
+            'Authorization': hasOverridenAuthorizationHeader ? headers.Authorization : 'Bearer ' + getSystemUserTokenFromGenerator(tokenOptions)
+        }
+    }
+
+    return resolveParams(defaultParams, params);
+}
 function getEnduserRequestParams(params = null, tokenOptions = null) {
     params = params || {};
     const headers = params.headers || {};
@@ -100,8 +115,16 @@ export function purgeSO(url, params = null, tokenOptions = null) {
     return http.request('POST', baseUrlServiceOwner + url + "/actions/purge", {}, getServiceOwnerRequestParams(params, tokenOptions));
 }
 
+export function freezeSO(url, params = null, tokenOptions = null) {
+    return http.request('POST', baseUrlServiceOwner + url + "/actions/freeze", {}, getServiceOwnerRequestParams(params, tokenOptions));
+}
+
 export function getEU(url, params = null, tokenOptions = null) {
     return http.get(baseUrlEndUser + url, getEnduserRequestParams(params, tokenOptions))
+}
+
+export function getSysEU(url, params = null, tokenOptions = null) {
+    return http.get(baseUrlEndUser + url, getSystemUserRequestParams(params, tokenOptions))
 }
 
 export function postEU(url, body, params = null, tokenOptions = null) {
@@ -127,7 +150,7 @@ export function deleteEU(url, params = null, tokenOptions = null) {
 }
 
 export function postGQ(body, params = null) {
-    body = JSON.stringify({ query: body })
+    body = JSON.stringify(body)
     params = extend(true, {}, params, { headers: { 'Content-Type': 'application/json' }});
     return http.post(baseUrlGraphql, body, params);
 }

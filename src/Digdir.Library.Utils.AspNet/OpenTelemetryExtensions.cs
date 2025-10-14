@@ -52,7 +52,8 @@ public static class OpenTelemetryExtensions
                     tracing.SetSampler(new AlwaysOnSampler());
                 }
 
-                tracing.AddProcessor(new PostgresExceptionFilter());
+                tracing.AddProcessor(new PostgresFilter());
+                tracing.AddProcessor(new HealthCheckFilter());
 
                 tracing
                     .AddHttpClientInstrumentation(o =>
@@ -78,7 +79,7 @@ public static class OpenTelemetryExtensions
                     .AddNpgsql()
                     .AddOtlpExporter(options =>
                     {
-                        options.Endpoint = new Uri(endpoint, "/v1/traces");
+                        options.Endpoint = endpoint;
                         options.Protocol = otlpProtocol;
                     });
 
@@ -101,7 +102,7 @@ public static class OpenTelemetryExtensions
                 {
                     metrics.AddOtlpExporter(options =>
                     {
-                        options.Endpoint = new Uri(endpoint, "/v1/metrics");
+                        options.Endpoint = endpoint;
                         options.Protocol = otlpProtocol;
                     });
                 }
@@ -172,7 +173,6 @@ public static class OpenTelemetryExtensions
         return builder.AddAspNetCoreInstrumentation(opts =>
         {
             opts.RecordException = true;
-            opts.Filter = httpContext => !httpContext.Request.Path.StartsWithSegments("/health");
         });
     }
 }

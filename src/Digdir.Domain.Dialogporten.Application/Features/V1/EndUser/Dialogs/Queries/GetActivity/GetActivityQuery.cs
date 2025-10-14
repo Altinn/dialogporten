@@ -1,8 +1,11 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using MediatR;
@@ -11,10 +14,12 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetActivity;
 
-public sealed class GetActivityQuery : IRequest<GetActivityResult>
+public sealed class GetActivityQuery : IRequest<GetActivityResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid ActivityId { get; set; }
+
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
@@ -41,10 +46,10 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
     {
         var dialog = await _dbContext.Dialogs
             .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-                .ThenInclude(x => x.PerformedBy)
-                .ThenInclude(x => x.ActorNameEntity)
+            .ThenInclude(x => x.PerformedBy)
+            .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-                .ThenInclude(x => x.Description!.Localizations)
+            .ThenInclude(x => x.Description!.Localizations)
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                 cancellationToken: cancellationToken);
@@ -81,6 +86,7 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
             return new EntityNotFound<DialogActivity>(request.ActivityId);
         }
 
+        activity.FilterLocalizations(request.AcceptedLanguages);
         return _mapper.Map<ActivityDto>(activity);
     }
 }

@@ -1233,6 +1233,11 @@
               }
             ]
           },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "mediaType": {
             "description": "The media type of the attachment.",
             "example": "application/pdf\napplication/zip",
@@ -4572,6 +4577,11 @@
                 "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
               }
             ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
           },
           "mediaType": {
             "description": "The media type of the attachment.",

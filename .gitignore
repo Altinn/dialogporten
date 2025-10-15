@@ -6,6 +6,9 @@
 # pg_dump backups
 *.dump
 
+w# Parquet output files
+*.parquet
+
 # Local User-specific application configuration
 appsettings.local.json
 

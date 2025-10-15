@@ -1,15 +1,20 @@
 using System.Globalization;
+using Azure.Identity;
+using Azure.Monitor.Query;
+using Azure.Storage.Blobs;
 using Cocona;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Janitor;
+using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using Digdir.Library.Utils.AspNet;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Trace;
 using Serilog;
 
@@ -46,6 +51,8 @@ static void BuildAndRun(string[] args)
     builder.Host.UseDefaultServiceProvider(options => options.ValidateScopes = false);
 
     builder.Configuration
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddJsonFile("CostManagementAggregation/cost-coefficients.json", optional: false, reloadOnChange: true)
         .AddUserSecrets<Program>()
         .AddLocalConfiguration(builder.Environment);
     builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -64,6 +71,46 @@ static void BuildAndRun(string[] args)
             .Build()
         .AddScoped<IUser, ConsoleUser>()
         .AddSingleton(TelemetryConfiguration.CreateDefault());
+
+    // Add metrics aggregation services
+    builder.Services
+        .AddOptions<MetricsAggregationOptions>()
+        .Bind(builder.Configuration.GetSection(MetricsAggregationOptions.SectionName))
+        .ValidateDataAnnotations();
+
+    // Add cost coefficients configuration
+    builder.Services
+        .AddOptions<CostCoefficientsOptions>()
+        .Bind(builder.Configuration.GetSection(CostCoefficientsOptions.SectionName))
+        .ValidateDataAnnotations();
+
+    builder.Services.AddSingleton(provider =>
+    {
+        var credential = new DefaultAzureCredential();
+        return new LogsQueryClient(credential);
+    });
+
+    builder.Services.AddSingleton(provider =>
+    {
+        var options = provider.GetRequiredService<IOptions<MetricsAggregationOptions>>().Value;
+
+        // Use configured connection string if available, otherwise fallback to Azurite local emulator for development
+        if (!string.IsNullOrEmpty(options.StorageConnectionString))
+        {
+            return new BlobServiceClient(options.StorageConnectionString);
+        }
+
+        // Azurite local emulator connection string (for local development)
+        const string azuriteConnectionString = "DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
+        return new BlobServiceClient(azuriteConnectionString);
+    });
+
+    builder.Services.AddSingleton<ApplicationInsightsService>();
+    builder.Services.AddSingleton<CostCoefficients>();
+    builder.Services.AddSingleton<MetricsAggregationService>();
+    builder.Services.AddSingleton<ParquetFileService>();
+    builder.Services.AddSingleton<AzureStorageService>();
+    builder.Services.AddSingleton<CostMetricsAggregationOrchestrator>();
 
     var app = builder.Build();
 

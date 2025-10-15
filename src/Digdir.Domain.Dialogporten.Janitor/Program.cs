@@ -82,7 +82,10 @@ static void BuildAndRun(string[] args)
     builder.Services
         .AddOptions<CostCoefficientsOptions>()
         .Bind(builder.Configuration.GetSection(CostCoefficientsOptions.SectionName))
-        .ValidateDataAnnotations();
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+
+    builder.Services.AddSingleton<IValidateOptions<CostCoefficientsOptions>, CostCoefficientsOptionsValidator>();
 
     builder.Services.AddSingleton(provider =>
     {
@@ -93,16 +96,23 @@ static void BuildAndRun(string[] args)
     builder.Services.AddSingleton(provider =>
     {
         var options = provider.GetRequiredService<IOptions<MetricsAggregationOptions>>().Value;
+        var configuration = provider.GetRequiredService<IConfiguration>();
 
-        // Use configured connection string if available, otherwise fallback to Azurite local emulator for development
+        // Use configured connection string if available
         if (!string.IsNullOrEmpty(options.StorageConnectionString))
         {
             return new BlobServiceClient(options.StorageConnectionString);
         }
 
-        // Azurite local emulator connection string (for local development)
-        const string azuriteConnectionString = "DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
-        return new BlobServiceClient(azuriteConnectionString);
+        // Check for environment variable override for local development
+        var localStorageConnectionString = configuration["AZURE_STORAGE_CONNECTION_STRING"];
+        if (!string.IsNullOrEmpty(localStorageConnectionString))
+        {
+            return new BlobServiceClient(localStorageConnectionString);
+        }
+
+        // Fallback to development storage (Azurite)
+        return new BlobServiceClient("UseDevelopmentStorage=true");
     });
 
     builder.Services.AddSingleton<ApplicationInsightsService>();

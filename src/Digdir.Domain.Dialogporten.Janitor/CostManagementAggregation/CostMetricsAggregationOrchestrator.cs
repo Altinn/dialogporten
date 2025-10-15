@@ -30,15 +30,22 @@ public sealed class CostMetricsAggregationOrchestrator
         bool skipUpload,
         CancellationToken cancellationToken = default)
     {
+        // Validate and normalize environments
+        var normalizedEnvironments = NormalizeEnvironments(environments);
+        if (normalizedEnvironments.Count == 0)
+        {
+            return new AggregationResult.Failure("No valid environments provided. Please specify at least one environment.");
+        }
+
         _logger.LogInformation("Starting metrics aggregation for date {Date:dd.MM.yyyy} with environments: [{Environments}]",
-            targetDate, string.Join(", ", environments));
+            targetDate, string.Join(", ", normalizedEnvironments));
 
         try
         {
-            var allRecords = await CollectMetricsFromSpecifiedEnvironmentsAsync(environments, targetDate, cancellationToken);
+            var allRecords = await CollectMetricsFromSpecifiedEnvironmentsAsync(normalizedEnvironments, targetDate, cancellationToken);
             var aggregatedRecords = _aggregationService.AggregateFeatureMetrics(allRecords);
             var parquetData = await _parquetService.GenerateParquetFileAsync(aggregatedRecords, cancellationToken);
-            var fileName = ParquetFileService.GetFileName(targetDate, environments);
+            var fileName = ParquetFileService.GetFileName(targetDate, normalizedEnvironments);
 
             if (skipUpload)
             {
@@ -56,6 +63,21 @@ public sealed class CostMetricsAggregationOrchestrator
             _logger.LogError(ex, "Failed to aggregate metrics for date {Date}", targetDate);
             return new AggregationResult.Failure(ex.Message);
         }
+    }
+
+    private static List<string> NormalizeEnvironments(List<string>? environments)
+    {
+        if (environments == null)
+        {
+            return new List<string>();
+        }
+
+        return environments
+            .Where(env => !string.IsNullOrWhiteSpace(env))
+            .Select(env => env.Trim().ToLowerInvariant())
+            .Distinct()
+            .OrderBy(env => env)
+            .ToList();
     }
 
     private async Task<List<FeatureMetricRecord>> CollectMetricsFromSpecifiedEnvironmentsAsync(

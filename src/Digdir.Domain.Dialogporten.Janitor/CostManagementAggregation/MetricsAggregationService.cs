@@ -42,7 +42,8 @@ public sealed class MetricsAggregationService
                 x.Record.OwnerOrg,
                 x.Record.ServiceResource,
                 TransactionType = x.TransactionType!.Value,
-                Failed = x.Record.Status is "failure" or "error"
+                Failed = string.Equals(x.Record.Status, "failure", StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(x.Record.Status, "error", StringComparison.OrdinalIgnoreCase)
             })
             .Select(group => new AggregatedMetricsRecord
             {

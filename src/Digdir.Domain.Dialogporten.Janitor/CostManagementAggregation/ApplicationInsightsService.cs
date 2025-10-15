@@ -139,8 +139,13 @@ public sealed class ApplicationInsightsService
     {
         var subscriptionId = GetSubscriptionId(environment);
 
-        // Construct resource ID using the Azure environment name directly
-        var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/dp-be-{environment}-rg/providers/microsoft.insights/components/dp-be-{environment}-applicationInsights";
+        if (string.IsNullOrEmpty(subscriptionId))
+        {
+            throw new InvalidOperationException($"Subscription ID for environment '{environment}' is not configured. Please ensure the {environment}SubscriptionId is set in your configuration.");
+        }
+
+        var lowerEnvironment = environment.ToLowerInvariant();
+        var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/dp-be-{lowerEnvironment}-rg/providers/microsoft.insights/components/dp-be-{lowerEnvironment}-applicationInsights";
 
         return resourceId;
     }

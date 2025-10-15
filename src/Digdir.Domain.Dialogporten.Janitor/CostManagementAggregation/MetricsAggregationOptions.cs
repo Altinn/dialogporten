@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
 public sealed class MetricsAggregationOptions

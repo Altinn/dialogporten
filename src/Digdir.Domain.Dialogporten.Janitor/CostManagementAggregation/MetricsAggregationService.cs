@@ -15,6 +15,7 @@ public sealed class MetricsAggregationService
 
     public List<AggregatedMetricsRecord> AggregateFeatureMetrics(List<FeatureMetricRecord> rawMetrics)
     {
+        ArgumentNullException.ThrowIfNull(rawMetrics);
         _logger.LogInformation("Aggregating {RecordCount} raw feature metric records", rawMetrics.Count);
 
         // Map feature types to transaction types and filter out unmapped ones

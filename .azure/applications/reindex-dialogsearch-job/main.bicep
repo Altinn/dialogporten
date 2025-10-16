@@ -22,10 +22,6 @@ param containerAppEnvironmentName string
 @secure()
 param environmentKeyVaultName string
 
-@description('The cron expression for the job schedule')
-@minLength(9)
-param jobSchedule string
-
 @description('The connection string for Application Insights')
 @minLength(3)
 @secure()
@@ -39,21 +35,21 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+var name = '${namePrefix}-reindex-dialogsearch'
 var tags = {
-  FullName: '${namePrefix}-sync-resource-policy-information'
+  FullName: name
   Environment: environment
   Product: 'Dialogporten'
-  Description: 'Synchronizes resource policy information'
-  JobType: 'Scheduled'
+  Description: 'Manual janitor job to reindex dialog search'
+  JobType: 'Manual'
 }
-var name = '${namePrefix}-sync-rp-info'
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName
 }
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-sync-rp-info-identity'
+  name: '${name}-identity'
   location: location
   tags: tags
 }
@@ -62,7 +58,9 @@ module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' 
   name: 'keyVaultReaderAccessPolicy-${name}'
   params: {
     keyvaultName: environmentKeyVaultName
-    principalIds: [managedIdentity.properties.principalId]
+    principalIds: [
+      managedIdentity.properties.principalId
+    ]
   }
 }
 
@@ -106,7 +104,7 @@ var secrets = [
   }
 ]
 
-module migrationJob '../../modules/containerAppJob/main.bicep' = {
+module dialogsearchReindexJob '../../modules/containerAppJob/main.bicep' = {
   name: name
   params: {
     name: name
@@ -116,9 +114,13 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     environmentVariables: containerAppEnvVars
     secrets: secrets
     tags: tags
-    cronExpression: jobSchedule
+    // We need a beefy container to run multiple reindexing workers
+    resources: {
+        cpu: 4
+        memory: '8Gi'
+    }
     args: [
-      'sync-resource-policy-information'
+      'reindex-dialogsearch'
     ]
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
@@ -130,4 +132,4 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
 }
 
 output identityPrincipalId string = managedIdentity.properties.principalId
-output name string = migrationJob.outputs.name
+output name string = dialogsearchReindexJob.outputs.name

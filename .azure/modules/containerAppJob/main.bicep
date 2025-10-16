@@ -19,11 +19,14 @@ param secrets { name: string, keyVaultUrl: string, identity: string }[] = []
 @description('The tags to be applied to the job')
 param tags object
 
+@description('CPU and memory resources for the container app')
+param resources object?
+
 @description('The cron expression for the job schedule (optional)')
 param cronExpression string = ''
 
-@description('The container args for the job (optional)')
-param args string = ''
+@description('The container args for the job (optional). Provide each argument as a separate array element.')
+param args string[] = []
 
 @description('The ID of the user-assigned managed identity')
 @minLength(1)
@@ -82,7 +85,8 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
           env: environmentVariables
           image: image
           name: name
-          args: empty(args) ? null : [args]
+          args: empty(args) ? null : args
+          resources: resources
         }
       ]
     }

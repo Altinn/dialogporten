@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.86.3](https://github.com/Altinn/dialogporten/compare/v1.86.2...v1.86.3) (2025-10-16)
+
+
+### Miscellaneous Chores
+
+* **infrastructure:** Introduce tier parameter, up TT02 webapi-so/postgres SKU, up YT01 postgres SKU ([#2859](https://github.com/Altinn/dialogporten/issues/2859)) ([e95288f](https://github.com/Altinn/dialogporten/commit/e95288f6b364c1dad21640720f1cd248fff03942))
+
 ## [1.86.2](https://github.com/Altinn/dialogporten/compare/v1.86.1...v1.86.2) (2025-10-16)
 
 

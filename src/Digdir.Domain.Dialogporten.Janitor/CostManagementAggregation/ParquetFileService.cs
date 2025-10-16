@@ -31,29 +31,29 @@ public sealed class ParquetFileService
 
         using var memoryStream = new MemoryStream();
 
-        var count = records.Count;
-        var miljø = new string[count];
-        var tjeneste = new string[count];
-        var konsumentorgnr = new string[count];
-        var tjenesteeierorgnr = new string[count];
-        var transaksjonstype = new string[count];
-        var feilet = new string[count];
-        var antall = new long[count];
-        var relativRessursbruk = new decimal[count];
+        var recordCount = records.Count;
+        var environment = new string[recordCount];
+        var service = new string[recordCount];
+        var consumerOrgNumber = new string[recordCount];
+        var ownerOrgNumber = new string[recordCount];
+        var transactionType = new string[recordCount];
+        var failed = new string[recordCount];
+        var count = new long[recordCount];
+        var relativeResourceUsage = new decimal[recordCount];
 
-        for (var i = 0; i < count; i++)
+        for (var i = 0; i < recordCount; i++)
         {
-            miljø[i] = records[i].Miljø;
-            tjeneste[i] = records[i].Tjeneste;
-            konsumentorgnr[i] = records[i].Konsumentorgnr;
-            tjenesteeierorgnr[i] = records[i].Tjenesteeierorgnr;
-            transaksjonstype[i] = records[i].Transaksjonstype;
-            feilet[i] = records[i].Feilet;
-            antall[i] = records[i].Antall;
-            relativRessursbruk[i] = records[i].RelativRessursbruk;
+            environment[i] = records[i].Environment;
+            service[i] = records[i].Service;
+            consumerOrgNumber[i] = records[i].ConsumerOrgNumber;
+            ownerOrgNumber[i] = records[i].OwnerOrgNumber;
+            transactionType[i] = records[i].TransactionType;
+            failed[i] = records[i].Failed;
+            count[i] = records[i].Count;
+            relativeResourceUsage[i] = records[i].RelativeResourceUsage;
         }
 
-        var columnData = new Array[] { miljø, tjeneste, konsumentorgnr, tjenesteeierorgnr, transaksjonstype, feilet, antall, relativRessursbruk };
+        var columnData = new Array[] { environment, service, consumerOrgNumber, ownerOrgNumber, transactionType, failed, count, relativeResourceUsage };
 
 #pragma warning disable CA2016 // ParquetWriter.CreateAsync doesn't support cancellation tokens
         using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream))

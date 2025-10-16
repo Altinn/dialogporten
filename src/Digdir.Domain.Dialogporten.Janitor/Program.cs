@@ -87,9 +87,11 @@ static void BuildAndRun(string[] args)
 
     builder.Services.AddSingleton<IValidateOptions<CostCoefficientsOptions>, CostCoefficientsOptionsValidator>();
 
-    builder.Services.AddSingleton(provider =>
+    builder.Services.AddSingleton(_ =>
     {
-        var credential = new DefaultAzureCredential();
+        Azure.Core.TokenCredential credential = builder.Environment.IsDevelopment()
+            ? new DefaultAzureCredential() // Tries multiple methods for local dev
+            : new ManagedIdentityCredential(); // Use managed identity in Azure
         return new LogsQueryClient(credential);
     });
 

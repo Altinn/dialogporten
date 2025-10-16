@@ -48,19 +48,19 @@ public sealed class MetricsAggregationService
             })
             .Select(group => new AggregatedMetricsRecord
             {
-                Miljø = ConvertToUserFacingEnvironmentName(group.Key.Environment),
-                Tjeneste = group.Key.ServiceResource,
-                Konsumentorgnr = group.Key.CallerOrg,
-                Tjenesteeierorgnr = group.Key.OwnerOrg,
-                Transaksjonstype = CostCoefficients.GetNorwegianName(group.Key.TransactionType),
-                Feilet = group.Key.Failed ? "Yes" : "No",
-                Antall = group.Sum(x => x.Record.Count),
-                RelativRessursbruk = group.Sum(x => x.Record.Count * _costCoefficients.GetCoefficient(group.Key.TransactionType))
+                Environment = ConvertToUserFacingEnvironmentName(group.Key.Environment),
+                Service = group.Key.ServiceResource,
+                ConsumerOrgNumber = group.Key.CallerOrg,
+                OwnerOrgNumber = group.Key.OwnerOrg,
+                TransactionType = CostCoefficients.GetNorwegianName(group.Key.TransactionType),
+                Failed = group.Key.Failed ? "Yes" : "No",
+                Count = group.Sum(x => x.Record.Count),
+                RelativeResourceUsage = group.Sum(x => x.Record.Count * _costCoefficients.GetCoefficient(group.Key.TransactionType))
             })
-            .OrderBy(r => r.Miljø)
-            .ThenBy(r => r.Tjenesteeierorgnr)
-            .ThenBy(r => r.Tjeneste)
-            .ThenBy(r => r.Transaksjonstype)
+            .OrderBy(r => r.Environment)
+            .ThenBy(r => r.OwnerOrgNumber)
+            .ThenBy(r => r.Service)
+            .ThenBy(r => r.TransactionType)
             .ToList();
 
         _logger.LogInformation("Aggregated into {AggregatedCount} records", aggregated.Count);
@@ -82,12 +82,12 @@ public sealed class MetricsAggregationService
 
 public sealed class AggregatedMetricsRecord
 {
-    public required string Miljø { get; init; }
-    public required string Tjeneste { get; init; }
-    public required string Konsumentorgnr { get; init; }
-    public required string Tjenesteeierorgnr { get; init; }
-    public required string Transaksjonstype { get; init; }
-    public required string Feilet { get; init; }
-    public required long Antall { get; init; }
-    public required decimal RelativRessursbruk { get; init; }
+    public required string Environment { get; init; }
+    public required string Service { get; init; }
+    public required string ConsumerOrgNumber { get; init; }
+    public required string OwnerOrgNumber { get; init; }
+    public required string TransactionType { get; init; }
+    public required string Failed { get; init; }
+    public required long Count { get; init; }
+    public required decimal RelativeResourceUsage { get; init; }
 }

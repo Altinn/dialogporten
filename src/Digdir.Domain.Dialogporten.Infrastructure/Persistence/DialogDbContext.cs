@@ -20,6 +20,7 @@ using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 
@@ -109,6 +110,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
                 .Where(x => ids.Contains(x))
                 .ToListAsync(cancellationToken);
     }
+    public DatabaseFacade GetDatabase() => Database;
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

@@ -1,3 +1,4 @@
+using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -27,55 +28,69 @@ public sealed class FullDialogAggregateDataLoader
 
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        var dialogEntity = await _dialogDbContext.Dialogs
-            .Include(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
-                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.SearchTags.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x!.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Sender)
-                .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Attachments)
-                .ThenInclude(x => x.Urls)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Attachments)
-                .ThenInclude(x => x.DisplayName!.Localizations)
-            .Include(x => x.Activities)
-                .ThenInclude(x => x.Description!.Localizations)
-            .Include(x => x.Activities)
-                .ThenInclude(x => x.PerformedBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.SeenLog
-                .OrderBy(x => x.CreatedAt))
-                .ThenInclude(x => x.SeenBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.EndUserContext.DialogEndUserContextSystemLabels)
-            .Include(x => x.ServiceOwnerContext)
-                .ThenInclude(x => x.ServiceOwnerLabels.OrderBy(x => x.Value))
-            .IgnoreQueryFilters()
-            .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
-            .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);
+        await using var dbTransaction = await _dialogDbContext.GetDatabase().BeginTransactionAsync(IsolationLevel.Chaos /* Amund: Ikke faktisk bruk chaos */, cancellationToken);
 
-        if (dialogEntity is not null)
+        try
         {
-            _dialogEntities.TryAdd(dialogId, dialogEntity);
-            return dialogEntity;
+            var dialogEntity = await _dialogDbContext.Dialogs
+                .Include(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
+                    .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.SearchTags.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x!.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Content)
+                    .ThenInclude(x => x.Value.Localizations)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Transmissions)
+                     .ThenInclude(x => x.Attachments)
+                     .ThenInclude(x => x.Urls)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.DisplayName!.Localizations)
+                .Include(x => x.Activities)
+                    .ThenInclude(x => x.Description!.Localizations)
+                .Include(x => x.Activities)
+                    .ThenInclude(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.SeenLog
+                    .OrderBy(x => x.CreatedAt))
+                    .ThenInclude(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.EndUserContext.DialogEndUserContextSystemLabels)
+                .Include(x => x.ServiceOwnerContext)
+                    .ThenInclude(x => x.ServiceOwnerLabels.OrderBy(x => x.Value))
+                .IgnoreQueryFilters()
+                .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
+                .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);
+
+            // Commit the transaction
+            await dbTransaction.CommitAsync(cancellationToken);
+
+            if (dialogEntity is not null)
+            {
+                _dialogEntities.TryAdd(dialogId, dialogEntity);
+                return dialogEntity;
+            }
+
+            return null;
+        }
+        catch
+        {
+            // Transaction will be automatically rolled back due to using statement
+            throw;
         }
 
-        return null;
     }
 
 }

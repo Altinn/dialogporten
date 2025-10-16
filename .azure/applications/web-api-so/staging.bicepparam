@@ -6,6 +6,11 @@ param apimIp = '51.13.86.131'
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param revisionSuffix = readEnvironmentVariable('REVISION_SUFFIX')
 
+param resources = {
+    cpu: 1
+    memory: '2Gi'
+}
+
 param otelTraceSamplerRatio = '1'
 
 // secrets

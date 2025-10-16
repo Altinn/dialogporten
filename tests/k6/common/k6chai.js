@@ -29,7 +29,7 @@ function expectStatusFor(response) {
                             }
                         }
 
-                        message += `\nExpected ${expectedStatus}, but got ${response.status}.\nResponse body:\n${prettyBody}`;
+                        message += `\nResponse body:\n${prettyBody}`;
                     }
 
                     expect(response.status, message).to.equal(expectedStatus);

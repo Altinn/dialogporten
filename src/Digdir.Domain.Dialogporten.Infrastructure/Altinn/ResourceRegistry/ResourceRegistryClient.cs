@@ -170,7 +170,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
     private async Task<ServiceResourceInformation[]> FetchServiceResourceInformation(CancellationToken cancellationToken)
     {
-        const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}resourcelist?includeMigratedResources=true";
+        const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}resourcelist?includeMigratedApps=true";
 
         return await _cache.GetOrSetAsync(
             ServiceResourceInformationCacheKey,

@@ -35,8 +35,6 @@ using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.DialogSearch;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search;
 using MassTransit;
 using MediatR;
 
@@ -93,7 +91,6 @@ public static class InfrastructureExtensions
             .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
-            .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient<Lazy<IPublishEndpoint>>(x =>
@@ -111,7 +108,10 @@ public static class InfrastructureExtensions
             .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>))
 
             // Feature Metrics
-            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
+            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>()
+
+            // Repositories
+            .AddScoped<IDialogSearchRepository, DialogSearchRepository>();
 
         services.AddFusionCacheNeueccMessagePackSerializer();
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);

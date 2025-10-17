@@ -126,7 +126,7 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
-            .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddScoped<IDialogSearchRepository, DialogSearchRepository>()
             .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
             .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();
     }

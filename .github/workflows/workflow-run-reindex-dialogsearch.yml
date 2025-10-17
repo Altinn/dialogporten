@@ -6,12 +6,6 @@ on:
       environment:
         required: true
         type: string
-      imageTag:
-        required: true
-        type: string
-      dryRun:
-        required: true
-        type: boolean
       mode:
         required: true
         type: string
@@ -71,68 +65,28 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Dryrun deploy reindex dialogsearch job (${{ inputs.environment }})
-        if: ${{ inputs.dryRun }}
-        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
-        env:
-          IMAGE_TAG: ${{ inputs.imageTag }}
-          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
-          AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
-          AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
-        with:
-          scope: resourceGroup
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          type: deployment
-          operation: whatIf
-          name: "reindex-dialogsearch-${{ inputs.environment }}-${{ github.run_id }}"
-          template-file: ./.azure/applications/reindex-dialogsearch-job/main.bicep
-          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          parameters-file: ./.azure/applications/reindex-dialogsearch-job/${{ inputs.environment }}.bicepparam
-
-      - name: Deploy reindex dialogsearch job (${{ inputs.environment }})
-        if: ${{ !inputs.dryRun }}
-        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
-        env:
-          IMAGE_TAG: ${{ inputs.imageTag }}
-          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
-          AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
-          AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
-        with:
-          scope: resourceGroup
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          type: deployment
-          operation: create
-          name: "reindex-dialogsearch-${{ inputs.environment }}-${{ github.run_id }}"
-          template-file: ./.azure/applications/reindex-dialogsearch-job/main.bicep
-          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          parameters-file: ./.azure/applications/reindex-dialogsearch-job/${{ inputs.environment }}.bicepparam
-
       - name: Ensure no reindex of dialogsearch execution is currently running
-        if: ${{ !inputs.dryRun }}
-        shell: bash
+        uses: azure/CLI@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956 # v2.2.0
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-        run: |
-          set -euo pipefail
+        with:
+          inlineScript: |
+            existing_execution="$(az containerapp job execution list \
+              --name "${JOB_NAME}" \
+              --resource-group "${RESOURCE_GROUP}" \
+              --query "[?properties.status=='Running' || properties.status=='Processing'] | [0].name" \
+              --output tsv || true)"
 
-          az extension add --name containerapp --allow-preview --upgrade -y
+            if [[ -n "${existing_execution}" ]]; then
+              echo "An execution is already running: ${existing_execution}"
+              exit 1
+            fi
 
-          existing_execution="$(az containerapp job execution list \
-            --name "${JOB_NAME}" \
-            --resource-group "${RESOURCE_GROUP}" \
-            --query "[?properties.status=='Running' || properties.status=='Processing'] | [0].name" \
-            --output tsv || true)"
-
-          if [[ -n "${existing_execution}" ]]; then
-            echo "An execution is already running: ${existing_execution}"
-            exit 1
-          fi
-
-          echo "No active execution detected"
+            echo "No active execution detected"
 
       - name: Start reindex dialogsearch job
-        if: ${{ !inputs.dryRun }}
-        shell: bash
+        id: start-job
+        uses: azure/CLI@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956 # v2.2.0
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           MODE: ${{ inputs.mode }}
@@ -142,74 +96,111 @@ jobs:
           WORKERS: ${{ inputs.workers }}
           THROTTLE_MS: ${{ inputs.throttleMs }}
           WORK_MEM_BYTES: ${{ inputs.workMemBytes }}
-        run: |
-          set -euo pipefail
+        with:
+          inlineScript: |
+            # Capture timestamp before starting the job for verification step
+            start_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            echo "START_TIMESTAMP=${start_timestamp}" >> $GITHUB_ENV
+            echo "Job start initiated at: ${start_timestamp}"
 
-          az extension add --name containerapp --allow-preview --upgrade -y
+            declare -a COMMAND_ARGS=("reindex-dialogsearch")
 
-          declare -a COMMAND_ARGS=("reindex-dialogsearch")
+            case "${MODE}" in
+              full)
+                COMMAND_ARGS+=("--full")
+                ;;
+              since)
+                COMMAND_ARGS+=("--since")
+                COMMAND_ARGS+=("${SINCE_TIMESTAMP}")
+                ;;
+              resume)
+                COMMAND_ARGS+=("--resume")
+                ;;
+              "stale-only")
+                COMMAND_ARGS+=("--stale-only")
+                ;;
+              *)
+                ;;
+            esac
 
-          case "${MODE}" in
-            full)
-              COMMAND_ARGS+=("--full")
-              ;;
-            since)
-              COMMAND_ARGS+=("--since")
-              COMMAND_ARGS+=("${SINCE_TIMESTAMP}")
-              ;;
-            resume)
-              COMMAND_ARGS+=("--resume")
-              ;;
-            "stale-only")
-              COMMAND_ARGS+=("--stale-only")
-              ;;
-            *)
-              ;;
-          esac
+            if [[ "${STALE_FIRST}" == "true" ]]; then
+              COMMAND_ARGS+=("--stale-first")
+            fi
 
-          if [[ "${STALE_FIRST}" == "true" ]]; then
-            COMMAND_ARGS+=("--stale-first")
-          fi
+            if [[ -n "${BATCH_SIZE// }" ]]; then
+              COMMAND_ARGS+=("--batch-size")
+              COMMAND_ARGS+=("${BATCH_SIZE}")
+            fi
 
-          if [[ -n "${BATCH_SIZE// }" ]]; then
-            COMMAND_ARGS+=("--batch-size")
-            COMMAND_ARGS+=("${BATCH_SIZE}")
-          fi
+            if [[ -n "${WORKERS// }" ]]; then
+              COMMAND_ARGS+=("--workers")
+              COMMAND_ARGS+=("${WORKERS}")
+            fi
 
-          if [[ -n "${WORKERS// }" ]]; then
-            COMMAND_ARGS+=("--workers")
-            COMMAND_ARGS+=("${WORKERS}")
-          fi
+            if [[ -n "${THROTTLE_MS// }" ]]; then
+              COMMAND_ARGS+=("--throttle-ms")
+              COMMAND_ARGS+=("${THROTTLE_MS}")
+            fi
 
-          if [[ -n "${THROTTLE_MS// }" ]]; then
-            COMMAND_ARGS+=("--throttle-ms")
-            COMMAND_ARGS+=("${THROTTLE_MS}")
-          fi
+            if [[ -n "${WORK_MEM_BYTES// }" ]]; then
+              COMMAND_ARGS+=("--work-mem-bytes")
+              COMMAND_ARGS+=("${WORK_MEM_BYTES}")
+            fi
 
-          if [[ -n "${WORK_MEM_BYTES// }" ]]; then
-            COMMAND_ARGS+=("--work-mem-bytes")
-            COMMAND_ARGS+=("${WORK_MEM_BYTES}")
-          fi
+            az containerapp job start \
+              --name "${JOB_NAME}" \
+              --resource-group "${RESOURCE_GROUP}" \
+              --args "${COMMAND_ARGS[@]}"
 
-          az containerapp job start \
-            --name "${JOB_NAME}" \
-            --resource-group "${RESOURCE_GROUP}" \
-            --args "${COMMAND_ARGS[@]}"
+            echo "Job ${JOB_NAME} started"
 
-          echo "Job ${JOB_NAME} started"
+      - name: Verify execution of job
+        uses: azure/CLI@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956 # v2.2.0
+        timeout-minutes: 3
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+        with:
+          inlineScript: |
+            # TODO: This verification logic should be refactored into containerAppJobVerifier.sh
+            # to support both "running" and "succeeded" verification modes
 
-          latest_execution="$(az containerapp job execution list \
-            --name "${JOB_NAME}" \
-            --resource-group "${RESOURCE_GROUP}" \
-            --query "sort_by(@, &properties.startTime)[-1].name" \
-            --output tsv || true)"
+            echo "Looking for executions started after: ${START_TIMESTAMP}"
 
-          if [[ -n "${latest_execution}" ]]; then
-            echo "Latest execution: ${latest_execution}"
-          else
-            echo "Unable to determine execution id from Azure CLI output"
-          fi
+            attempt=1
+            max_attempts=12  # 12 attempts * 10 seconds = 2 minutes max
 
-      - name: Logout from Azure
-        if: ${{ failure() || success() }}
-        run: az logout
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt: Checking for running execution..."
+
+              # Get the latest execution that started after our timestamp
+              latest_execution="$(az containerapp job execution list \
+                --name "${JOB_NAME}" \
+                --resource-group "${RESOURCE_GROUP}" \
+                --query "[?properties.startTime>='${START_TIMESTAMP}'] | sort_by(@, &properties.startTime)[-1]" \
+                --output json || true)"
+
+              if [[ -n "${latest_execution}" && "${latest_execution}" != "null" ]]; then
+                execution_name=$(echo "$latest_execution" | jq -r '.name // empty')
+                execution_status=$(echo "$latest_execution" | jq -r '.properties.status // empty')
+                execution_start_time=$(echo "$latest_execution" | jq -r '.properties.startTime // empty')
+
+                echo "Execution: ${execution_name}"
+                echo "Status: ${execution_status}"
+                echo "Start time: ${execution_start_time}"
+
+                if [[ "${execution_status}" == "Running" || "${execution_status}" == "Processing" ]]; then
+                  echo "Job execution has started successfully"
+                  exit 0
+                elif [[ "${execution_status}" == "Failed" ]]; then
+                  echo "Job execution failed"
+                  exit 1
+                fi
+              fi
+
+              echo "Execution not yet running, waiting 10 seconds..."
+              sleep 10
+              attempt=$((attempt + 1))
+            done
+
+            echo "Timeout: Job execution did not start within 2 minutes"
+            exit 1

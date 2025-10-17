@@ -1,0 +1,16 @@
+{
+  "CostCoefficients": {
+    "CreateDialog": 1.5,
+    "UpdateDialog": 1.8,
+    "SoftDeleteDialog": 0.7,
+    "HardDeleteDialog": 0.7,
+    "GetDialogServiceOwner": 1.0,
+    "GetDialogEndUser": 1.2,
+    "SearchDialogsServiceOwner": 1.5,
+    "SearchDialogsServiceOwnerWithEndUser": 2.5,
+    "SearchDialogsEndUser": 2.5,
+    "SetDialogLabel": 1.3,
+    "BulkSetLabelsServiceOwnerWithEndUser": 2.0,
+    "BulkSetLabelsEndUser": 2.0
+  }
+}

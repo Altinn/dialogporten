@@ -24,7 +24,6 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
         options.DefaultPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .AddAuthenticationSchemes(authenticationSchemas)
-            .RequireValidConsumerClaim()
             .Build();
 
         options.AddPolicy(AuthorizationPolicy.EndUser, builder => builder
@@ -42,6 +41,7 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
 
         options.AddPolicy(AuthorizationPolicy.ServiceProvider, builder => builder
             .Combine(options.DefaultPolicy)
+            .RequireValidConsumerClaim()
             .RequireScope(AuthorizationScope.ServiceProvider));
 
         options.AddPolicy(AuthorizationPolicy.ServiceProviderSearch, builder => builder

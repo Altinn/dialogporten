@@ -39,5 +39,6 @@ public sealed class AuthorizedResource
 public enum AuthorizedPartyType
 {
     Person,
-    Organization
+    Organization,
+    SelfIdentified
 }

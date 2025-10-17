@@ -32,6 +32,11 @@ public sealed class DialogUserType : AbstractLookupEntity<DialogUserType, Dialog
         /// <summary>
         /// Like "Person", but via a service owner system
         /// </summary>
-        ServiceOwnerOnBehalfOfPerson = 4
+        ServiceOwnerOnBehalfOfPerson = 4,
+
+        /// <summary>
+        /// Self-identified user
+        /// </summary>
+        SelfIdentifiedUser = 5
     }
 }

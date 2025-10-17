@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.86.4](https://github.com/Altinn/dialogporten/compare/v1.86.3...v1.86.4) (2025-10-17)
+
+
+### Bug Fixes
+
+* **infra:** Include migrated resources in resourcelist factory ([#2881](https://github.com/Altinn/dialogporten/issues/2881)) ([9c0f9ff](https://github.com/Altinn/dialogporten/commit/9c0f9ff3a411244bb4322ed634f465deb193058f))
+
+
+### Miscellaneous Chores
+
+* **infra:** Add additional GeneralPurpose SKUs ([#2877](https://github.com/Altinn/dialogporten/issues/2877)) ([e881634](https://github.com/Altinn/dialogporten/commit/e8816346eb15b8dec5f1fd7f6b9379ea0aca0404))
+
 ## [1.86.3](https://github.com/Altinn/dialogporten/compare/v1.86.2...v1.86.3) (2025-10-16)
 
 

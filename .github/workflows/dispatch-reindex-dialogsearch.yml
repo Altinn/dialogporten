@@ -12,15 +12,6 @@ on:
           - yt01
           - staging
           - prod
-      imageTag:
-        description: "Janitor image tag to deploy (e.g. 1.23.4)"
-        required: true
-        type: string
-      dryRun:
-        description: "Validate deployment only (no changes, job is not started)"
-        required: false
-        default: false
-        type: boolean
       mode:
         description: "Reindex mode"
         required: true
@@ -76,8 +67,6 @@ jobs:
     uses: ./.github/workflows/workflow-run-reindex-dialogsearch.yml
     with:
       environment: ${{ inputs.environment }}
-      imageTag: ${{ inputs.imageTag }}
-      dryRun: ${{ inputs.dryRun }}
       mode: ${{ inputs.mode }}
       sinceTimestamp: ${{ inputs.sinceTimestamp }}
       staleFirst: ${{ inputs.staleFirst }}

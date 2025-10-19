@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.86.4](https://github.com/Altinn/dialogporten/compare/v1.86.3...v1.86.4) (2025-10-19)
+
+
+### Bug Fixes
+
+* **infra:** Include migrated resources in resourcelist factory ([#2881](https://github.com/Altinn/dialogporten/issues/2881)) ([9c0f9ff](https://github.com/Altinn/dialogporten/commit/9c0f9ff3a411244bb4322ed634f465deb193058f))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency azure.identity to 1.17.0 ([#2886](https://github.com/Altinn/dialogporten/issues/2886)) ([0131f61](https://github.com/Altinn/dialogporten/commit/0131f611ef5791ee60bebbf72eb25ec47dfee251))
+* **deps:** update dotnet monorepo ([#2882](https://github.com/Altinn/dialogporten/issues/2882)) ([58aaa5e](https://github.com/Altinn/dialogporten/commit/58aaa5ec2de6e9b692204942810941afe1bd775a))
+* **deps:** update grafana/loki docker tag to v3.5.6 ([#2883](https://github.com/Altinn/dialogporten/issues/2883)) ([3d2bec2](https://github.com/Altinn/dialogporten/commit/3d2bec2db375366a7c655bc095691947770cfdba))
+* **deps:** update Microsoft dependencies to 9.0.10 ([#2888](https://github.com/Altinn/dialogporten/issues/2888)) ([2fc6a43](https://github.com/Altinn/dialogporten/commit/2fc6a43e09e6c5ab8bd9648149a24a728b66414d))
+* **deps:** update nginx docker tag to v1.29.2 ([#2884](https://github.com/Altinn/dialogporten/issues/2884)) ([f665926](https://github.com/Altinn/dialogporten/commit/f66592689b4d7d75b0bb0daa1559e47e46b408d5))
+* **deps:** update opentelemetry-dotnet monorepo to 1.13.1 ([#2885](https://github.com/Altinn/dialogporten/issues/2885)) ([8b06f21](https://github.com/Altinn/dialogporten/commit/8b06f2102999228f1cfa632df4e58f2130cbdc41))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.137.0 ([#2887](https://github.com/Altinn/dialogporten/issues/2887)) ([2265c2c](https://github.com/Altinn/dialogporten/commit/2265c2cd1ee6e059d5a7861734f0c05e9eea7ef0))
+* **infra:** Add additional GeneralPurpose SKUs ([#2877](https://github.com/Altinn/dialogporten/issues/2877)) ([e881634](https://github.com/Altinn/dialogporten/commit/e8816346eb15b8dec5f1fd7f6b9379ea0aca0404))
+
 ## [1.86.3](https://github.com/Altinn/dialogporten/compare/v1.86.2...v1.86.3) (2025-10-16)
 
 

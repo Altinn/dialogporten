@@ -35,8 +35,18 @@ public sealed class DialogUserType : AbstractLookupEntity<DialogUserType, Dialog
         ServiceOwnerOnBehalfOfPerson = 4,
 
         /// <summary>
-        /// Self-identified user
+        /// Self-identified user from ID-porten
         /// </summary>
-        SelfIdentifiedUser = 5
+        IdportenSelfIdentifiedUser = 5,
+
+        /// <summary>
+        /// Self-identified user from Altinn
+        /// </summary>
+        AltinnSelfIdentifiedUser = 6,
+
+        /// <summary>
+        /// Self-identified user from UDIR Feide IDP
+        /// </summary>
+        FeideUser = 7
     }
 }

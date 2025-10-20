@@ -2,10 +2,12 @@
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSelfIdentifiedUserType : Migration
+    public partial class AddAddtionalSiUserTypes : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -13,7 +15,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.InsertData(
                 table: "DialogUserType",
                 columns: new[] { "Id", "Name" },
-                values: new object[] { 5, "LegacySelfIdentifiedUser" });
+                values: new object[,]
+                {
+                    { 6, "AltinnSelfIdentifiedUser" },
+                    { 7, "FeideUser" }
+                });
         }
 
         /// <inheritdoc />
@@ -22,7 +28,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.DeleteData(
                 table: "DialogUserType",
                 keyColumn: "Id",
-                keyValue: 5);
+                keyValue: 6);
+
+            migrationBuilder.DeleteData(
+                table: "DialogUserType",
+                keyColumn: "Id",
+                keyValue: 7);
         }
     }
 }

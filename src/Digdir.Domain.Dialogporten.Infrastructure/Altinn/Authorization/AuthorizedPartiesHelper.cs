@@ -5,9 +5,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 internal static class AuthorizedPartiesHelper
 {
+    public const string PartyTypeSelfIdentified = "SelfIdentified";
+    public const string SelfIdentifiedUserRoleCode = "urn:altinn:rolecode:seln";
+
     private const string PartyTypeOrganization = "Organization";
     private const string PartyTypePerson = "Person";
-    private const string PartyTypeSelfIdentified = "SelfIdentified";
     private const string AttributeIdResource = "urn:altinn:resource";
     private const string AttributeIdRoleCode = "urn:altinn:rolecode";
     private const string AttributeIdAccessPackage = "urn:altinn:accesspackage";
@@ -23,20 +25,19 @@ internal static class AuthorizedPartiesHelper
         {
             foreach (var authorizedPartyDto in authorizedPartiesDto)
             {
-                result.AuthorizedParties.Add(MapFromDto(authorizedPartyDto, authorizedPartiesRequest.Value));
+                result.AuthorizedParties.Add(MapFromDto(authorizedPartyDto, authorizedPartiesRequest));
             }
         }
 
         return result;
     }
 
-    private static AuthorizedParty MapFromDto(AuthorizedPartiesResultDto dto, string currentUserValue)
+    private static AuthorizedParty MapFromDto(AuthorizedPartiesResultDto dto, AuthorizedPartiesRequest authenticatedUser)
     {
         var party = dto.Type switch
         {
             PartyTypeOrganization => NorwegianOrganizationIdentifier.PrefixWithSeparator + dto.OrganizationNumber,
             PartyTypePerson => NorwegianPersonIdentifier.PrefixWithSeparator + dto.PersonId,
-            PartyTypeSelfIdentified => GenericPartyIdentifier.PrefixWithSeparator + dto.PartyUuid,
             _ => throw new ArgumentOutOfRangeException(nameof(dto))
         };
 
@@ -50,12 +51,11 @@ internal static class AuthorizedPartiesHelper
             {
                 PartyTypeOrganization => AuthorizedPartyType.Organization,
                 PartyTypePerson => AuthorizedPartyType.Person,
-                PartyTypeSelfIdentified => AuthorizedPartyType.SelfIdentified,
                 _ => throw new ArgumentOutOfRangeException(nameof(dto))
             },
             IsDeleted = dto.IsDeleted,
             HasKeyRole = dto.AuthorizedRoles.Exists(role => KeyRoleCodes.Contains(role)),
-            IsCurrentEndUser = dto.PersonId == currentUserValue || dto.Type == PartyTypeSelfIdentified, // Self-identified users can only represent themselves
+            IsCurrentEndUser = dto.PersonId == authenticatedUser.Value,
             IsMainAdministrator = dto.AuthorizedRoles.Contains(MainAdministratorRoleCode),
             IsAccessManager = dto.AuthorizedRoles.Contains(AccessManagerRoleCode),
             HasOnlyAccessToSubParties = dto.OnlyHierarchyElementWithNoAccess,
@@ -67,7 +67,7 @@ internal static class AuthorizedPartiesHelper
                     ResourceId = x.ResourceId,
                     InstanceId = x.InstanceId,
                 }).ToList(),
-            SubParties = dto.Subunits.Count > 0 ? dto.Subunits.Select(x => MapFromDto(x, currentUserValue)).ToList() : null
+            SubParties = dto.Subunits.Count > 0 ? dto.Subunits.Select(x => MapFromDto(x, authenticatedUser)).ToList() : null
         };
     }
 

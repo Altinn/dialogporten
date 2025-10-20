@@ -57,6 +57,13 @@ var tags = {
 }
 var name = '${namePrefix}-aggregate-cost-metrics'
 
+// Compute a valid storage account name (<=24, lowercase, alphanumeric)
+var saPrefixBase = replace(toLower(namePrefix), '-', '')
+var saShortPrefix = take(saPrefixBase, 8)
+var saStatic = 'costmetrics' // 11 chars
+var saUnique = take(uniqueString(resourceGroup().id), 5)
+var storageAccountSafeName = '${saShortPrefix}${saStatic}${saUnique}'
+
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName
 }
@@ -69,7 +76,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
 
 // Create storage account for cost metrics
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: '${namePrefix}costmetrics${uniqueString(resourceGroup().id)}'
+  name: storageAccountSafeName
   location: location
   sku: {
     name: 'Standard_LRS'
@@ -85,9 +92,14 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   tags: tags
 }
 
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  name: 'default'
+  parent: storageAccount
+}
+
 // Create blob container for cost metrics
 resource storageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
-  parent: storageAccount::storageAccount::blobServices
+  parent: blobService
   name: storageContainerName
   properties: {
     publicAccess: 'None'

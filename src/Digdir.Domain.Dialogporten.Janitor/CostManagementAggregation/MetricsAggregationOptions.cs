@@ -14,5 +14,7 @@ public sealed class MetricsAggregationOptions
 
     public string StorageConnectionString { get; set; } = string.Empty;
 
+    public string StorageAccountName { get; set; } = string.Empty;
+
     public string StorageContainerName { get; set; } = string.Empty;
 }

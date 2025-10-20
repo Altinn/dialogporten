@@ -98,23 +98,27 @@ static void BuildAndRun(string[] args)
     builder.Services.AddSingleton(provider =>
     {
         var options = provider.GetRequiredService<IOptions<MetricsAggregationOptions>>().Value;
-        var configuration = provider.GetRequiredService<IConfiguration>();
+        var environment = provider.GetRequiredService<IHostEnvironment>();
 
-        // Use configured connection string if available
-        if (!string.IsNullOrEmpty(options.StorageConnectionString))
+        if (environment.IsDevelopment())
         {
-            return new BlobServiceClient(options.StorageConnectionString);
+            // Use connection string from user secrets if available, otherwise Azurite
+            if (!string.IsNullOrEmpty(options.StorageConnectionString))
+            {
+                return new BlobServiceClient(options.StorageConnectionString);
+            }
+
+            return new BlobServiceClient("UseDevelopmentStorage=true");
         }
 
-        // Check for environment variable override for local development
-        var localStorageConnectionString = configuration["AZURE_STORAGE_CONNECTION_STRING"];
-        if (!string.IsNullOrEmpty(localStorageConnectionString))
+        if (string.IsNullOrEmpty(options.StorageAccountName))
         {
-            return new BlobServiceClient(localStorageConnectionString);
+            throw new InvalidOperationException("MetricsAggregation:StorageAccountName must be configured in non-development environments.");
         }
 
-        // Fallback to development storage (Azurite)
-        return new BlobServiceClient("UseDevelopmentStorage=true");
+        var credential = new DefaultAzureCredential();
+        var storageUri = new Uri($"https://{options.StorageAccountName}.blob.core.windows.net");
+        return new BlobServiceClient(storageUri, credential);
     });
 
     builder.Services.AddSingleton<ApplicationInsightsService>();

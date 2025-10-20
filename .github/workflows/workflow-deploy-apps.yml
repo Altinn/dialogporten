@@ -321,3 +321,80 @@ jobs:
         if: ${{failure() || success()}}
         continue-on-error: true
         run: az logout
+
+  deploy-aggregate-cost-metrics-job:
+    name: Deploy job aggregate-cost-metrics-job to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    if: ${{ always() && !failure() && !cancelled() && inputs.environment == 'prod' }}
+    needs: deploy-apps
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
+      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Dryrun Deploy job aggregate-cost-metrics-job(${{ inputs.environment }})
+        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        if: ${{ inputs.dryRun }}
+        id: deploy-dry-run
+        env:
+          # parameters
+          IMAGE_TAG: ${{ inputs.version }}
+          # secrets
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+          AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+          AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
+        with:
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: whatIf
+          name: "aggregate-cost-metrics-job-${{ inputs.version }}"
+          template-file: ./.azure/applications/aggregate-cost-metrics-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/aggregate-cost-metrics-job/${{ inputs.environment }}.bicepparam
+
+      - name: Deploy job aggregate-cost-metrics-job(${{ inputs.environment }})
+        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        if: ${{!inputs.dryRun}}
+        id: deploy
+        env:
+          # parameters
+          IMAGE_TAG: ${{ inputs.version }}
+          # secrets
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+          AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+          AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
+        with:
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: create
+          name: "aggregate-cost-metrics-job-${{ inputs.version }}"
+          template-file: ./.azure/applications/aggregate-cost-metrics-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/aggregate-cost-metrics-job/${{ inputs.environment }}.bicepparam
+
+      - name: Logout from azure
+        if: ${{failure() || success()}}
+        continue-on-error: true
+        run: az logout

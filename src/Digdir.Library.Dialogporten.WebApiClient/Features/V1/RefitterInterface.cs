@@ -2872,7 +2872,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <summary>
         /// The unique identifier for the attachment URL in UUIDv7 format.
         /// </summary>
-
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.86.5](https://github.com/Altinn/dialogporten/compare/v1.86.4...v1.86.5) (2025-10-20)
+
+
+### Bug Fixes
+
+* **docs:** use correct Altinn docs URL ([#2891](https://github.com/Altinn/dialogporten/issues/2891)) ([5c3b144](https://github.com/Altinn/dialogporten/commit/5c3b1441301ab32576ee145457806b8f5a1772ac))
+
 ## [1.86.4](https://github.com/Altinn/dialogporten/compare/v1.86.3...v1.86.4) (2025-10-19)
 
 

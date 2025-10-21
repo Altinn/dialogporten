@@ -658,6 +658,11 @@ public sealed class DialogTransmissionAttachmentDto
 public sealed class DialogTransmissionAttachmentUrlDto
 {
     /// <summary>
+    /// The unique identifier for the attachment URL in UUIDv7 format.
+    /// </summary>
+    public Guid Id { get; set; }
+
+    /// <summary>
     /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
     /// not authorized to access the transmission.
     /// </summary>

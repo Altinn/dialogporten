@@ -66,6 +66,36 @@ public class NotificationConditionTests(DialogApplication application) : Applica
                 x.SendNotification.Should().Be(expectedSendNotificationValue));
     }
 
+    [Theory, ClassData(typeof(TransmissionNotificationConditionTestData))]
+    public Task Bad_Request_On_TransmissionId_When_ActivityType_Is_Not_TransmissionOpened(DialogActivityType.Values activityType) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SendCommand((_, ctx) => new NotificationConditionQuery
+            {
+                DialogId = ctx.GetDialogId(),
+                ActivityType = activityType,
+                ConditionType = NotificationConditionType.Exists,
+                TransmissionId = Guid.NewGuid()
+            })
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText(nameof(DialogActivityType.Values.TransmissionOpened)));
+
+    public sealed class TransmissionNotificationConditionTestData : TheoryData<DialogActivityType.Values>
+    {
+        public TransmissionNotificationConditionTestData()
+        {
+            var invalidActivityTypes = Enum
+                .GetValues(typeof(DialogActivityType.Values))
+                .Cast<DialogActivityType.Values>()
+                .Where(x => x != DialogActivityType.Values.TransmissionOpened);
+
+            foreach (var activityType in invalidActivityTypes)
+            {
+                Add(activityType);
+            }
+        }
+    }
+
     [Fact]
     public Task NotFound_Should_Be_Returned_When_Dialog_Does_Not_Exist() =>
         FlowBuilder.For(Application)

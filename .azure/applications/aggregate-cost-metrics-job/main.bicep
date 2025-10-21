@@ -86,7 +86,7 @@ resource storageContainer 'Microsoft.Storage/storageAccounts/blobServices/contai
 }
 
 module storageBlobDataContributorRole '../../modules/storageAccount/addBlobDataContributorRole.bicep' = {
-  name: 'storageBlobDataContributorRole-${name}'
+  name: 'storageContributorRole-${name}'
   params: {
     storageAccountName: storageAccount.outputs.storageAccountName
     principalIds: [managedIdentity.properties.principalId]
@@ -94,7 +94,7 @@ module storageBlobDataContributorRole '../../modules/storageAccount/addBlobDataC
 }
 
 module appInsightsMonitoringReaderRole '../../modules/applicationInsights/addMonitoringReaderRole.bicep' = {
-  name: 'appInsightsMonitoringReaderRole-${name}'
+  name: 'appInsightsReaderRole-${name}'
   params: {
     appInsightsName: appInsightsName
     principalIds: [managedIdentity.properties.principalId]

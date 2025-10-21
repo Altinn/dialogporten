@@ -1,7 +1,7 @@
 const breakpoint = (__ENV.BREAKPOINT ?? 'false') === 'true';
 const abort_on_fail = (__ENV.ABORT_ON_FAIL ?? 'false') === 'true';
 const stages_duration = __ENV.stages_duration ?? '5m';
-const stages_target = __ENV.stages_target ?? 10;
+const stages_target = parseInt(__ENV.stages_target ?? '10', 10);
 
 /**
  * getOptions for k6 test. 

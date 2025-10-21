@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.87.0](https://github.com/Altinn/dialogporten/compare/v1.86.5...v1.87.0) (2025-10-21)
+
+
+### Features
+
+* **janitor:** Add cost management aggregation for feature metrics ([#2872](https://github.com/Altinn/dialogporten/issues/2872)) ([6d475cc](https://github.com/Altinn/dialogporten/commit/6d475cce8387dc396253b6b4fcb696a03db44ca5))
+
 ## [1.86.5](https://github.com/Altinn/dialogporten/compare/v1.86.4...v1.86.5) (2025-10-20)
 
 

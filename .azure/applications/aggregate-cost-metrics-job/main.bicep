@@ -144,6 +144,7 @@ module costMetricsJob '../../modules/containerAppJob/main.bicep' = {
     workloadProfileName: workloadProfileName
   }
   dependsOn: [
+    storageBlobDataContributorRole
     appInsightsMonitoringReaderRole
   ]
 }

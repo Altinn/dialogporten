@@ -9,7 +9,30 @@ function expectStatusFor(response) {
             equal(expectedStatus) {
 
                 try {
-                    expect(response.status, "response status").to.equal(expectedStatus);
+                    let message = "response status";
+
+                    const is4xx = response.status >= 400 && response.status < 500;
+                    const statusMismatch = response.status !== expectedStatus;
+
+                    if (statusMismatch && is4xx) {
+                        let prettyBody;
+
+                        if (!response.body || response.body.trim() === "") {
+                            prettyBody = "(empty response body)";
+                        } else {
+                            try {
+                                const json = response.json();
+                                prettyBody = JSON.stringify(json, null, 2).replace(/\\\//g, "/");
+                            } catch {
+                                // Fall back to raw body if not JSON
+                                prettyBody = response.body;
+                            }
+                        }
+
+                        message += `\nResponse body:\n${prettyBody}\n`;
+                    }
+
+                    expect(response.status, message).to.equal(expectedStatus);
                 }
                 catch (e) {
                     let errorDetails = "";

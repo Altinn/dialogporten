@@ -118,7 +118,7 @@ static void BuildAndRun(string[] args)
         if (string.IsNullOrEmpty(options.SubscriptionId))
         {
             throw new InvalidOperationException(
-                $"{MetricsAggregationOptions.SectionName}:{nameof(MetricsAggregationOptions.StorageContainerName)}" +
+                $"{MetricsAggregationOptions.SectionName}:{nameof(MetricsAggregationOptions.SubscriptionId)}" +
                 $" must be configured in non-development environments.");
         }
 

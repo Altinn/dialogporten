@@ -119,10 +119,13 @@ export function createTransmissions(serviceOwner, endUser, traceCalls, numberOfT
 }
 
 /**
- * Creates a dialog and add a number of transmissions
+ * Creates a dialog and add a transmission and an activity
  *
  * @param {Object} serviceOwner - The service owner object.
  * @param {Object} endUser - The end user object.
+ * @param {boolean} traceCalls - Whether to trace calls.
+ * @param {string} testid - The test identifier.
+ * @return {Array} - An array containing the dialogId, relatedTransmissionId and activityId.
  */
 export function CreateDialogTransmissionAndActivity(serviceOwner, endUser, traceCalls, testid) {
   let traceparent = uuidv4();
@@ -152,6 +155,15 @@ export function CreateDialogTransmissionAndActivity(serviceOwner, endUser, trace
   return [dialogId, relatedTransmissionId, activityId];
 }
 
+/**
+ * Creates a transmission.
+ * @param {uuidv7} dialogId -  The dialogId to add the transmission to.
+ * @param {uuidv7} relatedTransmissionId - The relatedTransmissionId for threading.
+ * @param {object} serviceOwner - holds service owner information.
+ * @param {uuidv7} testid - The test identifier. 
+ * @param {boolean} skdTransmission - Whether to create a SKD transmission or not. Default is false. 
+ * @return {uuidv7} - The id of the created transmission.
+ */
 export function createTransmission(dialogId, relatedTransmissionId, serviceOwner, testid, skdTransmission = false) {
     let traceparent = uuidv4();
 
@@ -179,6 +191,14 @@ export function createTransmission(dialogId, relatedTransmissionId, serviceOwner
     return newRelatedTransmissionId;
 }
 
+/**
+ * Create an activity
+ * @param {uuidv7} dialogId - The dialogId to add the activity to. 
+ * @param {*} serviceOwner - holds service owner information.
+ * @param {*} testid - The test identifier.
+ * @return {uuidv7} - The id of the created activity.
+ */
+
 function createActivity(dialogId, serviceOwner, testid) {
     let traceparent = uuidv4();
 
@@ -199,6 +219,10 @@ function createActivity(dialogId, serviceOwner, testid) {
     return activityId;
 } 
 
+/**
+ * Get activity body
+ * @return {Object} - The activity body.
+ */
 function getActivityBody() 
 {
   return {

@@ -1,3 +1,4 @@
+using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -24,6 +25,7 @@ internal sealed class UpdateServiceOwnerContextDataLoader : TypedDataLoader<Upda
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
+        await using var dbTransaction = await _dialogDbContext.GetDatabase().BeginTransactionAsync(IsolationLevel.Snapshot, cancellationToken);
         var serviceOwnerContext = await _dialogDbContext
             .DialogServiceOwnerContexts
             .Include(x => x.ServiceOwnerLabels)

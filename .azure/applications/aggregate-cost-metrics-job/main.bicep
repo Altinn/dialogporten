@@ -40,12 +40,17 @@ param workloadProfileName string = 'Consumption'
 @description('The name of the storage container for cost metrics')
 param storageContainerName string = 'costmetrics'
 
+@description('Azure Subscription Id')
+@secure
+param azureSubscriptionId string
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 // Use naming convention for Application Insights resource
 // Pattern: dp-be-{environment}-applicationInsights
 var appInsightsName = 'dp-be-${environment}-applicationInsights'
+
 var tags = {
   FullName: '${namePrefix}-aggregate-cost-metrics'
   Environment: environment
@@ -53,6 +58,7 @@ var tags = {
   Description: 'Aggregates cost metrics from Application Insights across environments'
   JobType: 'Scheduled'
 }
+
 var name = '${namePrefix}-aggregate-cost-metrics'
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
@@ -120,6 +126,10 @@ var containerAppEnvVars = [
   {
     name: 'MetricsAggregation__StorageContainerName'
     value: storageContainerName
+  }
+  {
+    name: 'MetricsAggregation__SubscriptionId'
+    value: azureSubscriptionId
   }
 ]
 

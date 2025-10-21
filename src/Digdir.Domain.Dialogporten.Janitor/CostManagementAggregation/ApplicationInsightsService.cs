@@ -22,17 +22,20 @@ public sealed class ApplicationInsightsService
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
-    private string GetSubscriptionId(string environment) =>
-        environment.ToLowerInvariant() switch
-        {
-            "staging" => _options.StagingSubscriptionId,
-            "prod" => _options.ProdSubscriptionId,
-            "test" => _options.TestSubscriptionId,
-            "yt01" => _options.Yt01SubscriptionId,
-            _ => throw new ArgumentException($"Unknown environment: {environment}. Valid values are: staging, prod, test, yt01")
-        };
+    private sealed class LogTableColumnNames
+    {
+        public const string FeatureType = "FeatureType";
+        public const string HasAdminScope = "HasAdminScope";
+        public const string CallerOrg = "CallerOrg";
+        public const string OwnerOrg = "OwnerOrg";
+        public const string ServiceResource = "ServiceResource";
+        public const string PresentationTag = "PresentationTag";
+        public const string Status = "Status";
+        public const string StatusCode = "StatusCode";
+        public const string Count = "count_";
+    }
 
-    public async Task<List<FeatureMetricRecord>> QueryFeatureMetricsAsync(DateOnly targetDate, string environment, CancellationToken cancellationToken = default)
+    public async Task<List<CostMetricRecord>> QueryFeatureMetricsAsync(DateOnly targetDate, string environment, CancellationToken cancellationToken = default)
     {
         var (startTime, endTime) = NorwegianTimeConverter.GetDayRangeInUtc(targetDate);
 
@@ -40,26 +43,25 @@ public sealed class ApplicationInsightsService
 
         _logger.LogInformation("Using Resource ID: {ResourceId}", resourceId);
 
-        var kql = """
-            traces
-            | where timestamp >= datetime({0:yyyy-MM-dd HH:mm:ss.fff})
-            | where timestamp <= datetime({1:yyyy-MM-dd HH:mm:ss.fff})
-            | extend EventIdNum = toint(extractjson("$.Id", tostring(customDimensions.EventId)))
-            | where isnotnull(EventIdNum) and EventIdNum == 1000
-            | extend FeatureType = tostring(customDimensions["FeatureType"])
-            | extend HasAdminScope = tobool(customDimensions["HasAdminScope"])
-            | extend Environment = tostring(customDimensions["Environment"])
-            | extend CallerOrg = tostring(customDimensions["CallerOrg"])
-            | extend OwnerOrg = tostring(customDimensions["OwnerOrg"])
-            | extend ServiceResource = tostring(customDimensions["ServiceResource"])
-            | extend PresentationTag = tostring(customDimensions["PresentationTag"])
-            | extend AdditionalTags = tostring(customDimensions["AdditionalTags"])
-            | extend AdditionalTagsParsed = parse_json(AdditionalTags)
-            | extend Status = tostring(AdditionalTagsParsed["Status"])
-            | extend StatusCode = tostring(AdditionalTagsParsed["StatusCode"])
-            | summarize count() by FeatureType, HasAdminScope, Environment, CallerOrg, OwnerOrg, ServiceResource, PresentationTag, Status, StatusCode
-            | where isnotempty(FeatureType)
-            """;
+        var kql = $$"""
+             traces
+             | where timestamp >= datetime({0:yyyy-MM-dd HH:mm:ss.fff})
+             | where timestamp <= datetime({1:yyyy-MM-dd HH:mm:ss.fff})
+             | extend EventIdNum = toint(extractjson("$.Id", tostring(customDimensions.EventId)))
+             | where isnotnull(EventIdNum) and EventIdNum == 1000
+             | extend {{LogTableColumnNames.FeatureType}} = tostring(customDimensions["{{LogTableColumnNames.FeatureType}}"])
+             | extend {{LogTableColumnNames.HasAdminScope}} = tobool(customDimensions["{{LogTableColumnNames.HasAdminScope}}"])
+             | extend {{LogTableColumnNames.CallerOrg}} = tostring(customDimensions["{{LogTableColumnNames.CallerOrg}}"])
+             | extend {{LogTableColumnNames.OwnerOrg}} = tostring(customDimensions["{{LogTableColumnNames.OwnerOrg}}"])
+             | extend {{LogTableColumnNames.ServiceResource}} = tostring(customDimensions["{{LogTableColumnNames.ServiceResource}}"])
+             | extend {{LogTableColumnNames.PresentationTag}} = tostring(customDimensions["{{LogTableColumnNames.PresentationTag}}"])
+             | extend AdditionalTags = tostring(customDimensions["AdditionalTags"])
+             | extend AdditionalTagsParsed = parse_json(AdditionalTags)
+             | extend {{LogTableColumnNames.Status}} = tostring(AdditionalTagsParsed["{{LogTableColumnNames.Status}}"])
+             | extend {{LogTableColumnNames.StatusCode}} = tostring(AdditionalTagsParsed["{{LogTableColumnNames.StatusCode}}"])
+             | summarize count() by {{LogTableColumnNames.FeatureType}}, {{LogTableColumnNames.HasAdminScope}}, {{LogTableColumnNames.CallerOrg}}, {{LogTableColumnNames.OwnerOrg}}, {{LogTableColumnNames.ServiceResource}}, {{LogTableColumnNames.PresentationTag}}, {{LogTableColumnNames.Status}}, {{LogTableColumnNames.StatusCode}}
+             | where isnotempty({{LogTableColumnNames.FeatureType}})
+             """;
 
         var formattedKql = string.Format(System.Globalization.CultureInfo.InvariantCulture, kql, startTime, endTime);
 
@@ -87,9 +89,9 @@ public sealed class ApplicationInsightsService
     private static string GetStringOrDefault(object? value, string defaultValue = "unknown")
         => value?.ToString() ?? defaultValue;
 
-    private List<FeatureMetricRecord> ParseQueryResponse(LogsQueryResult result, string environment)
+    private List<CostMetricRecord> ParseQueryResponse(LogsQueryResult result, string environment)
     {
-        var records = new List<FeatureMetricRecord>();
+        var records = new List<CostMetricRecord>();
         var failedCount = 0;
         var totalRows = result.Table.Rows.Count;
 
@@ -98,19 +100,18 @@ public sealed class ApplicationInsightsService
             var row = result.Table.Rows[i];
             try
             {
-                var record = new FeatureMetricRecord
+                var record = new CostMetricRecord
                 {
                     Environment = environment,
-                    FeatureType = GetStringOrDefault(row[0]),
-                    HasAdminScope = GetStringOrDefault(row[1]).Equals("true", StringComparison.OrdinalIgnoreCase),
-                    EnvironmentFromLog = GetStringOrDefault(row[2]),
-                    CallerOrg = GetStringOrDefault(row[3]),
-                    OwnerOrg = GetStringOrDefault(row[4]),
-                    ServiceResource = GetStringOrDefault(row[5]),
-                    PresentationTag = GetStringOrDefault(row[6]),
-                    Status = GetStringOrDefault(row[7]),
-                    StatusCode = GetStringOrDefault(row[8]),
-                    Count = Convert.ToInt64(row[9] ?? 0, System.Globalization.CultureInfo.InvariantCulture)
+                    FeatureType = GetStringOrDefault(row[LogTableColumnNames.FeatureType]),
+                    HasAdminScope = GetStringOrDefault(row[LogTableColumnNames.HasAdminScope]).Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase),
+                    CallerOrg = GetStringOrDefault(row[LogTableColumnNames.CallerOrg]),
+                    OwnerOrg = GetStringOrDefault(row[LogTableColumnNames.OwnerOrg]),
+                    ServiceResource = GetStringOrDefault(row[LogTableColumnNames.ServiceResource]),
+                    PresentationTag = GetStringOrDefault(row[LogTableColumnNames.PresentationTag]),
+                    Status = GetStringOrDefault(row[LogTableColumnNames.Status]),
+                    StatusCode = GetStringOrDefault(row[LogTableColumnNames.StatusCode]),
+                    Count = Convert.ToInt64(row[LogTableColumnNames.Count] ?? 0, System.Globalization.CultureInfo.InvariantCulture)
                 };
 
                 records.Add(record);
@@ -135,28 +136,16 @@ public sealed class ApplicationInsightsService
         return records;
     }
 
-    private string GetResourceId(string environment)
-    {
-        var subscriptionId = GetSubscriptionId(environment);
-
-        if (string.IsNullOrEmpty(subscriptionId))
-        {
-            throw new InvalidOperationException($"Subscription ID for environment '{environment}' is not configured. Please ensure the {environment}SubscriptionId is set in your configuration.");
-        }
-
-        var lowerEnvironment = environment.ToLowerInvariant();
-        var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/dp-be-{lowerEnvironment}-rg/providers/microsoft.insights/components/dp-be-{lowerEnvironment}-applicationInsights";
-
-        return resourceId;
-    }
+    private string GetResourceId(string environment) =>
+        $"/subscriptions/{_options.SubscriptionId.ToLowerInvariant()}/resourceGroups/dp-be-{environment.ToLowerInvariant()}-rg" +
+        $"/providers/microsoft.insights/components/dp-be-{environment.ToLowerInvariant()}-applicationInsights";
 }
 
-public sealed class FeatureMetricRecord
+public sealed class CostMetricRecord
 {
     public required string Environment { get; init; }
     public required string FeatureType { get; init; }
     public required bool HasAdminScope { get; init; }
-    public required string EnvironmentFromLog { get; init; }
     public required string CallerOrg { get; init; }
     public required string OwnerOrg { get; init; }
     public required string ServiceResource { get; init; }

@@ -48,7 +48,6 @@ internal static class Commands
                 [FromService] CostMetricsAggregationOrchestrator orchestrator,
                 [FromService] ILogger<CoconaApp> logger,
                 [Option('d', Description = "Target date for metrics aggregation (format: YYYY-MM-DD or DD/MM/YYYY). Defaults to yesterday in Norwegian time.")] DateOnly? targetDate,
-                [Option('e', Description = "Environment(s) to query. Can be specified multiple times (e.g., -e staging -e prod). Required.")] string[]? environments,
                 [Option('s', Description = "Skip uploading to Azure Storage and save file locally instead")] bool skipUpload = false)
             =>
             {
@@ -56,13 +55,7 @@ internal static class Commands
 
                 logger.LogInformation("Host Environment: {Environment}", hostEnvironment.EnvironmentName);
 
-                if (environments == null || environments.Length == 0)
-                {
-                    logger.LogError("No environments specified. Use -e to specify at least one environment (e.g., -e staging -e prod)");
-                    return -1;
-                }
-
-                var result = await orchestrator.AggregateMetricsAsync(date, environments.ToList(), skipUpload, ctx.CancellationToken);
+                var result = await orchestrator.AggregateCostMetricsAsync(date, skipUpload, ctx.CancellationToken);
 
                 return result.Match(
                     success => 0,

@@ -1,3 +1,18 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+
+using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
+using SearchDialogsQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
+using SetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
+using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+
+using GetDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogQuery;
+using SearchDialogsQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+using SetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelCommand;
+using BulkSetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
 /// <summary>
@@ -27,24 +42,24 @@ public static class TransactionTypeMapper
     private static readonly Dictionary<string, TransactionType> FeatureTypeMap = new()
     {
         // Commands
-        ["Commands.Create.CreateDialogCommand"] = TransactionType.CreateDialog,
-        ["Commands.Update.UpdateDialogCommand"] = TransactionType.UpdateDialog,
-        ["Commands.Delete.DeleteDialogCommand"] = TransactionType.SoftDeleteDialog,
-        ["Commands.Purge.PurgeDialogCommand"] = TransactionType.HardDeleteDialog,
+        [typeof(CreateDialogCommand).FullName!] = TransactionType.CreateDialog,
+        [typeof(UpdateDialogCommand).FullName!] = TransactionType.UpdateDialog,
+        [typeof(DeleteDialogCommand).FullName!] = TransactionType.SoftDeleteDialog,
+        [typeof(PurgeDialogCommand).FullName!] = TransactionType.HardDeleteDialog,
 
         // ServiceOwner Get/Search
-        ["ServiceOwner.Dialogs.Queries.Get.GetDialogQuery"] = TransactionType.GetDialogServiceOwner,
-        ["ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery"] = TransactionType.SearchDialogsServiceOwner,
+        [typeof(GetDialogQuerySO).FullName!] = TransactionType.GetDialogServiceOwner,
+        [typeof(SearchDialogsQuerySO).FullName!] = TransactionType.SearchDialogsServiceOwner,
 
         // EndUser Get/Search
-        ["EndUser.Dialogs.Queries.Get.GetDialogQuery"] = TransactionType.GetDialogEndUser,
-        ["EndUser.Dialogs.Queries.Search.SearchDialogQuery"] = TransactionType.SearchDialogsEndUser,
+        [typeof(GetDialogQueryEU).FullName!] = TransactionType.GetDialogEndUser,
+        [typeof(SearchDialogsQueryEU).FullName!] = TransactionType.SearchDialogsEndUser,
 
         // Labels - exact matches needed for these
-        ["EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand"] = TransactionType.SetDialogLabel,
-        ["ServiceOwner.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand"] = TransactionType.SetDialogLabel,
-        ["ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand"] = TransactionType.BulkSetLabelsServiceOwnerWithEndUser,
-        ["EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand"] = TransactionType.BulkSetLabelsEndUser,
+        [typeof(SetSystemLabelCommandEU).FullName!] = TransactionType.SetDialogLabel,
+        [typeof(BulkSetSystemLabelCommandEU).FullName!] = TransactionType.BulkSetLabelsEndUser,
+        [typeof(SetSystemLabelCommandSO).FullName!] = TransactionType.SetDialogLabel,
+        [typeof(BulkSetSystemLabelCommandSO).FullName!] = TransactionType.BulkSetLabelsServiceOwnerWithEndUser,
     };
 
     public static TransactionType? MapFeatureTypeToTransactionType(string featureType, string presentationTag)

@@ -13,7 +13,7 @@ public sealed class MetricsAggregationService
         _costCoefficients = costCoefficients ?? throw new ArgumentNullException(nameof(costCoefficients));
     }
 
-    public List<AggregatedMetricsRecord> AggregateFeatureMetrics(List<FeatureMetricRecord> rawMetrics)
+    public List<AggregatedCostMetricsRecord> AggregateFeatureMetrics(List<CostMetricRecord> rawMetrics)
     {
         ArgumentNullException.ThrowIfNull(rawMetrics);
         _logger.LogInformation("Aggregating {RecordCount} raw feature metric records", rawMetrics.Count);
@@ -41,19 +41,21 @@ public sealed class MetricsAggregationService
                 x.Record.Environment,
                 x.Record.CallerOrg,
                 x.Record.OwnerOrg,
+                x.Record.HasAdminScope,
                 x.Record.ServiceResource,
                 TransactionType = x.TransactionType!.Value,
                 Failed = string.Equals(x.Record.Status, "failure", StringComparison.OrdinalIgnoreCase) ||
                          string.Equals(x.Record.Status, "error", StringComparison.OrdinalIgnoreCase)
             })
-            .Select(group => new AggregatedMetricsRecord
+            .Select(group => new AggregatedCostMetricsRecord
             {
                 Environment = ConvertToUserFacingEnvironmentName(group.Key.Environment),
+                HasAdminScope = group.Key.HasAdminScope ? "Ja" : "Nei",
                 Service = group.Key.ServiceResource,
                 ConsumerOrgNumber = group.Key.CallerOrg,
                 OwnerOrgNumber = group.Key.OwnerOrg,
                 TransactionType = CostCoefficients.GetNorwegianName(group.Key.TransactionType),
-                Failed = group.Key.Failed ? "Yes" : "No",
+                Failed = group.Key.Failed ? "Ja" : "Nei",
                 Count = group.Sum(x => x.Record.Count),
                 RelativeResourceUsage = group.Sum(x => x.Record.Count * _costCoefficients.GetCoefficient(group.Key.TransactionType))
             })
@@ -67,9 +69,8 @@ public sealed class MetricsAggregationService
         return aggregated;
     }
 
-    private static string ConvertToUserFacingEnvironmentName(string azureEnvironmentName)
-    {
-        return azureEnvironmentName.ToLowerInvariant() switch
+    private static string ConvertToUserFacingEnvironmentName(string azureEnvironmentName) =>
+        azureEnvironmentName.ToLowerInvariant() switch
         {
             "staging" => "TT02",
             "prod" => "PROD",
@@ -77,12 +78,12 @@ public sealed class MetricsAggregationService
             "yt01" => "YT01",
             _ => azureEnvironmentName // Return as-is if unknown
         };
-    }
 }
 
-public sealed class AggregatedMetricsRecord
+public sealed class AggregatedCostMetricsRecord
 {
     public required string Environment { get; init; }
+    public required string HasAdminScope { get; init; }
     public required string Service { get; init; }
     public required string ConsumerOrgNumber { get; init; }
     public required string OwnerOrgNumber { get; init; }

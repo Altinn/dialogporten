@@ -51,10 +51,10 @@ static void BuildAndRun(string[] args)
     builder.Host.UseDefaultServiceProvider(options => options.ValidateScopes = false);
 
     builder.Configuration
-        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
         .AddJsonFile("CostManagementAggregation/cost-coefficients.json", optional: false, reloadOnChange: true)
         .AddUserSecrets<Program>()
         .AddLocalConfiguration(builder.Environment);
+
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
@@ -87,33 +87,39 @@ static void BuildAndRun(string[] args)
 
     builder.Services.AddSingleton<IValidateOptions<CostCoefficientsOptions>, CostCoefficientsOptionsValidator>();
 
-    builder.Services.AddSingleton(_ =>
-    {
-        Azure.Core.TokenCredential credential = builder.Environment.IsDevelopment()
-            ? new DefaultAzureCredential() // Tries multiple methods for local dev
-            : new ManagedIdentityCredential(); // Use managed identity in Azure
-        return new LogsQueryClient(credential);
-    });
+    builder.Services.AddSingleton(_ => new LogsQueryClient(new DefaultAzureCredential()));
 
     builder.Services.AddSingleton(provider =>
     {
         var options = provider.GetRequiredService<IOptions<MetricsAggregationOptions>>().Value;
         var environment = provider.GetRequiredService<IHostEnvironment>();
 
-        if (environment.IsDevelopment())
-        {
-            // Use connection string from user secrets if available, otherwise Azurite
-            if (!string.IsNullOrEmpty(options.StorageConnectionString))
-            {
-                return new BlobServiceClient(options.StorageConnectionString);
-            }
+        var localDevelopmentSettings = builder.Configuration.GetLocalDevelopmentSettings();
 
+        if (environment.IsDevelopment() && localDevelopmentSettings.UseLocalMetricsAggregationStorage)
+        {
             return new BlobServiceClient("UseDevelopmentStorage=true");
         }
 
         if (string.IsNullOrEmpty(options.StorageAccountName))
         {
-            throw new InvalidOperationException("MetricsAggregation:StorageAccountName must be configured in non-development environments.");
+            throw new InvalidOperationException(
+                $"{MetricsAggregationOptions.SectionName}:{nameof(MetricsAggregationOptions.StorageAccountName)}" +
+                $" must be configured in non-development environments.");
+        }
+
+        if (string.IsNullOrEmpty(options.StorageContainerName))
+        {
+            throw new InvalidOperationException(
+                $"{MetricsAggregationOptions.SectionName}:{nameof(MetricsAggregationOptions.StorageContainerName)}" +
+                $" must be configured in non-development environments.");
+        }
+
+        if (string.IsNullOrEmpty(options.SubscriptionId))
+        {
+            throw new InvalidOperationException(
+                $"{MetricsAggregationOptions.SectionName}:{nameof(MetricsAggregationOptions.StorageContainerName)}" +
+                $" must be configured in non-development environments.");
         }
 
         var credential = new DefaultAzureCredential();

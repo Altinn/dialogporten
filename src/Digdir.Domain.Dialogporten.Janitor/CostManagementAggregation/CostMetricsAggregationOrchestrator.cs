@@ -1,9 +1,12 @@
+using Digdir.Domain.Dialogporten.Application;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
 public sealed class CostMetricsAggregationOrchestrator
 {
+    private readonly IConfiguration _config;
     private readonly ILogger<CostMetricsAggregationOrchestrator> _logger;
     private readonly ApplicationInsightsService _applicationInsightsService;
     private readonly MetricsAggregationService _aggregationService;
@@ -11,12 +14,14 @@ public sealed class CostMetricsAggregationOrchestrator
     private readonly AzureStorageService _storageService;
 
     public CostMetricsAggregationOrchestrator(
+        IConfiguration config,
         ILogger<CostMetricsAggregationOrchestrator> logger,
         ApplicationInsightsService applicationInsightsService,
         MetricsAggregationService aggregationService,
         ParquetFileService parquetService,
         AzureStorageService storageService)
     {
+        _config = config ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _applicationInsightsService = applicationInsightsService ?? throw new ArgumentNullException(nameof(applicationInsightsService));
         _aggregationService = aggregationService ?? throw new ArgumentNullException(nameof(aggregationService));
@@ -24,30 +29,25 @@ public sealed class CostMetricsAggregationOrchestrator
         _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
     }
 
-    public async Task<AggregationResult> AggregateMetricsAsync(
+    public async Task<AggregationResult> AggregateCostMetricsAsync(
         DateOnly targetDate,
-        List<string> environments,
         bool skipUpload,
         CancellationToken cancellationToken = default)
     {
-        // Validate and normalize environments
-        var normalizedEnvironments = NormalizeEnvironments(environments);
-        if (normalizedEnvironments.Count == 0)
-        {
-            return new AggregationResult.Failure("No valid environments provided. Please specify at least one environment.");
-        }
-
-        _logger.LogInformation("Starting metrics aggregation for date {Date:dd.MM.yyyy} with environments: [{Environments}]",
-            targetDate, string.Join(", ", normalizedEnvironments));
+        _logger.LogInformation("Starting metrics aggregation for date {Date:dd.MM.yyyy}", targetDate);
 
         try
         {
-            var allRecords = await CollectMetricsFromSpecifiedEnvironmentsAsync(normalizedEnvironments, targetDate, cancellationToken);
+            var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development";
+
+            var allRecords = await CollectCostMetricsAsync(targetDate, env, cancellationToken);
             var aggregatedRecords = _aggregationService.AggregateFeatureMetrics(allRecords);
             var parquetData = await _parquetService.GenerateParquetFileAsync(aggregatedRecords, cancellationToken);
-            var fileName = ParquetFileService.GetFileName(targetDate, normalizedEnvironments);
+            var fileName = ParquetFileService.GetFileName(targetDate, env);
 
-            if (skipUpload)
+            var localDevSettings = _config.GetLocalDevelopmentSettings();
+
+            if (skipUpload || localDevSettings.UseLocalMetricsAggregationStorage)
             {
                 await SaveLocallyAsync(parquetData, fileName, aggregatedRecords.Count, cancellationToken);
             }
@@ -65,36 +65,13 @@ public sealed class CostMetricsAggregationOrchestrator
         }
     }
 
-    private static List<string> NormalizeEnvironments(List<string>? environments)
-    {
-        if (environments == null)
-        {
-            return new List<string>();
-        }
-
-        return environments
-            .Where(env => !string.IsNullOrWhiteSpace(env))
-            .Select(env => env.Trim().ToLowerInvariant())
-            .Distinct()
-            .OrderBy(env => env)
-            .ToList();
-    }
-
-    private async Task<List<FeatureMetricRecord>> CollectMetricsFromSpecifiedEnvironmentsAsync(
-        List<string> environments,
+    private async Task<List<CostMetricRecord>> CollectCostMetricsAsync(
         DateOnly targetDate,
+        string environment,
         CancellationToken cancellationToken)
     {
-        var allRecords = new List<FeatureMetricRecord>();
-
-        foreach (var env in environments)
-        {
-            _logger.LogInformation("Querying feature metrics from Application Insights for environment {Environment}", env);
-            var records = await _applicationInsightsService.QueryFeatureMetricsAsync(targetDate, env, cancellationToken);
-            allRecords.AddRange(records);
-        }
-
-        return allRecords;
+        _logger.LogInformation("Querying feature metrics from Application Insights");
+        return await _applicationInsightsService.QueryFeatureMetricsAsync(targetDate, environment, cancellationToken);
     }
 
     private async Task SaveLocallyAsync(byte[] parquetData, string fileName, int recordCount, CancellationToken cancellationToken)

@@ -3,7 +3,7 @@ using './main.bicep'
 param environment = 'prod'
 param location = 'norwayeast'
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
-param jobSchedule = '0 4 * * *' // 2:00AM every day
+param jobSchedule = '0 2 * * *' // 2:00 AM UTC every day
 param replicaTimeOutInSeconds = 1800 // 30 minutes
 param storageContainerName = 'costmetrics'
 

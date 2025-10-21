@@ -29,7 +29,7 @@ public sealed class CostMetricsAggregationOrchestrator
         _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
     }
 
-    public async Task<AggregationResult> AggregateCostMetricsAsync(
+    public async Task<AggregationResult> AggregateCostMetricsForDateOnlyAsync(
         DateOnly targetDate,
         bool skipUpload,
         CancellationToken cancellationToken = default)
@@ -38,12 +38,14 @@ public sealed class CostMetricsAggregationOrchestrator
 
         try
         {
-            var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development";
+            var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development";
 
-            var allRecords = await CollectCostMetricsAsync(targetDate, env, cancellationToken);
+            var (startTime, endTime) = NorwegianTimeConverter.GetDayRangeInUtc(targetDate);
+
+            var allRecords = await _applicationInsightsService.QueryFeatureMetricsAsync(startTime, endTime, environment, cancellationToken);
             var aggregatedRecords = _aggregationService.AggregateFeatureMetrics(allRecords);
             var parquetData = await _parquetService.GenerateParquetFileAsync(aggregatedRecords, cancellationToken);
-            var fileName = ParquetFileService.GetFileName(targetDate, env);
+            var fileName = GetDateOnlyFileName(targetDate, environment);
 
             var localDevSettings = _config.GetLocalDevelopmentSettings();
 
@@ -65,15 +67,6 @@ public sealed class CostMetricsAggregationOrchestrator
         }
     }
 
-    private async Task<List<CostMetricRecord>> CollectCostMetricsAsync(
-        DateOnly targetDate,
-        string environment,
-        CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Querying feature metrics from Application Insights");
-        return await _applicationInsightsService.QueryFeatureMetricsAsync(targetDate, environment, cancellationToken);
-    }
-
     private async Task SaveLocallyAsync(byte[] parquetData, string fileName, int recordCount, CancellationToken cancellationToken)
     {
         var outputPath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
@@ -81,6 +74,9 @@ public sealed class CostMetricsAggregationOrchestrator
         _logger.LogInformation("Saved parquet file to {FilePath} with {RecordCount} records ({FileSize} bytes)",
             outputPath, recordCount, parquetData.Length);
     }
+
+    public static string GetDateOnlyFileName(DateOnly date, string environment) =>
+        $"Dialogporten_metrics_{environment}_{date:yyyy-MM-dd}.parquet";
 }
 
 public abstract record AggregationResult
@@ -88,13 +84,11 @@ public abstract record AggregationResult
     public sealed record Success(int RecordCount, string FileName) : AggregationResult;
     public sealed record Failure(string ErrorMessage) : AggregationResult;
 
-    public int Match(Func<Success, int> onSuccess, Func<Failure, int> onFailure)
-    {
-        return this switch
+    public int Match(Func<Success, int> onSuccess, Func<Failure, int> onFailure) =>
+        this switch
         {
             Success success => onSuccess(success),
             Failure failure => onFailure(failure),
             _ => onFailure(new Failure("Unknown result type"))
         };
-    }
 }

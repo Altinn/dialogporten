@@ -35,10 +35,8 @@ public sealed class ApplicationInsightsService
         public const string Count = "count_";
     }
 
-    public async Task<List<CostMetricRecord>> QueryFeatureMetricsAsync(DateOnly targetDate, string environment, CancellationToken cancellationToken = default)
+    public async Task<List<CostMetricRecord>> QueryFeatureMetricsAsync(DateTimeOffset startTime, DateTimeOffset endTime, string environment, CancellationToken cancellationToken = default)
     {
-        var (startTime, endTime) = NorwegianTimeConverter.GetDayRangeInUtc(targetDate);
-
         var resourceId = GetResourceId(environment);
 
         _logger.LogInformation("Using Resource ID: {ResourceId}", resourceId);

@@ -47,15 +47,15 @@ internal static class Commands
                 [FromService] IHostEnvironment hostEnvironment,
                 [FromService] CostMetricsAggregationOrchestrator orchestrator,
                 [FromService] ILogger<CoconaApp> logger,
-                [Option('d', Description = "Target date for metrics aggregation (format: YYYY-MM-DD or DD/MM/YYYY). Defaults to yesterday in Norwegian time.")] DateOnly? targetDate,
+                [Option('d', Description = "Target date for metrics aggregation (format: YYYY-MM-DD or DD/MM/YYYY). Defaults to yesterday in Norwegian time.")] DateOnly? targetDateInput,
                 [Option('s', Description = "Skip uploading to Azure Storage and save file locally instead")] bool skipUpload = false)
             =>
             {
-                var date = targetDate ?? NorwegianTimeConverter.GetYesterday();
+                var targetDate = targetDateInput ?? NorwegianTimeConverter.GetYesterday();
 
                 logger.LogInformation("Host Environment: {Environment}", hostEnvironment.EnvironmentName);
 
-                var result = await orchestrator.AggregateCostMetricsAsync(date, skipUpload, ctx.CancellationToken);
+                var result = await orchestrator.AggregateCostMetricsForDateOnlyAsync(targetDate, skipUpload, ctx.CancellationToken);
 
                 return result.Match(
                     success => 0,

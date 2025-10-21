@@ -37,15 +37,9 @@ public static class NorwegianTimeConverter
     /// </summary>
     /// <param name="norwegianDate">The date in Norwegian timezone</param>
     /// <returns>Tuple containing start and end of day in UTC</returns>
-    public static (DateTime startUtc, DateTime endUtc) GetDayRangeInUtc(DateOnly norwegianDate)
-    {
-        var norwegianStartOfDay = norwegianDate.ToDateTime(TimeOnly.MinValue);
-        var norwegianEndOfDay = norwegianDate.AddDays(1).ToDateTime(TimeOnly.MinValue).AddTicks(-1);
-
-        return (
-            TimeZoneInfo.ConvertTimeToUtc(norwegianStartOfDay, NorwegianTimeZone),
-            TimeZoneInfo.ConvertTimeToUtc(norwegianEndOfDay, NorwegianTimeZone)
-        );
-    }
-
+    public static (DateTime startUtc, DateTime endUtc) GetDayRangeInUtc(DateOnly norwegianDate) =>
+    (
+        TimeZoneInfo.ConvertTimeToUtc(norwegianDate.ToDateTime(TimeOnly.MinValue), NorwegianTimeZone),
+        TimeZoneInfo.ConvertTimeToUtc(norwegianDate.ToDateTime(TimeOnly.MaxValue), NorwegianTimeZone)
+    );
 }

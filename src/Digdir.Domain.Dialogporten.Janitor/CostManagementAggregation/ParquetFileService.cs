@@ -86,7 +86,4 @@ public sealed class ParquetFileService
         _logger.LogInformation("Generated Parquet file with {FileSize} bytes", memoryStream.Length);
         return memoryStream.ToArray();
     }
-
-    public static string GetFileName(DateOnly targetDate, string environment) =>
-        $"Dialogporten_metrics_{environment}_{targetDate:yyyy-MM-dd}.parquet";
 }

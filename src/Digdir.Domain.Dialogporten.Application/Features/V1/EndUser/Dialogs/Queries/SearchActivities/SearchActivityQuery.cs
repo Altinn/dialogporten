@@ -24,7 +24,7 @@ public sealed partial class SearchActivityResult : OneOfBase<List<ActivityDto>, 
 
 internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivityQuery, SearchActivityResult>
 {
-    private readonly IDialogDbContext _db;
+    private readonly IDialogDbContext _dbContext;
     private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
@@ -33,18 +33,22 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
         IMapper mapper,
         IAltinnAuthorization altinnAuthorization)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _dbContext = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
     public async Task<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _db.Dialogs
-            .Include(x => x.Activities)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        DialogEntity? dialog;
+        await using (await _dbContext.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _dbContext.Dialogs
+                .Include(x => x.Activities)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: cancellationToken);
+        }
 
         if (dialog is null)
         {

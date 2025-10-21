@@ -1,4 +1,3 @@
-using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -29,46 +28,46 @@ public sealed class FullDialogAggregateDataLoader
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
         DialogEntity? ret;
-        // With Postgre Snapshot gets mapped to ReadCommited
-        await using var dbTransaction = await _dialogDbContext.GetDatabase().BeginTransactionAsync(IsolationLevel.Snapshot, cancellationToken);
+        // With Postgre Snapshot gets mapped to ReadCommited Amund: Sauce?
+        await using var dbTransaction = await _dialogDbContext.BeginTransactionAsync(cancellationToken);
         var dialogEntity = await _dialogDbContext.Dialogs
             .Include(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
-            .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.SearchTags.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
             .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
             .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .ThenInclude(x => x!.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
+                .ThenInclude(x => x!.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
             .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
             .Include(x => x.Transmissions)
-            .ThenInclude(x => x.Content)
-            .ThenInclude(x => x.Value.Localizations)
+                .ThenInclude(x => x.Content)
+                .ThenInclude(x => x.Value.Localizations)
             .Include(x => x.Transmissions)
-            .ThenInclude(x => x.Sender)
-            .ThenInclude(x => x.ActorNameEntity)
+                .ThenInclude(x => x.Sender)
+                .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.Transmissions)
-            .ThenInclude(x => x.Attachments)
-            .ThenInclude(x => x.Urls)
+                .ThenInclude(x => x.Attachments)
+                .ThenInclude(x => x.Urls)
             .Include(x => x.Transmissions)
-            .ThenInclude(x => x.Attachments)
-            .ThenInclude(x => x.DisplayName!.Localizations)
+                .ThenInclude(x => x.Attachments)
+                .ThenInclude(x => x.DisplayName!.Localizations)
             .Include(x => x.Activities)
-            .ThenInclude(x => x.Description!.Localizations)
+                .ThenInclude(x => x.Description!.Localizations)
             .Include(x => x.Activities)
-            .ThenInclude(x => x.PerformedBy)
-            .ThenInclude(x => x.ActorNameEntity)
+                .ThenInclude(x => x.PerformedBy)
+                .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.SeenLog
                 .OrderBy(x => x.CreatedAt))
-            .ThenInclude(x => x.SeenBy)
-            .ThenInclude(x => x.ActorNameEntity)
+                .ThenInclude(x => x.SeenBy)
+                .ThenInclude(x => x.ActorNameEntity)
             .Include(x => x.EndUserContext.DialogEndUserContextSystemLabels)
             .Include(x => x.ServiceOwnerContext)
-            .ThenInclude(x => x.ServiceOwnerLabels.OrderBy(x => x.Value))
+                .ThenInclude(x => x.ServiceOwnerLabels.OrderBy(x => x.Value))
             .IgnoreQueryFilters()
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
             .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);

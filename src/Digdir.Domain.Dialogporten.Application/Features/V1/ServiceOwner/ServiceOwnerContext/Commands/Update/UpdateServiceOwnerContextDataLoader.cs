@@ -25,7 +25,7 @@ internal sealed class UpdateServiceOwnerContextDataLoader : TypedDataLoader<Upda
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        await using var dbTransaction = await _dialogDbContext.GetDatabase().BeginTransactionAsync(IsolationLevel.Snapshot, cancellationToken);
+        await using var dbTransaction = await _dialogDbContext.BeginTransactionAsync(cancellationToken);
         var serviceOwnerContext = await _dialogDbContext
             .DialogServiceOwnerContexts
             .Include(x => x.ServiceOwnerLabels)

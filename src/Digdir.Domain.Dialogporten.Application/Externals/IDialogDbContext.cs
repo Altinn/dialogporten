@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+﻿using System.Data;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -13,6 +14,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals;
 
@@ -76,5 +78,5 @@ public interface IDialogDbContext
         CancellationToken cancellationToken)
         where TEntity : class, IIdentifiableEntity;
 
-    DatabaseFacade GetDatabase();
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
 }

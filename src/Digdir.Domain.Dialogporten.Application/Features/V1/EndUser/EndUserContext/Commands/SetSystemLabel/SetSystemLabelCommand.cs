@@ -26,14 +26,14 @@ public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSucce
 
 internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLabelCommand, SetSystemLabelResult>
 {
-    private readonly IDialogDbContext _db;
+    private readonly IDialogDbContext _dbContext;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
     public SetSystemLabelCommandHandler(IDialogDbContext db, IUnitOfWork unitOfWork, IUserRegistry userRegistry, IAltinnAuthorization altinnAuthorization)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _dbContext = db ?? throw new ArgumentNullException(nameof(db));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
@@ -43,10 +43,14 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         SetSystemLabelCommand request,
         CancellationToken cancellationToken)
     {
-        var dialog = await _db.Dialogs
-            .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+        DialogEntity? dialog;
+        await using (await _dbContext.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _dbContext.Dialogs
+                .Include(x => x.EndUserContext)
+                    .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+        }
 
         if (dialog is null)
         {

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Data;
+using System.Diagnostics;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
@@ -60,46 +61,49 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // However, we need to guarantee an order for sub resources of the dialog aggregate.
         // This is to ensure that the get is consistent, and that PATCH in the API presentation
         // layer behaviours in an expected manner. Therefore, we need to be a bit more verbose about it.
-        var dialog = await _db.Dialogs
-            .Include(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Sender)
-                .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Attachments)
-                .ThenInclude(x => x.Urls)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Attachments)
-                .ThenInclude(x => x.DisplayName!.Localizations)
-            .Include(x => x.Activities)
-                .ThenInclude(x => x.Description!.Localizations)
-            .Include(x => x.Activities)
-                .ThenInclude(x => x.PerformedBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.SeenLog
+        DialogEntity? dialog = null;
+        await using (await _db.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _db.Dialogs
+                .Include(x => x.Content)
+                    .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Content)
+                    .ThenInclude(x => x.Value.Localizations)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.Urls)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.DisplayName!.Localizations)
+                .Include(x => x.Activities)
+                    .ThenInclude(x => x.Description!.Localizations)
+                .Include(x => x.Activities)
+                    .ThenInclude(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.SeenLog
                     .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
                     .OrderBy(x => x.CreatedAt))
-                .ThenInclude(x => x.SeenBy)
+                    .ThenInclude(x => x.SeenBy)
                     .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);
-
+                .Include(x => x.EndUserContext)
+                    .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);
+        }
         if (dialog is null)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
@@ -108,7 +112,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(
             dialog,
             cancellationToken: cancellationToken);
-
         if (!authorizationResult.HasAccessToMainResource())
         {
             // If the user for some reason does not have access to the main resource, which might be
@@ -189,6 +192,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ReplaceUnauthorizedUrls(dialogDto);
 
         return dialogDto;
+
     }
 
     private List<DialogSeenLogDto> GetSeenLogs(

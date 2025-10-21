@@ -1,3 +1,4 @@
+using System.Data;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -44,15 +45,19 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
     public async Task<GetActivityResult> Handle(GetActivityQuery request,
         CancellationToken cancellationToken)
     {
-        var dialog = await _dbContext.Dialogs
-            .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-            .ThenInclude(x => x.PerformedBy)
-            .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-            .ThenInclude(x => x.Description!.Localizations)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        DialogEntity? dialog;
+        await using (await _dbContext.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _dbContext.Dialogs
+                .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
+                    .ThenInclude(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
+                    .ThenInclude(x => x.Description!.Localizations)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: cancellationToken);
+        }
 
         if (dialog is null)
         {

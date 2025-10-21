@@ -22,7 +22,6 @@ public sealed class AzureStorageService
 
     public async Task UploadParquetFileAsync(byte[] parquetData, string fileName, CancellationToken cancellationToken = default)
     {
-
         _logger.LogInformation("Uploading Parquet file {FileName} ({FileSize} bytes) to Azure Storage",
             fileName, parquetData.Length);
 

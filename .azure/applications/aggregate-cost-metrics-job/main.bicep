@@ -54,14 +54,14 @@ var tags = {
   JobType: 'Scheduled'
 }
 
-var name = '${namePrefix}-aggregate-cost-metrics'
+var name = '${namePrefix}-cost-metrics'
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName
 }
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-aggregate-cost-metrics-identity'
+  name: '${namePrefix}-cost-metrics-identity'
   location: location
   tags: tags
 }

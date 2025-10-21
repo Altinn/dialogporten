@@ -57,13 +57,6 @@ var tags = {
 }
 var name = '${namePrefix}-aggregate-cost-metrics'
 
-// Compute a valid storage account name (<=24, lowercase, alphanumeric)
-var saPrefixBase = replace(toLower(namePrefix), '-', '')
-var saShortPrefix = take(saPrefixBase, 8)
-var saStatic = 'costmetrics' // 11 chars
-var saUnique = take(uniqueString(resourceGroup().id), 5)
-var storageAccountSafeName = '${saShortPrefix}${saStatic}${saUnique}'
-
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName
 }
@@ -75,44 +68,19 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
 }
 
 // Create storage account for cost metrics
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: storageAccountSafeName
-  location: location
-  identity: {
-    type: 'SystemAssigned'
+module storageAccount '../../modules/storageAccount/main.bicep' = {
+  name: 'storageAccount-${name}'
+  params: {
+    namePrefix: namePrefix
+    location: location
+    tags: tags
+    accessTier: 'Cool'
   }
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    accessTier: 'Hot'
-    supportsHttpsTrafficOnly: true
-    minimumTlsVersion: 'TLS1_2'
-    allowBlobPublicAccess: false
-    allowSharedKeyAccess: false
-    encryption: {
-      services: {
-        blob: {
-          enabled: true
-        }
-      }
-      keySource: 'Microsoft.Storage'
-      requireInfrastructureEncryption: true
-    }
-  }
-  tags: tags
-}
-
-resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
-  name: 'default'
-  parent: storageAccount
 }
 
 // Create blob container for cost metrics
 resource storageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
-  parent: blobService
-  name: storageContainerName
+  name: '${storageAccount.name}/default/${storageContainerName}'
   properties: {
     publicAccess: 'None'
   }
@@ -141,7 +109,7 @@ var containerAppEnvVars = [
   }
   {
     name: 'MetricsAggregation__StorageAccountName'
-    value: storageAccount.name
+    value: storageAccount.outputs.storageAccountName
   }
   {
     name: 'MetricsAggregation__StorageContainerName'
@@ -199,5 +167,5 @@ module costMetricsJob '../../modules/containerAppJob/main.bicep' = {
 
 output identityPrincipalId string = managedIdentity.properties.principalId
 output name string = costMetricsJob.outputs.name
-output storageAccountName string = storageAccount.name
+output storageAccountName string = storageAccount.outputs.storageAccountName
 output storageContainerName string = storageContainerName

@@ -147,8 +147,3 @@ module costMetricsJob '../../modules/containerAppJob/main.bicep' = {
     appInsightsMonitoringReaderRole
   ]
 }
-
-output identityPrincipalId string = managedIdentity.properties.principalId
-output name string = costMetricsJob.outputs.name
-output storageAccountName string = storageAccount.outputs.storageAccountName
-output storageContainerName string = storageContainerName

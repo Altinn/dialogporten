@@ -30,7 +30,7 @@ param appInsightConnectionString string
 param replicaTimeOutInSeconds int
 
 @description('Azure Subscription Id')
-@secure
+@secure()
 param azureSubscriptionId string
 
 @description('The workload profile name to use, defaults to "Consumption"')

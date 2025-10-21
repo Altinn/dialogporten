@@ -66,8 +66,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   tags: tags
 }
 
-// Create storage account for cost metrics
-module storageAccount '../../modules/storageAccount/main.bicep' = {
+module storageAccountModule '../../modules/storageAccount/main.bicep' = {
   name: 'storageAccount-${name}'
   params: {
     namePrefix: namePrefix
@@ -77,9 +76,18 @@ module storageAccount '../../modules/storageAccount/main.bicep' = {
   }
 }
 
-// Create blob container for cost metrics
-resource storageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
-  name: '${storageAccount.name}/default/${storageContainerName}'
+resource storageAcount 'Microsoft.Resources/deployments@2025-01-01' existing = {
+  name: storageAccountModule.outputs.storageAccountName
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2025-01-01' = {
+  name: 'default'
+  parent: storageAcount
+}
+
+resource storageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2025-01-01' = {
+  name: storageContainerName
+  parent: blobService
   properties: {
     publicAccess: 'None'
   }

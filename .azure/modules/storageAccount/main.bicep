@@ -21,7 +21,7 @@ param accessTier 'Hot' | 'Cool' = 'Hot'
 
 var storageAccountName = take('${toLower(replace(namePrefix, '-', ''))}storage${uniqueString(resourceGroup().id)}', 24)
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
   name: storageAccountName
   location: location
   sku: {

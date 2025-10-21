@@ -31,6 +31,7 @@ export function getOptions(labels) {
     for (const label of labels) {
       options.thresholds[`http_req_duration{name:${label}}`] = [{ threshold: "max<5000", abortOnFail: abort_on_fail }];
       options.thresholds[`http_req_failed{name:${label}}`] = [{ threshold: 'rate<=0.0', abortOnFail: abort_on_fail }];
+      options.thresholds[`http_reqs{name:${label}}`] = [];
     }
     
     options.stages = [
@@ -39,6 +40,7 @@ export function getOptions(labels) {
   } else {
     for (const label of labels) {
       options.thresholds[`http_req_duration{name:${label}}`] = [];
+      options.thresholds[`http_req_failed{name:${label}}`] = [];
       options.thresholds[`http_reqs{name:${label}}`] = [];
     }
   }

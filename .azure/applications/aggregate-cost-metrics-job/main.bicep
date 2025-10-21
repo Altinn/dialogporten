@@ -17,11 +17,6 @@ param location string
 @secure()
 param containerAppEnvironmentName string
 
-@description('The name of the Key Vault for the environment')
-@minLength(3)
-@secure()
-param environmentKeyVaultName string
-
 @description('The cron expression for the job schedule')
 @minLength(9)
 param jobSchedule string
@@ -34,15 +29,15 @@ param appInsightConnectionString string
 @description('The replica timeout for the job in seconds')
 param replicaTimeOutInSeconds int
 
+@description('Azure Subscription Id')
+@secure
+param azureSubscriptionId string
+
 @description('The workload profile name to use, defaults to "Consumption"')
 param workloadProfileName string = 'Consumption'
 
 @description('The name of the storage container for cost metrics')
 param storageContainerName string = 'costmetrics'
-
-@description('Azure Subscription Id')
-@secure
-param azureSubscriptionId string
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'

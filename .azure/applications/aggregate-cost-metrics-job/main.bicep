@@ -40,14 +40,12 @@ param workloadProfileName string = 'Consumption'
 @description('The name of the storage container for cost metrics')
 param storageContainerName string = 'costmetrics'
 
-@description('Environments to aggregate metrics from')
-param environments array = [
-  'staging'
-  'prod'
-]
-
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+
+// Use naming convention for Application Insights resource
+// Pattern: dp-be-{environment}-applicationInsights
+var appInsightsName = 'dp-be-${environment}-applicationInsights'
 var tags = {
   FullName: '${namePrefix}-aggregate-cost-metrics'
   Environment: environment
@@ -94,10 +92,10 @@ module storageBlobDataContributorRole '../../modules/storageAccount/addBlobDataC
   }
 }
 
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
-  name: 'keyVaultReaderAccessPolicy-${name}'
+module appInsightsMonitoringReaderRole '../../modules/applicationInsights/addMonitoringReaderRole.bicep' = {
+  name: 'appInsightsMonitoringReaderRole-${name}'
   params: {
-    keyvaultName: environmentKeyVaultName
+    appInsightsName: appInsightsName
     principalIds: [managedIdentity.properties.principalId]
   }
 }
@@ -125,33 +123,6 @@ var containerAppEnvVars = [
   }
 ]
 
-// Base URL for accessing secrets in the Key Vault
-// https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-functions-deployment#example-1
-var keyVaultBaseUrl = 'https://${environmentKeyVaultName}${az.environment().suffixes.keyvaultDns}/secrets'
-
-var secrets = [
-  {
-    name: 'stagingSubscriptionId'
-    keyVaultUrl: '${keyVaultBaseUrl}/aggregateCostMetricsStagingSubscriptionId'
-    identity: managedIdentity.id
-  }
-  {
-    name: 'prodSubscriptionId'
-    keyVaultUrl: '${keyVaultBaseUrl}/aggregateCostMetricsProdSubscriptionId'
-    identity: managedIdentity.id
-  }
-  {
-    name: 'testSubscriptionId'
-    keyVaultUrl: '${keyVaultBaseUrl}/aggregateCostMetricsTestSubscriptionId'
-    identity: managedIdentity.id
-  }
-  {
-    name: 'yt01SubscriptionId'
-    keyVaultUrl: '${keyVaultBaseUrl}/aggregateCostMetricsYt01SubscriptionId'
-    identity: managedIdentity.id
-  }
-]
-
 module costMetricsJob '../../modules/containerAppJob/main.bicep' = {
   name: name
   params: {
@@ -160,16 +131,15 @@ module costMetricsJob '../../modules/containerAppJob/main.bicep' = {
     image: '${baseImageUrl}janitor:${imageTag}'
     containerAppEnvId: containerAppEnvironment.id
     environmentVariables: containerAppEnvVars
-    secrets: secrets
     tags: tags
     cronExpression: jobSchedule
-    args: 'aggregate-cost-metrics -e ${join(environments, ' -e ')}'
+    args: 'aggregate-cost-metrics'
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
     workloadProfileName: workloadProfileName
   }
   dependsOn: [
-    keyVaultReaderAccessPolicy
+    appInsightsMonitoringReaderRole
   ]
 }
 

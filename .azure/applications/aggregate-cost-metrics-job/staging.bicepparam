@@ -1,6 +1,6 @@
 using './main.bicep'
 
-param environment = 'prod'
+param environment = 'staging'
 param location = 'norwayeast'
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param jobSchedule = '0 2 * * *' // 2:00AM every day

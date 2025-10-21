@@ -76,7 +76,7 @@ module storageAccountModule '../../modules/storageAccount/main.bicep' = {
   }
 }
 
-resource storageAcount 'Microsoft.Resources/deployments@2025-01-01' existing = {
+resource storageAcount 'Microsoft.Storage/storageAccounts@2025-01-01' existing = {
   name: storageAccountModule.outputs.storageAccountName
 }
 

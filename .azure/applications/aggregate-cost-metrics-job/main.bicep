@@ -86,6 +86,14 @@ resource storageContainer 'Microsoft.Storage/storageAccounts/blobServices/contai
   }
 }
 
+module storageBlobDataContributorRole '../../modules/storageAccount/addBlobDataContributorRole.bicep' = {
+  name: 'storageBlobDataContributorRole-${name}'
+  params: {
+    storageAccountName: storageAccount.outputs.storageAccountName
+    principalIds: [managedIdentity.properties.principalId]
+  }
+}
+
 module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
   name: 'keyVaultReaderAccessPolicy-${name}'
   params: {

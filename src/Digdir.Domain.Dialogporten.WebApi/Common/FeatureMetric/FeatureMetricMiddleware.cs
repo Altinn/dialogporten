@@ -121,8 +121,6 @@ public static class FeatureMetricMiddlewareExtensions
     /// <summary>
     /// Adds feature metric middleware to the pipeline
     /// </summary>
-    public static IApplicationBuilder UseFeatureMetrics(this IApplicationBuilder builder)
-    {
-        return builder.UseMiddleware<FeatureMetricMiddleware>();
-    }
+    public static IApplicationBuilder UseFeatureMetrics(this IApplicationBuilder builder) =>
+        builder.UseMiddleware<FeatureMetricMiddleware>();
 }

@@ -87,12 +87,12 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next, IOptions<Featu
         return queryParam;
     }
 
-    private static string? GetRouteTemplate(Microsoft.AspNetCore.Http.Endpoint? endpoint)
+    private static string? GetRouteTemplate(Endpoint? endpoint)
     {
         if (endpoint == null) return null;
 
         // Try RouteEndpoint first
-        if (endpoint is Microsoft.AspNetCore.Routing.RouteEndpoint routeEndpoint)
+        if (endpoint is RouteEndpoint routeEndpoint)
         {
             return routeEndpoint.RoutePattern.RawText;
         }

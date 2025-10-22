@@ -1,6 +1,4 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 

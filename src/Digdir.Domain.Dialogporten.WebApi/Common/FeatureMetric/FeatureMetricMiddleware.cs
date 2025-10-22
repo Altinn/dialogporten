@@ -67,8 +67,7 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next, IOptions<Featu
         var template = GetRouteTemplate(endpoint);
         if (!string.IsNullOrEmpty(template))
         {
-            var foo = $"{method}_{template.Trim('/')}{queryParam}";
-            return foo;
+            return $"{method}_{template.Trim('/')}{queryParam}";
         }
 
         // Fallback: Use actual path if template not available

@@ -7,13 +7,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 [SuppressMessage("Style", "IDE0060:Remove unused parameter")]
 public class FormattableStringBuilder
 {
+    private const string Null = "!!__null__!!";
     private readonly StringBuilder _format = new();
     private readonly Dictionary<object, int> _argNumberByArg = [];
+    private readonly Dictionary<object, string> _consolidatedFormatByFormattableSource = [];
 
     public FormattableString ToFormattableString() =>
         FormattableStringFactory.Create(_format.ToString(), _argNumberByArg
             .OrderBy(x => x.Value)
-            .Select(x => x.Key)
+            .Select(x => Equals(x.Key, Null) ? null : x.Key)
             .ToArray());
 
     public FormattableStringBuilder Append(string value)
@@ -61,29 +63,69 @@ public class FormattableStringBuilder
 
         public void AppendFormatted(object? value, int alignment = 0, string? format = null)
         {
-            const string @null = "null";
-
-            if (!_builder._argNumberByArg.TryGetValue(value ?? @null, out var argNumber))
+            if (value is FormattableString or FormattableStringBuilder)
             {
-                argNumber = _builder._argNumberByArg[value ?? @null] = _builder._argNumberByArg.Count;
+                AppendFormattableSource(value);
+                return;
             }
 
-            _builder._format.Append('{').Append(argNumber);
+            _builder._format.Append('{').Append(GetArgumentNumber(value));
             if (alignment != 0) _builder._format.Append(',').Append(alignment);
             if (format is not null) _builder._format.Append(':').Append(format);
             _builder._format.Append('}');
         }
+
+        private void AppendFormattableSource(object value)
+        {
+            if (!_builder._consolidatedFormatByFormattableSource.TryGetValue(value, out var consolidatedFormat))
+            {
+                _builder._consolidatedFormatByFormattableSource[value] = consolidatedFormat = value switch
+                {
+                    FormattableString fs => ConsolidateFormat(
+                        srcFormat: fs.Format,
+                        srcArgs: fs.GetArguments().Select((x, i) => (x ?? Null, i))),
+                    FormattableStringBuilder fsBuilder => ConsolidateFormat(
+                        srcFormat: fsBuilder._format.ToString(),
+                        srcArgs: fsBuilder._argNumberByArg.Select(x => (x.Key, x.Value))),
+                    _ => throw new InvalidOperationException("Unsupported formattable source.")
+                };
+            }
+
+            _builder._format.Append(consolidatedFormat);
+        }
+
+        private string ConsolidateFormat(string srcFormat, IEnumerable<(object, int)> srcArgs)
+        {
+            foreach (var (srcValue, srcArgNumber) in srcArgs)
+            {
+                var argNumber = GetArgumentNumber(srcValue);
+                if (srcArgNumber == argNumber) continue;
+                srcFormat = srcFormat.Replace("{" + srcArgNumber, "{" + argNumber);
+            }
+            return srcFormat;
+        }
+
+        private int GetArgumentNumber(object? value) =>
+            !_builder._argNumberByArg.TryGetValue(value ?? Null, out var argumentNumber)
+                ? _builder._argNumberByArg[value ?? Null] = _builder._argNumberByArg.Count
+                : argumentNumber;
     }
 }
 
 public class PostgresFormattableStringBuilder : FormattableStringBuilder
 {
-    public new FormattableStringBuilder Append(
+    public new PostgresFormattableStringBuilder Append(
         [InterpolatedStringHandlerArgument(""), StringSyntax("PostgreSQL")]
-        ref FormattableStringHandler handler) => base.Append(ref handler);
+        ref FormattableStringHandler handler) => (PostgresFormattableStringBuilder)base.Append(ref handler);
 
-    public new FormattableStringBuilder AppendIf(
+    public new PostgresFormattableStringBuilder AppendIf(
         bool condition,
         [InterpolatedStringHandlerArgument("", "condition"), StringSyntax("PostgreSQL")]
-        ref FormattableStringHandler handler) => base.AppendIf(condition, ref handler);
+        ref FormattableStringHandler handler) => (PostgresFormattableStringBuilder)base.AppendIf(condition, ref handler);
+
+    public new PostgresFormattableStringBuilder Append([StringSyntax("PostgreSQL")] string value) =>
+        (PostgresFormattableStringBuilder)base.Append(value);
+
+    public new PostgresFormattableStringBuilder AppendIf(bool condition, [StringSyntax("PostgreSQL")] string value) =>
+        (PostgresFormattableStringBuilder)base.AppendIf(condition, value);
 }

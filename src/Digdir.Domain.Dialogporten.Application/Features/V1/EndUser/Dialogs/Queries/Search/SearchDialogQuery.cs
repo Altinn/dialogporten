@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -112,7 +113,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
     /// </summary>
-    public string? Search { get; init; }
+    public string? Search { get; set; }
 
     /// <summary>
     /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
@@ -150,19 +151,22 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
+    private readonly IDialogSearchRepository _searchRepository;
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
-        IAltinnAuthorization altinnAuthorization)
+        IAltinnAuthorization altinnAuthorization,
+        IDialogSearchRepository searchRepository)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -177,6 +181,34 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         {
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
+
+        var someting = await _searchRepository.GetDialogs(new GetDialogsQuery
+        {
+            Deleted = false,
+            // OrderBy = request.OrderBy,
+            ContinuationToken = request.ContinuationToken,
+            Limit = request.Limit!.Value,
+            ContentUpdatedAfter = request.ContentUpdatedAfter,
+            ContentUpdatedBefore = request.ContentUpdatedBefore,
+            AcceptedLanguages = request.AcceptedLanguages,
+            Search = request.Search,
+            SearchLanguageCode = request.SearchLanguageCode,
+            CreatedAfter = request.CreatedAfter,
+            CreatedBefore = request.CreatedBefore,
+            DueAfter = request.DueAfter,
+            DueBefore = request.DueBefore,
+            ExcludeApiOnly = request.ExcludeApiOnly,
+            Process = request.Process,
+            SystemLabel = request.SystemLabel,
+            UpdatedAfter = request.UpdatedAfter,
+            UpdatedBefore = request.UpdatedBefore,
+            ExternalReference = request.ExternalReference,
+            ExtendedStatus = request.ExtendedStatus,
+            Org = request.Org,
+            Party = request.Party,
+            ServiceResource = request.ServiceResource,
+            Status = request.Status,
+        }, authorizedResources, cancellationToken);
 
         var paginatedList = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)

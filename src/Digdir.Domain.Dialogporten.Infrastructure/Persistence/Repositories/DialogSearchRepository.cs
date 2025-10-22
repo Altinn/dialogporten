@@ -1,6 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -11,14 +15,35 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearchRepository
 {
     private readonly DialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
+    private static readonly OrderSet<SearchDialogQueryOrderDefinition, DialogEntity> IdDescendingOrder = new(
+    [
+        new Order<DialogEntity>("id", new OrderSelector<DialogEntity>(x => x.Id))
+    ]);
 
     public Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken) =>
         _db.Database.ExecuteSqlAsync(FormattableStringFactory.Create(FreeTextSearchIndexerSql, dialogId), cancellationToken);
 
 
-    public IQueryable<DialogEntity> Prefilter(SearchDialogQuery2 query, DialogSearchAuthorizationResult authorizedResources)
+    [SuppressMessage("Style", "IDE0037:Use inferred member name")]
+    public async Task<PaginatedList<DialogEntity>> GetDialogs(
+        GetDialogsQuery query,
+        DialogSearchAuthorizationResult authorizedResources,
+        CancellationToken cancellationToken)
     {
-        const int searchSampleLimit = 10000;
+        const int searchSampleLimit = 10_000;
+
+        if (query.Limit > searchSampleLimit)
+        {
+            throw new ArgumentOutOfRangeException(nameof(query.Limit),
+                $"Limit cannot be greater than the search sample limit of {searchSampleLimit}.");
+        }
+
+        if (authorizedResources.HasNoAuthorizations)
+        {
+            return new PaginatedList<DialogEntity>([], false, null, IdDescendingOrder.GetOrderString());
+        }
+
+        var now = DateTimeOffset.UtcNow;
         var partiesAndServices = JsonSerializer.Serialize(authorizedResources.ResourcesByParties
             .Select(x => (party: x.Key, services: x.Value))
             .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
@@ -28,34 +53,202 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
                 services = x.Key.ToArray()
             }));
 
+        var paginationCondition = new PostgresFormattableStringBuilder()
+            .ApplyPaginationCondition(query.OrderBy ?? IdDescendingOrder, query.ContinuationToken);
+        var paginationOrder = new PostgresFormattableStringBuilder()
+            .ApplyPaginationOrder(query.OrderBy ?? IdDescendingOrder);
+        var searchTags = query.Search?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
         var queryBuilder = new PostgresFormattableStringBuilder()
             .Append(
                 $"""
-                 WITH partyResourceAccess AS (
-                     SELECT DISTINCT s.service, p.party
-                     FROM jsonb_to_recordset({partiesAndServices}::jsonb) AS x(parties text[], services text[])
-                     CROSS JOIN LATERAL unnest(x.services) AS s(service)
-                     CROSS JOIN LATERAL unnest(x.parties) AS p(party))
-                 ,accessibleDialogs AS (
-                     SELECT DISTINCT d."Id" AS dialogId
-                     FROM "Dialog" d
-                     INNER JOIN partyResourceAccess c ON d."ServiceResource" = c.service AND d."Party" = c.party)
-                 ,accessibleSearchSample AS (
-                     SELECT ds."DialogId" as dialogId
-                          ,ts_rank(ds."SearchVector", websearch_to_tsquery({query.Search})) rank
-                     FROM accessibleDialogs a 
+                 WITH vectorizedSearchString AS (
+                    SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) value
+                    FROM (VALUES (coalesce({query.SearchLanguageCode}, 'simple'))) AS v(isoCode)
+                    LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
+                    LIMIT 1
+                 ),accessiblePartyServiceTuple AS (
+                    SELECT DISTINCT p.party, s.service
+                    FROM jsonb_to_recordset({partiesAndServices}::jsonb) AS x(parties text[], services text[])
+                    CROSS JOIN LATERAL unnest(x.services) AS s(service)
+                    CROSS JOIN LATERAL unnest(x.parties) AS p(party)
+                 ),accessibleDialogs AS (
+                    SELECT d."Id" AS dialogId
+                    FROM "Dialog" d
+                    LEFT JOIN accessiblePartyServiceTuple ps ON d."ServiceResource" = ps.service AND d."Party" = ps.party
+                    WHERE ps.party IS NOT NULL OR d."Id" = ANY({authorizedResources.DialogIds}::uuid[])
+                 ),accessibleFilteredDialogs AS (
+                    SELECT d."Id" AS dialogId
+                    FROM "Dialog" d
+                    INNER JOIN accessibleDialogs a ON d."Id" = a.dialogId
+                    WHERE ({query.Deleted} IS NULL OR d."Deleted" = {query.Deleted}::boolean)
+                       AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" < {now}::timestamptz)
+                       AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {now}::timestamptz)
+                       AND ({query.Org} IS NULL OR d."Org" = ANY({query.Org}::text[]))
+                       AND ({query.ServiceResource} IS NULL OR d."ServiceResource" = ANY({query.ServiceResource}::text[]))
+                       AND ({query.Party} IS NULL OR d."Party" = ANY({query.Party}::text[]))
+                       AND ({query.ExtendedStatus} IS NULL OR d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]))
+                       AND ({query.ExternalReference} IS NULL OR d."ExternalReference" = {query.ExternalReference}::text)
+                       AND ({query.Status} IS NULL OR d."StatusId" = ANY({query.Status}::int[]))
+                       AND ({query.CreatedAfter} IS NULL OR {query.CreatedAfter}::timestamptz <= d."CreatedAt")
+                       AND ({query.CreatedBefore} IS NULL OR d."CreatedAt" <= {query.CreatedBefore}::timestamptz)
+                       AND ({query.UpdatedAfter} IS NULL OR {query.UpdatedAfter}::timestamptz <= d."UpdatedAt")
+                       AND ({query.UpdatedBefore} IS NULL OR d."UpdatedAt" <= {query.UpdatedBefore}::timestamptz)
+                       AND ({query.ContentUpdatedAfter} IS NULL OR {query.ContentUpdatedAfter}::timestamptz <= d."ContentUpdatedAt")
+                       AND ({query.ContentUpdatedBefore} IS NULL OR d."ContentUpdatedAt" <= {query.ContentUpdatedBefore}::timestamptz)
+                       AND ({query.DueAfter} IS NULL OR {query.DueAfter}::timestamptz <= d."DueAt")
+                       AND ({query.DueBefore} IS NULL OR d."DueAt" <= {query.DueBefore}::timestamptz)
+                       AND ({query.Process} IS NULL OR d."Process" = {query.Process}::text)
+                       AND ({query.ExcludeApiOnly} IS NULL OR ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false))
+                       AND ({searchTags} IS NULL OR EXISTS (
+                           SELECT 1
+                           FROM unnest({searchTags}::text[]) as st(value)
+                           INNER JOIN "DialogSearchTag" dst
+                               ON dst."Value" = st.value
+                               AND dst."DialogId" = d."Id"
+                       ))
+                       AND ({query.SystemLabel} IS NULL OR NOT EXISTS (
+                           SELECT 1
+                           FROM unnest({query.SystemLabel}::int[]) as st(value)
+                           LEFT JOIN "DialogEndUserContext" dec ON dec."DialogId" = d."Id"
+                           LEFT JOIN "DialogEndUserContextSystemLabel" sl 
+                               ON sl."DialogEndUserContextId" = dec."Id" 
+                               AND sl."SystemLabelId" = st.value
+                           WHERE sl."DialogEndUserContextId" IS NULL
+                       ))
+                       {paginationCondition}
+                    {paginationOrder}
+                 ),accessibleFilteredSearchSample AS (
+                     SELECT a.dialogId, ds."SearchVector" searchVector
+                     FROM vectorizedSearchString ss, accessibleFilteredDialogs a 
                      LEFT JOIN search."DialogSearch" ds ON a.dialogId = ds."DialogId"
-                     WHERE ds."SearchVector" @@ websearch_to_tsquery({query.Search})
-                     LIMIT {searchSampleLimit})
+                     WHERE {query.Search} IS NULL OR ds."SearchVector" @@ ss.value
+                     LIMIT {searchSampleLimit}
+                 )
                  SELECT d.*
-                 FROM "Dialog" d
-                 INNER JOIN accessibleDialogs a ON d."Id" = a.dialogId
-                 LEFT JOIN accessibleSearchSample ds ON ds.dialogId = d."Id"
-                 ORDER BY ds.rank DESC NULLS LAST
-                 """);
+                 FROM vectorizedSearchString ss, accessibleFilteredSearchSample ds
+                 INNER JOIN "Dialog" d ON ds.dialogId = d."Id"
+                 
+                 """)
+            // Ordering by full text search rank only works on the first page of results
+            // because pagination requires both OrderBy and ContinuationToken to be set.
+            .AppendIf(query.OrderBy is null, "ORDER BY ts_rank(ds.searchVector, ss.value) DESC\n")
+            .AppendIf(query.OrderBy is not null, $"{paginationOrder}\n");
 
-        return _db.Dialogs.FromSql(queryBuilder.ToFormattableString());
+        // DO NOT use Include here, as it will use the custom SQL above which is
+        // much less efficient than querying further by the resulting dialogIds.
+        // We only get dialogs here, and will later query related data as
+        // needed based on the IDs.
+        var efQuery = _db.Dialogs
+            .FromSql(queryBuilder.ToFormattableString())
+            .IgnoreQueryFilters()
+            .AsNoTracking();
+
+        // TODO: Add content
+        // TODO: Add DialogEndUserContextSystemLabels
+        // TODO: Add SeenLog
+
+        var dialogs = await efQuery.ToPaginatedListAsync(
+            query.OrderBy ?? IdDescendingOrder,
+            query.ContinuationToken,
+            query.Limit,
+            applyOrder: false,
+            applyContinuationToken: false,
+            cancellationToken);
+
+        return dialogs;
+
+        // var dialogIds = dialogs.Select(x => x.Id).ToArray();
+        // var guiAttachmentCountByDialogId = await _db.DialogAttachments
+        //     .Where(x => dialogIds.Contains(x.DialogId))
+        //     .Where(x => x.Urls.Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))
+        //     .GroupBy(x => x.DialogId)
+        //     .Select(g => new { DialogId = g.Key, GuiAttachmentCount = g.Count() })
+        //     .ToDictionaryAsync(x => x.DialogId, x => x.GuiAttachmentCount, cancellationToken);
+
+        // .Include(x => x.Content.Where(c => c.Type.OutputInList))
+        // .Include(x => x.EndUserContext.DialogEndUserContextSystemLabels)
+        // .Include(x => x.SeenLog
+        //     .Where(l => l.CreatedAt >= l.Dialog.CreatedAt ||
+        //                 l.CreatedAt >= l.Dialog.ContentUpdatedAt)
+        //     .OrderByDescending(sl => sl.CreatedAt))
+        // .Include(x => x.Activities.OrderByDescending(a => a.CreatedAt).ThenByDescending(a => a.Id).Take(1));
     }
+
+    public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<DialogEntity>
+    {
+        public static IOrderOptions<DialogEntity> Configure(IOrderOptionsBuilder<DialogEntity> options) =>
+            options.AddId(x => x.Id)
+                .AddDefault("createdAt", x => x.CreatedAt)
+                .AddOption("updatedAt", x => x.UpdatedAt)
+                .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
+                .AddOption("dueAt", x => x.DueAt)
+                .Build();
+    }
+
+    // public IQueryable<DialogEntity> FullTextSearch(IQueryable<DialogEntity> query,
+    //     string? search,
+    //     IOrderSet<DialogEntity>? order = null,
+    //     IContinuationTokenSet? continuationTokenSet = null,
+    //     int limit = 1000)
+    // {
+    //     const int searchSampleLimit = 10_000;
+    //     if (search == null) return query;
+    //     order ??= IdDescendingOrder;
+    //
+    //     // order = new OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>(
+    //     // [
+    //     //     new Order<DialogEntity>("createdAt", new OrderSelector<DialogEntity>(x => x.CreatedAt)),
+    //     //     new Order<DialogEntity>("id", new OrderSelector<DialogEntity>(x => x.Id))
+    //     // ]);
+    //
+    //     var paginatedSearchSampleQuery = query
+    //         // Apply pagination to limit/scope the number of records to be searched
+    //         .ApplyCondition(order, null) // TODO: Add continuation token
+    //         .ApplyOrder(order)
+    //
+    //         // Left join with DialogSearch to perform full-text search
+    //         .GroupJoin(_db.Set<DialogSearch>(), x => x.Id, x => x.DialogId, (d, s) => new { d, s })
+    //         .SelectMany(t => t.s.DefaultIfEmpty(), (d, s) => new { d.d, s })
+    //         .Where(t => t.s!.SearchVector.Matches(EF.Functions.WebSearchToTsQuery(search)))
+    //
+    //         // Only take a limited number of search results to optimize performance of full text search ranking
+    //         .Take(searchSampleLimit)
+    //         .Select(t => new { Dialog = t.d, t.s!.SearchVector });
+    //
+    //     var outerQuery = _db.Dialogs
+    //         .IgnoreQueryFilters()
+    //         .SelectMany(x => paginatedSearchSampleQuery.Where(y => y.Dialog.Id == x.Id))
+    //         .OrderByDescending(x => x.SearchVector.Rank(EF.Functions.WebSearchToTsQuery(search)))
+    //         .Select(x => x.Dialog)
+    //         .Take(limit + 1);
+    //
+    //     // If the user has not specified a custom order, we order by the search rank
+    //     outerQuery = order != IdDescendingOrder
+    //         ? outerQuery.ApplyOrder(order)
+    //         : outerQuery;
+    //
+    //     var items = await outerQuery.ToArrayAsync();
+    //
+    //     // Fetch one more item than requested to determine if there is a next page
+    //     var hasNextPage = items.Length > limit;
+    //     if (hasNextPage)
+    //     {
+    //         Array.Resize(ref items, limit);
+    //     }
+    //
+    //     var nextContinuationToken = order.GetContinuationTokenFrom(items
+    //             .AsQueryable()
+    //             .ApplyOrder(order)
+    //             .LastOrDefault())
+    //         ?? continuationTokenSet?.Raw;
+    //
+    //     return new PaginatedList<DialogEntity>(
+    //         items,
+    //         hasNextPage,
+    //         @continue: nextContinuationToken,
+    //         orderBy: order.GetOrderString());
+    // }
 
     //language=PostgreSQL
     private const string FreeTextSearchIndexerSql =
@@ -133,3 +326,16 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             "SearchVector" = EXCLUDED."SearchVector";
         """;
 }
+
+internal class MyObject
+{
+    public Guid Id { get; set; }
+    public List<SomethingMore> SomethingMores { get; set; } = null!;
+}
+
+internal class SomethingMore
+{
+    public Guid Id { get; set; }
+}
+
+

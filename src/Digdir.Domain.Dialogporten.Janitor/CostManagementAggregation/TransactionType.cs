@@ -85,5 +85,5 @@ public static class TransactionTypeMapper
 
     // TODO: Currently not working as expected, see issue #2871
     private static bool HasEndUserParameter(string presentationTag) =>
-        presentationTag.Contains("endUserId", StringComparison.OrdinalIgnoreCase);
+        presentationTag.Contains(nameof(SearchDialogsQuerySO.EndUserId), StringComparison.OrdinalIgnoreCase);
 }

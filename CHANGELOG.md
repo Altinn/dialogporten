@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.87.1](https://github.com/Altinn/dialogporten/compare/v1.87.0...v1.87.1) (2025-10-21)
+
+
+### Bug Fixes
+
+* **ci:** use valid Azure names for storage account and rbac roles ([#2902](https://github.com/Altinn/dialogporten/issues/2902)) ([d2a68f8](https://github.com/Altinn/dialogporten/commit/d2a68f8b8531563a51d98c04b08021f8939e8a2b)), closes [#2377](https://github.com/Altinn/dialogporten/issues/2377)
+
+## [1.87.0](https://github.com/Altinn/dialogporten/compare/v1.86.5...v1.87.0) (2025-10-21)
+
+
+### Features
+
+* **janitor:** Add cost management aggregation for feature metrics ([#2872](https://github.com/Altinn/dialogporten/issues/2872)) ([6d475cc](https://github.com/Altinn/dialogporten/commit/6d475cce8387dc396253b6b4fcb696a03db44ca5))
+
 ## [1.86.5](https://github.com/Altinn/dialogporten/compare/v1.86.4...v1.86.5) (2025-10-20)
 
 

@@ -1,6 +1,6 @@
 using Azure;
-using Azure.Monitor.Query;
-using Azure.Monitor.Query.Models;
+using Azure.Monitor.Query.Logs;
+using Azure.Monitor.Query.Logs.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -72,7 +72,7 @@ public sealed class ApplicationInsightsService
             var response = await _logsClient.QueryResourceAsync(
                 new Azure.Core.ResourceIdentifier(resourceId),
                 formattedKql,
-                new QueryTimeRange(startTime, endTime),
+                new LogsQueryTimeRange(startTime, endTime),
                 cancellationToken: cancellationToken);
 
             return ParseQueryResponse(response.Value, environment);

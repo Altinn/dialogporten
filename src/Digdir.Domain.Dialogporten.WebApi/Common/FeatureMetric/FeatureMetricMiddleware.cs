@@ -79,12 +79,9 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next, IOptions<Featu
     {
         var queryParam = string.Empty;
 
-        if (!string.IsNullOrWhiteSpace(context.Request.QueryString.Value))
+        if (context.Request.Query.ContainsKey(nameof(SearchDialogQuery.EndUserId)))
         {
-            if (context.Request.QueryString.Value.Contains(nameof(SearchDialogQuery.EndUserId)))
-            {
-                queryParam += $"_{nameof(SearchDialogQuery.EndUserId)}";
-            }
+            queryParam += $"_{nameof(SearchDialogQuery.EndUserId)}";
         }
 
         return queryParam;

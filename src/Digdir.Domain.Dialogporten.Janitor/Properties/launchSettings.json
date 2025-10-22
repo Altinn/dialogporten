@@ -13,6 +13,13 @@
         "DOTNET_ENVIRONMENT": "Development"
       },
       "commandLineArgs": "sync-resource-policy-information -c 1"
+    },
+    "aggregate-cost-metrics": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "aggregate-cost-metrics"
     }
   }
 }

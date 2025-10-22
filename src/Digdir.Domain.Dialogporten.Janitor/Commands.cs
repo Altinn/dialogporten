@@ -1,8 +1,10 @@
 using Cocona;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -44,7 +46,8 @@ internal static class Commands
 
         app.AddCommand("aggregate-cost-metrics", async (
                 [FromService] CoconaAppContext ctx,
-                [FromService] IHostEnvironment hostEnvironment,
+                [FromService] IConfiguration config,
+                [FromService] IHostEnvironment env,
                 [FromService] CostMetricsAggregationOrchestrator orchestrator,
                 [FromService] ILogger<CoconaApp> logger,
                 [Option('d', Description = "Target date for metrics aggregation (format: YYYY-MM-DD or DD/MM/YYYY). Defaults to yesterday in Norwegian time.")] DateOnly? targetDateInput,
@@ -53,7 +56,13 @@ internal static class Commands
             {
                 var targetDate = targetDateInput ?? NorwegianTimeConverter.GetYesterday();
 
-                logger.LogInformation("Host Environment: {Environment}", hostEnvironment.EnvironmentName);
+                logger.LogInformation("Host Environment: {Environment}", env.EnvironmentName);
+
+                var localDevSettings = config.GetLocalDevelopmentSettings();
+                if (env.IsDevelopment() && localDevSettings.UseLocalMetricsAggregationStorage)
+                {
+                    skipUpload = true;
+                }
 
                 var result = await orchestrator.AggregateCostMetricsForDateOnlyAsync(targetDate, skipUpload, ctx.CancellationToken);
 

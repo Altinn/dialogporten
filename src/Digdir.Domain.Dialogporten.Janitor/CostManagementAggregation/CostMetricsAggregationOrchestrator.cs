@@ -1,5 +1,3 @@
-using Digdir.Domain.Dialogporten.Application;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -7,7 +5,6 @@ namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
 public sealed class CostMetricsAggregationOrchestrator
 {
-    private readonly IConfiguration _config;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly ILogger<CostMetricsAggregationOrchestrator> _logger;
     private readonly ApplicationInsightsService _applicationInsightsService;
@@ -16,7 +13,6 @@ public sealed class CostMetricsAggregationOrchestrator
     private readonly AzureStorageService _storageService;
 
     public CostMetricsAggregationOrchestrator(
-        IConfiguration config,
         IHostEnvironment hostEnvironment,
         ILogger<CostMetricsAggregationOrchestrator> logger,
         ApplicationInsightsService applicationInsightsService,
@@ -24,7 +20,6 @@ public sealed class CostMetricsAggregationOrchestrator
         ParquetFileService parquetService,
         AzureStorageService storageService)
     {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
         _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _applicationInsightsService = applicationInsightsService ?? throw new ArgumentNullException(nameof(applicationInsightsService));
@@ -49,9 +44,8 @@ public sealed class CostMetricsAggregationOrchestrator
             var parquetData = await _parquetService.GenerateParquetFileAsync(aggregatedRecords, cancellationToken);
             var fileName = GetDateOnlyFileName(targetDate, _hostEnvironment.EnvironmentName);
 
-            var localDevSettings = _config.GetLocalDevelopmentSettings();
 
-            if (skipUpload || (_hostEnvironment.IsDevelopment() && localDevSettings.UseLocalMetricsAggregationStorage))
+            if (skipUpload)
             {
                 await SaveLocallyAsync(parquetData, fileName, aggregatedRecords.Count, cancellationToken);
             }

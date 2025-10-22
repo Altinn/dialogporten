@@ -83,7 +83,6 @@ public static class TransactionTypeMapper
         return null;
     }
 
-    // TODO: Currently not working as expected, see issue #2871
     private static bool HasEndUserParameter(string presentationTag) =>
         presentationTag.Contains(nameof(SearchDialogsQuerySO.EndUserId), StringComparison.OrdinalIgnoreCase);
 }

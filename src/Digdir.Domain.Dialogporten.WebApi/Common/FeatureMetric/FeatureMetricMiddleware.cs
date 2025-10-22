@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
@@ -60,16 +61,34 @@ public sealed class FeatureMetricMiddleware(RequestDelegate next, IOptions<Featu
         var method = context.Request.Method;
         var endpoint = context.GetEndpoint();
 
+        var queryParam = GetQueryParams(context);
+
         // Get the route template from endpoint metadata
         var template = GetRouteTemplate(endpoint);
         if (!string.IsNullOrEmpty(template))
         {
-            return $"{method}_{template.Trim('/')}";
+            var foo = $"{method}_{template.Trim('/')}{queryParam}";
+            return foo;
         }
 
         // Fallback: Use actual path if template not available
         var path = context.Request.Path.Value?.Trim('/') ?? "";
-        return $"{method}_{path}";
+        return $"{method}_{path}{queryParam}";
+    }
+
+    private static string GetQueryParams(HttpContext context)
+    {
+        var queryParam = string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(context.Request.QueryString.Value))
+        {
+            if (context.Request.QueryString.Value.Contains(nameof(SearchDialogQuery.EndUserId)))
+            {
+                queryParam += $"_{nameof(SearchDialogQuery.EndUserId)}";
+            }
+        }
+
+        return queryParam;
     }
 
     private static string? GetRouteTemplate(Microsoft.AspNetCore.Http.Endpoint? endpoint)

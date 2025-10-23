@@ -28,7 +28,6 @@ public sealed class FullDialogAggregateDataLoader
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
         DialogEntity? ret;
-        // With Postgre Snapshot gets mapped to ReadCommited Amund: Sauce?
         await using var dbTransaction = await _dialogDbContext.BeginTransactionAsync(cancellationToken);
         var dialogEntity = await _dialogDbContext.Dialogs
             .Include(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))

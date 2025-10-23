@@ -21,7 +21,6 @@ using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence;

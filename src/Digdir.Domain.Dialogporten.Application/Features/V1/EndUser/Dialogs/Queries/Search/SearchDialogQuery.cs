@@ -1,4 +1,3 @@
-using System.Data;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;

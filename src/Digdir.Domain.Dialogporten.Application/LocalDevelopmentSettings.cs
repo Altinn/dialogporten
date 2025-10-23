@@ -18,6 +18,7 @@ public sealed class LocalDevelopmentSettings
     public bool DisableSubjectResourceSyncOnStartup { get; set; } = true;
     public bool DisablePolicyInformationSyncOnStartup { get; set; } = true;
     public bool UseLocalDevelopmentPartyNameRegistry { get; set; } = true;
+    public bool UseLocalMetricsAggregationStorage { get; set; } = true;
 }
 
 public static class LocalDevelopmentSettingsExtensions

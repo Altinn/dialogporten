@@ -18,10 +18,9 @@ internal sealed class ReindexDialogSearchCommandValidator : AbstractValidator<Re
             })
             .WithMessage("Specify exactly one of: --full OR --since <ts> OR --resume OR --stale-only.");
 
-
-        RuleFor(x => x.BatchSize).GreaterThan(0).When(x => x.BatchSize.HasValue);
-        RuleFor(x => x.Workers).GreaterThan(0).When(x => x.Workers.HasValue);
-        RuleFor(x => x.ThrottleMs).GreaterThanOrEqualTo(0).When(x => x.ThrottleMs.HasValue);
-        RuleFor(x => x.WorkMemBytes).GreaterThan(0).When(x => x.WorkMemBytes.HasValue);
+        RuleFor(x => x.BatchSize).GreaterThan(0);
+        RuleFor(x => x.Workers).GreaterThan(0);
+        RuleFor(x => x.ThrottleMs).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.WorkMemBytes).GreaterThan(0);
     }
 }

@@ -1,8 +1,13 @@
 using Cocona;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Search.Commands.ReindexDialogSearch;
+using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using MediatR;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Janitor;
 
@@ -70,7 +75,34 @@ internal static class Commands
             return result.Match(
                 success => 0,
                 validationError => -1);
-        });
+            });
+
+        app.AddCommand("aggregate-cost-metrics", async (
+                [FromService] CoconaAppContext ctx,
+                [FromService] IConfiguration config,
+                [FromService] IHostEnvironment env,
+                [FromService] CostMetricsAggregationOrchestrator orchestrator,
+                [FromService] ILogger<CoconaApp> logger,
+                [Option('d', Description = "Target date for metrics aggregation (format: YYYY-MM-DD or DD/MM/YYYY). Defaults to yesterday in Norwegian time.")] DateOnly? targetDateInput,
+                [Option('s', Description = "Skip uploading to Azure Storage and save file locally instead")] bool skipUpload = false)
+            =>
+            {
+                var targetDate = targetDateInput ?? NorwegianTimeConverter.GetYesterday();
+
+                logger.LogInformation("Host Environment: {Environment}", env.EnvironmentName);
+
+                var localDevSettings = config.GetLocalDevelopmentSettings();
+                if (env.IsDevelopment() && localDevSettings.UseLocalMetricsAggregationStorage)
+                {
+                    skipUpload = true;
+                }
+
+                var result = await orchestrator.AggregateCostMetricsForDateOnlyAsync(targetDate, skipUpload, ctx.CancellationToken);
+
+                return result.Match(
+                    success => 0,
+                    failure => -1);
+            });
 
         return app;
     }

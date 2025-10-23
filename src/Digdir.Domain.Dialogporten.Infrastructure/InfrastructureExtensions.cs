@@ -61,26 +61,29 @@ public static class InfrastructureExtensions
                 var connectionString = services.GetRequiredService<IOptions<InfrastructureSettings>>()
                     .Value.DialogDbConnectionString;
                 options.UseNpgsql(connectionString, o =>
-                {
-                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                })
-                .EnableSensitiveDataLogging(environment.IsDevelopment())
-                .AddInterceptors(
-                    services.GetRequiredService<PopulateActorNameInterceptor>(),
-                    services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
-                );
+                    {
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    })
+                    .EnableSensitiveDataLogging(environment.IsDevelopment())
+                    .AddInterceptors(
+                        services.GetRequiredService<PopulateActorNameInterceptor>(),
+                        services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
+                    );
             })
             .AddHostedService<FusionCacheWarmupHostedService>()
             .AddHostedService<DevelopmentMigratorHostedService>()
             .AddHostedService<DevelopmentCleanupOutboxHostedService>()
             .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()
             .AddHostedService<DevelopmentResourcePolicyInformationSyncHostedService>()
-            .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient, includeInternalTypes: true)
+            .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient,
+                includeInternalTypes: true)
             .AddPolicyRegistry((_, registry) =>
             {
                 registry.Add(PollyPolicy.DefaultHttpRetryPolicy, HttpPolicyExtensions
                     .HandleTransientHttpError()
-                    .WaitAndRetryAsync(Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: 3)));
+                    .WaitAndRetryAsync(
+                        Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1),
+                            retryCount: 3)));
             })
             .AddCustomHealthChecks()
 
@@ -91,6 +94,7 @@ public static class InfrastructureExtensions
             .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
+            .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient<Lazy<IPublishEndpoint>>(x =>
@@ -108,10 +112,7 @@ public static class InfrastructureExtensions
             .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>))
 
             // Feature Metrics
-            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>()
-
-            // Repositories
-            .AddScoped<IDialogSearchRepository, DialogSearchRepository>();
+            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
 
         services.AddFusionCacheNeueccMessagePackSerializer();
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);

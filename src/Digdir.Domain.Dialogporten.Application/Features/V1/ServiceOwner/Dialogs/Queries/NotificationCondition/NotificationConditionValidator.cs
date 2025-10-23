@@ -8,7 +8,7 @@ internal sealed class NotificationConditionQueryValidator : AbstractValidator<No
     public NotificationConditionQueryValidator()
     {
         RuleFor(x => x.DialogId)
-            .NotEqual(default(Guid));
+            .NotEqual(Guid.Empty);
 
         RuleFor(x => x.ConditionType)
             .NotNull()
@@ -20,13 +20,13 @@ internal sealed class NotificationConditionQueryValidator : AbstractValidator<No
 
         RuleFor(x => x.TransmissionId)
             .NotNull()
-            .NotEqual(default(Guid))
+            .NotEqual(Guid.Empty)
             .When(x => x.ActivityType == DialogActivityType.Values.TransmissionOpened)
             .WithMessage($"{{PropertyName}} must not be empty when ${nameof(NotificationConditionQuery.ActivityType)} is ${nameof(DialogActivityType.Values.TransmissionOpened)}");
 
         RuleFor(x => x.TransmissionId)
             .Null()
-            .When(x => x.ActivityType == DialogActivityType.Values.DialogOpened)
-            .WithMessage($"{{PropertyName}} must be empty when {nameof(NotificationConditionQuery.ActivityType)} is {nameof(DialogActivityType.Values.DialogOpened)}.");
+            .When(x => x.ActivityType != DialogActivityType.Values.TransmissionOpened)
+            .WithMessage($"{{PropertyName}} must be empty when {nameof(NotificationConditionQuery.ActivityType)} is not {nameof(DialogActivityType.Values.TransmissionOpened)}.");
     }
 }

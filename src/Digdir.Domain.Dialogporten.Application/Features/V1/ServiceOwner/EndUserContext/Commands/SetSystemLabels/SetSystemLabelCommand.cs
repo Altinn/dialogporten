@@ -46,10 +46,14 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         SetSystemLabelCommand request,
         CancellationToken cancellationToken)
     {
-        var dialog = await _db.Dialogs
-            .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+        DialogEntity? dialog;
+        await using (await _db.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _db.Dialogs
+                .Include(x => x.EndUserContext)
+                    .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+        }
 
         if (dialog is null)
         {
@@ -72,8 +76,8 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, currentUserInformation.UserId.ExternalIdWithPrefix);
 
         var saveResult = await _unitOfWork
-                               .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)
-                               .SaveChangesAsync(cancellationToken);
+            .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)
+            .SaveChangesAsync(cancellationToken);
 
         return saveResult.Match<SetSystemLabelResult>(
             _ => new SetSystemLabelSuccess(dialog.EndUserContext.Revision),

@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -44,12 +45,16 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
     {
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch([], [], cancellationToken);
 
-        var dialogs = await _db.Dialogs
-            .PrefilterAuthorizedDialogs(authorizedResources)
-            .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-            .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
-            .ToListAsync(cancellationToken);
+        List<DialogEntity> dialogs;
+        await using (await _db.BeginTransactionAsync(cancellationToken))
+        {
+            dialogs = await _db.Dialogs
+                .PrefilterAuthorizedDialogs(authorizedResources)
+                .Include(x => x.EndUserContext)
+                    .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
+                .ToListAsync(cancellationToken);
+        }
 
         if (dialogs.Count != request.Dto.Dialogs.Count)
         {

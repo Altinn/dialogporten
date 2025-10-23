@@ -42,11 +42,14 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
             return new Forbidden("Requires admin scope");
         }
 
-        var activity = await _db.DialogActivities
-            .Include(x => x.Dialog)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.ActivityId && x.DialogId == request.DialogId, cancellationToken);
-
+        DialogActivity? activity;
+        await using (await _db.BeginTransactionAsync(cancellationToken))
+        {
+            activity = await _db.DialogActivities
+                .Include(x => x.Dialog)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.ActivityId && x.DialogId == request.DialogId, cancellationToken);
+        }
         if (activity is null)
         {
             return new EntityNotFound<DialogActivity>(request.ActivityId);

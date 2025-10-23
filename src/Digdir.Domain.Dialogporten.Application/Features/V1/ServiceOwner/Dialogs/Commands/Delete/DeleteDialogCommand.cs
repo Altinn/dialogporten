@@ -47,11 +47,16 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        var dialog = await _db.Dialogs
-            .Include(x => x.Activities)
-            .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        DialogEntity? dialog;
+        await using (await _db.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _db.Dialogs
+                .Include(x => x.Activities)
+                .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        }
+
 
         if (dialog is null)
         {

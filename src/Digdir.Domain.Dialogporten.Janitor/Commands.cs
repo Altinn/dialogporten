@@ -58,23 +58,23 @@ internal static class Commands
                 [Option("throttle-ms", Description = "Sleep between batches per worker (ms)")] int? throttleMs,
                 [Option("work-mem-bytes", Description = "work_mem per worker (default 268435456 bytes = 256MB)")] long? workMemBytes)
             =>
-        {
-            var result = await application.Send(new ReindexDialogSearchCommand
             {
-                Full = full,
-                Since = since,
-                Resume = resume,
-                StaleOnly = staleOnly,
-                StaleFirst = staleFirst,
-                BatchSize = batchSize,
-                Workers = workers,
-                ThrottleMs = throttleMs,
-                WorkMemBytes = workMemBytes
-            }, ctx.CancellationToken);
+                var result = await application.Send(new ReindexDialogSearchCommand
+                {
+                    Full = full,
+                    Since = since,
+                    Resume = resume,
+                    StaleOnly = staleOnly,
+                    StaleFirst = staleFirst,
+                    BatchSize = batchSize,
+                    Workers = workers,
+                    ThrottleMs = throttleMs,
+                    WorkMemBytes = workMemBytes
+                }, ctx.CancellationToken);
 
-            return result.Match(
-                success => 0,
-                validationError => -1);
+                return result.Match(
+                    success => 0,
+                    validationError => -1);
             });
 
         app.AddCommand("aggregate-cost-metrics", async (

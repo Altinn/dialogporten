@@ -42,4 +42,8 @@
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Architecture.Tests"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Include="Persistence/Sql/**/*.sql" />
+    </ItemGroup>
+
 </Project>

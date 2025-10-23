@@ -112,7 +112,10 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
                 .Where(x => ids.Contains(x))
                 .ToListAsync(cancellationToken);
     }
-    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken) => Database.BeginTransactionAsync(IsolationLevel.Snapshot, cancellationToken);
+    // PostgreSQL doesn't support SNAPSHOT isolation level
+    // REPEATABLE READ provides snapshot-like behavior
+    // https://www.postgresql.org/docs/current/transaction-iso.html#XACT-REPEATABLE-READ
+    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken) => Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

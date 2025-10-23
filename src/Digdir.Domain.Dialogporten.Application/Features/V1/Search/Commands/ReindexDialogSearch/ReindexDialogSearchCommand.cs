@@ -73,7 +73,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
             _logger.LogInformation(
                 "Reindex cancelled by user, rolling back blocks currently being processed. Processed {Total} dialogs (~{AverageSpeed:F1} dialogs/s across {Elapsed}).",
                 total, averageSpeedDuringRun, elapsed);
-            return new ReindexDialogSearchResult(new Success());
+            return new Success();
         }
 
         var finalProgress = await WithRepositoryAsync((repo, token) => repo.GetProgressAsync(token), ct);
@@ -84,7 +84,9 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
             "Reindex finished. Total processed by all workers: {Total}. Average speed ~{AverageSpeed:F1} dialogs/s across {Elapsed}.",
             total, averageSpeed, elapsed);
 
-        return new ReindexDialogSearchResult(new Success());
+        await OptimizeSearchIndex(ct);
+
+        return new Success();
     }
 
     private static Options BuildOptions(ReindexDialogSearchCommand request) => new()
@@ -213,6 +215,13 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         await using var scope = _scopeFactory.CreateAsyncScope();
         var repository = scope.ServiceProvider.GetRequiredService<IDialogSearchRepository>();
         return await action(repository, ct);
+    }
+
+    private async Task OptimizeSearchIndex(CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IDialogSearchRepository>();
+        await repository.OptimizeIndexAsync(ct);
     }
 
     private sealed record Options

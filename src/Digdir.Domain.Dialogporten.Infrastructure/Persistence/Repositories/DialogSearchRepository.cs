@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,76 +10,40 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {
-        var sql = FormattableStringFactory.Create(
-            "SELECT search.\"UpsertDialogSearchOne\"({0})",
-            dialogId);
-
-        await _db.Database.ExecuteSqlAsync(sql, cancellationToken);
+        await _db.Database.ExecuteSqlAsync($@"SELECT search.""UpsertDialogSearchOne""({dialogId})", cancellationToken);
     }
 
-    public async Task<int> SeedFullAsync(bool resetExisting, CancellationToken ct)
+    public async Task<int> SeedFullAsync(bool resetExisting, CancellationToken ct) =>
+        await _db.Database
+            .SqlQuery<int>($@"SELECT search.""SeedDialogSearchQueueFull""({resetExisting}) AS ""Value""")
+            .SingleAsync(ct);
+
+    public async Task<int> SeedSinceAsync(DateTimeOffset since, bool resetMatching, CancellationToken ct) =>
+        await _db.Database
+            .SqlQuery<int>($@"SELECT search.""SeedDialogSearchQueueSince""({since}, {resetMatching}) AS ""Value""")
+            .SingleAsync(ct);
+
+    public async Task<int> SeedStaleAsync(bool resetMatching, CancellationToken ct) =>
+        await _db.Database
+            .SqlQuery<int>($@"SELECT search.""SeedDialogSearchQueueStale""({resetMatching}) AS ""Value""")
+            .SingleAsync(ct);
+
+    public async Task<int> WorkBatchAsync(int batchSize, long workMemBytes, bool staleFirst, CancellationToken ct) =>
+        await _db.Database
+            .SqlQuery<int>($@"SELECT search.""RebuildDialogSearchOnce""({(staleFirst ? "stale_first" : "standard")}, {batchSize}, {workMemBytes}) AS ""Value""")
+            .SingleAsync(ct);
+
+    public async Task<DialogSearchReindexProgress> GetProgressAsync(CancellationToken ct) =>
+        await _db.Database
+            .SqlQuery<DialogSearchReindexProgress>(
+                $"""
+                 SELECT "Total", "Pending", "Processing", "Done"
+                 FROM search."DialogSearchRebuildProgress"
+                 """)
+            .SingleAsync(ct);
+
+    public async Task OptimizeIndexAsync(CancellationToken ct)
     {
-        var sql = FormattableStringFactory.Create(
-            "SELECT search.\"SeedDialogSearchQueueFull\"({0}) AS \"Value\"",
-            resetExisting);
-
-        return await _db.Database.SqlQuery<int>(sql).SingleAsync(ct);
-    }
-
-    public async Task<int> SeedSinceAsync(DateTimeOffset since, bool resetMatching, CancellationToken ct)
-    {
-        var utc = since.ToUniversalTime();
-        var sql = FormattableStringFactory.Create(
-            "SELECT search.\"SeedDialogSearchQueueSince\"({0}, {1}) AS \"Value\"",
-            utc, resetMatching);
-
-        return await _db.Database.SqlQuery<int>(sql).SingleAsync(ct);
-    }
-
-    public async Task<int> SeedStaleAsync(bool resetMatching, CancellationToken ct)
-    {
-        var sql = FormattableStringFactory.Create(
-            "SELECT search.\"SeedDialogSearchQueueStale\"({0}) AS \"Value\"",
-            resetMatching);
-
-        return await _db.Database.SqlQuery<int>(sql).SingleAsync(ct);
-    }
-
-    public async Task<int> WorkBatchAsync(int batchSize, long workMemBytes, bool staleFirst, CancellationToken ct)
-    {
-        var sql = staleFirst
-            ? FormattableStringFactory.Create(
-                "SELECT search.\"RebuildDialogSearchOnce\"('stale_first', {0}, {1}) AS \"Value\"",
-                batchSize, workMemBytes)
-            : FormattableStringFactory.Create(
-                "SELECT search.\"RebuildDialogSearchOnce\"('standard', {0}, {1}) AS \"Value\"",
-                batchSize, workMemBytes);
-
-        return await _db.Database.SqlQuery<int>(sql).SingleAsync(ct);
-    }
-
-    public async Task<DialogSearchReindexProgress> GetProgressAsync(CancellationToken ct)
-    {
-        var progressSql = FormattableStringFactory.Create(
-            """
-            SELECT "Total", "Pending", "Processing", "Done"
-            FROM search."DialogSearchRebuildProgress"
-            """);
-        var progress = await _db.Database.SqlQuery<ProgressRow>(progressSql).SingleAsync(ct);
-
-        return new DialogSearchReindexProgress(
-            Total: progress.Total,
-            Pending: progress.Pending,
-            Processing: progress.Processing,
-            Done: progress.Done
-        );
-    }
-
-    private sealed class ProgressRow
-    {
-        public long Total { get; init; }
-        public long Pending { get; init; }
-        public long Processing { get; init; }
-        public long Done { get; init; }
+        await _db.Database.ExecuteSqlAsync($@"VACUUM ANALYZE search.""DialogSearch""", ct);
     }
 }

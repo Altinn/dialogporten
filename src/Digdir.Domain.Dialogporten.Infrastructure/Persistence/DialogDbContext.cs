@@ -112,6 +112,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
                 .Where(x => ids.Contains(x))
                 .ToListAsync(cancellationToken);
     }
+    
     // PostgreSQL doesn't support SNAPSHOT isolation level
     // REPEATABLE READ provides snapshot-like behavior
     // https://www.postgresql.org/docs/current/transaction-iso.html#XACT-REPEATABLE-READ

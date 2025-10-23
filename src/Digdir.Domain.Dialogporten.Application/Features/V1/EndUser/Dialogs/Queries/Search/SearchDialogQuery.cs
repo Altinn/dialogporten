@@ -182,8 +182,11 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
-        var someting = await _searchRepository.GetDialogs(new GetDialogsQuery
+        var now = _clock.NowOffset;
+        var dialogs = await _searchRepository.GetDialogs(new GetDialogsQuery
         {
+            VisibleAfter = now,
+            ExpiresBefore = now,
             Deleted = false,
             // OrderBy = request.OrderBy,
             ContinuationToken = request.ContinuationToken,

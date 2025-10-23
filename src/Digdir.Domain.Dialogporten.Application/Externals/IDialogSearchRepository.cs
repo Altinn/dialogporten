@@ -131,4 +131,7 @@ public class GetDialogsQuery
     /// Accepted languages for localization filtering, sorted by preference
     /// </summary>
     public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
+
+    public DateTimeOffset? VisibleAfter { get; set; }
+    public DateTimeOffset? ExpiresBefore { get; set; }
 }

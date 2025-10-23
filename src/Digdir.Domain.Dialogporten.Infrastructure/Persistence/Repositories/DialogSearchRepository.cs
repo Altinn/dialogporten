@@ -43,7 +43,6 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             return new PaginatedList<DialogEntity>([], false, null, IdDescendingOrder.GetOrderString());
         }
 
-        var now = DateTimeOffset.UtcNow;
         var partiesAndServices = JsonSerializer.Serialize(authorizedResources.ResourcesByParties
             .Select(x => (party: x.Key, services: x.Value))
             .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
@@ -82,8 +81,8 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
                     FROM "Dialog" d
                     INNER JOIN accessibleDialogs a ON d."Id" = a.dialogId
                     WHERE ({query.Deleted} IS NULL OR d."Deleted" = {query.Deleted}::boolean)
-                       AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" < {now}::timestamptz)
-                       AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {now}::timestamptz)
+                       AND ({query.VisibleAfter} IS NULL OR d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz)
+                       AND ({query.ExpiresBefore} IS NULL OR d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz)
                        AND ({query.Org} IS NULL OR d."Org" = ANY({query.Org}::text[]))
                        AND ({query.ServiceResource} IS NULL OR d."ServiceResource" = ANY({query.ServiceResource}::text[]))
                        AND ({query.Party} IS NULL OR d."Party" = ANY({query.Party}::text[]))
@@ -186,70 +185,6 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
                 .Build();
     }
 
-    // public IQueryable<DialogEntity> FullTextSearch(IQueryable<DialogEntity> query,
-    //     string? search,
-    //     IOrderSet<DialogEntity>? order = null,
-    //     IContinuationTokenSet? continuationTokenSet = null,
-    //     int limit = 1000)
-    // {
-    //     const int searchSampleLimit = 10_000;
-    //     if (search == null) return query;
-    //     order ??= IdDescendingOrder;
-    //
-    //     // order = new OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>(
-    //     // [
-    //     //     new Order<DialogEntity>("createdAt", new OrderSelector<DialogEntity>(x => x.CreatedAt)),
-    //     //     new Order<DialogEntity>("id", new OrderSelector<DialogEntity>(x => x.Id))
-    //     // ]);
-    //
-    //     var paginatedSearchSampleQuery = query
-    //         // Apply pagination to limit/scope the number of records to be searched
-    //         .ApplyCondition(order, null) // TODO: Add continuation token
-    //         .ApplyOrder(order)
-    //
-    //         // Left join with DialogSearch to perform full-text search
-    //         .GroupJoin(_db.Set<DialogSearch>(), x => x.Id, x => x.DialogId, (d, s) => new { d, s })
-    //         .SelectMany(t => t.s.DefaultIfEmpty(), (d, s) => new { d.d, s })
-    //         .Where(t => t.s!.SearchVector.Matches(EF.Functions.WebSearchToTsQuery(search)))
-    //
-    //         // Only take a limited number of search results to optimize performance of full text search ranking
-    //         .Take(searchSampleLimit)
-    //         .Select(t => new { Dialog = t.d, t.s!.SearchVector });
-    //
-    //     var outerQuery = _db.Dialogs
-    //         .IgnoreQueryFilters()
-    //         .SelectMany(x => paginatedSearchSampleQuery.Where(y => y.Dialog.Id == x.Id))
-    //         .OrderByDescending(x => x.SearchVector.Rank(EF.Functions.WebSearchToTsQuery(search)))
-    //         .Select(x => x.Dialog)
-    //         .Take(limit + 1);
-    //
-    //     // If the user has not specified a custom order, we order by the search rank
-    //     outerQuery = order != IdDescendingOrder
-    //         ? outerQuery.ApplyOrder(order)
-    //         : outerQuery;
-    //
-    //     var items = await outerQuery.ToArrayAsync();
-    //
-    //     // Fetch one more item than requested to determine if there is a next page
-    //     var hasNextPage = items.Length > limit;
-    //     if (hasNextPage)
-    //     {
-    //         Array.Resize(ref items, limit);
-    //     }
-    //
-    //     var nextContinuationToken = order.GetContinuationTokenFrom(items
-    //             .AsQueryable()
-    //             .ApplyOrder(order)
-    //             .LastOrDefault())
-    //         ?? continuationTokenSet?.Raw;
-    //
-    //     return new PaginatedList<DialogEntity>(
-    //         items,
-    //         hasNextPage,
-    //         @continue: nextContinuationToken,
-    //         orderBy: order.GetOrderString());
-    // }
-
     //language=PostgreSQL
     private const string FreeTextSearchIndexerSql =
         """
@@ -326,16 +261,3 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             "SearchVector" = EXCLUDED."SearchVector";
         """;
 }
-
-internal class MyObject
-{
-    public Guid Id { get; set; }
-    public List<SomethingMore> SomethingMores { get; set; } = null!;
-}
-
-internal class SomethingMore
-{
-    public Guid Id { get; set; }
-}
-
-

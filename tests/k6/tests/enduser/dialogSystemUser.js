@@ -29,11 +29,10 @@ export default function () {
         expect(purgeResponse.status, 'response status').to.equal(204);
     });
 
-
     describe('SystemUser with empty party list', () => {
         // Arrange
         let dialog = dialogToInsert();
-        let title = "system titles";
+        let title = "system-title";
         let defaultParty = "urn:altinn:person:identifier-no:" + getDefaultEnduserSsn();
         setVisibleFrom(dialog, null);
         setTitle(dialog, title);

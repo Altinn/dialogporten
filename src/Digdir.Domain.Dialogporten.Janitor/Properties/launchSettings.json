@@ -20,6 +20,13 @@
         "DOTNET_ENVIRONMENT": "Development"
       },
       "commandLineArgs": "reindex-dialogsearch -f"
+    },
+    "aggregate-cost-metrics": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "aggregate-cost-metrics"
     }
   }
 }

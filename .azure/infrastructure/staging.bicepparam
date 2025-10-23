@@ -28,13 +28,14 @@ param appInsightsSku = {
 }
 param postgresConfiguration = {
   sku: {
-    name: 'Standard_D4ads_v5'
+    name: 'Standard_D8ads_v5'
     tier: 'GeneralPurpose'
   }
   storage: {
     storageSizeGB: 256
     autoGrow: 'Enabled'
     type: 'Premium_LRS'
+    tier: 'P20'
   }
   enableIndexTuning: true
   enableQueryPerformanceInsight: true

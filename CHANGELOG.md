@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.88.0](https://github.com/Altinn/dialogporten/compare/v1.87.2...v1.88.0) (2025-10-24)
+
+
+### Features
+
+* **search:** Add support for rebuilding dialog search index ([#2849](https://github.com/Altinn/dialogporten/issues/2849)) ([9346d4a](https://github.com/Altinn/dialogporten/commit/9346d4a217cd41eb44e4fc9339e9c99b763672bf))
+
+
+### Bug Fixes
+
+* **reindex-dialogsearch:** apply more logging ([#2927](https://github.com/Altinn/dialogporten/issues/2927)) ([cc2f3ae](https://github.com/Altinn/dialogporten/commit/cc2f3aef0f52ed6388e7c3891d70a60715a1cf95))
+* **webapi:** distinguish enduserid on SO search feature metrics ([#2918](https://github.com/Altinn/dialogporten/issues/2918)) ([566a392](https://github.com/Altinn/dialogporten/commit/566a392f8a4ea2a9f788ce69ffd102691f871691))
+
+
+### Miscellaneous Chores
+
+* **actions:** Add bicep/workflows for starting reindexing ([#2860](https://github.com/Altinn/dialogporten/issues/2860)) ([e2e9bc7](https://github.com/Altinn/dialogporten/commit/e2e9bc768aebcceb15fce721e80bb1d4f34f07de))
+* **app:** set redis health check failure status to degraded ([#2915](https://github.com/Altinn/dialogporten/issues/2915)) ([e0ffb56](https://github.com/Altinn/dialogporten/commit/e0ffb56181d03a8fbb37386ff562f3700a7c7194))
+* ensure input params are parsed correctly ([#2924](https://github.com/Altinn/dialogporten/issues/2924)) ([2ff566b](https://github.com/Altinn/dialogporten/commit/2ff566ba52b7bbcc5bd4901fb548e33ad94cefc0)), closes [#2860](https://github.com/Altinn/dialogporten/issues/2860)
+* fix cli input params in reindex dispatch ([#2925](https://github.com/Altinn/dialogporten/issues/2925)) ([c0e2924](https://github.com/Altinn/dialogporten/commit/c0e292456f7d87d9e09a5303642348faa2eddddd))
+* fix params for reindex dispatch ([#2926](https://github.com/Altinn/dialogporten/issues/2926)) ([c393dd4](https://github.com/Altinn/dialogporten/commit/c393dd467284bdff1ea525b73ed682e1a6cf63bb))
+
 ## [1.87.2](https://github.com/Altinn/dialogporten/compare/v1.87.1...v1.87.2) (2025-10-22)
 
 

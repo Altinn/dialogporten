@@ -143,10 +143,6 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             .IgnoreQueryFilters()
             .AsNoTracking();
 
-        // TODO: Add content
-        // TODO: Add DialogEndUserContextSystemLabels
-        // TODO: Add SeenLog
-
         var dialogs = await efQuery.ToPaginatedListAsync(
             query.OrderBy ?? IdDescendingOrder,
             query.ContinuationToken,
@@ -156,33 +152,6 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             cancellationToken);
 
         return dialogs;
-
-        // var dialogIds = dialogs.Select(x => x.Id).ToArray();
-        // var guiAttachmentCountByDialogId = await _db.DialogAttachments
-        //     .Where(x => dialogIds.Contains(x.DialogId))
-        //     .Where(x => x.Urls.Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))
-        //     .GroupBy(x => x.DialogId)
-        //     .Select(g => new { DialogId = g.Key, GuiAttachmentCount = g.Count() })
-        //     .ToDictionaryAsync(x => x.DialogId, x => x.GuiAttachmentCount, cancellationToken);
-
-        // .Include(x => x.Content.Where(c => c.Type.OutputInList))
-        // .Include(x => x.EndUserContext.DialogEndUserContextSystemLabels)
-        // .Include(x => x.SeenLog
-        //     .Where(l => l.CreatedAt >= l.Dialog.CreatedAt ||
-        //                 l.CreatedAt >= l.Dialog.ContentUpdatedAt)
-        //     .OrderByDescending(sl => sl.CreatedAt))
-        // .Include(x => x.Activities.OrderByDescending(a => a.CreatedAt).ThenByDescending(a => a.Id).Take(1));
-    }
-
-    public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<DialogEntity>
-    {
-        public static IOrderOptions<DialogEntity> Configure(IOrderOptionsBuilder<DialogEntity> options) =>
-            options.AddId(x => x.Id)
-                .AddDefault("createdAt", x => x.CreatedAt)
-                .AddOption("updatedAt", x => x.UpdatedAt)
-                .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
-                .AddOption("dueAt", x => x.DueAt)
-                .Build();
     }
 
     //language=PostgreSQL

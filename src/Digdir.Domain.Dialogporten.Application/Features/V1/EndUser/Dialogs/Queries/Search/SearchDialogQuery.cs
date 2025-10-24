@@ -11,7 +11,10 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
+using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -21,7 +24,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 
-public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>, IRequest<SearchDialogResult>, IFeatureMetricServiceResourceIgnoreRequest
+public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, DialogEntity>, IRequest<SearchDialogResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     private readonly string? _searchLanguageCode;
 
@@ -130,17 +133,6 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
-public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<IntermediateDialogDto>
-{
-    public static IOrderOptions<IntermediateDialogDto> Configure(IOrderOptionsBuilder<IntermediateDialogDto> options) =>
-        options.AddId(x => x.Id)
-            .AddDefault("createdAt", x => x.CreatedAt)
-            .AddOption("updatedAt", x => x.UpdatedAt)
-            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
-            .AddOption("dueAt", x => x.DueAt)
-            .Build();
-}
-
 [GenerateOneOf]
 public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogDto>, ValidationError, Forbidden>;
 
@@ -188,7 +180,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             VisibleAfter = now,
             ExpiresBefore = now,
             Deleted = false,
-            // OrderBy = request.OrderBy,
+            OrderBy = request.OrderBy,
             ContinuationToken = request.ContinuationToken,
             Limit = request.Limit!.Value,
             ContentUpdatedAfter = request.ContentUpdatedAfter,
@@ -213,44 +205,133 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             Status = request.Status,
         }, authorizedResources, cancellationToken);
 
-        var paginatedList = await _db.Dialogs
-            .PrefilterAuthorizedDialogs(authorizedResources)
-            .AsNoTracking()
-            .Include(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
-            .WhereIf(!request.Org.IsNullOrEmpty(), x => request.Org!.Contains(x.Org))
-            .WhereIf(!request.ServiceResource.IsNullOrEmpty(), x => request.ServiceResource!.Contains(x.ServiceResource))
-            .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
-            .WhereIf(!request.ExtendedStatus.IsNullOrEmpty(), x => x.ExtendedStatus != null && request.ExtendedStatus!.Contains(x.ExtendedStatus))
-            .WhereIf(!string.IsNullOrWhiteSpace(request.ExternalReference),
-                x => x.ExternalReference != null && request.ExternalReference == x.ExternalReference)
-            .WhereIf(!request.Status.IsNullOrEmpty(), x => request.Status!.Contains(x.StatusId))
-            .WhereIf(request.CreatedAfter.HasValue, x => request.CreatedAfter <= x.CreatedAt)
-            .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
-            .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
-            .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
-            .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
-            .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
-            .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
-            .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
-            .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
-            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
-                request.SystemLabel!.All(label =>
-                    x.EndUserContext.DialogEndUserContextSystemLabels
-                        .Any(sl => sl.SystemLabelId == label)))
-            .WhereIf(request.Search is not null, x =>
-                x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
-                x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
-            )
-            .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
-            .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
-            .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
-            .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
-            .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
+        var dialogIds = dialogs.Items.Select(x => x.Id).ToArray();
+        var guiAttachmentCountByDialogId = await _db.DialogAttachments.AsNoTracking()
+            .Where(x => dialogIds.Contains(x.DialogId))
+            .Where(x => x.Urls.Any(url => url.ConsumerTypeId == AttachmentUrlConsumerType.Values.Gui))
+            .GroupBy(x => x.DialogId)
+            .ToDictionaryAsync(x => x.Key, x => x.Count(), cancellationToken);
+        var contentByDialogId = await _db.DialogContents.AsNoTracking()
+            .Where(x => dialogIds.Contains(x.DialogId))
+            .Where(c => c.Type.OutputInList)
+            .Include(x => x.Value.Localizations)
+            .GroupBy(x => x.DialogId)
+            .ToDictionaryAsync(x => x.Key, x => x.ToList(), cancellationToken);
+        var systemLabelsByDialogId = await _db.DialogEndUserContexts.AsNoTracking()
+            .Where(x => dialogIds.Contains(x.DialogId!.Value))
+            .GroupBy(x => x.DialogId)
+            .ToDictionaryAsync(x => x.Key!.Value, x => x
+                .Select(g => new DialogEndUserContextDto
+                {
+                    Revision = g.Revision,
+                    SystemLabels = g.DialogEndUserContextSystemLabels
+                        .Select(l => l.SystemLabelId)
+                        .ToList()
+                })
+                .First(), cancellationToken);
+        var seenLogsByDialogId = await _db.DialogSeenLog.AsNoTracking()
+            .Where(x => dialogIds.Contains(x.DialogId))
+            // Do not need to filter on dialog.UpdatedAt because dialog.ContentUpdatedAt is always
+            // before or equal to dialog.UpdatedAt
+            .Where(l => l.CreatedAt >= l.Dialog.ContentUpdatedAt)
+            .Include(x => x.SeenBy.ActorNameEntity)
+            .GroupBy(x => x.DialogId)
+            .ToDictionaryAsync(x => x.Key, x => x
+                .Select(g => new DialogSeenLogDto
+                {
+                    SeenAt = g.CreatedAt,
+                    Id = g.Id,
+                    IsViaServiceOwner = g.IsViaServiceOwner,
+                    SeenBy = new ActorDto
+                    {
+                        ActorId = g.SeenBy.ActorNameEntity!.ActorId,
+                        ActorName = g.SeenBy.ActorNameEntity!.Name,
+                        ActorType = g.SeenBy.ActorTypeId
+                    }
+                })
+                .ToList(), cancellationToken);
 
-        paginatedList.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguages));
+        var currentUserId = _userRegistry.GetCurrentUserId().ExternalIdWithPrefix;
+        foreach (var item in seenLogsByDialogId.Values.SelectMany(x => x))
+        {
+            item.IsCurrentEndUser = item.SeenBy.ActorId == currentUserId;
+            item.SeenBy.ActorId = IdentifierMasker.GetMaybeMaskedIdentifier(item.SeenBy.ActorId);
+        }
 
-        foreach (var dialog in paginatedList.Items)
+        var latestActivitiesByDialogId = await _db.DialogActivities.AsNoTracking()
+            .Where(x => dialogIds.Contains(x.DialogId))
+            .GroupBy(x => x.DialogId)
+            .ToDictionaryAsync(x => x.Key, x => x
+                .OrderByDescending(a => a.CreatedAt)
+                .ThenByDescending(a => a.Id)
+                .Select(a => new DialogActivityDto
+                {
+                    Id = a.Id,
+                    CreatedAt = a.CreatedAt,
+                    Type = a.TypeId,
+                    ExtendedType = a.ExtendedType,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorId = a.PerformedBy.ActorNameEntity!.ActorId,
+                        ActorName = a.PerformedBy.ActorNameEntity!.Name,
+                        ActorType = a.PerformedBy.ActorTypeId
+                    },
+                    TransmissionId = a.TransmissionId,
+                    Description = a.Description!.Localizations
+                        .Select(l => new LocalizationDto
+                        {
+                            LanguageCode = l.LanguageCode,
+                            Value = l.Value
+                        })
+                        .ToList()
+                })
+                .FirstOrDefault(), cancellationToken);
+
+        foreach (var item in latestActivitiesByDialogId.Values
+                     .Where(x => x is not null)
+                     .Select(x => x!.PerformedBy))
+        {
+            item.ActorId = IdentifierMasker.GetMaybeMaskedIdentifier(item.ActorId);
+        }
+
+        // var paginatedList = await _db.Dialogs
+        //     .PrefilterAuthorizedDialogs(authorizedResources)
+        //     .AsNoTracking()
+        //     .Include(x => x.Content)
+        //         .ThenInclude(x => x.Value.Localizations)
+        //     .WhereIf(!request.Org.IsNullOrEmpty(), x => request.Org!.Contains(x.Org))
+        //     .WhereIf(!request.ServiceResource.IsNullOrEmpty(), x => request.ServiceResource!.Contains(x.ServiceResource))
+        //     .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
+        //     .WhereIf(!request.ExtendedStatus.IsNullOrEmpty(), x => x.ExtendedStatus != null && request.ExtendedStatus!.Contains(x.ExtendedStatus))
+        //     .WhereIf(!string.IsNullOrWhiteSpace(request.ExternalReference),
+        //         x => x.ExternalReference != null && request.ExternalReference == x.ExternalReference)
+        //     .WhereIf(!request.Status.IsNullOrEmpty(), x => request.Status!.Contains(x.StatusId))
+        //     .WhereIf(request.CreatedAfter.HasValue, x => request.CreatedAfter <= x.CreatedAt)
+        //     .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
+        //     .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
+        //     .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
+        //     .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
+        //     .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
+        //     .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
+        //     .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
+        //     .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
+        //     .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
+        //         request.SystemLabel!.All(label =>
+        //             x.EndUserContext.DialogEndUserContextSystemLabels
+        //                 .Any(sl => sl.SystemLabelId == label)))
+        //     .WhereIf(request.Search is not null, x =>
+        //         x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
+        //         x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
+        //     )
+        //     .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
+        //     .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
+        //     .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
+        //     .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
+        //     .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
+
+        dialogs.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguages));
+
+        foreach (var dialog in dialogs.Items)
         {
             // This filtering cannot be done in AutoMapper using ProjectTo
             dialog.SeenSinceLastContentUpdate = dialog.SeenSinceLastContentUpdate
@@ -261,20 +342,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 .ToList();
         }
 
-        var seenLogs = paginatedList.Items
-            .SelectMany(x => x.SeenSinceLastContentUpdate)
-            .Concat(paginatedList.Items.SelectMany(x => x.SeenSinceLastUpdate))
-            .ToList();
-
-        foreach (var seenLog in seenLogs)
-        {
-            seenLog.IsCurrentEndUser = IdentifierMasker
-                .GetMaybeMaskedIdentifier(_userRegistry
-                    .GetCurrentUserId()
-                    .ExternalIdWithPrefix) == seenLog.SeenBy.ActorId;
-        }
-
-        var serviceResources = paginatedList.Items
+        var serviceResources = dialogs.Items
             .Select(x => x.ServiceResource)
             .Distinct()
             .ToList();
@@ -283,7 +351,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .Where(x => serviceResources.Contains(x.Resource))
             .ToDictionaryAsync(x => x.Resource, x => x.MinimumAuthenticationLevel, cancellationToken);
 
-        foreach (var dialog in paginatedList.Items)
+        foreach (var dialog in dialogs.Items)
         {
             if (!resourcePolicyInformation.TryGetValue(dialog.ServiceResource, out var minimumAuthenticationLevel))
             {
@@ -296,6 +364,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             }
         }
 
-        return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
+        return dialogs.ConvertTo(_mapper.Map<DialogDto>);
     }
 }

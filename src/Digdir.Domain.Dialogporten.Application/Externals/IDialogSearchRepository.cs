@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -19,10 +20,21 @@ public interface IDialogSearchRepository
         CancellationToken cancellationToken);
 }
 
+public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<DialogEntity>
+{
+    public static IOrderOptions<DialogEntity> Configure(IOrderOptionsBuilder<DialogEntity> options) =>
+        options.AddId(x => x.Id)
+            .AddDefault("createdAt", x => x.CreatedAt)
+            .AddOption("updatedAt", x => x.UpdatedAt)
+            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
+            .AddOption("dueAt", x => x.DueAt)
+            .Build();
+}
+
 public class GetDialogsQuery
 {
     public required bool Deleted { get; set; }
-    public IOrderSet<DialogEntity>? OrderBy { get; set; }
+    public OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>? OrderBy { get; set; }
     public IContinuationTokenSet? ContinuationToken { get; set; }
     public int Limit { get; set; } = 100;
 

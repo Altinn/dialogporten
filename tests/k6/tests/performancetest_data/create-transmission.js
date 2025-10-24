@@ -72,8 +72,7 @@ export function transmissionToInsertSkd(relatedTransmissionId, orgNo) {
       "extendedType": "string",
       "type": "Information",
       "sender": {
-          "actorType": "partyRepresentative",
-          "actorId": "urn:altinn:organization:identifier-no:" + orgNo,
+          "actorType": "serviceOwner"
       },
       "content": {
           "title": {

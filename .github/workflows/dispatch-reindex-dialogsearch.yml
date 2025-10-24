@@ -52,7 +52,7 @@ on:
         default: 268435456
         type: number
 
-run-name: Reindex of dialogsearch ${{ inputs.environment }} (image ${{ inputs.imageTag }})
+run-name: Reindex of dialogsearch ${{ inputs.environment }} (${{ inputs.mode }})
 
 concurrency:
   group: dispatch-reindex-dialogsearch-${{ inputs.environment }}

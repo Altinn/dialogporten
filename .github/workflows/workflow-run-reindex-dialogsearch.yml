@@ -150,7 +150,7 @@ jobs:
             az containerapp job start \
               --name "${JOB_NAME}" \
               --resource-group "${RESOURCE_GROUP}" \
-              --args ${COMMAND_ARGS[@]}
+              --args "${COMMAND_ARGS[*]}"
 
             echo "Job ${JOB_NAME} started"
 

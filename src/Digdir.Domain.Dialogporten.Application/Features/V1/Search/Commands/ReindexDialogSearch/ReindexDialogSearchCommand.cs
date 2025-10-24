@@ -42,7 +42,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
     {
         _logger.LogInformation(
             "ReindexDialogSearchCommand handler started. Mode: Full={Full}, Since={Since}, Resume={Resume}, StaleOnly={StaleOnly}, StaleFirst={StaleFirst}, BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}",
-            request.Full, request.Since, request.Resume, request.StaleOnly, request.StaleFirst, 
+            request.Full, request.Since, request.Resume, request.StaleOnly, request.StaleFirst,
             request.BatchSize, request.Workers, request.ThrottleMs, request.WorkMemBytes);
 
         var options = BuildOptions(request);

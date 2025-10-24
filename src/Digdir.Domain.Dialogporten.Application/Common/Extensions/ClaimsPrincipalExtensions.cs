@@ -23,10 +23,13 @@ public static class ClaimsPrincipalExtensions
     private const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
-    public const string AltinnOrgClaim = "urn:altinn:org";
-    public const string ScopeClaim = "scope";
+    private const string AltinnUserIdClaim = "urn:altinn:userid";
+    private const string AltinnAuthenticationMethod = "urn:altinn:authenticatemethod";
+    private const string SelfIdentifiedAuthenticationMethod = "SelfIdentified";
     private const char ScopeClaimSeparator = ' ';
     private const string PidClaim = "pid";
+    public const string ScopeClaim = "scope";
+    public const string AltinnOrgClaim = "urn:altinn:org";
 
     public static bool TryGetClaimValue(this ClaimsPrincipal claimsPrincipal, string claimType,
         [NotNullWhen(true)] out string? value)
@@ -145,6 +148,11 @@ public static class ClaimsPrincipalExtensions
         }
     }
 
+    public static bool TryGetSelfIdentifiedUserId(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? altinnUserId)
+        => claimsPrincipal.TryGetClaimValue(AltinnUserIdClaim, out altinnUserId)
+           && claimsPrincipal.TryGetClaimValue(AltinnAuthenticationMethod, out var authMethod)
+           && authMethod == SelfIdentifiedAuthenticationMethod;
+
     public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
     {
         if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level) && level >= 0)
@@ -218,6 +226,11 @@ public static class ClaimsPrincipalExtensions
             return (UserIdType.ServiceOwner, externalId);
         }
 
+        if (claimsPrincipal.TryGetSelfIdentifiedUserId(out externalId))
+        {
+            return (UserIdType.SelfIdentifiedUser, externalId);
+        }
+
         return (UserIdType.Unknown, string.Empty);
     }
 
@@ -235,6 +248,9 @@ public static class ClaimsPrincipalExtensions
             UserIdType.SystemUser
                 => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
                     ? systemUserId : null,
+            UserIdType.SelfIdentifiedUser
+                => AltinnUserIdentifier.TryParse(externalId, out var altinnUserId)
+                    ? altinnUserId : null,
             UserIdType.Unknown => null,
             UserIdType.ServiceOwner => null,
             _ => null

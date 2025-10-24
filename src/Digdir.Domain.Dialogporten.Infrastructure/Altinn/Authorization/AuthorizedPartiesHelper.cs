@@ -7,6 +7,7 @@ internal static class AuthorizedPartiesHelper
 {
     private const string PartyTypeOrganization = "Organization";
     private const string PartyTypePerson = "Person";
+    private const string PartyTypeSelfIdentified = "SelfIdentified";
     private const string AttributeIdResource = "urn:altinn:resource";
     private const string AttributeIdRoleCode = "urn:altinn:rolecode";
     private const string AttributeIdAccessPackage = "urn:altinn:accesspackage";
@@ -35,6 +36,7 @@ internal static class AuthorizedPartiesHelper
         {
             PartyTypeOrganization => NorwegianOrganizationIdentifier.PrefixWithSeparator + dto.OrganizationNumber,
             PartyTypePerson => NorwegianPersonIdentifier.PrefixWithSeparator + dto.PersonId,
+            PartyTypeSelfIdentified => GenericPartyIdentifier.PrefixWithSeparator + dto.PartyUuid,
             _ => throw new ArgumentOutOfRangeException(nameof(dto))
         };
 
@@ -48,11 +50,12 @@ internal static class AuthorizedPartiesHelper
             {
                 PartyTypeOrganization => AuthorizedPartyType.Organization,
                 PartyTypePerson => AuthorizedPartyType.Person,
+                PartyTypeSelfIdentified => AuthorizedPartyType.SelfIdentified,
                 _ => throw new ArgumentOutOfRangeException(nameof(dto))
             },
             IsDeleted = dto.IsDeleted,
             HasKeyRole = dto.AuthorizedRoles.Exists(role => KeyRoleCodes.Contains(role)),
-            IsCurrentEndUser = dto.PersonId == currentUserValue,
+            IsCurrentEndUser = dto.PersonId == currentUserValue || dto.Type == PartyTypeSelfIdentified, // Self-identified users can only represent themselves
             IsMainAdministrator = dto.AuthorizedRoles.Contains(MainAdministratorRoleCode),
             IsAccessManager = dto.AuthorizedRoles.Contains(AccessManagerRoleCode),
             HasOnlyAccessToSubParties = dto.OnlyHierarchyElementWithNoAccess,

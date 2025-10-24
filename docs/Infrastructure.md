@@ -158,6 +158,17 @@ Use the following steps:
 
 - To expose the applications through APIM, see [Common APIM Guide](CommonAPIM.md)
 
+## Manual dialog search reindex job
+
+The janitor image contains a resumable `reindex-dialogsearch` command that can be executed on demand through Azure Container Apps jobs.
+
+- **Start a run:** Trigger the `Dispatch reindex dialogsearch` workflow. Select the environment and pick the desired mode from the dropdown (`full`, `since`, `resume`, `stale-only`). Supply extra parameters such as the `since` timestamp, batch size, or worker count as needed. The job uses the currently deployed janitor image in the selected environment. The workflow verifies that no execution is currently running, then starts a new execution with the specified parameters. The GitHub run finishes immediately after the start command to avoid long blocking runs. The workflow outputs the execution ID, and progress can be monitored using the progress workflow or inspected with the Azure CLI (`az containerapp job execution list/show/logs`).
+- **Arguments:** The dispatch workflow exposes inputs for reindex mode (`full`, `since`, `resume`, `stale-only`) and parameters mirroring the CLI switches: `sinceTimestamp` (for `--since`, ISO 8601 format, e.g., `2024-08-01T00:00:00Z`), `staleFirst` (`--stale-first`), `batchSize` (`--batch-size`), `workers` (`--workers`), `throttleMs` (`--throttle-ms`), and `workMemBytes` (`--work-mem-bytes`).
+- **Avoiding overlap:** The workflow aborts if it detects an execution with status `Processing` or `Running`. If a previous run was interrupted, use the `resume` mode on the next invocation.
+- **Cancel a run:** Trigger the `Cancel reindex of dialogsearch` workflow for the relevant environment. It stops the active execution (falling back to deletion if stop is unavailable) and fails if no run is currently active.
+- **Check progress:** Trigger the `Show reindex dialogsearch progress` workflow to display the last 10 logs from the active execution. The workflow fails if no execution is currently running.
+- **Job naming:** Each environment deploys the job as `dp-be-<environment>-reindex-dialogsearch`. The job uses the regular janitor secrets (database, Redis, Application Insights) and a user-assigned managed identity identical to the scheduled janitor jobs.
+
 ## Connecting to resources in Azure
 
 There is a `ssh-jumper` virtual machine deployed with the infrastructure. This can be used to create a `ssh`-tunnel into the `vnet`. There are two ways to establish connections:

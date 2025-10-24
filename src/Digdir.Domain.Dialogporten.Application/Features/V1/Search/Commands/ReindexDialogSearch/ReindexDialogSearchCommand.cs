@@ -40,7 +40,15 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
     public async Task<ReindexDialogSearchResult> Handle(ReindexDialogSearchCommand request, CancellationToken ct)
     {
+        _logger.LogInformation(
+            "ReindexDialogSearchCommand handler started. Mode: Full={Full}, Since={Since}, Resume={Resume}, StaleOnly={StaleOnly}, StaleFirst={StaleFirst}, BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}",
+            request.Full, request.Since, request.Resume, request.StaleOnly, request.StaleFirst,
+            request.BatchSize, request.Workers, request.ThrottleMs, request.WorkMemBytes);
+
         var options = BuildOptions(request);
+        _logger.LogInformation(
+            "Reindex options configured: BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}",
+            options.BatchSize, options.Workers, options.ThrottleMs, options.WorkMemBytes);
 
         if (!request.Resume)
         {
@@ -53,13 +61,20 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
         var baselineProgress = await WithRepositoryAsync((repo, token) => repo.GetProgressAsync(token), ct);
         var baselineDone = baselineProgress.Done;
+        _logger.LogInformation(
+            "Baseline progress retrieved: Total={Total}, Pending={Pending}, Done={Done}",
+            baselineProgress.Total, baselineProgress.Pending, baselineDone);
+
         var startedAtUtc = DateTimeOffset.UtcNow;
 
         var workerTasks = CreateWorkerTasks(options, request.StaleFirst, ct);
+        _logger.LogInformation("Created {WorkerCount} worker tasks", workerTasks.Count);
 
         using var progressCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         var progressTask = StartProgressLoggerAsync(startedAtUtc, baselineDone, progressCts.Token);
+        _logger.LogInformation("Progress logger started");
 
+        _logger.LogInformation("Waiting for all workers to complete...");
         await Task.WhenAll(workerTasks);
         await progressCts.CancelAsync();
         await progressTask;
@@ -84,7 +99,9 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
             "Reindex finished. Total processed by all workers: {Total}. Average speed ~{AverageSpeed:F1} dialogs/s across {Elapsed}.",
             total, averageSpeed, elapsed);
 
+        _logger.LogInformation("Starting search index optimization...");
         await OptimizeSearchIndex(ct);
+        _logger.LogInformation("Search index optimization completed");
 
         return new Success();
     }
@@ -138,6 +155,9 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
     private async Task<long> RunWorkerAsync(int workerId, Options options, bool staleFirst, CancellationToken ct)
     {
+        _logger.LogInformation("Worker #{WorkerId} starting (BatchSize={BatchSize}, StaleFirst={StaleFirst})",
+            workerId, options.BatchSize, staleFirst);
+
         long total = 0;
 
         await using var scope = _scopeFactory.CreateAsyncScope();

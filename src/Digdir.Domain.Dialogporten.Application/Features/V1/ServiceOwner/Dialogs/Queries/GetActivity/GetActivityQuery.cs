@@ -39,17 +39,21 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        var dialog = await _dbContext.Dialogs
-            .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-                .ThenInclude(x => x.PerformedBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-                .ThenInclude(x => x.Description!.Localizations)
-            .IgnoreQueryFilters()
-            .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
-                x => resourceIds.Contains(x.ServiceResource))
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        DialogEntity? dialog;
+        await using (await _dbContext.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _dbContext.Dialogs
+                .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
+                    .ThenInclude(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
+                    .ThenInclude(x => x.Description!.Localizations)
+                .IgnoreQueryFilters()
+                .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
+                    x => resourceIds.Contains(x.ServiceResource))
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: cancellationToken);
+        }
 
         if (dialog is null)
         {

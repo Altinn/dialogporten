@@ -22,7 +22,7 @@ public sealed partial class SearchSeenLogResult : OneOfBase<List<SeenLogDto>, En
 
 internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQuery, SearchSeenLogResult>
 {
-    private readonly IDialogDbContext _db;
+    private readonly IDialogDbContext _dbContext;
     private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IUserRegistry _userRegistry;
@@ -33,7 +33,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         IAltinnAuthorization altinnAuthorization,
         IUserRegistry userRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        _dbContext = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
@@ -43,14 +43,18 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
     {
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        var dialog = await _db.Dialogs
-            .AsNoTracking()
-            .Include(x => x.SeenLog)
+        DialogEntity? dialog;
+        await using (await _dbContext.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _dbContext.Dialogs
+                .AsNoTracking()
+                .Include(x => x.SeenLog)
                 .ThenInclude(x => x.SeenBy)
                 .ThenInclude(x => x.ActorNameEntity)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: cancellationToken);
+        }
 
         if (dialog is null)
         {

@@ -34,13 +34,17 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
 
     public async Task<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _dialogDbContext.Dialogs
-            .AsNoTracking()
-            .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.LabelAssignmentLogs)
-                .ThenInclude(x => x.PerformedBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+        DialogEntity? dialog;
+        await using (await _dialogDbContext.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _dialogDbContext.Dialogs
+                .AsNoTracking()
+                .Include(x => x.EndUserContext)
+                    .ThenInclude(x => x.LabelAssignmentLogs)
+                    .ThenInclude(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+        }
 
         if (dialog == null)
         {

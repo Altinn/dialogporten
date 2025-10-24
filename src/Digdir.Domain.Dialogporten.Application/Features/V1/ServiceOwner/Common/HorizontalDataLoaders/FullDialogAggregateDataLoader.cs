@@ -27,6 +27,8 @@ public sealed class FullDialogAggregateDataLoader
 
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
+        DialogEntity? ret;
+        await using var dbTransaction = await _dialogDbContext.BeginTransactionAsync(cancellationToken);
         var dialogEntity = await _dialogDbContext.Dialogs
             .Include(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
                 .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
@@ -69,13 +71,20 @@ public sealed class FullDialogAggregateDataLoader
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
             .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);
 
+        // Commit the transaction
+        await dbTransaction.CommitAsync(cancellationToken);
+
         if (dialogEntity is not null)
         {
             _dialogEntities.TryAdd(dialogId, dialogEntity);
-            return dialogEntity;
+            ret = dialogEntity;
+        }
+        else
+        {
+            ret = null;
         }
 
-        return null;
-    }
+        return ret;
 
+    }
 }

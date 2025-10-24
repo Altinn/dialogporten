@@ -155,7 +155,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
     private async Task<long> RunWorkerAsync(int workerId, Options options, bool staleFirst, CancellationToken ct)
     {
-        _logger.LogInformation("Worker #{WorkerId} starting (BatchSize={BatchSize}, StaleFirst={StaleFirst})", 
+        _logger.LogInformation("Worker #{WorkerId} starting (BatchSize={BatchSize}, StaleFirst={StaleFirst})",
             workerId, options.BatchSize, staleFirst);
 
         long total = 0;

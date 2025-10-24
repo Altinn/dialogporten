@@ -147,12 +147,49 @@ jobs:
               COMMAND_ARGS+=("${WORK_MEM_BYTES}")
             fi
 
-            az containerapp job start \
+            # Log the command arguments for debugging
+            echo "Command arguments: ${COMMAND_ARGS[*]}"
+
+            # Note: az containerapp job start --args is ignored (known Azure CLI bug)
+            # Workaround: Update the job configuration using JSON and proper array format
+            # See: https://github.com/microsoft/azure-container-apps/issues/1360
+
+            # Build a proper JSON array for the args using printf
+            ARGS_JSON=$(printf '%s\n' "${COMMAND_ARGS[@]}" | jq -R . | jq -s .)
+
+            echo "Args JSON array: ${ARGS_JSON}"
+            echo "Fetching current job configuration..."
+
+            # Get current job configuration
+            az containerapp job show \
               --name "${JOB_NAME}" \
               --resource-group "${RESOURCE_GROUP}" \
-              --args "${COMMAND_ARGS[*]}"
+              --output json > /tmp/job-config.json
+
+            # Update the args in the JSON using jq
+            jq --argjson args "${ARGS_JSON}" \
+              '.properties.template.containers[0].args = $args' \
+              /tmp/job-config.json > /tmp/job-config-updated.json
+
+            echo "Updating job configuration with new arguments..."
+            echo "New args configuration:"
+            jq '.properties.template.containers[0].args' /tmp/job-config-updated.json
+
+            # Update using the modified JSON
+            az containerapp job update \
+              --name "${JOB_NAME}" \
+              --resource-group "${RESOURCE_GROUP}" \
+              --yaml /tmp/job-config-updated.json
+
+            echo "Starting job..."
+            az containerapp job start \
+              --name "${JOB_NAME}" \
+              --resource-group "${RESOURCE_GROUP}"
 
             echo "Job ${JOB_NAME} started"
+
+            # Clean up temporary files containing job configuration
+            rm -f /tmp/job-config.json /tmp/job-config-updated.json
 
       - name: Verify execution of job
         uses: azure/CLI@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956 # v2.2.0

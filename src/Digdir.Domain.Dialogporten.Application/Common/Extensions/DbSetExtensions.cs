@@ -52,10 +52,8 @@ public static class DbSetExtensions
 
 public sealed class HashSetEqualityComparer<T> : IEqualityComparer<HashSet<T>>
 {
-    public bool Equals(HashSet<T>? x, HashSet<T>? y)
-    {
-        return ReferenceEquals(x, y) || (x is not null && y is not null && x.SetEquals(y));
-    }
+    public bool Equals(HashSet<T>? x, HashSet<T>? y) =>
+        ReferenceEquals(x, y) || (x is not null && y is not null && x.SetEquals(y));
 
     public int GetHashCode(HashSet<T> obj)
     {

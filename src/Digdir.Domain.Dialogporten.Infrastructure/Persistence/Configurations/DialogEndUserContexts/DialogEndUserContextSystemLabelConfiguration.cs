@@ -6,8 +6,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.D
 
 internal sealed class DialogEndUserContextSystemLabelConfiguration : IEntityTypeConfiguration<DialogEndUserContextSystemLabel>
 {
-    public void Configure(EntityTypeBuilder<DialogEndUserContextSystemLabel> builder)
-    {
+    public void Configure(EntityTypeBuilder<DialogEndUserContextSystemLabel> builder) =>
         builder.HasKey(x => new { x.DialogEndUserContextId, x.SystemLabelId });
-    }
 }

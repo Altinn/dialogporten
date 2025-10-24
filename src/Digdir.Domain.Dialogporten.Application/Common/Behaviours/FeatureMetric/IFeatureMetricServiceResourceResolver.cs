@@ -1,6 +1,4 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 
@@ -38,10 +36,8 @@ public interface IFeatureMetricServiceResourceThroughDialogIdRequest
 /// </summary>
 internal sealed class FeatureMetricServiceResourceThroughDialogIdRequestResolver(IFeatureMetricServiceResourceCache cache) : IFeatureMetricServiceResourceResolver<IFeatureMetricServiceResourceThroughDialogIdRequest>
 {
-    public async Task<ServiceResourceInformation?> Resolve(IFeatureMetricServiceResourceThroughDialogIdRequest request, CancellationToken cancellationToken)
-    {
-        return await cache.GetServiceResource(request.DialogId, cancellationToken);
-    }
+    public async Task<ServiceResourceInformation?> Resolve(IFeatureMetricServiceResourceThroughDialogIdRequest request, CancellationToken cancellationToken) =>
+        await cache.GetServiceResource(request.DialogId, cancellationToken);
 }
 
 /// <summary>

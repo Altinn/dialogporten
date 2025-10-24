@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.87.2](https://github.com/Altinn/dialogporten/compare/v1.87.1...v1.87.2) (2025-10-22)
+
+
+### Bug Fixes
+
+* **ci:** use valid container app job name  ([#2904](https://github.com/Altinn/dialogporten/issues/2904)) ([29ecb02](https://github.com/Altinn/dialogporten/commit/29ecb02b2a15bb61703829ce75cfa3e41cb953b4)), closes [#2377](https://github.com/Altinn/dialogporten/issues/2377)
+
+
+### Miscellaneous Chores
+
+* **deps:** update azure azure-sdk-for-net monorepo ([#2910](https://github.com/Altinn/dialogporten/issues/2910)) ([cee086e](https://github.com/Altinn/dialogporten/commit/cee086e89b886df8228e5636490d496a72c47923))
+* **deps:** update dotnet monorepo ([#2909](https://github.com/Altinn/dialogporten/issues/2909)) ([d171b1a](https://github.com/Altinn/dialogporten/commit/d171b1acd41d17ccc9f39385cf173b8a15c866c7))
+* **janitor:** Update cost metrics aggregation to use IHostEnvironment, remove deployment to test ([#2911](https://github.com/Altinn/dialogporten/issues/2911)) ([2ef77d9](https://github.com/Altinn/dialogporten/commit/2ef77d93b5b3283786da5ab5c265619964400008))
+
 ## [1.87.1](https://github.com/Altinn/dialogporten/compare/v1.87.0...v1.87.1) (2025-10-21)
 
 

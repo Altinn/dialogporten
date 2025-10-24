@@ -1,12 +1,11 @@
-using Digdir.Domain.Dialogporten.Application;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
 public sealed class CostMetricsAggregationOrchestrator
 {
-    private readonly IConfiguration _config;
+    private readonly IHostEnvironment _hostEnvironment;
     private readonly ILogger<CostMetricsAggregationOrchestrator> _logger;
     private readonly ApplicationInsightsService _applicationInsightsService;
     private readonly MetricsAggregationService _aggregationService;
@@ -14,14 +13,14 @@ public sealed class CostMetricsAggregationOrchestrator
     private readonly AzureStorageService _storageService;
 
     public CostMetricsAggregationOrchestrator(
-        IConfiguration config,
+        IHostEnvironment hostEnvironment,
         ILogger<CostMetricsAggregationOrchestrator> logger,
         ApplicationInsightsService applicationInsightsService,
         MetricsAggregationService aggregationService,
         ParquetFileService parquetService,
         AzureStorageService storageService)
     {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
+        _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _applicationInsightsService = applicationInsightsService ?? throw new ArgumentNullException(nameof(applicationInsightsService));
         _aggregationService = aggregationService ?? throw new ArgumentNullException(nameof(aggregationService));
@@ -38,18 +37,15 @@ public sealed class CostMetricsAggregationOrchestrator
 
         try
         {
-            var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development";
-
             var (startTime, endTime) = NorwegianTimeConverter.GetDayRangeInUtc(targetDate);
 
-            var allRecords = await _applicationInsightsService.QueryFeatureMetricsAsync(startTime, endTime, environment, cancellationToken);
+            var allRecords = await _applicationInsightsService.QueryFeatureMetricsAsync(startTime, endTime, _hostEnvironment.EnvironmentName, cancellationToken);
             var aggregatedRecords = _aggregationService.AggregateFeatureMetrics(allRecords);
             var parquetData = await _parquetService.GenerateParquetFileAsync(aggregatedRecords, cancellationToken);
-            var fileName = GetDateOnlyFileName(targetDate, environment);
+            var fileName = GetDateOnlyFileName(targetDate, _hostEnvironment.EnvironmentName);
 
-            var localDevSettings = _config.GetLocalDevelopmentSettings();
 
-            if (skipUpload || localDevSettings.UseLocalMetricsAggregationStorage)
+            if (skipUpload)
             {
                 await SaveLocallyAsync(parquetData, fileName, aggregatedRecords.Count, cancellationToken);
             }

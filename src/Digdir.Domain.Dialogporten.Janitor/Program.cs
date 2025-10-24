@@ -1,6 +1,6 @@
 using System.Globalization;
 using Azure.Identity;
-using Azure.Monitor.Query;
+using Azure.Monitor.Query.Logs;
 using Azure.Storage.Blobs;
 using Cocona;
 using Digdir.Domain.Dialogporten.Application;

@@ -35,8 +35,6 @@ using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.DialogSearch;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search;
 using MassTransit;
 using MediatR;
 
@@ -63,26 +61,29 @@ public static class InfrastructureExtensions
                 var connectionString = services.GetRequiredService<IOptions<InfrastructureSettings>>()
                     .Value.DialogDbConnectionString;
                 options.UseNpgsql(connectionString, o =>
-                {
-                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                })
-                .EnableSensitiveDataLogging(environment.IsDevelopment())
-                .AddInterceptors(
-                    services.GetRequiredService<PopulateActorNameInterceptor>(),
-                    services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
-                );
+                    {
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    })
+                    .EnableSensitiveDataLogging(environment.IsDevelopment())
+                    .AddInterceptors(
+                        services.GetRequiredService<PopulateActorNameInterceptor>(),
+                        services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
+                    );
             })
             .AddHostedService<FusionCacheWarmupHostedService>()
             .AddHostedService<DevelopmentMigratorHostedService>()
             .AddHostedService<DevelopmentCleanupOutboxHostedService>()
             .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()
             .AddHostedService<DevelopmentResourcePolicyInformationSyncHostedService>()
-            .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient, includeInternalTypes: true)
+            .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient,
+                includeInternalTypes: true)
             .AddPolicyRegistry((_, registry) =>
             {
                 registry.Add(PollyPolicy.DefaultHttpRetryPolicy, HttpPolicyExtensions
                     .HandleTransientHttpError()
-                    .WaitAndRetryAsync(Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: 3)));
+                    .WaitAndRetryAsync(
+                        Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1),
+                            retryCount: 3)));
             })
             .AddCustomHealthChecks()
 

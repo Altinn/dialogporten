@@ -147,32 +147,27 @@ jobs:
               COMMAND_ARGS+=("${WORK_MEM_BYTES}")
             fi
 
-            # Log the command arguments for debugging
             echo "Command arguments: ${COMMAND_ARGS[*]}"
 
             # Note: az containerapp job start --args is ignored (known Azure CLI bug)
             # Workaround: Update the job configuration using JSON and proper array format
             # See: https://github.com/microsoft/azure-container-apps/issues/1360
 
-            # Build a proper JSON array for the args using printf
             ARGS_JSON=$(printf '%s\n' "${COMMAND_ARGS[@]}" | jq -R . | jq -s .)
 
             echo "Args JSON array: ${ARGS_JSON}"
             echo "Fetching current job configuration..."
 
-            # Get current job configuration
             az containerapp job show \
               --name "${JOB_NAME}" \
               --resource-group "${RESOURCE_GROUP}" \
               --output json > /tmp/job-config.json
 
-            # Update the args in the JSON using jq
             jq --argjson args "${ARGS_JSON}" \
               '.properties.template.containers[0].args = $args' \
               /tmp/job-config.json > /tmp/job-config-updated.json
 
             echo "Updating job configuration with new arguments..."
-            echo "New args configuration:"
             jq '.properties.template.containers[0].args' /tmp/job-config-updated.json
 
             # Update using the modified JSON

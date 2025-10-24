@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -29,6 +30,17 @@ internal static class UpdateDialogCommandExtensions
         modify?.Invoke(transmission);
         command.Dto.Transmissions.Add(transmission);
         return command;
+    }
+
+    public static TransmissionDto WithPartyRepresentativeActor(this TransmissionDto transmission)
+    {
+        transmission.Sender = new ActorDto
+        {
+            ActorType = ActorType.Values.PartyRepresentative,
+            ActorName = "Fredrik",
+        };
+
+        return transmission;
     }
 
     public static UpdateDialogCommand AddGuiAction(this UpdateDialogCommand command, Action<GuiActionDto>? modify = null)

@@ -147,6 +147,14 @@ jobs:
               COMMAND_ARGS+=("${WORK_MEM_BYTES}")
             fi
 
+            set -e  # Exit on any error
+
+            # Set up cleanup trap to ensure temp files are always removed
+            cleanup() {
+              rm -f /tmp/job-config.json /tmp/job-config-updated.json
+            }
+            trap cleanup EXIT
+
             echo "Command arguments: ${COMMAND_ARGS[*]}"
 
             # Note: az containerapp job start --args is ignored (known Azure CLI bug)
@@ -174,17 +182,14 @@ jobs:
             az containerapp job update \
               --name "${JOB_NAME}" \
               --resource-group "${RESOURCE_GROUP}" \
-              --yaml /tmp/job-config-updated.json
+              --yaml /tmp/job-config-updated.json || { echo "Failed to update job configuration"; exit 1; }
 
             echo "Starting job..."
             az containerapp job start \
               --name "${JOB_NAME}" \
-              --resource-group "${RESOURCE_GROUP}"
+              --resource-group "${RESOURCE_GROUP}" || { echo "Failed to start job"; exit 1; }
 
             echo "Job ${JOB_NAME} started"
-
-            # Clean up temporary files containing job configuration
-            rm -f /tmp/job-config.json /tmp/job-config-updated.json
 
       - name: Verify execution of job
         uses: azure/CLI@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956 # v2.2.0

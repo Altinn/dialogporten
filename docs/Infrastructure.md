@@ -167,7 +167,7 @@ The janitor image contains a resumable `reindex-dialogsearch` command that can b
 - **Avoiding overlap:** The workflow aborts if it detects an execution with status `Processing` or `Running`. If a previous run was interrupted, use the `resume` mode on the next invocation.
 - **Cancel a run:** Trigger the `Cancel reindex of dialogsearch` workflow for the relevant environment. It stops the active execution (falling back to deletion if stop is unavailable) and fails if no run is currently active.
 - **Check progress:** Trigger the `Show reindex dialogsearch progress` workflow to display the last 10 logs from the active execution. The workflow fails if no execution is currently running.
-- **Job naming:** Each environment deploys the job as `dp-be-<environment>-reindex-dialogsearch`. The job uses the regular janitor secrets (database, Redis, Application Insights) and a user-assigned managed identity identical to the scheduled janitor jobs.
+- **Job naming:** Each environment deploys the job as `dp-be-<environment>-reindex-search`. The job uses the regular janitor secrets (database, Redis, Application Insights) and a user-assigned managed identity identical to the scheduled janitor jobs.
 
 ## Connecting to resources in Azure
 

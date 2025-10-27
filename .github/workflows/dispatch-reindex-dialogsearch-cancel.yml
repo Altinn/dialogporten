@@ -31,7 +31,7 @@ jobs:
       id-token: write
       contents: read
     env:
-      JOB_NAME: dp-be-${{ inputs.environment }}-reindex-dialogsearch
+      JOB_NAME: dp-be-${{ inputs.environment }}-reindex-search
     steps:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0

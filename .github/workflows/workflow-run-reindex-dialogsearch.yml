@@ -18,16 +18,16 @@ on:
         type: boolean
       batchSize:
         required: true
-        type: number
+        type: string
       workers:
         required: true
-        type: number
+        type: string
       throttleMs:
         required: true
-        type: number
+        type: string
       workMemBytes:
         required: true
-        type: number
+        type: string
     secrets:
       AZURE_CLIENT_ID:
         required: true
@@ -150,7 +150,7 @@ jobs:
             az containerapp job start \
               --name "${JOB_NAME}" \
               --resource-group "${RESOURCE_GROUP}" \
-              --args "${COMMAND_ARGS[@]}"
+              --args "${COMMAND_ARGS[*]}"
 
             echo "Job ${JOB_NAME} started"
 

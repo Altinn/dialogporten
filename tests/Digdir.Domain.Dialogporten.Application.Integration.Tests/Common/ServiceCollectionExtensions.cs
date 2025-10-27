@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Microsoft.Extensions.DependencyInjection;

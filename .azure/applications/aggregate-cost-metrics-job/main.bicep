@@ -203,7 +203,9 @@ module costMetricsJob '../../modules/containerAppJob/main.bicep' = {
     secrets: secrets
     tags: tags
     cronExpression: jobSchedule
-    args: 'aggregate-cost-metrics'
+    args: [
+      'aggregate-cost-metrics'
+    ]
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
     workloadProfileName: workloadProfileName
@@ -214,3 +216,6 @@ module costMetricsJob '../../modules/containerAppJob/main.bicep' = {
     keyVaultReaderAccessPolicy
   ]
 }
+
+output identityPrincipalId string = managedIdentity.properties.principalId
+output name string = costMetricsJob.outputs.name

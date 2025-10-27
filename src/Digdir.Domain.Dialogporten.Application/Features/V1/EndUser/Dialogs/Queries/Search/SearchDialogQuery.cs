@@ -163,7 +163,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
-        var searchExpression = Expressions.LocalizedSearchExpression(request.Search, request.SearchLanguageCode);
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
             request.Party ?? [],
             request.ServiceResource ?? [],
@@ -174,36 +173,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
-        var now = _clock.NowOffset;
-        var dialogs = await _searchRepository.GetDialogs(new GetDialogsQuery
-        {
-            VisibleAfter = now,
-            ExpiresBefore = now,
-            Deleted = false,
-            OrderBy = request.OrderBy,
-            ContinuationToken = request.ContinuationToken,
-            Limit = request.Limit!.Value,
-            ContentUpdatedAfter = request.ContentUpdatedAfter,
-            ContentUpdatedBefore = request.ContentUpdatedBefore,
-            AcceptedLanguages = request.AcceptedLanguages,
-            Search = request.Search,
-            SearchLanguageCode = request.SearchLanguageCode,
-            CreatedAfter = request.CreatedAfter,
-            CreatedBefore = request.CreatedBefore,
-            DueAfter = request.DueAfter,
-            DueBefore = request.DueBefore,
-            ExcludeApiOnly = request.ExcludeApiOnly,
-            Process = request.Process,
-            SystemLabel = request.SystemLabel,
-            UpdatedAfter = request.UpdatedAfter,
-            UpdatedBefore = request.UpdatedBefore,
-            ExternalReference = request.ExternalReference,
-            ExtendedStatus = request.ExtendedStatus,
-            Org = request.Org,
-            Party = request.Party,
-            ServiceResource = request.ServiceResource,
-            Status = request.Status,
-        }, authorizedResources, cancellationToken);
+        var dialogs = await _searchRepository.GetDialogs(
+            request.ToGetDialogsQuery(_clock.UtcNowOffset),
+            authorizedResources,
+            cancellationToken);
 
         var dialogIds = dialogs.Items.Select(x => x.Id).ToArray();
         var guiAttachmentCountByDialogId = await _db.DialogAttachments.AsNoTracking()
@@ -365,5 +338,41 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         }
 
         return dialogs.ConvertTo(_mapper.Map<DialogDto>);
+    }
+}
+
+internal static class SearchDialogQueryExtensions
+{
+    public static GetDialogsQuery ToGetDialogsQuery(this SearchDialogQuery request, DateTimeOffset nowUtc)
+    {
+        return new GetDialogsQuery
+        {
+            VisibleAfter = nowUtc,
+            ExpiresBefore = nowUtc,
+            Deleted = false,
+            OrderBy = request.OrderBy,
+            ContinuationToken = request.ContinuationToken,
+            Limit = request.Limit!.Value,
+            ContentUpdatedAfter = request.ContentUpdatedAfter,
+            ContentUpdatedBefore = request.ContentUpdatedBefore,
+            AcceptedLanguages = request.AcceptedLanguages,
+            Search = request.Search,
+            SearchLanguageCode = request.SearchLanguageCode,
+            CreatedAfter = request.CreatedAfter,
+            CreatedBefore = request.CreatedBefore,
+            DueAfter = request.DueAfter,
+            DueBefore = request.DueBefore,
+            ExcludeApiOnly = request.ExcludeApiOnly,
+            Process = request.Process,
+            SystemLabel = request.SystemLabel,
+            UpdatedAfter = request.UpdatedAfter,
+            UpdatedBefore = request.UpdatedBefore,
+            ExternalReference = request.ExternalReference,
+            ExtendedStatus = request.ExtendedStatus,
+            Org = request.Org,
+            Party = request.Party,
+            ServiceResource = request.ServiceResource,
+            Status = request.Status,
+        };
     }
 }

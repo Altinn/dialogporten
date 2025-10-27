@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.88.1](https://github.com/Altinn/dialogporten/compare/v1.88.0...v1.88.1) (2025-10-27)
+
+
+### Bug Fixes
+
+* **ci:** shorten search reindex container app job ([#2934](https://github.com/Altinn/dialogporten/issues/2934)) ([237eb9f](https://github.com/Altinn/dialogporten/commit/237eb9fd91453223b71bc14ece9c23b15dd26232))
+
 ## [1.88.0](https://github.com/Altinn/dialogporten/compare/v1.87.2...v1.88.0) (2025-10-27)
 
 

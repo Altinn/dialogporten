@@ -254,6 +254,7 @@ jobs:
         include:
           - name: sync-subject-resource-mappings-job
           - name: sync-resource-policy-information-job
+          - name: reindex-dialogsearch-job
           - name: aggregate-cost-metrics-job
             environments: ['staging', 'prod']
     steps:

@@ -56,6 +56,7 @@ on:
           - 'tests/k6/tests/serviceowner/performance/createTransmissionsBreakpoint.js'
           - 'tests/k6/tests/serviceowner/performance/serviceownerSearchBreakpoint.js'
           - 'tests/k6/tests/serviceowner/performance/serviceOwnerShouldSendNotification.js'
+          - 'tests/k6/tests/serviceowner/performance/createDialogTransmissionActivity.js'
           - 'tests/k6/tests/enduser/performance/enduserSearchBreakpoint.js'
           - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduser.js'
           - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForParties.js'

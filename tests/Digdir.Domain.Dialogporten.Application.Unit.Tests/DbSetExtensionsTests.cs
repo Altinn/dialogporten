@@ -65,8 +65,6 @@ public class DbSetExtensionsTests
         actualParameters.Should().BeEquivalentTo(expectedParameters);
     }
 
-    private static string RemoveWhitespace(string input)
-    {
-        return string.Concat(input.Where(c => !char.IsWhiteSpace(c)));
-    }
+    private static string RemoveWhitespace(string input) =>
+        string.Concat(input.Where(c => !char.IsWhiteSpace(c)));
 }

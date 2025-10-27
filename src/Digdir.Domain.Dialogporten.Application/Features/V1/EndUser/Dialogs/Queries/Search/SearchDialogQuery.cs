@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
@@ -17,6 +18,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -188,8 +190,37 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .Where(x => dialogIds.Contains(x.DialogId))
             .Where(c => c.Type.OutputInList)
             .Include(x => x.Value.Localizations)
+            .Select(x => new
+            {
+                x.DialogId,
+                Type = x.TypeId,
+                Content = new ContentValueDto
+                {
+                    MediaType = x.MediaType,
+                    Value = x.Value.Localizations
+                        .Select(l => new LocalizationDto
+                        {
+                            LanguageCode = l.LanguageCode,
+                            Value = l.Value
+                        })
+                        .ToList()
+                }
+            })
             .GroupBy(x => x.DialogId)
-            .ToDictionaryAsync(x => x.Key, x => x.ToList(), cancellationToken);
+            .ToDictionaryAsync(x => x.Key, x => new ContentDto
+            {
+                Title = x.Select(g => g.TypeId == DialogContentType.Values.Title).Localizations
+                        .Select(l => new LocalizationDto
+                        {
+                            LanguageCode = l.LanguageCode,
+                            Value = l.Value
+                        }
+            }, cancellationToken);
+                // .Select(g => new ContentDto
+                // {
+                //     Title = g.
+                // })
+                // .ToList(), cancellationToken);
         var systemLabelsByDialogId = await _db.DialogEndUserContexts.AsNoTracking()
             .Where(x => dialogIds.Contains(x.DialogId!.Value))
             .GroupBy(x => x.DialogId)
@@ -302,40 +333,40 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         //     .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
         //     .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
 
-        dialogs.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguages));
-
-        foreach (var dialog in dialogs.Items)
-        {
-            // This filtering cannot be done in AutoMapper using ProjectTo
-            dialog.SeenSinceLastContentUpdate = dialog.SeenSinceLastContentUpdate
-                .GroupBy(log => log.SeenBy.ActorId)
-                .Select(group => group
-                    .OrderByDescending(log => log.SeenAt)
-                    .First())
-                .ToList();
-        }
-
-        var serviceResources = dialogs.Items
-            .Select(x => x.ServiceResource)
-            .Distinct()
-            .ToList();
-
-        var resourcePolicyInformation = await _db.ResourcePolicyInformation
-            .Where(x => serviceResources.Contains(x.Resource))
-            .ToDictionaryAsync(x => x.Resource, x => x.MinimumAuthenticationLevel, cancellationToken);
-
-        foreach (var dialog in dialogs.Items)
-        {
-            if (!resourcePolicyInformation.TryGetValue(dialog.ServiceResource, out var minimumAuthenticationLevel))
-            {
-                continue;
-            }
-
-            if (!_altinnAuthorization.UserHasRequiredAuthLevel(minimumAuthenticationLevel))
-            {
-                dialog.Content.SetNonSensitiveContent();
-            }
-        }
+        // dialogs.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguages));
+        //
+        // foreach (var dialog in dialogs.Items)
+        // {
+        //     // This filtering cannot be done in AutoMapper using ProjectTo
+        //     dialog.SeenSinceLastContentUpdate = dialog.SeenSinceLastContentUpdate
+        //         .GroupBy(log => log.SeenBy.ActorId)
+        //         .Select(group => group
+        //             .OrderByDescending(log => log.SeenAt)
+        //             .First())
+        //         .ToList();
+        // }
+        //
+        // var serviceResources = dialogs.Items
+        //     .Select(x => x.ServiceResource)
+        //     .Distinct()
+        //     .ToList();
+        //
+        // var resourcePolicyInformation = await _db.ResourcePolicyInformation
+        //     .Where(x => serviceResources.Contains(x.Resource))
+        //     .ToDictionaryAsync(x => x.Resource, x => x.MinimumAuthenticationLevel, cancellationToken);
+        //
+        // foreach (var dialog in dialogs.Items)
+        // {
+        //     if (!resourcePolicyInformation.TryGetValue(dialog.ServiceResource, out var minimumAuthenticationLevel))
+        //     {
+        //         continue;
+        //     }
+        //
+        //     if (!_altinnAuthorization.UserHasRequiredAuthLevel(minimumAuthenticationLevel))
+        //     {
+        //         dialog.Content.SetNonSensitiveContent();
+        //     }
+        // }
 
         return dialogs.ConvertTo(_mapper.Map<DialogDto>);
     }

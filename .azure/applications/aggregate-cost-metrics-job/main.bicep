@@ -216,6 +216,3 @@ module costMetricsJob '../../modules/containerAppJob/main.bicep' = {
     keyVaultReaderAccessPolicy
   ]
 }
-
-output identityPrincipalId string = managedIdentity.properties.principalId
-output name string = costMetricsJob.outputs.name

@@ -11,3 +11,4 @@ param storageContainerName = 'costmetrics'
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')
 param appInsightConnectionString = readEnvironmentVariable('AZURE_APP_INSIGHTS_CONNECTION_STRING')
 param azureSubscriptionId = readEnvironmentVariable('AZURE_SUBSCRIPTION_ID')
+param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_VAULT_NAME')

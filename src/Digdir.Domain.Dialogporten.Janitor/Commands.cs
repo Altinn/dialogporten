@@ -2,6 +2,7 @@ using Cocona;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Search.Commands.ReindexDialogSearch;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +43,59 @@ internal static class Commands
                 return result.Match(
                     success => 0,
                     validationError => -1);
+            });
+
+        app.AddCommand("reindex-dialogsearch", async (
+                [FromService] CoconaAppContext ctx,
+                [FromService] ISender application,
+                [FromService] ILogger<CoconaApp> logger,
+                [Option('f', Description = "Force full reindex (seed all)")] bool full,
+                [Option('s', Description = "Reindex dialogs with Dialog.UpdatedAt >= <timestamp> (UTC)")] DateTimeOffset? since,
+                [Option('r', Description = "Resume previously started reindex (do not reseed)")] bool resume,
+                [Option('o', Description = "Seed only stale dialogs (missing/outdated)")] bool staleOnly,
+                [Option("stale-first", Description = "Prioritize stale dialogs first")] bool staleFirst,
+                [Option('b', Description = "Batch size per worker (default 1000)")] int? batchSize,
+                [Option('w', Description = "Number of parallel workers (default 1)")] int? workers,
+                [Option("throttle-ms", Description = "Sleep between batches per worker (ms)")] int? throttleMs,
+                [Option("work-mem-bytes", Description = "work_mem per worker (default 268435456 bytes = 256MB)")] long? workMemBytes)
+            =>
+            {
+                logger.LogInformation(
+                    "Starting reindex-dialogsearch command with parameters: Full={Full}, Since={Since}, Resume={Resume}, StaleOnly={StaleOnly}, StaleFirst={StaleFirst}, BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}",
+                    full, since, resume, staleOnly, staleFirst, batchSize, workers, throttleMs, workMemBytes);
+
+                try
+                {
+                    var result = await application.Send(new ReindexDialogSearchCommand
+                    {
+                        Full = full,
+                        Since = since,
+                        Resume = resume,
+                        StaleOnly = staleOnly,
+                        StaleFirst = staleFirst,
+                        BatchSize = batchSize,
+                        Workers = workers,
+                        ThrottleMs = throttleMs,
+                        WorkMemBytes = workMemBytes
+                    }, ctx.CancellationToken);
+
+                    return result.Match(
+                        success =>
+                        {
+                            logger.LogInformation("Reindex-dialogsearch command completed successfully");
+                            return 0;
+                        },
+                        validationError =>
+                        {
+                            logger.LogError("Reindex-dialogsearch command failed with validation error: {@ValidationError}", validationError);
+                            return -1;
+                        });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Reindex-dialogsearch command failed with exception: {Message}", ex.Message);
+                    throw;
+                }
             });
 
         app.AddCommand("aggregate-cost-metrics", async (

@@ -117,7 +117,9 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     secrets: secrets
     tags: tags
     cronExpression: jobSchedule
-    args: 'sync-resource-policy-information'
+    args: [
+      'sync-resource-policy-information'
+    ]
     userAssignedIdentityId: managedIdentity.id
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
     workloadProfileName: workloadProfileName

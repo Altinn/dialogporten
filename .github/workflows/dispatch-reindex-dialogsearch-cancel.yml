@@ -1,0 +1,83 @@
+name: Cancel reindex of dialogsearch
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to cancel the reindex job in"
+        required: true
+        type: choice
+        options:
+          - test
+          - yt01
+          - staging
+          - prod
+
+run-name: Cancel reindex of dialogsearch ${{ inputs.environment }}
+
+concurrency:
+  group: cancel-reindex-dialogsearch-${{ inputs.environment }}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  cancel-reindex-dialogsearch:
+    name: Cancel reindex of dialogsearch (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      JOB_NAME: dp-be-${{ inputs.environment }}-reindex-dialogsearch
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Cancel active reindex dialogsearch execution
+        shell: bash
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+        run: |
+          set -euo pipefail
+
+          az extension add --name containerapp --allow-preview --upgrade -y
+
+          execution_name="$(az containerapp job execution list \
+            --name "${JOB_NAME}" \
+            --resource-group "${RESOURCE_GROUP}" \
+            --query "[?properties.status=='Running' || properties.status=='Processing'] | [0].name" \
+            --output tsv || true)"
+
+          if [[ -z "${execution_name}" ]]; then
+            echo "No active execution found for ${JOB_NAME}"
+            exit 1
+          fi
+
+          echo "Stopping execution ${execution_name} for ${JOB_NAME}"
+
+          if ! az containerapp job execution stop \
+            --name "${JOB_NAME}" \
+            --resource-group "${RESOURCE_GROUP}" \
+            --job-execution-name "${execution_name}"; then
+            echo "Stop command failed, attempting to delete execution ${execution_name}"
+            az containerapp job execution delete \
+              --name "${JOB_NAME}" \
+              --resource-group "${RESOURCE_GROUP}" \
+              --job-execution-name "${execution_name}"
+          fi
+
+          echo "Cancellation request submitted for execution ${execution_name}"
+
+      - name: Logout from Azure
+        if: ${{ failure() || success() }}
+        run: az logout

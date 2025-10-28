@@ -179,4 +179,14 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                     d.Party == IntegrationTestUser.DefaultParty);
             });
     }
+
+    [Fact]
+    public async Task Search_Should_Return_Dialogs_With_Correct_Process_And_Preceding()
+    {
+        await FlowBuilder.For(Application)
+            .CreateComplexDialog()
+            .GetEndUserDialog()
+            .SearchEndUserDialogs((x, ctx) => x.Party = [ctx.GetParty()])
+            .ExecuteAsync();
+    }
 }

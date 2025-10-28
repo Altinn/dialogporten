@@ -46,7 +46,7 @@ param postgresConfiguration = {
     tier: 'GeneralPurpose'
   }
   storage: {
-    storageSizeGB: 256
+    storageSizeGB: 4096
     autoGrow: 'Enabled'
     type: 'Premium_LRS'
     tier: 'P50'

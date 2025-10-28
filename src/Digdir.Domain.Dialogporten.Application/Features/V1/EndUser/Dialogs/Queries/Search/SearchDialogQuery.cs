@@ -385,13 +385,18 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 }
             })
             .GroupBy(x => x.DialogId)
-            .ToDictionaryAsync(x => x.Key, g => new ContentDto
+            .Select(g => new
             {
-                Title = g.First(x => x.Type == DialogContentType.Values.Title).Content,
-                Summary = g.FirstOrDefault(x => x.Type == DialogContentType.Values.Summary)?.Content,
-                ExtendedStatus = g.FirstOrDefault(x => x.Type == DialogContentType.Values.ExtendedStatus)?.Content,
-                SenderName = g.FirstOrDefault(x => x.Type == DialogContentType.Values.SenderName)?.Content,
-            }, cancellationToken);
+                DialogId = g.Key,
+                Content = new ContentDto
+                {
+                    Title = g.First(x => x.Type == DialogContentType.Values.Title).Content,
+                    Summary = g.FirstOrDefault(x => x.Type == DialogContentType.Values.Summary)!.Content,
+                    ExtendedStatus = g.FirstOrDefault(x => x.Type == DialogContentType.Values.ExtendedStatus)!.Content,
+                    SenderName = g.FirstOrDefault(x => x.Type == DialogContentType.Values.SenderName)!.Content,
+                }
+            })
+            .ToDictionaryAsync(x => x.DialogId, x => x.Content, cancellationToken);
     }
 
     private async Task<Dictionary<string, int>> FetchMinAuthLevelByServiceResource(string[] serviceResources,

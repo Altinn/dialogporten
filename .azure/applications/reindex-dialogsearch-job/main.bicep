@@ -35,7 +35,7 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-var name = '${namePrefix}-reindex-dialogsearch'
+var name = '${namePrefix}-reindex-search'
 var tags = {
   FullName: name
   Environment: environment

@@ -1,9 +1,11 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -140,19 +142,22 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogSearchRepository _searchRepository;
+    private readonly IUser _user;
 
     public SearchDialogQueryHandler(
         IDialogDbContext db,
         IClock clock,
         IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization,
-        IDialogSearchRepository searchRepository)
+        IDialogSearchRepository searchRepository,
+        IUser user)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
+        _user = user ?? throw new ArgumentNullException(nameof(user));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -175,13 +180,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         var dialogIds = dialogs.Items
             .Select(x => x.Id)
             .ToArray();
-        var serviceResources = dialogs.Items
-            .Select(x => x.ServiceResource)
-            .Distinct()
-            .ToArray();
 
         var guiAttachmentCountByDialogId = await FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
-        var minAuthLevelByServiceResource = await FetchMinAuthLevelByServiceResource(serviceResources, cancellationToken);
         var contentByDialogId = await FetchContentByDialogId(dialogIds, cancellationToken);
         var endUserContextByDialogId = await FetchEndUserContextByDialogId(dialogIds, cancellationToken);
         var seenLogsByDialogId = await FetchSeenLogByDialogId(dialogIds, cancellationToken);
@@ -243,20 +243,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 Content = contentByDialogId[dialog.Id],
             };
         });
-
-        //
-        // foreach (var dialog in dialogs.Items)
-        // {
-        //     if (!resourcePolicyInformation.TryGetValue(dialog.ServiceResource, out var minimumAuthenticationLevel))
-        //     {
-        //         continue;
-        //     }
-        //
-        //     if (!_altinnAuthorization.UserHasRequiredAuthLevel(minimumAuthenticationLevel))
-        //     {
-        //         dialog.Content.SetNonSensitiveContent();
-        //     }
-        // }
 
         return result;
     }
@@ -369,42 +355,58 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
     private async Task<Dictionary<Guid, ContentDto>> FetchContentByDialogId(Guid[] dialogIds, CancellationToken cancellationToken)
     {
-        return await _db.DialogContents.AsNoTracking()
+        var userAuthLevel = _user.GetPrincipal().GetAuthenticationLevel();
+        var queryResult = await _db.DialogContents.AsNoTracking()
+            .IgnoreQueryFilters()
             .Where(x => dialogIds.Contains(x.DialogId))
             .Where(c => c.Type.OutputInList)
-            .Select(x => new
-            {
-                x.DialogId,
-                Type = x.TypeId,
-                Content = new ContentValueDto
+            .GroupJoin(_db.ResourcePolicyInformation,
+                x => x.Dialog.ServiceResource,
+                x => x.Resource,
+                (x, policy) => new
                 {
-                    MediaType = x.MediaType,
-                    Value = x.Value.Localizations
-                        .Select(l => new LocalizationDto { LanguageCode = l.LanguageCode, Value = l.Value })
-                        .ToList()
-                }
-            })
+                    x.DialogId,
+                    Type = x.TypeId,
+                    Content = new ContentValueDto
+                    {
+                        MediaType = x.MediaType,
+                        Value = x.Value.Localizations
+                            .Select(l => new LocalizationDto { LanguageCode = l.LanguageCode, Value = l.Value })
+                            .ToList()
+                    },
+                    HasRequiredAuthLevel = policy
+                        .Select(p => p.MinimumAuthenticationLevel)
+                        .FirstOrDefault() <= userAuthLevel
+                })
             .GroupBy(x => x.DialogId)
-            .Select(g => new
-            {
-                DialogId = g.Key,
-                Content = new ContentDto
+            .ToDictionaryAsync(x => x.Key, x => x.ToList(), cancellationToken);
+        return queryResult.ToDictionary(x => x.Key, group => new ContentDto
+        {
+            Title = group.Value
+                .Where(x => x.Type is DialogContentType.Values.Title or DialogContentType.Values.NonSensitiveTitle)
+                .OrderBy(x => x switch
                 {
-                    Title = g.First(x => x.Type == DialogContentType.Values.Title).Content,
-                    Summary = g.FirstOrDefault(x => x.Type == DialogContentType.Values.Summary)!.Content,
-                    ExtendedStatus = g.FirstOrDefault(x => x.Type == DialogContentType.Values.ExtendedStatus)!.Content,
-                    SenderName = g.FirstOrDefault(x => x.Type == DialogContentType.Values.SenderName)!.Content,
-                }
-            })
-            .ToDictionaryAsync(x => x.DialogId, x => x.Content, cancellationToken);
-    }
-
-    private async Task<Dictionary<string, int>> FetchMinAuthLevelByServiceResource(string[] serviceResources,
-        CancellationToken cancellationToken)
-    {
-        return await _db.ResourcePolicyInformation
-            .Where(x => serviceResources.Contains(x.Resource))
-            .ToDictionaryAsync(x => x.Resource, x => x.MinimumAuthenticationLevel, cancellationToken);
+                    { HasRequiredAuthLevel: true, Type: DialogContentType.Values.Title } => 0,
+                    { HasRequiredAuthLevel: false, Type: DialogContentType.Values.NonSensitiveTitle } => 1,
+                    { Type: DialogContentType.Values.Title } => 2,
+                    _ => 3
+                })
+                .Select(x => x.Content)
+                .First(),
+            Summary = group.Value
+                .Where(x => x.Type is DialogContentType.Values.Summary or DialogContentType.Values.NonSensitiveSummary)
+                .OrderBy(x => x switch
+                {
+                    { HasRequiredAuthLevel: true, Type: DialogContentType.Values.Summary } => 0,
+                    { HasRequiredAuthLevel: false, Type: DialogContentType.Values.NonSensitiveSummary } => 1,
+                    { Type: DialogContentType.Values.Summary } => 2,
+                    _ => 3
+                })
+                .Select(x => x.Content)
+                .FirstOrDefault(),
+            ExtendedStatus = group.Value.FirstOrDefault(x => x.Type == DialogContentType.Values.ExtendedStatus)?.Content,
+            SenderName = group.Value.FirstOrDefault(x => x.Type == DialogContentType.Values.SenderName)?.Content,
+        });
     }
 
     private async Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,

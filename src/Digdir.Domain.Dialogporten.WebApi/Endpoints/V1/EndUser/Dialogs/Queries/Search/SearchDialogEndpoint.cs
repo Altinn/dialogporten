@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -42,7 +42,7 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
     }
 }
 
-public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
+public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, DialogEntity>
 {
     private readonly string? _searchLanguageCode;
 

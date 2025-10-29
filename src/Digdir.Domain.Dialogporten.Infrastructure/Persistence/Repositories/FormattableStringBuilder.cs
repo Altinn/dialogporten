@@ -5,7 +5,7 @@ using System.Text;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 [SuppressMessage("Style", "IDE0060:Remove unused parameter")]
-public class FormattableStringBuilder
+internal class FormattableStringBuilder
 {
     private const string Null = "!!__null__!!";
     private readonly StringBuilder _format = new();
@@ -44,7 +44,7 @@ public class FormattableStringBuilder
         ref FormattableStringHandler handler) => this;
 
     [InterpolatedStringHandler]
-    public readonly ref struct FormattableStringHandler
+    internal readonly ref struct FormattableStringHandler
     {
         private readonly FormattableStringBuilder _builder;
 
@@ -112,7 +112,7 @@ public class FormattableStringBuilder
     }
 }
 
-public class PostgresFormattableStringBuilder : FormattableStringBuilder
+internal sealed class PostgresFormattableStringBuilder : FormattableStringBuilder
 {
     public new PostgresFormattableStringBuilder Append(
         [InterpolatedStringHandlerArgument(""), StringSyntax("PostgreSQL")]

@@ -31,7 +31,7 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<DialogEn
             .Build();
 }
 
-public class GetDialogsQuery
+public sealed class GetDialogsQuery
 {
     public required bool Deleted { get; set; }
     public OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>? OrderBy { get; set; }

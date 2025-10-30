@@ -27,10 +27,8 @@ public sealed class CostCoefficients
         };
     }
 
-    public decimal GetCoefficient(TransactionType transactionType)
-    {
-        return _coefficients.TryGetValue(transactionType, out var coefficient) ? coefficient : 1.0m;
-    }
+    public decimal GetCoefficient(TransactionType transactionType) =>
+        _coefficients.TryGetValue(transactionType, out var coefficient) ? coefficient : 1.0m;
 
     public static string GetNorwegianName(TransactionType transactionType)
     {

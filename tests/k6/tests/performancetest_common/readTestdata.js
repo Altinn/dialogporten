@@ -76,7 +76,7 @@ export function endUsersPart(totalVus, vuId) {
 }
 
 export function setup() {
-  const totalVus = exec.test.options.scenarios.default.vus;
+  const totalVus = exec.test.options.scenarios.default.vus ?? __ENV.stages_target ?? 10;
   let parts = [];
   for (let i = 1; i <= totalVus; i++) {
       parts.push(endUsersPart(totalVus, i));

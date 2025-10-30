@@ -56,14 +56,14 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
             .ApplyPaginationCondition(query.OrderBy ?? IdDescendingOrder, query.ContinuationToken);
         var paginationOrder = new PostgresFormattableStringBuilder()
             .ApplyPaginationOrder(query.OrderBy ?? IdDescendingOrder);
-        var searchTags = query.Search?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         var queryBuilder = new PostgresFormattableStringBuilder()
             .Append(
                 $"""
-                 WITH vectorizedSearchString AS (
-                    SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) value
-                    FROM (VALUES (coalesce({query.SearchLanguageCode}, 'simple'))) AS v(isoCode)
+                 WITH searchString AS (
+                    SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
+                        ,string_to_array({query.Search}::text, ' ') AS searchTerms
+                    FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
                     LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
                     LIMIT 1
                  ),accessiblePartyServiceTuple AS (
@@ -99,13 +99,6 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
                        AND ({query.DueBefore} IS NULL OR d."DueAt" <= {query.DueBefore}::timestamptz)
                        AND ({query.Process} IS NULL OR d."Process" = {query.Process}::text)
                        AND ({query.ExcludeApiOnly} IS NULL OR ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false))
-                       AND ({searchTags} IS NULL OR EXISTS (
-                           SELECT 1
-                           FROM unnest({searchTags}::text[]) as st(value)
-                           INNER JOIN "DialogSearchTag" dst
-                               ON dst."Value" = st.value
-                               AND dst."DialogId" = d."Id"
-                       ))
                        AND ({query.SystemLabel} IS NULL OR NOT EXISTS (
                            SELECT 1
                            FROM unnest({query.SystemLabel}::int[]) as st(value)
@@ -118,20 +111,26 @@ internal sealed class DialogSearchRepository(DialogDbContext db) : IDialogSearch
                        {paginationCondition}
                     {paginationOrder}
                  ),accessibleFilteredSearchSample AS (
-                     SELECT a.dialogId, ds."SearchVector" searchVector
-                     FROM vectorizedSearchString ss, accessibleFilteredDialogs a 
+                     SELECT a.dialogId, ds."SearchVector" as searchVector
+                     FROM searchString ss, accessibleFilteredDialogs a 
                      LEFT JOIN search."DialogSearch" ds ON a.dialogId = ds."DialogId"
-                     WHERE {query.Search} IS NULL OR ds."SearchVector" @@ ss.value
+                     WHERE (ss.searchVector IS NULL OR ds."SearchVector" @@ ss.searchVector)
+                        OR (ss.searchTerms IS NULL OR EXISTS (
+                             SELECT 1
+                             FROM "DialogSearchTag" dst
+                             WHERE dst."DialogId" = a.dialogId 
+                                AND dst."Value" = ANY(ss.searchTerms)
+                         ))
                      LIMIT {searchSampleLimit}
                  )
                  SELECT d.*
-                 FROM vectorizedSearchString ss, accessibleFilteredSearchSample ds
+                 FROM searchString ss, accessibleFilteredSearchSample ds
                  INNER JOIN "Dialog" d ON ds.dialogId = d."Id"
                  
                  """)
             // Ordering by full text search rank only works on the first page of results
             // because pagination requires both OrderBy and ContinuationToken to be set.
-            .AppendIf(query.OrderBy is null, "ORDER BY ts_rank(ds.searchVector, ss.value) DESC\n")
+            .AppendIf(query.OrderBy is null, "ORDER BY ts_rank(ds.searchVector, ss.searchVector) DESC\n")
             .AppendIf(query.OrderBy is not null, $"{paginationOrder}\n");
 
         // DO NOT use Include here, as it will use the custom SQL above which is

@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
@@ -15,8 +16,13 @@ internal class FormattableStringBuilder
     public FormattableString ToFormattableString() =>
         FormattableStringFactory.Create(_format.ToString(), _argNumberByArg
             .OrderBy(x => x.Value)
-            .Select(x => Equals(x.Key, Null) ? null : x.Key)
+#pragma warning disable IDE0004
+            .Select(x => Equals(x.Key, Null) ? GetNullValue() : x.Key)
+#pragma warning restore IDE0004
             .ToArray());
+
+    protected virtual object? GetNullValue() => null;
+    protected virtual object? SomethingValue(object? value) => value;
 
     public FormattableStringBuilder Append(string value)
     {
@@ -105,15 +111,27 @@ internal class FormattableStringBuilder
             return srcFormat;
         }
 
-        private int GetArgumentNumber(object? value) =>
-            !_builder._argNumberByArg.TryGetValue(value ?? Null, out var argumentNumber)
+        private int GetArgumentNumber(object? value)
+        {
+            value = _builder.SomethingValue(value);
+            return !_builder._argNumberByArg.TryGetValue(value ?? Null, out var argumentNumber)
                 ? _builder._argNumberByArg[value ?? Null] = _builder._argNumberByArg.Count
                 : argumentNumber;
+        }
     }
 }
 
 internal sealed class PostgresFormattableStringBuilder : FormattableStringBuilder
 {
+    private static readonly NpgsqlParameter NullValue = new NpgsqlParameter<string?>("__null__", null);
+    protected override object GetNullValue() => NullValue;
+    protected override object? SomethingValue(object? value) => value switch
+    {
+        DateTime dateTime => (DateTimeOffset)dateTime.ToUniversalTime(),
+        DateTimeOffset dateTimeOffset => dateTimeOffset.ToUniversalTime(),
+        _ => base.SomethingValue(value)
+    };
+
     public new PostgresFormattableStringBuilder Append(
         [InterpolatedStringHandlerArgument(""), StringSyntax("PostgreSQL")]
         ref FormattableStringHandler handler) => (PostgresFormattableStringBuilder)base.Append(ref handler);

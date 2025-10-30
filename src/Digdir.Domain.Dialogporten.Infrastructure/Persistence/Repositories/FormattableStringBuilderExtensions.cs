@@ -1,83 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
-using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 internal static class PostgresFormattableStringBuilderExtensions
 {
-    public static Task<PaginatedList<TTarget>> ToPaginatedListAsync<TOrderDefinition, TTarget>
-    (this DbContext db,
-        PostgresFormattableStringBuilder query,
-        SortablePaginationParameter<TOrderDefinition, TTarget> parameter,
-        CancellationToken cancellationToken = default)
-        where TOrderDefinition : IOrderDefinition<TTarget>
-        => CreateAsync(
-            db,
-            query,
-            parameter.OrderBy.DefaultIfNull(),
-            parameter.ContinuationToken,
-            parameter.Limit!.Value,
-            cancellationToken);
-
-    public static Task<PaginatedList<TTarget>> ToPaginatedListAsync<TOrderDefinition, TTarget>
-    (this DbContext db,
-        PostgresFormattableStringBuilder query,
-        PaginationParameter<TOrderDefinition, TTarget> parameter,
-        CancellationToken cancellationToken = default)
-        where TOrderDefinition : IOrderDefinition<TTarget>
-        => CreateAsync(
-            db,
-            query,
-            OrderSet<TOrderDefinition, TTarget>.Default,
-            parameter.ContinuationToken,
-            parameter.Limit!.Value,
-            cancellationToken);
-
-    private static async Task<PaginatedList<T>> CreateAsync<T>(
-        this DbContext db,
-        PostgresFormattableStringBuilder query,
-        IOrderSet<T> orderSet,
-        IContinuationTokenSet? continuationTokenSet,
-        int limit,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(query);
-
-        const int oneMore = 1;
-
-        query.ApplyPaginationCondition(orderSet, continuationTokenSet)
-            .ApplyPaginationOrder(orderSet)
-            .ApplyPaginationLimit(limit + oneMore);
-
-        var items = await db.Database
-            .SqlQuery<T>(query.ToFormattableString())
-            .ToArrayAsync(cancellationToken);
-
-        // Fetch one more item than requested to determine if there is a next page
-        var hasNextPage = items.Length > limit;
-        if (hasNextPage)
-        {
-            Array.Resize(ref items, limit);
-        }
-
-        var nextContinuationToken =
-            orderSet.GetContinuationTokenFrom(items.LastOrDefault())
-            ?? continuationTokenSet?.Raw;
-
-        return new PaginatedList<T>(
-            items,
-            hasNextPage,
-            @continue: nextContinuationToken,
-            orderBy: orderSet.GetOrderString());
-    }
-
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
     internal static PostgresFormattableStringBuilder ApplyPaginationOrder<T>(this PostgresFormattableStringBuilder builder, IOrderSet<T> orderSet)
     {
@@ -130,6 +60,8 @@ internal static class PostgresFormattableStringBuilderExtensions
             throw new InvalidOperationException("Missing token keys.");
         }
 
+        builder.Append(" AND (");
+
         CreateLessThanGreaterThanPart(builder, ltGtEnumerator.Current.OrderPart);
 
         while (ltGtEnumerator.MoveNext())
@@ -146,6 +78,8 @@ internal static class PostgresFormattableStringBuilderExtensions
 
             builder.Append(")");
         }
+
+        builder.Append(")");
 
         return builder;
     }
@@ -170,19 +104,19 @@ internal static class PostgresFormattableStringBuilderExtensions
         orderPart.Direction switch
         {
             OrderDirection.Asc when orderPart.Type.IsNullableType() && orderPart.Value is not null
-                => builder.Append($""" "{orderPart.Key}" IS NULL OR "{orderPart.Key}" > '{orderPart.Value}'"""),
+                => builder.Append($""" {orderPart.Key} IS NULL OR "{orderPart.Key}" > '{orderPart.Value}'"""),
             OrderDirection.Desc when orderPart.Type.IsNullableType() && orderPart.Value is null
-                => builder.Append($""" "{orderPart.Key}" IS NOT NULL"""),
+                => builder.Append($""" {orderPart.Key} IS NOT NULL"""),
 
-            OrderDirection.Asc => builder.Append($""" "{orderPart.Key}" > '{orderPart.Value}'"""),
-            OrderDirection.Desc => builder.Append($""" "{orderPart.Key}" < '{orderPart.Value}'"""),
+            OrderDirection.Asc => builder.Append($""" {orderPart.Key} > '{orderPart.Value}'"""),
+            OrderDirection.Desc => builder.Append($""" {orderPart.Key} < '{orderPart.Value}'"""),
             _ => throw new InvalidOperationException()
         };
 
     private static PostgresFormattableStringBuilder CreateEqualsPart(this PostgresFormattableStringBuilder builder, OrderPart x) =>
         x.Value is not null
-            ? builder.Append($""" "{x.Key}" = '{x.Value}'""")
-            : builder.Append($""" "{x.Key}" IS NULL""");
+            ? builder.Append($""" {x.Key} = '{x.Value}'""")
+            : builder.Append($""" {x.Key} IS NULL""");
 
     private sealed record OrderPart(OrderDirection Direction, Type Type, string Key, object? Value);
 

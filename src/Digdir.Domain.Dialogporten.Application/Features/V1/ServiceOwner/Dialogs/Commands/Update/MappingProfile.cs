@@ -86,12 +86,12 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.Activities, opt => opt.Ignore())
             .ForMember(dest => dest.Transmissions, opt => opt.Ignore());
         CreateMap<Queries.Get.SearchTagDto, SearchTagDto>();
-        CreateMap<Queries.Get.DialogActivityDto, ActivityDto>();
-        CreateMap<Queries.Get.DialogApiActionDto, ApiActionDto>();
-        CreateMap<Queries.Get.DialogApiActionEndpointDto, ApiActionEndpointDto>();
-        CreateMap<Queries.Get.DialogGuiActionDto, GuiActionDto>();
-        CreateMap<Queries.Get.DialogAttachmentDto, AttachmentDto>();
-        CreateMap<Queries.Get.DialogAttachmentUrlDto, AttachmentUrlDto>();
+        CreateMap<DialogActivityDto, ActivityDto>();
+        CreateMap<DialogApiActionDto, ApiActionDto>();
+        CreateMap<DialogApiActionEndpointDto, ApiActionEndpointDto>();
+        CreateMap<DialogGuiActionDto, GuiActionDto>();
+        CreateMap<DialogAttachmentDto, AttachmentDto>();
+        CreateMap<DialogAttachmentUrlDto, AttachmentUrlDto>();
         CreateMap<Queries.Get.ContentDto, ContentDto>();
     }
 }

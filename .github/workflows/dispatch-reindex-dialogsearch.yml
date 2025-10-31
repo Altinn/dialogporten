@@ -1,0 +1,84 @@
+name: Dispatch reindex dialogsearch
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run the reindex job in"
+        required: true
+        type: choice
+        options:
+          - test
+          - yt01
+          - staging
+          - prod
+      mode:
+        description: "Reindex mode"
+        required: true
+        type: choice
+        options:
+          - full
+          - since
+          - resume
+          - stale-only
+      sinceTimestamp:
+        description: "Timestamp used when mode is `since` (e.g. 2024-08-01T00:00:00Z)"
+        required: false
+        default: ""
+        type: string
+      staleFirst:
+        description: "Prioritize stale dialogs first (`--stale-first`)"
+        required: false
+        default: false
+        type: boolean
+      batchSize:
+        description: "Batch size per worker"
+        required: false
+        default: 2000
+        type: number
+      workers:
+        description: "Number of parallel workers"
+        required: false
+        default: 4
+        type: number
+      throttleMs:
+        description: "Delay between processing batches (in ms)"
+        required: false
+        default: 0
+        type: number
+      workMemBytes:
+        description: "PostgreSQL work_mem per worker in bytes"
+        required: false
+        default: 268435456
+        type: number
+
+run-name: Reindex of dialogsearch ${{ inputs.environment }} (${{ inputs.mode }})
+
+concurrency:
+  group: dispatch-reindex-dialogsearch-${{ inputs.environment }}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  run-reindex-dialogsearch:
+    name: Run reindex of dialogsearch (${{ inputs.environment }})
+    uses: ./.github/workflows/workflow-run-reindex-dialogsearch.yml
+    with:
+      environment: ${{ inputs.environment }}
+      mode: ${{ inputs.mode }}
+      sinceTimestamp: ${{ inputs.sinceTimestamp }}
+      staleFirst: ${{ inputs.staleFirst }}
+      batchSize: ${{ inputs.batchSize }}
+      workers: ${{ inputs.workers }}
+      throttleMs: ${{ inputs.throttleMs }}
+      workMemBytes: ${{ inputs.workMemBytes }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+      AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+      AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+      AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}

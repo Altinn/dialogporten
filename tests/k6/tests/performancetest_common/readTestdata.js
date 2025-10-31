@@ -28,6 +28,7 @@ if (!__ENV.API_ENVIRONMENT) {
 }
 const filenameEndusers = `../performancetest_data/endusers-${__ENV.API_ENVIRONMENT}.csv`;
 const filenameServiceowners = `../performancetest_data/serviceowners-${__ENV.API_ENVIRONMENT}.csv`;
+const filenameDialogsWithTransmissions = `../performancetest_data/dialogs-with-transmissions-${__ENV.API_ENVIRONMENT}.csv`;
 
 /**
  * SharedArray variable that stores the service owners data.
@@ -52,6 +53,10 @@ export const endUsers = new SharedArray('endUsers', function () {
   return readCsv(filenameEndusers);
 });
 
+export const dialogsWithTransmissions = new SharedArray('dialogsWithTransmissions', function () {
+  return readCsv(filenameDialogsWithTransmissions);
+});
+
 export function endUsersPart(totalVus, vuId) {
   const endUsersLength = endUsers.length;
   if (totalVus == 1) {
@@ -71,7 +76,7 @@ export function endUsersPart(totalVus, vuId) {
 }
 
 export function setup() {
-  const totalVus = exec.test.options.scenarios.default.vus;
+  const totalVus = exec.test.options.scenarios.default.vus ?? __ENV.stages_target ?? 10;
   let parts = [];
   for (let i = 1; i <= totalVus; i++) {
       parts.push(endUsersPart(totalVus, i));

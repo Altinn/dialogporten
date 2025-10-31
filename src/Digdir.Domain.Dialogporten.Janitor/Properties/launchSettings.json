@@ -13,6 +13,20 @@
         "DOTNET_ENVIRONMENT": "Development"
       },
       "commandLineArgs": "sync-resource-policy-information -c 1"
+    },
+    "reindex-dialogsearch": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "reindex-dialogsearch -f"
+    },
+    "aggregate-cost-metrics": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "aggregate-cost-metrics"
     }
   }
 }

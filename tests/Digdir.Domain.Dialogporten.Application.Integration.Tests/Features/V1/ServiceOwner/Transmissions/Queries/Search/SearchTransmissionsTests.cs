@@ -7,10 +7,10 @@ using FluentAssertions;
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Queries.Search;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class GetTransmissionsTests(DialogApplication application) : ApplicationCollectionFixture(application)
+public class SearchTransmissionsTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
-    public Task Get_Transmission_Should_Include_ExternalReference() =>
+    public Task Search_Transmission_Should_Include_ExternalReference() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
                 x.AddTransmission(x => x.ExternalReference = "ext"))

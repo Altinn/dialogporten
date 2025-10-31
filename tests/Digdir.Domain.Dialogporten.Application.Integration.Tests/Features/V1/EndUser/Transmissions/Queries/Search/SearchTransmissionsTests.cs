@@ -7,7 +7,7 @@ using FluentAssertions;
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Transmissions.Queries.Search;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class GetTransmissionsTests(DialogApplication application) : ApplicationCollectionFixture(application)
+public class SearchTransmissionsTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
     public Task Search_Transmission_Should_Include_ExternalReference() =>

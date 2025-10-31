@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.88.2](https://github.com/Altinn/dialogporten/compare/v1.88.1...v1.88.2) (2025-10-30)
+
+
+### Bug Fixes
+
+* **apps:** adjust OTEL sampling rate to 20% in prod ([#2940](https://github.com/Altinn/dialogporten/issues/2940)) ([aab730c](https://github.com/Altinn/dialogporten/commit/aab730c7088377eae7d77a552495f89b64c88345))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency parquet.net to 4.25.0 ([#2929](https://github.com/Altinn/dialogporten/issues/2929)) ([95ee331](https://github.com/Altinn/dialogporten/commit/95ee331ca95ffdea86ac9eac2ed04e61fcbd84de))
+
 ## [1.88.1](https://github.com/Altinn/dialogporten/compare/v1.88.0...v1.88.1) (2025-10-27)
 
 

@@ -27,6 +27,7 @@ using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()

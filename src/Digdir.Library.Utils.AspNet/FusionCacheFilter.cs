@@ -6,14 +6,17 @@ public sealed class FusionCacheFilter : OpenTelemetry.BaseProcessor<Activity>
 {
     public override void OnEnd(Activity activity)
     {
-        if (activity.Source.Name.Contains("FusionCache", StringComparison.OrdinalIgnoreCase))
+        if (!activity.Source.Name.Contains(Constants.FusionCache, StringComparison.OrdinalIgnoreCase))
         {
-            var isError = activity.Tags.Any(t => t is { Key: "otel.status_code", Value: "ERROR" });
-            if (!isError)
-            {
-                activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
-                return;
-            }
+            base.OnEnd(activity);
+            return;
+        }
+
+        var isError = activity.Tags.Any(t => t is { Key: Constants.OtelStatusCode, Value: Constants.Error });
+        if (!isError)
+        {
+            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            return;
         }
 
         base.OnEnd(activity);

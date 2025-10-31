@@ -13,7 +13,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 /// Add to the DbContext only in development environment like so:
 /// <code>optionsBuilder.AddInterceptors(new DevelopmentCommandLineQueryWriter());</code>
 /// </summary>
-public class DevelopmentCommandLineQueryWriter : DbCommandInterceptor
+internal sealed class DevelopmentCommandLineQueryWriter : DbCommandInterceptor
 {
     public override InterceptionResult<DbDataReader> ReaderExecuting(
         DbCommand command,

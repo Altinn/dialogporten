@@ -1,0 +1,458 @@
+﻿{
+  Items: [
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Gorgeous Granite Tuna Avon,
+              LanguageCode: en
+            },
+            {
+              Value: bus frictionless,
+              LanguageCode: nn
+            },
+            {
+              Value: benchmark payment,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: bandwidth Home Loan Account olive Mill Plastic Club exuding,
+              LanguageCode: nb
+            },
+            {
+              Value: Greens Sleek withdrawal Unbranded Auto Loan Account world-class back-end,
+              LanguageCode: en
+            },
+            {
+              Value: reciprocal Handcrafted JSON transmitting Product AI wireless,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_1,
+      Org: ttd,
+      Revision: Guid_2,
+      ServiceResource: urn:altinn:resource:0985,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:person:identifier-no:26026692945,
+      Progress: 2,
+      Process: https://leonard.com/refined/analyst,
+      GuiAttachmentCount: 4,
+      ExtendedStatus: g76ahin0pq,
+      ExternalReference: 5rprr0pju0,
+      CreatedAt: DateTimeOffset_1,
+      UpdatedAt: DateTimeOffset_1,
+      ContentUpdatedAt: DateTimeOffset_1,
+      DueAt: DateTimeOffset_2,
+      Status: RequiresAttention,
+      IsApiOnly: false,
+      FromPartyTransmissionsCount: 1,
+      HasUnopenedContent: false,
+      LatestActivity: {
+        Id: Guid_3,
+        CreatedAt: DateTimeOffset_3,
+        ExtendedType: https://lawrence.com/borders/convergence/optimization,
+        Type: SentToPayment,
+        PerformedBy: {
+          ActorType: PartyRepresentative,
+          ActorName: Cole Goyette
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_4,
+        ServiceOwnerLabels: [
+          {
+            Value: some-label
+          }
+        ]
+      },
+      EndUserContext: {
+        Revision: Guid_5,
+        SystemLabels: [
+          Default,
+          Sent
+        ]
+      }
+    },
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: haptic Chief,
+              LanguageCode: nn
+            },
+            {
+              Value: database Awesome Wooden Soap,
+              LanguageCode: en
+            },
+            {
+              Value: deposit District,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Fantastic Metal Shoes Money Market Account Practical Rubber Chicken Garden Security system-worthy coherent,
+              LanguageCode: en
+            },
+            {
+              Value: Jewelery & Tools invoice Quality PNG Rustic Granite Hat quantifying Generic Steel Chicken,
+              LanguageCode: nn
+            },
+            {
+              Value: Infrastructure sky blue SSL Parkways parallelism morph Assistant,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        SenderName: {
+          Value: [
+            {
+              Value: Gorgeous withdrawal,
+              LanguageCode: nb
+            },
+            {
+              Value: scale bandwidth,
+              LanguageCode: nn
+            },
+            {
+              Value: alarm Lilangeni,
+              LanguageCode: en
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_6,
+      Org: ttd,
+      Revision: Guid_7,
+      ServiceResource: urn:altinn:resource:0994,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:person:identifier-no:16026999581,
+      Progress: 25,
+      Process: https://janessa.net/club/program/tcp,
+      GuiAttachmentCount: 2,
+      ExtendedStatus: tu4kylalp2,
+      ExternalReference: et3plpnp0x,
+      CreatedAt: DateTimeOffset_4,
+      UpdatedAt: DateTimeOffset_4,
+      ContentUpdatedAt: DateTimeOffset_4,
+      DueAt: DateTimeOffset_5,
+      Status: Awaiting,
+      IsApiOnly: false,
+      FromServiceOwnerTransmissionsCount: 2,
+      HasUnopenedContent: true,
+      LatestActivity: {
+        Id: Guid_8,
+        CreatedAt: DateTimeOffset_6,
+        ExtendedType: https://columbus.com/invoice/supervisor/reboot,
+        Type: DialogOpened,
+        PerformedBy: {
+          ActorType: PartyRepresentative,
+          ActorName: Zachary Hodkiewicz
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_9
+      },
+      EndUserContext: {
+        Revision: Guid_10,
+        SystemLabels: [
+          Archive
+        ]
+      }
+    },
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: communities Island Saint Lucia black,
+              LanguageCode: en
+            },
+            {
+              Value: Buckinghamshire Sports Auto Loan Account copying,
+              LanguageCode: nb
+            },
+            {
+              Value: Solutions generate protocol Turnpike,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Gorgeous Steel Table Croatia Data Botswana Producer experiences USB Vermont Congo Taka,
+              LanguageCode: en
+            },
+            {
+              Value: quantifying Rubber Colorado Implemented Bedfordshire Buckinghamshire Wooden Home, Jewelery & Grocery program programming,
+              LanguageCode: nb
+            },
+            {
+              Value: alarm withdrawal Liberian Dollar Supervisor 1080p Forward lime index Global Gorgeous Fresh Computer,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        SenderName: {
+          Value: [
+            {
+              Value: bypassing Maryland,
+              LanguageCode: nb
+            },
+            {
+              Value: Generic Rubber Shirt data-warehouse,
+              LanguageCode: en
+            },
+            {
+              Value: Cyprus payment,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_11,
+      Org: ttd,
+      Revision: Guid_12,
+      ServiceResource: urn:altinn:resource:0971,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:organization:identifier-no:991411453,
+      Progress: 58,
+      Process: https://rhea.name/system,
+      GuiAttachmentCount: 3,
+      ExtendedStatus: pd7yyiuzsu,
+      ExternalReference: omrfidkzbj,
+      CreatedAt: DateTimeOffset_7,
+      UpdatedAt: DateTimeOffset_7,
+      ContentUpdatedAt: DateTimeOffset_7,
+      DueAt: DateTimeOffset_8,
+      Status: InProgress,
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      LatestActivity: {
+        Id: Guid_13,
+        CreatedAt: DateTimeOffset_9,
+        ExtendedType: https://marcus.net/configurable/shoes--grocery/withdrawal,
+        Type: FormSubmitted,
+        PerformedBy: {
+          ActorType: PartyRepresentative,
+          ActorName: Milton Bednar
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_14
+      },
+      EndUserContext: {
+        Revision: Guid_15,
+        SystemLabels: [
+          Default
+        ]
+      }
+    },
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Greens reintermediate,
+              LanguageCode: en
+            },
+            {
+              Value: Generic Wooden Mouse SCSI,
+              LanguageCode: nb
+            },
+            {
+              Value: Markets Unbranded Concrete Car,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: leading edge Fantastic Wooden Chair Summit circuit Generic Rubber Tuna Frozen plug-and-play,
+              LanguageCode: nb
+            },
+            {
+              Value: structure withdrawal Tasty Orchestrator Rupiah Small Soft Bacon Idaho,
+              LanguageCode: en
+            },
+            {
+              Value: Rubber tan HDD Track auxiliary sky blue benchmark,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        SenderName: {
+          Value: [
+            {
+              Value: Baby, Toys & Jewelery,
+              LanguageCode: en
+            },
+            {
+              Value: Configurable,
+              LanguageCode: nn
+            },
+            {
+              Value: Fantastic,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_16,
+      Org: ttd,
+      Revision: Guid_17,
+      ServiceResource: urn:altinn:resource:0878,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:person:identifier-no:19106797261,
+      Progress: 60,
+      Process: https://maximillian.net/france,
+      GuiAttachmentCount: 0,
+      ExtendedStatus: 19p3qpecrj,
+      ExternalReference: z1p9aynzy3,
+      CreatedAt: DateTimeOffset_10,
+      UpdatedAt: DateTimeOffset_10,
+      ContentUpdatedAt: DateTimeOffset_10,
+      DueAt: DateTimeOffset_11,
+      Status: Draft,
+      IsApiOnly: false,
+      FromServiceOwnerTransmissionsCount: 1,
+      HasUnopenedContent: true,
+      LatestActivity: {
+        Id: Guid_18,
+        CreatedAt: DateTimeOffset_12,
+        ExtendedType: https://aleen.net/lavender/dam,
+        Type: FormSubmitted,
+        PerformedBy: {
+          ActorType: PartyRepresentative,
+          ActorName: Annamae Kris
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_19
+      },
+      EndUserContext: {
+        Revision: Guid_20,
+        SystemLabels: [
+          Default
+        ]
+      }
+    },
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Legacy transmitting Health & Jewelery,
+              LanguageCode: nb
+            },
+            {
+              Value: Pines Fresh RSS,
+              LanguageCode: en
+            },
+            {
+              Value: experiences backing up Hills,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: static compress deliverables Books, Automotive & Kids invoice generating Product project system solid state,
+              LanguageCode: en
+            },
+            {
+              Value: Borders Mountain Down-sized benchmark Tasty Soft Chips disintermediate Buckinghamshire azure data-warehouse Indiana,
+              LanguageCode: nn
+            },
+            {
+              Value: Markets Island violet Montana Fantastic Rubber Fish pixel e-business e-business Architect Clothing,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_21,
+      Org: ttd,
+      Revision: Guid_22,
+      ServiceResource: urn:altinn:resource:0937,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:organization:identifier-no:996669149,
+      Progress: 89,
+      Process: https://desiree.org/png,
+      GuiAttachmentCount: 4,
+      ExtendedStatus: l5hh208vmx,
+      ExternalReference: srnbj6vtti,
+      CreatedAt: DateTimeOffset_13,
+      UpdatedAt: DateTimeOffset_13,
+      ContentUpdatedAt: DateTimeOffset_13,
+      DueAt: DateTimeOffset_14,
+      Status: Awaiting,
+      IsApiOnly: false,
+      FromServiceOwnerTransmissionsCount: 1,
+      HasUnopenedContent: true,
+      SeenSinceLastUpdate: [
+        {
+          Id: Guid_23,
+          SeenAt: DateTimeOffset_15,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
+      SeenSinceLastContentUpdate: [
+        {
+          Id: Guid_23,
+          SeenAt: DateTimeOffset_15,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
+      ServiceOwnerContext: {
+        Revision: Guid_24
+      },
+      EndUserContext: {
+        Revision: Guid_25,
+        SystemLabels: [
+          Default
+        ]
+      }
+    }
+  ],
+  HasNextPage: false,
+  OrderBy: createdat_desc,id_desc
+}

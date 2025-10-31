@@ -453,6 +453,8 @@ type Transmission {
   isAuthorized: Boolean!
   "Arbitrary URI\/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use)."
   extendedType: URL
+  "Arbitrary string with a service-specific reference to an external system or service."
+  externalReference: String
   "Reference to any other transmission that this transmission is related to."
   relatedTransmissionId: UUID
   "The type of transmission."

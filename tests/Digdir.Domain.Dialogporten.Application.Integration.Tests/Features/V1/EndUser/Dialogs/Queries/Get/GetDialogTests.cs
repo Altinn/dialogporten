@@ -22,6 +22,17 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 public class GetDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
+    public Task Get_Dialog_Should_Include_Transmission_ExternalReference() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                    x.ExternalReference = "ext"))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Transmissions.Should().ContainSingle()
+                    .Which.ExternalReference.Should().Be("ext"));
+
+    [Fact]
     public Task Get_Should_Populate_EnduserContextRevision() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

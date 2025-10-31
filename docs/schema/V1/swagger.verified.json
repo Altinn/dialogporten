@@ -1157,6 +1157,11 @@
             "nullable": true,
             "type": "string"
           },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
@@ -1488,6 +1493,11 @@
           "extendedType": {
             "description": "The extended type URI for the transmission.",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -2061,6 +2071,11 @@
           "extendedType": {
             "description": "The extended type URI for the transmission.",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -4832,6 +4847,11 @@
           "extendedType": {
             "description": "The extended type URI for the transmission.",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },

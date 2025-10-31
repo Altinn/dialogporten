@@ -29,6 +29,11 @@ public sealed class TransmissionDto
     public Uri? ExtendedType { get; set; }
 
     /// <summary>
+    /// Arbitrary string with a service-specific reference to an external system or service.
+    /// </summary>
+    public string? ExternalReference { get; set; }
+
+    /// <summary>
     /// The unique identifier for the related transmission, if any.
     /// </summary>
     public Guid? RelatedTransmissionId { get; set; }

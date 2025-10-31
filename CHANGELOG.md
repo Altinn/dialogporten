@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.88.3](https://github.com/Altinn/dialogporten/compare/v1.88.2...v1.88.3) (2025-10-31)
+
+
+### Bug Fixes
+
+* **api:** add missing ExternalReferences ([#2944](https://github.com/Altinn/dialogporten/issues/2944)) ([279847c](https://github.com/Altinn/dialogporten/commit/279847c9b493eda920c5d5d00e93b927688a19e0))
+
 ## [1.88.2](https://github.com/Altinn/dialogporten/compare/v1.88.1...v1.88.2) (2025-10-30)
 
 

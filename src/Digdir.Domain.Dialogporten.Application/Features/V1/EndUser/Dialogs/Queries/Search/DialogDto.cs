@@ -161,7 +161,6 @@ public sealed class DialogDto
     /// <summary>
     /// The content of the dialog in search results.
     /// </summary>
-    [JsonPropertyOrder(100)] // ILU MAGNUS
     public ContentDto Content { get; set; } = null!;
 }
 

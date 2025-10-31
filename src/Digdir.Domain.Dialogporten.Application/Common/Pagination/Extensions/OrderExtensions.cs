@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 
-public static class OrderExtensions
+internal static class OrderExtensions
 {
     public static OrderSet<TOrderDefinition, TTarget> DefaultIfNull<TOrderDefinition, TTarget>(this OrderSet<TOrderDefinition, TTarget>? orderSet)
         where TOrderDefinition : IOrderDefinition<TTarget> => orderSet ?? OrderSet<TOrderDefinition, TTarget>.Default;

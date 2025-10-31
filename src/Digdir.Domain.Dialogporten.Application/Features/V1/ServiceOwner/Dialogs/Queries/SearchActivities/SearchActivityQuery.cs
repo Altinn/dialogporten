@@ -36,13 +36,17 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        var dialog = await _db.Dialogs
-            .Include(x => x.Activities)
-            .IgnoreQueryFilters()
-            .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
-                x => resourceIds.Contains(x.ServiceResource))
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        DialogEntity? dialog;
+        await using (await _db.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _db.Dialogs
+                .Include(x => x.Activities)
+                .IgnoreQueryFilters()
+                .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
+                    x => resourceIds.Contains(x.ServiceResource))
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: cancellationToken);
+        }
 
         if (dialog is null)
         {

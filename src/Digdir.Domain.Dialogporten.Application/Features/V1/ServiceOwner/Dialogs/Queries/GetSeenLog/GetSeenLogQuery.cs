@@ -41,16 +41,20 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        var dialog = await _dbContext.Dialogs
-            .AsNoTracking()
-            .Include(x => x.SeenLog.Where(x => x.Id == request.SeenLogId))
-                .ThenInclude(x => x.SeenBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .IgnoreQueryFilters()
-            .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
-                x => resourceIds.Contains(x.ServiceResource))
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        DialogEntity? dialog;
+        await using (await _dbContext.BeginTransactionAsync(cancellationToken))
+        {
+            dialog = await _dbContext.Dialogs
+                .AsNoTracking()
+                .Include(x => x.SeenLog.Where(x => x.Id == request.SeenLogId))
+                    .ThenInclude(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
+                    x => resourceIds.Contains(x.ServiceResource))
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: cancellationToken);
+        }
 
         if (dialog is null)
         {

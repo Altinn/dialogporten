@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Externals;
+﻿using System.Data;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -20,6 +21,7 @@ using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 
@@ -109,6 +111,11 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
                 .Where(x => ids.Contains(x))
                 .ToListAsync(cancellationToken);
     }
+
+    // PostgreSQL doesn't support SNAPSHOT isolation level
+    // REPEATABLE READ provides snapshot-like behavior
+    // https://www.postgresql.org/docs/current/transaction-iso.html#XACT-REPEATABLE-READ
+    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken) => Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

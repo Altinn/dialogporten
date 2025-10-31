@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -38,12 +39,16 @@ internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetSer
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        var serviceOwnerContext = await _db
-            .DialogServiceOwnerContexts
-            .Include(x => x.ServiceOwnerLabels)
-            .Where(x => x.DialogId == request.DialogId)
-            .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        DialogServiceOwnerContext? serviceOwnerContext;
+        await using (await _db.BeginTransactionAsync(cancellationToken))
+        {
+            serviceOwnerContext = await _db
+                .DialogServiceOwnerContexts
+                .Include(x => x.ServiceOwnerLabels)
+                .Where(x => x.DialogId == request.DialogId)
+                .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
+                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        }
 
         if (serviceOwnerContext is null)
         {

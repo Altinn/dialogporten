@@ -12,10 +12,19 @@ public static class FluentValidationPartyIdentifierExtensions
             .Must(identifier => identifier is null
                 || (
                     PartyIdentifier.TryParse(identifier, out var id)
-                    && id is NorwegianPersonIdentifier or NorwegianOrganizationIdentifier
+                    && id
+                        is NorwegianPersonIdentifier
+                        or NorwegianOrganizationIdentifier
+                        or IdportenSelfIdentifiedUserIdentifier
+                        or AltinnSelfIdentifiedUserIdentifier
+                        or FeideUserIdentifier
                 ))
             .WithMessage(
-                $"'{{PropertyName}}' must be on format '{NorwegianOrganizationIdentifier.PrefixWithSeparator}{{norwegian org-nr}}' or " +
-                $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}' with valid numbers respectively.");
+                $"'{{PropertyName}}' must be on format '{NorwegianOrganizationIdentifier.PrefixWithSeparator}{{norwegian org-nr}}', " +
+                $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}', " +
+                $"'{AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{username}}', " +
+                $"'{IdportenSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{e-mail}}' or " +
+                $"'{FeideUserIdentifier.PrefixWithSeparator}{{subject}}' or " +
+                "with valid values respectively.");
     }
 }

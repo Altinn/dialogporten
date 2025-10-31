@@ -20,7 +20,6 @@ using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
-using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 
@@ -61,6 +60,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+        // optionsBuilder.AddInterceptors(new DevelopmentCommandLineQueryWriter());
         optionsBuilder.UseExceptionProcessor();
     }
 

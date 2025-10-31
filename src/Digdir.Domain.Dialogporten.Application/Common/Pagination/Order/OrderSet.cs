@@ -114,6 +114,6 @@ public sealed class OrderSet<TOrderDefinition, TTarget> : IOrderSet<TTarget>
             return x.Key == y.Key;
         }
 
-        public int GetHashCode([DisallowNull] Order<TTarget> obj) => obj.Key.GetHashCode();
+        public int GetHashCode(Order<TTarget> obj) => obj.Key.GetHashCode();
     }
 }

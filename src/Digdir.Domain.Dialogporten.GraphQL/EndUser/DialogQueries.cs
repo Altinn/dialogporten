@@ -2,9 +2,11 @@ using AppAny.HotChocolate.FluentValidation;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 using MediatR;
@@ -79,7 +81,7 @@ public partial class Queries
         var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
         searchDialogQuery.AcceptedLanguages = acceptLanguage?.AcceptedLanguage;
 
-        if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(
+        if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(
             input.ContinuationToken, out var continuationTokenSet) && input.ContinuationToken != null)
         {
             return new SearchDialogsPayload

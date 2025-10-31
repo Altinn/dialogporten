@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.88.4](https://github.com/Altinn/dialogporten/compare/v1.88.3...v1.88.4) (2025-10-31)
+
+
+### Miscellaneous Chores
+
+* **app:** Add FusionCacheFilter to OpenTelemetry processors ([#2943](https://github.com/Altinn/dialogporten/issues/2943)) ([a947ac0](https://github.com/Altinn/dialogporten/commit/a947ac01bdd7a1eac5dd9c1f4135bd52b2b34f73))
+* **deps:** update dependency testcontainers.postgresql to 4.8.0 ([#2938](https://github.com/Altinn/dialogporten/issues/2938)) ([3e20315](https://github.com/Altinn/dialogporten/commit/3e2031591d8a7b3ea2dabc0db6ad258707ce97ac))
+
 ## [1.88.3](https://github.com/Altinn/dialogporten/compare/v1.88.2...v1.88.3) (2025-10-31)
 
 

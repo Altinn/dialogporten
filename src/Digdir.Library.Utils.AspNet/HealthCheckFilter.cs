@@ -6,7 +6,7 @@ public class HealthCheckFilter : OpenTelemetry.BaseProcessor<Activity>
 {
     public override void OnEnd(Activity activity)
     {
-        if (!activity.Source.Name.StartsWith(Constants.AspNetCore))
+        if (!activity.Source.Name.StartsWith(Constants.AspNetCore, StringComparison.OrdinalIgnoreCase))
         {
             base.OnEnd(activity);
             return;

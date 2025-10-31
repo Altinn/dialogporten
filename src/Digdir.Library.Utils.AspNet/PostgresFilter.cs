@@ -6,7 +6,7 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 {
     public override void OnEnd(Activity activity)
     {
-        if (!activity.Source.Name.Contains(Constants.Npgsql, StringComparison.OrdinalIgnoreCase))
+        if (!activity.Source.Name.StartsWith(Constants.Npgsql, StringComparison.OrdinalIgnoreCase))
         {
             base.OnEnd(activity);
             return;

@@ -6,7 +6,7 @@ public sealed class FusionCacheFilter : OpenTelemetry.BaseProcessor<Activity>
 {
     public override void OnEnd(Activity activity)
     {
-        if (!activity.Source.Name.Contains(Constants.FusionCache, StringComparison.OrdinalIgnoreCase))
+        if (!activity.Source.Name.StartsWith(Constants.FusionCache, StringComparison.OrdinalIgnoreCase))
         {
             base.OnEnd(activity);
             return;

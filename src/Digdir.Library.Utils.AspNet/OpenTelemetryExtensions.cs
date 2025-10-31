@@ -54,6 +54,7 @@ public static class OpenTelemetryExtensions
 
                 tracing.AddProcessor(new PostgresFilter());
                 tracing.AddProcessor(new HealthCheckFilter());
+                tracing.AddProcessor(new FusionCacheFilter());
 
                 tracing
                     .AddHttpClientInstrumentation(o =>

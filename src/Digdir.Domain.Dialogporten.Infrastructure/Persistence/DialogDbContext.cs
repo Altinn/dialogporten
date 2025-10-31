@@ -60,7 +60,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
+        // optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
         optionsBuilder.UseExceptionProcessor();
     }
 

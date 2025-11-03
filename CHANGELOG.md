@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.88.4](https://github.com/Altinn/dialogporten/compare/v1.88.3...v1.88.4) (2025-11-03)
+
+
+### Miscellaneous Chores
+
+* **app:** Add FusionCacheFilter to OpenTelemetry processors ([#2943](https://github.com/Altinn/dialogporten/issues/2943)) ([a947ac0](https://github.com/Altinn/dialogporten/commit/a947ac01bdd7a1eac5dd9c1f4135bd52b2b34f73))
+* **deps:** update dependency testcontainers.postgresql to 4.8.0 ([#2938](https://github.com/Altinn/dialogporten/issues/2938)) ([3e20315](https://github.com/Altinn/dialogporten/commit/3e2031591d8a7b3ea2dabc0db6ad258707ce97ac))
+* **deps:** update dependency testcontainers.postgresql to 4.8.1 ([#2949](https://github.com/Altinn/dialogporten/issues/2949)) ([8b4f991](https://github.com/Altinn/dialogporten/commit/8b4f991901dc9bec8b99a81d2d82ecced3746eb1))
+* **deps:** update masstransit monorepo to 8.5.5 ([#2950](https://github.com/Altinn/dialogporten/issues/2950)) ([e6aaaf4](https://github.com/Altinn/dialogporten/commit/e6aaaf40671a61fbc09e72a9dae7659e0b13deff))
+* **infra:** Increase postgresql SKU in prod ([#2932](https://github.com/Altinn/dialogporten/issues/2932)) ([271307e](https://github.com/Altinn/dialogporten/commit/271307e6d0367072e8d9e7a8cfab7704990e6d24))
+* **service:** revert to serializable in MassTransit ([#2951](https://github.com/Altinn/dialogporten/issues/2951)) ([b93e57d](https://github.com/Altinn/dialogporten/commit/b93e57d74dbedbe6a8a736a76b1c2b082f014b8e))
+
 ## [1.88.3](https://github.com/Altinn/dialogporten/compare/v1.88.2...v1.88.3) (2025-10-31)
 
 

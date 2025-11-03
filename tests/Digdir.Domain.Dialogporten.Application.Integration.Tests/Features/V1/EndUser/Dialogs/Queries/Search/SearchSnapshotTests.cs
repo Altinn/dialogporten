@@ -1,8 +1,11 @@
+using Bogus;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 
@@ -14,39 +17,43 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
 {
     public SearchSnapshotTests(DialogApplication application) : base(application) { }
 
-    private const string ServiceResource = "urn:altinn:resource:1337";
-
     [Fact]
     public async Task Search_Dialog_Verify_Output()
     {
         var searchResult = await FlowBuilder.For(Application)
             .CreateComplexDialog(x =>
             {
+                x.Dto = SnapshotDialog.Create();
                 x.Dto.Activities.Clear();
-                x.Dto.ServiceResource = ServiceResource;
             })
             .GetEndUserDialog() // Trigger seen log
             .CreateComplexDialog(x =>
             {
+                x.Dto = SnapshotDialog.Create();
                 x.Dto.Attachments.Clear();
-                x.Dto.ServiceResource = ServiceResource;
             })
             .CreateComplexDialog(x =>
             {
+                x.Dto = SnapshotDialog.Create();
                 x.Dto.Transmissions.Clear();
-                x.Dto.ServiceResource = ServiceResource;
             })
             .CreateComplexDialog(x =>
             {
+                x.Dto = SnapshotDialog.Create();
                 x.Dto.SystemLabel = SystemLabel.Values.Archive;
-                x.Dto.ServiceResource = ServiceResource;
             })
             .CreateComplexDialog(x =>
             {
-                x.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = "some-label" }];
-                x.Dto.ServiceResource = ServiceResource;
+                x.Dto = SnapshotDialog.Create();
+                x.Dto.ServiceOwnerContext = new DialogServiceOwnerContextDto
+                {
+                    ServiceOwnerLabels = [new() { Value = "some-label" }]
+                };
             })
-            .SearchEndUserDialogs(x => { x.ServiceResource = [ServiceResource]; })
+            .SearchEndUserDialogs(x =>
+            {
+                x.ServiceResource = [SnapshotDialog.ServiceResource];
+            })
             .ExecuteAndAssert<PaginatedList<DialogDto>>();
 
         var settings = new VerifySettings();

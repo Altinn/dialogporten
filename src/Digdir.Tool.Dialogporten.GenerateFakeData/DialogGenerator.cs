@@ -79,7 +79,7 @@ public static class DialogGenerator
         .RuleFor(o => o.Sender, _ => new ActorDto { ActorType = ActorType.Values.ServiceOwner })
         .RuleFor(o => o.Content, _ => GenerateFakeTransmissionContent());
 
-    public static readonly Faker<CreateDialogDto> CreateDialogFaker = new Faker<CreateDialogDto>()
+    private static readonly Faker<CreateDialogDto> CreateDialogFaker = new Faker<CreateDialogDto>()
         // We need to handle id, serviceResource, party, and others passed as arguments
         // RuleFor cannot directly use external parameters easily. We handle these post-generation.
         // Placeholder rules are set, real values might be overridden later.

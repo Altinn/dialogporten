@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.88.5](https://github.com/Altinn/dialogporten/compare/v1.88.4...v1.88.5) (2025-11-03)
+
+
+### Miscellaneous Chores
+
+* **infra:** Enable read commited isolation level ([#2952](https://github.com/Altinn/dialogporten/issues/2952)) ([04a86d9](https://github.com/Altinn/dialogporten/commit/04a86d9d16ac90006c8d0805fd2e2d242f358350))
+
 ## [1.88.4](https://github.com/Altinn/dialogporten/compare/v1.88.3...v1.88.4) (2025-11-03)
 
 

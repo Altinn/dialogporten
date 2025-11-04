@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.88.6](https://github.com/Altinn/dialogporten/compare/v1.88.5...v1.88.6) (2025-11-04)
+
+
+### Bug Fixes
+
+* **auth:** Remove consumer claim requirement from end-user token authorization ([#2955](https://github.com/Altinn/dialogporten/issues/2955)) ([5eeea30](https://github.com/Altinn/dialogporten/commit/5eeea30b8f6fbb3f48070ab8ce576e5ab0c06536))
+* **tests:** Add module initializer for snapshot verification in SearchSnapshotTests ([#2956](https://github.com/Altinn/dialogporten/issues/2956)) ([300f58e](https://github.com/Altinn/dialogporten/commit/300f58eb2faa8c02dec9c83ed4b66cd5565ac477))
+
 ## [1.88.5](https://github.com/Altinn/dialogporten/compare/v1.88.4...v1.88.5) (2025-11-03)
 
 

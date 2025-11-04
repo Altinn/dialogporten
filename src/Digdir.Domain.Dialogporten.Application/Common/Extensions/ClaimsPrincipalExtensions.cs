@@ -209,6 +209,7 @@ public static class ClaimsPrincipalExtensions
         var identifyingClaims = claimsList.Where(c =>
             c.Type == PidClaim ||
             c.Type == AltinnUsernameClaim ||
+            c.Type == IdportenEmailClaim ||
             c.Type == IdportenAuthLevelClaim ||
             c.Type == FeideSubjectClaim ||
             c.Type == ConsumerClaim ||

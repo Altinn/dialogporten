@@ -6,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 internal static class AuthorizedPartiesHelper
 {
     public const string PartyTypeSelfIdentified = "SelfIdentified";
-    public const string SelfIdentifiedUserRoleCode = "urn:altinn:rolecode:seln";
+    public const string SelfIdentifiedUserRoleCode = "seln";
 
     private const string PartyTypeOrganization = "Organization";
     private const string PartyTypePerson = "Person";
@@ -38,6 +38,9 @@ internal static class AuthorizedPartiesHelper
         {
             PartyTypeOrganization => NorwegianOrganizationIdentifier.PrefixWithSeparator + dto.OrganizationNumber,
             PartyTypePerson => NorwegianPersonIdentifier.PrefixWithSeparator + dto.PersonId,
+
+            // We need a hack here, as we only support scenarios where the self-identified user is the authenticated user.
+            PartyTypeSelfIdentified => authenticatedUser.Type + ":" + authenticatedUser.Value,
             _ => throw new ArgumentOutOfRangeException(nameof(dto))
         };
 
@@ -51,6 +54,7 @@ internal static class AuthorizedPartiesHelper
             {
                 PartyTypeOrganization => AuthorizedPartyType.Organization,
                 PartyTypePerson => AuthorizedPartyType.Person,
+                PartyTypeSelfIdentified => AuthorizedPartyType.SelfIdentified,
                 _ => throw new ArgumentOutOfRangeException(nameof(dto))
             },
             IsDeleted = dto.IsDeleted,

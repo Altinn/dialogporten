@@ -15,6 +15,7 @@ internal static class DecisionRequestHelper
 
     private const string PidClaimType = "pid";
     private const string UserIdClaimType = "urn:altinn:userid";
+    private const string PartyUuidClaimType = "urn:altinn:party:uuid";
     private const string RarAuthorizationDetailsClaimType = "authorization_details";
 
     private const string AttributeIdAction = "urn:oasis:names:tc:xacml:1.0:action:action-id";
@@ -29,9 +30,10 @@ internal static class DecisionRequestHelper
     private const string AttributeIdUserId = "urn:altinn:userid";
     private const string AttributeIdPerson = "urn:altinn:person:identifier-no";
     private const string AttributeIdSystemUser = "urn:altinn:systemuser:uuid";
+    private const string AttributeIdPartyUuid = "urn:altinn:party:uuid";
 
     // The order of these attribute types is important as we want to prioritize the most specific claim types.
-    private static readonly List<string> PrioritizedClaimTypes = [AttributeIdUserId, AttributeIdPerson, AttributeIdSystemUser];
+    private static readonly List<string> PrioritizedClaimTypes = [AttributeIdPartyUuid, AttributeIdUserId, AttributeIdPerson, AttributeIdSystemUser];
 
     private const string ReservedResourcePrefixForApps = "app_";
 
@@ -40,6 +42,13 @@ internal static class DecisionRequestHelper
     public static XacmlJsonRequestRoot CreateDialogDetailsRequest(DialogDetailsAuthorizationRequest request)
     {
         var sortedActions = request.AltinnActions.SortForXacml();
+
+        /*
+        if (request.Claims.GetEndUserPartyIdentifier() is { } endUserPartyIdentifier and (AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier or FeideUserIdentifier))
+        {
+
+        }
+        */
 
         var accessSubject = CreateAccessSubjectCategory(request.Claims);
         var actions = CreateActionCategories(sortedActions, out var actionIdByName);
@@ -91,6 +100,11 @@ internal static class DecisionRequestHelper
         // the user id from the pid. See PrioritizedClaimTypes for the order of prioritization.
         claims.Select(claim => claim.Type switch
         {
+            PartyUuidClaimType => new XacmlJsonCategory
+            {
+                Id = SubjectId,
+                Attribute = [new() { AttributeId = AttributeIdPartyUuid, Value = claim.Value }]
+            },
             UserIdClaimType => new XacmlJsonCategory
             {
                 Id = SubjectId,

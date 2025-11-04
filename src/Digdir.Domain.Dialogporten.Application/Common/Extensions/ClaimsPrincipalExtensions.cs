@@ -126,7 +126,7 @@ public static class ClaimsPrincipalExtensions
                && TryGetOrganizationNumberFromConsumerOrganization(systemUserDetails.SystemUserOrg, out orgNumber);
     }
 
-    public static bool TryGetConsumerOrgNumber(this Claim? consumerClaim, [NotNullWhen(true)] out string? orgNumber)
+    private static bool TryGetConsumerOrgNumber(this Claim? consumerClaim, [NotNullWhen(true)] out string? orgNumber)
     {
         orgNumber = null;
         if (consumerClaim is null || consumerClaim.Type != ConsumerClaim)

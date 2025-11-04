@@ -1,4 +1,4 @@
-using Bogus;
+using System.Runtime.CompilerServices;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
@@ -61,6 +61,13 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
         // Timestamps and tiebreaker UUIDs on continuation token will differ on each run
         settings.IgnoreMember(nameof(PaginatedList<DialogDto>.ContinuationToken));
 
+        await Verify(searchResult, settings)
+            .UseDirectory("Snapshots");
+    }
+
+    [ModuleInitializer]
+    internal static void Init()
+    {
         // Scrub ephemeral person identifiers that differ on each run
         VerifierSettings.MemberConverter<ActorDto, string>(
             expression: x => x.ActorId,
@@ -73,9 +80,6 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
 
                 return x;
             });
-
-        await Verify(searchResult, settings)
-            .UseDirectory("Snapshots");
     }
 }
 

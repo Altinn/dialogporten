@@ -49,17 +49,17 @@ internal sealed class RedisHealthCheck : IHealthCheck
         {
             var responseTime = Stopwatch.GetElapsedTime(startTime);
             _logger.LogWarning("Redis connection timed out ({Elapsed:N1}s).", responseTime.TotalSeconds);
-            return HealthCheckResult.Unhealthy($"Redis connection timed out after {responseTime.TotalSeconds:N1}s.", exception: ex);
+            return HealthCheckResult.Degraded($"Redis connection timed out after {responseTime.TotalSeconds:N1}s.", exception: ex);
         }
         catch (RedisConnectionException ex)
         {
             _logger.LogWarning(ex, "Unable to connect to Redis.");
-            return HealthCheckResult.Unhealthy("Unable to connect to Redis.", exception: ex);
+            return HealthCheckResult.Degraded("Unable to connect to Redis.", exception: ex);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unexpected error occurred while checking Redis' health.");
-            return HealthCheckResult.Unhealthy("An unexpected error occurred while checking Redis' health.", exception: ex);
+            return HealthCheckResult.Degraded("An unexpected error occurred while checking Redis' health.", exception: ex);
         }
     }
 }

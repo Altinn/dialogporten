@@ -259,6 +259,11 @@ public sealed class DialogTransmissionDto
     public Uri? ExtendedType { get; set; }
 
     /// <summary>
+    /// Arbitrary string with a service-specific reference to an external system or service.
+    /// </summary>
+    public string? ExternalReference { get; set; }
+
+    /// <summary>
     /// Reference to any other transmission that this transmission is related to.
     /// </summary>
     public Guid? RelatedTransmissionId { get; set; }
@@ -657,6 +662,11 @@ public sealed class DialogTransmissionAttachmentDto
 
 public sealed class DialogTransmissionAttachmentUrlDto
 {
+    /// <summary>
+    /// The unique identifier for the attachment URL in UUIDv7 format.
+    /// </summary>
+    public Guid Id { get; set; }
+
     /// <summary>
     /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
     /// not authorized to access the transmission.

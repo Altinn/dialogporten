@@ -264,6 +264,7 @@ We are able to toggle some external resources in local development. This is done
     "UseLocalDevelopmentResourceRegister": true,
     "UseLocalDevelopmentOrganizationRegister": true,
     "UseLocalDevelopmentNameRegister": true,
+    "UseLocalDevelopmentPartyNameRegistry": true,
     "UseLocalDevelopmentAltinnAuthorization": true,
     "UseLocalDevelopmentCloudEventBus": true,
     "UseLocalDevelopmentCompactJwsGenerator": true,
@@ -271,7 +272,8 @@ We are able to toggle some external resources in local development. This is done
     "DisableAuth": true,
     "UseInMemoryServiceBusTransport": true,
     "DisableSubjectResourceSyncOnStartup": false,
-    "DisablePolicyInformationSyncOnStartup": true
+    "DisablePolicyInformationSyncOnStartup": true,
+    "UseLocalMetricsAggregationStorage": true
 }
 ```
 Toggling these flags will enable/disable the external resources. The `DisableAuth` flag, for example, will disable authentication in the WebAPI project. This is useful when debugging the WebAPI project in an IDE. These settings will only be respected in the `Development` environment.

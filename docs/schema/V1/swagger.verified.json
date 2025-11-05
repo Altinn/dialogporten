@@ -1157,6 +1157,11 @@
             "nullable": true,
             "type": "string"
           },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
@@ -1232,6 +1237,11 @@
                 "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
               }
             ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
           },
           "mediaType": {
             "description": "The media type of the attachment.",
@@ -1483,6 +1493,11 @@
           "extendedType": {
             "description": "The extended type URI for the transmission.",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -2056,6 +2071,11 @@
           "extendedType": {
             "description": "The extended type URI for the transmission.",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -4573,6 +4593,11 @@
               }
             ]
           },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "mediaType": {
             "description": "The media type of the attachment.",
             "example": "application/pdf\napplication/zip",
@@ -4822,6 +4847,11 @@
           "extendedType": {
             "description": "The extended type URI for the transmission.",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -5658,7 +5688,7 @@
     }
   },
   "info": {
-    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/dialogporten\u0022\u003Ehttps://docs.altinn.studio/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs",
+    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs",
     "title": "Dialogporten",
     "version": "v1"
   },

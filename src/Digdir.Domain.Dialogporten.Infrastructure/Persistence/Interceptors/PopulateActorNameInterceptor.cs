@@ -136,14 +136,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         }
     }
 
-    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken)
-    {
-        return (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
-    }
+    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>
+        (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
 
     private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
-        // Why are we doing "composite key contains" this way, you ask? 
+        // Why are we doing "composite key contains" this way, you ask?
         // See https://stackoverflow.com/a/26201371/2301766
         var distinctIdNameTupples = actorNameEntities
             .Select(x => (x.ActorId, x.Name))

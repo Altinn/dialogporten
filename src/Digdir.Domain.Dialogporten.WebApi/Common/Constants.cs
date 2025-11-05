@@ -7,7 +7,7 @@ internal static class Constants
     internal const string ETag = "Etag";
     internal const string Authorization = "Authorization";
     internal const string CurrentTokenIssuer = "CurrentIssuer";
-    internal const int MaxRequestBodySize = 200_000;
+    internal const int MaxRequestBodySize = 2_000_000;
 
     internal static class SwaggerSummary
     {

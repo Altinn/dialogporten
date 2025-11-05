@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.88.7](https://github.com/Altinn/dialogporten/compare/v1.88.6...v1.88.7) (2025-11-05)
+
+
+### Miscellaneous Chores
+
+* **api:** Increase max request size to cater for huge A3 instances ([#2963](https://github.com/Altinn/dialogporten/issues/2963)) ([2c1fe71](https://github.com/Altinn/dialogporten/commit/2c1fe715b180701cb0b9c52c2ed7d0e67213dd58))
+* **deps:** update dependency bogus to 35.6.5 ([#2960](https://github.com/Altinn/dialogporten/issues/2960)) ([93908d3](https://github.com/Altinn/dialogporten/commit/93908d38ad3cf929606a5859e1faf6532504557e))
+* **deps:** update dotnet monorepo ([#2959](https://github.com/Altinn/dialogporten/issues/2959)) ([35da10f](https://github.com/Altinn/dialogporten/commit/35da10fd99ba811ad4b493af8e3eb1488ca47791))
+* **infra:** Add autovacuum settings ([#2954](https://github.com/Altinn/dialogporten/issues/2954)) ([dbe478a](https://github.com/Altinn/dialogporten/commit/dbe478a01ed4700a413f072b0a180d198eb2488e))
+
 ## [1.88.6](https://github.com/Altinn/dialogporten/compare/v1.88.5...v1.88.6) (2025-11-04)
 
 

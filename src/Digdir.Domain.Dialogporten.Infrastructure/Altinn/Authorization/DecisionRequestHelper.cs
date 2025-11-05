@@ -43,16 +43,16 @@ internal static class DecisionRequestHelper
     {
         var sortedActions = request.AltinnActions.SortForXacml();
 
-        /*
-        if (request.Claims.GetEndUserPartyIdentifier() is { } endUserPartyIdentifier and (AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier or FeideUserIdentifier))
-        {
+        // The PDP does not support self-identified users as parties, so we need to use the party uuid claim instead.
+        var party = request.ClaimsPrincipal.GetEndUserPartyIdentifier()
+                is AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier or FeideUserIdentifier
+                    && request.ClaimsPrincipal.TryGetPartyUuid(out var partyUuid)
+            ? $"{PartyUuidClaimType}:{partyUuid}"
+            : request.Party;
 
-        }
-        */
-
-        var accessSubject = CreateAccessSubjectCategory(request.Claims);
+        var accessSubject = CreateAccessSubjectCategory(request.ClaimsPrincipal.Claims);
         var actions = CreateActionCategories(sortedActions, out var actionIdByName);
-        var resources = CreateResourceCategories(request.ServiceResource, request.DialogId, request.Party, sortedActions, out var resourceIdByName);
+        var resources = CreateResourceCategories(request.ServiceResource, request.DialogId, party, sortedActions, out var resourceIdByName);
 
         var multiRequests = CreateMultiRequests(sortedActions, actionIdByName, resourceIdByName);
 

@@ -63,7 +63,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     {
         var request = new DialogDetailsAuthorizationRequest
         {
-            Claims = _user.GetPrincipal().Claims.ToList(),
+            ClaimsPrincipal = _user.GetPrincipal(),
             ServiceResource = dialogEntity.ServiceResource,
             DialogId = dialogEntity.Id,
             Party = dialogEntity.Party,

@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Externals;
+﻿using System.Data;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -133,4 +134,26 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
                 builder.ToTable($"MassTransit{builder.Metadata.GetTableName()}");
             });
     }
+
+    public Task<T> WrapWithRepeatableRead<T>(
+        Func<IDialogDbContext, CancellationToken, Task<T>> queryFunc,
+        CancellationToken cancellationToken) =>
+        WrapWithIsolationLevel(IsolationLevel.RepeatableRead, queryFunc, cancellationToken);
+
+    private async Task<T> WrapWithIsolationLevel<T>(
+        IsolationLevel level,
+        Func<IDialogDbContext, CancellationToken, Task<T>> queryFunc,
+        CancellationToken cancellationToken)
+    {
+        if (Database.CurrentTransaction is not null)
+        {
+            throw new InvalidOperationException("Cannot start a new transaction when there is already an active transaction.");
+        }
+
+        await using var transaction = await Database.BeginTransactionAsync(level, cancellationToken);
+        var result = await queryFunc(this, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return result;
+    }
+
 }

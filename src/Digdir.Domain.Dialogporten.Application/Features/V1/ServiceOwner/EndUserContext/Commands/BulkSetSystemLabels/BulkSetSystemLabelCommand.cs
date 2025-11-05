@@ -60,7 +60,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
 
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        await _unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
         foreach (var dialog in dialogs)
         {
             dialog.EndUserContext.UpdateSystemLabels(

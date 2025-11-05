@@ -51,7 +51,7 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
         {
             var mergeCount = 0;
             var syncTime = DateTimeOffset.Now;
-            await _unitOfWork.BeginTransactionAsync(cancellationToken);
+            await _unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
             await foreach (var resourceBatch in _resourceRegistry
                 .GetUpdatedSubjectResources(lastUpdated, request.BatchSize ?? DefaultBatchSize, cancellationToken))
             {

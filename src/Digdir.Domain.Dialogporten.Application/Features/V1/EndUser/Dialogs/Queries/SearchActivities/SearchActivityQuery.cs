@@ -40,11 +40,14 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
 
     public async Task<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _db.Dialogs
-            .Include(x => x.Activities)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.Activities)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct),
+            cancellationToken);
 
         if (dialog is null)
         {

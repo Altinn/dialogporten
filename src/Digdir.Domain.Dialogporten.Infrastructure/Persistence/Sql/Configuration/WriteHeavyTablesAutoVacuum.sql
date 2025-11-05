@@ -1,14 +1,14 @@
--- Override autovacuum settings for write heavy tables
+-- Override autovacuum settings for large tables
 
 DO $$
 DECLARE
 
-  vac_scale     CONSTANT numeric := 0.005;  -- 0.5%
-  vac_threshold CONSTANT integer := 1000;   -- min changed rows before vacuum
-  ana_scale     CONSTANT numeric := 0.002;  -- 0.2%
-  ana_threshold CONSTANT integer := 500;    -- min changed rows before analyze
-  cost_limit    CONSTANT integer := 8000;   -- allow deeper cleanup per run
-  cost_delay    CONSTANT integer := 2;      -- ms
+  vac_scale     CONSTANT numeric := 0.0001;  -- 0.01%
+  vac_threshold CONSTANT integer := 1000;    -- min dead tuples before vacuum
+  ana_scale     CONSTANT numeric := 0.00005; -- 0.005%
+  ana_threshold CONSTANT integer := 500;     -- min dead tuples before analyze
+  cost_limit    CONSTANT integer := 8000;    -- allow deeper cleanup per run
+  cost_delay    CONSTANT integer := 2;       -- ms
 
   fq_tables CONSTANT text[] := ARRAY[
     'public.Actor',
@@ -44,18 +44,18 @@ BEGIN
     sch := split_part(fq, '.', 1);
     rel := split_part(fq, '.', 2);
 
-  sql := format($f$
-      ALTER TABLE %I.%I SET (
-        autovacuum_enabled = true,
-        autovacuum_vacuum_scale_factor   = %s,
-        autovacuum_vacuum_threshold      = %s,
-        autovacuum_analyze_scale_factor  = %s,
-        autovacuum_analyze_threshold     = %s,
-        autovacuum_vacuum_cost_limit     = %s,
-        autovacuum_vacuum_cost_delay     = %s
-      )$f$, sch, rel,
-      vac_scale, vac_threshold, ana_scale, ana_threshold, cost_limit, cost_delay);
+    sql := format($f$
+    ALTER TABLE %I.%I SET (
+    autovacuum_enabled = true,
+    autovacuum_vacuum_scale_factor   = %s,
+    autovacuum_vacuum_threshold      = %s,
+    autovacuum_analyze_scale_factor  = %s,
+    autovacuum_analyze_threshold     = %s,
+    autovacuum_vacuum_cost_limit     = %s,
+    autovacuum_vacuum_cost_delay     = %s
+    )$f$, sch, rel,
+    vac_scale, vac_threshold, ana_scale, ana_threshold, cost_limit, cost_delay);
 
-  EXECUTE sql;
-END LOOP;
+    EXECUTE sql;
+  END LOOP;
 END$$;

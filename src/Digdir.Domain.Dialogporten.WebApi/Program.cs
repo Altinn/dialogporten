@@ -58,7 +58,7 @@ static void BuildAndRun(string[] args)
 
     builder.WebHost.ConfigureKestrel(kestrelOptions =>
     {
-        kestrelOptions.Limits.MaxRequestBodySize = Constants.MaxRequestBodySize;
+        kestrelOptions.Limits.MaxRequestBodySize = Constants.MaxRequestBodySizeInBytes;
     });
 
     builder.Configuration

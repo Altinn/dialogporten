@@ -37,14 +37,16 @@ internal sealed class NotificationConditionQueryHandler : IRequestHandler<Notifi
 
     public async Task<NotificationConditionResult> Handle(NotificationConditionQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _db.Dialogs
-            .AsNoTracking()
-            .Include(x => x.Activities
-                .Where(x => request.TransmissionId == null || x.TransmissionId == request.TransmissionId)
-                .Where(x => x.TypeId == request.ActivityType))
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.Activities
+                    .Where(x => request.TransmissionId == null || x.TransmissionId == request.TransmissionId)
+                    .Where(x => x.TypeId == request.ActivityType))
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct),
+            cancellationToken);
 
         if (dialog is null)
         {

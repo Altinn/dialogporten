@@ -38,12 +38,13 @@ internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetSer
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        var serviceOwnerContext = await _db
-            .DialogServiceOwnerContexts
-            .Include(x => x.ServiceOwnerLabels)
-            .Where(x => x.DialogId == request.DialogId)
-            .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var serviceOwnerContext = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.DialogServiceOwnerContexts
+                .Include(x => x.ServiceOwnerLabels)
+                .Where(x => x.DialogId == request.DialogId)
+                .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
+                .FirstOrDefaultAsync(cancellationToken: ct),
+            cancellationToken);
 
         if (serviceOwnerContext is null)
         {

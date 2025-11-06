@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.89.0](https://github.com/Altinn/dialogporten/compare/v1.88.7...v1.89.0) (2025-11-06)
+
+
+### Features
+
+* **api:** Remove admin-scope requirement for silent update ([#2965](https://github.com/Altinn/dialogporten/issues/2965)) ([ec3a544](https://github.com/Altinn/dialogporten/commit/ec3a54403818f3252b4873c8ff23043b42c009be))
+
+
+### Bug Fixes
+
+* **app:** add repeatable read isolation level to db queries ([#2964](https://github.com/Altinn/dialogporten/issues/2964)) ([b5c3c69](https://github.com/Altinn/dialogporten/commit/b5c3c69111e8fdf9542850a7eb93a1e20389c927))
+* **app:** re-introduce edge case fix for mapping SystemLabel ([#2970](https://github.com/Altinn/dialogporten/issues/2970)) ([8515f31](https://github.com/Altinn/dialogporten/commit/8515f31625f15ba94c079bec8439dd13e6e37dc4))
+* **resourceRegistry:** accept null OrgCode ([#2968](https://github.com/Altinn/dialogporten/issues/2968)) ([b13ea18](https://github.com/Altinn/dialogporten/commit/b13ea185ada76fb0433ca3fb878c684bd274bd75))
+
 ## [1.88.7](https://github.com/Altinn/dialogporten/compare/v1.88.6...v1.88.7) (2025-11-05)
 
 

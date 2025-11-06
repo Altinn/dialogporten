@@ -79,11 +79,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
-        if (request.IsSilentUpdate && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
-        {
-            return new Forbidden(Constants.SilentUpdateRequiresAdminScope);
-        }
-
         var dialog = UpdateDialogDataLoader.GetPreloadedData(_dataLoaderContext);
 
         if (dialog is null)

@@ -208,7 +208,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 : label.ToLower(CultureInfo.InvariantCulture))
             .ToList();
 
-        var paginatedList = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+        var paginatedList = await _db.WrapWithRepeatableRead((_, ct) =>
             dialogQuery
                 .Include(x => x.Content)
                     .ThenInclude(x => x.Value.Localizations)

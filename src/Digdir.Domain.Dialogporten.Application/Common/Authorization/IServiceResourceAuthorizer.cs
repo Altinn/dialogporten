@@ -76,7 +76,7 @@ internal sealed class ServiceResourceAuthorizer : IServiceResourceAuthorizer
         {
             _domainContext.AddError(nameof(CreateDialogDto.ServiceResource),
                 $"""
-                 Service resource '{dialog.ServiceResource}' not found or unsupported due to one or more of the following reasons:
+                 Service resource '{dialog.ServiceResource}' is invalid due to one or more of the following reasons:
                  - It does not exist in the resource registry.
                  - It does not have mandatory fields 'CompetentAuthority.Organization' / 'CompetentAuthority.OrgCode' set.
                  - It is not of the following supported resource types: [{string.Join(", ", Constants.SupportedResourceTypes)}].

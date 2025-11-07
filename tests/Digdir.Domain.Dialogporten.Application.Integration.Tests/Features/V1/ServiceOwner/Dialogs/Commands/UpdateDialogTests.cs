@@ -30,7 +30,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class UpdateDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
-    public Task UpdateDialogCommand_Should_Set_Update_Correct_Dialog()
+    public Task UpdateDialogCommand_Should_Update_Correct_Dialog()
     {
         Guid? id = null;
         const string expectedExternalReference = "I've been updated!";
@@ -61,6 +61,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.ExternalReference.Should().Be(expectedExternalReference);
             });
     }
+
     [Fact]
     public async Task UpdateDialogCommand_Should_Set_New_Revision_If_IsSilentUpdate_Is_Set()
     {

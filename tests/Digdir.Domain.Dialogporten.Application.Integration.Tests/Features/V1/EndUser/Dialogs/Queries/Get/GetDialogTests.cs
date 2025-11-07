@@ -22,6 +22,28 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 public class GetDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
+    public Task Get_Should_Return_Dialog_With_Correct_Id()
+    {
+        const string externalReference = "Bare for å være sikker...";
+        var id = NewUuidV7();
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog(x => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .SendCommand(_ => new GetDialogQuery { DialogId = id })
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Id.Should().Be(id);
+                x.ExternalReference.Should().Be(externalReference);
+            });
+    }
+
+    [Fact]
     public Task Get_Dialog_Should_Include_Transmission_ExternalReference() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>

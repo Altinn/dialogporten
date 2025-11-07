@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.89.1](https://github.com/Altinn/dialogporten/compare/v1.89.0...v1.89.1) (2025-11-07)
+
+
+### Bug Fixes
+
+* **application:** Add check for fetching correct dialog on horisontal data loader ([#2971](https://github.com/Altinn/dialogporten/issues/2971)) ([c964291](https://github.com/Altinn/dialogporten/commit/c9642910c57c5dfb518c9322f42ec013cb86f252))
+
 ## [1.89.0](https://github.com/Altinn/dialogporten/compare/v1.88.7...v1.89.0) (2025-11-06)
 
 

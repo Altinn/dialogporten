@@ -15,7 +15,7 @@ param resources = {
     memory: '4Gi'
 }
 
-param otelTraceSamplerRatio = '0.2'
+param otelTraceSamplerRatio = '0.01'
 
 // secrets
 param appInsightConnectionString = readEnvironmentVariable('AZURE_APP_INSIGHTS_CONNECTION_STRING')

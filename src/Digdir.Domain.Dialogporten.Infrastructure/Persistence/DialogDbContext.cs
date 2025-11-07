@@ -141,18 +141,20 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
         WrapWithIsolationLevel(IsolationLevel.RepeatableRead, queryFunc, cancellationToken);
 
     private async Task<T> WrapWithIsolationLevel<T>(
+#pragma warning disable IDE0060
         IsolationLevel level,
+#pragma warning restore IDE0060
         Func<IDialogDbContext, CancellationToken, Task<T>> queryFunc,
         CancellationToken cancellationToken)
     {
-        if (Database.CurrentTransaction is not null)
-        {
-            throw new InvalidOperationException("Cannot start a new transaction when there is already an active transaction.");
-        }
-
-        await using var transaction = await Database.BeginTransactionAsync(level, cancellationToken);
+        // if (Database.CurrentTransaction is not null)
+        // {
+        //     throw new InvalidOperationException("Cannot start a new transaction when there is already an active transaction.");
+        // }
+        //
+        // await using var transaction = await Database.BeginTransactionAsync(level, cancellationToken);
         var result = await queryFunc(this, cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
+        // await transaction.CommitAsync(cancellationToken);
         return result;
     }
 

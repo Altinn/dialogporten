@@ -274,4 +274,47 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
                     .Should()
                     .BeTrue();
             });
+
+    [Fact]
+    public Task Only_Create_Update_Deleted_DomainEvents_When_IsSilentUpdate_Is_Set() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.Activities.Add(DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information));
+                x.Dto.Transmissions.Add(DialogGenerator.GenerateFakeDialogTransmissions(1).First());
+                x.IsSilentUpdate = true;
+            })
+            .AssertSuccessAndUpdateDialog(x =>
+            {
+                x.IsSilentUpdate = true;
+                x.Dto.ExtendedStatus = "Updated status";
+            })
+            .AssertResult<UpdateDialogSuccess>()
+            .SendCommand((_, ctx) => new DeleteDialogCommand
+            {
+                Id = ctx.GetDialogId(),
+                IsSilentUpdate = true
+            })
+            .RestoreDialog(x => x.IsSilentUpdate = true)
+            .SendCommand((_, ctx) => new PurgeDialogCommand
+            {
+                IsSilentUpdate = true,
+                DialogId = ctx.GetDialogId()
+            })
+            .ExecuteAndAssert<Success>(_ =>
+            {
+                var publishedEvents = Application.GetPublishedEvents();
+
+                publishedEvents
+                    .OfType<IDomainEvent>()
+                    .Should()
+                    .HaveCount(5); // 1.Create, 2.Update, 3.Delete, 4.Restored, 5.Delete (for purge)
+
+                publishedEvents
+                    .OfType<IDomainEvent>()
+                    .All(e => e.Metadata[Constants.IsSilentUpdate] == bool.TrueString)
+                    .Should()
+                    .BeTrue();
+            });
+
 }

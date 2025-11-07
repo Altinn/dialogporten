@@ -81,7 +81,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         updateSuccess.Revision.Should().NotBe(revision!.Value);
     }
 
-
     [Fact]
     public async Task UpdateDialogCommand_Should_Not_Set_SystemLabel_If_IsSilentUpdate_Is_Set()
     {

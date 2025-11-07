@@ -30,6 +30,38 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class UpdateDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
+    public Task UpdateDialogCommand_Should_Set_Update_Correct_Dialog()
+    {
+        Guid? id = null;
+        const string expectedExternalReference = "I've been updated!";
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.Id = id = NewUuidV7();
+                x.Dto.ExternalReference = "I'm so original...";
+            })
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+            {
+                x.Id = id!.Value;
+                x.IfMatchDialogRevision = null;
+                x.Dto.ExternalReference = expectedExternalReference;
+            })
+            .AssertSuccess()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .SendCommand(_ => new GetDialogQuery { DialogId = id!.Value })
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Id.Should().Be(id!.Value);
+                x.ExternalReference.Should().Be(expectedExternalReference);
+            });
+    }
+    [Fact]
     public async Task UpdateDialogCommand_Should_Set_New_Revision_If_IsSilentUpdate_Is_Set()
     {
         Guid? revision = null!;

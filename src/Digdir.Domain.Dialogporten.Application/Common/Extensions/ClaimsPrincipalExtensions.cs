@@ -165,13 +165,15 @@ public static class ClaimsPrincipalExtensions
             && Guid.TryParse(s, out partyUuid))
            || (partyUuid = Guid.Empty) is { };
 
+    public static bool TryGetUserId(this ClaimsPrincipal claimsPrincipal, out int userId)
+        => (claimsPrincipal.TryGetClaimValue(UserIdClaim, out var s)
+            && int.TryParse(s, out userId))
+           || (userId = 0) is { };
+
     public static bool TryGetPartyId(this ClaimsPrincipal claimsPrincipal, out int partyId)
         => (claimsPrincipal.TryGetClaimValue(PartyIdClaim, out var s)
             && int.TryParse(s, out partyId))
            || (partyId = 0) is { };
-
-    public static bool TryGetUserId(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? userId)
-        => claimsPrincipal.TryGetClaimValue(UserIdClaim, out userId);
 
     public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
     {

@@ -15,7 +15,6 @@ internal static class DecisionRequestHelper
 
     private const string PidClaimType = "pid";
     private const string UserIdClaimType = "urn:altinn:userid";
-    private const string PartyUuidClaimType = "urn:altinn:party:uuid";
     private const string RarAuthorizationDetailsClaimType = "authorization_details";
 
     private const string AttributeIdAction = "urn:oasis:names:tc:xacml:1.0:action:action-id";
@@ -30,10 +29,9 @@ internal static class DecisionRequestHelper
     private const string AttributeIdUserId = "urn:altinn:userid";
     private const string AttributeIdPerson = "urn:altinn:person:identifier-no";
     private const string AttributeIdSystemUser = "urn:altinn:systemuser:uuid";
-    private const string AttributeIdPartyUuid = "urn:altinn:party:uuid";
 
     // The order of these attribute types is important as we want to prioritize the most specific claim types.
-    private static readonly List<string> PrioritizedClaimTypes = [AttributeIdPartyUuid, AttributeIdUserId, AttributeIdPerson, AttributeIdSystemUser];
+    private static readonly List<string> PrioritizedClaimTypes = [AttributeIdUserId, AttributeIdPerson, AttributeIdSystemUser];
 
     private const string ReservedResourcePrefixForApps = "app_";
 
@@ -43,11 +41,12 @@ internal static class DecisionRequestHelper
     {
         var sortedActions = request.AltinnActions.SortForXacml();
 
-        // The PDP does not support self-identified users as parties, so we need to use the party uuid claim instead.
+        // The PDP does not support self-identified users as parties, so we need to use the userid claim instead.
+        // Should be replaced with partyUuid when supported by PDP, see https://github.com/Altinn/altinn-authorization-tmp/issues/1662
         var party = request.ClaimsPrincipal.GetEndUserPartyIdentifier()
                 is AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier or FeideUserIdentifier
-                    && request.ClaimsPrincipal.TryGetPartyUuid(out var partyUuid)
-            ? $"{PartyUuidClaimType}:{partyUuid}"
+                    && request.ClaimsPrincipal.TryGetUserId(out var userId)
+            ? $"{UserIdClaimType}:{userId}"
             : request.Party;
 
         var accessSubject = CreateAccessSubjectCategory(request.ClaimsPrincipal.Claims);
@@ -100,11 +99,6 @@ internal static class DecisionRequestHelper
         // the user id from the pid. See PrioritizedClaimTypes for the order of prioritization.
         claims.Select(claim => claim.Type switch
         {
-            PartyUuidClaimType => new XacmlJsonCategory
-            {
-                Id = SubjectId,
-                Attribute = [new() { AttributeId = AttributeIdPartyUuid, Value = claim.Value }]
-            },
             UserIdClaimType => new XacmlJsonCategory
             {
                 Id = SubjectId,

@@ -292,10 +292,10 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         DialogDetailsAuthorizationRequest request, CancellationToken cancellationToken)
     {
         var xacmlJsonRequest = DecisionRequestHelper.CreateDialogDetailsRequest(request);
-        var xamlJsonResponse = await SendPdpRequest(xacmlJsonRequest, cancellationToken);
-        LogIfIndeterminate(xamlJsonResponse, xacmlJsonRequest);
+        var xacmlJsonResponse = await SendPdpRequest(xacmlJsonRequest, cancellationToken);
+        LogIfIndeterminate(xacmlJsonResponse, xacmlJsonRequest);
 
-        return DecisionRequestHelper.CreateDialogDetailsResponse(request.AltinnActions, xamlJsonResponse);
+        return DecisionRequestHelper.CreateDialogDetailsResponse(request.AltinnActions, xacmlJsonResponse);
     }
 
     private void LogIfIndeterminate(XacmlJsonResponse? response, XacmlJsonRequestRoot request)

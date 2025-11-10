@@ -27,6 +27,6 @@ public sealed record FeideUserIdentifier : IPartyIdentifier
     public static bool IsValid(ReadOnlySpan<char> value)
     {
         var subject = PartyIdentifier.GetIdPart(value);
-        return subject.Length == 32;
+        return subject.Length == 64;
     }
 }

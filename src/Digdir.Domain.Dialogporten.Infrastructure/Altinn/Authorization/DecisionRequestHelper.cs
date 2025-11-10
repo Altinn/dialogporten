@@ -5,7 +5,6 @@ using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
@@ -15,6 +14,7 @@ internal static class DecisionRequestHelper
 
     private const string PidClaimType = "pid";
     private const string UserIdClaimType = "urn:altinn:userid";
+    private const string PartyIdClaimType = "urn:altinn:partyid";
     private const string RarAuthorizationDetailsClaimType = "authorization_details";
 
     private const string AttributeIdAction = "urn:oasis:names:tc:xacml:1.0:action:action-id";
@@ -41,17 +41,17 @@ internal static class DecisionRequestHelper
     {
         var sortedActions = request.AltinnActions.SortForXacml();
 
-        // The PDP does not support self-identified users as parties, so we need to use the userid claim instead.
-        // Should be replaced with partyUuid when supported by PDP, see https://github.com/Altinn/altinn-authorization-tmp/issues/1662
-        var party = request.ClaimsPrincipal.GetEndUserPartyIdentifier()
+        // The PDP does not support self-identified users as parties, so we need to use the party-id claim instead.
+        // Eventually, the PDP should support alle external party identifiers, but until then we need to special case this.
+        var resourceParty = request.ClaimsPrincipal.GetEndUserPartyIdentifier()
                 is AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier or FeideUserIdentifier
-                    && request.ClaimsPrincipal.TryGetUserId(out var userId)
-            ? $"{UserIdClaimType}:{userId}"
+                    && request.ClaimsPrincipal.TryGetPartyId(out var partyId)
+            ? $"{PartyIdClaimType}:{partyId}"
             : request.Party;
 
         var accessSubject = CreateAccessSubjectCategory(request.ClaimsPrincipal.Claims);
         var actions = CreateActionCategories(sortedActions, out var actionIdByName);
-        var resources = CreateResourceCategories(request.ServiceResource, request.DialogId, party, sortedActions, out var resourceIdByName);
+        var resources = CreateResourceCategories(request.ServiceResource, request.DialogId, resourceParty, sortedActions, out var resourceIdByName);
 
         var multiRequests = CreateMultiRequests(sortedActions, actionIdByName, resourceIdByName);
 
@@ -278,16 +278,17 @@ internal static class DecisionRequestHelper
 
     private static XacmlJsonAttribute? GetPartyAttribute(string party)
     {
-        if (PartyIdentifier.TryParse(party, out var partyIdentifier))
+        var lastColonIndex = party.LastIndexOf(':');
+        if (lastColonIndex == -1 || lastColonIndex == party.Length - 1)
         {
-            return new XacmlJsonAttribute
-            {
-                AttributeId = partyIdentifier.Prefix(),
-                Value = partyIdentifier.Id
-            };
+            return null;
         }
 
-        return null;
+        return new XacmlJsonAttribute
+        {
+            AttributeId = party[..lastColonIndex],
+            Value = party[(lastColonIndex + 1)..]
+        };
     }
 
     private static XacmlJsonMultiRequests CreateMultiRequests(

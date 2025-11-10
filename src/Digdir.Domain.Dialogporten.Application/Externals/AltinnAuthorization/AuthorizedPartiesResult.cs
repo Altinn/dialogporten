@@ -12,6 +12,7 @@ public sealed class AuthorizedParty
     public int PartyId { get; init; }
     public string Name { get; init; } = null!;
     public AuthorizedPartyType PartyType { get; init; }
+    public DateTime? DateOfBirth { get; init; }
     public bool IsDeleted { get; init; }
     public bool HasKeyRole { get; init; }
     public bool IsCurrentEndUser { get; set; }

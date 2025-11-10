@@ -26,11 +26,8 @@ public static class ClaimsPrincipalExtensions
     private const string IdportenEmailClaim = "email";
     private const string AltinnUsernameClaim = "urn:altinn:username";
     private const string FeideSubjectClaim = "orgsub";
-    private const string AltinnAuthenticationMethod = "urn:altinn:authenticatemethod";
-    private const string SelfIdentifiedAuthenticationMethod = "SelfIdentified";
     private const string PartyUuidClaim = "urn:altinn:party:uuid";
     private const string PartyIdClaim = "urn:altinn:partyid";
-    private const string UserIdClaim = "urn:altinn:userid";
     private const char ScopeClaimSeparator = ' ';
     private const string PidClaim = "pid";
     public const string ScopeClaim = "scope";
@@ -148,32 +145,37 @@ public static class ClaimsPrincipalExtensions
     }
 
     public static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
-        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
-           && claimsPrincipal.TryGetClaimValue(AltinnAuthenticationMethod, out var authMethod)
-           && authMethod == SelfIdentifiedAuthenticationMethod;
+        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email);
 
     public static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? username)
-        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
-           && claimsPrincipal.TryGetClaimValue(AltinnAuthenticationMethod, out var authMethod)
-           && authMethod == SelfIdentifiedAuthenticationMethod;
+        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username);
 
     public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
         => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);
 
     public static bool TryGetPartyUuid(this ClaimsPrincipal claimsPrincipal, out Guid partyUuid)
-        => (claimsPrincipal.TryGetClaimValue(PartyUuidClaim, out var s)
-            && Guid.TryParse(s, out partyUuid))
-           || (partyUuid = Guid.Empty) is { };
+    {
+        if (claimsPrincipal.TryGetClaimValue(PartyUuidClaim, out var s) && Guid.TryParse(s, out var id))
+        {
+            partyUuid = id;
+            return true;
+        }
 
-    public static bool TryGetUserId(this ClaimsPrincipal claimsPrincipal, out int userId)
-        => (claimsPrincipal.TryGetClaimValue(UserIdClaim, out var s)
-            && int.TryParse(s, out userId))
-           || (userId = 0) is { };
+        partyUuid = Guid.Empty;
+        return false;
+    }
 
     public static bool TryGetPartyId(this ClaimsPrincipal claimsPrincipal, out int partyId)
-        => (claimsPrincipal.TryGetClaimValue(PartyIdClaim, out var s)
-            && int.TryParse(s, out partyId))
-           || (partyId = 0) is { };
+    {
+        if (claimsPrincipal.TryGetClaimValue(PartyIdClaim, out var s) && int.TryParse(s, out var id))
+        {
+            partyId = id;
+            return true;
+        }
+
+        partyId = 0;
+        return false;
+    }
 
     public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
     {
@@ -238,8 +240,10 @@ public static class ClaimsPrincipalExtensions
     /// 1. Person (has pid claim)
     /// 2. System user (has authorization_details claim with type urn:altinn:systemuser)
     /// 3. Service owner (has consumer claim and service_owner scope)
-    /// 4. Self-identified user (has email claim and authentication method SelfIdentified)
-    /// 5. Unknown (none of the above)
+    /// 4. Feide user (has orgsub claim)
+    /// 5. Altinn self-identified user (has urn:altinn:username claim with SelfIdentified auth method)
+    /// 6. Idporten self-identified user (has email claim)
+    /// 7. Unknown (none of the above)
     /// </summary>
     /// <param name="claimsPrincipal"></param>
     /// <returns></returns>

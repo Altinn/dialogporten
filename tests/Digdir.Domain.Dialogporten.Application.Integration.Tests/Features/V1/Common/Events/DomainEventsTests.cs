@@ -276,7 +276,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             });
 
     [Fact]
-    public Task Only_Create_Update_Deleted_DomainEvents_When_IsSilentUpdate_Is_Set() =>
+    public Task Only_Create_And_Update_DomainEvents_When_IsSilentUpdate_Is_Set() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
             {

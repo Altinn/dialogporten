@@ -115,7 +115,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
     private async Task<UpdatedResourcePolicyInformation?> GetUpdatedResourcePolicyInformation(UpdatedResource resource, CancellationToken cancellationToken)
     {
         var resourceRegistryEntry = new ResourceRegistryEntry(resource.ResourceUrn);
-        if (!resourceRegistryEntry.HasPolicyInResourceRegistry)
+        if (!resourceRegistryEntry.ShouldInclude)
         {
             return null;
         }
@@ -197,20 +197,18 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
     private sealed class ResourceRegistryEntry
     {
         public string Identifier { get; }
-        public bool HasPolicyInResourceRegistry { get; }
+        public bool ShouldInclude { get; }
 
         private const string Altinn2ServicePrefix = "se_";
-        private const string AltinnAppPrefix = "app_";
         private const char UrnSeparator = ':';
 
         public ResourceRegistryEntry(Uri resourceUrn)
         {
-            // Utility class to extract the identifier from a resource URN, and determine if it has a policy
-            // available in the resource registry API (Altinn 2 representations and Altinn Apps do not)
+            // Utility class to extract the identifier from a resource URN, and determine if this
+            // is something we want to process (we skip Altinn 2 services)
             var fullIdentifier = resourceUrn.ToString();
             Identifier = fullIdentifier[(fullIdentifier.LastIndexOf(UrnSeparator) + 1)..];
-            HasPolicyInResourceRegistry = !Identifier.StartsWith(Altinn2ServicePrefix, StringComparison.Ordinal)
-                        && !Identifier.StartsWith(AltinnAppPrefix, StringComparison.Ordinal);
+            ShouldInclude = !Identifier.StartsWith(Altinn2ServicePrefix, StringComparison.Ordinal);
         }
     }
 

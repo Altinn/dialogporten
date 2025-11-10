@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.89.2](https://github.com/Altinn/dialogporten/compare/v1.89.1...v1.89.2) (2025-11-10)
+
+
+### Bug Fixes
+
+* **janitor:** Include migrated apps in resource information ([#2973](https://github.com/Altinn/dialogporten/issues/2973)) ([3d4f3fd](https://github.com/Altinn/dialogporten/commit/3d4f3fd4d22c75f7b52db3628b93582edceb16f8))
+
+
+### Miscellaneous Chores
+
+* **app:** remove edge case handling and add test for dialog retrieval by ID ([#2974](https://github.com/Altinn/dialogporten/issues/2974)) ([9263141](https://github.com/Altinn/dialogporten/commit/9263141168cb1e62b07aa40b40db577968422f1b))
+* **events:** Skip some domain events when doing silent updates ([#2976](https://github.com/Altinn/dialogporten/issues/2976)) ([65ceeaf](https://github.com/Altinn/dialogporten/commit/65ceeaf6f1b7400162cdc731d512f2308f967d93))
+
 ## [1.89.1](https://github.com/Altinn/dialogporten/compare/v1.89.0...v1.89.1) (2025-11-07)
 
 

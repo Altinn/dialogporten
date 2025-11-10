@@ -59,13 +59,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialog.SeenLog = dialog.SeenLog
             .Where(x => x.CreatedAt >= dialog.ContentUpdatedAt).ToList();
 
-        // Edge case where the dialog is requested the same instant it is purged
-        // https://github.com/Altinn/dialogporten/issues/2627
-        if (dialog.EndUserContext.DialogEndUserContextSystemLabels.Count == 0)
-        {
-            return new EntityNotFound<DialogEntity>(request.DialogId);
-        }
-
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 
         if (request.EndUserId is not null)

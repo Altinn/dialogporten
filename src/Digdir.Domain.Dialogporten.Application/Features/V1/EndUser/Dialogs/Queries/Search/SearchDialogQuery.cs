@@ -29,8 +29,6 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
 {
     private readonly string? _searchLanguageCode;
 
-    public override OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>? OrderBy { get; set; } = null!;
-
     /// <summary>
     /// Filter by one or more service owner codes
     /// </summary>

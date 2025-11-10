@@ -14,10 +14,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialogSearchRepository
 {
     private readonly DialogDbContext _db = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-    private static readonly OrderSet<SearchDialogQueryOrderDefinition, DialogEntity> IdDescendingOrder = new(
-    [
-        new Order<DialogEntity>("id", new OrderSelector<DialogEntity>(x => x.Id))
-    ]);
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {
@@ -74,7 +70,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
 
         if (authorizedResources.HasNoAuthorizations)
         {
-            return new PaginatedList<DialogEntity>([], false, null, IdDescendingOrder.GetOrderString());
+            return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());
         }
 
         var partiesAndServices = JsonSerializer.Serialize(authorizedResources.ResourcesByParties
@@ -91,84 +87,79 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             })
             .Where(x => x.parties.Length > 0 && x.services.Length > 0));
 
-        var paginationCondition = new PostgresFormattableStringBuilder()
-            .ApplyPaginationCondition(query.OrderBy ?? IdDescendingOrder, query.ContinuationToken);
-        var paginationOrder = new PostgresFormattableStringBuilder()
-            .ApplyPaginationOrder(query.OrderBy ?? IdDescendingOrder);
+        var accessibleFilteredDialogs = new PostgresFormattableStringBuilder()
+            .Append($"""
+                     SELECT d.* ,ds."SearchVector" as searchVector
+                     FROM "Dialog" d
+                     LEFT JOIN accessiblePartyServiceTuple ps ON d."ServiceResource" = ps.service AND d."Party" = ps.party
+                     LEFT JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
+                     CROSS JOIN searchString ss
+                     WHERE 1=1
+                        AND ps.party IS NOT NULL OR d."Id" = ANY({authorizedResources.DialogIds}::uuid[])
+                     """)
+            .AppendIf(query.Search is not null,
+                $"""
+                AND (ds."SearchVector" @@ ss.searchVector OR EXISTS (
+                    SELECT 1
+                    FROM "DialogSearchTag" dst
+                    WHERE dst."DialogId" = d."Id"
+                    AND dst."Value" = ANY(ss.searchTerms)
+                ))
+                """)
+            .AppendIf(query.Deleted is not null, $@"AND d.""Deleted"" = {query.Deleted}::boolean\n")
+            .AppendIf(query.VisibleAfter is not null, $@"AND d.""VisibleFrom"" IS NULL OR d.""VisibleFrom"" <= {query.VisibleAfter}::timestamptz\n")
+            .AppendIf(query.ExpiresBefore is not null, $@"AND d.""ExpiresAt"" IS NULL OR d.""ExpiresAt"" > {query.ExpiresBefore}::timestamptz\n")
+            .AppendIf(query.Org is not null, $@"AND d.""Org"" = ANY({query.Org}::text[])\n")
+            .AppendIf(query.ServiceResource is not null, $@"AND d.""ServiceResource"" = ANY({query.ServiceResource}::text[])\n")
+            .AppendIf(query.Party is not null, $@"AND d.""Party"" = ANY({query.Party}::text[])\n")
+            .AppendIf(query.ExtendedStatus is not null, $@"AND d.""ExtendedStatus"" = ANY({query.ExtendedStatus}::text[])\n")
+            .AppendIf(query.ExternalReference is not null, $@"AND d.""ExternalReference"" = {query.ExternalReference})::text\n")
+            .AppendIf(query.Status is not null, $@"AND d.""StatusId"" = ANY({query.Status}::int[])\n")
+            .AppendIf(query.CreatedAfter is not null, $@"AND {query.CreatedAfter}::timestamptz <= d.""CreatedAt""\n")
+            .AppendIf(query.CreatedBefore is not null, $@"AND d.""CreatedAt"" <= {query.CreatedBefore}::timestamptz\n")
+            .AppendIf(query.UpdatedAfter is not null, $@"AND {query.UpdatedAfter}::timestamptz <= d.""UpdatedAt""\n")
+            .AppendIf(query.UpdatedBefore is not null, $@"AND d.""UpdatedAt"" <= {query.UpdatedBefore}::timestamptz\n")
+            .AppendIf(query.ContentUpdatedAfter is not null, $@"AND {query.ContentUpdatedAfter}::timestamptz <= d.""ContentUpdatedAt""\n")
+            .AppendIf(query.ContentUpdatedBefore is not null, $@"AND d.""ContentUpdatedAt"" <= {query.ContentUpdatedBefore}::timestamptz\n")
+            .AppendIf(query.DueAfter is not null, $@"AND {query.DueAfter}::timestamptz <= d.""DueAt""\n")
+            .AppendIf(query.DueBefore is not null, $@"AND d.""DueAt"" <= {query.DueBefore}::timestamptz\n")
+            .AppendIf(query.Process is not null, $@"AND d.""Process"" = {query.Process}::text\n")
+            .AppendIf(query.ExcludeApiOnly is not null, $@"AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d.""IsApiOnly"" = false)\n")
+            .AppendIf(query.SystemLabel is not null,
+                $"""
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM unnest({query.SystemLabel}::int[]) as st(value)
+                    LEFT JOIN "DialogEndUserContext" dec ON dec."DialogId" = d."Id"
+                    LEFT JOIN "DialogEndUserContextSystemLabel" sl 
+                        ON sl."DialogEndUserContextId" = dec."Id" 
+                        AND sl."SystemLabelId" = st.value
+                    WHERE sl."DialogEndUserContextId" IS NULL
+                )
+                """)
+            .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken)
+            .ApplyPaginationOrder(query.OrderBy!);
 
         var queryBuilder = new PostgresFormattableStringBuilder()
             .Append(
                 $"""
-                  WITH searchString AS (
-                     SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
-                         ,string_to_array({query.Search}::text, ' ') AS searchTerms
-                     FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
-                     LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
-                     LIMIT 1
-                  ),accessiblePartyServiceTuple AS (
-                     SELECT DISTINCT p.party, s.service
-                     FROM jsonb_to_recordset({partiesAndServices}::jsonb) AS x(parties text[], services text[])
-                     CROSS JOIN LATERAL unnest(x.services) AS s(service)
-                     CROSS JOIN LATERAL unnest(x.parties) AS p(party)
-                  ),accessibleDialogs AS (
-                     SELECT d.*
-                     FROM "Dialog" d
-                     LEFT JOIN accessiblePartyServiceTuple ps ON d."ServiceResource" = ps.service AND d."Party" = ps.party
-                     WHERE ps.party IS NOT NULL OR d."Id" = ANY({authorizedResources.DialogIds}::uuid[])
-                  ),accessibleFilteredDialogs AS (
-                     SELECT d.* ,ds."SearchVector" as searchVector
-                     FROM accessibleDialogs d
-                     LEFT JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
-                     CROSS JOIN searchString ss
-                     WHERE 1=1
-                        AND ({query.Deleted} IS NULL OR d."Deleted" = {query.Deleted}::boolean)
-                        AND ({query.VisibleAfter} IS NULL OR d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz)
-                        AND ({query.ExpiresBefore} IS NULL OR d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz)
-                        AND ({query.Org} IS NULL OR d."Org" = ANY({query.Org}::text[]))
-                        --AND ({query.ServiceResource} IS NULL OR d."ServiceResource" = ANY({query.ServiceResource}::text[]))
-                        --AND ({query.Party} IS NULL OR d."Party" = ANY({query.Party}::text[]))
-                        AND ({query.ExtendedStatus} IS NULL OR d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]))
-                        AND ({query.ExternalReference} IS NULL OR d."ExternalReference" = {query.ExternalReference}::text)
-                        AND ({query.Status} IS NULL OR d."StatusId" = ANY({query.Status}::int[]))
-                        AND ({query.CreatedAfter} IS NULL OR {query.CreatedAfter}::timestamptz <= d."CreatedAt")
-                        AND ({query.CreatedBefore} IS NULL OR d."CreatedAt" <= {query.CreatedBefore}::timestamptz)
-                        AND ({query.UpdatedAfter} IS NULL OR {query.UpdatedAfter}::timestamptz <= d."UpdatedAt")
-                        AND ({query.UpdatedBefore} IS NULL OR d."UpdatedAt" <= {query.UpdatedBefore}::timestamptz)
-                        AND ({query.ContentUpdatedAfter} IS NULL OR {query.ContentUpdatedAfter}::timestamptz <= d."ContentUpdatedAt")
-                        AND ({query.ContentUpdatedBefore} IS NULL OR d."ContentUpdatedAt" <= {query.ContentUpdatedBefore}::timestamptz)
-                        AND ({query.DueAfter} IS NULL OR {query.DueAfter}::timestamptz <= d."DueAt")
-                        AND ({query.DueBefore} IS NULL OR d."DueAt" <= {query.DueBefore}::timestamptz)
-                        AND ({query.Process} IS NULL OR d."Process" = {query.Process}::text)
-                        AND ({query.ExcludeApiOnly} IS NULL OR ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false))
-                        AND ({query.SystemLabel} IS NULL OR NOT EXISTS (
-                            SELECT 1
-                            FROM unnest({query.SystemLabel}::int[]) as st(value)
-                            LEFT JOIN "DialogEndUserContext" dec ON dec."DialogId" = d."Id"
-                            LEFT JOIN "DialogEndUserContextSystemLabel" sl 
-                                ON sl."DialogEndUserContextId" = dec."Id" 
-                                AND sl."SystemLabelId" = st.value
-                            WHERE sl."DialogEndUserContextId" IS NULL
-                        ))
-                        AND (ss.searchVector IS NULL OR ds."SearchVector" @@ ss.searchVector)
-                          OR (ss.searchTerms IS NULL OR EXISTS (
-                               SELECT 1
-                               FROM "DialogSearchTag" dst
-                               WHERE dst."DialogId" = d."Id"
-                                  AND dst."Value" = ANY(ss.searchTerms)
-                           ))
-                        {paginationCondition}
-                     {paginationOrder}
-                     LIMIT {searchSampleLimit}
-                  )
-                  SELECT ds.*
-                  FROM accessibleFilteredDialogs ds
-                  CROSS JOIN searchString ss
-                  
-                  """)
-            // Ordering by full text search rank only works on the first page of results
-            // because pagination requires both OrderBy and ContinuationToken to be set.
-            .AppendIf(query.OrderBy is null, "ORDER BY ts_rank(ds.searchVector, ss.searchVector) DESC\n")
-            .AppendIf(query.OrderBy is not null, $"{paginationOrder}\n");
+                 WITH searchString AS (
+                    SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
+                        ,string_to_array({query.Search}::text, ' ') AS searchTerms
+                    FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
+                    LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
+                    LIMIT 1
+                 ),accessiblePartyServiceTuple AS (
+                    SELECT DISTINCT p.party, s.service
+                    FROM jsonb_to_recordset({partiesAndServices}::jsonb) AS x(parties text[], services text[])
+                    CROSS JOIN LATERAL unnest(x.services) AS s(service)
+                    CROSS JOIN LATERAL unnest(x.parties) AS p(party)
+                 ),accessibleFilteredDialogs AS (
+                    {accessibleFilteredDialogs}
+                 )
+                 SELECT ds.*
+                 FROM accessibleFilteredDialogs ds
+                 """);
 
         // DO NOT use Include here, as it will use the custom SQL above which is
         // much less efficient than querying further by the resulting dialogIds.
@@ -180,10 +171,10 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .AsNoTracking();
 
         var dialogs = await efQuery.ToPaginatedListAsync(
-            query.OrderBy ?? IdDescendingOrder,
+            query.OrderBy!,
             query.ContinuationToken,
             query.Limit,
-            applyOrder: false,
+            applyOrder: true,
             applyContinuationToken: false,
             cancellationToken);
 

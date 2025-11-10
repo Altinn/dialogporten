@@ -22,7 +22,7 @@ public class PaginationParameter<TOrderDefinition, TTarget>
 public class SortablePaginationParameter<TOrderDefinition, TTarget> : PaginationParameter<TOrderDefinition, TTarget>
     where TOrderDefinition : IOrderDefinition<TTarget>
 {
-    public virtual OrderSet<TOrderDefinition, TTarget>? OrderBy { get; set; } = OrderSet<TOrderDefinition, TTarget>.Default;
+    public OrderSet<TOrderDefinition, TTarget>? OrderBy { get; set; } = OrderSet<TOrderDefinition, TTarget>.Default;
 }
 
 internal sealed class PaginationParameterValidator<TOrderDefinition, TTarget> : AbstractValidator<PaginationParameter<TOrderDefinition, TTarget>>

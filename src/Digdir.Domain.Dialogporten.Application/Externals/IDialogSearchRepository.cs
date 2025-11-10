@@ -41,6 +41,7 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<DialogEn
             .AddOption("updatedAt", x => x.UpdatedAt)
             .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
             .AddOption("dueAt", x => x.DueAt)
+            .AddOption("searchRank", x => x.Status)
             .Build();
 }
 

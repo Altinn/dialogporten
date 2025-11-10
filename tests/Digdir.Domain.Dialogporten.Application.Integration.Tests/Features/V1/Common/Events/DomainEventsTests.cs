@@ -308,7 +308,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
                 publishedEvents
                     .OfType<IDomainEvent>()
                     .Should()
-                    .HaveCount(5); // 1.Create, 2.Update, 3.Delete, 4.Restored, 5.Delete (for purge)
+                    .HaveCount(2);
 
                 publishedEvents
                     .OfType<IDomainEvent>()

@@ -2,8 +2,7 @@ using System.Globalization;
 using System.Text;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
-using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 
@@ -46,7 +45,7 @@ internal static class SearchDialogSortTypeExtensions
     }
 
     public static bool TryToOrderSet(this List<SearchDialogSortType>? searchDialogSortTypes,
-        out OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>? orderSet)
+        out OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>? orderSet)
     {
         if (searchDialogSortTypes is null)
         {
@@ -80,7 +79,7 @@ internal static class SearchDialogSortTypeExtensions
             }
         }
 
-        if (OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(stringBuilder.ToString(),
+        if (OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(stringBuilder.ToString(),
                 out var parsedOrderSet))
         {
             orderSet = parsedOrderSet;

@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -9,6 +10,19 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 
 internal static class DialogExtensions
 {
+    public static void FilterLocalizations(this IntermediateDialogDto dialog, List<AcceptedLanguage>? acceptedLanguages)
+    {
+        if (acceptedLanguages is null)
+        {
+            return;
+        }
+
+        foreach (var dialogContent in dialog.Content)
+        {
+            dialogContent.Value.Localizations.PruneLocalizations(acceptedLanguages);
+        }
+    }
+
     public static void FilterLocalizations(this DialogEntity dialog, List<AcceptedLanguage>? acceptedLanguages)
     {
         if (acceptedLanguages is null)

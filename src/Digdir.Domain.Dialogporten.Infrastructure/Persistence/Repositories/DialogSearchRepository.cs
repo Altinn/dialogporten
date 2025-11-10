@@ -88,7 +88,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                 services = x.Key
                     .Where(s => query.ServiceResource is null || query.ServiceResource.Contains(s))
                     .ToArray()
-            }));
+            })
+            .Where(x => x.parties.Length > 0 && x.services.Length > 0));
 
         var paginationCondition = new PostgresFormattableStringBuilder()
             .ApplyPaginationCondition(query.OrderBy ?? IdDescendingOrder, query.ContinuationToken);
@@ -119,7 +120,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                      FROM accessibleDialogs d
                      LEFT JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
                      CROSS JOIN searchString ss
-                     WHERE ({query.Deleted} IS NULL OR d."Deleted" = {query.Deleted}::boolean)
+                     WHERE 1=1
+                        AND ({query.Deleted} IS NULL OR d."Deleted" = {query.Deleted}::boolean)
                         AND ({query.VisibleAfter} IS NULL OR d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz)
                         AND ({query.ExpiresBefore} IS NULL OR d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz)
                         AND ({query.Org} IS NULL OR d."Org" = ANY({query.Org}::text[]))

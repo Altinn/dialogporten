@@ -1,13 +1,12 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld;
 
-public sealed class DialogDto
+public class DialogDtoBase
 {
     /// <summary>
     /// The unique identifier for the dialog in UUIDv7 format.
@@ -115,7 +114,7 @@ public sealed class DialogDto
 
     /// <summary>
     /// System defined label used to categorize dialogs.
-    /// This is obsolete and will only show; <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// This is obsolete and will only show; <see cref="SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
     /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
     /// </summary>
     [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]
@@ -156,34 +155,6 @@ public sealed class DialogDto
     /// Metadata about the dialog owned by end-users.
     /// </summary>
     public DialogEndUserContextDto EndUserContext { get; set; } = null!;
-
-    /// <summary>
-    /// The content of the dialog in search results.
-    /// </summary>
-    public ContentDto Content { get; set; } = null!;
-}
-
-public sealed class ContentDto
-{
-    /// <summary>
-    /// The title of the dialog.
-    /// </summary>
-    public ContentValueDto Title { get; set; } = null!;
-
-    /// <summary>
-    /// A short summary of the dialog and its current state.
-    /// </summary>
-    public ContentValueDto? Summary { get; set; }
-
-    /// <summary>
-    /// Overridden sender name. If not supplied, assume "org" as the sender name.
-    /// </summary>
-    public ContentValueDto? SenderName { get; set; }
-
-    /// <summary>
-    /// Used as the human-readable label used to describe the "ExtendedStatus" field.
-    /// </summary>
-    public ContentValueDto? ExtendedStatus { get; set; }
 }
 
 public sealed class DialogEndUserContextDto

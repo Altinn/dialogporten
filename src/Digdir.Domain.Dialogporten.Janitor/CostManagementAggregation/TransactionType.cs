@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
 using SearchDialogsQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
+using SearchDialogsQueryEUOld = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld.SearchDialogQuery;
 using SetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
 using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 
@@ -54,6 +55,7 @@ public static class TransactionTypeMapper
         // EndUser Get/Search
         [typeof(GetDialogQueryEU).FullName!] = TransactionType.GetDialogEndUser,
         [typeof(SearchDialogsQueryEU).FullName!] = TransactionType.SearchDialogsEndUser,
+        [typeof(SearchDialogsQueryEUOld).FullName!] = TransactionType.SearchDialogsEndUser,
 
         // Labels - exact matches needed for these
         [typeof(SetSystemLabelCommandEU).FullName!] = TransactionType.SetDialogLabel,

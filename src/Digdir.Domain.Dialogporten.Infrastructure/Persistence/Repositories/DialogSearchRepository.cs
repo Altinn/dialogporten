@@ -98,7 +98,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                         AND ps.party IS NOT NULL OR d."Id" = ANY({authorizedResources.DialogIds}::uuid[])
                      """)
             .AppendIf(query.Search is not null,
-                $"""
+                """
                 AND (ds."SearchVector" @@ ss.searchVector OR EXISTS (
                     SELECT 1
                     FROM "DialogSearchTag" dst

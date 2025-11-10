@@ -25,7 +25,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     private const string AuthorizedPartiesUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties?includeAltinn2=true";
 
     private readonly HttpClient _httpClient;
-    //private readonly IFusionCache _pdpCache;
+    private readonly IFusionCache _pdpCache;
     private readonly IFusionCache _partiesCache;
     private readonly IFusionCache _subjectResourcesCache;
     private readonly IUser _user;
@@ -48,7 +48,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         IServiceScopeFactory serviceScopeFactory)
     {
         _httpClient = client ?? throw new ArgumentNullException(nameof(client));
-        //_pdpCache = cacheProvider.GetCache(nameof(Authorization)) ?? throw new ArgumentNullException(nameof(cacheProvider));
+        _pdpCache = cacheProvider.GetCache(nameof(Authorization)) ?? throw new ArgumentNullException(nameof(cacheProvider));
         _partiesCache = cacheProvider.GetCache(nameof(AuthorizedPartiesResult)) ?? throw new ArgumentNullException(nameof(cacheProvider));
         _subjectResourcesCache = cacheProvider.GetCache(nameof(SubjectResource)) ?? throw new ArgumentNullException(nameof(cacheProvider));
         _user = user ?? throw new ArgumentNullException(nameof(user));
@@ -70,9 +70,8 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             AltinnActions = dialogEntity.GetAltinnActions()
         };
 
-        return await PerformDialogDetailsAuthorization(request, cancellationToken);
-        /*return await _pdpCache.GetOrSetAsync(request.GenerateCacheKey(), async token
-            => await PerformDialogDetailsAuthorization(request, token), token: cancellationToken);*/
+        return await _pdpCache.GetOrSetAsync(request.GenerateCacheKey(), async token
+            => await PerformDialogDetailsAuthorization(request, token), token: cancellationToken);
     }
 
     public async Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(

@@ -35,7 +35,7 @@ internal static class ErrorResponseBuilderExtensions
         {
             StatusCodes.Status413PayloadTooLarge => new ProblemDetails
             {
-                Title = $"Payload too large. The maximum allowed size is {Constants.MaxRequestBodySize} bytes.",
+                Title = $"Payload too large. The maximum allowed size is {Constants.MaxRequestBodySizeInBytes} bytes.",
                 Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.11",
                 Status = statusCode,
                 Instance = ctx.Request.Path,

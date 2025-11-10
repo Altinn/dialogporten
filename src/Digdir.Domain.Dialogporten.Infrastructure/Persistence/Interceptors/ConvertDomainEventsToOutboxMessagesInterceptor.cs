@@ -53,6 +53,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
                 x.Entity is IEventPublisher publisher
                     ? publisher.PopDomainEvents()
                     : [])
+            .Where(EventShouldBeIncluded)
             .ToList();
 
         if (_domainEvents.Count == 0)
@@ -128,4 +129,10 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
             throw new InvalidOperationException("Failed to ensure lazy-loaded services. Is the presentation layer registered with publishing capabilities?", e);
         }
     }
+
+    // This is an optimization to include only include dialog create and update events when doing
+    // silent updates, as these are (currently) the only events consumed that are not effectively no-ops. This avoids
+    // flooding the message bus with events that are not used during migration or other bulk silent updates.
+    private bool EventShouldBeIncluded(IDomainEvent domainEvent) =>
+        !_applicationContext.IsSilentUpdate() || domainEvent is DialogCreatedDomainEvent or DialogUpdatedDomainEvent;
 }

@@ -45,14 +45,16 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
     {
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        var dialog = await _dbContext.Dialogs
-            .AsNoTracking()
-            .Include(x => x.SeenLog.Where(x => x.Id == request.SeenLogId))
-                .ThenInclude(x => x.SeenBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _dbContext.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.SeenLog.Where(x => x.Id == request.SeenLogId))
+                    .ThenInclude(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct),
+            cancellationToken);
 
         if (dialog is null)
         {

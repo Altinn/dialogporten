@@ -40,22 +40,25 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
     public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
         CancellationToken cancellationToken)
     {
-        var dialog = await _dbContext.Dialogs
-            .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-            .ThenInclude(x => x.Content)
-            .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-            .ThenInclude(x => x.Attachments)
-            .ThenInclude(x => x.DisplayName!.Localizations)
-            .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-            .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.Transmissions)
-            .ThenInclude(x => x.Sender)
-            .ThenInclude(x => x.ActorNameEntity)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _dbContext.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
+                    .ThenInclude(x => x.Content)
+                    .ThenInclude(x => x.Value.Localizations)
+                .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.DisplayName!.Localizations)
+                .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
+                    .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct),
+            cancellationToken);
 
         if (dialog is null)
         {

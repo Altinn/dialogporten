@@ -61,7 +61,6 @@ public static class ApplicationExtensions
 
             // Transient
             .AddTransient<IServiceResourceAuthorizer, ServiceResourceAuthorizer>()
-            .AddTransient<IUserOrganizationRegistry, UserOrganizationRegistry>()
             .AddTransient<IUserResourceRegistry, UserResourceRegistry>()
             .AddTransient<IUserRegistry, UserRegistry>()
             .AddTransient<IUserParties, UserParties>()
@@ -86,11 +85,6 @@ public static class ApplicationExtensions
             predicate:
             localDeveloperSettings.UseLocalDevelopmentUser ||
             localDeveloperSettings.UseLocalDevelopmentResourceRegister);
-
-        services.Decorate<IUserOrganizationRegistry, LocalDevelopmentUserOrganizationRegistryDecorator>(
-            predicate:
-            localDeveloperSettings.UseLocalDevelopmentUser ||
-            localDeveloperSettings.UseLocalDevelopmentOrganizationRegister);
 
         services.Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>(
             predicate:

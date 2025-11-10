@@ -1,5 +1,76 @@
 # Changelog
 
+## [1.89.2](https://github.com/Altinn/dialogporten/compare/v1.89.1...v1.89.2) (2025-11-10)
+
+
+### Bug Fixes
+
+* **janitor:** Include migrated apps in resource information ([#2973](https://github.com/Altinn/dialogporten/issues/2973)) ([3d4f3fd](https://github.com/Altinn/dialogporten/commit/3d4f3fd4d22c75f7b52db3628b93582edceb16f8))
+
+
+### Miscellaneous Chores
+
+* **app:** remove edge case handling and add test for dialog retrieval by ID ([#2974](https://github.com/Altinn/dialogporten/issues/2974)) ([9263141](https://github.com/Altinn/dialogporten/commit/9263141168cb1e62b07aa40b40db577968422f1b))
+* **events:** Skip some domain events when doing silent updates ([#2976](https://github.com/Altinn/dialogporten/issues/2976)) ([65ceeaf](https://github.com/Altinn/dialogporten/commit/65ceeaf6f1b7400162cdc731d512f2308f967d93))
+
+## [1.89.1](https://github.com/Altinn/dialogporten/compare/v1.89.0...v1.89.1) (2025-11-07)
+
+
+### Bug Fixes
+
+* **application:** Add check for fetching correct dialog on horisontal data loader ([#2971](https://github.com/Altinn/dialogporten/issues/2971)) ([c964291](https://github.com/Altinn/dialogporten/commit/c9642910c57c5dfb518c9322f42ec013cb86f252))
+
+## [1.89.0](https://github.com/Altinn/dialogporten/compare/v1.88.7...v1.89.0) (2025-11-06)
+
+
+### Features
+
+* **api:** Remove admin-scope requirement for silent update ([#2965](https://github.com/Altinn/dialogporten/issues/2965)) ([ec3a544](https://github.com/Altinn/dialogporten/commit/ec3a54403818f3252b4873c8ff23043b42c009be))
+
+
+### Bug Fixes
+
+* **app:** add repeatable read isolation level to db queries ([#2964](https://github.com/Altinn/dialogporten/issues/2964)) ([b5c3c69](https://github.com/Altinn/dialogporten/commit/b5c3c69111e8fdf9542850a7eb93a1e20389c927))
+* **app:** re-introduce edge case fix for mapping SystemLabel ([#2970](https://github.com/Altinn/dialogporten/issues/2970)) ([8515f31](https://github.com/Altinn/dialogporten/commit/8515f31625f15ba94c079bec8439dd13e6e37dc4))
+* **resourceRegistry:** accept null OrgCode ([#2968](https://github.com/Altinn/dialogporten/issues/2968)) ([b13ea18](https://github.com/Altinn/dialogporten/commit/b13ea185ada76fb0433ca3fb878c684bd274bd75))
+
+## [1.88.7](https://github.com/Altinn/dialogporten/compare/v1.88.6...v1.88.7) (2025-11-05)
+
+
+### Miscellaneous Chores
+
+* **api:** Increase max request size to cater for huge A3 instances ([#2963](https://github.com/Altinn/dialogporten/issues/2963)) ([2c1fe71](https://github.com/Altinn/dialogporten/commit/2c1fe715b180701cb0b9c52c2ed7d0e67213dd58))
+* **deps:** update dependency bogus to 35.6.5 ([#2960](https://github.com/Altinn/dialogporten/issues/2960)) ([93908d3](https://github.com/Altinn/dialogporten/commit/93908d38ad3cf929606a5859e1faf6532504557e))
+* **deps:** update dotnet monorepo ([#2959](https://github.com/Altinn/dialogporten/issues/2959)) ([35da10f](https://github.com/Altinn/dialogporten/commit/35da10fd99ba811ad4b493af8e3eb1488ca47791))
+* **infra:** Add autovacuum settings ([#2954](https://github.com/Altinn/dialogporten/issues/2954)) ([dbe478a](https://github.com/Altinn/dialogporten/commit/dbe478a01ed4700a413f072b0a180d198eb2488e))
+
+## [1.88.6](https://github.com/Altinn/dialogporten/compare/v1.88.5...v1.88.6) (2025-11-04)
+
+
+### Bug Fixes
+
+* **auth:** Remove consumer claim requirement from end-user token authorization ([#2955](https://github.com/Altinn/dialogporten/issues/2955)) ([5eeea30](https://github.com/Altinn/dialogporten/commit/5eeea30b8f6fbb3f48070ab8ce576e5ab0c06536))
+* **tests:** Add module initializer for snapshot verification in SearchSnapshotTests ([#2956](https://github.com/Altinn/dialogporten/issues/2956)) ([300f58e](https://github.com/Altinn/dialogporten/commit/300f58eb2faa8c02dec9c83ed4b66cd5565ac477))
+
+## [1.88.5](https://github.com/Altinn/dialogporten/compare/v1.88.4...v1.88.5) (2025-11-03)
+
+
+### Miscellaneous Chores
+
+* **infra:** Enable read commited isolation level ([#2952](https://github.com/Altinn/dialogporten/issues/2952)) ([04a86d9](https://github.com/Altinn/dialogporten/commit/04a86d9d16ac90006c8d0805fd2e2d242f358350))
+
+## [1.88.4](https://github.com/Altinn/dialogporten/compare/v1.88.3...v1.88.4) (2025-11-03)
+
+
+### Miscellaneous Chores
+
+* **app:** Add FusionCacheFilter to OpenTelemetry processors ([#2943](https://github.com/Altinn/dialogporten/issues/2943)) ([a947ac0](https://github.com/Altinn/dialogporten/commit/a947ac01bdd7a1eac5dd9c1f4135bd52b2b34f73))
+* **deps:** update dependency testcontainers.postgresql to 4.8.0 ([#2938](https://github.com/Altinn/dialogporten/issues/2938)) ([3e20315](https://github.com/Altinn/dialogporten/commit/3e2031591d8a7b3ea2dabc0db6ad258707ce97ac))
+* **deps:** update dependency testcontainers.postgresql to 4.8.1 ([#2949](https://github.com/Altinn/dialogporten/issues/2949)) ([8b4f991](https://github.com/Altinn/dialogporten/commit/8b4f991901dc9bec8b99a81d2d82ecced3746eb1))
+* **deps:** update masstransit monorepo to 8.5.5 ([#2950](https://github.com/Altinn/dialogporten/issues/2950)) ([e6aaaf4](https://github.com/Altinn/dialogporten/commit/e6aaaf40671a61fbc09e72a9dae7659e0b13deff))
+* **infra:** Increase postgresql SKU in prod ([#2932](https://github.com/Altinn/dialogporten/issues/2932)) ([271307e](https://github.com/Altinn/dialogporten/commit/271307e6d0367072e8d9e7a8cfab7704990e6d24))
+* **service:** revert to serializable in MassTransit ([#2951](https://github.com/Altinn/dialogporten/issues/2951)) ([b93e57d](https://github.com/Altinn/dialogporten/commit/b93e57d74dbedbe6a8a736a76b1c2b082f014b8e))
+
 ## [1.88.3](https://github.com/Altinn/dialogporten/compare/v1.88.2...v1.88.3) (2025-10-31)
 
 

@@ -130,11 +130,9 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         }
     }
 
-    // This is an optimization to include only include dialog create, update and delete/restore events, when doing
+    // This is an optimization to include only include dialog create and update events when doing
     // silent updates, as these are (currently) the only events consumed that are not effectively no-ops. This avoids
     // flooding the message bus with events that are not used during migration or other bulk silent updates.
     private bool EventShouldBeIncluded(IDomainEvent domainEvent) =>
-        !_applicationContext.IsSilentUpdate() || domainEvent
-            is DialogCreatedDomainEvent
-            or DialogUpdatedDomainEvent;
+        !_applicationContext.IsSilentUpdate() || domainEvent is DialogCreatedDomainEvent or DialogUpdatedDomainEvent;
 }

@@ -33,10 +33,10 @@
         GuiAttachmentCount: 1,
         ExtendedStatus: ext-status,
         ExternalReference: external-ref,
-        CreatedAt: 2023-01-05 +0,
-        UpdatedAt: 2023-01-05 +0,
-        ContentUpdatedAt: 2023-01-05 +0,
-        DueAt: 2127-01-01 +0,
+        CreatedAt: 2023-01-01 +0,
+        UpdatedAt: 2023-01-01 +0,
+        ContentUpdatedAt: 2023-01-01 +0,
+        DueAt: 2123-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
         IsApiOnly: false,
@@ -80,10 +80,10 @@
         GuiAttachmentCount: 1,
         ExtendedStatus: ext-status,
         ExternalReference: external-ref,
-        CreatedAt: 2023-01-04 +0,
-        UpdatedAt: 2023-01-04 +0,
-        ContentUpdatedAt: 2023-01-04 +0,
-        DueAt: 2126-01-01 +0,
+        CreatedAt: 2023-01-02 +0,
+        UpdatedAt: 2023-01-02 +0,
+        ContentUpdatedAt: 2023-01-02 +0,
+        DueAt: 2124-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
         IsApiOnly: false,
@@ -97,7 +97,7 @@
       }
     ],
     HasNextPage: true,
-    OrderBy: createdat_desc,id_desc
+    OrderBy: contentupdatedat_asc,id_desc
   },
   {
     Items: [
@@ -180,10 +180,10 @@
         GuiAttachmentCount: 1,
         ExtendedStatus: ext-status,
         ExternalReference: external-ref,
-        CreatedAt: 2023-01-02 +0,
-        UpdatedAt: 2023-01-02 +0,
-        ContentUpdatedAt: 2023-01-02 +0,
-        DueAt: 2124-01-01 +0,
+        CreatedAt: 2023-01-04 +0,
+        UpdatedAt: 2023-01-04 +0,
+        ContentUpdatedAt: 2023-01-04 +0,
+        DueAt: 2126-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
         IsApiOnly: false,
@@ -197,7 +197,7 @@
       }
     ],
     HasNextPage: true,
-    OrderBy: createdat_desc,id_desc
+    OrderBy: contentupdatedat_asc,id_desc
   },
   {
     Items: [
@@ -233,10 +233,10 @@
         GuiAttachmentCount: 1,
         ExtendedStatus: ext-status,
         ExternalReference: external-ref,
-        CreatedAt: 2023-01-01 +0,
-        UpdatedAt: 2023-01-01 +0,
-        ContentUpdatedAt: 2023-01-01 +0,
-        DueAt: 2123-01-01 +0,
+        CreatedAt: 2023-01-05 +0,
+        UpdatedAt: 2023-01-05 +0,
+        ContentUpdatedAt: 2023-01-05 +0,
+        DueAt: 2127-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
         IsApiOnly: false,
@@ -250,6 +250,6 @@
       }
     ],
     HasNextPage: false,
-    OrderBy: createdat_desc,id_desc
+    OrderBy: contentupdatedat_asc,id_desc
   }
 ]

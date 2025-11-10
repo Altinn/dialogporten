@@ -58,8 +58,8 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
                         .TryParse(previousToken, out var token) ? token : null;
                     x.OrderBy =
                         OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(orderBy,
-                            out var lala)
-                            ? lala
+                            out var orderSet)
+                            ? orderSet
                             : null;
                 })
                 .ExecuteAndAssert<PaginatedList<DialogDto>>();

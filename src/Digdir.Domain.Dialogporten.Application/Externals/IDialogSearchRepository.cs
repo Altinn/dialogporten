@@ -47,7 +47,7 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<DialogEn
 
 public sealed class GetDialogsQuery
 {
-    public required bool Deleted { get; set; }
+    public required bool? Deleted { get; set; }
     public OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>? OrderBy { get; set; }
     public IContinuationTokenSet? ContinuationToken { get; set; }
     public int Limit { get; set; } = 100;

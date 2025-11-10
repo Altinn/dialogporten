@@ -182,12 +182,13 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
                 return response
                     .Where(x => !string.IsNullOrWhiteSpace(x.HasCompetentAuthority.Organization))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.HasCompetentAuthority.OrgCode))
                     .Where(x => Application.Common.Authorization.Constants.SupportedResourceTypes.Contains(x.ResourceType))
                     .Select(x => new ServiceResourceInformation(
                         $"{Constants.ServiceResourcePrefix}{x.Identifier}",
                         x.ResourceType,
                         x.HasCompetentAuthority.Organization!,
-                        x.HasCompetentAuthority.OrgCode))
+                        x.HasCompetentAuthority.OrgCode!))
                     .ToArray();
             },
             token: cancellationToken);
@@ -225,7 +226,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         // Altinn 2 resources do not always have an organization number as competent authority, only service owner code
         // We filter these out anyway, but we need to allow null here
         public string? Organization { get; init; }
-        public required string OrgCode { get; init; }
+        public string? OrgCode { get; init; }
     }
 
     private sealed record UpdatedResponse(UpdatedResponseLinks Links, List<UpdatedSubjectResource> Data);

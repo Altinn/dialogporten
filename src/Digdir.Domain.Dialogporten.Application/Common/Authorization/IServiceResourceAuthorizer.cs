@@ -74,11 +74,13 @@ internal sealed class ServiceResourceAuthorizer : IServiceResourceAuthorizer
         var serviceResourceInformation = await _resourceRegistry.GetResourceInformation(dialog.ServiceResource, cancellationToken);
         if (serviceResourceInformation is null)
         {
-            var supportedResourceTypes = string.Join(", ", Constants.SupportedResourceTypes);
             _domainContext.AddError(nameof(CreateDialogDto.ServiceResource),
-                $"Service resource '{dialog.ServiceResource}' does not exist in the resource " +
-                $"registry, or is not of the following supported resource types: " +
-                $"[{supportedResourceTypes}].");
+                $"""
+                 Service resource '{dialog.ServiceResource}' is invalid due to one or more of the following reasons:
+                 - It does not exist in the resource registry.
+                 - It does not have mandatory fields 'CompetentAuthority.Organization' / 'CompetentAuthority.OrgCode' set.
+                 - It is not of the following supported resource types: [{string.Join(", ", Constants.SupportedResourceTypes)}].
+                 """);
             return new DomainContextInvalidated();
         }
 

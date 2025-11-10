@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.89.1](https://github.com/Altinn/dialogporten/compare/v1.89.0...v1.89.1) (2025-11-07)
+
+
+### Bug Fixes
+
+* **application:** Add check for fetching correct dialog on horisontal data loader ([#2971](https://github.com/Altinn/dialogporten/issues/2971)) ([c964291](https://github.com/Altinn/dialogporten/commit/c9642910c57c5dfb518c9322f42ec013cb86f252))
+
+## [1.89.0](https://github.com/Altinn/dialogporten/compare/v1.88.7...v1.89.0) (2025-11-06)
+
+
+### Features
+
+* **api:** Remove admin-scope requirement for silent update ([#2965](https://github.com/Altinn/dialogporten/issues/2965)) ([ec3a544](https://github.com/Altinn/dialogporten/commit/ec3a54403818f3252b4873c8ff23043b42c009be))
+
+
+### Bug Fixes
+
+* **app:** add repeatable read isolation level to db queries ([#2964](https://github.com/Altinn/dialogporten/issues/2964)) ([b5c3c69](https://github.com/Altinn/dialogporten/commit/b5c3c69111e8fdf9542850a7eb93a1e20389c927))
+* **app:** re-introduce edge case fix for mapping SystemLabel ([#2970](https://github.com/Altinn/dialogporten/issues/2970)) ([8515f31](https://github.com/Altinn/dialogporten/commit/8515f31625f15ba94c079bec8439dd13e6e37dc4))
+* **resourceRegistry:** accept null OrgCode ([#2968](https://github.com/Altinn/dialogporten/issues/2968)) ([b13ea18](https://github.com/Altinn/dialogporten/commit/b13ea185ada76fb0433ca3fb878c684bd274bd75))
+
+## [1.88.7](https://github.com/Altinn/dialogporten/compare/v1.88.6...v1.88.7) (2025-11-05)
+
+
+### Miscellaneous Chores
+
+* **api:** Increase max request size to cater for huge A3 instances ([#2963](https://github.com/Altinn/dialogporten/issues/2963)) ([2c1fe71](https://github.com/Altinn/dialogporten/commit/2c1fe715b180701cb0b9c52c2ed7d0e67213dd58))
+* **deps:** update dependency bogus to 35.6.5 ([#2960](https://github.com/Altinn/dialogporten/issues/2960)) ([93908d3](https://github.com/Altinn/dialogporten/commit/93908d38ad3cf929606a5859e1faf6532504557e))
+* **deps:** update dotnet monorepo ([#2959](https://github.com/Altinn/dialogporten/issues/2959)) ([35da10f](https://github.com/Altinn/dialogporten/commit/35da10fd99ba811ad4b493af8e3eb1488ca47791))
+* **infra:** Add autovacuum settings ([#2954](https://github.com/Altinn/dialogporten/issues/2954)) ([dbe478a](https://github.com/Altinn/dialogporten/commit/dbe478a01ed4700a413f072b0a180d198eb2488e))
+
 ## [1.88.6](https://github.com/Altinn/dialogporten/compare/v1.88.5...v1.88.6) (2025-11-04)
 
 

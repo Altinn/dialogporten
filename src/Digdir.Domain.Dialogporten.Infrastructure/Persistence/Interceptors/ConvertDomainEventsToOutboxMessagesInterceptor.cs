@@ -136,7 +136,5 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
     private bool EventShouldBeIncluded(IDomainEvent domainEvent) =>
         !_applicationContext.IsSilentUpdate() || domainEvent
             is DialogCreatedDomainEvent
-            or DialogUpdatedDomainEvent
-            or DialogDeletedDomainEvent
-            or DialogRestoredDomainEvent;
+            or DialogUpdatedDomainEvent;
 }

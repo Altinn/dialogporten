@@ -1,26 +1,6 @@
 ﻿{
   Items: [
     {
-      Content: {
-        Title: {
-          Value: [
-            {
-              Value: Dette er en tittel, dialog,
-              LanguageCode: nb
-            }
-          ],
-          MediaType: text/plain
-        },
-        Summary: {
-          Value: [
-            {
-              Value: Dette er et sammendrag, dialog,
-              LanguageCode: nb
-            }
-          ],
-          MediaType: text/plain
-        }
-      },
       Id: Guid_1,
       Org: ttd,
       ServiceResource: urn:altinn:resource:1337,
@@ -52,9 +32,7 @@
         SystemLabels: [
           Default
         ]
-      }
-    },
-    {
+      },
       Content: {
         Title: {
           Value: [
@@ -74,7 +52,9 @@
           ],
           MediaType: text/plain
         }
-      },
+      }
+    },
+    {
       Id: Guid_4,
       Org: ttd,
       ServiceResource: urn:altinn:resource:1337,
@@ -106,9 +86,7 @@
         SystemLabels: [
           Archive
         ]
-      }
-    },
-    {
+      },
       Content: {
         Title: {
           Value: [
@@ -128,7 +106,9 @@
           ],
           MediaType: text/plain
         }
-      },
+      }
+    },
+    {
       Id: Guid_7,
       Org: ttd,
       ServiceResource: urn:altinn:resource:1337,
@@ -159,9 +139,7 @@
         SystemLabels: [
           Default
         ]
-      }
-    },
-    {
+      },
       Content: {
         Title: {
           Value: [
@@ -181,7 +159,9 @@
           ],
           MediaType: text/plain
         }
-      },
+      }
+    },
+    {
       Id: Guid_10,
       Org: ttd,
       ServiceResource: urn:altinn:resource:1337,
@@ -213,9 +193,7 @@
         SystemLabels: [
           Default
         ]
-      }
-    },
-    {
+      },
       Content: {
         Title: {
           Value: [
@@ -235,7 +213,9 @@
           ],
           MediaType: text/plain
         }
-      },
+      }
+    },
+    {
       Id: Guid_13,
       Org: ttd,
       ServiceResource: urn:altinn:resource:1337,
@@ -285,6 +265,26 @@
         SystemLabels: [
           Default
         ]
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Dette er en tittel, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Dette er et sammendrag, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
       }
     }
   ],

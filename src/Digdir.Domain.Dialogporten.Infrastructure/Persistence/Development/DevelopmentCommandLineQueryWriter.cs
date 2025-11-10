@@ -13,21 +13,23 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 /// Add to the DbContext only in development environment like so:
 /// <code>optionsBuilder.AddInterceptors(new DevelopmentCommandLineQueryWriter());</code>
 /// </summary>
-internal sealed class DevelopmentCommandLineQueryWriter : DbCommandInterceptor
+internal sealed class DevelopmentCommandLineQueryWriter(Action<string>? log = null) : DbCommandInterceptor
 {
+    private readonly Action<string> _log = log ?? Console.WriteLine;
+
     public override InterceptionResult<DbDataReader> ReaderExecuting(
         DbCommand command,
         CommandEventData eventData,
         InterceptionResult<DbDataReader> result)
     {
-        Console.WriteLine($"{ToExecutableSql(command)}{Environment.NewLine}");
+        _log($"{ToExecutableSql(command)}{Environment.NewLine}");
         return base.ReaderExecuting(command, eventData, result);
     }
 
     public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result,
         CancellationToken cancellationToken = default)
     {
-        Console.WriteLine($"{ToExecutableSql(command)}{Environment.NewLine}");
+        _log($"{ToExecutableSql(command)}{Environment.NewLine}");
         return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
     }
 

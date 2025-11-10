@@ -10,6 +10,7 @@ using Digdir.Library.Entity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Linq.Expressions;
+using System.Text;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
@@ -18,6 +19,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
@@ -58,10 +60,11 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<DialogAttachment> DialogAttachments => Set<DialogAttachment>();
 
 
+    private static readonly StringBuilder QueryLog = new();
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
-        // optionsBuilder.AddInterceptors(new DevelopmentCommandLineQueryWriter());
+        optionsBuilder.AddInterceptors(new DevelopmentCommandLineQueryWriter(x => QueryLog.AppendLine(x)));
         optionsBuilder.UseExceptionProcessor();
     }
 

@@ -106,9 +106,9 @@ internal class FormattableStringBuilder
             {
                 var argNumber = GetArgumentNumber(srcValue);
                 if (srcArgNumber == argNumber) continue;
-                srcFormat = srcFormat.Replace("{" + srcArgNumber, "{" + argNumber);
+                srcFormat = srcFormat.Replace("{" + srcArgNumber, "{tmp" + argNumber);
             }
-            return srcFormat;
+            return srcFormat.Replace("{tmp", "{");
         }
 
         private int GetArgumentNumber(object? value)

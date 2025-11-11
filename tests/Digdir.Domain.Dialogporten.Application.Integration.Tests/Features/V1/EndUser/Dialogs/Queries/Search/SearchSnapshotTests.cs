@@ -50,10 +50,7 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
                     ServiceOwnerLabels = [new() { Value = "some-label" }]
                 };
             })
-            .SearchEndUserDialogs(x =>
-            {
-                x.ServiceResource = [SnapshotDialog.ServiceResource];
-            })
+            .SearchEndUserDialogs(x => x.ServiceResource = [SnapshotDialog.ServiceResource])
             .ExecuteAndAssert<PaginatedList<DialogDto>>();
 
         var settings = new VerifySettings();

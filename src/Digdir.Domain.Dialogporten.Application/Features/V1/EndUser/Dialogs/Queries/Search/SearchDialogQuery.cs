@@ -178,43 +178,40 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
-        var paginatedList = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
-            dbCtx.Dialogs
-                .PrefilterAuthorizedDialogs(authorizedResources)
-                .AsNoTracking()
-                .Include(x => x.Content)
-                    .ThenInclude(x => x.Value.Localizations)
-                .WhereIf(!request.Org.IsNullOrEmpty(), x => request.Org!.Contains(x.Org))
-                .WhereIf(!request.ServiceResource.IsNullOrEmpty(),
-                    x => request.ServiceResource!.Contains(x.ServiceResource))
-                .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
-                .WhereIf(!request.ExtendedStatus.IsNullOrEmpty(),
-                    x => x.ExtendedStatus != null && request.ExtendedStatus!.Contains(x.ExtendedStatus))
-                .WhereIf(!string.IsNullOrWhiteSpace(request.ExternalReference),
-                    x => x.ExternalReference != null && request.ExternalReference == x.ExternalReference)
-                .WhereIf(!request.Status.IsNullOrEmpty(), x => request.Status!.Contains(x.StatusId))
-                .WhereIf(request.CreatedAfter.HasValue, x => request.CreatedAfter <= x.CreatedAt)
-                .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
-                .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
-                .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
-                .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
-                .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
-                .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
-                .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
-                .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
-                .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
-                    request.SystemLabel!.All(label =>
-                        x.EndUserContext.DialogEndUserContextSystemLabels
-                            .Any(sl => sl.SystemLabelId == label)))
-                .WhereIf(request.Search is not null, x =>
-                    x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
-                    x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
-                )
-                .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
-                .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
-                .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
-                .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
-                .ToPaginatedListAsync(request, cancellationToken: ct),
+        var paginatedList = await _db.WrapWithRepeatableRead((dbCtx, ct) => dbCtx.Dialogs
+            .PrefilterAuthorizedDialogs(authorizedResources)
+            .AsNoTracking()
+            .Include(x => x.Content)
+                .ThenInclude(x => x.Value.Localizations)
+            .WhereIf(!request.Org.IsNullOrEmpty(), x => request.Org!.Contains(x.Org))
+            .WhereIf(!request.ServiceResource.IsNullOrEmpty(), x => request.ServiceResource!.Contains(x.ServiceResource))
+            .WhereIf(!request.Party.IsNullOrEmpty(), x => request.Party!.Contains(x.Party))
+            .WhereIf(!request.ExtendedStatus.IsNullOrEmpty(), x => x.ExtendedStatus != null && request.ExtendedStatus!.Contains(x.ExtendedStatus))
+            .WhereIf(!string.IsNullOrWhiteSpace(request.ExternalReference),
+                x => x.ExternalReference != null && request.ExternalReference == x.ExternalReference)
+            .WhereIf(!request.Status.IsNullOrEmpty(), x => request.Status!.Contains(x.StatusId))
+            .WhereIf(request.CreatedAfter.HasValue, x => request.CreatedAfter <= x.CreatedAt)
+            .WhereIf(request.CreatedBefore.HasValue, x => x.CreatedAt <= request.CreatedBefore)
+            .WhereIf(request.UpdatedAfter.HasValue, x => request.UpdatedAfter <= x.UpdatedAt)
+            .WhereIf(request.UpdatedBefore.HasValue, x => x.UpdatedAt <= request.UpdatedBefore)
+            .WhereIf(request.ContentUpdatedAfter.HasValue, x => request.ContentUpdatedAfter <= x.ContentUpdatedAt)
+            .WhereIf(request.ContentUpdatedBefore.HasValue, x => x.ContentUpdatedAt <= request.ContentUpdatedBefore)
+            .WhereIf(request.DueAfter.HasValue, x => request.DueAfter <= x.DueAt)
+            .WhereIf(request.DueBefore.HasValue, x => x.DueAt <= request.DueBefore)
+            .WhereIf(request.Process is not null, x => EF.Functions.ILike(x.Process!, request.Process!))
+            .WhereIf(!request.SystemLabel.IsNullOrEmpty(), x =>
+                request.SystemLabel!.All(label =>
+                    x.EndUserContext.DialogEndUserContextSystemLabels
+                        .Any(sl => sl.SystemLabelId == label)))
+            .WhereIf(request.Search is not null, x =>
+                x.Content.Any(x => x.Value.Localizations.AsQueryable().Any(searchExpression)) ||
+                x.SearchTags.Any(x => EF.Functions.ILike(x.Value, request.Search!))
+            )
+            .WhereIf(request.ExcludeApiOnly == true, x => !x.IsApiOnly)
+            .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
+            .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
+            .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
+            .ToPaginatedListAsync(request, cancellationToken: ct),
             cancellationToken);
 
         paginatedList.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguages));

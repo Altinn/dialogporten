@@ -38,7 +38,7 @@ DECLARE
   fq    text;
   sch   text;
   rel   text;
-sql   text;
+  sql   text;
 BEGIN
   FOREACH fq IN ARRAY fq_tables LOOP
     sch := split_part(fq, '.', 1);

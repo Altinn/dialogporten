@@ -114,7 +114,8 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
             .AddScoped<IServiceOwnerNameRegistry>(_ => CreateServiceOwnerNameRegistrySubstitute())
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
-            .AddScoped<IOptions<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
+            .AddScoped<IOptionsSnapshot<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
+            .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>())
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
@@ -142,9 +143,9 @@ public class DialogApplication : IAsyncLifetime
 
     private static string Base64UrlEncode(byte[] input) => Convert.ToBase64String(input).Replace("+", "-").Replace("/", "_").TrimEnd('=');
 
-    private static IOptions<ApplicationSettings> CreateApplicationSettingsSubstitute()
+    private static IOptionsSnapshot<ApplicationSettings> CreateApplicationSettingsSubstitute()
     {
-        var applicationSettingsSubstitute = Substitute.For<IOptions<ApplicationSettings>>();
+        var applicationSettingsSubstitute = Substitute.For<IOptionsSnapshot<ApplicationSettings>>();
 
         using var primaryKeyPair = Key.Create(SignatureAlgorithm.Ed25519,
             new KeyCreationParameters

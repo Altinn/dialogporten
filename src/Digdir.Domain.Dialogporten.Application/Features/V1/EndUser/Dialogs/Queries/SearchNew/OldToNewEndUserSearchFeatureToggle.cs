@@ -4,17 +4,18 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Microsoft.Extensions.Options;
 using Old = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using SearchDialogQueryOrderDefinition = Digdir.Domain.Dialogporten.Application.Externals.SearchDialogQueryOrderDefinition;
-
 #pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
 
-internal sealed class OldToNewEndUserSearchFeatureToggle :
-    AbstractApplicationFeatureToggle<Old.SearchDialogQuery, Old.SearchDialogResult, SearchDialogQuery, SearchDialogResult>
+internal sealed class OldToNewEndUserSearchFeatureToggle(IOptionsSnapshot<ApplicationSettings> appSettings) :
+    AbstractApplicationFeatureToggle<Old.SearchDialogQuery, Old.SearchDialogResult, SearchDialogQuery,
+        SearchDialogResult>
 {
-    public override bool IsEnabled => false;
+    public override bool IsEnabled => appSettings.Value.FeatureToggle.UseOptimizedEndUserDialogSearch;
 
     protected override SearchDialogQuery ConvertRequest(Old.SearchDialogQuery request) => new()
     {

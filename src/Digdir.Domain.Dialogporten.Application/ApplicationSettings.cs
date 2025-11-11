@@ -8,6 +8,12 @@ public sealed class ApplicationSettings
     public const string ConfigurationSectionName = "Application";
 
     public required DialogportenSettings Dialogporten { get; init; }
+    public FeatureToggle FeatureToggle { get; init; } = new();
+}
+
+public sealed class FeatureToggle
+{
+    public bool UseOptimizedEndUserDialogSearch { get; init; }
 }
 
 public sealed class DialogportenSettings

@@ -24,7 +24,7 @@ public static class FluentValidationPartyIdentifierExtensions
                 $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}', " +
                 $"'{AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{username}}', " +
                 $"'{IdportenSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{e-mail}}' or " +
-                $"'{FeideUserIdentifier.PrefixWithSeparator}{{subject}}' or " +
-                "with valid values respectively.");
+                $"'{FeideUserIdentifier.PrefixWithSeparator}{{subject}}' " +
+                "with valid values, respectively.");
     }
 }

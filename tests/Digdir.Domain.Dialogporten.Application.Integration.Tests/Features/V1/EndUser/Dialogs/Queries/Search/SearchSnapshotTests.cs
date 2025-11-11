@@ -1,15 +1,13 @@
 using System.Runtime.CompilerServices;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
-using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
@@ -56,7 +54,7 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
             .SendCommand(_ => new SearchDialogQuery
             {
                 ServiceResource = [SnapshotDialog.ServiceResource],
-                OrderBy = OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse("createdAt", out var lala) ? lala : null
+                OrderBy = OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse("createdAt", out var lala) ? lala : null
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>();
 

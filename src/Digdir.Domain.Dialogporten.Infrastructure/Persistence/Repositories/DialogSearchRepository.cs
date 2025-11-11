@@ -2,8 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -95,7 +93,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                      LEFT JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
                      CROSS JOIN searchString ss
                      WHERE 1=1
-                        AND ps.party IS NOT NULL OR d."Id" = ANY({authorizedResources.DialogIds}::uuid[])
+                        AND (ps.party IS NOT NULL OR d."Id" = ANY({authorizedResources.DialogIds}::uuid[]))
                      """)
             .AppendIf(query.Search is not null,
                 """
@@ -107,8 +105,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                 ))
                 """)
             .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
-            .AppendIf(query.VisibleAfter is not null, $""" AND d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz """)
-            .AppendIf(query.ExpiresBefore is not null, $""" AND d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz """)
+            .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
+            .AppendIf(query.ExpiresBefore is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz) """)
             .AppendIf(query.Org is not null, $""" AND d."Org" = ANY({query.Org}::text[]) """)
             .AppendIf(query.ServiceResource is not null, $""" AND d."ServiceResource" = ANY({query.ServiceResource}::text[]) """)
             .AppendIf(query.Party is not null, $""" AND d."Party" = ANY({query.Party}::text[]) """)

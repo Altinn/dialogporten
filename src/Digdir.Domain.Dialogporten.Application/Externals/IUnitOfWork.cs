@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+﻿using System.Data;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using OneOf.Types;
 using OneOf;
@@ -14,7 +15,7 @@ public interface IUnitOfWork
         Guid? revision)
         where TEntity : class, IVersionableEntity;
 
-    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default);
 
     IUnitOfWork DisableAggregateFilter();
     IUnitOfWork DisableVersionableFilter();

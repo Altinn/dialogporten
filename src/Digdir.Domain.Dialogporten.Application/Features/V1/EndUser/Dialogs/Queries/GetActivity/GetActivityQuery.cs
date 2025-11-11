@@ -44,15 +44,17 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
     public async Task<GetActivityResult> Handle(GetActivityQuery request,
         CancellationToken cancellationToken)
     {
-        var dialog = await _dbContext.Dialogs
-            .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-            .ThenInclude(x => x.PerformedBy)
-            .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
-            .ThenInclude(x => x.Description!.Localizations)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _dbContext.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
+                    .ThenInclude(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
+                    .ThenInclude(x => x.Description!.Localizations)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct), cancellationToken);
 
         if (dialog is null)
         {

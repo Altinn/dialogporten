@@ -64,6 +64,12 @@ public class CreateDialogTests : ApplicationCollectionFixture
         }
     }
 
+    [Theory, ClassData(typeof(CreateDialogWithSpecifiedDialogIdTestData))]
+    public Task Create_Dialog_With_Specified_DialogId_Tests(string _, Guid guidInput, Type assertType) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.Id = guidInput)
+            .ExecuteAndAssert(assertType);
+
     private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<string, string>
     {
         public CreateDialogWithSpecifiedPartyTestData()
@@ -71,16 +77,11 @@ public class CreateDialogTests : ApplicationCollectionFixture
             Add("Can create dialog with OrganizationIdentifier as Party", "urn:altinn:organization:identifier-no:974760673");
             Add("Can create dialog with PersonalIdentifier as Party", "urn:altinn:person:identifier-no:15915299854");
             Add("Can create dialog with A2 SI User as Party", "urn:altinn:username:someusername");
-            Add("Can create dialog with Feide orgsub", "urn:altinn:feide-subject:33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551");
-            Add("Can create dialog with ID-Porten email as Party", "urn:altinn:idporten-sre:foo@bar.com");
+            // Not supported yet
+            //Add("Can create dialog with Feide orgsub", "urn:altinn:feide-subject:33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551");
+            //Add("Can create dialog with ID-Porten email as Party", "urn:altinn:idporten-sre:foo@bar.com");
         }
     }
-
-    [Theory, ClassData(typeof(CreateDialogWithSpecifiedDialogIdTestData))]
-    public Task Create_Dialog_With_Specified_DialogId_Tests(string _, Guid guidInput, Type assertType) =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = guidInput)
-            .ExecuteAndAssert(assertType);
 
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedPartyTestData))]
     public async Task Creates_Dialog_When_Dialog_Is_Simple_For_All_PartyTypes(string _, string party)

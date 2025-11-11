@@ -6,7 +6,7 @@ using FluentAssertions;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search.FilterTests;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture

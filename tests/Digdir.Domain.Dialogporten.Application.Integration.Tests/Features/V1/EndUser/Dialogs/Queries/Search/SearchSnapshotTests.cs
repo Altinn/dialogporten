@@ -51,11 +51,7 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
                     ServiceOwnerLabels = [new() { Value = "some-label" }]
                 };
             })
-            .SendCommand(_ => new SearchDialogQuery
-            {
-                ServiceResource = [SnapshotDialog.ServiceResource],
-                OrderBy = OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse("createdAt", out var lala) ? lala : null
-            })
+            .SearchEndUserDialogs(x => x.ServiceResource = [SnapshotDialog.ServiceResource])
             .ExecuteAndAssert<PaginatedList<DialogDto>>();
 
         var settings = new VerifySettings();

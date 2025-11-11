@@ -9,7 +9,6 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
-using SearchDialogQueryOrderDefinition = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQueryOrderDefinition;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.Search;
 

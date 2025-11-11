@@ -1,19 +1,21 @@
-using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using FluentValidation;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.ValidationErrorStrings;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
 
 internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialogQuery>
 {
     public SearchDialogQueryValidator()
     {
-        Include(new PaginationParameterValidator<SearchDialogQueryOrderDefinition, IntermediateDialogDto>());
+        Include(new PaginationParameterValidator<SearchDialogQueryOrderDefinition, DialogEntity>());
         RuleFor(x => x.Search)
             .MinimumLength(3)
             .When(x => x.Search is not null);

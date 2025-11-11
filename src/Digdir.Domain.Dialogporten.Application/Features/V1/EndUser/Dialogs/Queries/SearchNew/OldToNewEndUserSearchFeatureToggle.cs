@@ -2,20 +2,21 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureToggle;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
-using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Old = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld;
-using New = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Old = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using SearchDialogQueryOrderDefinition = Digdir.Domain.Dialogporten.Application.Externals.SearchDialogQueryOrderDefinition;
+
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
 
 internal sealed class OldToNewEndUserSearchFeatureToggle :
-    AbstractApplicationFeatureToggle<Old.SearchDialogQuery, Old.SearchDialogResult, New.SearchDialogQuery, New.SearchDialogResult>
+    AbstractApplicationFeatureToggle<Old.SearchDialogQuery, Old.SearchDialogResult, SearchDialogQuery, SearchDialogResult>
 {
     public override bool IsEnabled => false;
 
-    protected override New.SearchDialogQuery ConvertRequest(Old.SearchDialogQuery request) => new()
+    protected override SearchDialogQuery ConvertRequest(Old.SearchDialogQuery request) => new()
     {
         Org = request.Org,
         Limit = request.Limit,
@@ -42,13 +43,13 @@ internal sealed class OldToNewEndUserSearchFeatureToggle :
         ContinuationToken = ToNew(request.ContinuationToken),
     };
 
-    protected override Old.SearchDialogResult ConvertResponse(New.SearchDialogResult response) =>
+    protected override Old.SearchDialogResult ConvertResponse(SearchDialogResult response) =>
         response.Match<Old.SearchDialogResult>(
             success => ToOld(success),
             validationError => validationError,
             forbidden => forbidden);
 
-    private static PaginatedList<Old.DialogDto> ToOld(PaginatedList<New.DialogDto> response) =>
+    private static PaginatedList<Old.DialogDto> ToOld(PaginatedList<DialogDto> response) =>
         response.ConvertTo(x => new Old.DialogDto
         {
             ServiceResource = x.ServiceResource,
@@ -79,7 +80,7 @@ internal sealed class OldToNewEndUserSearchFeatureToggle :
             LatestActivity = ToOld(x.LatestActivity)
         });
 
-    private static Old.DialogActivityDto? ToOld(New.DialogActivityDto? x) =>
+    private static Old.DialogActivityDto? ToOld(DialogActivityDto? x) =>
         x is null ? null : new Old.DialogActivityDto
         {
             Id = x.Id,
@@ -91,13 +92,13 @@ internal sealed class OldToNewEndUserSearchFeatureToggle :
             Type = x.Type
         };
 
-    private static Old.DialogEndUserContextDto ToOld(New.DialogEndUserContextDto x) => new()
+    private static Old.DialogEndUserContextDto ToOld(DialogEndUserContextDto x) => new()
     {
         Revision = x.Revision,
         SystemLabels = x.SystemLabels
     };
 
-    private static Old.ContentDto ToOld(New.ContentDto x) => new()
+    private static Old.ContentDto ToOld(ContentDto x) => new()
     {
         ExtendedStatus = x.ExtendedStatus,
         SenderName = x.SenderName,
@@ -105,7 +106,7 @@ internal sealed class OldToNewEndUserSearchFeatureToggle :
         Title = x.Title
     };
 
-    private static List<Old.DialogSeenLogDto> ToOld(List<New.DialogSeenLogDto> arg) => arg
+    private static List<Old.DialogSeenLogDto> ToOld(List<DialogSeenLogDto> arg) => arg
         .Select(x => new Old.DialogSeenLogDto
         {
             Id = x.Id,
@@ -117,13 +118,13 @@ internal sealed class OldToNewEndUserSearchFeatureToggle :
         .ToList();
 
     private static OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>? ToNew(
-        OrderSet<Old.SearchDialogQueryOrderDefinition, Old.IntermediateDialogDto>? x) => x is null ? null
+        OrderSet<Old.SearchDialogQueryOrderDefinition, IntermediateDialogDto>? x) => x is null ? null
         : !OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(x.GetOrderString(), out var order)
             ? throw new InvalidOperationException("Could not convert order set.")
             : order;
 
     private static ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>? ToNew(
-        ContinuationTokenSet<Old.SearchDialogQueryOrderDefinition, Old.IntermediateDialogDto>? x) => x is null ? null
+        ContinuationTokenSet<Old.SearchDialogQueryOrderDefinition, IntermediateDialogDto>? x) => x is null ? null
         : !ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(x.Raw, out var ct)
             ? throw new InvalidOperationException("Could not convert continuation token set.")
             : ct;

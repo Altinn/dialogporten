@@ -14,9 +14,9 @@ using AttachmentUrl = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById.Atta
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using DialogStatus = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogStatus;
 using HttpVerb = Digdir.Domain.Dialogporten.Domain.Http.HttpVerb;
-using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld.DialogDto;
+using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 using SystemLabel = Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel;
-using SearchDialogQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld.SearchDialogQuery;
+using SearchDialogQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 

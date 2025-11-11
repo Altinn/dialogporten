@@ -13,11 +13,11 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureToggle;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using SearchDialogQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld.SearchDialogQuery;
-using SearchDialogResult = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld.SearchDialogResult;
+using SearchDialogQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
+using SearchDialogResult = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
 
 namespace Digdir.Domain.Dialogporten.Application;
 

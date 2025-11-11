@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchOld.DialogDto;
+using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 

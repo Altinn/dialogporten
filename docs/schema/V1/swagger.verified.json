@@ -5744,18 +5744,6 @@
         "operationId": "V1EndUserDialogsQueriesSearch_Dialog",
         "parameters": [
           {
-            "in": "query",
-            "name": "orderBy",
-            "schema": {
-              "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
-            }
-          },
-          {
             "description": "Filter by one or more service owner codes",
             "explode": true,
             "in": "query",
@@ -5962,6 +5950,18 @@
             "schema": {
               "nullable": true,
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
+                }
+              ]
             }
           },
           {

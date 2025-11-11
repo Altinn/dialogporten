@@ -8,7 +8,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search.FilterTests;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class CreatedAtFilterTests : ApplicationCollectionFixture

@@ -42,7 +42,7 @@ internal static class DecisionRequestHelper
         var sortedActions = request.AltinnActions.SortForXacml();
 
         // The PDP does not support self-identified users as parties, so we need to use the party-id claim instead.
-        // Eventually, the PDP should support alle external party identifiers, but until then we need to special case this.
+        // Eventually, the PDP should support all external party identifiers, but until then we need to special case this.
         var resourceParty = request.ClaimsPrincipal.GetEndUserPartyIdentifier()
                 is AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier or FeideUserIdentifier
                     && request.ClaimsPrincipal.TryGetPartyId(out var partyId)

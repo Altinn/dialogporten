@@ -60,11 +60,10 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<DialogAttachment> DialogAttachments => Set<DialogAttachment>();
 
 
-    private static readonly StringBuilder QueryLog = new();
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
-        optionsBuilder.AddInterceptors(new DevelopmentCommandLineQueryWriter(x => QueryLog.AppendLine(x)));
+        // optionsBuilder.AddInterceptors(new DevelopmentCommandLineQueryWriter(x => QueryLog.AppendLine(x)));
         optionsBuilder.UseExceptionProcessor();
     }
 

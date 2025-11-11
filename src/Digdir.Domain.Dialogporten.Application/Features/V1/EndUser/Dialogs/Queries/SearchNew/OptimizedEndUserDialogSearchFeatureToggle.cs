@@ -11,7 +11,7 @@ using SearchDialogQueryOrderDefinition = Digdir.Domain.Dialogporten.Application.
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
 
-internal sealed class OldToNewEndUserSearchFeatureToggle(IOptionsSnapshot<ApplicationSettings> appSettings) :
+internal sealed class OptimizedEndUserDialogSearchFeatureToggle(IOptionsSnapshot<ApplicationSettings> appSettings) :
     AbstractApplicationFeatureToggle<Old.SearchDialogQuery, Old.SearchDialogResult, SearchDialogQuery,
         SearchDialogResult>
 {

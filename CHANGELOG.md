@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.89.4](https://github.com/Altinn/dialogporten/compare/v1.89.3...v1.89.4) (2025-11-12)
+
+
+### Bug Fixes
+
+* **ci:** pin migration docker image dotnet-ef tool version 9.0.10 ([#2995](https://github.com/Altinn/dialogporten/issues/2995)) ([24b6e14](https://github.com/Altinn/dialogporten/commit/24b6e141776281a8855c395a22fa64ab33ae8ec6))
+
 ## [1.89.3](https://github.com/Altinn/dialogporten/compare/v1.89.2...v1.89.3) (2025-11-12)
 
 

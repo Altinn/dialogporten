@@ -37,6 +37,7 @@ param postgresConfiguration = {
     type: 'Premium_LRS'
     tier: 'P20'
   }
+  // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true
   enableQueryPerformanceInsight: true
   backupRetentionDays: 7

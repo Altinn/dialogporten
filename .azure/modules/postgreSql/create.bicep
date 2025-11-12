@@ -191,7 +191,10 @@ resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/co
   dependsOn: [enable_extensions]
 }
 
-resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {
+// Enable Query Store when either index tuning or query performance insight is enabled
+var enableQueryStore = enableIndexTuning || enableQueryPerformanceInsight
+
+resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryStore) {
   parent: postgres
   name: 'track_io_timing'
   properties: {
@@ -201,7 +204,7 @@ resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configuratio
   dependsOn: [idle_transactions_timeout]
 }
 
-resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {
+resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryStore) {
   parent: postgres
   name: 'pg_qs.query_capture_mode'
   properties: {
@@ -228,7 +231,7 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     value: 'report'
     source: 'user-override'
   }
-  dependsOn: [pgms_wait_sampling_query_capture_mode]
+  dependsOn: [pg_qs_query_capture_mode]
 }
 
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
@@ -250,7 +253,7 @@ var diagnosticLogCategories = [
   'PostgreSQLFlexDatabaseXacts'
 ]
 
-resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (enableQueryPerformanceInsight) {
+resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (enableQueryStore) {
   name: 'PostgreSQLDiagnosticSetting'
   scope: postgres
   properties: {
@@ -269,7 +272,7 @@ resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
       }
     ]
   }
-  dependsOn: [pgms_wait_sampling_query_capture_mode]
+  dependsOn: [pg_qs_query_capture_mode]
 }
 
 module adoConnectionString '../keyvault/upsertSecret.bicep' = {

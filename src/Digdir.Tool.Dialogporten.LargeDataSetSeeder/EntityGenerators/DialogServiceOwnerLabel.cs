@@ -1,3 +1,4 @@
+using System.Globalization;
 using Digdir.Tool.Dialogporten.LargeDataSetSeeder.Common;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetSeeder.EntityGenerators;
@@ -17,7 +18,7 @@ public sealed record DialogServiceOwnerLabel(
                 yield return new(
                     DialogServiceOwnerContextId: context.DialogId,
                     CreatedAt: context.CreatedAt,
-                    Value: serviceLabel.ToLower()
+                    Value: serviceLabel.ToLowerInvariant()
                 );
             }
         }

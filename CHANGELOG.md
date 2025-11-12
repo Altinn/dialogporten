@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.89.3](https://github.com/Altinn/dialogporten/compare/v1.89.2...v1.89.3) (2025-11-12)
+
+
+### Miscellaneous Chores
+
+* **app:** Improve search performance for end user search ([#2948](https://github.com/Altinn/dialogporten/issues/2948)) ([bf1c64e](https://github.com/Altinn/dialogporten/commit/bf1c64e62278778c85f48e106b631bdd8ed30c2f))
+* **deps:** update dependency uuidnext to 4.2.2 ([#2980](https://github.com/Altinn/dialogporten/issues/2980)) ([15c7e00](https://github.com/Altinn/dialogporten/commit/15c7e007fe8895831b59a2139a2ad86fcce26279))
+* **deps:** update dotnet monorepo ([#2991](https://github.com/Altinn/dialogporten/issues/2991)) ([06dd57c](https://github.com/Altinn/dialogporten/commit/06dd57ca09801bc078275bc77c6f90b5370e30a2))
+* **deps:** update prom/prometheus docker tag to v3.7.3 ([#2981](https://github.com/Altinn/dialogporten/issues/2981)) ([78ffcab](https://github.com/Altinn/dialogporten/commit/78ffcab8d2904e607db2582acb37dab638bafe03))
+
 ## [1.89.2](https://github.com/Altinn/dialogporten/compare/v1.89.1...v1.89.2) (2025-11-10)
 
 

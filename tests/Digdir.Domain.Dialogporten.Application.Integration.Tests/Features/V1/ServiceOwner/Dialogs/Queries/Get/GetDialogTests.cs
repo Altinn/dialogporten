@@ -5,13 +5,34 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using FluentAssertions;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class GetDialogTests : ApplicationCollectionFixture
+public class GetDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    public GetDialogTests(DialogApplication application) : base(application) { }
+    [Fact]
+    public Task Get_Should_Return_Dialog_With_Correct_Id()
+    {
+        const string externalReference = "Bare for å være sikker...";
+        var id = NewUuidV7();
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog(x => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .SendCommand(_ => new GetDialogQuery { DialogId = id })
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Id.Should().Be(id);
+                x.ExternalReference.Should().Be(externalReference);
+            });
+    }
 
     [Fact]
     public async Task Get_ReturnsSimpleDialog_WhenDialogExists()

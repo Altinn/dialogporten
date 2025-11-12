@@ -44,8 +44,6 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
         var dialog = await _db.Dialogs
-            .Include(x => x.Attachments)
-            .Include(x => x.Activities)
             .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(), x => resourceIds.Contains(x.ServiceResource))
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);

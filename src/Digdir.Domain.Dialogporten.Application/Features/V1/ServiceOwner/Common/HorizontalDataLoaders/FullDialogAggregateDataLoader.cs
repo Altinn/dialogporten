@@ -68,7 +68,7 @@ public sealed class FullDialogAggregateDataLoader
                 .IgnoreQueryFilters()
                 .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
                     x => resourceIds.Contains(x.ServiceResource))
-                .FirstOrDefaultAsync(ct),
+                .FirstOrDefaultAsync(x => x.Id == dialogId, ct),
             cancellationToken);
 
         if (dialogEntity is not null)

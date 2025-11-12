@@ -272,7 +272,7 @@ resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
       }
     ]
   }
-  dependsOn: [pgms_wait_sampling_query_capture_mode]
+  dependsOn: [pg_qs_query_capture_mode]
 }
 
 module adoConnectionString '../keyvault/upsertSecret.bicep' = {

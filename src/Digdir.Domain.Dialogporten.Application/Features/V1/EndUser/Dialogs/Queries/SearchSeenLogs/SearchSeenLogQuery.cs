@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -11,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
 
-public sealed class SearchSeenLogQuery : IRequest<SearchSeenLogResult>
+public sealed class SearchSeenLogQuery : IRequest<SearchSeenLogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }
@@ -42,14 +43,16 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
     {
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
-        var dialog = await _db.Dialogs
-            .AsNoTracking()
-            .Include(x => x.SeenLog)
-                .ThenInclude(x => x.SeenBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.SeenLog)
+                    .ThenInclude(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct),
+            cancellationToken);
 
         if (dialog is null)
         {

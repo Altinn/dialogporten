@@ -19,6 +19,12 @@ public sealed class DialogByIdDeleted : IDialogByIdError
     public string Message { get; set; } = null!;
 }
 
+public sealed class DialogByIdNotVisible : IDialogByIdError
+{
+    public string Message { get; set; } = null!;
+    public DateTimeOffset VisibleFrom { get; set; }
+}
+
 public sealed class DialogByIdForbidden : IDialogByIdError
 {
     public string Message { get; set; } = "Forbidden";
@@ -150,6 +156,9 @@ public sealed class Transmission
 
     [GraphQLDescription("Arbitrary URI/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use).")]
     public Uri? ExtendedType { get; set; }
+
+    [GraphQLDescription("Arbitrary string with a service-specific reference to an external system or service.")]
+    public string? ExternalReference { get; set; }
 
     [GraphQLDescription("Reference to any other transmission that this transmission is related to.")]
     public Guid? RelatedTransmissionId { get; set; }

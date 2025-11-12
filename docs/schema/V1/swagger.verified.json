@@ -372,6 +372,12 @@
             "example": "urn:altinn:organization:identifier-no:912345678",
             "type": "string"
           },
+          "partyId": {
+            "description": "The numeric identifier for the party.",
+            "example": 50136280,
+            "format": "int32",
+            "type": "integer"
+          },
           "partyType": {
             "description": "The type of the party, either \u0022Organization\u0022 or \u0022Person\u0022.",
             "example": "Organization",
@@ -449,6 +455,32 @@
           "value": {
             "description": "The localized text (or URL if a front-channel embed).",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserCommon_AcceptedLanguage": {
+        "additionalProperties": false,
+        "properties": {
+          "languageCode": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserCommon_AcceptedLanguages": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguage": {
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -1042,6 +1074,20 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogsQueriesGet_DialogRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogsQueriesGet_DialogSeenLog": {
         "additionalProperties": false,
         "properties": {
@@ -1108,6 +1154,11 @@
           "extendedType": {
             "description": "Arbitrary URI/URN describing a service-specific transmission type.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -1186,6 +1237,11 @@
                 "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
               }
             ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
           },
           "mediaType": {
             "description": "The media type of the attachment.",
@@ -1268,6 +1324,20 @@
           },
           "type": {
             "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetActivity_ActivityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
           }
         },
         "type": "object"
@@ -1426,6 +1496,11 @@
             "nullable": true,
             "type": "string"
           },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
@@ -1454,6 +1529,20 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetTransmission_TransmissionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
               }
             ]
           }
@@ -1739,6 +1828,20 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogsQueriesSearch_DialogRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogsQueriesSearch_DialogSeenLog": {
         "additionalProperties": false,
         "properties": {
@@ -1799,6 +1902,20 @@
           },
           "type": {
             "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchActivities_ActivityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
           }
         },
         "type": "object"
@@ -1957,6 +2074,11 @@
             "nullable": true,
             "type": "string"
           },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
@@ -1985,6 +2107,20 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchTransmissions_TransmissionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
               }
             ]
           }
@@ -4457,6 +4593,11 @@
               }
             ]
           },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "mediaType": {
             "description": "The media type of the attachment.",
             "example": "application/pdf\napplication/zip",
@@ -4706,6 +4847,11 @@
           "extendedType": {
             "description": "The extended type URI for the transmission.",
             "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
             "nullable": true,
             "type": "string"
           },
@@ -5542,7 +5688,7 @@
     }
   },
   "info": {
-    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/dialogporten\u0022\u003Ehttps://docs.altinn.studio/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs",
+    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs",
     "title": "Dialogporten",
     "version": "v1"
   },
@@ -5840,6 +5986,18 @@
               "nullable": true,
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -5872,7 +6030,7 @@
     },
     "/api/v1/enduser/dialogs/{dialogId}": {
       "get": {
-        "description": "Gets a single dialog aggregate. ",
+        "description": "Gets a single dialog aggregate.",
         "operationId": "V1EndUserDialogsQueriesGet_Dialog",
         "parameters": [
           {
@@ -5882,6 +6040,18 @@
             "schema": {
               "format": "guid",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
             }
           }
         ],
@@ -5938,6 +6108,18 @@
             "schema": {
               "format": "guid",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
             }
           }
         ],
@@ -6006,6 +6188,18 @@
             "schema": {
               "format": "guid",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
             }
           }
         ],
@@ -6362,6 +6556,18 @@
               "format": "guid",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -6432,6 +6638,18 @@
             "schema": {
               "format": "guid",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
             }
           }
         ],
@@ -7367,6 +7585,96 @@
           }
         ],
         "summary": "Replaces a dialog",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze": {
+      "post": {
+        "description": "Freezes a given dialog.\nThe dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen",
+        "operationId": "V1ServiceOwnerDialogsCommandsFreeze_FreezeDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The dialog aggregate was frozen successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the dialog",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Unauthorized to freeze the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Freezes a dialog",
         "tags": [
           "Serviceowner"
         ]

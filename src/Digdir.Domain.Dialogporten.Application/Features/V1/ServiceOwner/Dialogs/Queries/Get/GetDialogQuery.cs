@@ -3,6 +3,7 @@ using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -12,7 +13,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
-public sealed class GetDialogQuery : IRequest<GetDialogResult>
+public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 
@@ -58,21 +59,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialog.SeenLog = dialog.SeenLog
             .Where(x => x.CreatedAt >= dialog.ContentUpdatedAt).ToList();
 
-        DialogDto dialogDto;
-        try
-        {
-            dialogDto = _mapper.Map<DialogDto>(dialog);
-        }
-        catch (AutoMapperMappingException e)
-        {
-            if (e.Message.Contains("Destination Member:\nSystemLabel"))
-            {
-                // Edge case where the dialog is requested the same instant it is purged
-                return new EntityNotFound<DialogEntity>(request.DialogId);
-            }
-
-            throw;
-        }
+        var dialogDto = _mapper.Map<DialogDto>(dialog);
 
         if (request.EndUserId is not null)
         {

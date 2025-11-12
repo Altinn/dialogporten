@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
+
 internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
 {
     private const string AuthorizeUrl = "authorization/api/v1/authorize";
@@ -203,8 +205,11 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         CancellationToken cancellationToken)
     {
         var authorizedPartiesDto = await SendAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken);
-        if (authorizedPartiesDto is null || authorizedPartiesDto.Count == 0)
+        // System users might have no rights whatsoever, which is not an error condition
+        // Other user types (persons, SI users) will always be able to represent themselves as a minimum 
+        if (authorizedPartiesDto is null || (authorizedPartiesDto.Count == 0 && authorizedPartiesRequest.Type != SystemUserIdentifier.Prefix))
         {
+            _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.Type, authorizedPartiesRequest.Value);
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
         }
 

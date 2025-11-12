@@ -1,5 +1,6 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -9,7 +10,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Queries.GetServiceOwnerLabels;
 
-public sealed class GetServiceOwnerLabelsQuery : IRequest<GetServiceOwnerLabelsResult>
+public sealed class GetServiceOwnerLabelsQuery : IRequest<GetServiceOwnerLabelsResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }
@@ -37,12 +38,13 @@ internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetSer
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
-        var serviceOwnerContext = await _db
-            .DialogServiceOwnerContexts
-            .Include(x => x.ServiceOwnerLabels)
-            .Where(x => x.DialogId == request.DialogId)
-            .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var serviceOwnerContext = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.DialogServiceOwnerContexts
+                .Include(x => x.ServiceOwnerLabels)
+                .Where(x => x.DialogId == request.DialogId)
+                .Where(x => resourceIds.Contains(x.Dialog.ServiceResource))
+                .FirstOrDefaultAsync(cancellationToken: ct),
+            cancellationToken);
 
         if (serviceOwnerContext is null)
         {

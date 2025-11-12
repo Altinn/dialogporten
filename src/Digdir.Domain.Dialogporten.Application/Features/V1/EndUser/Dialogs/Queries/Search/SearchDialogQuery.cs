@@ -1,6 +1,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
@@ -8,6 +9,8 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -17,7 +20,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 
-public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>, IRequest<SearchDialogResult>
+public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>, IRequest<SearchDialogResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     private readonly string? _searchLanguageCode;
 
@@ -119,6 +122,11 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
         get => _searchLanguageCode;
         init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
     }
+
+    /// <summary>
+    /// Accepted languages for localization filtering, sorted by preference
+    /// </summary>
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<IntermediateDialogDto>
@@ -170,7 +178,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
-        var paginatedList = await _db.Dialogs
+        var paginatedList = await _db.WrapWithRepeatableRead((dbCtx, ct) => dbCtx.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
             .AsNoTracking()
             .Include(x => x.Content)
@@ -203,7 +211,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
             .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
-            .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
+            .ToPaginatedListAsync(request, cancellationToken: ct),
+            cancellationToken);
+
+        paginatedList.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguages));
 
         foreach (var dialog in paginatedList.Items)
         {
@@ -250,6 +261,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 dialog.Content.SetNonSensitiveContent();
             }
         }
+
         return paginatedList.ConvertTo(_mapper.Map<DialogDto>);
     }
 }

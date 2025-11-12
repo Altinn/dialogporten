@@ -26,17 +26,17 @@ jobs:
     outputs:
       version-exists: ${{ steps.check-published-version.outputs.version-exists }}
     steps:
-      - uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+      - uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ inputs.ref }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org/'
@@ -49,15 +49,17 @@ jobs:
       - name: Check if version exists on NPM
         id: check-published-version
         run: |
-          if npm view "${{ env.PACKAGE_NAME }}@${{ inputs.version }}" > /dev/null 2>&1; then
+          if npm view "${PACKAGE_NAME}@${VERSION}" > /dev/null 2>&1; then
             echo "version-exists=true" >> $GITHUB_OUTPUT
-            echo "Version ${{ inputs.version }} already exists"
+            echo "Version ${VERSION} already exists"
           else
             echo "version-exists=false" >> $GITHUB_OUTPUT
-            echo "Version ${{ inputs.version }} does not exist"
+            echo "Version ${VERSION} does not exist"
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PACKAGE_NAME: ${{ env.PACKAGE_NAME }}
+          VERSION: ${{ inputs.version }}
 
   publish-schema-to-npm:
     runs-on: ubuntu-latest
@@ -68,7 +70,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ inputs.ref }}
 
@@ -79,8 +81,10 @@ jobs:
 
       - name: Update package version
         run: |
-          jq '.version = "${{ inputs.version }}"' package.json > temp.json
+          jq --arg version "$VERSION" '.version = $version' package.json > temp.json
           mv temp.json package.json
+        env:
+          VERSION: ${{ inputs.version }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Publish package

@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using MediatR;
@@ -7,7 +8,7 @@ using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 
-public sealed class SyncSubjectMapCommand : IRequest<SyncSubjectMapResult>
+public sealed class SyncSubjectMapCommand : IRequest<SyncSubjectMapResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     public DateTimeOffset? Since { get; set; }
     public int? BatchSize { get; set; }
@@ -50,7 +51,7 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
         {
             var mergeCount = 0;
             var syncTime = DateTimeOffset.Now;
-            await _unitOfWork.BeginTransactionAsync(cancellationToken);
+            await _unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
             await foreach (var resourceBatch in _resourceRegistry
                 .GetUpdatedSubjectResources(lastUpdated, request.BatchSize ?? DefaultBatchSize, cancellationToken))
             {

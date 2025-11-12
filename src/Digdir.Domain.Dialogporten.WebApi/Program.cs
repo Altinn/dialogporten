@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
@@ -26,6 +27,7 @@ using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -56,7 +58,7 @@ static void BuildAndRun(string[] args)
 
     builder.WebHost.ConfigureKestrel(kestrelOptions =>
     {
-        kestrelOptions.Limits.MaxRequestBodySize = Constants.MaxRequestBodySize;
+        kestrelOptions.Limits.MaxRequestBodySize = Constants.MaxRequestBodySizeInBytes;
     });
 
     builder.Configuration
@@ -95,6 +97,7 @@ static void BuildAndRun(string[] args)
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
+        .Configure<FeatureMetricOptions>(builder.Configuration.GetSection("FeatureMetrics"))
 
         // Clean architecture projects
         .AddApplication(builder.Configuration, builder.Environment)
@@ -233,7 +236,8 @@ static void BuildAndRun(string[] args)
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
             var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
-        });
+        })
+        .UseFeatureMetrics();
 
     app.Run();
 }

@@ -3,11 +3,8 @@ name: CI/CD YT01
 run-name: CI/CD YT01 ${{ github.event.client_payload.version && format('({0})', github.event.client_payload.version) || '' }}
 
 on:
-  workflow_call:
-# Temp. disabled during re-seeding of yt01
-#on:
-#  repository_dispatch:
-#    types: [release_created]
+  repository_dispatch:
+    types: [release_created]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

@@ -1,0 +1,344 @@
+﻿{
+  Items: [
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Dette er en tittel, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Dette er et sammendrag, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_1,
+      Org: ttd,
+      Revision: Guid_2,
+      ServiceResource: urn:altinn:resource:1337,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:person:identifier-no:06875895484,
+      Progress: 22,
+      Process: some-process,
+      PrecedingProcess: some-preceding-process,
+      GuiAttachmentCount: 1,
+      ExtendedStatus: ext-status,
+      ExternalReference: external-ref,
+      CreatedAt: DateTimeOffset_1,
+      UpdatedAt: DateTimeOffset_1,
+      ContentUpdatedAt: DateTimeOffset_1,
+      Status: NotApplicable,
+      IsApiOnly: false,
+      FromServiceOwnerTransmissionsCount: 1,
+      HasUnopenedContent: true,
+      LatestActivity: {
+        Id: Guid_3,
+        CreatedAt: DateTimeOffset_2,
+        Type: DialogCreated,
+        PerformedBy: {
+          ActorType: ServiceOwner
+        }
+      },
+      SeenSinceLastUpdate: [
+        {
+          Id: Guid_4,
+          SeenAt: DateTimeOffset_3,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
+      SeenSinceLastContentUpdate: [
+        {
+          Id: Guid_4,
+          SeenAt: DateTimeOffset_3,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
+      ServiceOwnerContext: {
+        Revision: Guid_5,
+        ServiceOwnerLabels: [
+          {
+            Value: some-label
+          }
+        ]
+      },
+      EndUserContext: {
+        Revision: Guid_6,
+        SystemLabels: [
+          Default
+        ]
+      }
+    },
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Dette er en tittel, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Dette er et sammendrag, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_7,
+      Org: ttd,
+      Revision: Guid_8,
+      ServiceResource: urn:altinn:resource:1337,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:person:identifier-no:06875895484,
+      Progress: 22,
+      Process: some-process,
+      PrecedingProcess: some-preceding-process,
+      GuiAttachmentCount: 1,
+      ExtendedStatus: ext-status,
+      ExternalReference: external-ref,
+      CreatedAt: DateTimeOffset_4,
+      UpdatedAt: DateTimeOffset_4,
+      ContentUpdatedAt: DateTimeOffset_4,
+      Status: NotApplicable,
+      IsApiOnly: false,
+      FromServiceOwnerTransmissionsCount: 1,
+      HasUnopenedContent: true,
+      LatestActivity: {
+        Id: Guid_9,
+        CreatedAt: DateTimeOffset_5,
+        Type: DialogCreated,
+        PerformedBy: {
+          ActorType: ServiceOwner
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_10
+      },
+      EndUserContext: {
+        Revision: Guid_11,
+        SystemLabels: [
+          Archive
+        ]
+      }
+    },
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Dette er en tittel, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Dette er et sammendrag, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_12,
+      Org: ttd,
+      Revision: Guid_13,
+      ServiceResource: urn:altinn:resource:1337,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:person:identifier-no:06875895484,
+      Progress: 22,
+      Process: some-process,
+      PrecedingProcess: some-preceding-process,
+      GuiAttachmentCount: 1,
+      ExtendedStatus: ext-status,
+      ExternalReference: external-ref,
+      CreatedAt: DateTimeOffset_6,
+      UpdatedAt: DateTimeOffset_6,
+      ContentUpdatedAt: DateTimeOffset_6,
+      Status: NotApplicable,
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      LatestActivity: {
+        Id: Guid_14,
+        CreatedAt: DateTimeOffset_7,
+        Type: DialogCreated,
+        PerformedBy: {
+          ActorType: ServiceOwner
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_15
+      },
+      EndUserContext: {
+        Revision: Guid_16,
+        SystemLabels: [
+          Default
+        ]
+      }
+    },
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Dette er en tittel, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Dette er et sammendrag, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_17,
+      Org: ttd,
+      Revision: Guid_18,
+      ServiceResource: urn:altinn:resource:1337,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:person:identifier-no:06875895484,
+      Progress: 22,
+      Process: some-process,
+      PrecedingProcess: some-preceding-process,
+      GuiAttachmentCount: 0,
+      ExtendedStatus: ext-status,
+      ExternalReference: external-ref,
+      CreatedAt: DateTimeOffset_8,
+      UpdatedAt: DateTimeOffset_8,
+      ContentUpdatedAt: DateTimeOffset_8,
+      Status: NotApplicable,
+      IsApiOnly: false,
+      FromServiceOwnerTransmissionsCount: 1,
+      HasUnopenedContent: true,
+      LatestActivity: {
+        Id: Guid_19,
+        CreatedAt: DateTimeOffset_9,
+        Type: DialogCreated,
+        PerformedBy: {
+          ActorType: ServiceOwner
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_20
+      },
+      EndUserContext: {
+        Revision: Guid_21,
+        SystemLabels: [
+          Default
+        ]
+      }
+    },
+    {
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Dette er en tittel, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Dette er et sammendrag, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      Id: Guid_22,
+      Org: ttd,
+      Revision: Guid_23,
+      ServiceResource: urn:altinn:resource:1337,
+      ServiceResourceType: localresourcetype,
+      Party: urn:altinn:person:identifier-no:06875895484,
+      Progress: 22,
+      Process: some-process,
+      PrecedingProcess: some-preceding-process,
+      GuiAttachmentCount: 1,
+      ExtendedStatus: ext-status,
+      ExternalReference: external-ref,
+      CreatedAt: DateTimeOffset_10,
+      UpdatedAt: DateTimeOffset_10,
+      ContentUpdatedAt: DateTimeOffset_10,
+      Status: NotApplicable,
+      IsApiOnly: false,
+      FromServiceOwnerTransmissionsCount: 1,
+      HasUnopenedContent: true,
+      SeenSinceLastUpdate: [
+        {
+          Id: Guid_24,
+          SeenAt: DateTimeOffset_11,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
+      SeenSinceLastContentUpdate: [
+        {
+          Id: Guid_24,
+          SeenAt: DateTimeOffset_11,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
+      ServiceOwnerContext: {
+        Revision: Guid_25
+      },
+      EndUserContext: {
+        Revision: Guid_26,
+        SystemLabels: [
+          Default
+        ]
+      }
+    }
+  ],
+  HasNextPage: false,
+  OrderBy: createdat_desc,id_desc
+}

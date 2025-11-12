@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common;
+﻿using System.Data;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -8,6 +9,7 @@ using Digdir.Library.Entity.EntityFrameworkCore;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Npgsql;
 using OneOf.Types;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
@@ -58,8 +60,8 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         return this;
     }
 
-    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
-        => _transaction ??= await _dialogDbContext.Database.BeginTransactionAsync(cancellationToken);
+    public async Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
+        => _transaction ??= await _dialogDbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
 
     public IUnitOfWork DisableAggregateFilter()
     {
@@ -157,11 +159,30 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             // On a retry, the client will get a "proper" error message
             return new ConcurrencyError();
         }
+        catch (Exception ex) when (IsSerializationFailure(ex))
+        {
+            return new ConcurrencyError();
+        }
 
         // Interceptors can add domain errors, so check again
         return !_domainContext.IsValid
             ? new DomainError(_domainContext.Pop())
             : new Success();
+    }
+
+    private static bool IsSerializationFailure(Exception ex)
+    {
+        for (var currentEx = ex; currentEx != null; currentEx = currentEx.InnerException)
+        {
+            if (currentEx is not PostgresException) continue;
+
+            if (currentEx.Message.StartsWith("40001: could not serialize access due to concurrent", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async Task CommitTransactionAsync(CancellationToken cancellationToken)

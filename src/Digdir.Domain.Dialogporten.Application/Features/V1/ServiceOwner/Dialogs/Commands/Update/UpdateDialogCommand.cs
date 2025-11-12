@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -23,16 +24,17 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using OneOf;
-using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater
+public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentUpdater, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid Id { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
     public UpdateDialogDto Dto { get; set; } = null!;
     public bool IsSilentUpdate { get; set; }
+
+    Guid IFeatureMetricServiceResourceThroughDialogIdRequest.DialogId => Id;
 }
 
 [GenerateOneOf]
@@ -76,11 +78,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
-        if (request.IsSilentUpdate && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
-        {
-            return new Forbidden(Constants.SilentUpdateRequiresAdminScope);
-        }
-
         var dialog = UpdateDialogDataLoader.GetPreloadedData(_dataLoaderContext);
 
         if (dialog is null)
@@ -93,6 +90,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             // TODO: https://github.com/altinn/dialogporten/issues/1543
             // When restoration is implemented, add a hint to the error message.
             return new EntityDeleted<DialogEntity>(request.Id);
+        }
+
+        if (dialog.Frozen && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            return new Forbidden("User cannot modify frozen dialog");
         }
 
         // Ensure transmissions have a UUIDv7 ID, needed for the transmission hierarchy validation.
@@ -187,7 +189,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
     {
-        if (!_user.TryGetOrganizationNumber(out var organizationNumber))
+        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
         {
             _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
             return;
@@ -293,13 +295,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         dialog.FromPartyTransmissionsCount += (short)newDialogTransmissions
             .Count(x => x.TypeId
-                is DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction);
+                is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
 
         dialog.FromServiceOwnerTransmissionsCount += (short)newDialogTransmissions
             .Count(x => x.TypeId is not
-                (DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction));
+                (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
         var newAttachmentIds = newDialogTransmissions
             .SelectMany(x => x.Attachments)

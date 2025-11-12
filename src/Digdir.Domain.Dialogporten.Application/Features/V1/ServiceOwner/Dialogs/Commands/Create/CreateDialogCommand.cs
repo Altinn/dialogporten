@@ -3,6 +3,7 @@ using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -24,10 +25,11 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
-public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater
+public sealed class CreateDialogCommand : IRequest<CreateDialogResult>, ISilentUpdater, IFeatureMetricServiceResourceRequest
 {
     public bool IsSilentUpdate { get; set; }
     public CreateDialogDto Dto { get; set; } = null!;
+    string IFeatureMetricServiceResourceRequest.ServiceResource => Dto.ServiceResource;
 }
 
 public sealed record CreateDialogSuccess(Guid DialogId, Guid Revision);
@@ -176,7 +178,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
     private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
     {
-        if (!_user.TryGetOrganizationNumber(out var organizationNumber))
+        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
         {
             _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
             return;

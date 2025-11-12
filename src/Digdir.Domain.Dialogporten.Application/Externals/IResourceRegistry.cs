@@ -10,20 +10,13 @@ public interface IResourceRegistry
         CancellationToken cancellationToken);
 }
 
-public sealed record ServiceResourceInformation
+public sealed record ServiceResourceInformation(string ResourceId, string ResourceType, string OwnerOrgNumber, string OwnOrgShortName)
 {
-    public string ResourceType { get; }
-    public string OwnerOrgNumber { get; }
-    public string OwnOrgShortName { get; }
-    public string ResourceId { get; }
-
-    public ServiceResourceInformation(string resourceId, string resourceType, string ownerOrgNumber, string ownOrgShortName)
-    {
-        ResourceId = resourceId.ToLowerInvariant();
-        ResourceType = resourceType.ToLowerInvariant();
-        OwnerOrgNumber = ownerOrgNumber.ToLowerInvariant();
-        OwnOrgShortName = ownOrgShortName.ToLowerInvariant();
-    }
+    public static readonly ServiceResourceInformation Empty = new(string.Empty, string.Empty, string.Empty, string.Empty);
+    public string ResourceType { get; } = ResourceType.ToLowerInvariant();
+    public string OwnerOrgNumber { get; } = OwnerOrgNumber.ToLowerInvariant();
+    public string OwnOrgShortName { get; } = OwnOrgShortName.ToLowerInvariant();
+    public string ResourceId { get; } = ResourceId.ToLowerInvariant();
 }
 
 

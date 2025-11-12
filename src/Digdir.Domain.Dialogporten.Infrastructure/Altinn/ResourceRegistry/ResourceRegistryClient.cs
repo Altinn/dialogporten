@@ -115,7 +115,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
     private async Task<UpdatedResourcePolicyInformation?> GetUpdatedResourcePolicyInformation(UpdatedResource resource, CancellationToken cancellationToken)
     {
         var resourceRegistryEntry = new ResourceRegistryEntry(resource.ResourceUrn);
-        if (!resourceRegistryEntry.HasPolicyInResourceRegistry)
+        if (!resourceRegistryEntry.ShouldInclude)
         {
             return null;
         }
@@ -170,7 +170,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
     private async Task<ServiceResourceInformation[]> FetchServiceResourceInformation(CancellationToken cancellationToken)
     {
-        const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}resourcelist";
+        const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}resourcelist?includeMigratedApps=true";
 
         return await _cache.GetOrSetAsync(
             ServiceResourceInformationCacheKey,
@@ -182,12 +182,13 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
                 return response
                     .Where(x => !string.IsNullOrWhiteSpace(x.HasCompetentAuthority.Organization))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.HasCompetentAuthority.OrgCode))
                     .Where(x => Application.Common.Authorization.Constants.SupportedResourceTypes.Contains(x.ResourceType))
                     .Select(x => new ServiceResourceInformation(
                         $"{Constants.ServiceResourcePrefix}{x.Identifier}",
                         x.ResourceType,
                         x.HasCompetentAuthority.Organization!,
-                        x.HasCompetentAuthority.OrgCode))
+                        x.HasCompetentAuthority.OrgCode!))
                     .ToArray();
             },
             token: cancellationToken);
@@ -196,20 +197,18 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
     private sealed class ResourceRegistryEntry
     {
         public string Identifier { get; }
-        public bool HasPolicyInResourceRegistry { get; }
+        public bool ShouldInclude { get; }
 
         private const string Altinn2ServicePrefix = "se_";
-        private const string AltinnAppPrefix = "app_";
         private const char UrnSeparator = ':';
 
         public ResourceRegistryEntry(Uri resourceUrn)
         {
-            // Utility class to extract the identifier from a resource URN, and determine if it has a policy
-            // available in the resource registry API (Altinn 2 representations and Altinn Apps do not)
+            // Utility class to extract the identifier from a resource URN, and determine if this
+            // is something we want to process (we skip Altinn 2 services)
             var fullIdentifier = resourceUrn.ToString();
             Identifier = fullIdentifier[(fullIdentifier.LastIndexOf(UrnSeparator) + 1)..];
-            HasPolicyInResourceRegistry = !Identifier.StartsWith(Altinn2ServicePrefix, StringComparison.Ordinal)
-                        && !Identifier.StartsWith(AltinnAppPrefix, StringComparison.Ordinal);
+            ShouldInclude = !Identifier.StartsWith(Altinn2ServicePrefix, StringComparison.Ordinal);
         }
     }
 
@@ -225,7 +224,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         // Altinn 2 resources do not always have an organization number as competent authority, only service owner code
         // We filter these out anyway, but we need to allow null here
         public string? Organization { get; init; }
-        public required string OrgCode { get; init; }
+        public string? OrgCode { get; init; }
     }
 
     private sealed record UpdatedResponse(UpdatedResponseLinks Links, List<UpdatedSubjectResource> Data);

@@ -5,6 +5,9 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
@@ -14,13 +17,14 @@ using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authoriza
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 
-public sealed class GetDialogQuery : IRequest<GetDialogResult>
+public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
-public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, EntityDeleted, Forbidden>;
+public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, EntityNotVisible, EntityDeleted, Forbidden>;
 
 internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, GetDialogResult>
 {
@@ -56,46 +60,47 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // However, we need to guarantee an order for sub resources of the dialog aggregate.
         // This is to ensure that the get is consistent, and that PATCH in the API presentation
         // layer behaviours in an expected manner. Therefore, we need to be a bit more verbose about it.
-        var dialog = await _db.Dialogs
-            .Include(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Sender)
-                .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Attachments)
-                .ThenInclude(x => x.Urls)
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Attachments)
-                .ThenInclude(x => x.DisplayName!.Localizations)
-            .Include(x => x.Activities)
-                .ThenInclude(x => x.Description!.Localizations)
-            .Include(x => x.Activities)
-                .ThenInclude(x => x.PerformedBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.SeenLog
-                    .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
-                    .OrderBy(x => x.CreatedAt))
-                .ThenInclude(x => x.SeenBy)
-                    .ThenInclude(x => x.ActorNameEntity)
-            .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-            .Where(x => !x.VisibleFrom.HasValue || x.VisibleFrom < _clock.UtcNowOffset)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken);
+        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+                dbCtx.Dialogs
+                    .Include(x => x.Content)
+                        .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                    .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                        .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                    .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                        .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                        .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                    .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                        .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
+                    .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                        .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .Include(x => x.Transmissions)
+                        .ThenInclude(x => x.Content)
+                        .ThenInclude(x => x.Value.Localizations)
+                    .Include(x => x.Transmissions)
+                        .ThenInclude(x => x.Sender)
+                        .ThenInclude(x => x.ActorNameEntity)
+                    .Include(x => x.Transmissions)
+                        .ThenInclude(x => x.Attachments)
+                        .ThenInclude(x => x.Urls)
+                    .Include(x => x.Transmissions)
+                        .ThenInclude(x => x.Attachments)
+                        .ThenInclude(x => x.DisplayName!.Localizations)
+                    .Include(x => x.Activities)
+                        .ThenInclude(x => x.Description!.Localizations)
+                    .Include(x => x.Activities)
+                        .ThenInclude(x => x.PerformedBy)
+                        .ThenInclude(x => x.ActorNameEntity)
+                    .Include(x => x.SeenLog
+                        .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
+                        .OrderBy(x => x.CreatedAt))
+                        .ThenInclude(x => x.SeenBy)
+                        .ThenInclude(x => x.ActorNameEntity)
+                    .Include(x => x.EndUserContext)
+                        .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(x => x.Id == request.DialogId, ct),
+            cancellationToken);
 
         if (dialog is null)
         {
@@ -133,6 +138,11 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
+        if (dialog.VisibleFrom.HasValue && dialog.VisibleFrom > _clock.UtcNowOffset)
+        {
+            return new EntityNotVisible<DialogEntity>(dialog.VisibleFrom.Value);
+        }
+
         // TODO: What if name lookup fails
         // https://github.com/altinn/dialogporten/issues/387
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
@@ -155,7 +165,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         saveResult.Switch(
             success => { },
             domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
-            concurrencyError => throw new UnreachableException("Should not get concurrencyError when updating SeenAt."));
+            concurrencyError =>
+                throw new UnreachableException("Should not get concurrencyError when updating SeenAt."));
+
+        dialog.FilterLocalizations(request.AcceptedLanguages);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 
@@ -225,7 +238,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 }
             }
 
-            var authorizedTransmissions = dto.Transmissions.Where(t => authorizationResult.HasReadAccessToDialogTransmission(t.AuthorizationAttribute));
+            var authorizedTransmissions = dto.Transmissions.Where(t =>
+                authorizationResult.HasReadAccessToDialogTransmission(t.AuthorizationAttribute));
             foreach (var transmission in authorizedTransmissions)
             {
                 transmission.IsAuthorized = true;

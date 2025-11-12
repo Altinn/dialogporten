@@ -42,15 +42,16 @@ param appInsightsSku = {
 }
 param postgresConfiguration = {
   sku: {
-    name: 'Standard_D8ads_v5'
+    name: 'Standard_D16ads_v5'
     tier: 'GeneralPurpose'
   }
   storage: {
-    storageSizeGB: 256
+    storageSizeGB: 4096
     autoGrow: 'Enabled'
     type: 'Premium_LRS'
+    tier: 'P50'
   }
-  enableIndexTuning: false
+  enableIndexTuning: true
   enableQueryPerformanceInsight: false
   highAvailability: {
     mode: 'ZoneRedundant'
@@ -63,7 +64,7 @@ param postgresConfiguration = {
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
 
 param redisSku = {
-  name: 'Basic'
+  name: 'Standard'
   family: 'C'
   capacity: 1
 }

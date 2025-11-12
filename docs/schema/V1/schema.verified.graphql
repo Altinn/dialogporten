@@ -97,6 +97,7 @@ type AuthorizedParty {
   subParties: [AuthorizedSubParty!]
   party: String!
   partyUuid: UUID!
+  partyId: Int!
   name: String!
   partyType: String!
   isDeleted: Boolean!
@@ -109,6 +110,7 @@ type AuthorizedParty {
 type AuthorizedSubParty {
   party: String!
   partyUuid: UUID!
+  partyId: Int!
   name: String!
   partyType: String!
   isDeleted: Boolean!
@@ -240,6 +242,11 @@ type DialogByIdForbiddenAuthLevelTooLow implements DialogByIdError {
 
 type DialogByIdNotFound implements DialogByIdError {
   message: String!
+}
+
+type DialogByIdNotVisible implements DialogByIdError {
+  message: String!
+  visibleFrom: DateTime!
 }
 
 type DialogByIdPayload {
@@ -401,13 +408,33 @@ type SeenLog {
   isCurrentEndUser: Boolean!
 }
 
+type SetSystemLabelConcurrencyError implements SetSystemLabelError {
+  message: String!
+}
+
+type SetSystemLabelDomainError implements SetSystemLabelError {
+  message: String!
+}
+
+type SetSystemLabelEntityDeleted implements SetSystemLabelError {
+  message: String!
+}
+
 type SetSystemLabelEntityNotFound implements SetSystemLabelError {
+  message: String!
+}
+
+type SetSystemLabelForbidden implements SetSystemLabelError {
   message: String!
 }
 
 type SetSystemLabelPayload {
   success: Boolean!
   errors: [SetSystemLabelError!]!
+}
+
+type SetSystemLabelValidationError implements SetSystemLabelError {
+  message: String!
 }
 
 type Subscriptions {
@@ -426,6 +453,8 @@ type Transmission {
   isAuthorized: Boolean!
   "Arbitrary URI\/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use)."
   extendedType: URL
+  "Arbitrary string with a service-specific reference to an external system or service."
+  externalReference: String
   "Reference to any other transmission that this transmission is related to."
   relatedTransmissionId: UUID
   "The type of transmission."
@@ -475,6 +504,8 @@ input SearchDialogInput {
   externalReference: String
   "Filter by status"
   status: [DialogStatus!]
+  "Filter by process"
+  process: String
   "Filter by system label"
   systemLabel: [SystemLabel!]
   "Whether to exclude API-only dialogs from the results. Defaults to false."
@@ -483,6 +514,10 @@ input SearchDialogInput {
   createdAfter: DateTime
   "Only return dialogs created before this date"
   createdBefore: DateTime
+  "Only return dialogs with content updated after this date"
+  contentUpdatedAfter: DateTime
+  "Only return dialogs with content updated before this date"
+  contentUpdatedBefore: DateTime
   "Only return dialogs updated after this date"
   updatedAfter: DateTime
   "Only return dialogs updated before this date"

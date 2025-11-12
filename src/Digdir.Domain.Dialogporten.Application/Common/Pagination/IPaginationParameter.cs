@@ -8,14 +8,14 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Pagination;
 public class PaginationParameter<TOrderDefinition, TTarget>
     where TOrderDefinition : IOrderDefinition<TTarget>
 {
-    private readonly int _limit = PaginationConstants.DefaultLimit;
+    private int _limit = PaginationConstants.DefaultLimit;
 
     public ContinuationTokenSet<TOrderDefinition, TTarget>? ContinuationToken { get; set; }
 
     public int? Limit
     {
         get => _limit;
-        init => _limit = value ?? PaginationConstants.DefaultLimit;
+        set => _limit = value ?? PaginationConstants.DefaultLimit;
     }
 }
 

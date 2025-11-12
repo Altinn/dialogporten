@@ -116,7 +116,7 @@ testid="${name}_$(date '+%Y%m%dT%H%M%S')"
 
 archive_args=""
 if $breakpoint; then
-    archive_args="-e stages_target=$vus -e stages_duration=$duration -e abort_on_fail=$abort_on_fail"
+    archive_args="-e stages_target=$vus -e stages_duration=$duration -e abort_on_fail=$abort_on_fail -e BREAKPOINT=true"
 fi
 # Create the k6 archive
 
@@ -130,11 +130,14 @@ if ! k6 archive $filename \
 fi
    
 # Create the configmap from the archive
-if ! kubectl create configmap $configmapname --from-file=archive.tar; then
-    echo "Error: Failed to create configmap"
-    rm archive.tar
-    exit 1
+if ! kubectl get configmap $configmapname &>/dev/null; then
+  if ! kubectl create configmap $configmapname --from-file=archive.tar; then
+      echo "Error: Failed to create configmap"
+      rm archive.tar
+      exit 1
+  fi
 fi
+
 
 # Create the config.yml file from a string
 arguments="--out experimental-prometheus-rw --vus=$vus --duration=$duration --tag testid=$testid --log-output=none"
@@ -168,7 +171,8 @@ spec:
         k6-test: $name
     resources:
       requests:
-        memory: "200Mi"
+        cpu: 250m
+        memory: 200Mi
     
 EOF
 # Apply the config.yml configuration

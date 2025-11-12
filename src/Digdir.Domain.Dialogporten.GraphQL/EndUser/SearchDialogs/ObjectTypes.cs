@@ -164,6 +164,9 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Filter by status")]
     public List<DialogStatus>? Status { get; init; }
 
+    [GraphQLDescription("Filter by process")]
+    public string? Process { get; init; }
+
     [GraphQLDescription("Filter by system label")]
     public List<SystemLabel>? SystemLabel { get; init; }
 
@@ -175,6 +178,12 @@ public sealed class SearchDialogInput
 
     [GraphQLDescription("Only return dialogs created before this date")]
     public DateTimeOffset? CreatedBefore { get; init; }
+
+    [GraphQLDescription("Only return dialogs with content updated after this date")]
+    public DateTimeOffset? ContentUpdatedAfter { get; init; }
+
+    [GraphQLDescription("Only return dialogs with content updated before this date")]
+    public DateTimeOffset? ContentUpdatedBefore { get; init; }
 
     [GraphQLDescription("Only return dialogs updated after this date")]
     public DateTimeOffset? UpdatedAfter { get; init; }

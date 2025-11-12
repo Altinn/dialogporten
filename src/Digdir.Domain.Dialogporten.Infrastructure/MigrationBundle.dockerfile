@@ -1,7 +1,7 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0.8@sha256:515c08e27cf8d933af442f0e1b6c92cc728acb71f113ca529f56c79cb597adb5 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0.10@sha256:3dcb33395722d14c80d19107158293ed677b2c07841100d51df07275ae2b2682 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0.304@sha256:ae000be75dac94fc40e00f0eee903289e985995cc06dac3937469254ce5b60b6 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0.306@sha256:81f6d622fe21ed9d31375167f62a3538ff4d6835f9d5e6da9c2defa8a84b7687 AS build
 WORKDIR /src
 
 RUN dotnet tool install --global dotnet-ef

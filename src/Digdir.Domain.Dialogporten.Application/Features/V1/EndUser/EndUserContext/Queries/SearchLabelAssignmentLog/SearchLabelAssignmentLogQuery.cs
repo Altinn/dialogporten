@@ -1,5 +1,6 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -10,7 +11,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 
-public sealed class SearchLabelAssignmentLogQuery : IRequest<SearchLabelAssignmentLogResult>
+public sealed class SearchLabelAssignmentLogQuery : IRequest<SearchLabelAssignmentLogResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 }
@@ -33,13 +34,16 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
 
     public async Task<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _dialogDbContext.Dialogs
-            .AsNoTracking()
-            .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.LabelAssignmentLogs)
-                .ThenInclude(x => x.PerformedBy)
-                .ThenInclude(x => x.ActorNameEntity)
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+        var dialog = await _dialogDbContext.WrapWithRepeatableRead((dbCtx, ct) =>
+                dbCtx.Dialogs
+                    .AsNoTracking()
+                    .Include(x => x.EndUserContext)
+                        .ThenInclude(x => x.LabelAssignmentLogs)
+                        .ThenInclude(x => x.PerformedBy)
+                        .ThenInclude(x => x.ActorNameEntity)
+                    .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                        cancellationToken: ct),
+            cancellationToken);
 
         if (dialog == null)
         {

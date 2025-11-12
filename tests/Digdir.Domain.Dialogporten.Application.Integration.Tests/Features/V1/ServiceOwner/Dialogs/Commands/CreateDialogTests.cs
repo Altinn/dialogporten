@@ -44,8 +44,16 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
                 typeof(ValidationError));
 
-            Add("Validations for UUIDv7 with timestamp in the future",
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
                 IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(1)),
+                typeof(CreateDialogSuccess));
+
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(14)),
+                typeof(CreateDialogSuccess));
+
+            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
+                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(16)),
                 typeof(ValidationError));
 
             Add("Can create a dialog with a valid UUIDv7 format",
@@ -201,6 +209,38 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("empty"));
 
+    private static ContentValueDto CreateInvalidHtml(string html) => new()
+    {
+        MediaType = MediaTypes.LegacyHtml,
+        Value = [new()
+        {
+            LanguageCode = "nb",
+            Value = html
+        }]
+    };
+
+    private static ContentValueDto CreateTableHtml() => new()
+    {
+        MediaType = MediaTypes.LegacyHtml,
+        Value = [new()
+        {
+            LanguageCode = "nb",
+            Value = """
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>table head</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>tr</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    """
+        }]
+    };
 
     private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>
     {
@@ -215,6 +255,36 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
                 x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(CreateDialogSuccess));
+
+            Add("Can create HTML content with table tag with valid html scope",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateTableHtml(),
+                typeof(CreateDialogSuccess));
+
+            Add("Cannot create dialog with forbidden HTML tags: iframe",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<iframe src='malicious site'></iframe>"),
+                typeof(ValidationError));
+
+            Add("Cannot create dialog with forbidden HTML tags: script",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<script>alert('hack');</script>"),
+                typeof(ValidationError));
+
+            Add("Cannot create dialog with forbidden HTML tags: img",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<img src='evil.png' />"),
+                typeof(ValidationError));
+
+            Add("Cannot create dialog with forbidden HTML tags: div",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<div>Not allowed</div>"),
+                typeof(ValidationError));
+
+            Add("Cannot create dialog with forbidden HTML tags: span",
+                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<span>Not allowed</span>"),
+                typeof(ValidationError));
 
             Add("Cannot create title content with HTML media type with valid html scope",
                 ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
@@ -455,4 +525,23 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.AddTransmission(x =>
                     x.AuthorizationAttribute = authAttribute))
             .ExecuteAndAssert(expectedTye);
+
+    [Fact]
+    public Task Supplied_UpdatedAt_Should_Be_Used_For_ContentUpdatedAt() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.UpdatedAt = x.Dto.CreatedAt = DateTimeOffset.UtcNow.AddDays(-1))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.ContentUpdatedAt.Should().Be(x.UpdatedAt));
+
+    [Fact]
+    public Task ContentUpdatedAt_Should_Default_To_Now_If_UpdatedAt_Not_Supplied() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                Assert.True(
+                    x.ContentUpdatedAt == x.UpdatedAt &&
+                    x.ContentUpdatedAt == x.CreatedAt));
 }

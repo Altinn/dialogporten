@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -11,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 
-public sealed class UpdateFormSavedActivityTimeCommand : IRequest<UpdateFormSavedActivityTimeResult>, ISilentUpdater
+public sealed class UpdateFormSavedActivityTimeCommand : IRequest<UpdateFormSavedActivityTimeResult>, ISilentUpdater, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
 
@@ -41,10 +42,12 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
             return new Forbidden("Requires admin scope");
         }
 
-        var activity = await _db.DialogActivities
-            .Include(x => x.Dialog)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.ActivityId && x.DialogId == request.DialogId, cancellationToken);
+        var activity = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+                dbCtx.DialogActivities
+                    .Include(x => x.Dialog)
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(x => x.Id == request.ActivityId && x.DialogId == request.DialogId, ct),
+            cancellationToken);
 
         if (activity is null)
         {

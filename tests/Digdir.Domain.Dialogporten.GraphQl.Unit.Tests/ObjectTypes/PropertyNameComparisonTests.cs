@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -17,6 +16,7 @@ using DialogStatus = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogSt
 using HttpVerb = Digdir.Domain.Dialogporten.Domain.Http.HttpVerb;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 using SystemLabel = Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel;
+using SearchDialogQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
@@ -45,6 +45,9 @@ public class PropertyNameComparisonTests
     {
         public PropertyNameComparisonTestsData()
         {
+            // ====== Input ======
+            Add(typeof(SearchDialogQuery), typeof(SearchDialogInput), IgnoreAcceptedLanguage);
+
             // ====== Dtos =======
             Add(typeof(DialogActivityDto), typeof(Activity), null);
             Add(typeof(DialogEndUserContextDto), typeof(EndUserContext), null);
@@ -98,6 +101,10 @@ public class PropertyNameComparisonTests
         return value!.OutputInList
                && ExcludeNonSensitiveContentTypes(name);
     }
+
+    private static bool IgnoreAcceptedLanguage(string name) =>
+        !name.Equals(nameof(SearchDialogQuery.AcceptedLanguages),
+            StringComparison.OrdinalIgnoreCase);
 
     private static bool ExcludeNonSensitiveContentTypes(string name) =>
         !name.Equals(nameof(DialogContentType.Values.NonSensitiveTitle), StringComparison.OrdinalIgnoreCase)

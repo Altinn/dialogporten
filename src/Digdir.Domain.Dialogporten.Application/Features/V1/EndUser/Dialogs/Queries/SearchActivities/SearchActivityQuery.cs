@@ -1,8 +1,11 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -10,9 +13,10 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchActivities;
 
-public sealed class SearchActivityQuery : IRequest<SearchActivityResult>
+public sealed class SearchActivityQuery : IRequest<SearchActivityResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
@@ -36,11 +40,14 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
 
     public async Task<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _db.Dialogs
-            .Include(x => x.Activities)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.Activities)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct),
+            cancellationToken);
 
         if (dialog is null)
         {
@@ -66,6 +73,8 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
         {
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
+
+        dialog.FilterLocalizations(request.AcceptedLanguages);
 
         return _mapper.Map<List<ActivityDto>>(dialog.Activities);
     }

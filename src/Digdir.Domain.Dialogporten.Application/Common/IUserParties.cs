@@ -1,7 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using Digdir.Domain.Dialogporten.Domain.Parties;
 
 namespace Digdir.Domain.Dialogporten.Application.Common;
 
@@ -21,10 +20,11 @@ public sealed class UserParties : IUserParties
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public Task<AuthorizedPartiesResult> GetUserParties(CancellationToken cancellationToken = default) =>
-        _user.TryGetPid(out var pid) &&
-        NorwegianPersonIdentifier.TryParse(NorwegianPersonIdentifier.PrefixWithSeparator + pid,
-            out var partyIdentifier)
+    public Task<AuthorizedPartiesResult> GetUserParties(CancellationToken cancellationToken = default)
+    {
+        var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifier();
+        return partyIdentifier != null
             ? _altinnAuthorization.GetAuthorizedParties(partyIdentifier, cancellationToken: cancellationToken)
             : Task.FromResult(new AuthorizedPartiesResult());
+    }
 }

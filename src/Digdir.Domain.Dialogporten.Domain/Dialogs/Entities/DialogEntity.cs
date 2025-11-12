@@ -66,6 +66,11 @@ public sealed class DialogEntity :
     /// </summary>
     public bool HasUnopenedContent { get; set; }
 
+    /// <summary>
+    ///  Indicates whether the dialog can be updated/deleted by the service owner 
+    /// </summary>
+    public bool Frozen { get; set; }
+
 
     // === Dependent relationships ===
     public DialogStatus.Values StatusId { get; set; }
@@ -103,7 +108,7 @@ public sealed class DialogEntity :
     public void OnCreate(AggregateNode self, DateTimeOffset utcNow)
     {
         _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
-        ContentUpdatedAt = utcNow;
+        ContentUpdatedAt = UpdatedAt;
     }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)

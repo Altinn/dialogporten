@@ -34,6 +34,7 @@ using ZiggyCreatures.Caching.Fusion.NullObjects;
 using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using MassTransit;
 using MediatR;
 
@@ -60,26 +61,29 @@ public static class InfrastructureExtensions
                 var connectionString = services.GetRequiredService<IOptions<InfrastructureSettings>>()
                     .Value.DialogDbConnectionString;
                 options.UseNpgsql(connectionString, o =>
-                {
-                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                })
-                .EnableSensitiveDataLogging(environment.IsDevelopment())
-                .AddInterceptors(
-                    services.GetRequiredService<PopulateActorNameInterceptor>(),
-                    services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
-                );
+                    {
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    })
+                    .EnableSensitiveDataLogging(environment.IsDevelopment())
+                    .AddInterceptors(
+                        services.GetRequiredService<PopulateActorNameInterceptor>(),
+                        services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
+                    );
             })
             .AddHostedService<FusionCacheWarmupHostedService>()
             .AddHostedService<DevelopmentMigratorHostedService>()
             .AddHostedService<DevelopmentCleanupOutboxHostedService>()
             .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()
             .AddHostedService<DevelopmentResourcePolicyInformationSyncHostedService>()
-            .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient, includeInternalTypes: true)
+            .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient,
+                includeInternalTypes: true)
             .AddPolicyRegistry((_, registry) =>
             {
                 registry.Add(PollyPolicy.DefaultHttpRetryPolicy, HttpPolicyExtensions
                     .HandleTransientHttpError()
-                    .WaitAndRetryAsync(Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: 3)));
+                    .WaitAndRetryAsync(
+                        Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1),
+                            retryCount: 3)));
             })
             .AddCustomHealthChecks()
 
@@ -90,6 +94,7 @@ public static class InfrastructureExtensions
             .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
+            .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient<Lazy<IPublishEndpoint>>(x =>
@@ -104,7 +109,10 @@ public static class InfrastructureExtensions
             .AddHttpClients(infrastructureSettings)
 
             // Decorators
-            .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>));
+            .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>))
+
+            // Feature Metrics
+            .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
 
         services.AddFusionCacheNeueccMessagePackSerializer();
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
@@ -170,6 +178,11 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(nameof(SubjectResource), new()
         {
             Duration = TimeSpan.FromMinutes(20)
+        })
+        .ConfigureFusionCache(nameof(IFeatureMetricServiceResourceCache), new()
+        {
+            IsFailSafeEnabled = false,
+            Duration = TimeSpan.FromMinutes(5)
         });
 
         if (environment.IsEnvironment("yt01"))

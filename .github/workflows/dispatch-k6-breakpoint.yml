@@ -55,7 +55,16 @@ on:
           - 'tests/k6/tests/serviceowner/performance/createDialogBreakpoint.js'
           - 'tests/k6/tests/serviceowner/performance/createTransmissionsBreakpoint.js'
           - 'tests/k6/tests/serviceowner/performance/serviceownerSearchBreakpoint.js'
+          - 'tests/k6/tests/serviceowner/performance/serviceOwnerShouldSendNotification.js'
+          - 'tests/k6/tests/serviceowner/performance/createDialogTransmissionActivity.js'
           - 'tests/k6/tests/enduser/performance/enduserSearchBreakpoint.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduser.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForParties.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduserFTS.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForPartiesFTS.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetParties.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForEnduserAutoCompleteFTS.js'
+          - 'tests/k6/tests/graphql/performance/graphqlGetAllDialogsForPartiesAutoCompleteFTS.js'
 
 run-name: ${{ inputs.tag }} ${{ inputs.targetVus }}/${{ inputs.duration }}/${{ inputs.parallelism }}
 

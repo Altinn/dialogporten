@@ -1,8 +1,11 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using MediatR;
@@ -11,10 +14,11 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission;
 
-public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>
+public sealed class GetTransmissionQuery : IRequest<GetTransmissionResult>, IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid TransmissionId { get; set; }
+    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
@@ -36,22 +40,25 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
     public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
         CancellationToken cancellationToken)
     {
-        var dialog = await _dbContext.Dialogs
-            .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-                .ThenInclude(x => x.Content)
-                .ThenInclude(x => x.Value.Localizations)
-            .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-                .ThenInclude(x => x.Attachments)
-                .ThenInclude(x => x.DisplayName!.Localizations)
-            .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
-                .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Sender)
-                .ThenInclude(x => x.ActorNameEntity)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _dbContext.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
+                    .ThenInclude(x => x.Content)
+                    .ThenInclude(x => x.Value.Localizations)
+                .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.DisplayName!.Localizations)
+                .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
+                    .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct),
+            cancellationToken);
 
         if (dialog is null)
         {
@@ -84,7 +91,9 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
             return new EntityNotFound<DialogTransmission>(request.TransmissionId);
         }
 
+        transmission.FilterLocalizations(request.AcceptedLanguages);
         var dto = _mapper.Map<TransmissionDto>(transmission);
+
         dto.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
 
         if (dto.IsAuthorized) return dto;

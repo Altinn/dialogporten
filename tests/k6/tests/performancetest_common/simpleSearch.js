@@ -5,8 +5,7 @@
 import { randomItem, uuidv4 } from '../../common/k6-utils.js';
 import { expect, expectStatusFor } from "../../common/testimports.js";
 import { describe } from '../../common/describe.js';
-import { getEU, postGQ, getSO } from '../../common/request.js';
-import { getGraphqlParty } from '../performancetest_data/graphql-search.js';
+import { getEU, getSO } from '../../common/request.js';
 import { getEnterpriseToken, getPersonalToken } from './getTokens.js';
 
 export const emptySearchThresholds = {
@@ -49,9 +48,11 @@ function retrieveDialogContent(response, paramsWithToken, getFunction = getEU) {
     getContentChain(dialogId, paramsWithToken, 'get transmissions', 'get transmission', '/transmissions/', getFunction);
 }
 
-function log(items, traceCalls, enduser) {
+export function log(items, traceCalls, enduser, duration = null) {
     if (items?.length && traceCalls) {
-        console.log("Found " + items.length + " dialogs" + " for enduser " + enduser.ssn);
+        console.log("Found " + items.length + " dialogs" + " for enduser " + enduser + (duration ? (" in " + duration + " ms") : ""));  
+    } else if (traceCalls) {
+        console.log("Found no dialogs for enduser " + enduser + (duration ? (" in " + duration + " ms") : ""));
     }
 }
 
@@ -143,37 +144,6 @@ export function getUrl(url, paramsWithToken, getFunction = getEU) {
     expectStatusFor(r).to.equal(200);
     expect(r, 'response').to.have.validJsonBody();
     return r;
-}
-
-/**
- * Performs a GraphQL search using the provided enduser token.
- *
- * @param {Object} enduser - The enduser object containing the token.
- * @returns {void}
- */
-export function graphqlSearch(enduser, searchParams, token,  traceCalls, label) {
-    if (token == null) {
-        token = getPersonalToken({ ssn: enduser, scopes: "digdir:dialogporten" });
-    }
-    let traceparent = uuidv4();
-    let paramsWithToken = {
-        headers: {
-            Authorization: "Bearer " + token,
-            traceparent: traceparent,
-            'User-Agent': 'dialogporten-k6-graphql-search'
-        },
-        tags: { name: label }
-    };
-    if (traceCalls) {
-        paramsWithToken.tags.traceparent = traceparent;
-        paramsWithToken.tags.enduser = enduser.ssn;
-    }
-    describe('Perform graphql dialog list', () => {
-        let r = postGQ(getGraphqlParty(searchParams), paramsWithToken);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        log(r.json().data.searchDialogs.items, traceCalls, enduser);
-    });
 }
 
 /**

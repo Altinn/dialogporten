@@ -50,8 +50,6 @@ public abstract class AggregateNode
     /// </summary>
     public bool ModifiedByChild { get; internal set; }
 
-    internal bool SkipAutomaticUpdatedAt { get; private set; }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateNode"/> class.
     /// </summary>
@@ -70,13 +68,6 @@ public abstract class AggregateNode
 
     internal bool IsLeafNode => _children.Count == 0;
     internal bool IsRootNode => _parents.Count == 0;
-
-    /// <summary>
-    /// Instructs the infrastructure to skip automatically setting <see cref="IUpdateableEntity.UpdatedAt"/>.
-    /// Setting UpdatedAt to a different value within a domain event handler does not require this to be called,
-    /// but this is necessary when an UpdateHandler wants to keep the existing UpdatedAt value.
-    /// </summary>
-    public void PreventAutomaticUpdatedAt() => SkipAutomaticUpdatedAt = true;
 
     internal static AggregateNode Create(Type type, object entity, AggregateNodeState state,
         IEnumerable<AggregateNodeProperty> modifiedProperties)

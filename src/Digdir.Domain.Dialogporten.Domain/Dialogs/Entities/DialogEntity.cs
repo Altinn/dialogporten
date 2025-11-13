@@ -124,15 +124,10 @@ public sealed class DialogEntity :
     {
         _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-        // When changes are made to dialogs with a future visibleFrom, we need to
-        // ensure that updatedAt/contentUpdatedAt remain at visibleFrom until the dialog
-        // is actually visible. In order to avoid this being overridden by automatic
-        // setting of updatedAt, we need to explicitly indicate that to the infrastructure.
         if (VisibleFrom is { } visibleFrom && visibleFrom > utcNow)
         {
             UpdatedAt = visibleFrom;
             ContentUpdatedAt = visibleFrom;
-            self.PreventAutomaticUpdatedAt();
             return;
         }
 

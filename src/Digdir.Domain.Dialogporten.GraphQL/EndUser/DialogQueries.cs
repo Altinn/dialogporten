@@ -98,10 +98,7 @@ public partial class Queries
             };
         }
 
-        if (orderSet is not null)
-        {
-            searchDialogQuery.OrderBy = orderSet;
-        }
+        searchDialogQuery.OrderBy = orderSet;
 
         var result = await mediator.Send(searchDialogQuery, cancellationToken);
 

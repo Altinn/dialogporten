@@ -16,9 +16,9 @@ public static class FluentValidationPartyIdentifierExtensions
                         is NorwegianPersonIdentifier
                         or NorwegianOrganizationIdentifier
                         or AltinnSelfIdentifiedUserIdentifier
-                        // Disabled for now, as we do not fully support these user types in Altinn yet
-                        //or IdportenSelfIdentifiedUserIdentifier
-                        //or FeideUserIdentifier
+                // Disabled for now, as we do not fully support these user types in Altinn yet
+                //or IdportenSelfIdentifiedUserIdentifier
+                //or FeideUserIdentifier
                 ))
             .WithMessage(
                 $"'{{PropertyName}}' must be on format '{NorwegianOrganizationIdentifier.PrefixWithSeparator}{{norwegian org-nr}}', " +

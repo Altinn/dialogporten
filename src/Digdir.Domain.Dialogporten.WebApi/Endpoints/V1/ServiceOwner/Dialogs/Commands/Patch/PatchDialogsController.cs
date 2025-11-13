@@ -115,20 +115,11 @@ public sealed class PatchDialogsController : ControllerBase
 
     private static void InitializeListProperties(UpdateDialogDto dto)
     {
-        var properties = dto.GetType()
-            .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-            .Where(p =>
-                p.GetValue(dto) == null &&
-                p.PropertyType.IsGenericType &&
-                p.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
-
-        foreach (var property in properties)
-        {
-            var propertyType = property.PropertyType;
-
-            var elementType = propertyType.GetGenericArguments()[0];
-            var listInstance = Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
-            property.SetValue(dto, listInstance);
-        }
+        dto.SearchTags ??= [];
+        dto.Attachments ??= [];
+        dto.Transmissions ??= [];
+        dto.GuiActions ??= [];
+        dto.ApiActions ??= [];
+        dto.Activities ??= [];
     }
 }

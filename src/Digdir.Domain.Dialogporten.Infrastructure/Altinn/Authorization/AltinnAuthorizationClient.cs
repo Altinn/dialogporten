@@ -158,6 +158,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             {
                 Party = party.Party,
                 PartyId = party.PartyId,
+                DateOfBirth = party.DateOfBirth,
                 ParentParty = null,
                 AuthorizedResources = party.AuthorizedResources.Count > 0
                     ? [.. party.AuthorizedResources]
@@ -181,6 +182,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                     Party = subParty.Party,
                     PartyId = subParty.PartyId,
                     ParentParty = party.Party,
+                    DateOfBirth = subParty.DateOfBirth,
                     AuthorizedResources = subParty.AuthorizedResources.Count > 0
                         ? [.. subParty.AuthorizedResources]
                         : EmptyStringList,
@@ -206,7 +208,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     {
         var authorizedPartiesDto = await SendAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken);
         // System users might have no rights whatsoever, which is not an error condition
-        // Other user types (persons, SI users) will always be able to represent themselves as a minimum 
+        // Other user types (persons, SI users) will always be able to represent themselves as a minimum
         if (authorizedPartiesDto is null || (authorizedPartiesDto.Count == 0 && authorizedPartiesRequest.Type != SystemUserIdentifier.Prefix))
         {
             _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.Type, authorizedPartiesRequest.Value);

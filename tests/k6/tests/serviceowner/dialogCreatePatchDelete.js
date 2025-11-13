@@ -214,6 +214,42 @@ export default function () {
         expect(r.json(), 'response json').to.have.property('errors');
     });
 
+    describe('Remove List properties with Patch', () => {
+
+            let d = dialogToInsert();
+            let post = postSO("dialogs", d);
+            expectStatusFor(post).to.equal(201);
+            expect(post, 'response').to.have.validJsonBody();
+
+            let dialogId = post.json();
+
+            let patchDocument = [
+                {
+                    "op": "remove",
+                    "path": "/guiActions"
+                },
+                {
+                    "op": "remove",
+                    "path": "/apiActions"
+                },
+                {
+                    "op": "remove",
+                    "path": "/searchTags"
+                },
+                {
+                    "op": "remove",
+                    "path": "/Attachments"
+                }
+            ];
+
+            let patch = patchSO('dialogs/' + dialogId, patchDocument);
+            expectStatusFor(patch).to.equal(204);
+
+            let purge = purgeSO('dialogs/' + dialogId);
+            expectStatusFor(purge).to.equal(204);
+        }
+    )
+
     describe('Clean up', () => {
         for (let i = 0; i < dialogIds.length; i++) {
             let r = purgeSO('dialogs/' + dialogIds[i]);

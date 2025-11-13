@@ -18,4 +18,8 @@
         <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Features\V1\ServiceOwner\" />
+    </ItemGroup>
+
 </Project>

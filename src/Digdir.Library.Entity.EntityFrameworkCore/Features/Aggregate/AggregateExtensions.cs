@@ -24,6 +24,8 @@ internal static class AggregateExtensions
 
         foreach (var (_, aggregateNode) in aggregateNodeByEntry)
         {
+            var skipSetUpdated = false;
+
             if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateCreatedHandler created && aggregateNode.IsAdded())
             {
                 created.OnCreate(aggregateNode, utcNow);
@@ -31,7 +33,17 @@ internal static class AggregateExtensions
 
             if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateUpdatedHandler updated && aggregateNode.IsModified())
             {
+                var updatedAtBefore = aggregateNode.Entity is IUpdateableEntity beforeUpdateable
+                    ? beforeUpdateable.UpdatedAt
+                    : (DateTimeOffset?)null;
+
                 updated.OnUpdate(aggregateNode, utcNow, options.EnableUpdatableFilter);
+
+                skipSetUpdated = aggregateNode.SkipAutomaticUpdatedAt
+                    || (updatedAtBefore is not null
+                        && aggregateNode.Entity is IUpdateableEntity afterUpdateable
+                        && afterUpdateable.UpdatedAt != updatedAtBefore);
+
             }
 
             if (options.EnableAggregateFilter && aggregateNode.Entity is IAggregateDeletedHandler deleted && aggregateNode.IsDeleted())
@@ -44,7 +56,7 @@ internal static class AggregateExtensions
                 restored.OnRestore(aggregateNode, utcNow);
             }
 
-            if (options.EnableUpdatableFilter && aggregateNode.Entity is IUpdateableEntity updatable)
+            if (options.EnableUpdatableFilter && aggregateNode.Entity is IUpdateableEntity updatable && !skipSetUpdated)
             {
                 if (aggregateNode.IsModified() || aggregateNode.IsAddedWithDefaultUpdatedAt(updatable))
                 {

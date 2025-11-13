@@ -67,7 +67,7 @@ public sealed class DialogEntity :
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
-    ///  Indicates whether the dialog can be updated/deleted by the service owner 
+    ///  Indicates whether the dialog can be updated/deleted by the service owner
     /// </summary>
     public bool Frozen { get; set; }
 
@@ -108,12 +108,33 @@ public sealed class DialogEntity :
     public void OnCreate(AggregateNode self, DateTimeOffset utcNow)
     {
         _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+
+        // We need to set updatedAt to visibleFrom to simulate it coming into existence at that time.
+        // This makes sure that sorting on updatedAt/contentUpdatedAt works as expected, including
+        // polling on updatedSince in the API.
+        if (VisibleFrom is { } visibleFrom)
+        {
+            UpdatedAt = visibleFrom;
+        }
+
         ContentUpdatedAt = UpdatedAt;
     }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
     {
         _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+
+        // When changes are made to dialogs with a future visibleFrom, we need to
+        // ensure that updatedAt/contentUpdatedAt remain at visibleFrom until the dialog
+        // is actually visible. In order to avoid this being overridden by automatic
+        // setting of updatedAt, we need to explicitly indicate that to the infrastructure.
+        if (VisibleFrom is { } visibleFrom && visibleFrom > utcNow)
+        {
+            UpdatedAt = visibleFrom;
+            ContentUpdatedAt = visibleFrom;
+            self.PreventAutomaticUpdatedAt();
+            return;
+        }
 
         if (!enableUpdatableFilter)
         {

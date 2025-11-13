@@ -30,15 +30,9 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         RuleFor(x => x.ExpiresAt)
             .GreaterThanOrEqualTo(x => x.DueAt)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
-            .When(x => x.DueAt.HasValue, ApplyConditionTo.CurrentValidator)
-            .GreaterThanOrEqualTo(x => x.VisibleFrom)
-            .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
-            .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
+            .When(x => x.DueAt.HasValue, ApplyConditionTo.CurrentValidator);
 
-        RuleFor(x => x.DueAt)
-            .GreaterThanOrEqualTo(x => x.VisibleFrom)
-            .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
-            .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
+        const string visibleFromErrorMessage = "{PropertyName} must be greater than or equal to VisibleFrom.";
 
         RuleFor(x => x.Status)
             .IsInEnum();
@@ -66,6 +60,24 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
                         $"This dialog is locked to {nameof(DialogDto.IsApiOnly)}=true, as one or " +
                         $"more of the existing immutable transmissions do not have content.");
             });
+
+        RuleFor(x => x.DueAt)
+            .Must((_, dueAt, context) =>
+            {
+                var visibleFrom = GetVisibleFrom(context);
+                return visibleFrom is null || dueAt is null || dueAt >= visibleFrom;
+            })
+            .WithMessage(visibleFromErrorMessage)
+            .When(DialogHasVisibleFrom);
+
+        RuleFor(x => x.ExpiresAt)
+            .Must((_, expiresAt, context) =>
+            {
+                var visibleFrom = GetVisibleFrom(context);
+                return visibleFrom is null || expiresAt is null || expiresAt >= visibleFrom;
+            })
+            .WithMessage(visibleFromErrorMessage)
+            .When(DialogHasVisibleFrom);
 
         RuleForEach(x => x.Transmissions)
             .SetValidator(transmissionValidator);
@@ -123,4 +135,9 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .MaximumLength(Constants.DefaultMaxUriLength)
             .When(x => x.PrecedingProcess is not null);
     }
+    private static bool DialogHasVisibleFrom<T>(T _, IValidationContext context) =>
+        GetVisibleFrom(context).HasValue;
+
+    private static DateTimeOffset? GetVisibleFrom(IValidationContext context) =>
+        UpdateDialogDataLoader.GetPreloadedData(context)?.VisibleFrom;
 }

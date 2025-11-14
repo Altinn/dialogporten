@@ -32,8 +32,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
             .When(x => x.DueAt.HasValue, ApplyConditionTo.CurrentValidator);
 
-        const string visibleFromErrorMessage = "{PropertyName} must be greater than or equal to VisibleFrom.";
-
         RuleFor(x => x.Status)
             .IsInEnum();
 
@@ -61,6 +59,7 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
                         $"more of the existing immutable transmissions do not have content.");
             });
 
+        const string visibleFromErrorMessage = "{PropertyName} must be greater than or equal to VisibleFrom.";
         RuleFor(x => x.DueAt)
             .Must((_, dueAt, context) =>
             {

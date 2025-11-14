@@ -338,6 +338,12 @@
       "V1AccessManagementQueriesGetParties_AuthorizedParty": {
         "additionalProperties": false,
         "properties": {
+          "dateOfBirth": {
+            "description": "The date of birth of the party, if a person.",
+            "example": "1977-12-26",
+            "nullable": true,
+            "type": "string"
+          },
           "hasKeyRole": {
             "description": "Whether the authenticated user has a key role in the party.\n            \nRead more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#n\u00F8kkelroller",
             "type": "boolean"

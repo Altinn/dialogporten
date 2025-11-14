@@ -31,6 +31,12 @@ public sealed class AuthorizedPartyDto
     public string Name { get; init; } = null!;
 
     /// <summary>
+    /// The date of birth of the party, if a person.
+    /// </summary>
+    /// <example>1977-12-26</example>
+    public string? DateOfBirth { get; init; }
+
+    /// <summary>
     /// The type of the party, either "Organization" or "Person".
     /// </summary>
     /// <example>Organization</example>

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.89.5](https://github.com/Altinn/dialogporten/compare/v1.89.4...v1.89.5) (2025-11-13)
+
+
+### Bug Fixes
+
+* **graphql:** keep default value if orderBy input is not provided on search ([#3000](https://github.com/Altinn/dialogporten/issues/3000)) ([1be3d02](https://github.com/Altinn/dialogporten/commit/1be3d020055637c1f08ebc0fadff1e1ee9489e10))
+* **infra:** ensure index tuning is enabled if set to true ([#2962](https://github.com/Altinn/dialogporten/issues/2962)) ([76055fe](https://github.com/Altinn/dialogporten/commit/76055fe74f23603418267ec44e25746a75d45c92))
+* **webapi:** prevent 500 error when removing lists via PATCH ([#3001](https://github.com/Altinn/dialogporten/issues/3001)) ([0e30f65](https://github.com/Altinn/dialogporten/commit/0e30f65adc7612b5bcba529b96d74082295f1792))
+
+
+### Miscellaneous Chores
+
+* **ci:** update azure cli to 2.79.0 ([#2998](https://github.com/Altinn/dialogporten/issues/2998)) ([801b39d](https://github.com/Altinn/dialogporten/commit/801b39d0c08fd3c0e0e496296be13a855197cef1))
+
 ## [1.89.4](https://github.com/Altinn/dialogporten/compare/v1.89.3...v1.89.4) (2025-11-12)
 
 

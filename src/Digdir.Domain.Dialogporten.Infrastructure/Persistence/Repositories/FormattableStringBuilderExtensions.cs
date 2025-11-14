@@ -104,19 +104,19 @@ internal static class PostgresFormattableStringBuilderExtensions
         orderPart.Direction switch
         {
             OrderDirection.Asc when orderPart.Type.IsNullableType() && orderPart.Value is not null
-                => builder.Append($""" {orderPart.Key} IS NULL OR "{orderPart.Key}" > '{orderPart.Value}'"""),
+                => builder.Append((string)$""" "{orderPart.Key}" IS NULL OR "{orderPart.Key}" > """).Append($"{orderPart.Value}"),
             OrderDirection.Desc when orderPart.Type.IsNullableType() && orderPart.Value is null
-                => builder.Append($""" {orderPart.Key} IS NOT NULL"""),
+                => builder.Append((string)$""" "{orderPart.Key}" IS NOT NULL"""),
 
-            OrderDirection.Asc => builder.Append($""" {orderPart.Key} > '{orderPart.Value}'"""),
-            OrderDirection.Desc => builder.Append($""" {orderPart.Key} < '{orderPart.Value}'"""),
+            OrderDirection.Asc => builder.Append((string)$""" "{orderPart.Key}" > """).Append($"{orderPart.Value}"),
+            OrderDirection.Desc => builder.Append((string)$""" "{orderPart.Key}" < """).Append($"{orderPart.Value}"),
             _ => throw new InvalidOperationException()
         };
 
     private static PostgresFormattableStringBuilder CreateEqualsPart(this PostgresFormattableStringBuilder builder, OrderPart x) =>
         x.Value is not null
-            ? builder.Append($""" {x.Key} = '{x.Value}'""")
-            : builder.Append($""" {x.Key} IS NULL""");
+            ? builder.Append((string)$""" "{x.Key}" = """).Append($"{x.Value}")
+            : builder.Append((string)$""" "{x.Key}" IS NULL""");
 
     private sealed record OrderPart(OrderDirection Direction, Type Type, string Key, object? Value);
 

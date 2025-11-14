@@ -285,17 +285,17 @@ export default function () {
 
     describe('List with process', () => {
         // Arrange
-        let processToSeachFor = "urn:test:listsearch:1";
+        let processToSearchFor = "urn:test:listsearch:1";
         let dialogIds = createDialogs(10, (dialog, index) => {
             setProcess(dialog, "urn:test:listsearch:" + (index + 1));
         });
 
         // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&process=' + processToSeachFor);
+        let r = getSO('dialogs/' + defaultFilter + '&process=' + processToSearchFor);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-        expect(r.json().items[0], 'process').to.have.property("process").that.equals(processToSeachFor);
+        expect(r.json().items[0], 'process').to.have.property("process").that.equals(processToSearchFor);
 
         // Clean up
         dialogIds.forEach((d) => {

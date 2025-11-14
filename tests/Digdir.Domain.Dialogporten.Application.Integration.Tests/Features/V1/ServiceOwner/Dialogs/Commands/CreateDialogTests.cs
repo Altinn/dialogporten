@@ -95,7 +95,11 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Dto.Party = party;
             })
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.Id.Should().Be(expectedDialogId));
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Id.Should().Be(expectedDialogId);
+                x.Party.Should().Be(party);
+            });
     }
 
     [Fact]

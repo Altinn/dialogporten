@@ -108,12 +108,12 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             // We currently do not have any support in the Register API to resolve the name of self-identified users,
             // so we need to get this from the request context, which means this will ONLY work in end-user contexts
             // where there is a end-user token available, ie. not in service owner contexts (using ?EndUserId=...) or
-            // service contexts
+            // service contexts.
 
             var authorizedPartiesResultDto = new AuthorizedPartiesResultDto
             {
-                PartyUuid = _user.GetPrincipal().TryGetPartyUuid(out var uuid) ? uuid : Guid.Empty,
-                PartyId = _user.GetPrincipal().TryGetPartyId(out var partyId) ? partyId : 0,
+                PartyUuid = _user.GetPrincipal().TryGetPartyUuid(out var uuid) ? uuid : throw new UnreachableException("Expected party UUID to be present"),
+                PartyId = _user.GetPrincipal().TryGetPartyId(out var partyId) ? partyId : throw new UnreachableException("Expected party ID to be present"),
                 Name = authorizedPartiesRequest.Value,
                 OrganizationNumber = "",
                 Type = AuthorizedPartiesHelper.PartyTypeSelfIdentified,

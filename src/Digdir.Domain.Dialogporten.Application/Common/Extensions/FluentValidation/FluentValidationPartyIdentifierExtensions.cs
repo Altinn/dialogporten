@@ -23,7 +23,7 @@ public static class FluentValidationPartyIdentifierExtensions
             .WithMessage(
                 $"'{{PropertyName}}' must be on format '{NorwegianOrganizationIdentifier.PrefixWithSeparator}{{norwegian org-nr}}', " +
                 $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}', or " +
-                $"'{AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{username}}'" +
+                $"'{AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{username}}' " +
 
                 // Disabled for now, as we do not fully support these user types in Altinn yet
                 //$"'{IdportenSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{e-mail}}' or " +

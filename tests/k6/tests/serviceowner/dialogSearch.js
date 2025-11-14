@@ -285,8 +285,10 @@ export default function () {
 
     describe('List with process', () => {
         // Arrange
-        let processToSeachFor = "urn:test:process:1";
-        let dialogIds = createDialogs(10);
+        let processToSeachFor = "urn:test:listsearch:1";
+        let dialogIds = createDialogs(10, (dialog, index) => {
+            setProcess(dialog, "urn:test:listsearch:" + (index + 1));
+        });
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&process=' + processToSeachFor);
@@ -350,7 +352,6 @@ function createDialogs(count, modify) {
     for (let i = 0; i < count; i++) {
         let d = dialogToInsert();
         setTitle(d, "e2e-test-dialog #" + (i + 1), "nn_NO");
-        setProcess(d, "urn:test:process:" + (i + 1));
         if (modify) {
             modify(d, i);
         }

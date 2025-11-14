@@ -52,7 +52,6 @@ public sealed class PatchDialogsController : ControllerBase
     /// <response code="412">The supplied Revision does not match the current Revision of the dialog</response>
     /// <response code="422">Domain error occurred. See problem details for a list of errors.</response>
     [HttpPatch("{dialogId}")]
-
     [OpenApiOperation("V1ServiceOwnerDialogsPatchDialog")]
     [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -88,6 +87,8 @@ public sealed class PatchDialogsController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        InitializeListProperties(updateDialogDto);
+
         var command = new UpdateDialogCommand
         {
             Id = dialogId,
@@ -110,5 +111,15 @@ public sealed class PatchDialogsController : ControllerBase
             domainError => UnprocessableEntity(HttpContext.GetResponseOrDefault(StatusCodes.Status422UnprocessableEntity, domainError.ToValidationResults())),
             concurrencyError => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status412PreconditionFailed)) { StatusCode = StatusCodes.Status412PreconditionFailed }
         );
+    }
+
+    private static void InitializeListProperties(UpdateDialogDto dto)
+    {
+        dto.SearchTags ??= [];
+        dto.Attachments ??= [];
+        dto.Transmissions ??= [];
+        dto.GuiActions ??= [];
+        dto.ApiActions ??= [];
+        dto.Activities ??= [];
     }
 }

@@ -6,6 +6,7 @@ public class AuthorizedPartyBase
     public Guid PartyUuid { get; init; }
     public int PartyId { get; init; }
     public string Name { get; init; } = null!;
+    public string? DateOfBirth { get; init; }
     public string PartyType { get; init; } = null!;
     public bool IsDeleted { get; init; }
     public bool HasKeyRole { get; init; }

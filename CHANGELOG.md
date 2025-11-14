@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.89.5](https://github.com/Altinn/dialogporten/compare/v1.89.4...v1.89.5) (2025-11-13)
+
+
+### Bug Fixes
+
+* **graphql:** keep default value if orderBy input is not provided on search ([#3000](https://github.com/Altinn/dialogporten/issues/3000)) ([1be3d02](https://github.com/Altinn/dialogporten/commit/1be3d020055637c1f08ebc0fadff1e1ee9489e10))
+* **infra:** ensure index tuning is enabled if set to true ([#2962](https://github.com/Altinn/dialogporten/issues/2962)) ([76055fe](https://github.com/Altinn/dialogporten/commit/76055fe74f23603418267ec44e25746a75d45c92))
+* **webapi:** prevent 500 error when removing lists via PATCH ([#3001](https://github.com/Altinn/dialogporten/issues/3001)) ([0e30f65](https://github.com/Altinn/dialogporten/commit/0e30f65adc7612b5bcba529b96d74082295f1792))
+
+
+### Miscellaneous Chores
+
+* **ci:** update azure cli to 2.79.0 ([#2998](https://github.com/Altinn/dialogporten/issues/2998)) ([801b39d](https://github.com/Altinn/dialogporten/commit/801b39d0c08fd3c0e0e496296be13a855197cef1))
+
+## [1.89.4](https://github.com/Altinn/dialogporten/compare/v1.89.3...v1.89.4) (2025-11-12)
+
+
+### Bug Fixes
+
+* **ci:** pin migration docker image dotnet-ef tool version 9.0.10 ([#2995](https://github.com/Altinn/dialogporten/issues/2995)) ([24b6e14](https://github.com/Altinn/dialogporten/commit/24b6e141776281a8855c395a22fa64ab33ae8ec6))
+
+## [1.89.3](https://github.com/Altinn/dialogporten/compare/v1.89.2...v1.89.3) (2025-11-12)
+
+
+### Miscellaneous Chores
+
+* **app:** Improve search performance for end user search ([#2948](https://github.com/Altinn/dialogporten/issues/2948)) ([bf1c64e](https://github.com/Altinn/dialogporten/commit/bf1c64e62278778c85f48e106b631bdd8ed30c2f))
+* **deps:** update dependency uuidnext to 4.2.2 ([#2980](https://github.com/Altinn/dialogporten/issues/2980)) ([15c7e00](https://github.com/Altinn/dialogporten/commit/15c7e007fe8895831b59a2139a2ad86fcce26279))
+* **deps:** update dotnet monorepo ([#2991](https://github.com/Altinn/dialogporten/issues/2991)) ([06dd57c](https://github.com/Altinn/dialogporten/commit/06dd57ca09801bc078275bc77c6f90b5370e30a2))
+* **deps:** update prom/prometheus docker tag to v3.7.3 ([#2981](https://github.com/Altinn/dialogporten/issues/2981)) ([78ffcab](https://github.com/Altinn/dialogporten/commit/78ffcab8d2904e607db2582acb37dab638bafe03))
+
 ## [1.89.2](https://github.com/Altinn/dialogporten/compare/v1.89.1...v1.89.2) (2025-11-10)
 
 

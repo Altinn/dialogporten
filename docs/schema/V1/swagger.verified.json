@@ -5518,6 +5518,15 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetDialogSystemLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
@@ -5571,15 +5580,6 @@
             "format": "guid",
             "nullable": true,
             "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerEndUserContextCommandsBulkSetSystenLabels_BulkSetDialogSystemLabelsRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "dto": {
-            "$ref": "#/components/schemas/V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
           }
         },
         "type": "object"
@@ -8876,7 +8876,7 @@
     "/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset": {
       "post": {
         "description": "Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.",
-        "operationId": "V1ServiceOwnerEndUserContextCommandsBulkSetSystenLabels_BulkSetDialogSystemLabels",
+        "operationId": "V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetDialogSystemLabels",
         "parameters": [
           {
             "in": "query",

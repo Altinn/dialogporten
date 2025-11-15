@@ -387,7 +387,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
-        Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsBulkSetSystenLabelsBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
+        Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>

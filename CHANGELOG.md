@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.90.0](https://github.com/Altinn/dialogporten/compare/v1.89.5...v1.90.0) (2025-11-15)
+
+
+### Features
+
+* **app:** add date of birth to authorized parties ([#3003](https://github.com/Altinn/dialogporten/issues/3003)) ([f0165f9](https://github.com/Altinn/dialogporten/commit/f0165f97082434554ebc1331c59a596747b2e382))
+
+
+### Bug Fixes
+
+* fix string formatting for order conditions ([#3007](https://github.com/Altinn/dialogporten/issues/3007)) ([1bce1bd](https://github.com/Altinn/dialogporten/commit/1bce1bdb6d97aaed2fe40f76172c9adae840016c))
+
+
+### Miscellaneous Chores
+
+* fix open api spec namespace typo ([#3002](https://github.com/Altinn/dialogporten/issues/3002)) ([a1bbab1](https://github.com/Altinn/dialogporten/commit/a1bbab192346761cb75610af918ad0c1ec0b0e11))
+* **tests:** improve test isolation when failing ([#3006](https://github.com/Altinn/dialogporten/issues/3006)) ([5b761c1](https://github.com/Altinn/dialogporten/commit/5b761c1846818c98216d6803db95ed207acc8d48))
+* **webapi:** Validate Accept header on well-known and parties endpoints ([#3009](https://github.com/Altinn/dialogporten/issues/3009)) ([b6a981c](https://github.com/Altinn/dialogporten/commit/b6a981c65ab22be6274701b46a3db84faaebfb0c))
+
 ## [1.89.5](https://github.com/Altinn/dialogporten/compare/v1.89.4...v1.89.5) (2025-11-13)
 
 

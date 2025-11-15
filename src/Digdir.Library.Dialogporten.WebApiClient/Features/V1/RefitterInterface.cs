@@ -3301,13 +3301,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string ExternalReference { get; set; }
 
         /// <summary>
-        /// The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be
-        /// <br/>immediately available.
-        /// </summary>
-        [JsonPropertyName("visibleFrom")]
-        public System.DateTimeOffset? VisibleFrom { get; set; }
-
-        /// <summary>
         /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
         /// </summary>
         [JsonPropertyName("dueAt")]

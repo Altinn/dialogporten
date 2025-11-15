@@ -220,12 +220,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             _domainContext.AddError(nameof(UpdateDialogCommand.Dto.DueAt), errorMessage + " (Or null)");
         }
 
-        if (!_db.MustWhenModified(dialog,
-            propertyExpression: x => x.VisibleFrom,
-            predicate: x => x > DateTimeOffset.UtcNow))
-        {
-            _domainContext.AddError(nameof(UpdateDialogCommand.Dto.VisibleFrom), errorMessage);
-        }
     }
 
     private void AppendActivity(DialogEntity dialog, UpdateDialogDto dto)

@@ -48,9 +48,28 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
-        const string apiUrl = "register/api/v1/parties/nameslookup";
+        const string apiUrl = "register/api/v1/dialogporten/parties/query";
 
-        if (!TryParse(externalIdWithPrefix, out var nameLookup))
+        if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
+        {
+            return null;
+        }
+
+        // We do not have any information about system users, self-identified users or feide users in the party name registry
+        switch (partyIdentifier)
+        {
+            case AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier:
+                return partyIdentifier.Id;
+            case FeideUserIdentifier:
+                return $"Feide User ({partyIdentifier.Id[..6]})";
+            case SystemUserIdentifier:
+                return "System User"; // TODO! Replace with a lookup to Altinn System registry
+            default:
+                // Handle below
+                break;
+        }
+
+        if (!TryGetLookupDto(partyIdentifier, out var nameLookup))
         {
             return null;
         }
@@ -61,7 +80,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             serializerOptions: SerializerOptions,
             cancellationToken: cancellationToken);
 
-        var name = nameLookupResult.PartyNames.FirstOrDefault()?.Name;
+        var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
         if (name is null)
         {
             // This is PII, but this is an error condition (probably due to missing Altinn profile)
@@ -71,18 +90,13 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return name;
     }
 
-    private static bool TryParse(string externalIdWithPrefix, [NotNullWhen(true)] out NameLookup? nameLookup)
+    private static bool TryGetLookupDto(IPartyIdentifier partyIdentifier, [NotNullWhen(true)] out NameLookup? nameLookup)
     {
-        if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
-        {
-            nameLookup = null;
-            return false;
-        }
 
         nameLookup = partyIdentifier switch
         {
-            NorwegianPersonIdentifier personIdentifier => new() { Parties = [new() { Ssn = personIdentifier.Id }] },
-            NorwegianOrganizationIdentifier organizationIdentifier => new() { Parties = [new() { OrgNo = organizationIdentifier.Id }] },
+            NorwegianPersonIdentifier personIdentifier => new() { Data = [personIdentifier.FullId] },
+            NorwegianOrganizationIdentifier organizationIdentifier => new() { Data = [organizationIdentifier.FullId] },
             _ => null
         };
 
@@ -91,19 +105,17 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private sealed class NameLookup
     {
-        public List<NameLookupParty> Parties { get; set; } = null!;
+        public List<string> Data { get; set; } = null!;
     }
 
     private sealed class NameLookupResult
     {
-        public List<NameLookupParty> PartyNames { get; set; } = null!;
+        public List<NameLookupEntry> Data { get; set; } = null!;
     }
 
-    private sealed class NameLookupParty
+    private sealed class NameLookupEntry
     {
-        public string Ssn { get; set; } = null!;
-        public string OrgNo { get; set; } = null!;
-        public string? Name { get; set; }
+        public string? DisplayName { get; set; }
     }
 }
 

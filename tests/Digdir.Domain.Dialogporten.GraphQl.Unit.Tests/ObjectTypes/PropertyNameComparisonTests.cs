@@ -25,20 +25,28 @@ namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.ObjectTypes;
 public class PropertyNameComparisonTests
 {
     [Theory, ClassData(typeof(PropertyNameComparisonTestsData))]
-    public void GraphQl_Contract_Objects_And_Enums_Should_Match_EndUser(Type dtoType, Type gqlType, Func<string, bool>? filter = null)
+    public void GraphQl_Contract_Objects_And_Enums_Should_Match_EndUser_REST_API(Type dtoType, Type gqlType, Func<string, bool>? filter = null)
     {
         var dtoProperties = GetNames(dtoType)
             .Where(filter ?? (_ => true))
             .ToList();
 
-        var gqlProperties = GetNames(gqlType);
+        var gqlProperties = GetNames(gqlType)
+            .ToList();
 
-        var missingProperties = dtoProperties
+        var missingFromDto = gqlProperties
+            .Except(dtoProperties, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var missingFromGql = dtoProperties
             .Except(gqlProperties, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        Assert.True(missingProperties.Count == 0,
-            $"Properties missing in graphql {gqlType.Name}: {string.Join(", ", missingProperties)}");
+        Assert.True(missingFromDto.Count == 0,
+            $"Properties missing in REST {dtoType.Name}: {string.Join(", ", missingFromDto)}");
+
+        Assert.True(missingFromGql.Count == 0,
+            $"Properties missing in graphql {gqlType.Name}: {string.Join(", ", missingFromGql)}");
     }
 
     private sealed class PropertyNameComparisonTestsData : TheoryData<Type, Type, Func<string, bool>?>

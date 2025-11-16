@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -29,12 +30,14 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
     private readonly IMapper _mapper;
     private readonly IDialogDbContext _dbContext;
     private readonly IAltinnAuthorization _altinnAuthorization;
+    private readonly IClock _clock;
 
-    public GetTransmissionQueryHandler(IMapper mapper, IDialogDbContext dbContext, IAltinnAuthorization altinnAuthorization)
+    public GetTransmissionQueryHandler(IMapper mapper, IDialogDbContext dbContext, IAltinnAuthorization altinnAuthorization, IClock clock)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
 
     public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
@@ -96,7 +99,11 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
 
         dto.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
 
-        if (dto.IsAuthorized) return dto;
+        if (dto.IsAuthorized)
+        {
+            ReplaceExpiredAttachmentUrls(dto);
+            return dto;
+        }
 
         var urls = dto.Attachments.SelectMany(a => a.Urls).ToList();
         foreach (var url in urls)
@@ -106,4 +113,18 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
 
         return dto;
     }
+
+    private void ReplaceExpiredAttachmentUrls(TransmissionDto dto)
+    {
+        var expiredTransmissionAttachmentUrls = dto
+            .Attachments
+            .Where(x => x.ExpiresAt < _clock.UtcNowOffset)
+            .SelectMany(x => x.Urls);
+
+        foreach (var url in expiredTransmissionAttachmentUrls)
+        {
+            url.Url = Constants.ExpiredUri;
+        }
+    }
 }
+

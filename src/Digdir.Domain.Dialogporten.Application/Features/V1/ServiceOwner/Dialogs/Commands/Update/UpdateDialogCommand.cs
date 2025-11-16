@@ -202,6 +202,44 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             ActorType.Values.ServiceOwner);
     }
 
+    private void ValidateTimeFields(DialogTransmissionAttachment attachment)
+    {
+        if (!_db.MustWhenAdded(attachment,
+                propertyExpression: x => x.ExpiresAt,
+                predicate: x => x > DateTimeOffset.UtcNow || x == null))
+        {
+            var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id}";
+
+            _domainContext.AddError($"{nameof(UpdateDialogDto.Transmissions)}." +
+                                    $"{nameof(UpdateDialogDto.Attachments)}." +
+                                    $"{nameof(AttachmentDto.ExpiresAt)}",
+                $"Must be in future or null, got '{attachment.ExpiresAt}'.{idString}");
+        }
+    }
+
+    private void ValidateTimeFields(DialogAttachment attachment)
+    {
+        if (!_db.MustWhenModified(attachment,
+                propertyExpression: x => x.ExpiresAt,
+                predicate: x => x > DateTimeOffset.UtcNow || x == null))
+        {
+            _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
+                                    $"{nameof(AttachmentDto.ExpiresAt)}",
+                $"Must be in future, current value, or null. (Id: {attachment.Id}");
+            return;
+        }
+
+        if (!_db.MustWhenAdded(attachment,
+                propertyExpression: x => x.ExpiresAt,
+                predicate: x => x > DateTimeOffset.UtcNow || x == null))
+        {
+            var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id}";
+            _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
+                                    $"{nameof(AttachmentDto.ExpiresAt)}",
+                $"Must be in future or null, got '{attachment.ExpiresAt}'.{idString}");
+        }
+    }
+
     private void ValidateTimeFields(DialogEntity dialog)
     {
         const string errorMessage = "Must be in future or current value.";
@@ -301,10 +339,12 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             .Count(x => x.TypeId is not
                 (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
-        var newAttachmentIds = newDialogTransmissions
+        var newAttachments = newDialogTransmissions
             .SelectMany(x => x.Attachments)
-            .Select(x => x.Id)
             .ToList();
+
+        var newAttachmentIds = newAttachments
+            .Select(x => x.Id);
 
         var existingAttachmentIds = _db.DialogTransmissions
             .Local
@@ -327,6 +367,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         dialog.Transmissions.AddRange(newDialogTransmissions);
         // Tell ef explicitly to add transmissions as new to the database.
         _db.DialogTransmissions.AddRange(newDialogTransmissions);
+
+        foreach (var attachment in newAttachments)
+        {
+            ValidateTimeFields(attachment);
+        }
     }
 
     private IEnumerable<DialogGuiAction> CreateGuiActions(IEnumerable<GuiActionDto> creatables)
@@ -370,6 +415,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             var attachment = _mapper.Map<DialogAttachment>(attachmentDto);
             attachment.Urls = _mapper.Map<List<AttachmentUrl>>(attachmentDto.Urls);
             _db.DialogAttachments.Add(attachment);
+            ValidateTimeFields(attachment);
             return attachment;
         });
     }
@@ -379,6 +425,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         foreach (var updateSet in updateSets)
         {
             _mapper.Map(updateSet.Source, updateSet.Destination);
+            ValidateTimeFields(updateSet.Destination);
             updateSet.Destination.Urls
                 .Merge(updateSet.Source.Urls,
                     destinationKeySelector: x => x.Id,

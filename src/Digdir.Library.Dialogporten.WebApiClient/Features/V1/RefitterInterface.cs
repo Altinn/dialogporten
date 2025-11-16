@@ -2706,6 +2706,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("urls")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogAttachmentUrl> Urls { get; set; }
 
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -2868,6 +2874,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("urls")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogTransmissionAttachmentUrl> Urls { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -3515,6 +3527,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("urls")]
         public ICollection<V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl> Urls { get; set; }
 
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3667,6 +3685,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("urls")]
         public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachmentUrl> Urls { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -4335,6 +4359,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("urls")]
         public ICollection<V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl> Urls { get; set; }
 
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -4480,6 +4510,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("urls")]
         public ICollection<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl> Urls { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 

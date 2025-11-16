@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
@@ -9,6 +10,7 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
@@ -144,6 +146,18 @@ public static class IFlowStepExtensions
         step.Select(x =>
         {
             step.Context.Application.ConfigureServices(configure);
+            return x;
+        });
+
+    public static IFlowStep<T> SetApplicationClockSkew<T>(this IFlowStep<T> step, TimeSpan skew) =>
+        step.Select(x =>
+        {
+            step.Context.Application.ConfigureServices(x =>
+            {
+                x.RemoveAll<IClock>();
+                x.AddSingleton<IClock>(new SkewedClock(skew));
+            });
+
             return x;
         });
 

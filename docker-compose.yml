@@ -5,7 +5,7 @@ include:
 
 services:
   dialogporten-webapi-ingress:
-    image: nginx:1.29.2
+    image: nginx:1.29.3
     ports:
       - "7214:80"
     volumes:
@@ -43,7 +43,7 @@ services:
       - ./.aspnet/https:/https
 
   dialogporten-graphql-ingress:
-    image: nginx:1.29.2
+    image: nginx:1.29.3
     ports:
       - "7215:80"
     volumes:

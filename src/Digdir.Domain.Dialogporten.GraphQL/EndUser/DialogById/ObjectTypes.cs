@@ -76,9 +76,6 @@ public sealed class Dialog
     [GraphQLDescription("Arbitrary string with a service-specific reference to an external system or service. Refer to the service-specific documentation provided by the service owner for details (if in use).")]
     public string? ExternalReference { get; set; }
 
-    [GraphQLDescription("The date and time when the dialog becomes visible to the end user.")]
-    public DateTimeOffset? VisibleFrom { get; set; }
-
     [GraphQLDescription("The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available. Example: 2022-12-31T23:59:59Z")]
     public DateTimeOffset? DueAt { get; set; }
 

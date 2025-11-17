@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 
-namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystenLabels;
+namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 
 public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkSetDialogSystemLabelsRequest>
 {

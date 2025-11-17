@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.90.0](https://github.com/Altinn/dialogporten/compare/v1.89.5...v1.90.0) (2025-11-17)
+
+
+### Features
+
+* **app:** add date of birth to authorized parties ([#3003](https://github.com/Altinn/dialogporten/issues/3003)) ([f0165f9](https://github.com/Altinn/dialogporten/commit/f0165f97082434554ebc1331c59a596747b2e382))
+
+
+### Bug Fixes
+
+* fix string formatting for order conditions ([#3007](https://github.com/Altinn/dialogporten/issues/3007)) ([1bce1bd](https://github.com/Altinn/dialogporten/commit/1bce1bdb6d97aaed2fe40f76172c9adae840016c))
+
+
+### Miscellaneous Chores
+
+* **deps:** update grafana/loki docker tag to v3.5.7 ([#3011](https://github.com/Altinn/dialogporten/issues/3011)) ([d4d6440](https://github.com/Altinn/dialogporten/commit/d4d6440984e7901fa82a5ad53eca553f7ffdaaf4))
+* **deps:** update nginx docker tag to v1.29.3 ([#3012](https://github.com/Altinn/dialogporten/issues/3012)) ([61d276f](https://github.com/Altinn/dialogporten/commit/61d276fb32ccd5dfc7653f0ddf4da7b1e6731399))
+* fix open api spec namespace typo ([#3002](https://github.com/Altinn/dialogporten/issues/3002)) ([a1bbab1](https://github.com/Altinn/dialogporten/commit/a1bbab192346761cb75610af918ad0c1ec0b0e11))
+* **graphql:** remove VisibleFrom from dialog dto ([#3010](https://github.com/Altinn/dialogporten/issues/3010)) ([65e8f81](https://github.com/Altinn/dialogporten/commit/65e8f81c7b623e3a6986ce89ef263a80f113e04a))
+* **tests:** improve test isolation when failing ([#3006](https://github.com/Altinn/dialogporten/issues/3006)) ([5b761c1](https://github.com/Altinn/dialogporten/commit/5b761c1846818c98216d6803db95ed207acc8d48))
+* **webapi:** Validate Accept header on well-known and parties endpoints ([#3009](https://github.com/Altinn/dialogporten/issues/3009)) ([b6a981c](https://github.com/Altinn/dialogporten/commit/b6a981c65ab22be6274701b46a3db84faaebfb0c))
+
 ## [1.89.5](https://github.com/Altinn/dialogporten/compare/v1.89.4...v1.89.5) (2025-11-13)
 
 

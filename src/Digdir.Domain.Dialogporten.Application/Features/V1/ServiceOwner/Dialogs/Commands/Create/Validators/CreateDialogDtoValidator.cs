@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -16,14 +17,15 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
         IValidator<ContentDto?> contentValidator,
-        IValidator<DialogServiceOwnerContextDto?> serviceOwnerContextValidator)
+        IValidator<DialogServiceOwnerContextDto?> serviceOwnerContextValidator,
+        IClock clock)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
             .UuidV7TimestampIsInPast();
 
         RuleFor(x => x.CreatedAt)
-            .IsInPast();
+            .IsInPast(clock);
 
         RuleFor(x => x.CreatedAt)
             .NotEmpty()
@@ -31,7 +33,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .When(x => x.UpdatedAt.HasValue && x.UpdatedAt != default(DateTimeOffset));
 
         RuleFor(x => x.UpdatedAt)
-            .IsInPast()
+            .IsInPast(clock)
             .GreaterThanOrEqualTo(x => x.CreatedAt)
             .WithMessage($"'{{PropertyName}}' must be greater than or equal to '{nameof(CreateDialogDto.CreatedAt)}'.")
             .When(x => x.CreatedAt.HasValue && x.CreatedAt != default(DateTimeOffset) &&
@@ -63,7 +65,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .MaximumLength(Constants.DefaultMaxStringLength);
 
         RuleFor(x => x.ExpiresAt)
-            .IsInFuture()
+            .IsInFuture(clock)
             .GreaterThanOrEqualTo(x => x.DueAt)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
             .When(x => x.DueAt.HasValue, ApplyConditionTo.CurrentValidator)
@@ -72,13 +74,13 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
 
         RuleFor(x => x.DueAt)
-            .IsInFuture()
+            .IsInFuture(clock)
             .GreaterThanOrEqualTo(x => x.VisibleFrom)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
             .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
 
         RuleFor(x => x.VisibleFrom)
-            .IsInFuture();
+            .IsInFuture(clock);
 
         RuleFor(x => x.Status)
             .IsInEnum()

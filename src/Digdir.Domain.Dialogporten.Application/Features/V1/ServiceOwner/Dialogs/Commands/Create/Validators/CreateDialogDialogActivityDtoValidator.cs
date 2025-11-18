@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -11,14 +12,15 @@ internal sealed class CreateDialogDialogActivityDtoValidator : AbstractValidator
 {
     public CreateDialogDialogActivityDtoValidator(
         IValidator<IEnumerable<LocalizationDto>> localizationsValidator,
-        IValidator<ActorDto> actorValidator)
+        IValidator<ActorDto> actorValidator,
+        IClock clock)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
             .UuidV7TimestampIsInPast();
 
         RuleFor(x => x.CreatedAt)
-            .IsInPast();
+            .IsInPast(clock);
 
         RuleFor(x => x.ExtendedType)
             .IsValidUri()

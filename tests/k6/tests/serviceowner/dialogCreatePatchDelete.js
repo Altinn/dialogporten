@@ -60,7 +60,8 @@ export default function () {
         expect(r.json(), 'dialog').to.have.property("createdAt");
         expect(r.json().createdAt, 'createdAt').to.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{7}Z$/);
         expect(r.json(), 'dialog').to.have.property("updatedAt");
-        expect(r.json().updatedAt, 'updatedAt').to.equal(r.json().createdAt);
+        expect(r.json(), 'dialog').to.have.property("visibleFrom");
+        expect(r.json().updatedAt, 'updatedAt').to.equal(r.json().visibleFrom);
         expect(r.json(), 'dialog').to.have.property('revision');
 
         eTag = r.json()["revision"];

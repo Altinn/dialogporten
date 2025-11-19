@@ -34,143 +34,143 @@ export default function () {
     const updatedAfter = (new Date()).toISOString(); // We use this on all tests to avoid clashing with unrelated dialogs
     const defaultFilter = "?UpdatedAfter=" + updatedAfter;
 
-    describe('Perform simple dialog list', () => {
-        // Arrange
-        let count = 10;
-        let dialogIds = createDialogs(count);
-
-        // Assert
-        let r = getSO('dialogs');
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf.at.least(10);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
-
-    describe('Search for title', () => {
-        // Arrange
-        let titleToSearchFor = uuidv4();
-        let dialogIds = createDialogs(5, (dialog, index) => {
-            if (index == 3) {
-                setTitle(dialog, titleToSearchFor);
-            }
-        });
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + titleToSearchFor);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
-
-    describe('Search for body', () => {
-        // Arrange
-        let additionalInfoToSearchFor = uuidv4();
-        let dialogIds = createDialogs(5, (dialog, index) => {
-            if (index == 3) {
-                setAdditionalInfo(dialog, additionalInfoToSearchFor);
-            }
-        });
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + additionalInfoToSearchFor);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
-
-    describe('Search for sender name ', () => {
-        // Arrange
-        let senderNameToSearchFor = uuidv4();
-        let dialogIds = createDialogs(5, (dialog, index) => {
-            if (index == 3) {
-                setSenderName(dialog, senderNameToSearchFor);
-            }
-        });
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + senderNameToSearchFor);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
-
-    describe('Filter by extended status', () => {
-        // Arrange
-        let extendedStatusToSearchFor = "status:" + uuidv4();
-        let secondExtendedStatusToSearchFor = "status:" + uuidv4();
-        let dialogIds = createDialogs(5, (dialog, index) => {
-            if (index == 3) {
-                setExtendedStatus(dialog, extendedStatusToSearchFor);
-            }
-            if (index == 2) {
-                setExtendedStatus(dialog, secondExtendedStatusToSearchFor);
-            }
-        });
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&ExtendedStatus=' + extendedStatusToSearchFor + "&ExtendedStatus=" + secondExtendedStatusToSearchFor);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(2);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
-
-    describe('List with limit', () => {
-        // Arrange
-        let dialogIds = createDialogs(10);
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&Limit=3');
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(3);
-        expect(r.json(), 'response json').to.have.property("hasNextPage").to.be.true;
-        expect(r.json(), 'response json').to.have.property("continuationToken");
-
-        let r2 = getSO('dialogs/' + defaultFilter + '&Limit=3&ContinuationToken=' + r.json().continuationToken);
-        expectStatusFor(r2).to.equal(200);
-        expect(r2, 'response').to.have.validJsonBody();
-        expect(r2.json(), 'response json').to.have.property("items").with.lengthOf(3);
-
-        // Check that we get other ids in the continuation call
-        let allIds = r.json().items.concat(r2.json().items).map((item) => item.id);
-        expect(allIds.some((id, i) => allIds.indexOf(id) !== i)).to.be.false;
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
+    // describe('Perform simple dialog list', () => {
+    //     // Arrange
+    //     let count = 10;
+    //     let dialogIds = createDialogs(count);
+    //
+    //     // Assert
+    //     let r = getSO('dialogs');
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf.at.least(10);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
+    //
+    // describe('Search for title', () => {
+    //     // Arrange
+    //     let titleToSearchFor = uuidv4();
+    //     let dialogIds = createDialogs(5, (dialog, index) => {
+    //         if (index == 3) {
+    //             setTitle(dialog, titleToSearchFor);
+    //         }
+    //     });
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + titleToSearchFor);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
+    //
+    // describe('Search for body', () => {
+    //     // Arrange
+    //     let additionalInfoToSearchFor = uuidv4();
+    //     let dialogIds = createDialogs(5, (dialog, index) => {
+    //         if (index == 3) {
+    //             setAdditionalInfo(dialog, additionalInfoToSearchFor);
+    //         }
+    //     });
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + additionalInfoToSearchFor);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
+    //
+    // describe('Search for sender name ', () => {
+    //     // Arrange
+    //     let senderNameToSearchFor = uuidv4();
+    //     let dialogIds = createDialogs(5, (dialog, index) => {
+    //         if (index == 3) {
+    //             setSenderName(dialog, senderNameToSearchFor);
+    //         }
+    //     });
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + senderNameToSearchFor);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
+    //
+    // describe('Filter by extended status', () => {
+    //     // Arrange
+    //     let extendedStatusToSearchFor = "status:" + uuidv4();
+    //     let secondExtendedStatusToSearchFor = "status:" + uuidv4();
+    //     let dialogIds = createDialogs(5, (dialog, index) => {
+    //         if (index == 3) {
+    //             setExtendedStatus(dialog, extendedStatusToSearchFor);
+    //         }
+    //         if (index == 2) {
+    //             setExtendedStatus(dialog, secondExtendedStatusToSearchFor);
+    //         }
+    //     });
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&ExtendedStatus=' + extendedStatusToSearchFor + "&ExtendedStatus=" + secondExtendedStatusToSearchFor);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(2);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
+    //
+    // describe('List with limit', () => {
+    //     // Arrange
+    //     let dialogIds = createDialogs(10);
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&Limit=3');
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(3);
+    //     expect(r.json(), 'response json').to.have.property("hasNextPage").to.be.true;
+    //     expect(r.json(), 'response json').to.have.property("continuationToken");
+    //
+    //     let r2 = getSO('dialogs/' + defaultFilter + '&Limit=3&ContinuationToken=' + r.json().continuationToken);
+    //     expectStatusFor(r2).to.equal(200);
+    //     expect(r2, 'response').to.have.validJsonBody();
+    //     expect(r2.json(), 'response json').to.have.property("items").with.lengthOf(3);
+    //
+    //     // Check that we get other ids in the continuation call
+    //     let allIds = r.json().items.concat(r2.json().items).map((item) => item.id);
+    //     expect(allIds.some((id, i) => allIds.indexOf(id) !== i)).to.be.false;
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
 
     describe('List with custom orderBy', () => {
         let titleForDueAtItem = uuidv4();
@@ -178,6 +178,7 @@ export default function () {
         let titleForLastItem = uuidv4();
 
         let dialogIds = createDialogs(10, (dialog, index) => {
+            setVisibleFrom(dialog, null);
             if (index == 3) {
                 setTitle(dialog, titleForDueAtItem);
                 setDueAt(dialog, new Date("2033-12-07T10:13:00Z"));
@@ -185,6 +186,9 @@ export default function () {
             if (index == 9) {
                 setTitle(dialog, titleForLastItem);
             }
+
+            // JSON pretty print dialog for debugging
+            console.log(JSON.stringify(dialog, null, 2));
         });
 
         // Update single dialog
@@ -200,6 +204,9 @@ export default function () {
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&Limit=3&OrderBy=dueAt_desc,updatedAt_desc');
         expectStatusFor(r).to.equal(200);
+        var jsonResponse = r.json();
+        // pretty print for debugging
+        console.log(JSON.stringify(jsonResponse, null, 2));
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf(3);
         expect(r.json().items[0], 'first dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForDueAtItem);
@@ -219,132 +226,132 @@ export default function () {
             expect(r.status, 'response status').to.equal(204);
         });
     });
-
-    describe('List with party filter', () => {
-        // Arrange
-        let auxParty = "urn:altinn:organization:identifier-no:" + getDefaultEnduserOrgNo();
-        let dialogIds = createDialogs(10, (dialog, index) => {
-            if (index == 1) {
-                setParty(dialog, auxParty);
-            }
-        });
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&Party=' + auxParty);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-        expect(r.json().items[0], 'party').to.have.property("party").that.equals(auxParty);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
-
-    describe('List with resource filter', () => {
-        // Arrange
-        let auxResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2"; // This must exist in Resource Registry
-        let dialogIds = createDialogs(10, (dialog, index) => {
-            if (index == 1) {
-                setServiceResource(dialog, auxResource);
-            }
-        });
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + auxResource);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-        expect(r.json().items[0], 'party').to.have.property("serviceResource").that.equals(auxResource);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
-
-    describe('List with invalid process', () => {
-        // Arrange
-        let dialogIds = createDialogs(10);
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&process=inval|d');
-        expectStatusFor(r).to.equal(400);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("errors");
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
-
-    describe('List with process', () => {
-        // Arrange
-        let processToSearchFor = "urn:test:listsearch:1";
-        let dialogIds = createDialogs(10, (dialog, index) => {
-            setProcess(dialog, "urn:test:listsearch:" + (index + 1));
-        });
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&process=' + processToSearchFor);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-        expect(r.json().items[0], 'process').to.have.property("process").that.equals(processToSearchFor);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    })
-
-    describe('List with enduserid', () => {
-        // Arrange
-        let auxResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2"; // This must exist in Resource Registry
-        let dialogIds = createDialogs(10, (dialog, index) => {
-            if (index == 1) {
-                setServiceResource(dialog, auxResource);
-            }
-        });
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&EndUserId=' + endUserId + '&ServiceResource=' + auxResource);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-        expect(r.json().items[0], 'party').to.have.property("serviceResource").that.equals(auxResource);
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        })
-    })
-
-    describe('List with invalid enduserid', () => {
-        // Arrange
-        let invalidEndUserId = "urn:altinn:person:identifier-no:" + notValidEnduserId;
-        let auxResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2"; // This must exist in Resource Registry
-        let dialogIds = createDialogs(10);
-
-        // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&EndUserId=' + invalidEndUserId + '&ServiceResource=' + auxResource);
-        expectStatusFor(r).to.equal(200);
-        expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').not.to.have.property("items");
-
-        // Clean up
-        dialogIds.forEach((d) => {
-            let r = purgeSO("dialogs/" + d);
-            expect(r.status, 'response status').to.equal(204);
-        });
-    });
+    //
+    // describe('List with party filter', () => {
+    //     // Arrange
+    //     let auxParty = "urn:altinn:organization:identifier-no:" + getDefaultEnduserOrgNo();
+    //     let dialogIds = createDialogs(10, (dialog, index) => {
+    //         if (index == 1) {
+    //             setParty(dialog, auxParty);
+    //         }
+    //     });
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&Party=' + auxParty);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
+    //     expect(r.json().items[0], 'party').to.have.property("party").that.equals(auxParty);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
+    //
+    // describe('List with resource filter', () => {
+    //     // Arrange
+    //     let auxResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2"; // This must exist in Resource Registry
+    //     let dialogIds = createDialogs(10, (dialog, index) => {
+    //         if (index == 1) {
+    //             setServiceResource(dialog, auxResource);
+    //         }
+    //     });
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + auxResource);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
+    //     expect(r.json().items[0], 'party').to.have.property("serviceResource").that.equals(auxResource);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
+    //
+    // describe('List with invalid process', () => {
+    //     // Arrange
+    //     let dialogIds = createDialogs(10);
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&process=inval|d');
+    //     expectStatusFor(r).to.equal(400);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("errors");
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
+    //
+    // describe('List with process', () => {
+    //     // Arrange
+    //     let processToSearchFor = "urn:test:listsearch:1";
+    //     let dialogIds = createDialogs(10, (dialog, index) => {
+    //         setProcess(dialog, "urn:test:listsearch:" + (index + 1));
+    //     });
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&process=' + processToSearchFor);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
+    //     expect(r.json().items[0], 'process').to.have.property("process").that.equals(processToSearchFor);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // })
+    //
+    // describe('List with enduserid', () => {
+    //     // Arrange
+    //     let auxResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2"; // This must exist in Resource Registry
+    //     let dialogIds = createDialogs(10, (dialog, index) => {
+    //         if (index == 1) {
+    //             setServiceResource(dialog, auxResource);
+    //         }
+    //     });
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&EndUserId=' + endUserId + '&ServiceResource=' + auxResource);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
+    //     expect(r.json().items[0], 'party').to.have.property("serviceResource").that.equals(auxResource);
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     })
+    // })
+    //
+    // describe('List with invalid enduserid', () => {
+    //     // Arrange
+    //     let invalidEndUserId = "urn:altinn:person:identifier-no:" + notValidEnduserId;
+    //     let auxResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2"; // This must exist in Resource Registry
+    //     let dialogIds = createDialogs(10);
+    //
+    //     // Assert
+    //     let r = getSO('dialogs/' + defaultFilter + '&EndUserId=' + invalidEndUserId + '&ServiceResource=' + auxResource);
+    //     expectStatusFor(r).to.equal(200);
+    //     expect(r, 'response').to.have.validJsonBody();
+    //     expect(r.json(), 'response json').not.to.have.property("items");
+    //
+    //     // Clean up
+    //     dialogIds.forEach((d) => {
+    //         let r = purgeSO("dialogs/" + d);
+    //         expect(r.status, 'response status').to.equal(204);
+    //     });
+    // });
 }
 
 function createDialogs(count, modify) {

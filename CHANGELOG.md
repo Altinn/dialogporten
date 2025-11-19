@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.90.1](https://github.com/Altinn/dialogporten/compare/v1.90.0...v1.90.1) (2025-11-19)
+
+
+### Miscellaneous Chores
+
+* **app:** use IClock for future/past validation extensions ([#3015](https://github.com/Altinn/dialogporten/issues/3015)) ([6c162b0](https://github.com/Altinn/dialogporten/commit/6c162b0aa47bae22d7d8f014216895ae31644f3b))
+* **webapi:** temporary set request size limit to 20Mb ([#3014](https://github.com/Altinn/dialogporten/issues/3014)) ([6d4078b](https://github.com/Altinn/dialogporten/commit/6d4078be115065e27e58c6d923addfeec0309795))
+
 ## [1.90.0](https://github.com/Altinn/dialogporten/compare/v1.89.5...v1.90.0) (2025-11-17)
 
 

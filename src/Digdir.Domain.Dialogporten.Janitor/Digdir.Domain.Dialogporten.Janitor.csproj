@@ -8,19 +8,19 @@
     <ItemGroup>
         <PackageReference Include="Azure.Monitor.Query.Logs" Version="1.0.0" />
         <PackageReference Include="Cocona" Version="2.2.0"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.10" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.10" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.10" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.11" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.11" />
         <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0"/>
         <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0"/>
         <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.0.0"/>
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
         <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0"/>
         <PackageReference Include="Parquet.Net" Version="4.25.0"/>
-        <PackageReference Include="System.Text.Json" Version="9.0.10"/>
+        <PackageReference Include="System.Text.Json" Version="9.0.11"/>
     </ItemGroup>
 
     <ItemGroup>

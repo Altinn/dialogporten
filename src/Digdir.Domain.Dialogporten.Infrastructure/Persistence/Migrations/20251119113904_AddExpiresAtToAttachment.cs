@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddExipresAtToAttachment : Migration
+    public partial class AddExpiresAtToAttachment : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

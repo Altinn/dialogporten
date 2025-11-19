@@ -13,8 +13,8 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20251115193018_AddExipresAtToAttachment")]
-    partial class AddExipresAtToAttachment
+    [Migration("20251119113904_AddExpiresAtToAttachment")]
+    partial class AddExpiresAtToAttachment
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

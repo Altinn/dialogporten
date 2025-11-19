@@ -208,7 +208,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 propertyExpression: x => x.ExpiresAt,
                 predicate: x => x > DateTimeOffset.UtcNow || x == null))
         {
-            var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id}";
+            var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id})";
 
             _domainContext.AddError($"{nameof(UpdateDialogDto.Transmissions)}." +
                                     $"{nameof(UpdateDialogDto.Attachments)}." +
@@ -233,7 +233,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 propertyExpression: x => x.ExpiresAt,
                 predicate: x => x > DateTimeOffset.UtcNow || x == null))
         {
-            var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id}";
+            var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id})";
             _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
                                     $"{nameof(AttachmentDto.ExpiresAt)}",
                 $"Must be in future or null, got '{attachment.ExpiresAt}'.{idString}");

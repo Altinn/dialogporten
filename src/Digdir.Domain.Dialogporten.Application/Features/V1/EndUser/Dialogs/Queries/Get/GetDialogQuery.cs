@@ -286,6 +286,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         }
 
         var expiredTransmissionAttachmentUrls = dto.Transmissions
+            .Where(x => x.IsAuthorized)
             .SelectMany(x => x.Attachments)
             .Where(x => x.ExpiresAt < _clock.UtcNowOffset)
             .SelectMany(x => x.Urls);

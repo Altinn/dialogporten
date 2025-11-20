@@ -1,10 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
@@ -14,6 +16,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
     private readonly IFusionCache _cache;
     private readonly HttpClient _client;
     private readonly ILogger<PartyNameRegistryClient> _logger;
+    private readonly IOptionsSnapshot<ApplicationSettings> _appSettings;
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -21,17 +24,22 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
     };
 
-    public PartyNameRegistryClient(HttpClient client, IFusionCacheProvider cacheProvider, ILogger<PartyNameRegistryClient> logger)
+    public PartyNameRegistryClient(
+        HttpClient client,
+        IFusionCacheProvider cacheProvider,
+        ILogger<PartyNameRegistryClient> logger,
+        IOptionsSnapshot<ApplicationSettings> appSettings)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         _cache = cacheProvider.GetCache(nameof(NameRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
     }
 
     public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
-        return await _cache.GetOrSetAsync<string?>(
-            $"Name_{externalIdWithPrefix}",
+        var name = await _cache.GetOrSetAsync<string?>(
+            $"Name_v2_{externalIdWithPrefix}",
             async (ctx, ct) =>
             {
                 var name = await GetNameFromRegister(externalIdWithPrefix, ct);
@@ -44,6 +52,20 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
                 return name;
             },
             token: cancellationToken);
+
+        // This is to emulate the old behavior, which had incorrect naming convention for parties (First Last instead of Last First)
+        // When the feature toggle is enabled, we will use the correct naming convention, which will have to be done _after_
+        // the existing data has been corrected manually. After the feature toggle has been enabled and the data corrected, this code can be removed.
+        if (name != null
+            && name.Contains(' ')
+            && PartyIdentifier.TryParse(externalIdWithPrefix, out var personId) && personId is NorwegianPersonIdentifier
+            && !_appSettings.Value.FeatureToggle.UseCorrectNamingConventionForParties)
+        {
+            var nameParts = name.Split(' ');
+            name = nameParts[^1] + " " + string.Join(' ', nameParts[..^1]);
+        }
+
+        return name;
     }
 
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken cancellationToken)

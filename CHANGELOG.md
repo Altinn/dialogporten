@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.90.2](https://github.com/Altinn/dialogporten/compare/v1.90.1...v1.90.2) (2025-11-19)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency fluentvalidation.dependencyinjectionextensions to 12.1.0 ([#3020](https://github.com/Altinn/dialogporten/issues/3020)) ([6d064dc](https://github.com/Altinn/dialogporten/commit/6d064dc651d726a13c28c891de98ea1e6c62cae1))
+* **deps:** update dotnet monorepo ([#3017](https://github.com/Altinn/dialogporten/issues/3017)) ([5ba04af](https://github.com/Altinn/dialogporten/commit/5ba04afe6ffe0f64f5b00e9c462c50355febb64b))
+* **deps:** update microsoft dependencies ([#3018](https://github.com/Altinn/dialogporten/issues/3018)) ([66060fa](https://github.com/Altinn/dialogporten/commit/66060fad482725079ee2214c117bd6d000f2838c))
+* **deps:** update step-security/harden-runner action to v2.13.2 ([#3019](https://github.com/Altinn/dialogporten/issues/3019)) ([becbfc3](https://github.com/Altinn/dialogporten/commit/becbfc350b4d44fa970718b86c5cf8d059b79d5d))
+* **infra:** Use flags and party filter against authorizedparties ([#3022](https://github.com/Altinn/dialogporten/issues/3022)) ([4cc6a1b](https://github.com/Altinn/dialogporten/commit/4cc6a1b6d7f99f0a66d3c9ef42c064b585854427))
+
 ## [1.90.1](https://github.com/Altinn/dialogporten/compare/v1.90.0...v1.90.1) (2025-11-19)
 
 

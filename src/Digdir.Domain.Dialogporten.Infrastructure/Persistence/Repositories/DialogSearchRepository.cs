@@ -85,15 +85,16 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             })
             .Where(x => x.parties.Length > 0 && x.services.Length > 0));
 
+        // TODO: Respect instance delegated dialogs
+        // TODO: Test index on ServiceResource,Party,{SelectedOrderDate},Id
         var accessibleFilteredDialogs = new PostgresFormattableStringBuilder()
-            .Append($"""
+            .Append("""
                      SELECT d.* ,ds."SearchVector" as searchVector
                      FROM "Dialog" d
-                     LEFT JOIN accessiblePartyServiceTuple ps ON d."ServiceResource" = ps.service AND d."Party" = ps.party
                      LEFT JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
                      CROSS JOIN searchString ss
-                     WHERE 1=1
-                        AND (ps.party IS NOT NULL OR d."Id" = ANY({authorizedResources.DialogIds}::uuid[]))
+                     WHERE d."Party" = dr.party
+                        AND (d."ServiceResource" || '') = ANY(dr.allowed_services)
                      """)
             .AppendIf(query.Search is not null,
                 """
@@ -108,8 +109,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
             .AppendIf(query.ExpiresBefore is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz) """)
             .AppendIf(query.Org is not null, $""" AND d."Org" = ANY({query.Org}::text[]) """)
-            .AppendIf(query.ServiceResource is not null, $""" AND d."ServiceResource" = ANY({query.ServiceResource}::text[]) """)
-            .AppendIf(query.Party is not null, $""" AND d."Party" = ANY({query.Party}::text[]) """)
+            // .AppendIf(query.ServiceResource is not null, $""" AND d."ServiceResource" = ANY({query.ServiceResource}::text[]) """)
+            // .AppendIf(query.Party is not null, $""" AND d."Party" = ANY({query.Party}::text[]) """)
             .AppendIf(query.ExtendedStatus is not null, $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]) """)
             .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference})::text """)
             .AppendIf(query.Status is not null, $""" AND d."StatusId" = ANY({query.Status}::int[]) """)
@@ -135,8 +136,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                     WHERE sl."DialogEndUserContextId" IS NULL
                 )
                 """)
-            .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken)
-            .ApplyPaginationOrder(query.OrderBy!);
+            .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
+            .ApplyPaginationOrder(query.OrderBy!, alias: "d");
 
         var queryBuilder = new PostgresFormattableStringBuilder()
             .Append(
@@ -147,16 +148,22 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                     FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
                     LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
                     LIMIT 1
-                 ),accessiblePartyServiceTuple AS (
+                 ),raw_permissions AS (
                     SELECT DISTINCT p.party, s.service
                     FROM jsonb_to_recordset({partiesAndServices}::jsonb) AS x(parties text[], services text[])
                     CROSS JOIN LATERAL unnest(x.services) AS s(service)
                     CROSS JOIN LATERAL unnest(x.parties) AS p(party)
-                 ),accessibleFilteredDialogs AS (
-                    {accessibleFilteredDialogs}
+                 ),party_permission_map AS (
+                      SELECT party
+                           , ARRAY_AGG(service) AS allowed_services
+                      FROM raw_permissions
+                      GROUP BY party
                  )
-                 SELECT ds.*
-                 FROM accessibleFilteredDialogs ds
+                 SELECT d_inner.*
+                 FROM party_permission_map dr
+                 CROSS JOIN LATERAL (
+                     {accessibleFilteredDialogs}
+                 ) d_inner
                  """);
 
         // DO NOT use Include here, as it will use the custom SQL above which is

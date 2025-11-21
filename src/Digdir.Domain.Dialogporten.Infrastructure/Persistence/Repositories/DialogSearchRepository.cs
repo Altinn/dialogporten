@@ -77,7 +77,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .Select(x => new
             {
                 parties = x.Select(k => k.party)
-                    .Where(p => query.Party is null || query.Party.Contains(p))
+                    .Where(p => query.Party.IsNullOrEmpty() || query.Party.Contains(p))
                     .ToArray(),
                 services = x.Key
                     .Where(s => query.ServiceResource.IsNullOrEmpty() || query.ServiceResource.Contains(s))

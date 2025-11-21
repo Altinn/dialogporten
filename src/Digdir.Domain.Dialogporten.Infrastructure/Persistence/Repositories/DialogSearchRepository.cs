@@ -149,7 +149,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                     LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
                     LIMIT 1
                  ),raw_permissions AS (
-                    SELECT DISTINCT p.party, s.service
+                    SELECT p.party, s.service
                     FROM jsonb_to_recordset({partiesAndServices}::jsonb) AS x(parties text[], services text[])
                     CROSS JOIN LATERAL unnest(x.services) AS s(service)
                     CROSS JOIN LATERAL unnest(x.parties) AS p(party)

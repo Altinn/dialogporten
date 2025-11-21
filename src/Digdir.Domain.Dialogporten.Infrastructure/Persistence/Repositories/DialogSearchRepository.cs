@@ -112,7 +112,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             // .AppendIf(query.ServiceResource is not null, $""" AND d."ServiceResource" = ANY({query.ServiceResource}::text[]) """)
             // .AppendIf(query.Party is not null, $""" AND d."Party" = ANY({query.Party}::text[]) """)
             .AppendIf(query.ExtendedStatus is not null, $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]) """)
-            .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference})::text """)
+            .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
             .AppendIf(query.Status is not null, $""" AND d."StatusId" = ANY({query.Status}::int[]) """)
             .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)
             .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore}::timestamptz """)

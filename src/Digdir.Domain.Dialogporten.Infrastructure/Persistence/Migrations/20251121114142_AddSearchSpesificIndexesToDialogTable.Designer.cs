@@ -13,7 +13,7 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20251121110859_AddSearchSpesificIndexesToDialogTable")]
+    [Migration("20251121114142_AddSearchSpesificIndexesToDialogTable")]
     partial class AddSearchSpesificIndexesToDialogTable
     {
         /// <inheritdoc />
@@ -1013,22 +1013,25 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ServiceResource", "Party"), new[] { "Id" });
 
                     b.HasIndex("Party", "ContentUpdatedAt", "Id")
+                        .IsDescending(false, true, true)
                         .HasAnnotation("Npgsql:CreatedConcurrently", true);
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ContentUpdatedAt", "Id"), new[] { "ServiceResource" });
 
                     b.HasIndex("Party", "CreatedAt", "Id")
+                        .IsDescending(false, true, true)
                         .HasAnnotation("Npgsql:CreatedConcurrently", true);
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "CreatedAt", "Id"), new[] { "ServiceResource" });
 
                     b.HasIndex("Party", "DueAt", "Id")
-                        .HasFilter("\"DueAt\" IS NOT NULL")
+                        .IsDescending(false, true, true)
                         .HasAnnotation("Npgsql:CreatedConcurrently", true);
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "DueAt", "Id"), new[] { "ServiceResource" });
 
                     b.HasIndex("Party", "UpdatedAt", "Id")
+                        .IsDescending(false, true, true)
                         .HasAnnotation("Npgsql:CreatedConcurrently", true);
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "UpdatedAt", "Id"), new[] { "ServiceResource" });

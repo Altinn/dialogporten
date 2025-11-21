@@ -26,17 +26,20 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
             .HasFilter($"\"{nameof(DialogEntity.IdempotentKey)}\" is not null");
         builder.HasIndex(x => new { x.ServiceResource, x.Party }).IncludeProperties(x => x.Id);
         builder.HasIndex(x => new { x.Party, x.CreatedAt, x.Id })
+            .IsDescending(false, true, true)
             .IncludeProperties(x => x.ServiceResource)
             .IsCreatedConcurrently();
         builder.HasIndex(x => new { x.Party, x.UpdatedAt, x.Id })
+            .IsDescending(false, true, true)
             .IncludeProperties(x => x.ServiceResource)
             .IsCreatedConcurrently();
         builder.HasIndex(x => new { x.Party, x.ContentUpdatedAt, x.Id })
+            .IsDescending(false, true, true)
             .IncludeProperties(x => x.ServiceResource)
             .IsCreatedConcurrently();
         builder.HasIndex(x => new { x.Party, x.DueAt, x.Id })
+            .IsDescending(false, true, true)
             .IncludeProperties(x => x.ServiceResource)
-            .HasFilter("\"DueAt\" IS NOT NULL")
             .IsCreatedConcurrently();
 
         builder.Property(x => x.Org).UseCollation("C");

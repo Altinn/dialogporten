@@ -13,14 +13,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Dialog_Party_ContentUpdatedAt_Id",
                 table: "Dialog",
-                columns: new[] { "Party", "ContentUpdatedAt", "Id" })
+                columns: new[] { "Party", "ContentUpdatedAt", "Id" },
+                descending: new[] { false, true, true })
                 .Annotation("Npgsql:CreatedConcurrently", true)
                 .Annotation("Npgsql:IndexInclude", new[] { "ServiceResource" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Dialog_Party_CreatedAt_Id",
                 table: "Dialog",
-                columns: new[] { "Party", "CreatedAt", "Id" })
+                columns: new[] { "Party", "CreatedAt", "Id" },
+                descending: new[] { false, true, true })
                 .Annotation("Npgsql:CreatedConcurrently", true)
                 .Annotation("Npgsql:IndexInclude", new[] { "ServiceResource" });
 
@@ -28,14 +30,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 name: "IX_Dialog_Party_DueAt_Id",
                 table: "Dialog",
                 columns: new[] { "Party", "DueAt", "Id" },
-                filter: "\"DueAt\" IS NOT NULL")
+                descending: new[] { false, true, true })
                 .Annotation("Npgsql:CreatedConcurrently", true)
                 .Annotation("Npgsql:IndexInclude", new[] { "ServiceResource" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Dialog_Party_UpdatedAt_Id",
                 table: "Dialog",
-                columns: new[] { "Party", "UpdatedAt", "Id" })
+                columns: new[] { "Party", "UpdatedAt", "Id" },
+                descending: new[] { false, true, true })
                 .Annotation("Npgsql:CreatedConcurrently", true)
                 .Annotation("Npgsql:IndexInclude", new[] { "ServiceResource" });
         }

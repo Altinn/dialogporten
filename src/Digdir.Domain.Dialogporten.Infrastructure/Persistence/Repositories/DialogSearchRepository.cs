@@ -80,7 +80,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                     .Where(p => query.Party is null || query.Party.Contains(p))
                     .ToArray(),
                 services = x.Key
-                    .Where(s => query.ServiceResource is null || query.ServiceResource.Contains(s))
+                    .Where(s => query.ServiceResource.IsNullOrEmpty() || query.ServiceResource.Contains(s))
                     .ToArray()
             })
             .Where(x => x.parties.Length > 0 && x.services.Length > 0));
@@ -107,12 +107,12 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
             .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
             .AppendIf(query.ExpiresBefore is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz) """)
-            .AppendIf(query.Org is not null, $""" AND d."Org" = ANY({query.Org}::text[]) """)
-            .AppendIf(query.ServiceResource is not null, $""" AND d."ServiceResource" = ANY({query.ServiceResource}::text[]) """)
-            .AppendIf(query.Party is not null, $""" AND d."Party" = ANY({query.Party}::text[]) """)
-            .AppendIf(query.ExtendedStatus is not null, $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]) """)
+            .AppendIf(!query.Org.IsNullOrEmpty(), $""" AND d."Org" = ANY({query.Org}::text[]) """)
+            .AppendIf(!query.ServiceResource.IsNullOrEmpty(), $""" AND d."ServiceResource" = ANY({query.ServiceResource}::text[]) """)
+            .AppendIf(!query.Party.IsNullOrEmpty(), $""" AND d."Party" = ANY({query.Party}::text[]) """)
+            .AppendIf(!query.ExtendedStatus.IsNullOrEmpty(), $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]) """)
             .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference})::text """)
-            .AppendIf(query.Status is not null, $""" AND d."StatusId" = ANY({query.Status}::int[]) """)
+            .AppendIf(!query.Status.IsNullOrEmpty(), $""" AND d."StatusId" = ANY({query.Status}::int[]) """)
             .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)
             .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore}::timestamptz """)
             .AppendIf(query.UpdatedAfter is not null, $""" AND {query.UpdatedAfter}::timestamptz <= d."UpdatedAt" """)
@@ -123,7 +123,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
-            .AppendIf(query.SystemLabel is not null,
+            .AppendIf(!query.SystemLabel.IsNullOrEmpty(),
                 $"""
                 AND NOT EXISTS (
                     SELECT 1

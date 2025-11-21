@@ -9,17 +9,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 internal static class PostgresFormattableStringBuilderExtensions
 {
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
-    internal static PostgresFormattableStringBuilder ApplyPaginationOrder<T>(this PostgresFormattableStringBuilder builder, IOrderSet<T> orderSet)
+    internal static PostgresFormattableStringBuilder ApplyPaginationOrder<T>(this PostgresFormattableStringBuilder builder, IOrderSet<T> orderSet, string alias)
     {
         using var enumerator = orderSet.Orders.GetEnumerator();
 
         if (!enumerator.MoveNext()) return builder;
 
-        builder.Append((string)$""" ORDER BY "{GetKey(enumerator.Current)}" {DirectionToSql(enumerator.Current.Direction)}""");
+        builder.Append((string)$" ORDER BY {GetKey(enumerator.Current, alias)} {DirectionToSql(enumerator.Current.Direction)}");
 
         while (enumerator.MoveNext())
         {
-            builder.Append((string)$""", "{GetKey(enumerator.Current)}" {DirectionToSql(enumerator.Current.Direction)}""");
+            builder.Append((string)$", {GetKey(enumerator.Current, alias)} {DirectionToSql(enumerator.Current.Direction)}");
         }
 
         return builder.Append(" ");
@@ -39,7 +39,8 @@ internal static class PostgresFormattableStringBuilderExtensions
     internal static PostgresFormattableStringBuilder ApplyPaginationCondition<T>(
         this PostgresFormattableStringBuilder builder,
         IOrderSet<T> orderSet,
-        IContinuationTokenSet? continuationTokenSet)
+        IContinuationTokenSet? continuationTokenSet,
+        string alias)
     {
         if (continuationTokenSet is null)
         {
@@ -48,7 +49,7 @@ internal static class PostgresFormattableStringBuilderExtensions
 
         var orderParts = orderSet.Orders
             .Join(continuationTokenSet.Tokens, x => x.Key, x => x.Key,
-                (order, token) => new OrderPart(order.Direction, order.GetSelector().Body.Type, GetKey(order), token.Value),
+                (order, token) => new OrderPart(order.Direction, order.GetSelector().Body.Type, GetKey(order, alias), token.Value),
                 StringComparer.InvariantCultureIgnoreCase)
             .ToList();
         // x => x.a < an OR (x.a = an AND x.b < bn) OR (x.a = an AND x.b = bn AND x.c < cn) OR ...
@@ -104,21 +105,22 @@ internal static class PostgresFormattableStringBuilderExtensions
         orderPart.Direction switch
         {
             OrderDirection.Asc when orderPart.Type.IsNullableType() && orderPart.Value is not null
-                => builder.Append((string)$""" "{orderPart.Key}" IS NULL OR "{orderPart.Key}" > """).Append($"{orderPart.Value}"),
+                => builder.Append((string)$" {orderPart.Key} IS NULL OR {orderPart.Key} > ").Append($"{orderPart.Value}"),
             OrderDirection.Desc when orderPart.Type.IsNullableType() && orderPart.Value is null
-                => builder.Append((string)$""" "{orderPart.Key}" IS NOT NULL"""),
+                => builder.Append((string)$" {orderPart.Key} IS NOT NULL"),
 
-            OrderDirection.Asc => builder.Append((string)$""" "{orderPart.Key}" > """).Append($"{orderPart.Value}"),
-            OrderDirection.Desc => builder.Append((string)$""" "{orderPart.Key}" < """).Append($"{orderPart.Value}"),
+            OrderDirection.Asc => builder.Append((string)$""" {orderPart.Key} > """).Append($"{orderPart.Value}"),
+            OrderDirection.Desc => builder.Append((string)$""" {orderPart.Key} < """).Append($"{orderPart.Value}"),
             _ => throw new InvalidOperationException()
         };
 
     private static PostgresFormattableStringBuilder CreateEqualsPart(this PostgresFormattableStringBuilder builder, OrderPart x) =>
         x.Value is not null
-            ? builder.Append((string)$""" "{x.Key}" = """).Append($"{x.Value}")
-            : builder.Append((string)$""" "{x.Key}" IS NULL""");
+            ? builder.Append((string)$" {x.Key} = ").Append($"{x.Value}")
+            : builder.Append((string)$" {x.Key} IS NULL");
 
     private sealed record OrderPart(OrderDirection Direction, Type Type, string Key, object? Value);
 
-    private static string GetKey<T>(Order<T> orderSet) => ((MemberExpression)orderSet.GetSelector().Body).Member.Name;
+    private static string GetKey<T>(Order<T> orderSet, string alias) =>
+        $"\"{alias}\".\"{((MemberExpression)orderSet.GetSelector().Body).Member.Name}\"";
 }

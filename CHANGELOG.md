@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.90.3](https://github.com/Altinn/dialogporten/compare/v1.90.2...v1.90.3) (2025-11-21)
+
+
+### Bug Fixes
+
+* **infra:** handle empty lists when building search query ([#3033](https://github.com/Altinn/dialogporten/issues/3033)) ([763f79d](https://github.com/Altinn/dialogporten/commit/763f79d6bd1860e2c3cde4f8b3cb7998bb9bfb8e))
+
+
+### Miscellaneous Chores
+
+* **ci:** upgrade azure cli to 2.80.0 ([#3025](https://github.com/Altinn/dialogporten/issues/3025)) ([9f7cf16](https://github.com/Altinn/dialogporten/commit/9f7cf16197cfce9eb9907dcfd4085107509361c4))
+* **perf:** Improve SQL query for dialog search retrieval ([#3030](https://github.com/Altinn/dialogporten/issues/3030)) ([e0f089e](https://github.com/Altinn/dialogporten/commit/e0f089e5c618fcd44c8443f9da7b052b9d3e9334))
+
 ## [1.90.2](https://github.com/Altinn/dialogporten/compare/v1.90.1...v1.90.2) (2025-11-19)
 
 

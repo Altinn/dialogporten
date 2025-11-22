@@ -4,6 +4,13 @@ namespace Digdir.Library.Utils.AspNet;
 
 public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 {
+    private readonly bool _enabledSqlStatementLogging;
+
+    public PostgresFilter(bool enabledSqlStatementLogging)
+    {
+        _enabledSqlStatementLogging = enabledSqlStatementLogging;
+    }
+
     public override void OnEnd(Activity activity)
     {
         if (!activity.Source.Name.StartsWith(Constants.Npgsql, StringComparison.OrdinalIgnoreCase))
@@ -12,8 +19,13 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
             return;
         }
 
-        if (activity.Tags.IsSuccessfulSqlStatementActivity() ||
-                activity.Tags.ContainsUniqueConstraintError())
+        if (activity.Tags.IsSuccessfulSqlStatementActivity() && !_enabledSqlStatementLogging)
+        {
+            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            return;
+        }
+
+        if (activity.Tags.ContainsUniqueConstraintError())
         {
             activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
             return;

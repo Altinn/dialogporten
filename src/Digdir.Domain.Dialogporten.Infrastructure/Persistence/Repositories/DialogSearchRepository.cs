@@ -137,7 +137,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                 )
                 """)
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
-            .ApplyPaginationOrder(query.OrderBy!, alias: "d");
+            .ApplyPaginationOrder(query.OrderBy!, alias: "d")
+            .ApplyPaginationLimit(query.Limit);
 
         var queryBuilder = new PostgresFormattableStringBuilder()
             .Append(

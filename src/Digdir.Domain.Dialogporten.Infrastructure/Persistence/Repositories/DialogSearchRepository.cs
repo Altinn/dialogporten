@@ -126,16 +126,14 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
             .AppendIf(!query.SystemLabel.IsNullOrEmpty(),
                 $"""
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM unnest({query.SystemLabel}::int[]) as st(value)
-                    LEFT JOIN "DialogEndUserContext" dec ON dec."DialogId" = d."Id"
-                    LEFT JOIN "DialogEndUserContextSystemLabel" sl 
-                        ON sl."DialogEndUserContextId" = dec."Id" 
-                        AND sl."SystemLabelId" = st.value
-                    WHERE sl."DialogEndUserContextId" IS NULL
-                )
-                """)
+                 AND (
+                     SELECT COUNT(sl."SystemLabelId")
+                     FROM "DialogEndUserContext" dec 
+                     JOIN "DialogEndUserContextSystemLabel" sl ON dec."Id" = sl."DialogEndUserContextId"
+                     WHERE dec."DialogId" = d."Id"
+                        AND sl."SystemLabelId" = ANY({query.SystemLabel}::int[]) 
+                     ) = {query.SystemLabel!.Count}::int
+                 """)
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);

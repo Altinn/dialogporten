@@ -71,6 +71,7 @@ public static class ApplicationExtensions
             .AddTransient<IClock, Clock>()
             .AddTransient<IApplicationFeatureToggle<SearchDialogQuery, SearchDialogResult>, OptimizedEndUserDialogSearchFeatureToggle>()
             .AddDataLoaders()
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DialogportenMaintenanceModeBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationFeatureToggleBehavior<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(DataLoaderBehaviour<,>))

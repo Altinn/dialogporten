@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.90.5](https://github.com/Altinn/dialogporten/compare/v1.90.4...v1.90.5) (2025-11-22)
+
+
+### Bug Fixes
+
+* **search:** add limit to search query for improved performance ([#3036](https://github.com/Altinn/dialogporten/issues/3036)) ([6878e12](https://github.com/Altinn/dialogporten/commit/6878e12f316234d5aa72db5590467153bf34b69c))
+* system-label-query ([#3038](https://github.com/Altinn/dialogporten/issues/3038)) ([39b0b81](https://github.com/Altinn/dialogporten/commit/39b0b81acacadb81485aeb3d4c1dfd9dd9999b68))
+
 ## [1.90.4](https://github.com/Altinn/dialogporten/compare/v1.90.3...v1.90.4) (2025-11-22)
 
 

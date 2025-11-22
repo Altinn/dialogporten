@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.90.4](https://github.com/Altinn/dialogporten/compare/v1.90.3...v1.90.4) (2025-11-22)
+
+
+### Miscellaneous Chores
+
+* **infra:** Add postgres statement logging in yt01 ([#3034](https://github.com/Altinn/dialogporten/issues/3034)) ([3730ee3](https://github.com/Altinn/dialogporten/commit/3730ee3002af957a65fda39eb8ae621929434bff))
+
 ## [1.90.3](https://github.com/Altinn/dialogporten/compare/v1.90.2...v1.90.3) (2025-11-21)
 
 

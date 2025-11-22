@@ -132,7 +132,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                      JOIN "DialogEndUserContextSystemLabel" sl ON dec."Id" = sl."DialogEndUserContextId"
                      WHERE dec."DialogId" = d."Id"
                         AND sl."SystemLabelId" = ANY({query.SystemLabel}::int[]) 
-                     ) = {query.SystemLabel!.Count}::int
+                     ) = {query.SystemLabel?.Count}::int
                  """)
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")

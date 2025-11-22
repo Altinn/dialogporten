@@ -86,7 +86,7 @@ internal static class PostgresFormattableStringBuilderExtensions
     }
 
     internal static PostgresFormattableStringBuilder ApplyPaginationLimit(this PostgresFormattableStringBuilder builder, int limit) =>
-        builder.Append((string)$" LIMIT {limit} ");
+        builder.Append((string)$" LIMIT {limit + 1} ");
 
     private static PostgresFormattableStringBuilder CreateLessThanGreaterThanPart(this PostgresFormattableStringBuilder builder, OrderPart orderPart) =>
         // Null values are excluded in greater/less than comparison in

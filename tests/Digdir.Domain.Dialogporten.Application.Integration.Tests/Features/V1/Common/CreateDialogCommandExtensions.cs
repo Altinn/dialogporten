@@ -57,6 +57,14 @@ internal static class CreateDialogCommandExtensions
         return command;
     }
 
+    public static CreateDialogCommand AddAttachment(this CreateDialogCommand command, Action<AttachmentDto>? modify = null)
+    {
+        var attachment = DialogGenerator.GenerateFakeDialogAttachment();
+        modify?.Invoke(attachment);
+        command.Dto.Attachments.Add(attachment);
+        return command;
+    }
+
     public static TransmissionDto AddAttachment(this TransmissionDto transmission, Action<TransmissionAttachmentDto>? modify = null)
     {
         var attachment = new TransmissionAttachmentDto

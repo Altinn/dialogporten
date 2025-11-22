@@ -660,6 +660,11 @@ public sealed class DialogAttachmentDto
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.
     /// </summary>
     public List<DialogAttachmentUrlDto> Urls { get; set; } = [];
+
+    /// <summary>
+    /// The UTC timestamp when the attachment expires and is no longer available.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
 }
 
 public sealed class DialogAttachmentUrlDto
@@ -708,6 +713,11 @@ public sealed class DialogTransmissionAttachmentDto
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.
     /// </summary>
     public List<DialogTransmissionAttachmentUrlDto> Urls { get; set; } = [];
+
+    /// <summary>
+    /// The UTC timestamp when the attachment expires and is no longer available.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
 }
 
 public sealed class DialogTransmissionAttachmentUrlDto

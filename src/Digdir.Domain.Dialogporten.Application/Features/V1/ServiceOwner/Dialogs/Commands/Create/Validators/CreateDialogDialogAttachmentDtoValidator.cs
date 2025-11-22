@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using FluentValidation;
@@ -8,7 +9,8 @@ internal sealed class CreateDialogDialogAttachmentDtoValidator : AbstractValidat
 {
     public CreateDialogDialogAttachmentDtoValidator(
         IValidator<IEnumerable<LocalizationDto>> localizationsValidator,
-        IValidator<AttachmentUrlDto> urlValidator)
+        IValidator<AttachmentUrlDto> urlValidator,
+        IClock clock)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
@@ -20,5 +22,8 @@ internal sealed class CreateDialogDialogAttachmentDtoValidator : AbstractValidat
         RuleFor(x => x.Urls)
             .NotEmpty()
             .ForEach(x => x.SetValidator(urlValidator));
+
+        RuleFor(x => x.ExpiresAt)
+            .IsInFuture(clock);
     }
 }

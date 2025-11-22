@@ -83,6 +83,23 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     }
 
     /// <inheritdoc/>
+    public bool MustWhenAdded<TEntity, TProperty>(
+        TEntity entity,
+        Expression<Func<TEntity, TProperty>> propertyExpression,
+        Func<TProperty, bool> predicate)
+        where TEntity : class
+    {
+        var entry = Entry(entity);
+        if (entry.State != EntityState.Added)
+        {
+            return true;
+        }
+
+        var property = entry.Property(propertyExpression);
+        return predicate(property.CurrentValue);
+    }
+
+    /// <inheritdoc/>
     public bool MustWhenModified<TEntity, TProperty>(
         TEntity entity,
         Expression<Func<TEntity, TProperty>> propertyExpression,

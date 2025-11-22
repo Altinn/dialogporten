@@ -79,6 +79,8 @@ type Attachment {
   displayName: [Localization!]!
   "The URLs associated with the attachment, each referring to a different representation of the attachment."
   urls: [AttachmentUrl!]!
+  "The UTC timestamp when the attachment expires and is no longer available."
+  expiresAt: DateTime
 }
 
 type AttachmentUrl {

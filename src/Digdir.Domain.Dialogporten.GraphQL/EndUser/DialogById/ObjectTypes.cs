@@ -351,6 +351,9 @@ public sealed class Attachment
 
     [GraphQLDescription("The URLs associated with the attachment, each referring to a different representation of the attachment.")]
     public List<AttachmentUrl> Urls { get; set; } = [];
+
+    [GraphQLDescription("The UTC timestamp when the attachment expires and is no longer available.")]
+    public DateTimeOffset? ExpiresAt { get; set; }
 }
 
 public sealed class AttachmentUrl

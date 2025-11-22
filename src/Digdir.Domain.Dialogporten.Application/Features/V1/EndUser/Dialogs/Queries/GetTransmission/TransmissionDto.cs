@@ -104,6 +104,11 @@ public sealed class AttachmentDto
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.
     /// </summary>
     public List<AttachmentUrlDto> Urls { get; set; } = [];
+
+    /// <summary>
+    /// The UTC timestamp when the attachment expires and is no longer available.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
 }
 
 public sealed class AttachmentUrlDto

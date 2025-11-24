@@ -83,6 +83,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         {
             NorwegianPersonIdentifier personIdentifier => new() { Parties = [new() { Ssn = personIdentifier.Id }] },
             NorwegianOrganizationIdentifier organizationIdentifier => new() { Parties = [new() { OrgNo = organizationIdentifier.Id }] },
+            SystemUserIdentifier systemUserIdentifier => new() { Parties = [new() { OrgNo = systemUserIdentifier.Id }] },
             _ => null
         };
 

@@ -183,7 +183,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .Select(x => x.Id)
             .ToArray();
 
-        var guiAttachmentCountByDialogId = await FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
+        var guiAttachmentCountByDialogId = await _searchRepository.FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
         var contentByDialogId = await FetchContentByDialogId(dialogIds, cancellationToken);
         var endUserContextByDialogId = await FetchEndUserContextByDialogId(dialogIds, cancellationToken);
         var seenLogsByDialogId = await FetchSeenLogByDialogId(dialogIds, cancellationToken);

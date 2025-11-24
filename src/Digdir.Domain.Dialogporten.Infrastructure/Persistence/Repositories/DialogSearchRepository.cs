@@ -1,17 +1,20 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Dapper;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialogSearchRepository
+internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDataSource dataSource) : IDialogSearchRepository
 {
     private readonly DialogDbContext _db = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+    private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {
@@ -184,4 +187,99 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
 
         return dialogs;
     }
+
+    public async Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
+        CancellationToken cancellationToken)
+    {
+        var (query, parameters) = new PostgresFormattableStringBuilder()
+            .Append(
+                $"""
+                 SELECT a."DialogId"
+                      , COUNT(a."Id") AS "GuiAttachmentCount"
+                 FROM "Attachment" AS a
+                 WHERE a."Discriminator" = 'DialogAttachment'
+                   AND a."DialogId" = ANY ({dialogIds}::uuid[])
+                   AND EXISTS (
+                     SELECT 1
+                     FROM "AttachmentUrl" AS au
+                     WHERE au."AttachmentId" = a."Id"
+                       AND au."ConsumerTypeId" = 1 -- GUI
+                 )
+                 GROUP BY a."DialogId";
+                 """)
+            .ToDynamicParameters();
+
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var result = await connection.QueryAsync<(Guid Id, int GuiAttachmentCount)>(query, parameters);
+        return result.ToDictionary(x => x.Id, x => x.GuiAttachmentCount);
+    }
+
+    private const string FetchContentByDialogIdSql =
+        """
+        SELECT d."Id"                                      AS id
+             , COALESCE(r."MinimumAuthenticationLevel", 0) AS "MinimumAuthenticationLevel"
+             , c."MediaType"
+             , c."TypeId"
+             , l."LanguageCode"
+             , l."Value"
+        FROM "Dialog" d
+        LEFT JOIN "ResourcePolicyInformation" AS r ON d."ServiceResource" = r."Resource"
+        INNER JOIN "DialogContent" AS c ON c."DialogId" = d."Id"
+        INNER JOIN "DialogContentType" AS ct ON c."TypeId" = ct."Id" AND ct."OutputInList"
+        INNER JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogContentValue' AND ls."DialogContentId" = c."Id"
+        INNER JOIN "Localization" l ON l."LocalizationSetId" = ls."Id"
+        WHERE c."DialogId" = ANY (:dialogIds);
+        """;
+
+    private const string FetchEndUserContextByDialogIdSql =
+        """
+        SELECT c."DialogId", cl."SystemLabelId", c."Id"
+        FROM "DialogEndUserContext" AS c
+        INNER JOIN "DialogEndUserContextSystemLabel" AS cl ON c."Id" = cl."DialogEndUserContextId"
+        WHERE c."DialogId" = ANY (:dialogIds)
+        ORDER BY c."DialogId", c."Id"
+        """;
+
+    private const string FetchSeenLogByDialogIdSql =
+        """
+        SELECT sl."DialogId"
+             , sl."Id"
+             , sl."CreatedAt"                                                 AS "SeenAt"
+             , sl."IsViaServiceOwner"
+             , an."ActorId" = :currentUserId AND an."ActorId" IS NOT NULL AS "IsCurrentEndUser"
+             , an."ActorId"
+             , an."Name"                                                      AS "ActorName"
+             , a."ActorTypeId"                                                AS "ActorType"
+        FROM "Dialog" d
+        INNER JOIN "DialogSeenLog" sl ON d."Id" = sl."DialogId"
+        INNER JOIN "Actor" a ON a."Discriminator" = 'DialogSeenLogSeenByActor' AND sl."Id" = a."DialogSeenLogId"
+        LEFT JOIN "ActorName" an ON a."ActorNameEntityId" = an."Id"
+        WHERE d."Id" = ANY (:dialogIds)
+          AND sl."CreatedAt" >= d."ContentUpdatedAt";
+        """;
+
+    private const string FetchLatestActivitiesByDialogIdSql =
+        """
+        SELECT d."DialogId"
+             , d."Id"
+             , d."CreatedAt"
+             , d."TypeId"
+             , d."ExtendedType"
+             , a1."ActorId"
+             , a1."Name"
+             , a0."ActorTypeId"
+             , d."TransmissionId"
+             , a0."Id" AS "ActorRecordId"
+             , a1."Id" AS "ActorNameId"
+             , l0."Id" AS "LocalizationSetId"
+             , l3."LanguageCode"
+             , l3."Value"
+        FROM "DialogActivity" AS d
+        INNER JOIN "Actor" AS a0 ON a0."Discriminator" = 'DialogActivityPerformedByActor' AND a0."ActivityId" = d."Id"
+        LEFT JOIN "ActorName" AS a1 ON a1."Id" = a0."ActorNameEntityId"
+        INNER JOIN "LocalizationSet" AS l0 ON l0."ActivityId" = d."Id" AND l0."Discriminator" = 'DialogActivityDescription'
+        INNER JOIN "Localization" AS l3 ON l3."LocalizationSetId" = l0."Id"
+        WHERE d."DialogId" = ANY (:dialogIds)
+        ORDER BY d."DialogId", d."Id", a0."Id", a1."Id", l0."Id";
+        """;
 }

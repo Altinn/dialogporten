@@ -23,6 +23,9 @@ public interface IDialogSearchRepository
         GetDialogsQuery query,
         DialogSearchAuthorizationResult authorizedResources,
         CancellationToken cancellationToken);
+
+    Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
+        CancellationToken cancellationToken);
 }
 
 public sealed class DialogSearchReindexProgress

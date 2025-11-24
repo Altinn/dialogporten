@@ -186,9 +186,6 @@ export default function () {
             if (index == 9) {
                 setTitle(dialog, titleForLastItem);
             }
-
-            // JSON pretty print dialog for debugging
-            console.log(JSON.stringify(dialog, null, 2));
         });
 
         // Update single dialog
@@ -205,8 +202,7 @@ export default function () {
         let r = getSO('dialogs/' + defaultFilter + '&Limit=3&OrderBy=dueAt_desc,updatedAt_desc');
         expectStatusFor(r).to.equal(200);
         var jsonResponse = r.json();
-        // pretty print for debugging
-        console.log(JSON.stringify(jsonResponse, null, 2));
+
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf(3);
         expect(r.json().items[0], 'first dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForDueAtItem);

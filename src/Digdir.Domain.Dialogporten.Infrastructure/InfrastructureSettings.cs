@@ -14,6 +14,8 @@ public sealed class InfrastructureSettings
     public required AltinnCdnPlatformSettings AltinnCdn { get; init; }
     public required MaskinportenSettings Maskinporten { get; init; }
     public required MassTransitSettings MassTransit { get; set; }
+    public bool EnableSqlStatementLogging { get; init; }
+    public bool EnableSqlParametersLogging { get; init; }
 }
 
 public sealed class MassTransitSettings

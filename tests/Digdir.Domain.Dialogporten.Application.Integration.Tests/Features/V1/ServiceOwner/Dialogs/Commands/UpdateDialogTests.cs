@@ -458,6 +458,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<DialogDto>(dialog =>
             {
                 dialog.VisibleFrom.Should().BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1));
+                dialog.CreatedAt.Should().Be(dialog.VisibleFrom);
                 dialog.UpdatedAt.Should().Be(dialog.VisibleFrom);
                 dialog.ContentUpdatedAt.Should().Be(dialog.VisibleFrom);
             });

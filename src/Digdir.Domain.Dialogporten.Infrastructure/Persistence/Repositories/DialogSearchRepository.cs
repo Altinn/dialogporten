@@ -89,23 +89,24 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
         var accessibleFilteredDialogs = new PostgresFormattableStringBuilder()
             .AppendIf(query.Search is null,
                 """
-                SELECT d.* FROM "Dialog" d
+                SELECT d."Id"
+                FROM "Dialog" d
                 WHERE d."Party" = ppm.party
-                
+
                 """)
             .AppendIf(query.Search is not null,
                 """
-                SELECT d.*, ds."SearchVector"
+                SELECT d."Id"
                 FROM search."DialogSearch" ds 
                 JOIN "Dialog" d ON d."Id" = ds."DialogId"
                 CROSS JOIN searchString ss
                 WHERE ds."Party" = ppm.party AND ds."SearchVector" @@ ss.searchVector
-                
+
                 """)
             .Append(
                 """
-                AND (d."ServiceResource" || '') = ANY(ppm.allowed_services)
-                
+                AND d."ServiceResource" = ANY(ppm.allowed_services)
+
                 """)
             .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
             .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
@@ -165,11 +166,16 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                      FROM raw_permissions
                      GROUP BY party
                  )
-                 SELECT d_inner.*
-                 FROM party_permission_map ppm
-                 CROSS JOIN LATERAL (
-                     {accessibleFilteredDialogs}
-                 ) d_inner
+                 SELECT d.*
+                 FROM (
+                     SELECT d_inner."Id"
+                     FROM party_permission_map ppm
+                     CROSS JOIN LATERAL (
+                         {accessibleFilteredDialogs}
+                     ) d_inner
+                 ) AS filtered_dialogs
+                 JOIN "Dialog" d ON d."Id" = filtered_dialogs."Id"
+
                  """);
 
         // DO NOT use Include here, as it will use the custom SQL above which is

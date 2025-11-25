@@ -186,7 +186,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     parent: postgres
     name: 'azure.extensions'
     properties: {
-      value: 'PG_TRGM'
+      value: 'PG_TRGM,BTREE_GIN'
       source: 'user-override'
     }
     dependsOn: [postgresAdministrators]

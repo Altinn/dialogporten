@@ -127,6 +127,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
 
         modelBuilder
             .HasPostgresExtension(Constants.PostgreSqlTrigram)
+            .HasPostgresExtension(Constants.BtreeGin)
             .RemovePluralizingTableNameConvention()
             .AddAuditableEntities()
             .ApplyConfigurationsFromAssembly(typeof(DialogDbContext).Assembly)

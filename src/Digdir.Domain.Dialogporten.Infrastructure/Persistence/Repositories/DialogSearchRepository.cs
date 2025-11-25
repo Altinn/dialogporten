@@ -86,31 +86,31 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .Where(x => x.parties.Length > 0 && x.services.Length > 0));
 
         // TODO: Respect instance delegated dialogs
-        // TODO: Test index on ServiceResource,Party,{SelectedOrderDate},Id
         var accessibleFilteredDialogs = new PostgresFormattableStringBuilder()
-            .Append("""
-                     SELECT d.* ,ds."SearchVector" as searchVector
-                     FROM "Dialog" d
-                     LEFT JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
-                     CROSS JOIN searchString ss
-                     WHERE d."Party" = dr.party
-                        AND (d."ServiceResource" || '') = ANY(dr.allowed_services)
-                     """)
+            .AppendIf(query.Search is null,
+                """
+                SELECT d.* FROM "Dialog" d
+                WHERE d."Party" = ppm.party
+                
+                """)
             .AppendIf(query.Search is not null,
                 """
-                AND (ds."SearchVector" @@ ss.searchVector OR EXISTS (
-                    SELECT 1
-                    FROM "DialogSearchTag" dst
-                    WHERE dst."DialogId" = d."Id"
-                    AND dst."Value" = ANY(ss.searchTerms)
-                ))
+                SELECT d.*, ds."SearchVector"
+                FROM search."DialogSearch" ds 
+                JOIN "Dialog" d ON d."Id" = ds."DialogId"
+                CROSS JOIN searchString ss
+                WHERE ds."Party" = ppm.party AND ds."SearchVector" @@ ss.searchVector
+                
+                """)
+            .Append(
+                """
+                AND (d."ServiceResource" || '') = ANY(ppm.allowed_services)
+                
                 """)
             .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
             .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
             .AppendIf(query.ExpiresBefore is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz) """)
             .AppendIf(!query.Org.IsNullOrEmpty(), $""" AND d."Org" = ANY({query.Org}::text[]) """)
-            // .AppendIf(!query.ServiceResource.IsNullOrEmpty(), $""" AND d."ServiceResource" = ANY({query.ServiceResource}::text[]) """)
-            // .AppendIf(!query.Party.IsNullOrEmpty(), $""" AND d."Party" = ANY({query.Party}::text[]) """)
             .AppendIf(!query.ExtendedStatus.IsNullOrEmpty(), $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]) """)
             .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
             .AppendIf(!query.Status.IsNullOrEmpty(), $""" AND d."StatusId" = ANY({query.Status}::int[]) """)
@@ -138,28 +138,35 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
 
+
         var queryBuilder = new PostgresFormattableStringBuilder()
-            .Append(
+            .Append("WITH ")
+            .AppendIf(query.Search is not null,
                 $"""
-                 WITH searchString AS (
-                    SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
-                        ,string_to_array({query.Search}::text, ' ') AS searchTerms
+                searchString AS (
+                   SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
+                    ,string_to_array({query.Search}::text, ' ') AS searchTerms
                     FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
                     LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
                     LIMIT 1
-                 ),raw_permissions AS (
+                ),
+                """)
+            .Append(
+                $"""
+                 raw_permissions AS (
                     SELECT p.party, s.service
                     FROM jsonb_to_recordset({partiesAndServices}::jsonb) AS x(parties text[], services text[])
                     CROSS JOIN LATERAL unnest(x.services) AS s(service)
                     CROSS JOIN LATERAL unnest(x.parties) AS p(party)
-                 ),party_permission_map AS (
-                      SELECT party
-                           , ARRAY_AGG(service) AS allowed_services
-                      FROM raw_permissions
-                      GROUP BY party
+                 )
+                 ,party_permission_map AS (
+                     SELECT party
+                          , ARRAY_AGG(service) AS allowed_services
+                     FROM raw_permissions
+                     GROUP BY party
                  )
                  SELECT d_inner.*
-                 FROM party_permission_map dr
+                 FROM party_permission_map ppm
                  CROSS JOIN LATERAL (
                      {accessibleFilteredDialogs}
                  ) d_inner

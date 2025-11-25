@@ -27,7 +27,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            var scripts = new[]
+            {
+                "Dialog/Search/View.VDialogDocument.sql",
+                "Dialog/Search/Function.UpsertDialogSearchOne.sql",
+                "Dialog/Search/Function.RebuildDialogSearchOnce.sql"
+            };
 
+            foreach (var sql in MigrationSqlLoader.LoadAll(scripts))
+            {
+                migrationBuilder.Sql(sql);
+            }
         }
     }
 }

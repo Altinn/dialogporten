@@ -17,7 +17,7 @@ inputs:
     default: 'false'
 
 env:
-  AZ_CLI_VERSION: 2.79.0
+  AZ_CLI_VERSION: 2.80.0
 
 runs:
   using: "composite"

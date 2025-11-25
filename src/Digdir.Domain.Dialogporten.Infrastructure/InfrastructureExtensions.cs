@@ -28,6 +28,8 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotificati
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using HotChocolate.Subscriptions;
+using Microsoft.Extensions.Logging;
+using Npgsql;
 using StackExchange.Redis;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.NullObjects;
@@ -54,13 +56,26 @@ public static class InfrastructureExtensions
         var (services, configuration, environment, infrastructureSettings, _) = builderContext;
 
         services
+            .AddSingleton(sp =>
+            {
+                var infrastructure = sp.GetRequiredService<IOptions<InfrastructureSettings>>().Value;
+                var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+                var dataSourceBuilder = new NpgsqlDataSourceBuilder(infrastructure.DialogDbConnectionString)
+                    .UseLoggerFactory(loggerFactory);
+
+                if (infrastructure.EnableSqlParametersLogging)
+                {
+                    dataSourceBuilder.EnableParameterLogging();
+                }
+
+                return dataSourceBuilder.Build();
+            })
 
             // Framework
             .AddDbContext<DialogDbContext>((services, options) =>
             {
-                var connectionString = services.GetRequiredService<IOptions<InfrastructureSettings>>()
-                    .Value.DialogDbConnectionString;
-                options.UseNpgsql(connectionString, o =>
+                var dataSource = services.GetRequiredService<NpgsqlDataSource>();
+                options.UseNpgsql(dataSource, o =>
                     {
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     })

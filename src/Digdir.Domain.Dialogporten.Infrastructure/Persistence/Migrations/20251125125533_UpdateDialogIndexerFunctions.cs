@@ -13,9 +13,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
             var scripts = new[]
             {
-                "Dialog/Search/View.VDialogDocument.sql",
-                "Dialog/Search/Function.UpsertDialogSearchOne.sql",
-                "Dialog/Search/Function.RebuildDialogSearchOnce.sql"
+                "Dialog/Search/View.VDialogDocument.V2.sql",
+                "Dialog/Search/Function.UpsertDialogSearchOne.V2.sql",
+                "Dialog/Search/Function.RebuildDialogSearchOnce.V2.sql"
             };
 
             foreach (var sql in MigrationSqlLoader.LoadAll(scripts))

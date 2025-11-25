@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.91.0](https://github.com/Altinn/dialogporten/compare/v1.90.5...v1.91.0) (2025-11-25)
+
+
+### Features
+
+* **infra:** add parameter logging for postgresql ([#3044](https://github.com/Altinn/dialogporten/issues/3044)) ([4488ddd](https://github.com/Altinn/dialogporten/commit/4488dddc32ff6dec93936fd47afbb4e750de19ee))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v5.0.1 ([#3039](https://github.com/Altinn/dialogporten/issues/3039)) ([530874c](https://github.com/Altinn/dialogporten/commit/530874c7295f9dc893a4b2a0b4cbcd66d451f961))
+
 ## [1.90.5](https://github.com/Altinn/dialogporten/compare/v1.90.4...v1.90.5) (2025-11-22)
 
 

@@ -14,5 +14,6 @@ SELECT d."Id" AS "DialogId",
          LEFT JOIN search."Iso639TsVectorMap" isomap
            ON c."LanguageCode" = isomap."IsoCode"
          WHERE c."DialogId" = d."Id"
-       ) AS "Document"
+       ) AS "Document",
+       d."Party" AS "Party"
 FROM "Dialog" d;

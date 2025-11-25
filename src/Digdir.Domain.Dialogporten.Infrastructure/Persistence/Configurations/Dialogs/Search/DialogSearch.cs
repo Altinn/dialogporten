@@ -9,6 +9,7 @@ internal sealed class DialogSearch
 {
     public Guid DialogId { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public string Party { get; set; } = null!;
     public DialogEntity Dialog { get; set; } = null!;
     public required NpgsqlTsVector SearchVector { get; set; }
 }
@@ -24,5 +25,6 @@ internal sealed class DialogSearchConfiguration : IEntityTypeConfiguration<Dialo
             .HasPrincipalKey<DialogEntity>(x => x.Id)
             .OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(ds => ds.SearchVector).HasMethod("GIN");
+        builder.HasIndex(ds => new { ds.Party, ds.SearchVector }).HasMethod("GIN");
     }
 }

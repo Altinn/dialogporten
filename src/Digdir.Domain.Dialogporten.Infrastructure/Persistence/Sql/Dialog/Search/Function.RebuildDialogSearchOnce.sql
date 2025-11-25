@@ -22,12 +22,13 @@ BEGIN
   END IF;
 
   WITH upsert AS (
-    INSERT INTO search."DialogSearch" ("DialogId","UpdatedAt","SearchVector")
-    SELECT "DialogId", now(), COALESCE("Document",''::tsvector)
+    INSERT INTO search."DialogSearch" ("DialogId","UpdatedAt","Party","SearchVector")
+    SELECT "DialogId", now(), "Party", COALESCE("Document",''::tsvector)
     FROM search."VDialogDocument"
     WHERE "DialogId" = ANY (claimed_ids)
     ON CONFLICT ("DialogId") DO UPDATE
     SET "UpdatedAt"   = EXCLUDED."UpdatedAt",
+        "Party"       = EXCLUDED."Party",
         "SearchVector"= EXCLUDED."SearchVector"
     RETURNING "DialogId"
   )

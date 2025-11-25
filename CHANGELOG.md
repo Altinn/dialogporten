@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.91.1](https://github.com/Altinn/dialogporten/compare/v1.91.0...v1.91.1) (2025-11-25)
+
+
+### Miscellaneous Chores
+
+* **perf:** Add party column, GIN index to DialogSearch ([#3046](https://github.com/Altinn/dialogporten/issues/3046)) ([736be92](https://github.com/Altinn/dialogporten/commit/736be926922e04ee77a8db3f0c74613c56d5fda8))
+
 ## [1.91.0](https://github.com/Altinn/dialogporten/compare/v1.90.5...v1.91.0) (2025-11-25)
 
 

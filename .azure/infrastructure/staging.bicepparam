@@ -41,8 +41,7 @@ param postgresConfiguration = {
   enableIndexTuning: true
   enableQueryPerformanceInsight: true
   parameterLogging: {
-    enabled: true
-    logMinDurationStatementMs: 5000
+    enabled: false
   }
   backupRetentionDays: 7
   availabilityZone: '2'

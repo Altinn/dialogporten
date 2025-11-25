@@ -138,20 +138,6 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
 
-        var searchCte = "";
-        if (query.Search is not null)
-        {
-            searchCte = $"""
-            searchString AS (
-                SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
-                ,string_to_array({query.Search}::text, ' ') AS searchTerms
-                FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
-                LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
-                LIMIT 1
-                ),
-
-            """;
-        }
 
         var queryBuilder = new PostgresFormattableStringBuilder()
             .Append("WITH ")

@@ -204,13 +204,14 @@ export default function () {
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&Limit=3&OrderBy=dueAt_desc,updatedAt_desc');
         expectStatusFor(r).to.equal(200);
-        var jsonResponse = r.json();
 
         expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(3);
-        expect(r.json().items[0], 'first dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForDueAtItem);
-        expect(r.json().items[1], 'second dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForUpdatedItem);
-        expect(r.json().items[2], 'third dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForLastItem);
+        let jsonResponse = r.json();
+
+        expect(jsonResponse, 'response json').to.have.property("items").with.lengthOf(3);
+        expect(jsonResponse.items[0], 'first dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForDueAtItem);
+        expect(jsonResponse.items[1], 'second dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForUpdatedItem);
+        expect(jsonResponse.items[2], 'third dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForLastItem);
 
         r = getSO('dialogs/' + defaultFilter + '&Limit=3&OrderBy=dueAt_asc,updatedAt_desc');
         expectStatusFor(r).to.equal(200);

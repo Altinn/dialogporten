@@ -228,7 +228,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         {
             _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
                                     $"{nameof(AttachmentDto.ExpiresAt)}",
-                $"Must be in future, current value, or null. (Id: {attachment.Id}");
+                $"Must be in future, current value, or null. (Id: {attachment.Id})");
             return;
         }
 

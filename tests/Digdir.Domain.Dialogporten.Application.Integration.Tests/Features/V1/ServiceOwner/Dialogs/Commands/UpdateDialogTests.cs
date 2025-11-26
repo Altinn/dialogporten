@@ -452,7 +452,11 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var visibleFrom = DateTimeOffset.UtcNow.AddDays(7);
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.VisibleFrom = visibleFrom)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.Progress = 36;
+            })
             .AssertSuccessAndUpdateDialog(x => x.Dto.Progress = 37)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>

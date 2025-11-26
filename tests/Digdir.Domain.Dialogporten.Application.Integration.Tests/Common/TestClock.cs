@@ -7,7 +7,7 @@ public sealed class TestClock : IClock
     private DateTimeOffset? _override;
 
     public DateTimeOffset UtcNowOffset => _override ?? DateTimeOffset.UtcNow;
-    public DateTimeOffset NowOffset => new(UtcNowOffset.Ticks, TimeSpan.FromHours(1));
+    public DateTimeOffset NowOffset => UtcNowOffset.ToOffset(TimeSpan.FromHours(1));
 
     public DateTime UtcNow => UtcNowOffset.UtcDateTime;
     public DateTime Now => NowOffset.DateTime;

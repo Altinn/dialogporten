@@ -40,6 +40,7 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
             .ExecuteAndAssert<List<TransmissionDto>>(x =>
                 x.Should().NotBeEmpty()
                     .And.AllSatisfy(x => x.Attachments.Should().NotBeEmpty()
+                        .And.AllSatisfy(x => x.ExpiresAt.Should().NotBeNull())
                         .And.AllSatisfy(x => x.Urls.Should().NotBeEmpty()
                             .And.AllSatisfy(x => x.Url.Should().Be(Constants.ExpiredUri)))));
 }

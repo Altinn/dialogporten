@@ -51,7 +51,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                 TransmissionId = transmissionId
             })
             .ExecuteAndAssert<TransmissionDto>(x => x
-                .Attachments.Should().ContainSingle()
+                .Attachments.Should().ContainSingle(t => t.ExpiresAt != null)
                 .Which.Urls.Should().ContainSingle()
                 .Which.Url.Should().Be(Constants.ExpiredUri));
     }

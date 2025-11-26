@@ -4789,6 +4789,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -5415,6 +5421,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",

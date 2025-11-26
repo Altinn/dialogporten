@@ -30,13 +30,6 @@ public sealed class UpdateDialogDto
     public string? ExternalReference { get; set; }
 
     /// <summary>
-    /// The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be
-    /// immediately available.
-    /// </summary>
-    /// <example>2022-12-31T23:59:59Z</example>
-    public DateTimeOffset? VisibleFrom { get; set; }
-
-    /// <summary>
     /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
     /// </summary>
     /// <example>2022-12-31T23:59:59Z</example>
@@ -476,6 +469,11 @@ public sealed class AttachmentDto
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.
     /// </summary>
     public List<AttachmentUrlDto> Urls { get; set; } = [];
+
+    /// <summary>
+    /// The UTC timestamp when the attachment expires and is no longer available.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
 }
 
 public sealed class AttachmentUrlDto
@@ -523,6 +521,11 @@ public sealed class TransmissionAttachmentDto
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.
     /// </summary>
     public List<TransmissionAttachmentUrlDto> Urls { get; set; } = [];
+
+    /// <summary>
+    /// The UTC timestamp when the attachment expires and is no longer available.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
 }
 
 public sealed class TransmissionAttachmentUrlDto

@@ -152,12 +152,7 @@ public static class IFlowStepExtensions
     public static IFlowStep<T> SetApplicationClockSkew<T>(this IFlowStep<T> step, TimeSpan skew) =>
         step.Select(x =>
         {
-            step.Context.Application.ConfigureServices(x =>
-            {
-                x.RemoveAll<IClock>();
-                x.AddSingleton<IClock>(new SkewedClock(skew));
-            });
-
+            DialogApplication.Clock.OverrideUtc(skew);
             return x;
         });
 

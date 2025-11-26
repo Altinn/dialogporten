@@ -46,6 +46,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 {
     private readonly IDialogDbContext _db;
     private readonly IUser _user;
+    private readonly IClock _clock;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
@@ -57,6 +58,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     public UpdateDialogCommandHandler(
         IDialogDbContext db,
         IUser user,
+        IClock clock,
         IMapper mapper,
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
@@ -66,6 +68,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         IDataLoaderContext dataLoaderContext)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -206,7 +209,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         if (!_db.MustWhenAdded(attachment,
                 propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > DateTimeOffset.UtcNow || x == null))
+                predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id})";
 
@@ -221,7 +224,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         if (!_db.MustWhenModified(attachment,
                 propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > DateTimeOffset.UtcNow || x == null))
+                predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
                                     $"{nameof(AttachmentDto.ExpiresAt)}",
@@ -231,7 +234,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (!_db.MustWhenAdded(attachment,
                 propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > DateTimeOffset.UtcNow || x == null))
+                predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id})";
             _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
@@ -246,21 +249,21 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (!_db.MustWhenModified(dialog,
             propertyExpression: x => x.ExpiresAt,
-            predicate: x => x > DateTimeOffset.UtcNow))
+            predicate: x => x > _clock.UtcNowOffset))
         {
             _domainContext.AddError(nameof(UpdateDialogCommand.Dto.ExpiresAt), errorMessage);
         }
 
         if (!_db.MustWhenModified(dialog,
             propertyExpression: x => x.DueAt,
-            predicate: x => x > DateTimeOffset.UtcNow || x == null))
+            predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             _domainContext.AddError(nameof(UpdateDialogCommand.Dto.DueAt), errorMessage + " (Or null)");
         }
 
         if (!_db.MustWhenModified(dialog,
             propertyExpression: x => x.VisibleFrom,
-            predicate: x => x > DateTimeOffset.UtcNow))
+            predicate: x => x > _clock.UtcNowOffset))
         {
             _domainContext.AddError(nameof(UpdateDialogCommand.Dto.VisibleFrom), errorMessage);
         }

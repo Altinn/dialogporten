@@ -16,156 +16,156 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public class V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
     {
         
-        /// <summary>
-        /// Filter by one or more service resources
-        /// </summary>
+                /// <summary>
+                /// Filter by one or more service resources
+                /// </summary>
         [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> ServiceResource { get; set; }
 
-        /// <summary>
-        /// Filter by one or more owning parties
-        /// </summary>
+                /// <summary>
+                /// Filter by one or more owning parties
+                /// </summary>
         [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> Party { get; set; }
 
-        /// <summary>
-        /// Filter by end user id
-        /// </summary>
+                /// <summary>
+                /// Filter by end user id
+                /// </summary>
         [Query] 
         public string EndUserId { get; set; }
 
-        /// <summary>
-        /// Filter by one or more extended statuses
-        /// </summary>
+                /// <summary>
+                /// Filter by one or more extended statuses
+                /// </summary>
         [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> ExtendedStatus { get; set; }
 
-        /// <summary>
-        /// Filter by external reference
-        /// </summary>
+                /// <summary>
+                /// Filter by external reference
+                /// </summary>
         [Query] 
         public string ExternalReference { get; set; }
 
-        /// <summary>
-        /// Filter by status
-        /// </summary>
+                /// <summary>
+                /// Filter by status
+                /// </summary>
         [Query(CollectionFormat.Multi)] 
         public IEnumerable<DialogsEntities_DialogStatus> Status { get; set; }
 
-        /// <summary>
-        /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
-        /// </summary>
+                /// <summary>
+                /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
+                /// </summary>
         [Query] 
         public V1Common_DeletedFilter? Deleted { get; set; }
 
-        /// <summary>
-        /// Only return dialogs created after this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs created after this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? CreatedAfter { get; set; }
 
-        /// <summary>
-        /// Only return dialogs created before this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs created before this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? CreatedBefore { get; set; }
 
-        /// <summary>
-        /// Only return dialogs updated after this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs updated after this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? UpdatedAfter { get; set; }
 
-        /// <summary>
-        /// Only return dialogs updated before this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs updated before this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? UpdatedBefore { get; set; }
 
-        /// <summary>
-        /// Only return dialogs with content updated after this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs with content updated after this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
 
-        /// <summary>
-        /// Only return dialogs with content updated before this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs with content updated before this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
 
-        /// <summary>
-        /// Only return dialogs with due date after this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs with due date after this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? DueAfter { get; set; }
 
-        /// <summary>
-        /// Only return dialogs with due date before this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs with due date before this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? DueBefore { get; set; }
 
-        /// <summary>
-        /// Only return dialogs with visible-from date after this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs with visible-from date after this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? VisibleAfter { get; set; }
 
-        /// <summary>
-        /// Only return dialogs with visible-from date before this date
-        /// </summary>
+                /// <summary>
+                /// Only return dialogs with visible-from date before this date
+                /// </summary>
         [Query] 
         public System.DateTimeOffset? VisibleBefore { get; set; }
 
-        /// <summary>
-        /// Filter by process
-        /// </summary>
+                /// <summary>
+                /// Filter by process
+                /// </summary>
         [Query] 
         public string Process { get; set; }
 
-        /// <summary>
-        /// Filter by Display state
-        /// </summary>
+                /// <summary>
+                /// Filter by Display state
+                /// </summary>
         [Query(CollectionFormat.Multi)] 
         public IEnumerable<DialogEndUserContextsEntities_SystemLabel> SystemLabel { get; set; }
 
-        /// <summary>
-        /// Whether to exclude API-only dialogs from the results. Defaults to false.
-        /// </summary>
+                /// <summary>
+                /// Whether to exclude API-only dialogs from the results. Defaults to false.
+                /// </summary>
         [Query] 
         public bool? ExcludeApiOnly { get; set; }
 
-        /// <summary>
-        /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
-        /// </summary>
+                /// <summary>
+                /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
+                /// </summary>
         [Query] 
         public string Search { get; set; }
 
-        /// <summary>
-        /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
-        /// </summary>
+                /// <summary>
+                /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
+                /// </summary>
         [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> ServiceOwnerLabels { get; set; }
 
-        /// <summary>
-        /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
-        /// </summary>
+                /// <summary>
+                /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
+                /// </summary>
         [Query] 
         public string SearchLanguageCode { get; set; }
 
         [Query] 
         public OrderSetOfTOrderDefinitionAndTTarget OrderBy { get; set; }
 
-        /// <summary>
-        /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
-        /// </summary>
+                /// <summary>
+                /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
+                /// </summary>
         [Query] 
         public ContinuationTokenSetOfTOrderDefinitionAndTTarget ContinuationToken { get; set; }
 
-        /// <summary>
-        /// Limit the number of results per page (1-1000, default: 100)
-        /// </summary>
+                /// <summary>
+                /// Limit the number of results per page (1-1000, default: 100)
+                /// </summary>
         [Query] 
         public int? Limit { get; set; }
 
@@ -192,7 +192,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Retrieve service owner labels for a dialog.</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.6.5.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.0.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Retrieve service owner labels for a dialog.</summary>
@@ -1124,7 +1124,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
 //----------------------
 // <auto-generated>
-//     Generated using the NSwag toolchain v14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0)) (http://NSwag.org)
+//     Generated using the NSwag toolchain v14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0)) (http://NSwag.org)
 // </auto-generated>
 //----------------------
 
@@ -1150,7 +1150,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ProblemDetails
     {
 
@@ -1177,7 +1177,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ProblemDetails_Error
     {
 
@@ -1195,7 +1195,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label
     {
 
@@ -1204,7 +1204,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
     {
 
@@ -1212,7 +1212,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// List of system labels to set on target dialogs
         /// </summary>
         [JsonPropertyName("systemLabels")]
-        // TODO(system.text.json): Add string enum item converter
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
         public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
 
@@ -1220,19 +1220,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
         /// </summary>
         [JsonPropertyName("addLabels")]
-        // TODO(system.text.json): Add string enum item converter
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> AddLabels { get; set; }
 
         /// <summary>
         /// List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
         /// </summary>
         [JsonPropertyName("removeLabels")]
-        // TODO(system.text.json): Add string enum item converter
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogEndUserContextsEntities_SystemLabel
     {
 
@@ -1253,7 +1253,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel
     {
 
@@ -1267,7 +1267,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// List of system labels to set on target dialogs
         /// </summary>
         [JsonPropertyName("systemLabels")]
-        // TODO(system.text.json): Add string enum item converter
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
         public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
 
@@ -1275,19 +1275,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// List of system labels to add to the target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
         /// </summary>
         [JsonPropertyName("addLabels")]
-        // TODO(system.text.json): Add string enum item converter
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> AddLabels { get; set; }
 
         /// <summary>
         /// List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
         /// </summary>
         [JsonPropertyName("removeLabels")]
-        // TODO(system.text.json): Add string enum item converter
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_DialogRevision
     {
 
@@ -1305,7 +1305,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission
     {
 
@@ -1355,7 +1355,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of the transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesTransmissions_DialogTransmissionType>))]
         public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
 
         /// <summary>
@@ -1378,7 +1378,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntitiesTransmissions_DialogTransmissionType
     {
 
@@ -1408,7 +1408,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerCommonActors_Actor
     {
 
@@ -1416,7 +1416,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of actor; either the service owner, or someone representing the party.
         /// </summary>
         [JsonPropertyName("actorType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
         public Actors_ActorType ActorType { get; set; }
 
         /// <summary>
@@ -1433,7 +1433,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum Actors_ActorType
     {
 
@@ -1445,7 +1445,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Content
     {
 
@@ -1469,7 +1469,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1CommonContent_ContentValue
     {
 
@@ -1487,7 +1487,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1CommonLocalizations_Localization
     {
 
@@ -1505,7 +1505,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment
     {
 
@@ -1535,7 +1535,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl
     {
 
@@ -1562,12 +1562,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of consumer the URL is intended for.
         /// </summary>
         [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum Attachments_AttachmentUrlConsumerType
     {
 
@@ -1579,7 +1579,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog
     {
 
@@ -1597,7 +1597,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchActivities_Activity
     {
 
@@ -1611,7 +1611,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Uri ExtendedType { get; set; }
 
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
 
         [JsonPropertyName("deletedAt")]
@@ -1622,7 +1622,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntitiesActivities_DialogActivityType
     {
 
@@ -1679,7 +1679,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog
     {
 
@@ -1709,7 +1709,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_Dialog
     {
 
@@ -1833,7 +1833,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The aggregated status of the dialog.
         /// </summary>
         [JsonPropertyName("status")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntities_DialogStatus>))]
         public DialogsEntities_DialogStatus Status { get; set; }
 
         /// <summary>
@@ -1842,7 +1842,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Use SystemLabels on EndUserContext instead.
         /// </summary>
         [JsonPropertyName("systemLabel")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogEndUserContextsEntities_SystemLabel>))]
         [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
         public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
@@ -1908,7 +1908,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntities_DialogStatus
     {
 
@@ -1932,7 +1932,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogActivity
     {
 
@@ -1960,7 +1960,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of activity.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
 
         /// <summary>
@@ -1983,7 +1983,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog
     {
 
@@ -2021,7 +2021,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext
     {
 
@@ -2039,7 +2039,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_ServiceOwnerLabel
     {
 
@@ -2051,7 +2051,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogEndUserContext
     {
 
@@ -2065,12 +2065,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// System defined labels used to categorize dialogs.
         /// </summary>
         [JsonPropertyName("systemLabels")]
-        // TODO(system.text.json): Add string enum item converter
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_Content
     {
 
@@ -2114,7 +2114,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition
     {
 
@@ -2123,7 +2123,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class OrderSetOfTOrderDefinitionAndTTarget
     {
 
@@ -2138,7 +2138,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
     {
 
@@ -2153,7 +2153,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum V1Common_DeletedFilter
     {
 
@@ -2168,7 +2168,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Transmission
     {
 
@@ -2218,7 +2218,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of the transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesTransmissions_DialogTransmissionType>))]
         public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
 
         /// <summary>
@@ -2241,7 +2241,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType
     {
 
@@ -2253,7 +2253,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Content
     {
 
@@ -2277,7 +2277,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Attachment
     {
 
@@ -2307,7 +2307,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl
     {
 
@@ -2334,12 +2334,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of consumer the URL is intended for.
         /// </summary>
         [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog
     {
 
@@ -2357,7 +2357,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetActivity_Activity
     {
 
@@ -2371,7 +2371,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Uri ExtendedType { get; set; }
 
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
 
         [JsonPropertyName("deletedAt")]
@@ -2388,7 +2388,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_Dialog
     {
 
@@ -2523,7 +2523,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The aggregated status of the dialog.
         /// </summary>
         [JsonPropertyName("status")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntities_DialogStatus>))]
         public DialogsEntities_DialogStatus Status { get; set; }
 
         /// <summary>
@@ -2532,7 +2532,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Use SystemLabels on EndUserContext instead.
         /// </summary>
         [JsonPropertyName("systemLabel")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogEndUserContextsEntities_SystemLabel>))]
         [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
         public DialogEndUserContextsEntities_SystemLabel SystemLabel { get; set; }
 
@@ -2628,7 +2628,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_Content
     {
 
@@ -2684,7 +2684,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_Tag
     {
 
@@ -2696,7 +2696,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogAttachment
     {
 
@@ -2726,7 +2726,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogAttachmentUrl
     {
 
@@ -2752,12 +2752,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// What type of consumer the URL is intended for.
         /// </summary>
         [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmission
     {
 
@@ -2812,7 +2812,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesTransmissions_DialogTransmissionType>))]
         public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
 
         /// <summary>
@@ -2841,7 +2841,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent
     {
 
@@ -2865,7 +2865,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmissionAttachment
     {
 
@@ -2895,7 +2895,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmissionAttachmentUrl
     {
 
@@ -2922,12 +2922,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of consumer the URL is intended for.
         /// </summary>
         [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogGuiAction
     {
 
@@ -2976,14 +2976,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>priority.
         /// </summary>
         [JsonPropertyName("priority")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActions_DialogGuiActionPriority>))]
         public DialogsEntitiesActions_DialogGuiActionPriority Priority { get; set; }
 
         /// <summary>
         /// The HTTP method that the frontend should use when redirecting the user.
         /// </summary>
         [JsonPropertyName("httpMethod")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Http_HttpVerb>))]
         public Http_HttpVerb HttpMethod { get; set; }
 
         /// <summary>
@@ -3001,7 +3001,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntitiesActions_DialogGuiActionPriority
     {
 
@@ -3016,7 +3016,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum Http_HttpVerb
     {
 
@@ -3049,7 +3049,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogApiAction
     {
 
@@ -3095,7 +3095,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogApiActionEndpoint
     {
 
@@ -3123,7 +3123,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The HTTP method that the endpoint expects for this action.
         /// </summary>
         [JsonPropertyName("httpMethod")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Http_HttpVerb>))]
         public Http_HttpVerb HttpMethod { get; set; }
 
         /// <summary>
@@ -3162,7 +3162,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogActivity
     {
 
@@ -3190,7 +3190,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of activity.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
 
         /// <summary>
@@ -3213,7 +3213,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogSeenLog
     {
 
@@ -3251,7 +3251,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext
     {
 
@@ -3269,7 +3269,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel
     {
 
@@ -3281,7 +3281,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogEndUserContext
     {
 
@@ -3295,12 +3295,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// System defined labels used to categorize dialogs.
         /// </summary>
         [JsonPropertyName("systemLabels")]
-        // TODO(system.text.json): Add string enum item converter
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Dialog
     {
 
@@ -3363,7 +3363,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The aggregated status of the dialog.
         /// </summary>
         [JsonPropertyName("status")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<V1ServiceOwnerCommonDialogStatuses_DialogStatusInput>))]
         public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput Status { get; set; }
 
         /// <summary>
@@ -3412,7 +3412,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum V1ServiceOwnerCommonDialogStatuses_DialogStatusInput
     {
 
@@ -3442,7 +3442,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Content
     {
 
@@ -3498,7 +3498,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Tag
     {
 
@@ -3510,7 +3510,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Attachment
     {
 
@@ -3540,7 +3540,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl
     {
 
@@ -3566,12 +3566,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of consumer the URL is intended for.
         /// </summary>
         [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Transmission
     {
 
@@ -3622,7 +3622,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesTransmissions_DialogTransmissionType>))]
         public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
 
         /// <summary>
@@ -3645,7 +3645,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent
     {
 
@@ -3669,7 +3669,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment
     {
 
@@ -3699,7 +3699,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachmentUrl
     {
 
@@ -3719,12 +3719,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of consumer the URL is intended for.
         /// </summary>
         [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_GuiAction
     {
 
@@ -3767,7 +3767,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The HTTP method that the frontend should use when redirecting the user.
         /// </summary>
         [JsonPropertyName("httpMethod")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Http_HttpVerb>))]
         public Http_HttpVerb? HttpMethod { get; set; }
 
         /// <summary>
@@ -3775,7 +3775,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>priority.
         /// </summary>
         [JsonPropertyName("priority")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActions_DialogGuiActionPriority>))]
         public DialogsEntitiesActions_DialogGuiActionPriority Priority { get; set; }
 
         /// <summary>
@@ -3793,7 +3793,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_ApiAction
     {
 
@@ -3833,7 +3833,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_ApiActionEndpoint
     {
 
@@ -3859,7 +3859,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The HTTP method that the endpoint expects for this action.
         /// </summary>
         [JsonPropertyName("httpMethod")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Http_HttpVerb>))]
         public Http_HttpVerb HttpMethod { get; set; }
 
         /// <summary>
@@ -3898,7 +3898,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Activity
     {
 
@@ -3926,7 +3926,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
 
         /// <summary>
@@ -3950,7 +3950,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest
     {
 
@@ -4001,7 +4001,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesTransmissions_DialogTransmissionType>))]
         public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
 
         /// <summary>
@@ -4024,7 +4024,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
     {
 
@@ -4052,7 +4052,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
 
         /// <summary>
@@ -4076,7 +4076,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Dialog
     {
 
@@ -4185,14 +4185,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The aggregated status of the dialog.
         /// </summary>
         [JsonPropertyName("status")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<V1ServiceOwnerCommonDialogStatuses_DialogStatusInput>))]
         public V1ServiceOwnerCommonDialogStatuses_DialogStatusInput? Status { get; set; }
 
         /// <summary>
         /// Set the system label of the dialog.
         /// </summary>
         [JsonPropertyName("systemLabel")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogEndUserContextsEntities_SystemLabel>))]
         public DialogEndUserContextsEntities_SystemLabel? SystemLabel { get; set; }
 
         /// <summary>
@@ -4245,7 +4245,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
     {
 
@@ -4257,7 +4257,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel
     {
 
@@ -4269,7 +4269,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Content
     {
 
@@ -4330,7 +4330,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Tag
     {
 
@@ -4342,7 +4342,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Attachment
     {
 
@@ -4372,7 +4372,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
     {
 
@@ -4392,12 +4392,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of consumer the URL is intended for.
         /// </summary>
         [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Transmission
     {
 
@@ -4447,7 +4447,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesTransmissions_DialogTransmissionType>))]
         public DialogsEntitiesTransmissions_DialogTransmissionType Type { get; set; }
 
         /// <summary>
@@ -4470,7 +4470,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
     {
 
@@ -4494,7 +4494,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
     {
 
@@ -4524,7 +4524,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
     {
 
@@ -4544,12 +4544,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of consumer the URL is intended for.
         /// </summary>
         [JsonPropertyName("consumerType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_GuiAction
     {
 
@@ -4592,7 +4592,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The HTTP method that the frontend should use when redirecting the user.
         /// </summary>
         [JsonPropertyName("httpMethod")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Http_HttpVerb>))]
         public Http_HttpVerb? HttpMethod { get; set; }
 
         /// <summary>
@@ -4600,7 +4600,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>priority.
         /// </summary>
         [JsonPropertyName("priority")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActions_DialogGuiActionPriority>))]
         public DialogsEntitiesActions_DialogGuiActionPriority Priority { get; set; }
 
         /// <summary>
@@ -4618,7 +4618,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_ApiAction
     {
 
@@ -4658,7 +4658,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_ApiActionEndpoint
     {
 
@@ -4678,7 +4678,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The HTTP method that the endpoint expects for this action.
         /// </summary>
         [JsonPropertyName("httpMethod")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<Http_HttpVerb>))]
         public Http_HttpVerb HttpMethod { get; set; }
 
         /// <summary>
@@ -4717,7 +4717,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Activity
     {
 
@@ -4744,7 +4744,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The type of transmission.
         /// </summary>
         [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
 
         /// <summary>
@@ -4768,12 +4768,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class JsonPatchOperations_Operation
     {
 
         [JsonPropertyName("operationType")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter<JsonPatchOperations_OperationType>))]
         public JsonPatchOperations_OperationType OperationType { get; set; }
 
         [JsonPropertyName("path")]
@@ -4790,7 +4790,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.0.0 (NJsonSchema v11.5.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum JsonPatchOperations_OperationType
     {
 

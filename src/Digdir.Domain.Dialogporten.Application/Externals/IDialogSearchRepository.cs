@@ -4,8 +4,11 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Domain;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals;
@@ -25,6 +28,19 @@ public interface IDialogSearchRepository
         CancellationToken cancellationToken);
 
     Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
+        CancellationToken cancellationToken);
+
+    Task<Dictionary<Guid, DataContentDto>> FetchContentByDialogId(Guid[] dialogIds,
+        int userAuthLevel,
+        CancellationToken cancellationToken);
+
+    Task<Dictionary<Guid, DataDialogEndUserContextDto>> FetchEndUserContextByDialogId(
+        Guid[] dialogIds,
+        CancellationToken cancellationToken);
+
+    Task<Dictionary<Guid, List<DataDialogSeenLogDto>>> FetchSeenLogByDialogId(
+        Guid[] dialogIds,
+        string currentUserId,
         CancellationToken cancellationToken);
 }
 
@@ -164,3 +180,29 @@ public sealed class GetDialogsQuery
     public DateTimeOffset? VisibleAfter { get; set; }
     public DateTimeOffset? ExpiresBefore { get; set; }
 }
+
+public sealed class DataContentDto
+{
+    public DataContentValueDto Title { get; set; } = null!;
+    public DataContentValueDto? Summary { get; set; }
+    public DataContentValueDto? SenderName { get; set; }
+    public DataContentValueDto? ExtendedStatus { get; set; }
+}
+
+public sealed class DataContentValueDto
+{
+    public List<DataLocalizationDto> Value { get; set; } = [];
+    public string MediaType { get; set; } = MediaTypes.PlainText;
+    public DialogContentType.Values TypeId { get; set; }
+}
+
+public sealed class DataLocalizationDto
+{
+    public required string Value { get; init; }
+    public required string LanguageCode { get; init; }
+}
+
+
+public sealed record DataDialogEndUserContextDto(Guid Revision, List<SystemLabel.Values> SystemLabels);
+public sealed record DataDialogSeenLogDto(Guid SeenLogId, Guid DialogId, DateTimeOffset SeenAt, bool IsViaServiceOwner, bool IsCurrentEndUser, DataActorDto SeenBy);
+public sealed record DataActorDto(ActorType.Values ActorType, string? ActorId, string? ActorName);

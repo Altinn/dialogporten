@@ -5,7 +5,10 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -214,49 +217,133 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
         return result.ToDictionary(x => x.Id, x => x.GuiAttachmentCount);
     }
 
-    private const string FetchContentByDialogIdSql =
-        """
-        SELECT d."Id"                                      AS id
-             , COALESCE(r."MinimumAuthenticationLevel", 0) AS "MinimumAuthenticationLevel"
-             , c."MediaType"
-             , c."TypeId"
-             , l."LanguageCode"
-             , l."Value"
-        FROM "Dialog" d
-        LEFT JOIN "ResourcePolicyInformation" AS r ON d."ServiceResource" = r."Resource"
-        INNER JOIN "DialogContent" AS c ON c."DialogId" = d."Id"
-        INNER JOIN "DialogContentType" AS ct ON c."TypeId" = ct."Id" AND ct."OutputInList"
-        INNER JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogContentValue' AND ls."DialogContentId" = c."Id"
-        INNER JOIN "Localization" l ON l."LocalizationSetId" = ls."Id"
-        WHERE c."DialogId" = ANY (:dialogIds);
-        """;
+    public async Task<Dictionary<Guid, DataContentDto>> FetchContentByDialogId(
+        Guid[] dialogIds,
+        int userAuthLevel,
+        CancellationToken cancellationToken)
+    {
+        var (query, parameters) = new PostgresFormattableStringBuilder()
+            .Append(
+                $"""
+                 SELECT d."Id" AS dialogId
+                      , COALESCE(r."MinimumAuthenticationLevel", 0) AS authLevel
+                      , c."TypeId"
+                      , c."MediaType"
+                      , l."LanguageCode"
+                      , l."Value"
+                 FROM "Dialog" d
+                 LEFT JOIN "ResourcePolicyInformation" AS r ON d."ServiceResource" = r."Resource"
+                 INNER JOIN "DialogContent" AS c ON c."DialogId" = d."Id"
+                 INNER JOIN "DialogContentType" AS ct ON c."TypeId" = ct."Id" AND ct."OutputInList"
+                 INNER JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogContentValue' AND ls."DialogContentId" = c."Id"
+                 INNER JOIN "Localization" l ON l."LocalizationSetId" = ls."Id"
+                 WHERE d."Id" = ANY ({dialogIds}::uuid[]);
+                 """)
+            .ToDynamicParameters();
 
-    private const string FetchEndUserContextByDialogIdSql =
-        """
-        SELECT c."DialogId", cl."SystemLabelId", c."Id"
-        FROM "DialogEndUserContext" AS c
-        INNER JOIN "DialogEndUserContextSystemLabel" AS cl ON c."Id" = cl."DialogEndUserContextId"
-        WHERE c."DialogId" = ANY (:dialogIds)
-        ORDER BY c."DialogId", c."Id"
-        """;
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var rawRows = await connection.QueryAsync<RawContentRow>(query, parameters);
+        return rawRows
+            .GroupBy(x => new { x.DialogId, x.AuthLevel })
+            .ToDictionary(x => x.Key.DialogId, row =>
+            {
+                var hasRequiredAuth = row.Key.AuthLevel <= userAuthLevel;
+                var contentValues = row
+                    .GroupBy(r => new { r.TypeId, r.MediaType })
+                    .Select(x => new DataContentValueDto
+                    {
+                        TypeId = x.Key.TypeId,
+                        MediaType = x.Key.MediaType,
+                        Value = x
+                            .Select(r => new DataLocalizationDto { LanguageCode = r.LanguageCode, Value = r.Value })
+                            .ToList()
+                    })
+                    .ToList();
+                return new DataContentDto
+                {
+                    Title = PickByAuth(contentValues,
+                        sensitive: DialogContentType.Values.Title,
+                        nonSensitive: DialogContentType.Values.NonSensitiveTitle,
+                        hasRequiredAuth: hasRequiredAuth)!,
+                    Summary = PickByAuth(contentValues,
+                        sensitive: DialogContentType.Values.Summary,
+                        nonSensitive: DialogContentType.Values.NonSensitiveSummary,
+                        hasRequiredAuth: hasRequiredAuth),
+                    ExtendedStatus = contentValues.FirstOrDefault(x =>
+                        x.TypeId == DialogContentType.Values.ExtendedStatus),
+                    SenderName = contentValues.FirstOrDefault(x =>
+                        x.TypeId == DialogContentType.Values.SenderName)
+                };
+            });
+    }
 
-    private const string FetchSeenLogByDialogIdSql =
-        """
-        SELECT sl."DialogId"
-             , sl."Id"
-             , sl."CreatedAt"                                                 AS "SeenAt"
-             , sl."IsViaServiceOwner"
-             , an."ActorId" = :currentUserId AND an."ActorId" IS NOT NULL AS "IsCurrentEndUser"
-             , an."ActorId"
-             , an."Name"                                                      AS "ActorName"
-             , a."ActorTypeId"                                                AS "ActorType"
-        FROM "Dialog" d
-        INNER JOIN "DialogSeenLog" sl ON d."Id" = sl."DialogId"
-        INNER JOIN "Actor" a ON a."Discriminator" = 'DialogSeenLogSeenByActor' AND sl."Id" = a."DialogSeenLogId"
-        LEFT JOIN "ActorName" an ON a."ActorNameEntityId" = an."Id"
-        WHERE d."Id" = ANY (:dialogIds)
-          AND sl."CreatedAt" >= d."ContentUpdatedAt";
-        """;
+    public async Task<Dictionary<Guid, DataDialogEndUserContextDto>> FetchEndUserContextByDialogId(
+        Guid[] dialogIds,
+        CancellationToken cancellationToken)
+    {
+        var (query, parameters) = new PostgresFormattableStringBuilder()
+            .Append(
+                $"""
+                 SELECT c."DialogId"
+                      , c."Revision"
+                      , cl."SystemLabelId"
+                 FROM "DialogEndUserContext" AS c
+                 INNER JOIN "DialogEndUserContextSystemLabel" AS cl ON c."Id" = cl."DialogEndUserContextId"
+                 WHERE c."DialogId" = ANY ({dialogIds}::uuid[])
+                 ORDER BY c."DialogId", c."Id"
+                 """)
+            .ToDynamicParameters();
+
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var rawRows = await connection.QueryAsync<RawEndUserContextRow>(query, parameters);
+        return rawRows
+            .GroupBy(x => new { x.DialogId, x.Revision })
+            .ToDictionary(x => x.Key.DialogId, row => new DataDialogEndUserContextDto(
+                row.Key.Revision,
+                row.Select(x => x.SystemLabelId)
+                    .ToList()));
+    }
+
+    public async Task<Dictionary<Guid, List<DataDialogSeenLogDto>>> FetchSeenLogByDialogId(
+        Guid[] dialogIds,
+        string currentUserId,
+        CancellationToken cancellationToken)
+    {
+        var (query, parameters) = new PostgresFormattableStringBuilder()
+            .Append(
+                $"""
+                 SELECT sl."DialogId"
+                      , sl."Id" AS "SeenLogId"
+                      , sl."CreatedAt" AS "SeenAt"
+                      , sl."IsViaServiceOwner"
+                      , a."ActorTypeId" AS "ActorType"
+                      , an."ActorId" IS NOT NULL AND an."ActorId" = {currentUserId}::text AS "IsCurrentEndUser"
+                      , an."ActorId"
+                      , an."Name" AS "ActorName"
+                 FROM "Dialog" d
+                 INNER JOIN "DialogSeenLog" sl ON d."Id" = sl."DialogId"
+                 INNER JOIN "Actor" a ON a."Discriminator" = 'DialogSeenLogSeenByActor' AND sl."Id" = a."DialogSeenLogId"
+                 LEFT JOIN "ActorName" an ON a."ActorNameEntityId" = an."Id"
+                 WHERE d."Id" = ANY ({dialogIds}::uuid[])
+                   AND sl."CreatedAt" >= d."ContentUpdatedAt";
+                 """)
+            .ToDynamicParameters();
+
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var rawRows = await connection.QueryAsync<RawSeenLogRow>(query, parameters);
+        return rawRows
+            .GroupBy(x => x.DialogId)
+            .ToDictionary(x => x.Key, x => x.Select(row => new DataDialogSeenLogDto(
+                row.SeenLogId,
+                row.DialogId,
+                row.SeenAt,
+                row.IsViaServiceOwner,
+                row.IsCurrentEndUser,
+                new DataActorDto(row.ActorType,
+                    row.ActorId,
+                    row.ActorName)))
+            .ToList());
+    }
 
     private const string FetchLatestActivitiesByDialogIdSql =
         """
@@ -282,4 +369,24 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
         WHERE d."DialogId" = ANY (:dialogIds)
         ORDER BY d."DialogId", d."Id", a0."Id", a1."Id", l0."Id";
         """;
+
+    [SuppressMessage("Style", "IDE0072:Add missing cases")]
+    private static DataContentValueDto? PickByAuth(
+        List<DataContentValueDto> values,
+        DialogContentType.Values sensitive,
+        DialogContentType.Values nonSensitive,
+        bool hasRequiredAuth) => values
+        .Where(x => x.TypeId == sensitive || x.TypeId == nonSensitive)
+        .OrderBy(x => x.TypeId switch
+        {
+            _ when x.TypeId == sensitive && hasRequiredAuth => 0,
+            _ when x.TypeId == nonSensitive && !hasRequiredAuth => 1,
+            _ when x.TypeId == sensitive => 2,
+            _ => 3
+        })
+        .FirstOrDefault();
+
+    private record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType, string LanguageCode, string Value);
+    private record RawEndUserContextRow(Guid DialogId, Guid Revision, SystemLabel.Values SystemLabelId);
+    private record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner, ActorType.Values ActorType, bool IsCurrentEndUser, string? ActorId, string? ActorName);
 }

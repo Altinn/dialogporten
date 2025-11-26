@@ -946,6 +946,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -1217,6 +1223,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -1381,6 +1393,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
@@ -1960,6 +1978,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -2456,6 +2480,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent creation of attachments. If not provided, a new UUIDv7 will be generated.",
             "format": "guid",
@@ -2946,6 +2976,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent creation of transmission attachments. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -3312,6 +3348,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent additions of attachments. If not provided, a new UUIDv7 will be generated.",
@@ -3724,6 +3766,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.",
@@ -4277,6 +4325,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -4564,6 +4618,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",

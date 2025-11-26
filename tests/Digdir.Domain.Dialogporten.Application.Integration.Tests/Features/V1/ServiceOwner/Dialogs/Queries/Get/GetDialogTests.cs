@@ -1,7 +1,9 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using FluentAssertions;
@@ -57,6 +59,33 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 );
             });
     }
+
+    [Fact]
+    public Task Get_Dialog_Should_Not_Mask_Expired_Attachment_Urls() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
+                x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
+
+                x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
+                x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
+            })
+            .SetApplicationClockSkew(TimeSpan.FromDays(2))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Transmissions.Should().NotBeEmpty()
+                    .And.AllSatisfy(t => t.Attachments.Should().NotBeEmpty()
+                        .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
+                            .And.AllSatisfy(url => url.Url.Should().NotBeNull()
+                                .And.NotBe(Constants.ExpiredUri))));
+
+                x.Attachments.Should().NotBeEmpty()
+                    .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
+                        .And.AllSatisfy(url => url.Url.Should().NotBeNull()
+                            .And.NotBe(Constants.ExpiredUri)));
+            });
 
     [Fact]
     public async Task Get_ReturnsDialog_WhenDialogExists()

@@ -190,6 +190,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         DecorateWithAuthorization(dialogDto, authorizationResult);
         ReplaceUnauthorizedUrls(dialogDto);
+        ReplaceExpiredAttachmentUrls(dialogDto);
 
         return dialogDto;
     }
@@ -270,6 +271,29 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             {
                 url.Url = Constants.UnauthorizedUri;
             }
+        }
+    }
+
+    private void ReplaceExpiredAttachmentUrls(DialogDto dto)
+    {
+        var expiredDialogAttachmentUrls = dto.Attachments
+            .Where(x => x.ExpiresAt < _clock.UtcNowOffset)
+            .SelectMany(x => x.Urls);
+
+        foreach (var url in expiredDialogAttachmentUrls)
+        {
+            url.Url = Constants.ExpiredUri;
+        }
+
+        var expiredTransmissionAttachmentUrls = dto.Transmissions
+            .Where(x => x.IsAuthorized)
+            .SelectMany(x => x.Attachments)
+            .Where(x => x.ExpiresAt < _clock.UtcNowOffset)
+            .SelectMany(x => x.Urls);
+
+        foreach (var url in expiredTransmissionAttachmentUrls)
+        {
+            url.Url = Constants.ExpiredUri;
         }
     }
 }

@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.92.0](https://github.com/Altinn/dialogporten/compare/v1.91.2...v1.92.0) (2025-11-26)
+
+
+### Features
+
+* **app:** add ExpiresAt on attachments ([#3013](https://github.com/Altinn/dialogporten/issues/3013)) ([9d13506](https://github.com/Altinn/dialogporten/commit/9d135062761ed97b095e0fef27de5abe698ce225))
+
+
+### Bug Fixes
+
+* **breaking:** Sync UpdatedAt fields with VisibleFrom ([#3004](https://github.com/Altinn/dialogporten/issues/3004)) ([fb96686](https://github.com/Altinn/dialogporten/commit/fb966860f95b0173a000a774becf9f369677f9bf))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.7.0 ([#3053](https://github.com/Altinn/dialogporten/issues/3053)) ([2442c65](https://github.com/Altinn/dialogporten/commit/2442c657832285189649b1c909c409e20c9ecc63))
+* **deps:** update opentelemetry dependencies  to 1.14.0 ([#3042](https://github.com/Altinn/dialogporten/issues/3042)) ([d12cac7](https://github.com/Altinn/dialogporten/commit/d12cac7b635b751ccf14770d599353693ddd4b27))
+
 ## [1.91.2](https://github.com/Altinn/dialogporten/compare/v1.91.1...v1.91.2) (2025-11-25)
 
 

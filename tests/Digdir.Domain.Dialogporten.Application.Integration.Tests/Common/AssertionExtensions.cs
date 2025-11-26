@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -17,4 +18,10 @@ public static class DomainErrorAssertionsExtensions
         domainError.Errors.Should().Contain(
             e => e.ErrorMessage.Contains(expectedText, StringComparison.OrdinalIgnoreCase),
             $"Expected an error containing the text '{expectedText}'");
+
+    public static void ShouldHaveErrorWithPropertyNameText(this DomainError domainError, string expectedText) =>
+        domainError.Errors.Should().Contain(
+            e => e.PropertyName.Contains(expectedText, StringComparison.OrdinalIgnoreCase),
+            $"Expected an error with {nameof(DomainFailure.PropertyName)} " +
+            $"containing the text '{expectedText}'");
 }

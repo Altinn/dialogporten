@@ -30,13 +30,6 @@ public sealed class UpdateDialogDto
     public string? ExternalReference { get; set; }
 
     /// <summary>
-    /// The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be
-    /// immediately available.
-    /// </summary>
-    /// <example>2022-12-31T23:59:59Z</example>
-    public DateTimeOffset? VisibleFrom { get; set; }
-
-    /// <summary>
     /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
     /// </summary>
     /// <example>2022-12-31T23:59:59Z</example>

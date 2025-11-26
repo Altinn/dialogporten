@@ -66,6 +66,19 @@ public static class InfrastructureExtensions
                 if (infrastructure.EnableSqlParametersLogging)
                 {
                     dataSourceBuilder.EnableParameterLogging();
+                    
+                    // Configure OpenTelemetry to include parameter values in traces
+                    dataSourceBuilder.ConfigureTracing(options =>
+                    {
+                        options.ConfigureCommandEnrichmentCallback((activity, command) =>
+                        {
+                            // Add each parameter as a separate tag following OpenTelemetry semantic conventions
+                            foreach (NpgsqlParameter parameter in command.Parameters)
+                            {
+                                activity.SetTag($"db.query.parameter.{parameter.ParameterName}", parameter.Value?.ToString() ?? "null");
+                            }
+                        });
+                    });
                 }
 
                 return dataSourceBuilder.Build();

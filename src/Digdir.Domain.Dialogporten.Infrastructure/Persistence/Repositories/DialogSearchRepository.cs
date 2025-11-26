@@ -96,11 +96,17 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                 """)
             .AppendIf(query.Search is not null,
                 """
-                SELECT d."Id"
-                FROM search."DialogSearch" ds 
-                JOIN "Dialog" d ON d."Id" = ds."DialogId"
-                CROSS JOIN searchString ss
-                WHERE ds."Party" = ppm.party AND ds."SearchVector" @@ ss.searchVector
+                WITH candidate_ds AS (
+                    SELECT d."Id"
+                    FROM search."DialogSearch" ds 
+                    JOIN "Dialog" d ON d."Id" = ds."DialogId"
+                    CROSS JOIN searchString ss
+                    WHERE ds."Party" = ppm.party AND ds."SearchVector" @@ ss.searchVector
+                    ORDER BY ds."DialogId" DESC          -- UUIDv7: newest first
+                    LIMIT 1000 -- Limit hits to reduce work in further filtering
+                )
+                SELECT d."Id" FROM candidate_ds
+                JOIN "Dialog" d ON d."Id" = candidate_ds."Id"
 
                 """)
             .Append(

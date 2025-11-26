@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.91.2](https://github.com/Altinn/dialogporten/compare/v1.91.1...v1.91.2) (2025-11-25)
+
+
+### Miscellaneous Chores
+
+* **perf:** Undo use of calculated column, use late materialization ([#3048](https://github.com/Altinn/dialogporten/issues/3048)) ([d62515f](https://github.com/Altinn/dialogporten/commit/d62515f9a015545a28c6f1974ca3e9dff978f5d3))
+
 ## [1.91.1](https://github.com/Altinn/dialogporten/compare/v1.91.0...v1.91.1) (2025-11-25)
 
 

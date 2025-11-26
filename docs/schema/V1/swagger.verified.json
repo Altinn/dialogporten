@@ -3593,13 +3593,6 @@
             },
             "nullable": true,
             "type": "array"
-          },
-          "visibleFrom": {
-            "description": "The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be\nimmediately available.",
-            "example": "2022-12-31T23:59:59Z",
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
           }
         },
         "type": "object"

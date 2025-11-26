@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.92.1](https://github.com/Altinn/dialogporten/compare/v1.92.0...v1.92.1) (2025-11-26)
+
+
+### Miscellaneous Chores
+
+* enable info logs on npsql ([#3059](https://github.com/Altinn/dialogporten/issues/3059)) ([18dbe97](https://github.com/Altinn/dialogporten/commit/18dbe973917cc00da99c20f3b1d7c303490e09a9))
+
 ## [1.92.0](https://github.com/Altinn/dialogporten/compare/v1.91.2...v1.92.0) (2025-11-26)
 
 

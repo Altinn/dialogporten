@@ -18,9 +18,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "9.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gin");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -138,6 +139,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -1009,6 +1013,30 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ServiceResource", "Party"), new[] { "Id" });
 
+                    b.HasIndex("Party", "ContentUpdatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ContentUpdatedAt", "Id"), new[] { "ServiceResource" });
+
+                    b.HasIndex("Party", "CreatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "CreatedAt", "Id"), new[] { "ServiceResource" });
+
+                    b.HasIndex("Party", "DueAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "DueAt", "Id"), new[] { "ServiceResource" });
+
+                    b.HasIndex("Party", "UpdatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "UpdatedAt", "Id"), new[] { "ServiceResource" });
+
                     b.ToTable("Dialog", (string)null);
                 });
 
@@ -1533,6 +1561,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("DialogId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Party")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<NpgsqlTsVector>("SearchVector")
                         .IsRequired()
                         .HasColumnType("tsvector");
@@ -1545,6 +1578,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("SearchVector");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SearchVector"), "GIN");
+
+                    b.HasIndex("Party", "SearchVector");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Party", "SearchVector"), "GIN");
 
                     b.ToTable("DialogSearch", "search");
                 });

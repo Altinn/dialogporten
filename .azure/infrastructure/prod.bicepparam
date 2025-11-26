@@ -54,6 +54,9 @@ param postgresConfiguration = {
   // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true
   enableQueryPerformanceInsight: false
+  parameterLogging: {
+    enabled: false
+  }
   highAvailability: {
     mode: 'ZoneRedundant'
     standbyAvailabilityZone: '2'

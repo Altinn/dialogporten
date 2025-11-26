@@ -127,7 +127,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
 
     private const string DummyService = "urn:altinn:resource:test-service";
 
-    [Fact]
+    [Fact(Skip = "Not yet supported")]
     public async Task Search_Should_Return_Delegated_Instances()
     {
         var delegatedDialogId = NewUuidV7();

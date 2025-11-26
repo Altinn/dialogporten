@@ -1,5 +1,84 @@
 # Changelog
 
+## [1.92.1](https://github.com/Altinn/dialogporten/compare/v1.92.0...v1.92.1) (2025-11-26)
+
+
+### Miscellaneous Chores
+
+* enable info logs on npsql ([#3059](https://github.com/Altinn/dialogporten/issues/3059)) ([18dbe97](https://github.com/Altinn/dialogporten/commit/18dbe973917cc00da99c20f3b1d7c303490e09a9))
+
+## [1.92.0](https://github.com/Altinn/dialogporten/compare/v1.91.2...v1.92.0) (2025-11-26)
+
+
+### Features
+
+* **app:** add ExpiresAt on attachments ([#3013](https://github.com/Altinn/dialogporten/issues/3013)) ([9d13506](https://github.com/Altinn/dialogporten/commit/9d135062761ed97b095e0fef27de5abe698ce225))
+
+
+### Bug Fixes
+
+* **breaking:** Sync UpdatedAt fields with VisibleFrom ([#3004](https://github.com/Altinn/dialogporten/issues/3004)) ([fb96686](https://github.com/Altinn/dialogporten/commit/fb966860f95b0173a000a774becf9f369677f9bf))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.7.0 ([#3053](https://github.com/Altinn/dialogporten/issues/3053)) ([2442c65](https://github.com/Altinn/dialogporten/commit/2442c657832285189649b1c909c409e20c9ecc63))
+* **deps:** update opentelemetry dependencies  to 1.14.0 ([#3042](https://github.com/Altinn/dialogporten/issues/3042)) ([d12cac7](https://github.com/Altinn/dialogporten/commit/d12cac7b635b751ccf14770d599353693ddd4b27))
+
+## [1.91.2](https://github.com/Altinn/dialogporten/compare/v1.91.1...v1.91.2) (2025-11-25)
+
+
+### Miscellaneous Chores
+
+* **perf:** Undo use of calculated column, use late materialization ([#3048](https://github.com/Altinn/dialogporten/issues/3048)) ([d62515f](https://github.com/Altinn/dialogporten/commit/d62515f9a015545a28c6f1974ca3e9dff978f5d3))
+
+## [1.91.1](https://github.com/Altinn/dialogporten/compare/v1.91.0...v1.91.1) (2025-11-25)
+
+
+### Miscellaneous Chores
+
+* **perf:** Add party column, GIN index to DialogSearch ([#3046](https://github.com/Altinn/dialogporten/issues/3046)) ([736be92](https://github.com/Altinn/dialogporten/commit/736be926922e04ee77a8db3f0c74613c56d5fda8))
+
+## [1.91.0](https://github.com/Altinn/dialogporten/compare/v1.90.5...v1.91.0) (2025-11-25)
+
+
+### Features
+
+* **infra:** add parameter logging for postgresql ([#3044](https://github.com/Altinn/dialogporten/issues/3044)) ([4488ddd](https://github.com/Altinn/dialogporten/commit/4488dddc32ff6dec93936fd47afbb4e750de19ee))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v5.0.1 ([#3039](https://github.com/Altinn/dialogporten/issues/3039)) ([530874c](https://github.com/Altinn/dialogporten/commit/530874c7295f9dc893a4b2a0b4cbcd66d451f961))
+
+## [1.90.5](https://github.com/Altinn/dialogporten/compare/v1.90.4...v1.90.5) (2025-11-22)
+
+
+### Bug Fixes
+
+* **search:** add limit to search query for improved performance ([#3036](https://github.com/Altinn/dialogporten/issues/3036)) ([6878e12](https://github.com/Altinn/dialogporten/commit/6878e12f316234d5aa72db5590467153bf34b69c))
+* system-label-query ([#3038](https://github.com/Altinn/dialogporten/issues/3038)) ([39b0b81](https://github.com/Altinn/dialogporten/commit/39b0b81acacadb81485aeb3d4c1dfd9dd9999b68))
+
+## [1.90.4](https://github.com/Altinn/dialogporten/compare/v1.90.3...v1.90.4) (2025-11-22)
+
+
+### Miscellaneous Chores
+
+* **infra:** Add postgres statement logging in yt01 ([#3034](https://github.com/Altinn/dialogporten/issues/3034)) ([3730ee3](https://github.com/Altinn/dialogporten/commit/3730ee3002af957a65fda39eb8ae621929434bff))
+
+## [1.90.3](https://github.com/Altinn/dialogporten/compare/v1.90.2...v1.90.3) (2025-11-21)
+
+
+### Bug Fixes
+
+* **infra:** handle empty lists when building search query ([#3033](https://github.com/Altinn/dialogporten/issues/3033)) ([763f79d](https://github.com/Altinn/dialogporten/commit/763f79d6bd1860e2c3cde4f8b3cb7998bb9bfb8e))
+
+
+### Miscellaneous Chores
+
+* **ci:** upgrade azure cli to 2.80.0 ([#3025](https://github.com/Altinn/dialogporten/issues/3025)) ([9f7cf16](https://github.com/Altinn/dialogporten/commit/9f7cf16197cfce9eb9907dcfd4085107509361c4))
+* **perf:** Improve SQL query for dialog search retrieval ([#3030](https://github.com/Altinn/dialogporten/issues/3030)) ([e0f089e](https://github.com/Altinn/dialogporten/commit/e0f089e5c618fcd44c8443f9da7b052b9d3e9334))
+
 ## [1.90.2](https://github.com/Altinn/dialogporten/compare/v1.90.1...v1.90.2) (2025-11-19)
 
 

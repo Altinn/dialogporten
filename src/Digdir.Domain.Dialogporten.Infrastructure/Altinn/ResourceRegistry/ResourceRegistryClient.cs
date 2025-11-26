@@ -64,7 +64,8 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
             yield return response.Data;
 
-            nextUrl = response.Links.Next?.ToString();
+            // Use PathAndQuery to work around internal (non-APIM) URLs being returned
+            nextUrl = response.Links.Next?.PathAndQuery;
         } while (nextUrl is not null);
     }
 

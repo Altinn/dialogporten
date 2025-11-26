@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.92.2](https://github.com/Altinn/dialogporten/compare/v1.92.1...v1.92.2) (2025-11-26)
+
+
+### Bug Fixes
+
+* **janitor:** Fix deletion/internal URL issues ([#3061](https://github.com/Altinn/dialogporten/issues/3061)) ([f1627e7](https://github.com/Altinn/dialogporten/commit/f1627e740fe50552bc617e62ea1358b897e7bef8))
+
 ## [1.92.1](https://github.com/Altinn/dialogporten/compare/v1.92.0...v1.92.1) (2025-11-26)
 
 

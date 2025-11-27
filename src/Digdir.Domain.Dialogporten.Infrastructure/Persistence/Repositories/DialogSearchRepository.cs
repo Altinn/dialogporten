@@ -264,30 +264,23 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
                 var hasRequiredAuth = row.Key.AuthLevel <= userAuthLevel;
                 var contentValues = row
                     .GroupBy(r => new { r.TypeId, r.MediaType })
-                    .Select(x => new DataContentValueDto
-                    {
-                        TypeId = x.Key.TypeId,
-                        MediaType = x.Key.MediaType,
-                        Value = x
-                            .Select(r => new DataLocalizationDto(r.LanguageCode, r.Value))
-                            .ToList()
-                    })
+                    .Select(x => new DataContentValueDto(TypeId: x.Key.TypeId, MediaType: x.Key.MediaType, Value: x
+                        .Select(r => new DataLocalizationDto(r.LanguageCode, r.Value))
+                        .ToList()))
                     .ToList();
-                return new DataContentDto
-                {
-                    Title = PickByAuth(contentValues,
+                return new DataContentDto(
+                    Title: PickByAuth(contentValues,
                         sensitive: DialogContentType.Values.Title,
                         nonSensitive: DialogContentType.Values.NonSensitiveTitle,
                         hasRequiredAuth: hasRequiredAuth)!,
-                    Summary = PickByAuth(contentValues,
+                    Summary: PickByAuth(contentValues,
                         sensitive: DialogContentType.Values.Summary,
                         nonSensitive: DialogContentType.Values.NonSensitiveSummary,
                         hasRequiredAuth: hasRequiredAuth),
-                    ExtendedStatus = contentValues.FirstOrDefault(x =>
+                    ExtendedStatus: contentValues.FirstOrDefault(x =>
                         x.TypeId == DialogContentType.Values.ExtendedStatus),
-                    SenderName = contentValues.FirstOrDefault(x =>
-                        x.TypeId == DialogContentType.Values.SenderName)
-                };
+                    SenderName: contentValues.FirstOrDefault(x =>
+                        x.TypeId == DialogContentType.Values.SenderName));
             });
     }
 

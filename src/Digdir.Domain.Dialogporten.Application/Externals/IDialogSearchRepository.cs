@@ -186,21 +186,8 @@ public sealed class GetDialogsQuery
     public DateTimeOffset? ExpiresBefore { get; set; }
 }
 
-public sealed class DataContentDto
-{
-    public DataContentValueDto Title { get; set; } = null!;
-    public DataContentValueDto? Summary { get; set; }
-    public DataContentValueDto? SenderName { get; set; }
-    public DataContentValueDto? ExtendedStatus { get; set; }
-}
-
-public sealed class DataContentValueDto
-{
-    public List<DataLocalizationDto> Value { get; set; } = [];
-    public string MediaType { get; set; } = MediaTypes.PlainText;
-    public DialogContentType.Values TypeId { get; set; }
-}
-
+public sealed record DataContentDto(DataContentValueDto Title, DataContentValueDto? Summary, DataContentValueDto? ExtendedStatus, DataContentValueDto? SenderName);
+public sealed record DataContentValueDto(DialogContentType.Values TypeId, string MediaType, List<DataLocalizationDto> Value);
 public sealed record DataLocalizationDto(string LanguageCode, string Value);
 public sealed record DataDialogEndUserContextDto(Guid Revision, List<SystemLabel.Values> SystemLabels);
 public sealed record DataDialogSeenLogDto(Guid SeenLogId, Guid DialogId, DateTimeOffset SeenAt, bool IsViaServiceOwner, bool IsCurrentEndUser, DataActorDto SeenBy);

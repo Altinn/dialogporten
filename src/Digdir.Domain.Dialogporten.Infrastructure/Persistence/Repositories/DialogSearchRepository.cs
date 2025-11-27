@@ -439,10 +439,10 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
         })
         .FirstOrDefault();
 
-    private record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
+    private sealed record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
         string LanguageCode, string Value);
-    private record RawEndUserContextRow(Guid DialogId, Guid Revision, SystemLabel.Values SystemLabelId);
-    private record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner,
+    private sealed record RawEndUserContextRow(Guid DialogId, Guid Revision, SystemLabel.Values SystemLabelId);
+    private sealed record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner,
         ActorType.Values ActorType, bool IsCurrentEndUser, string? ActorId, string? ActorName);
     private sealed record RawActivityRow(Guid DialogId, Guid ActivityId, DateTime CreatedAt,
         DialogActivityType.Values TypeId, string? ExtendedType, Guid? TransmissionId, ActorType.Values ActorType,

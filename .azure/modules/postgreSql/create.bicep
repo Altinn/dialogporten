@@ -51,6 +51,17 @@ param enableQueryPerformanceInsight bool
 @description('Enable index tuning')
 param enableIndexTuning bool
 
+@export()
+type ParameterLoggingConfiguration = {
+  @description('Enable parameter logging for queries')
+  enabled: bool
+  @description('Minimum query duration in milliseconds to log. Defaults to 5000ms (5 seconds). Set to 0 to log all queries.')
+  logMinDurationStatementMs: int?
+}
+
+@description('Parameter logging configuration. Logs query parameters for slow queries which can be useful for debugging but increases log volume.')
+param parameterLogging ParameterLoggingConfiguration
+
 @description('The name of the Application Insights workspace')
 param appInsightWorkspaceName string
 
@@ -175,7 +186,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     parent: postgres
     name: 'azure.extensions'
     properties: {
-      value: 'PG_TRGM'
+      value: 'PG_TRGM,BTREE_GIN'
       source: 'user-override'
     }
     dependsOn: [postgresAdministrators]
@@ -232,6 +243,37 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     source: 'user-override'
   }
   dependsOn: [pg_qs_query_capture_mode]
+}
+
+// Parameter logging configuration (independent of Query Store)
+resource log_min_duration_statement 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (parameterLogging.enabled) {
+  parent: postgres
+  name: 'log_min_duration_statement'
+  properties: {
+    value: string(parameterLogging.?logMinDurationStatementMs ?? 5000)
+    source: 'user-override'
+  }
+  dependsOn: [idle_transactions_timeout]
+}
+
+resource log_statement 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (parameterLogging.enabled) {
+  parent: postgres
+  name: 'log_statement'
+  properties: {
+    value: 'none'  // Only log queries that exceed log_min_duration_statement
+    source: 'user-override'
+  }
+  dependsOn: [log_min_duration_statement]
+}
+
+resource log_duration 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (parameterLogging.enabled) {
+  parent: postgres
+  name: 'log_duration'
+  properties: {
+    value: 'on'  // Log duration of completed statements
+    source: 'user-override'
+  }
+  dependsOn: [log_statement]
 }
 
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {

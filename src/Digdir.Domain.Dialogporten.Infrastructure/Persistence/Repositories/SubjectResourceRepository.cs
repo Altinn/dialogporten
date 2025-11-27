@@ -51,7 +51,7 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
             	delete
             when matched AND NOT s.isDeleted then
               	update set "{nameof(SubjectResource.UpdatedAt)}" = s.updatedAt
-            when not matched then
+            when not matched AND NOT s.isDeleted then
               	insert ("{nameof(SubjectResource.Id)}", "{nameof(SubjectResource.Subject)}", "{nameof(SubjectResource.Resource)}", "{nameof(SubjectResource.CreatedAt)}", "{nameof(SubjectResource.UpdatedAt)}")
               	values (s.id, s.subject, s.resource, s.createdAt, s.updatedAt);
             """;

@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -182,6 +183,11 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         var dialogIds = dialogs.Items
             .Select(x => x.Id)
             .ToArray();
+
+        if (dialogIds.Length == 0)
+        {
+            return PaginatedList<DialogDto>.CreateEmpty(request);
+        }
 
         var guiAttachmentCountByDialogId = await FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
         var contentByDialogId = await FetchContentByDialogId(dialogIds, cancellationToken);

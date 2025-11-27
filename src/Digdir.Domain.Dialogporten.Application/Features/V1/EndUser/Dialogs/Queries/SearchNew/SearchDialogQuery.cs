@@ -12,13 +12,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
-using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using OneOf;
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -139,7 +136,6 @@ public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogD
 
 internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQuery, SearchDialogResult>
 {
-    private readonly IDialogDbContext _db;
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
@@ -147,14 +143,12 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IUser _user;
 
     public SearchDialogQueryHandler(
-        IDialogDbContext db,
         IClock clock,
         IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization,
         IDialogSearchRepository searchRepository,
         IUser user)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
@@ -254,55 +248,43 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         return result;
     }
 
-    private static void MaskActorIdentifiers(Dictionary<Guid, List<DialogSeenLogDto>> seenLogsByDialogId, Dictionary<Guid, DialogActivityDto?> latestActivitiesByDialogId)
+    private static void MaskActorIdentifiers(Dictionary<Guid, List<DialogSeenLogDto>> seenLogsByDialogId, Dictionary<Guid, DialogActivityDto> latestActivitiesByDialogId)
     {
         foreach (var item in seenLogsByDialogId.Values
                      .SelectMany(x => x)
                      .Select(x => x.SeenBy)
                      .Concat(latestActivitiesByDialogId.Values
-                         .Where(x => x is not null)
-                         .Select(x => x!.PerformedBy)))
+                         .Select(x => x.PerformedBy)))
         {
             item.ActorId = IdentifierMasker.GetMaybeMaskedIdentifier(item.ActorId);
         }
     }
 
-    private async Task<Dictionary<Guid, DialogActivityDto?>> FetchLatestActivitiesByDialogId(Guid[] dialogIds,
+    private async Task<Dictionary<Guid, DialogActivityDto>> FetchLatestActivitiesByDialogId(Guid[] dialogIds,
         CancellationToken cancellationToken)
     {
-        return await _db.DialogActivities.AsNoTracking()
-            .Where(x => dialogIds.Contains(x.DialogId))
-            .Select(a => new
+        var result = await _searchRepository.FetchLatestActivitiesByDialogId(dialogIds, cancellationToken);
+        return result.ToDictionary(x => x.Key, x => new DialogActivityDto
+        {
+            Id = x.Value.ActivityId,
+            CreatedAt = x.Value.CreatedAt,
+            Type = x.Value.Type,
+            ExtendedType = x.Value.ExtendedType,
+            PerformedBy = new ActorDto
             {
-                a.DialogId,
-                Activity = new DialogActivityDto
+                ActorId = x.Value.PerformedBy.ActorId,
+                ActorName = x.Value.PerformedBy.ActorName,
+                ActorType = x.Value.PerformedBy.ActorType
+            },
+            TransmissionId = x.Value.TransmissionId,
+            Description = x.Value.Description
+                .Select(l => new LocalizationDto
                 {
-                    Id = a.Id,
-                    CreatedAt = a.CreatedAt,
-                    Type = a.TypeId,
-                    ExtendedType = a.ExtendedType,
-                    PerformedBy = new ActorDto
-                    {
-                        ActorId = a.PerformedBy.ActorNameEntity!.ActorId,
-                        ActorName = a.PerformedBy.ActorNameEntity!.Name,
-                        ActorType = a.PerformedBy.ActorTypeId
-                    },
-                    TransmissionId = a.TransmissionId,
-                    Description = a.Description!.Localizations
-                        .Select(l => new LocalizationDto
-                        {
-                            LanguageCode = l.LanguageCode,
-                            Value = l.Value
-                        })
-                        .ToList()
-                }
-            })
-            .GroupBy(x => x.DialogId)
-            .ToDictionaryAsync(x => x.Key, g => g
-                .Select(x => x.Activity)
-                .OrderByDescending(x => x.CreatedAt)
-                .ThenByDescending(x => x.Id)
-                .FirstOrDefault(), cancellationToken);
+                    LanguageCode = l.LanguageCode,
+                    Value = l.Value
+                })
+                .ToList()
+        });
     }
 
     private async Task<Dictionary<Guid, List<DialogSeenLogDto>>> FetchSeenLogByDialogId(Guid[] dialogIds,

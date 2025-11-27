@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -255,7 +256,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
                         TypeId = x.Key.TypeId,
                         MediaType = x.Key.MediaType,
                         Value = x
-                            .Select(r => new DataLocalizationDto { LanguageCode = r.LanguageCode, Value = r.Value })
+                            .Select(r => new DataLocalizationDto(r.LanguageCode, r.Value))
                             .ToList()
                     })
                     .ToList();
@@ -345,30 +346,69 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
             .ToList());
     }
 
-    private const string FetchLatestActivitiesByDialogIdSql =
-        """
-        SELECT d."DialogId"
-             , d."Id"
-             , d."CreatedAt"
-             , d."TypeId"
-             , d."ExtendedType"
-             , a1."ActorId"
-             , a1."Name"
-             , a0."ActorTypeId"
-             , d."TransmissionId"
-             , a0."Id" AS "ActorRecordId"
-             , a1."Id" AS "ActorNameId"
-             , l0."Id" AS "LocalizationSetId"
-             , l3."LanguageCode"
-             , l3."Value"
-        FROM "DialogActivity" AS d
-        INNER JOIN "Actor" AS a0 ON a0."Discriminator" = 'DialogActivityPerformedByActor' AND a0."ActivityId" = d."Id"
-        LEFT JOIN "ActorName" AS a1 ON a1."Id" = a0."ActorNameEntityId"
-        INNER JOIN "LocalizationSet" AS l0 ON l0."ActivityId" = d."Id" AND l0."Discriminator" = 'DialogActivityDescription'
-        INNER JOIN "Localization" AS l3 ON l3."LocalizationSetId" = l0."Id"
-        WHERE d."DialogId" = ANY (:dialogIds)
-        ORDER BY d."DialogId", d."Id", a0."Id", a1."Id", l0."Id";
-        """;
+    public async Task<Dictionary<Guid, DataDialogActivityDto>> FetchLatestActivitiesByDialogId(
+        Guid[] dialogIds,
+        CancellationToken cancellationToken)
+    {
+        var (query, parameters) = new PostgresFormattableStringBuilder()
+            .Append(
+                $"""
+                 WITH
+                     latestActivity AS (
+                         SELECT DISTINCT ON (da."DialogId") 
+                             da."DialogId"
+                             , da."Id" AS "ActivityId"
+                         FROM "DialogActivity" da
+                         WHERE da."DialogId" = ANY ({dialogIds}::uuid[])
+                         ORDER BY da."DialogId", da."CreatedAt" DESC, da."Id" DESC
+                     )
+                 SELECT da."DialogId"
+                      , da."Id"         AS "ActivityId"
+                      , da."CreatedAt"
+                      , da."TypeId"
+                      , da."ExtendedType"
+                      , da."TransmissionId"
+                      , a."ActorTypeId" AS "ActorType"
+                      , an."ActorId"
+                      , an."Name"       AS "ActorName"
+                      , l."LanguageCode"
+                      , l."Value"       AS "Description"
+                 FROM latestActivity la
+                 INNER JOIN "DialogActivity" da ON da."Id" = la."ActivityId"
+                 INNER JOIN "Actor" a ON a."Discriminator" = 'DialogActivityPerformedByActor' AND a."ActivityId" = da."Id"
+                 LEFT JOIN "ActorName" an ON an."Id" = a."ActorNameEntityId"
+                 LEFT JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogActivityDescription' AND ls."ActivityId" = da."Id"
+                 LEFT JOIN "Localization" l ON l."LocalizationSetId" = ls."Id";
+                 """)
+            .ToDynamicParameters();
+
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var rawRows = await connection.QueryAsync<RawActivityRow>(query, parameters);
+        return rawRows
+            .GroupBy(x => x.DialogId)
+            .ToDictionary(x => x.Key, x => x
+                .GroupBy(y => y.ActivityId)
+                .Select(y =>
+                {
+                    var row = y.First();
+                    return new DataDialogActivityDto(
+                        row.ActivityId,
+                        row.CreatedAt,
+                        row.TypeId,
+                        row.ExtendedType is not null ? new Uri(row.ExtendedType) : null,
+                        row.TransmissionId,
+                        new DataActorDto(
+                            row.ActorType,
+                            row.ActorId,
+                            row.ActorName),
+                        y.Where(x => x.Description is not null && x.LanguageCode is not null)
+                            .Select(x => new DataLocalizationDto(x.LanguageCode!, x.Description!))
+                            .ToList()
+                    );
+                })
+                .Single()
+            );
+    }
 
     [SuppressMessage("Style", "IDE0072:Add missing cases")]
     private static DataContentValueDto? PickByAuth(
@@ -386,7 +426,12 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
         })
         .FirstOrDefault();
 
-    private record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType, string LanguageCode, string Value);
+    private record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
+        string LanguageCode, string Value);
     private record RawEndUserContextRow(Guid DialogId, Guid Revision, SystemLabel.Values SystemLabelId);
-    private record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner, ActorType.Values ActorType, bool IsCurrentEndUser, string? ActorId, string? ActorName);
+    private record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner,
+        ActorType.Values ActorType, bool IsCurrentEndUser, string? ActorId, string? ActorName);
+    private sealed record RawActivityRow(Guid DialogId, Guid ActivityId, DateTime CreatedAt,
+        DialogActivityType.Values TypeId, string? ExtendedType, Guid? TransmissionId, ActorType.Values ActorType,
+        string? ActorId, string? ActorName, string? LanguageCode, string? Description);
 }

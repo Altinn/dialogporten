@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 
@@ -41,6 +42,10 @@ public interface IDialogSearchRepository
     Task<Dictionary<Guid, List<DataDialogSeenLogDto>>> FetchSeenLogByDialogId(
         Guid[] dialogIds,
         string currentUserId,
+        CancellationToken cancellationToken);
+
+    Task<Dictionary<Guid, DataDialogActivityDto>> FetchLatestActivitiesByDialogId(
+        Guid[] dialogIds,
         CancellationToken cancellationToken);
 }
 
@@ -196,13 +201,8 @@ public sealed class DataContentValueDto
     public DialogContentType.Values TypeId { get; set; }
 }
 
-public sealed class DataLocalizationDto
-{
-    public required string Value { get; init; }
-    public required string LanguageCode { get; init; }
-}
-
-
+public sealed record DataLocalizationDto(string LanguageCode, string Value);
 public sealed record DataDialogEndUserContextDto(Guid Revision, List<SystemLabel.Values> SystemLabels);
 public sealed record DataDialogSeenLogDto(Guid SeenLogId, Guid DialogId, DateTimeOffset SeenAt, bool IsViaServiceOwner, bool IsCurrentEndUser, DataActorDto SeenBy);
 public sealed record DataActorDto(ActorType.Values ActorType, string? ActorId, string? ActorName);
+public sealed record DataDialogActivityDto(Guid ActivityId, DateTimeOffset? CreatedAt, DialogActivityType.Values Type, Uri? ExtendedType, Guid? TransmissionId, DataActorDto PerformedBy, List<DataLocalizationDto> Description);

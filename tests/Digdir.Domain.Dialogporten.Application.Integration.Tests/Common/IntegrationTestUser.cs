@@ -27,6 +27,7 @@ internal sealed class IntegrationTestUser : IUser
     private readonly ClaimsPrincipal _principal;
 
     public ClaimsPrincipal GetPrincipal() => _principal;
+    public string GetSystemUserOrg() => throw new NotImplementedException();
 
     public static List<Claim> GetDefaultClaims()
     {

@@ -17,4 +17,5 @@ public sealed class ConsoleUser : IUser
         var identity = new ClaimsIdentity(claims);
         return new ClaimsPrincipal(identity);
     }
+    public string GetSystemUserOrg() => throw new NotImplementedException();
 }

@@ -46,14 +46,61 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             token: cancellationToken);
     }
 
+    public async Task<string?> GetOrgName(string org, CancellationToken cancellationToken)
+    {
+        return await _cache.GetOrSetAsync<string?>(
+            $"OrgName_{org}",
+            async (ctx, ct) =>
+            {
+                var name = await GetOrgNameFromRegister(org, ct);
+                if (name is null)
+                {
+                    // Short negative cache
+                    ctx.Options.Duration = TimeSpan.FromSeconds(10);
+                }
+
+                return name;
+            },
+            token: cancellationToken);
+    }
+
+    private async Task<string?> GetOrgNameFromRegister(string org, CancellationToken cancellationToken)
+    {
+        NameLookup nameLookup = new() { Parties = [new() { OrgNo = org }] };
+
+        var name = await LookupName(nameLookup, cancellationToken);
+
+        if (name is null)
+        {
+            // This is PII, but this is an error condition (probably due to missing Altinn profile)
+            _logger.LogError("Failed to get name from party name registry for organisation {Org}", org);
+        }
+
+        return name;
+    }
+
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
-        const string apiUrl = "register/api/v1/parties/nameslookup";
 
         if (!TryParse(externalIdWithPrefix, out var nameLookup))
         {
             return null;
         }
+
+        var name = await LookupName(nameLookup, cancellationToken);
+
+        if (name is null)
+        {
+            // This is PII, but this is an error condition (probably due to missing Altinn profile)
+            _logger.LogError("Failed to get name from party name registry for external id {ExternalId}", externalIdWithPrefix);
+        }
+
+        return name;
+    }
+    private async Task<string?> LookupName(NameLookup nameLookup, CancellationToken cancellationToken)
+    {
+
+        const string apiUrl = "register/api/v1/parties/nameslookup";
 
         var nameLookupResult = await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
             apiUrl,
@@ -62,12 +109,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             cancellationToken: cancellationToken);
 
         var name = nameLookupResult.PartyNames.FirstOrDefault()?.Name;
-        if (name is null)
-        {
-            // This is PII, but this is an error condition (probably due to missing Altinn profile)
-            _logger.LogError("Failed to get name from party name registry for external id {ExternalId}", externalIdWithPrefix);
-        }
-
         return name;
     }
 
@@ -111,4 +152,5 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 internal sealed class LocalPartNameRegistryClient : IPartyNameRegistry
 {
     public Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Gunnarson");
+    public Task<string?> GetOrgName(string orgId, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Org");
 }

@@ -177,6 +177,11 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .Select(x => x.Id)
             .ToArray();
 
+        if (dialogIds.Length == 0)
+        {
+            return PaginatedList<DialogDto>.CreateEmpty(request);
+        }
+
         var guiAttachmentCountByDialogIdTask = FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
         var contentByDialogIdTask = FetchContentByDialogId(dialogIds, cancellationToken);
         var endUserContextByDialogIdTask = FetchEndUserContextByDialogId(dialogIds, cancellationToken);

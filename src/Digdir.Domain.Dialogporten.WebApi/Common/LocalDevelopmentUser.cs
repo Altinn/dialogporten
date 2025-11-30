@@ -24,5 +24,4 @@ internal sealed class LocalDevelopmentUser : IUser
     ]));
 
     public ClaimsPrincipal GetPrincipal() => _principal;
-    public string GetSystemUserOrg() => throw new NotImplementedException();
 }

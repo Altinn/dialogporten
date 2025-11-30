@@ -52,7 +52,6 @@ internal sealed class ValidatorTestUser : IUser
     }
 
     public ClaimsPrincipal GetPrincipal() => _principal;
-    public string GetSystemUserOrg() => throw new NotImplementedException();
 
     public static List<Claim> GetDefaultClaims()
     {

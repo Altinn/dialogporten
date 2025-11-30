@@ -46,13 +46,13 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             token: cancellationToken);
     }
 
-    public async Task<string?> GetOrgName(string org, CancellationToken cancellationToken)
+    public async Task<string?> GetOrgName(string orgNumber, CancellationToken cancellationToken)
     {
         return await _cache.GetOrSetAsync<string?>(
-            $"OrgName_{org}",
+            $"OrgName_{orgNumber}",
             async (ctx, ct) =>
             {
-                var name = await GetOrgNameFromRegister(org, ct);
+                var name = await GetOrgNameFromRegister(orgNumber, ct);
                 if (name is null)
                 {
                     // Short negative cache
@@ -64,16 +64,15 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             token: cancellationToken);
     }
 
-    private async Task<string?> GetOrgNameFromRegister(string org, CancellationToken cancellationToken)
+    private async Task<string?> GetOrgNameFromRegister(string orgNumber, CancellationToken cancellationToken)
     {
-        NameLookup nameLookup = new() { Parties = [new() { OrgNo = org }] };
+        NameLookup nameLookup = new() { Parties = [new() { OrgNo = orgNumber }] };
 
         var name = await LookupName(nameLookup, cancellationToken);
 
         if (name is null)
         {
-            // This is PII, but this is an error condition (probably due to missing Altinn profile)
-            _logger.LogError("Failed to get name from party name registry for organisation {Org}", org);
+            _logger.LogError("Failed to get name from party name registry for organisation {Org}", orgNumber);
         }
 
         return name;
@@ -81,7 +80,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
-
         if (!TryParse(externalIdWithPrefix, out var nameLookup))
         {
             return null;
@@ -97,9 +95,9 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
         return name;
     }
+
     private async Task<string?> LookupName(NameLookup nameLookup, CancellationToken cancellationToken)
     {
-
         const string apiUrl = "register/api/v1/parties/nameslookup";
 
         var nameLookupResult = await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
@@ -124,7 +122,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         {
             NorwegianPersonIdentifier personIdentifier => new() { Parties = [new() { Ssn = personIdentifier.Id }] },
             NorwegianOrganizationIdentifier organizationIdentifier => new() { Parties = [new() { OrgNo = organizationIdentifier.Id }] },
-            SystemUserIdentifier systemUserIdentifier => new() { Parties = [new() { OrgNo = systemUserIdentifier.Id }] },
             _ => null
         };
 
@@ -152,5 +149,5 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 internal sealed class LocalPartNameRegistryClient : IPartyNameRegistry
 {
     public Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Gunnarson");
-    public Task<string?> GetOrgName(string orgId, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Org");
+    public Task<string?> GetOrgName(string orgNumber, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Org");
 }

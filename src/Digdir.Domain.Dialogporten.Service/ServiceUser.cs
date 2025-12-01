@@ -11,8 +11,4 @@ internal sealed class ServiceUser : IUser
             "At the time of this writing, Digdir.Domain.Dialogporten.Service should not " +
             "be using application commands or queries requiring the need for a user.");
     }
-    public string GetSystemUserOrg() =>
-        throw new NotSupportedException(
-            "At the time of this writing, Digdir.Domain.Dialogporten.Service should not " +
-            "be using application commands or queries requiring the need for a user.");
 }

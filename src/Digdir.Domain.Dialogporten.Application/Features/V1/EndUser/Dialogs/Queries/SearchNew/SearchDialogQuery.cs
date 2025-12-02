@@ -20,7 +20,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using OneOf;
 
 #pragma warning disable CS0618 // Type or member is obsolete

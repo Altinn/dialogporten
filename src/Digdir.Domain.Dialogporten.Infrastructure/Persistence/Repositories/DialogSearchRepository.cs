@@ -6,10 +6,11 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialogSearchRepository
+internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<DialogSearchRepository> logger) : IDialogSearchRepository
 {
     private readonly DialogDbContext _db = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
@@ -71,19 +72,22 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());
         }
 
-        var partiesAndServices = JsonSerializer.Serialize(authorizedResources.ResourcesByParties
+        var partiesAndServices = authorizedResources.ResourcesByParties
             .Select(x => (party: x.Key, services: x.Value))
             .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
-            .Select(x => new
-            {
-                parties = x.Select(k => k.party)
+            .Select(x => new PartiesAndServices(
+                x.Select(k => k.party)
                     .Where(p => query.Party.IsNullOrEmpty() || query.Party.Contains(p))
                     .ToArray(),
-                services = x.Key
+                x.Key
                     .Where(s => query.ServiceResource.IsNullOrEmpty() || query.ServiceResource.Contains(s))
                     .ToArray()
-            })
-            .Where(x => x.parties.Length > 0 && x.services.Length > 0));
+               )
+            )
+            .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
+            .ToList();
+
+        LogPartiesAndServicesCount(logger, partiesAndServices);
 
         // TODO: Respect instance delegated dialogs
         var accessibleFilteredDialogs = new PostgresFormattableStringBuilder()
@@ -156,7 +160,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
                 $"""
                  raw_permissions AS (
                     SELECT p.party, s.service
-                    FROM jsonb_to_recordset({partiesAndServices}::jsonb) AS x(parties text[], services text[])
+                    FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x(parties text[], services text[])
                     CROSS JOIN LATERAL unnest(x.services) AS s(service)
                     CROSS JOIN LATERAL unnest(x.parties) AS p(party)
                  )
@@ -196,5 +200,20 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext) : IDialo
             cancellationToken);
 
         return dialogs;
+    }
+
+    private sealed record PartiesAndServices(string[] Parties, string[] Services);
+    private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, List<PartiesAndServices> partiesAndServices)
+    {
+        var totalPartiesCount = partiesAndServices.Sum(g => g.Parties.Length);
+        var totalServicesCount = partiesAndServices.Sum(g => g.Services.Length);
+        var groupsCount = partiesAndServices.Count;
+        var groupSizes = partiesAndServices
+            .Select(g => (g.Parties.Length, g.Services.Length))
+            .ToList();
+
+        logger.LogInformation(
+            "PartiesAndServices: tp={TotalPartiesCount}, ts={TotalServicesCount}, g={GroupsCount}, gs={GroupSizes}",
+            totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
     }
 }

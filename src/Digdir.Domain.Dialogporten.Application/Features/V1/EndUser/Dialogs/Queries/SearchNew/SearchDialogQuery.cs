@@ -442,7 +442,6 @@ internal static class SearchDialogQueryExtensions
             Limit = request.Limit!.Value,
             ContentUpdatedAfter = request.ContentUpdatedAfter,
             ContentUpdatedBefore = request.ContentUpdatedBefore,
-            AcceptedLanguages = request.AcceptedLanguages,
             Search = request.Search,
             SearchLanguageCode = request.SearchLanguageCode,
             CreatedAfter = request.CreatedAfter,

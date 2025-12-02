@@ -153,11 +153,6 @@ public sealed class GetDialogsQuery
         init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
     }
 
-    /// <summary>
-    /// Accepted languages for localization filtering, sorted by preference
-    /// </summary>
-    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
-
     public DateTimeOffset? VisibleAfter { get; set; }
     public DateTimeOffset? ExpiresBefore { get; set; }
 }

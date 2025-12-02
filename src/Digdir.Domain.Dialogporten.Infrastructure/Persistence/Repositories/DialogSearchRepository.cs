@@ -84,7 +84,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
                     .ToArray()
                )
             )
-            .Where(x => x.Parties.Length > 0 && x.Services.Length > 0);
+            .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
+            .ToList();
 
         LogPartiesAndServicesCount(logger, partiesAndServices);
 
@@ -201,15 +202,13 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
         return dialogs;
     }
 
-    private record PartiesAndServices(string[] Parties, string[] Services);
-    private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, IEnumerable<PartiesAndServices> partiesAndServices)
+    private sealed record PartiesAndServices(string[] Parties, string[] Services);
+    private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, List<PartiesAndServices> partiesAndServices)
     {
-        var materialized = partiesAndServices.ToList();
-
-        var totalPartiesCount = materialized.Sum(g => g.Parties.Length);
-        var totalServicesCount = materialized.Sum(g => g.Services.Length);
-        var groupsCount = materialized.Count;
-        var groupSizes = materialized
+        var totalPartiesCount = partiesAndServices.Sum(g => g.Parties.Length);
+        var totalServicesCount = partiesAndServices.Sum(g => g.Services.Length);
+        var groupsCount = partiesAndServices.Count;
+        var groupSizes = partiesAndServices
             .Select(g => (g.Parties.Length, g.Services.Length))
             .ToList();
 

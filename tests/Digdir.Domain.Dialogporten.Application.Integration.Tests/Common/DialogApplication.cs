@@ -172,6 +172,10 @@ public class DialogApplication : IAsyncLifetime
             .Value
             .Returns(new ApplicationSettings
             {
+                FeatureToggle = new FeatureToggle
+                {
+                    UseOptimizedEndUserDialogSearch = true
+                },
                 Dialogporten = new DialogportenSettings
                 {
                     BaseUri = new Uri("https://integration.test"),

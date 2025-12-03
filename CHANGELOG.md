@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.92.3](https://github.com/Altinn/dialogporten/compare/v1.92.2...v1.92.3) (2025-11-28)
+
+
+### Miscellaneous Chores
+
+* **graphql:** enable psql statement logging in prod ([#3065](https://github.com/Altinn/dialogporten/issues/3065)) ([71206fc](https://github.com/Altinn/dialogporten/commit/71206fc322f3b7d7ffe1e972fb9ee11cc0fc7052))
+
 ## [1.92.2](https://github.com/Altinn/dialogporten/compare/v1.92.1...v1.92.2) (2025-11-26)
 
 

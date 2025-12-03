@@ -63,7 +63,7 @@ public sealed class UserRegistry : IUserRegistry
         var name = userId.Type switch
         {
             UserIdType.Person or UserIdType.ServiceOwnerOnBehalfOfPerson => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
-            UserIdType.SystemUser => "System User",// TODO: Implement when SystemUsers are introduced?
+            UserIdType.SystemUser => await _partyNameRegistry.GetOrgName(GetSystemUserOrg(), cancellationToken),
             UserIdType.Unknown => throw new UnreachableException(),
             UserIdType.ServiceOwner => throw new UnreachableException(),
             _ => throw new UnreachableException()
@@ -74,6 +74,12 @@ public sealed class UserRegistry : IUserRegistry
             Name = name
         };
     }
+
+    private string GetSystemUserOrg() => _user
+        .GetPrincipal()
+        .TryGetSystemUserOrgNumber(out var orgNumber)
+        ? orgNumber
+        : throw new InvalidOperationException("System user org number not found");
 }
 
 internal sealed class LocalDevelopmentUserRegistryDecorator : IUserRegistry

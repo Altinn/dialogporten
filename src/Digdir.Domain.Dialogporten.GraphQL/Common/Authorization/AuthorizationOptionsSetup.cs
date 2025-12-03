@@ -57,7 +57,6 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .RequireScope(AuthorizationScope.Testing));
 
         options.AddPolicy(AuthorizationPolicy.EndUserSubscription, policy => policy
-            .Combine(options.GetPolicy(AuthorizationPolicy.EndUser)!)
             .RequireAssertion(context =>
                 context.TryGetDialogEventsSubscriptionDialogId(out var dialogIdTopic)
                 && context.User.TryGetClaimValue(DialogTokenClaimTypes.DialogId, out var dialogIdClaimValue)

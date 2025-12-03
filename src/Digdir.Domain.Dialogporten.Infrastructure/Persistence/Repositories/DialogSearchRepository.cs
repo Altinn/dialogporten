@@ -11,8 +11,8 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
@@ -207,21 +207,6 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
             cancellationToken);
 
         return dialogs;
-    }
-
-    private sealed record PartiesAndServices(string[] Parties, string[] Services);
-    private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, List<PartiesAndServices> partiesAndServices)
-    {
-        var totalPartiesCount = partiesAndServices.Sum(g => g.Parties.Length);
-        var totalServicesCount = partiesAndServices.Sum(g => g.Services.Length);
-        var groupsCount = partiesAndServices.Count;
-        var groupSizes = partiesAndServices
-            .Select(g => (g.Parties.Length, g.Services.Length))
-            .ToList();
-
-        logger.LogInformation(
-            "PartiesAndServices: tp={TotalPartiesCount}, ts={TotalServicesCount}, g={GroupsCount}, gs={GroupSizes}",
-            totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
     }
 
     public async Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
@@ -452,6 +437,21 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
             _ => 3
         })
         .FirstOrDefault();
+
+    private sealed record PartiesAndServices(string[] Parties, string[] Services);
+    private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, List<PartiesAndServices> partiesAndServices)
+    {
+        var totalPartiesCount = partiesAndServices.Sum(g => g.Parties.Length);
+        var totalServicesCount = partiesAndServices.Sum(g => g.Services.Length);
+        var groupsCount = partiesAndServices.Count;
+        var groupSizes = partiesAndServices
+            .Select(g => (g.Parties.Length, g.Services.Length))
+            .ToList();
+
+        logger.LogInformation(
+            "PartiesAndServices: tp={TotalPartiesCount}, ts={TotalServicesCount}, g={GroupsCount}, gs={GroupSizes}",
+            totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
+    }
 
     private sealed record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
         string LanguageCode, string Value);

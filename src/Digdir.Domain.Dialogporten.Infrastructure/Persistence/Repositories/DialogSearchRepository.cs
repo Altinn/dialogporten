@@ -297,7 +297,6 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
                  FROM "DialogEndUserContext" AS c
                  INNER JOIN "DialogEndUserContextSystemLabel" AS cl ON c."Id" = cl."DialogEndUserContextId"
                  WHERE c."DialogId" = ANY ({dialogIds}::uuid[])
-                 ORDER BY c."DialogId", c."Id"
                  """)
             .ToDynamicParameters();
 
@@ -364,26 +363,29 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, NpgsqlDa
                          SELECT DISTINCT ON (da."DialogId") 
                              da."DialogId"
                              , da."Id" AS "ActivityId"
+                             , da."CreatedAt"
+                             , da."TypeId"
+                             , da."ExtendedType"
+                             , da."TransmissionId"
                          FROM "DialogActivity" da
                          WHERE da."DialogId" = ANY ({dialogIds}::uuid[])
                          ORDER BY da."DialogId", da."CreatedAt" DESC, da."Id" DESC
                      )
-                 SELECT da."DialogId"
-                      , da."Id"         AS "ActivityId"
-                      , da."CreatedAt"
-                      , da."TypeId"
-                      , da."ExtendedType"
-                      , da."TransmissionId"
+                 SELECT la."DialogId"
+                      , la."ActivityId"
+                      , la."CreatedAt"
+                      , la."TypeId"
+                      , la."ExtendedType"
+                      , la."TransmissionId"
                       , a."ActorTypeId" AS "ActorType"
                       , an."ActorId"
                       , an."Name"       AS "ActorName"
                       , l."LanguageCode"
                       , l."Value"       AS "Description"
                  FROM latestActivity la
-                 INNER JOIN "DialogActivity" da ON da."Id" = la."ActivityId"
-                 INNER JOIN "Actor" a ON a."Discriminator" = 'DialogActivityPerformedByActor' AND a."ActivityId" = da."Id"
+                 INNER JOIN "Actor" a ON a."Discriminator" = 'DialogActivityPerformedByActor' AND a."ActivityId" = la."ActivityId"
                  LEFT JOIN "ActorName" an ON an."Id" = a."ActorNameEntityId"
-                 LEFT JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogActivityDescription' AND ls."ActivityId" = da."Id"
+                 LEFT JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogActivityDescription' AND ls."ActivityId" = la."ActivityId"
                  LEFT JOIN "Localization" l ON l."LocalizationSetId" = ls."Id";
                  """)
             .ToDynamicParameters();

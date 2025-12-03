@@ -160,9 +160,9 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
                 $"""
                  raw_permissions AS (
                     SELECT p.party, s.service
-                    FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x(parties text[], services text[])
-                    CROSS JOIN LATERAL unnest(x.services) AS s(service)
-                    CROSS JOIN LATERAL unnest(x.parties) AS p(party)
+                    FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
+                    CROSS JOIN LATERAL unnest(x."Services") AS s(service)
+                    CROSS JOIN LATERAL unnest(x."Parties") AS p(party)
                  )
                  ,party_permission_map AS (
                      SELECT party

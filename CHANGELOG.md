@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.93.1](https://github.com/Altinn/dialogporten/compare/v1.93.0...v1.93.1) (2025-12-04)
+
+
+### Bug Fixes
+
+* **infra:** Use TryCreate on extended type to avoid exception on invalid data ([#3086](https://github.com/Altinn/dialogporten/issues/3086)) ([8f3b540](https://github.com/Altinn/dialogporten/commit/8f3b540342dc5ed88ac88f8074eaa2287a23ccab))
+
 ## [1.93.0](https://github.com/Altinn/dialogporten/compare/v1.92.3...v1.93.0) (2025-12-04)
 
 

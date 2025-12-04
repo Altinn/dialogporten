@@ -407,7 +407,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
                         row.ActivityId,
                         row.CreatedAt,
                         row.TypeId,
-                        row.ExtendedType is not null ? new Uri(row.ExtendedType) : null,
+                        Uri.TryCreate(row.ExtendedType, UriKind.RelativeOrAbsolute, out var extendedType)
+                            ? extendedType : null,
                         row.TransmissionId,
                         new DataActorDto(
                             row.ActorType,

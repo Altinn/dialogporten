@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.WellKnown.Jwks.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.PreProcessors;
 using FastEndpoints;
 using MediatR;
 using Microsoft.Net.Http.Headers;
@@ -18,6 +19,7 @@ public sealed class GetJwksEndpoint : EndpointWithoutRequest<GetJwksDto>
     public override void Configure()
     {
         Get(".well-known/jwks.json");
+        PreProcessor<RequireJsonAcceptPreProcessor>();
         Group<MetadataGroup>();
 
         Description(b => b.ProducesOneOf<GetJwksDto>(StatusCodes.Status200OK));

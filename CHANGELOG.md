@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.92.3](https://github.com/Altinn/dialogporten/compare/v1.92.2...v1.92.3) (2025-11-28)
+
+
+### Miscellaneous Chores
+
+* **graphql:** enable psql statement logging in prod ([#3065](https://github.com/Altinn/dialogporten/issues/3065)) ([71206fc](https://github.com/Altinn/dialogporten/commit/71206fc322f3b7d7ffe1e972fb9ee11cc0fc7052))
+
+## [1.92.2](https://github.com/Altinn/dialogporten/compare/v1.92.1...v1.92.2) (2025-11-26)
+
+
+### Bug Fixes
+
+* **janitor:** Fix deletion/internal URL issues ([#3061](https://github.com/Altinn/dialogporten/issues/3061)) ([f1627e7](https://github.com/Altinn/dialogporten/commit/f1627e740fe50552bc617e62ea1358b897e7bef8))
+
+## [1.92.1](https://github.com/Altinn/dialogporten/compare/v1.92.0...v1.92.1) (2025-11-26)
+
+
+### Miscellaneous Chores
+
+* enable info logs on npsql ([#3059](https://github.com/Altinn/dialogporten/issues/3059)) ([18dbe97](https://github.com/Altinn/dialogporten/commit/18dbe973917cc00da99c20f3b1d7c303490e09a9))
+
+## [1.92.0](https://github.com/Altinn/dialogporten/compare/v1.91.2...v1.92.0) (2025-11-26)
+
+
+### Features
+
+* **app:** add ExpiresAt on attachments ([#3013](https://github.com/Altinn/dialogporten/issues/3013)) ([9d13506](https://github.com/Altinn/dialogporten/commit/9d135062761ed97b095e0fef27de5abe698ce225))
+
+
+### Bug Fixes
+
+* **breaking:** Sync UpdatedAt fields with VisibleFrom ([#3004](https://github.com/Altinn/dialogporten/issues/3004)) ([fb96686](https://github.com/Altinn/dialogporten/commit/fb966860f95b0173a000a774becf9f369677f9bf))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.7.0 ([#3053](https://github.com/Altinn/dialogporten/issues/3053)) ([2442c65](https://github.com/Altinn/dialogporten/commit/2442c657832285189649b1c909c409e20c9ecc63))
+* **deps:** update opentelemetry dependencies  to 1.14.0 ([#3042](https://github.com/Altinn/dialogporten/issues/3042)) ([d12cac7](https://github.com/Altinn/dialogporten/commit/d12cac7b635b751ccf14770d599353693ddd4b27))
+
 ## [1.91.2](https://github.com/Altinn/dialogporten/compare/v1.91.1...v1.91.2) (2025-11-25)
 
 

@@ -103,8 +103,9 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
+            .AddSingleton<NpgsqlDataSource>(_ => new NpgsqlDataSourceBuilder(_dbContainer.GetConnectionString() + ";Include Error Detail=true").Build())
             .AddDbContext<DialogDbContext>((services, options) =>
-                options.UseNpgsql(_dbContainer.GetConnectionString() + ";Include Error Detail=true", o =>
+                options.UseNpgsql(services.GetRequiredService<NpgsqlDataSource>(), o =>
                     {
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     })
@@ -172,6 +173,10 @@ public class DialogApplication : IAsyncLifetime
             .Value
             .Returns(new ApplicationSettings
             {
+                FeatureToggle = new FeatureToggle
+                {
+                    UseOptimizedEndUserDialogSearch = true
+                },
                 Dialogporten = new DialogportenSettings
                 {
                     BaseUri = new Uri("https://integration.test"),

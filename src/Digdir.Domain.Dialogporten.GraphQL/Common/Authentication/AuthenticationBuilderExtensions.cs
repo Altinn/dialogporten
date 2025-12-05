@@ -71,19 +71,7 @@ internal static class AuthenticationBuilderExtensions
             });
         }
 
-        var applicationSettings = configuration
-            .GetSection(ApplicationSettings.ConfigurationSectionName)
-            .Get<ApplicationSettings>();
-
-        var keyPairs = applicationSettings!.Dialogporten.Ed25519KeyPairs;
-        _dialogportenIssuer = applicationSettings?.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') +
-                              DialogTokenIssuerVersion;
-
-        _primaryPublicKey = PublicKey.Import(SignatureAlgorithm.Ed25519,
-            Base64Url.Decode(keyPairs.Primary.PublicComponent), KeyBlobFormat.RawPublicKey);
-
-        _secondaryPublicKey = PublicKey.Import(SignatureAlgorithm.Ed25519,
-            Base64Url.Decode(keyPairs.Secondary.PublicComponent), KeyBlobFormat.RawPublicKey);
+        SetDialogportenPublicKeys(configuration);
 
         authenticationBuilder.AddJwtBearer(DialogportenAuthenticationSchemaName, options =>
         {
@@ -122,6 +110,23 @@ internal static class AuthenticationBuilderExtensions
     private static PublicKey? _primaryPublicKey;
     private static PublicKey? _secondaryPublicKey;
     private static string? _dialogportenIssuer;
+
+    private static void SetDialogportenPublicKeys(IConfiguration configuration)
+    {
+        var applicationSettings = configuration
+            .GetSection(ApplicationSettings.ConfigurationSectionName)
+            .Get<ApplicationSettings>() ?? throw new InvalidOperationException(
+            $"Missing config '{ApplicationSettings.ConfigurationSectionName}'.");
+
+        var keyPairs = applicationSettings.Dialogporten.Ed25519KeyPairs;
+        _dialogportenIssuer = applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + DialogTokenIssuerVersion;
+
+        _primaryPublicKey = PublicKey.Import(SignatureAlgorithm.Ed25519,
+            Base64Url.Decode(keyPairs.Primary.PublicComponent), KeyBlobFormat.RawPublicKey);
+
+        _secondaryPublicKey = PublicKey.Import(SignatureAlgorithm.Ed25519,
+            Base64Url.Decode(keyPairs.Secondary.PublicComponent), KeyBlobFormat.RawPublicKey);
+    }
 
     private static JsonWebToken ValidateSignature(string encodedToken, object _)
     {

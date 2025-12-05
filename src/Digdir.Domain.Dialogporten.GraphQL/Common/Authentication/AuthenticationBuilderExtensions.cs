@@ -61,8 +61,8 @@ internal static class AuthenticationBuilderExtensions
                             .GetRequiredService<ITokenIssuerCache>()
                             .GetIssuerForScheme(schema.Name);
 
-                        if (!context.HttpContext.Items.TryGetValue(Constants.CurrentTokenIssuer, out var tokenIssuer)
-                            || (string?)tokenIssuer != expectedIssuer)
+                        if (context.HttpContext.Items.TryGetValue(Constants.CurrentTokenIssuer, out var tokenIssuer)
+                            && (string?)tokenIssuer != expectedIssuer)
                         {
                             context.NoResult();
                         }

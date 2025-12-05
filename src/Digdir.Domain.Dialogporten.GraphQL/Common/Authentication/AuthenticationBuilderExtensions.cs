@@ -112,12 +112,6 @@ internal static class AuthenticationBuilderExtensions
                     }
 
                     return Task.CompletedTask;
-                },
-                OnTokenValidated = x =>
-                {
-                    Console.WriteLine(x.Scheme);
-
-                    return Task.CompletedTask;
                 }
             };
         });

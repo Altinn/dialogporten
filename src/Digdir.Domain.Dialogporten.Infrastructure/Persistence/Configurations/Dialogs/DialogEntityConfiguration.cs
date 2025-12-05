@@ -24,19 +24,28 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.HasIndex(x => x.Org);
         builder.HasIndex(x => new { x.Org, x.IdempotentKey }).IsUnique()
             .HasFilter($"\"{nameof(DialogEntity.IdempotentKey)}\" is not null");
-        builder.HasIndex(x => new { x.ServiceResource, x.Party }).IncludeProperties(x => x.Id);
+
+        // Index specially optimized for querying dialogs without FTS in Arbeidsflate
+        builder.HasIndex(x => new { x.Party, x.ContentUpdatedAt, x.Id })
+            .HasDatabaseName("IX_Dialog_Party_ContentUpdatedAt_Id_Covering")
+            .IsDescending(false, true, true)
+            .IncludeProperties(x => new { x.ServiceResource, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt });
+
+        // Index specially optimized for querying dialogs with FTS in Arbeidsflate
+        builder.HasIndex(x => new { x.Id })
+            .HasDatabaseName("IX_Dialog_Id_Covering")
+            .IncludeProperties(x => new { x.ServiceResource, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt, x.ContentUpdatedAt });
+
         builder.HasIndex(x => new { x.Party, x.CreatedAt, x.Id })
             .IsDescending(false, true, true)
             .IncludeProperties(x => x.ServiceResource)
             .IsCreatedConcurrently();
+
         builder.HasIndex(x => new { x.Party, x.UpdatedAt, x.Id })
             .IsDescending(false, true, true)
             .IncludeProperties(x => x.ServiceResource)
             .IsCreatedConcurrently();
-        builder.HasIndex(x => new { x.Party, x.ContentUpdatedAt, x.Id })
-            .IsDescending(false, true, true)
-            .IncludeProperties(x => x.ServiceResource)
-            .IsCreatedConcurrently();
+
         builder.HasIndex(x => new { x.Party, x.DueAt, x.Id })
             .IsDescending(false, true, true)
             .IncludeProperties(x => x.ServiceResource)

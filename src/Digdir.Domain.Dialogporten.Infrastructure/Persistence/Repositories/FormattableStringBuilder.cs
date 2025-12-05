@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Dapper;
 using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -16,10 +17,20 @@ internal class FormattableStringBuilder
     public FormattableString ToFormattableString() =>
         FormattableStringFactory.Create(_format.ToString(), _argNumberByArg
             .OrderBy(x => x.Value)
-#pragma warning disable IDE0004
             .Select(x => Equals(x.Key, Null) ? GetNullValue() : x.Key)
-#pragma warning restore IDE0004
             .ToArray());
+
+    public (string Sql, DynamicParameters Parameters) ToDynamicParameters()
+    {
+        var parameters = _argNumberByArg
+            .OrderBy(x => x.Value)
+            .Aggregate(new DynamicParameters(), (parameters, pair) =>
+            {
+                parameters.Add($"p{pair.Value}", Equals(pair.Key, Null) ? GetNullValue() : pair.Key);
+                return parameters;
+            });
+        return (Sql: _format.ToString().Replace("{", "@p").Replace("}", ""), Parameters: parameters);
+    }
 
     protected virtual object? GetNullValue() => null;
     protected virtual object? SomethingValue(object? value) => value;

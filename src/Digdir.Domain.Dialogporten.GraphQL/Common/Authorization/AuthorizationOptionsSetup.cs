@@ -24,6 +24,7 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .Authentication
             .JwtBearerTokenSchemas
             .Select(x => x.Name)
+            .Append(DialogportenAuthenticationSchemaName)
             .ToArray();
 
         options.DefaultPolicy = new AuthorizationPolicyBuilder()
@@ -58,8 +59,7 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .RequireScope(AuthorizationScope.Testing));
 
         options.AddPolicy(AuthorizationPolicy.EndUserSubscription, policy => policy
-            .RequireAuthenticatedUser()
-            .AddAuthenticationSchemes(DialogportenAuthenticationSchemaName)
+            .Combine(options.DefaultPolicy)
             .RequireAssertion(context =>
                 context.TryGetDialogEventsSubscriptionDialogId(out var dialogIdTopic)
                 && context.User.TryGetClaimValue(DialogTokenClaimTypes.DialogId, out var dialogIdClaimValue)

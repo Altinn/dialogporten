@@ -54,24 +54,19 @@ internal static class AuthenticationBuilderExtensions
 
                 options.Events = new JwtBearerEvents
                 {
-                    OnAuthenticationFailed = context =>
+                    OnMessageReceived = async context =>
                     {
-                        Debug.WriteLine($"Authentication failed: {context.Exception.Message}");
-                        return Task.CompletedTask;
-                    },
-                    // OnMessageReceived = async context =>
-                    // {
-                    //     var expectedIssuer = await context.HttpContext
-                    //         .RequestServices
-                    //         .GetRequiredService<ITokenIssuerCache>()
-                    //         .GetIssuerForScheme(schema.Name);
-                    //
-                    //     if (!context.HttpContext.Items.TryGetValue(Constants.CurrentTokenIssuer, out var tokenIssuer)
-                    //         || (string?)tokenIssuer != expectedIssuer)
-                    //     {
-                    //         context.NoResult();
-                    //     }
-                    // }
+                        var expectedIssuer = await context.HttpContext
+                            .RequestServices
+                            .GetRequiredService<ITokenIssuerCache>()
+                            .GetIssuerForScheme(schema.Name);
+
+                        if (!context.HttpContext.Items.TryGetValue(Constants.CurrentTokenIssuer, out var tokenIssuer)
+                            || (string?)tokenIssuer != expectedIssuer)
+                        {
+                            context.NoResult();
+                        }
+                    }
                 };
             });
         }
@@ -81,7 +76,8 @@ internal static class AuthenticationBuilderExtensions
             .Get<ApplicationSettings>();
 
         var keyPairs = applicationSettings!.Dialogporten.Ed25519KeyPairs;
-        _dialogportenIssuer = applicationSettings?.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + DialogTokenIssuerVersion;
+        _dialogportenIssuer = applicationSettings?.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') +
+                              DialogTokenIssuerVersion;
 
         _primaryPublicKey = PublicKey.Import(SignatureAlgorithm.Ed25519,
             Base64Url.Decode(keyPairs.Primary.PublicComponent), KeyBlobFormat.RawPublicKey);
@@ -93,33 +89,33 @@ internal static class AuthenticationBuilderExtensions
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                RequireSignedTokens = false,
-                ValidateIssuerSigningKey = true,
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 RequireExpirationTime = true,
                 ValidateLifetime = true,
-
                 ClockSkew = TimeSpan.FromSeconds(2),
-                // IssuerSigningKeys = issuerSigningKeys
+                // EdDsa is not natively supported in .NET
+                // https://github.com/dotnet/runtime/issues/63174
+                RequireSignedTokens = false,
+                ValidateIssuerSigningKey = true,
                 SignatureValidator = ValidateSignature
             };
 
             options.Events = new JwtBearerEvents
             {
-                OnAuthenticationFailed = context =>
-                {
-                    Debug.WriteLine($"Authentication failed: {context.Exception.Message}");
-                    return Task.CompletedTask;
-                },
-
                 OnMessageReceived = context =>
                 {
                     if (context.HttpContext.Items.TryGetValue(Constants.CurrentTokenIssuer, out var tokenIssuer)
-                    && (string?)tokenIssuer != _dialogportenIssuer)
+                        && (string?)tokenIssuer != _dialogportenIssuer)
                     {
                         context.NoResult();
                     }
+
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = x =>
+                {
+                    Console.WriteLine(x.Scheme);
 
                     return Task.CompletedTask;
                 }
@@ -140,12 +136,14 @@ internal static class AuthenticationBuilderExtensions
 
         var signature = Base64Url.Decode(jwt.EncodedSignature);
         var signatureIsValid = SignatureAlgorithm.Ed25519
-            .Verify(_primaryPublicKey!, Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload), signature);
+            .Verify(_primaryPublicKey!, Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload),
+                signature);
 
         if (!signatureIsValid)
         {
             signatureIsValid = SignatureAlgorithm.Ed25519
-                .Verify(_secondaryPublicKey!, Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload), signature);
+                .Verify(_secondaryPublicKey!, Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload),
+                    signature);
         }
 
         if (signatureIsValid)

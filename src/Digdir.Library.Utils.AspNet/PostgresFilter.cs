@@ -5,10 +5,12 @@ namespace Digdir.Library.Utils.AspNet;
 public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 {
     private readonly bool _enabledSqlStatementLogging;
+    private readonly bool _enabledSqlParametersLogging;
 
-    public PostgresFilter(bool enabledSqlStatementLogging)
+    public PostgresFilter(bool enabledSqlStatementLogging, bool enabledSqlParametersLogging = false)
     {
         _enabledSqlStatementLogging = enabledSqlStatementLogging;
+        _enabledSqlParametersLogging = enabledSqlParametersLogging;
     }
 
     public override void OnEnd(Activity activity)
@@ -17,6 +19,12 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
         {
             base.OnEnd(activity);
             return;
+        }
+
+        // Add parameter information to the activity if enabled
+        if (_enabledSqlParametersLogging)
+        {
+            AddParameterInformation(activity);
         }
 
         if (activity.Tags.IsSuccessfulSqlStatementActivity() && !_enabledSqlStatementLogging)
@@ -32,6 +40,30 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
         }
 
         base.OnEnd(activity);
+    }
+
+    private static void AddParameterInformation(Activity activity)
+    {
+        // Npgsql's OpenTelemetry instrumentation adds parameter information to activity tags
+        // when EnableParameterLogging() is called on the data source.
+        // Parameters are added with keys like "db.query.parameter.<name>" following OpenTelemetry semantic conventions
+        var parameters = activity.Tags
+            .Where(t => t.Key.StartsWith("db.query.parameter.", StringComparison.Ordinal) ||
+                       t.Key.StartsWith("db.statement.parameter.", StringComparison.Ordinal))
+            .OrderBy(t => t.Key)
+            .Select(t =>
+            {
+                var paramName = t.Key.Replace("db.query.parameter.", "")
+                                    .Replace("db.statement.parameter.", "@p");
+                return $"{paramName}={t.Value}";
+            })
+            .ToList();
+
+        if (parameters.Count > 0)
+        {
+            // Add a consolidated parameter tag for easier viewing in logs
+            activity.SetTag("db.query.parameters", string.Join("; ", parameters));
+        }
     }
 }
 

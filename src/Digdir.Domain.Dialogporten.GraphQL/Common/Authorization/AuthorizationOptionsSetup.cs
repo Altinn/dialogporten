@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Extensions.HotChocolate;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using static Digdir.Domain.Dialogporten.GraphQL.Common.Authentication.AuthenticationBuilderExtensions;
 using AuthorizationOptions = Microsoft.AspNetCore.Authorization.AuthorizationOptions;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
@@ -57,6 +58,8 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .RequireScope(AuthorizationScope.Testing));
 
         options.AddPolicy(AuthorizationPolicy.EndUserSubscription, policy => policy
+            .RequireAuthenticatedUser()
+            .AddAuthenticationSchemes(DialogportenAuthenticationSchemaName)
             .RequireAssertion(context =>
                 context.TryGetDialogEventsSubscriptionDialogId(out var dialogIdTopic)
                 && context.User.TryGetClaimValue(DialogTokenClaimTypes.DialogId, out var dialogIdClaimValue)

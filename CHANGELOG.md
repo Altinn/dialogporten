@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.94.0](https://github.com/Altinn/dialogporten/compare/v1.93.1...v1.94.0) (2025-12-05)
+
+
+### Features
+
+* **graphql:** remove EndUser base policy from subscription policy ([#3082](https://github.com/Altinn/dialogporten/issues/3082)) ([b1ae372](https://github.com/Altinn/dialogporten/commit/b1ae3727f793d82bd3541bd4481c06b723819c2f))
+
 ## [1.93.1](https://github.com/Altinn/dialogporten/compare/v1.93.0...v1.93.1) (2025-12-04)
 
 

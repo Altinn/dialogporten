@@ -175,7 +175,8 @@ public class DialogApplication : IAsyncLifetime
             {
                 FeatureToggle = new FeatureToggle
                 {
-                    UseOptimizedEndUserDialogSearch = true
+                    UseOptimizedEndUserDialogSearch = true,
+                    UseOptimizedServiceOwnerDialogSearch = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

@@ -12,6 +12,7 @@ public interface IUserResourceRegistry
     Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken);
     bool UserCanModifyResourceType(string serviceResourceType);
     bool IsCurrentUserServiceOwnerAdmin();
+    Task<IReadOnlyCollection<string>> GetCurrentUserOrgShortNames(CancellationToken cancellationToken);
 }
 
 internal sealed class UserResourceRegistry : IUserResourceRegistry
@@ -42,6 +43,17 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
         return dic.Select(x => x.ResourceId).ToList();
     }
 
+    public async Task<IReadOnlyCollection<string>> GetCurrentUserOrgShortNames(CancellationToken cancellationToken)
+    {
+        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var orgNumber))
+        {
+            throw new UnreachableException();
+        }
+
+        var dic = await _resourceRegistry.GetResourceInformationForOrg(orgNumber, cancellationToken);
+        return dic.Select(x => x.OwnOrgShortName).ToList();
+    }
+
     public bool UserCanModifyResourceType(string serviceResourceType) => serviceResourceType switch
     {
         ResourceRegistry.Constants.CorrespondenceService => _user.GetPrincipal().HasScope(AuthorizationScope.CorrespondenceScope),
@@ -69,4 +81,7 @@ internal sealed class LocalDevelopmentUserResourceRegistryDecorator : IUserResou
 
     public bool UserCanModifyResourceType(string serviceResourceType) => true;
     public bool IsCurrentUserServiceOwnerAdmin() => true;
+
+    public Task<IReadOnlyCollection<string>> GetCurrentUserOrgShortNames(CancellationToken cancellationToken) =>
+        _userResourceRegistry.GetCurrentUserOrgShortNames(cancellationToken);
 }

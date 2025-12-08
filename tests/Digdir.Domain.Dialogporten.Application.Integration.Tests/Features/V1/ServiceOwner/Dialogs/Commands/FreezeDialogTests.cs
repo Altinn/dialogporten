@@ -63,6 +63,7 @@ internal sealed class TestUserResourceRegistry(IUserResourceRegistry userResourc
     public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyCollection<string>>(["urn:altinn:resource:SuperKulTest"]);
     public bool UserCanModifyResourceType(string serviceResourceType) => userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
     public bool IsCurrentUserServiceOwnerAdmin() => false;
+    public Task<IReadOnlyCollection<string>> GetCurrentUserOrgShortNames(CancellationToken cancellationToken) => throw new NotImplementedException();
 }
 
 internal sealed class TestServiceResourceAuthorizer : IServiceResourceAuthorizer

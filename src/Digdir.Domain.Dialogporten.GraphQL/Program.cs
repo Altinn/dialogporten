@@ -148,47 +148,14 @@ static void BuildAndRun(string[] args)
 
     var app = builder.Build();
 
-    app.MapAspNetHealthChecks();
-
-    app.Use(async (context, next) =>
-        {
-            if (!HttpMethods.IsPost(context.Request.Method))
-            {
-                await next();
-                return;
-            }
-
-            context.Request.EnableBuffering();
-            using var sr = new StreamReader(context.Request.Body, Encoding.UTF8,
-                detectEncodingFromByteOrderMarks: false, leaveOpen: true);
-            var body = await sr.ReadToEndAsync();
-            context.Request.Body.Position = 0;
-
-            // Only require CORS for subscription requests on dialogEvents
-            if (!DialogEventsSubscriptionQuery().IsMatch(body))
-            {
-                await next();
-                return;
-            }
-
-            var corsService = context.RequestServices.GetRequiredService<ICorsService>();
-            var corsPolicyProvider = context.RequestServices.GetRequiredService<ICorsPolicyProvider>();
-
-            var policy = await corsPolicyProvider.GetPolicyAsync(context, GraphQlCorsOptions.PolicyName);
-            if (policy != null)
-            {
-                var corsResult = corsService.EvaluatePolicy(context, policy);
-                corsService.ApplyResult(corsResult, context.Response);
-            }
-
-            await next();
-        })
+    app.MapAspNetHealthChecks()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()
         .UseAzureConfiguration();
 
     app.MapGraphQL()
+        .RequireCors(GraphQlCorsOptions.PolicyName)
         .RequireAuthorization()
         .WithOptions(new GraphQLServerOptions
         {
@@ -200,10 +167,4 @@ static void BuildAndRun(string[] args)
         });
 
     app.Run();
-}
-
-internal static partial class Program
-{
-    [GeneratedRegex("(?=.*subscription)(?=.*dialogEvents)", RegexOptions.Singleline)]
-    private static partial Regex DialogEventsSubscriptionQuery();
 }

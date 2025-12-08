@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.95.0](https://github.com/Altinn/dialogporten/compare/v1.94.0...v1.95.0) (2025-12-08)
+
+
+### Features
+
+* **graphql:** enable cors ([#3102](https://github.com/Altinn/dialogporten/issues/3102)) ([3b862d8](https://github.com/Altinn/dialogporten/commit/3b862d8bcf21a73881180865f8d6f681a7a73fc3))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency medo.uuid7 to 3.2.0 ([#3095](https://github.com/Altinn/dialogporten/issues/3095)) ([16ddd6a](https://github.com/Altinn/dialogporten/commit/16ddd6aa12839046058d3dfa63370810810865d8))
+* **deps:** update dependency testcontainers.postgresql to 4.9.0 ([#3096](https://github.com/Altinn/dialogporten/issues/3096)) ([a8715f1](https://github.com/Altinn/dialogporten/commit/a8715f18815601284e3bf1e04be28f56d39cf37d))
+* **deps:** update docker/metadata-action action to v5.10.0 ([#3097](https://github.com/Altinn/dialogporten/issues/3097)) ([a7ccec0](https://github.com/Altinn/dialogporten/commit/a7ccec0f9c3f2449d7a64a26523ae2488fc78d13))
+* **deps:** update masstransit monorepo to 8.5.7 ([#3094](https://github.com/Altinn/dialogporten/issues/3094)) ([9771505](https://github.com/Altinn/dialogporten/commit/97715055b403995e65af4bbbe57821290078795f))
+* **graphql:** remove unnecessary tracing ([#3088](https://github.com/Altinn/dialogporten/issues/3088)) ([d57f9ee](https://github.com/Altinn/dialogporten/commit/d57f9eec730ed30f9674dc6b9d04c0083bc16902))
+* **logging:** Enable logging of party/services tuples ([#3101](https://github.com/Altinn/dialogporten/issues/3101)) ([0ad2d40](https://github.com/Altinn/dialogporten/commit/0ad2d40154cb1c1d8bb737475b8f432d4f9d8555))
+
 ## [1.94.0](https://github.com/Altinn/dialogporten/compare/v1.93.1...v1.94.0) (2025-12-05)
 
 

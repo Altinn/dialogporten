@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
@@ -164,7 +165,7 @@ static void BuildAndRun(string[] args)
             context.Request.Body.Position = 0;
 
             // Only require CORS for subscription requests on dialogEvents
-            if (!System.Text.RegularExpressions.Regex.IsMatch(body, "(?=.*subscription)(?=.*dialogEvents)", System.Text.RegularExpressions.RegexOptions.Singleline))
+            if (!DialogEventsSubscriptionQuery().IsMatch(body))
             {
                 await next();
                 return;
@@ -199,4 +200,10 @@ static void BuildAndRun(string[] args)
         });
 
     app.Run();
+}
+
+internal partial class Program
+{
+    [GeneratedRegex("(?=.*subscription)(?=.*dialogEvents)", RegexOptions.Singleline)]
+    private static partial Regex DialogEventsSubscriptionQuery();
 }

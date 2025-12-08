@@ -16,7 +16,7 @@ internal sealed class LocalDevelopmentUser : IUser
         new Claim("scope", string.Join(" ", AuthorizationScope.AllScopes.Value)),
         new Claim("consumer",
             /*lang=json,strict*/
-                                 """
+            """
             {
                 "authority": "iso6523-actorid-upis",
                 "ID": "0192:991825827"

@@ -3,8 +3,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
-using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -25,7 +23,7 @@ public interface IDialogSearchRepository
     Task OptimizeIndexAsync(CancellationToken ct);
     Task<PaginatedList<DialogEntity>> GetDialogs(
         GetDialogsQuery query,
-        DialogSearchAuthorizationResult authorizedResources,
+        DialogSearchAuthorizationResult? authorizedResources,
         CancellationToken cancellationToken);
 
     Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
@@ -41,12 +39,14 @@ public interface IDialogSearchRepository
 
     Task<Dictionary<Guid, List<DataDialogSeenLogDto>>> FetchSeenLogByDialogId(
         Guid[] dialogIds,
-        string currentUserId,
+        string? currentUserId,
         CancellationToken cancellationToken);
 
     Task<Dictionary<Guid, DataDialogActivityDto>> FetchLatestActivitiesByDialogId(
         Guid[] dialogIds,
         CancellationToken cancellationToken);
+
+    Task<Dictionary<Guid, DataDialogServiceOwnerContextDto>> FetchServiceOwnerContextByDialogId(Guid[] dialogIds, CancellationToken cancellationToken);
 }
 
 public sealed class DialogSearchReindexProgress
@@ -149,6 +149,16 @@ public sealed class GetDialogsQuery
     public DateTimeOffset? DueBefore { get; set; }
 
     /// <summary>
+    /// Only return dialogs with visible-from date after this date
+    /// </summary>
+    public DateTimeOffset? VisibleAfter { get; set; }
+
+    /// <summary>
+    /// Only return dialogs with visible-from date before this date
+    /// </summary>
+    public DateTimeOffset? VisibleBefore { get; set; }
+
+    /// <summary>
     /// Filter by process
     /// </summary>
     public string? Process { get; init; }
@@ -169,6 +179,11 @@ public sealed class GetDialogsQuery
     public string? Search { get; set; }
 
     /// <summary>
+    /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
+    /// </summary>
+    public List<string>? ServiceOwnerLabels { get; set; }
+
+    /// <summary>
     /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
     /// </summary>
     public string? SearchLanguageCode
@@ -177,7 +192,6 @@ public sealed class GetDialogsQuery
         init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
     }
 
-    public DateTimeOffset? VisibleAfter { get; set; }
     public DateTimeOffset? ExpiresBefore { get; set; }
 }
 
@@ -188,3 +202,4 @@ public sealed record DataDialogEndUserContextDto(Guid Revision, List<SystemLabel
 public sealed record DataDialogSeenLogDto(Guid SeenLogId, Guid DialogId, DateTimeOffset SeenAt, bool IsViaServiceOwner, bool IsCurrentEndUser, DataActorDto SeenBy);
 public sealed record DataActorDto(ActorType.Values ActorType, string? ActorId, string? ActorName);
 public sealed record DataDialogActivityDto(Guid ActivityId, DateTimeOffset? CreatedAt, DialogActivityType.Values Type, Uri? ExtendedType, Guid? TransmissionId, DataActorDto PerformedBy, List<DataLocalizationDto> Description);
+public sealed record DataDialogServiceOwnerContextDto(Guid Revision, List<string> Labels);

@@ -63,23 +63,15 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
     [SuppressMessage("Style", "IDE0037:Use inferred member name")]
     public async Task<PaginatedList<DialogEntity>> GetDialogs(
         GetDialogsQuery query,
-        DialogSearchAuthorizationResult authorizedResources,
+        DialogSearchAuthorizationResult? authorizedResources,
         CancellationToken cancellationToken)
     {
-        const int searchSampleLimit = 10_000;
-
-        if (query.Limit > searchSampleLimit)
-        {
-            throw new ArgumentOutOfRangeException(nameof(query.Limit),
-                $"Limit cannot be greater than the search sample limit of {searchSampleLimit}.");
-        }
-
-        if (authorizedResources.HasNoAuthorizations)
+        if (authorizedResources is not null && authorizedResources.HasNoAuthorizations)
         {
             return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());
         }
 
-        var partiesAndServices = authorizedResources.ResourcesByParties
+        var partiesAndServices = authorizedResources?.ResourcesByParties
             .Select(x => (party: x.Key, services: x.Value))
             .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
             .Select(x => new PartiesAndServices(
@@ -105,7 +97,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
                 WHERE d."Party" = ppm.party
 
                 """)
-            .AppendIf(query.Search is not null,
+            .AppendIf(query.Search is not null && partiesAndServices is not null,
                 """
                 SELECT d."Id"
                 FROM search."DialogSearch" ds 
@@ -119,13 +111,6 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
                 AND d."ServiceResource" = ANY(ppm.allowed_services)
 
                 """)
-            .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
-            .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
-            .AppendIf(query.ExpiresBefore is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz) """)
-            .AppendIf(!query.Org.IsNullOrEmpty(), $""" AND d."Org" = ANY({query.Org}::text[]) """)
-            .AppendIf(!query.ExtendedStatus.IsNullOrEmpty(), $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]) """)
-            .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
-            .AppendIf(!query.Status.IsNullOrEmpty(), $""" AND d."StatusId" = ANY({query.Status}::int[]) """)
             .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)
             .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore}::timestamptz """)
             .AppendIf(query.UpdatedAfter is not null, $""" AND {query.UpdatedAfter}::timestamptz <= d."UpdatedAt" """)
@@ -134,6 +119,14 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
             .AppendIf(query.ContentUpdatedBefore is not null, $""" AND d."ContentUpdatedAt" <= {query.ContentUpdatedBefore}::timestamptz """)
             .AppendIf(query.DueAfter is not null, $""" AND {query.DueAfter}::timestamptz <= d."DueAt" """)
             .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
+            .AppendIf(query.VisibleAfter is not null, $""" AND {query.VisibleAfter}::timestamptz <= d."VisibleFrom" """)
+            .AppendIf(query.VisibleBefore is not null, $""" AND d."VisibleFrom" <= {query.VisibleBefore}::timestamptz """)
+            .AppendIf(query.ExpiresBefore is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" <= {query.ExpiresBefore}::timestamptz) """)
+            .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
+            .AppendIf(!query.Org.IsNullOrEmpty(), $""" AND d."Org" = ANY({query.Org}::text[]) """)
+            .AppendIf(!query.ExtendedStatus.IsNullOrEmpty(), $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]) """)
+            .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
+            .AppendIf(!query.Status.IsNullOrEmpty(), $""" AND d."StatusId" = ANY({query.Status}::int[]) """)
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
             .AppendIf(!query.SystemLabel.IsNullOrEmpty(),
@@ -316,7 +309,7 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
 
     public async Task<Dictionary<Guid, List<DataDialogSeenLogDto>>> FetchSeenLogByDialogId(
         Guid[] dialogIds,
-        string currentUserId,
+        string? currentUserId,
         CancellationToken cancellationToken)
     {
         var (query, parameters) = new PostgresFormattableStringBuilder()
@@ -327,9 +320,22 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
                       , sl."CreatedAt" AS "SeenAt"
                       , sl."IsViaServiceOwner"
                       , a."ActorTypeId" AS "ActorType"
-                      , an."ActorId" IS NOT NULL AND an."ActorId" = {currentUserId}::text AS "IsCurrentEndUser"
                       , an."ActorId"
                       , an."Name" AS "ActorName"
+                      , an."ActorId" IS NOT NULL 
+                            AND {currentUserId}::text IS NOT NULL 
+                            AND an."ActorId" = {currentUserId}::text AS "IsCurrentEndUser"
+                 """)
+            .AppendIf(currentUserId is not null,
+                $"""
+                 , an."ActorId" IS NOT NULL AND an."ActorId" = {currentUserId}::text AS "IsCurrentEndUser"
+                 """)
+            .AppendIf(currentUserId is null,
+                """
+                , FALSE AS "IsCurrentEndUser"
+                """)
+            .Append(
+                $"""
                  FROM "Dialog" d
                  INNER JOIN "DialogSeenLog" sl ON d."Id" = sl."DialogId"
                  INNER JOIN "Actor" a ON a."Discriminator" = 'DialogSeenLogSeenByActor' AND sl."Id" = a."DialogSeenLogId"
@@ -422,6 +428,27 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
             );
     }
 
+    public async Task<Dictionary<Guid, DataDialogServiceOwnerContextDto>> FetchServiceOwnerContextByDialogId(Guid[] dialogIds,
+        CancellationToken cancellationToken)
+    {
+        var (query, parameters) = new PostgresFormattableStringBuilder()
+            .Append(
+                $"""
+                 SELECT c."DialogId", c."Revision", l."Value"
+                 FROM "DialogServiceOwnerContext" c
+                 LEFT JOIN "DialogServiceOwnerLabel" l ON c."DialogId" = l."DialogServiceOwnerContextId"
+                 WHERE c."DialogId" = ANY ({dialogIds}::uuid[])
+                 """)
+            .ToDynamicParameters();
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var rawRows = await connection.QueryAsync<(Guid DialogId, Guid Revision, string Value)>(query, parameters);
+        return rawRows.GroupBy(x => new { x.DialogId, x.Revision })
+            .ToDictionary(x => x.Key.DialogId,
+                row => new DataDialogServiceOwnerContextDto(
+                    row.Key.Revision,
+                    row.Select(x => x.Value).ToList()));
+    }
+
     [SuppressMessage("Style", "IDE0072:Add missing cases")]
     private static DataContentValueDto? PickByAuth(
         List<DataContentValueDto> values,
@@ -439,8 +466,9 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
         .FirstOrDefault();
 
     private sealed record PartiesAndServices(string[] Parties, string[] Services);
-    private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, List<PartiesAndServices> partiesAndServices)
+    private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, List<PartiesAndServices>? partiesAndServices)
     {
+        if (partiesAndServices is null) return;
         var totalPartiesCount = partiesAndServices.Sum(g => g.Parties.Length);
         var totalServicesCount = partiesAndServices.Sum(g => g.Services.Length);
         var groupsCount = partiesAndServices.Count;

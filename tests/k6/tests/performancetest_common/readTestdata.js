@@ -6,6 +6,7 @@
  * @module readTestdata
  */
 
+import http from 'k6/http';
 import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 import { SharedArray } from 'k6/data';
 import exec from 'k6/execution';
@@ -14,9 +15,14 @@ import exec from 'k6/execution';
  * @param {} filename
  * @returns
  */
-function readCsv(filename) {
+export function readCsv(filename) {
+  const csvData = open(filename);
+  return parseCsvData(csvData);
+}
+
+function parseCsvData(csvData) {
   try {
-    return papaparse.parse(open(filename), { header: true, skipEmptyLines: true }).data;
+    return papaparse.parse(csvData, { header: true, skipEmptyLines: true }).data;
   } catch (error) {
     console.log(`Error reading CSV file: ${error}`);
     return [];
@@ -42,22 +48,20 @@ export const serviceOwners = new SharedArray('serviceOwners', function () {
 });
 
 /**
- * SharedArray variable that stores the end users data.
- * The data is parsed from the CSV file specified by the filenameEndusers variable.
- * The filenameEndusers variable is dynamically generated based on the value of the API_ENVIRONMENT environment variable.
- *
- * @name endUsers
- * @type {SharedArray}
+ * Reads the enduser data from github raw CSV file.
+ * @returns {Array} endUsers - Array of end users read from CSV file.
  */
-export const endUsers = new SharedArray('endUsers', function () {
-  return readCsv(filenameEndusers);
-});
+export function getEndUsers(){
+  const res = http.get(`https://raw.githubusercontent.com/Altinn/dialogporten/refs/heads/main/tests/k6/tests/performancetest_data/endusers-${__ENV.API_ENVIRONMENT}.csv`);
+  return parseCsvData(res.body);
+}
 
 export const dialogsWithTransmissions = new SharedArray('dialogsWithTransmissions', function () {
   return readCsv(filenameDialogsWithTransmissions);
 });
 
 export function endUsersPart(totalVus, vuId) {
+  const endUsers = getEndUsers();
   const endUsersLength = endUsers.length;
   if (totalVus == 1) {
       return endUsers.slice(0, endUsersLength);

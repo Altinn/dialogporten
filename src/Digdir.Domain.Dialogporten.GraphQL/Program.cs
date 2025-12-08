@@ -75,20 +75,10 @@ static void BuildAndRun(string[] args)
     var thisAssembly = Assembly.GetExecutingAssembly();
 
     // CORS allowed origins by environment in order to GraphQL streams to work from Arbeidsflate directly through APIM
-    string[] testOrigins = { "http://app.localhost", "https://af.at23.altinn.cloud" };
-    string[] stagingOrigins = { "https://af.tt.altinn.no" };
-    string[] prodOrigins = { "https://af.altinn.no" };
-    string[] yt01Origins = { "https://af.yt.altinn.cloud" };
-    var emptyOrigins = Array.Empty<string>();
-
-    var allowedOrigins = builder.Environment.EnvironmentName.ToLowerInvariant() switch
-    {
-        "test" => testOrigins,
-        "staging" => stagingOrigins,
-        "prod" => prodOrigins,
-        "yt01" => yt01Origins,
-        _ => emptyOrigins
-    };
+    var allowedOrigins = builder.Configuration
+        .GetSection(GraphQlSettings.SectionName)
+        .GetSection(GraphQlCorsOptions.SectionName)
+        .GetValue<string[]>(nameof(GraphQlCorsOptions.AllowedOrigins)) ?? [];
 
     builder.Services
         // Options setup
@@ -108,7 +98,7 @@ static void BuildAndRun(string[] args)
         // CORS
         .AddCors(options =>
         {
-            options.AddPolicy("GraphQlStreamPolicy", policy =>
+            options.AddPolicy(GraphQlCorsOptions.PolicyName, policy =>
             {
                 policy.WithOrigins(allowedOrigins)
                     .AllowAnyMethod()
@@ -160,11 +150,11 @@ static void BuildAndRun(string[] args)
 
     app.Use(async (context, next) =>
     {
-        if (context.Request.Path.StartsWithSegments("/api/graphql/stream", StringComparison.OrdinalIgnoreCase))
+        if (context.Request.Path.StartsWithSegments("graphql/stream", StringComparison.OrdinalIgnoreCase))
         {
             var corsService = context.RequestServices.GetRequiredService<ICorsService>();
             var corsPolicyProvider = context.RequestServices.GetRequiredService<ICorsPolicyProvider>();
-            var policy = await corsPolicyProvider.GetPolicyAsync(context, "GraphQlStreamPolicy");
+            var policy = await corsPolicyProvider.GetPolicyAsync(context, GraphQlCorsOptions.PolicyName);
             if (policy != null)
             {
                 var corsResult = corsService.EvaluatePolicy(context, policy);

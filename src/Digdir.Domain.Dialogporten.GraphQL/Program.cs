@@ -149,6 +149,7 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
 
     app.MapAspNetHealthChecks()
+        .UseCors()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()

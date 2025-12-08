@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Reflection;
+using System.Text;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
@@ -77,8 +78,8 @@ static void BuildAndRun(string[] args)
     // CORS allowed origins by environment in order to GraphQL streams to work from Arbeidsflate directly through APIM
     var allowedOrigins = builder.Configuration
         .GetSection(GraphQlSettings.SectionName)
-        .GetSection(GraphQlCorsOptions.SectionName)
-        .GetValue<string[]>(nameof(GraphQlCorsOptions.AllowedOrigins)) ?? [];
+        .Get<GraphQlSettings>()
+        ?.Cors.AllowedOrigins.ToArray() ?? [];
 
     builder.Services
         // Options setup
@@ -149,31 +150,42 @@ static void BuildAndRun(string[] args)
     app.MapAspNetHealthChecks();
 
     app.Use(async (context, next) =>
-    {
-        if (context.Request.Path.StartsWithSegments("graphql/stream", StringComparison.OrdinalIgnoreCase))
         {
+            if (!HttpMethods.IsPost(context.Request.Method))
+            {
+                await next();
+                return;
+            }
+
+            context.Request.EnableBuffering();
+            using var sr = new StreamReader(context.Request.Body, Encoding.UTF8,
+                detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+            var body = await sr.ReadToEndAsync();
+            context.Request.Body.Position = 0;
+
+            // Only require CORS for subscription requests on dialogEvents
+            if (!System.Text.RegularExpressions.Regex.IsMatch(body, "(?=.*subscription)(?=.*dialogEvents)", System.Text.RegularExpressions.RegexOptions.Singleline))
+            {
+                await next();
+                return;
+            }
+
             var corsService = context.RequestServices.GetRequiredService<ICorsService>();
             var corsPolicyProvider = context.RequestServices.GetRequiredService<ICorsPolicyProvider>();
+
             var policy = await corsPolicyProvider.GetPolicyAsync(context, GraphQlCorsOptions.PolicyName);
             if (policy != null)
             {
                 var corsResult = corsService.EvaluatePolicy(context, policy);
                 corsService.ApplyResult(corsResult, context.Response);
-
-                // Short-circuit preflight OPTIONS requests
-                if (context.Request.Method == "OPTIONS")
-                {
-                    context.Response.StatusCode = 204;
-                    return;
-                }
             }
-        }
-        await next();
-    })
-    .UseJwtSchemeSelector()
-    .UseAuthentication()
-    .UseAuthorization()
-    .UseAzureConfiguration();
+
+            await next();
+        })
+        .UseJwtSchemeSelector()
+        .UseAuthentication()
+        .UseAuthorization()
+        .UseAzureConfiguration();
 
     app.MapGraphQL()
         .RequireAuthorization()

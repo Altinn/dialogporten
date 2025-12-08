@@ -170,7 +170,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
         // TODO: Get org short code instead of resource ids, and use it as the search driver for SO search
-        var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
+        // var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
         // If the service owner impersonates an end user, we need to filter the dialogs
         // based on the end user's authorization, not the service owner's (which is
@@ -210,7 +210,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             seenLogsByDialogIdTask,
             latestActivitiesByDialogIdTask,
             serviceOwnerContextByDialogIdTask);
-        MaskActorIdentifiers(seenLogsByDialogIdTask.Result, latestActivitiesByDialogIdTask.Result);
 
         var result = dialogs.ConvertTo(dialog =>
         {
@@ -274,18 +273,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 .Select(label => new ServiceOwnerLabelDto { Value = label })
                 .ToList()
         });
-    }
-
-    private static void MaskActorIdentifiers(Dictionary<Guid, List<DialogSeenLogDto>> seenLogsByDialogId, Dictionary<Guid, DialogActivityDto> latestActivitiesByDialogId)
-    {
-        foreach (var item in seenLogsByDialogId.Values
-                     .SelectMany(x => x)
-                     .Select(x => x.SeenBy)
-                     .Concat(latestActivitiesByDialogId.Values
-                         .Select(x => x.PerformedBy)))
-        {
-            item.ActorId = IdentifierMasker.GetMaybeMaskedIdentifier(item.ActorId);
-        }
     }
 
     private async Task<Dictionary<Guid, DialogActivityDto>> FetchLatestActivitiesByDialogId(Guid[] dialogIds,

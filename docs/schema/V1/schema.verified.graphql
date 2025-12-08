@@ -440,7 +440,7 @@ type SetSystemLabelValidationError implements SetSystemLabelError {
 }
 
 type Subscriptions {
-  "Requires a dialog token in the 'DigDir-Dialog-Token' header."
+  "Requires a dialog token in the 'Authorization' header."
   dialogEvents(dialogId: UUID!): DialogEventPayload! @authorize(policy: "enduserSubscription", apply: VALIDATION)
 }
 

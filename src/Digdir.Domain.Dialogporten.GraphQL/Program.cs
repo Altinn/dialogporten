@@ -133,7 +133,6 @@ static void BuildAndRun(string[] args)
     app.UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()
-        .UseMiddleware<DialogTokenMiddleware>()
         .UseAzureConfiguration();
 
     app.MapGraphQL()

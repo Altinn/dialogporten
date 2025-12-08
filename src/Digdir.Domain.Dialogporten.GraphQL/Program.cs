@@ -202,7 +202,7 @@ static void BuildAndRun(string[] args)
     app.Run();
 }
 
-internal partial class Program
+internal static partial class Program
 {
     [GeneratedRegex("(?=.*subscription)(?=.*dialogEvents)", RegexOptions.Singleline)]
     private static partial Regex DialogEventsSubscriptionQuery();

@@ -2,21 +2,22 @@ using System.Globalization;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.GraphQL;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Authentication;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
-using Digdir.Domain.Dialogporten.GraphQL;
 using Digdir.Library.Utils.AspNet;
-using Serilog;
 using FluentValidation;
 using HotChocolate.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Serilog;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -107,7 +108,7 @@ static void BuildAndRun(string[] args)
         // CORS
         .AddCors(options =>
         {
-            options.AddDefaultPolicy(policy =>
+            options.AddPolicy("GraphQlStreamPolicy", policy =>
             {
                 policy.WithOrigins(allowedOrigins)
                     .AllowAnyMethod()
@@ -157,11 +158,32 @@ static void BuildAndRun(string[] args)
 
     app.MapAspNetHealthChecks();
 
-    app.UseCors()
-        .UseJwtSchemeSelector()
-        .UseAuthentication()
-        .UseAuthorization()
-        .UseAzureConfiguration();
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api/graphql/stream", StringComparison.OrdinalIgnoreCase))
+        {
+            var corsService = context.RequestServices.GetRequiredService<ICorsService>();
+            var corsPolicyProvider = context.RequestServices.GetRequiredService<ICorsPolicyProvider>();
+            var policy = await corsPolicyProvider.GetPolicyAsync(context, "GraphQlStreamPolicy");
+            if (policy != null)
+            {
+                var corsResult = corsService.EvaluatePolicy(context, policy);
+                corsService.ApplyResult(corsResult, context.Response);
+
+                // Short-circuit preflight OPTIONS requests
+                if (context.Request.Method == "OPTIONS")
+                {
+                    context.Response.StatusCode = 204;
+                    return;
+                }
+            }
+        }
+        await next();
+    })
+    .UseJwtSchemeSelector()
+    .UseAuthentication()
+    .UseAuthorization()
+    .UseAzureConfiguration();
 
     app.MapGraphQL()
         .RequireAuthorization()

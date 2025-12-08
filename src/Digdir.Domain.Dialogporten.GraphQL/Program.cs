@@ -73,6 +73,22 @@ static void BuildAndRun(string[] args)
 
     var thisAssembly = Assembly.GetExecutingAssembly();
 
+    // CORS allowed origins by environment in order to GraphQL streams to work from Arbeidsflate directly through APIM
+    string[] testOrigins = { "http://app.localhost", "https://af.at23.altinn.cloud" };
+    string[] stagingOrigins = { "https://af.tt.altinn.no" };
+    string[] prodOrigins = { "https://af.altinn.no" };
+    string[] yt01Origins = { "https://af.yt.altinn.cloud" };
+    var emptyOrigins = Array.Empty<string>();
+
+    var allowedOrigins = builder.Environment.EnvironmentName.ToLowerInvariant() switch
+    {
+        "test" => testOrigins,
+        "staging" => stagingOrigins,
+        "prod" => prodOrigins,
+        "yt01" => yt01Origins,
+        _ => emptyOrigins
+    };
+
     builder.Services
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
@@ -87,6 +103,17 @@ static void BuildAndRun(string[] args)
         .AddScoped<IUser, ApplicationUser>()
         .AddValidatorsFromAssembly(thisAssembly, ServiceLifetime.Transient, includeInternalTypes: true)
         .AddAzureAppConfiguration()
+
+        // CORS
+        .AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        })
 
         // Graph QL
         .AddDialogportenGraphQl()
@@ -130,7 +157,8 @@ static void BuildAndRun(string[] args)
 
     app.MapAspNetHealthChecks();
 
-    app.UseJwtSchemeSelector()
+    app.UseCors()
+        .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()
         .UseAzureConfiguration();

@@ -55,6 +55,7 @@ public static class OpenTelemetryExtensions
                 }
 
                 tracing.AddProcessor(new PostgresFilter(enabledSqlStatementLogging));
+                tracing.AddProcessor(new GraphQLFilter());
                 tracing.AddProcessor(new HealthCheckFilter());
                 tracing.AddProcessor(new FusionCacheFilter());
 

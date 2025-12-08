@@ -13,10 +13,10 @@ public static class Constants
     public const string AspNetCore = "Microsoft.AspNetCore";
     public const string Npgsql = "Npgsql";
     public const string HotChocolateDiagnostics = "HotChocolate.Diagnostics";
-    public const string GraphQLTarget = "target";
 
-    public const string GraphQLTargetParseHttpRequest = "Parse HTTP Request";
-    public const string GraphQLTargetValidateDocument = "Validate Document";
-    public const string GraphQLTargetCompileOperation = "Compile Operation";
-    public const string GraphQLTargetFormatHttpResponse = "Format HTTP Response";
+    // GraphQL Activity OperationNames to filter out (internal processing steps)
+    public const string GraphQLOperationParseHttpRequest = "ParseHttpRequest";
+    public const string GraphQLOperationValidateDocument = "ValidateDocument";
+    public const string GraphQLOperationCompileOperation = "CompileOperation";
+    public const string GraphQLOperationFormatHttpResponse = "FormatHttpResponse";
 }

@@ -12,7 +12,15 @@ public class GraphQLFilter : OpenTelemetry.BaseProcessor<Activity>
             return;
         }
 
-        if (activity.Tags.HasFilteredGraphQLTarget())
+        // Filter out internal GraphQL processing activities that don't add value to traces
+        // We filter based on OperationName which identifies the internal processing step
+        // Keep: ExecuteHttpRequest (main operation), ResolveFieldValue (field resolution)
+        // Filter: ParseHttpRequest, ValidateDocument, CompileOperation, FormatHttpResponse
+        if (activity.OperationName is
+            Constants.GraphQLOperationParseHttpRequest or
+            Constants.GraphQLOperationValidateDocument or
+            Constants.GraphQLOperationCompileOperation or
+            Constants.GraphQLOperationFormatHttpResponse)
         {
             activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
             return;
@@ -20,17 +28,4 @@ public class GraphQLFilter : OpenTelemetry.BaseProcessor<Activity>
 
         base.OnEnd(activity);
     }
-}
-
-internal static class GraphQLActivityTagsExtensions
-{
-    public static bool HasFilteredGraphQLTarget(this IEnumerable<KeyValuePair<string, string?>> tags) =>
-        tags.Any(t => t is
-        {
-            Key: Constants.GraphQLTarget,
-            Value: Constants.GraphQLTargetParseHttpRequest or
-                   Constants.GraphQLTargetValidateDocument or
-                   Constants.GraphQLTargetCompileOperation or
-                   Constants.GraphQLTargetFormatHttpResponse
-        });
 }

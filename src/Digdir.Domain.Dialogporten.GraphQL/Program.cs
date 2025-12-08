@@ -73,7 +73,7 @@ static void BuildAndRun(string[] args)
 
     var thisAssembly = Assembly.GetExecutingAssembly();
 
-    // CORS allowed origins by environment in order to GraphQL streams to work from Arbeidsflate directly through APIM
+    // CORS allowed origins by environment in order for GraphQL streams to work from Arbeidsflate directly through APIM
     var allowedOrigins = builder.Configuration
         .GetSection(GraphQlSettings.SectionName)
         .Get<GraphQlSettings>()

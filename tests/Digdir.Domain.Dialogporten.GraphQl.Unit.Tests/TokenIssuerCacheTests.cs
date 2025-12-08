@@ -15,7 +15,8 @@ public class TokenIssuerCacheTests
             Authentication = new AuthenticationOptions
             {
                 JwtBearerTokenSchemas = []
-            }
+            },
+            Cors = new GraphQlCorsOptions { AllowedOrigins = ["*"] }
         };
         var cache = new TokenIssuerCache(Options.Create(settings));
 

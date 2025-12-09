@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.94.0](https://github.com/Altinn/dialogporten/compare/v1.93.1...v1.94.0) (2025-12-05)
+
+
+### Features
+
+* **graphql:** remove EndUser base policy from subscription policy ([#3082](https://github.com/Altinn/dialogporten/issues/3082)) ([b1ae372](https://github.com/Altinn/dialogporten/commit/b1ae3727f793d82bd3541bd4481c06b723819c2f))
+
+## [1.93.1](https://github.com/Altinn/dialogporten/compare/v1.93.0...v1.93.1) (2025-12-04)
+
+
+### Bug Fixes
+
+* **infra:** Use TryCreate on extended type to avoid exception on invalid data ([#3086](https://github.com/Altinn/dialogporten/issues/3086)) ([8f3b540](https://github.com/Altinn/dialogporten/commit/8f3b540342dc5ed88ac88f8074eaa2287a23ccab))
+
+## [1.93.0](https://github.com/Altinn/dialogporten/compare/v1.92.3...v1.93.0) (2025-12-04)
+
+
+### Features
+
+* systemuser_org as actorname for systemusers ([#3063](https://github.com/Altinn/dialogporten/issues/3063)) ([0d31c91](https://github.com/Altinn/dialogporten/commit/0d31c91774d75c6a12d4dbd1fbd77c18de88eea6))
+
+
+### Bug Fixes
+
+* **DialogSearch:** Fix json parsing of search query ([#3080](https://github.com/Altinn/dialogporten/issues/3080)) ([be27be5](https://github.com/Altinn/dialogporten/commit/be27be5bab5049d70d59b41b2ee272316a63bfdc))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-dotnet action to v5.0.1 ([#3074](https://github.com/Altinn/dialogporten/issues/3074)) ([4c5e5e4](https://github.com/Altinn/dialogporten/commit/4c5e5e467a4d43a201ee045e8b4dbe89094e2f53))
+* **deps:** update dependency altinn.authorization.abac to 0.1.1 ([#2990](https://github.com/Altinn/dialogporten/issues/2990)) ([b5dab61](https://github.com/Altinn/dialogporten/commit/b5dab61ab7c30b5b483ba8aa12dc792c4530117c))
+* **deps:** update docker/metadata-action action to v5.9.0 ([#3070](https://github.com/Altinn/dialogporten/issues/3070)) ([408697d](https://github.com/Altinn/dialogporten/commit/408697daa4321af3d805da96a01bba8442e65a44))
+* **deps:** update masstransit monorepo to 8.5.6 ([#3075](https://github.com/Altinn/dialogporten/issues/3075)) ([0a60a28](https://github.com/Altinn/dialogporten/commit/0a60a2837c33f860d9d20ec0b332aaeb9c8a73f3))
+* **logging:** Add parties and services count logging ([#3072](https://github.com/Altinn/dialogporten/issues/3072)) ([222c0e4](https://github.com/Altinn/dialogporten/commit/222c0e4d8b1f74069b00a87cd36746f56b3ddee8))
+* **logging:** Don't treat empty party list as error if party filter is supplied ([#3076](https://github.com/Altinn/dialogporten/issues/3076)) ([c66351f](https://github.com/Altinn/dialogporten/commit/c66351f74fc7904113e42ecdff3a8b22991e5ea4))
+* **perf:** Add covering indexes for AF ([#3056](https://github.com/Altinn/dialogporten/issues/3056)) ([ad56336](https://github.com/Altinn/dialogporten/commit/ad563368c8a08e062eed13ddf39d7676e2309178))
+* **perf:** Optimize enduser sub queries ([#3045](https://github.com/Altinn/dialogporten/issues/3045)) ([8b2eb3c](https://github.com/Altinn/dialogporten/commit/8b2eb3c7637af47aed79213ca3365510a7b393a4))
+
 ## [1.92.3](https://github.com/Altinn/dialogporten/compare/v1.92.2...v1.92.3) (2025-11-28)
 
 

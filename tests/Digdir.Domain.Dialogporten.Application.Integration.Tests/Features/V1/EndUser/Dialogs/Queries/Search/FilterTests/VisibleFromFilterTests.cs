@@ -12,8 +12,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class VisibleFromFilterTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    [Theory]
-    [ClassData(typeof(DialogVisibleFromFilterTestData))]
+    [Theory, ClassData(typeof(DialogVisibleFromFilterTestData))]
     public async Task Should_Filter_On_VisibleFrom(
         List<DialogData> dataSet,
         DateTimeOffset searchTime,
@@ -28,13 +27,10 @@ public class VisibleFromFilterTests(DialogApplication application) : Application
             .CreateDialogs(createDialogCommands)
             .OverrideUtc(searchTime)
             .SearchEndUserDialogs(x => x.Party = [Tests.Common.Common.Party])
-            .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
-            {
-                result.Items
-                    .Select(x => x.ExternalReference)
-                    .Should()
-                    .BeEquivalentTo(expectedReferences);
-            });
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(result => result.Items
+                .Select(x => x.ExternalReference)
+                .Should()
+                .BeEquivalentTo(expectedReferences));
     }
 
     private static CreateDialogCommand CreateDialogCommand(DialogData data) =>

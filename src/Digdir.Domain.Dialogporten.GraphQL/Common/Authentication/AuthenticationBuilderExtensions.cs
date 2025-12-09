@@ -102,7 +102,7 @@ internal static class AuthenticationBuilderExtensions
         return services;
     }
 
-    private static (string issuer, EdDsaSecurityKey pimaryKey, EdDsaSecurityKey secondaryKey) GetAuthConfig(IConfiguration configuration)
+    private static (string issuer, EdDsaSecurityKey primaryKey, EdDsaSecurityKey secondaryKey) GetAuthConfig(IConfiguration configuration)
     {
         var applicationSettings = configuration
             .GetSection(ApplicationSettings.ConfigurationSectionName)

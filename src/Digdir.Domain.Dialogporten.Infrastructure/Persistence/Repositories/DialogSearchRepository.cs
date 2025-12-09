@@ -81,6 +81,7 @@ internal sealed class DialogSearchRepository(
                 FROM "Dialog" d
                 WHERE d."Org" = {orgName}
                 """)
+            .AppendIf(query.Party is not null, $""" AND d."Party" = ANY({query.Party}::text[]) """)
             .AppendIf(query.ServiceResource is not null, $"""  AND d."ServiceResource" = ANY({query.ServiceResource}::text[]) """)
             .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)
             .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore}::timestamptz """)

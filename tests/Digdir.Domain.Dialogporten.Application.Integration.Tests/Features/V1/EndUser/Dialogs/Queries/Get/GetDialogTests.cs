@@ -74,7 +74,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
                 x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
             })
-            .SetApplicationClockSkew(TimeSpan.FromDays(2))
+            .OverrideUtc(TimeSpan.FromDays(2))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {

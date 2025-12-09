@@ -149,12 +149,25 @@ public static class IFlowStepExtensions
             return x;
         });
 
-    public static IFlowStep<T> SetApplicationClockSkew<T>(this IFlowStep<T> step, TimeSpan skew) =>
+    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, TimeSpan skew) =>
         step.Select(x =>
         {
             DialogApplication.Clock.OverrideUtc(skew);
             return x;
         });
+
+    public static IFlowStep OverrideUtc(this IFlowStep step, TimeSpan skew) =>
+        step.Do(_ => DialogApplication.Clock.OverrideUtc(skew));
+
+    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, DateTimeOffset time) =>
+        step.Select(x =>
+        {
+            DialogApplication.Clock.OverrideUtc(time);
+            return x;
+        });
+
+    public static IFlowStep OverrideUtc(this IFlowStep step, DateTimeOffset time) =>
+        step.Do(_ => DialogApplication.Clock.OverrideUtc(time));
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()

@@ -120,8 +120,8 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
 
                 """)
             .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
-            .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR {query.VisibleAfter}::timestamptz <= d."VisibleFrom") """)
-            .AppendIf(query.ExpiresBefore is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" <= {query.ExpiresBefore}::timestamptz) """)
+            .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR {query.VisibleAfter}::timestamptz >= d."VisibleFrom") """)
+            .AppendIf(query.ExpiresBefore is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresBefore}::timestamptz) """)
             .AppendIf(!query.Org.IsNullOrEmpty(), $""" AND d."Org" = ANY({query.Org}::text[]) """)
             .AppendIf(!query.ExtendedStatus.IsNullOrEmpty(), $""" AND d."ExtendedStatus" = ANY({query.ExtendedStatus}::text[]) """)
             .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)

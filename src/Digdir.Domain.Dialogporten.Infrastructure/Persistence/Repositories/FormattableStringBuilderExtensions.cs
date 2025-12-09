@@ -100,6 +100,23 @@ internal static class PostgresFormattableStringBuilderExtensions
         return queryBuilder;
     }
 
+    internal static PostgresFormattableStringBuilder AppendManyFilter<T>(
+        this PostgresFormattableStringBuilder builder,
+        List<T>? values,
+        string field,
+        string pgType = "text")
+    {
+        if (values is null || values.Count == 0)
+        {
+            return builder;
+        }
+
+        return values.Count == 1
+            // Optimize for single value case by making it easier for the query planner to use index scans
+            ? builder.Append(" AND d.\"" + field + "\"").Append($""" = {values.First()} """)
+            : builder.Append(" AND d.\"" + field + "\"").Append($""" = ANY({values}::""").Append(pgType + "[]) ");
+    }
+
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
     internal static PostgresFormattableStringBuilder ApplyPaginationCondition<T>(
         this PostgresFormattableStringBuilder builder,

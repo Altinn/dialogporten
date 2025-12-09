@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using NSec.Cryptography;
+using ScottBrady.IdentityModel.Crypto;
+using ScottBrady.IdentityModel.Tokens;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common.Authentication;
@@ -71,10 +70,10 @@ internal static class AuthenticationBuilderExtensions
             });
         }
 
-        SetDialogportenPublicKeys(configuration);
-
         authenticationBuilder.AddJwtBearer(DialogportenAuthenticationSchemaName, options =>
         {
+            var (dialogportenIssuer, primaryKey, secondaryKey) = GetAuthConfig(configuration);
+
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = false,
@@ -82,11 +81,7 @@ internal static class AuthenticationBuilderExtensions
                 RequireExpirationTime = true,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(2),
-                // EdDsa is not natively supported in .NET
-                // https://github.com/dotnet/runtime/issues/63174
-                RequireSignedTokens = false,
-                ValidateIssuerSigningKey = true,
-                SignatureValidator = ValidateSignature
+                IssuerSigningKeys = [primaryKey, secondaryKey]
             };
 
             options.Events = new JwtBearerEvents
@@ -94,7 +89,7 @@ internal static class AuthenticationBuilderExtensions
                 OnMessageReceived = context =>
                 {
                     if (context.HttpContext.Items.TryGetValue(Constants.CurrentTokenIssuer, out var tokenIssuer)
-                        && (string?)tokenIssuer != _dialogportenIssuer)
+                        && (string?)tokenIssuer != dialogportenIssuer)
                     {
                         context.NoResult();
                     }
@@ -107,49 +102,23 @@ internal static class AuthenticationBuilderExtensions
         return services;
     }
 
-    private static PublicKey? _primaryPublicKey;
-    private static PublicKey? _secondaryPublicKey;
-    private static string? _dialogportenIssuer;
-
-    private static void SetDialogportenPublicKeys(IConfiguration configuration)
+    private static (string issuer, EdDsaSecurityKey pimaryKey, EdDsaSecurityKey secondaryKey) GetAuthConfig(IConfiguration configuration)
     {
         var applicationSettings = configuration
             .GetSection(ApplicationSettings.ConfigurationSectionName)
             .Get<ApplicationSettings>() ?? throw new InvalidOperationException(
             $"Missing config '{ApplicationSettings.ConfigurationSectionName}'.");
 
+        var issuer = applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + DialogTokenIssuerVersion;
+
         var keyPairs = applicationSettings.Dialogporten.Ed25519KeyPairs;
-        _dialogportenIssuer = applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + DialogTokenIssuerVersion;
 
-        _primaryPublicKey = PublicKey.Import(SignatureAlgorithm.Ed25519,
-            Base64Url.Decode(keyPairs.Primary.PublicComponent), KeyBlobFormat.RawPublicKey);
-
-        _secondaryPublicKey = PublicKey.Import(SignatureAlgorithm.Ed25519,
-            Base64Url.Decode(keyPairs.Secondary.PublicComponent), KeyBlobFormat.RawPublicKey);
+        return (issuer, CreateKey(keyPairs.Primary), CreateKey(keyPairs.Secondary));
     }
 
-    private static JsonWebToken ValidateSignature(string encodedToken, object _)
-    {
-        var handler = new JsonWebTokenHandler();
-        var jwt = handler.ReadJsonWebToken(encodedToken);
-
-        var signature = Base64Url.Decode(jwt.EncodedSignature);
-        var signatureIsValid = SignatureAlgorithm.Ed25519
-            .Verify(_primaryPublicKey!, Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload),
-                signature);
-
-        if (!signatureIsValid)
+    private static EdDsaSecurityKey CreateKey(Ed25519KeyPair keyPair) =>
+        new(EdDsa.Create(new EdDsaParameters(ExtendedSecurityAlgorithms.Curves.Ed25519)
         {
-            signatureIsValid = SignatureAlgorithm.Ed25519
-                .Verify(_secondaryPublicKey!, Encoding.UTF8.GetBytes(jwt.EncodedHeader + '.' + jwt.EncodedPayload),
-                    signature);
-        }
-
-        if (signatureIsValid)
-        {
-            return jwt;
-        }
-
-        throw new SecurityTokenInvalidSignatureException("Invalid token signature.");
-    }
+            X = Base64Url.Decode(keyPair.PublicComponent)
+        }));
 }

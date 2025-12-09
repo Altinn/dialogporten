@@ -51,6 +51,21 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
             .IncludeProperties(x => x.ServiceResource)
             .IsCreatedConcurrently();
 
+        builder.HasIndex(x => new { x.Org, x.Party, x.ContentUpdatedAt, x.Id })
+            .IsDescending(false, false, true, true);
+
+        builder.HasIndex(x => new { x.Org, x.ServiceResource, x.ContentUpdatedAt, x.Id })
+            .IsDescending(false, false, true, true);
+
+        builder.HasIndex(x => new { x.Org, x.ContentUpdatedAt, x.Id })
+            .IsDescending(false, true, true);
+
+        builder.HasIndex(x => new { x.Org, x.CreatedAt, x.Id })
+            .IsDescending(false, true, true);
+
+        builder.HasIndex(x => new { x.Org, x.UpdatedAt, x.Id })
+            .IsDescending(false, true, true);
+
         builder.Property(x => x.Org).UseCollation("C");
         builder.Property(x => x.Party).UseCollation("C");
         builder.Property(x => x.ServiceResource).HasMaxLength(Domain.Common.Constants.DefaultMaxStringLength);

@@ -168,7 +168,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
-        var dialogs = await _searchRepository.GetDialogs(
+        var dialogs = await _searchRepository.GetDialogsAsEndUser(
             request.ToGetDialogsQuery(_clock.UtcNowOffset),
             authorizedResources,
             cancellationToken);
@@ -370,7 +370,7 @@ internal static class SearchDialogQueryExtensions
         return new GetDialogsQuery
         {
             VisibleAfter = nowUtc,
-            ExpiresBefore = nowUtc,
+            ExpiresAfter = nowUtc,
             Deleted = false,
             OrderBy = request.OrderBy.DefaultIfNull(),
             ContinuationToken = request.ContinuationToken,

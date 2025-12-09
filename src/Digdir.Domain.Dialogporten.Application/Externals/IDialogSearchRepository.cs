@@ -21,9 +21,14 @@ public interface IDialogSearchRepository
     Task<int> WorkBatchAsync(int batchSize, long workMemBytes, bool staleFirst, CancellationToken ct);
     Task<DialogSearchReindexProgress> GetProgressAsync(CancellationToken ct);
     Task OptimizeIndexAsync(CancellationToken ct);
-    Task<PaginatedList<DialogEntity>> GetDialogs(
+    Task<PaginatedList<DialogEntity>> GetDialogsAsEndUser(
         GetDialogsQuery query,
-        DialogSearchAuthorizationResult? authorizedResources,
+        DialogSearchAuthorizationResult authorizedResources,
+        CancellationToken cancellationToken);
+
+    Task<PaginatedList<DialogEntity>> GetDialogsAsServiceOwner(
+        GetDialogsQuery query,
+        string orgName,
         CancellationToken cancellationToken);
 
     Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
@@ -81,7 +86,7 @@ public sealed class GetDialogsQuery
     /// <summary>
     /// Filter by one or more service owner codes
     /// </summary>
-    public List<string>? Org { get; init; }
+    public List<string>? Org { get; set; }
 
     /// <summary>
     /// Filter by one or more service resources
@@ -192,7 +197,7 @@ public sealed class GetDialogsQuery
         init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
     }
 
-    public DateTimeOffset? ExpiresBefore { get; set; }
+    public DateTimeOffset? ExpiresAfter { get; set; }
 }
 
 public sealed record DataContentDto(DataContentValueDto Title, DataContentValueDto? Summary, DataContentValueDto? ExtendedStatus, DataContentValueDto? SenderName);

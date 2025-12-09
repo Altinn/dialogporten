@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
@@ -33,6 +34,70 @@ internal static class PostgresFormattableStringBuilderExtensions
                 _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
             };
         }
+    }
+
+    internal static PostgresFormattableStringBuilder AppendSystemLabelFilterCondition(
+        this PostgresFormattableStringBuilder queryBuilder,
+        IEnumerable<SystemLabel.Values>? endUserLabels)
+    {
+        if (endUserLabels is null)
+        {
+            return queryBuilder;
+        }
+
+        foreach (var endUserLabel in endUserLabels)
+        {
+            queryBuilder.Append(
+                $"""
+                AND EXISTS (
+                    SELECT 1
+                    FROM "DialogEndUserContext" dec 
+                    JOIN "DialogEndUserContextSystemLabel" sl ON dec."Id" = sl."DialogEndUserContextId"
+                    WHERE dec."DialogId" = d."Id"
+                       AND sl."SystemLabelId" = {endUserLabel} 
+                    )
+                """);
+        }
+
+        return queryBuilder;
+    }
+
+    internal static PostgresFormattableStringBuilder AppendServiceOwnerLabelFilterCondition(
+        this PostgresFormattableStringBuilder queryBuilder,
+        IEnumerable<string>? serviceOwnerLabels)
+    {
+        if (!TryGetProcessedServiceOwnerLabels(serviceOwnerLabels, out var processedLabels))
+        {
+            return queryBuilder;
+        }
+
+        foreach (var (pattern, isPrefix) in processedLabels)
+        {
+            if (isPrefix)
+            {
+                queryBuilder.Append($"""
+                                     AND EXISTS (
+                                         SELECT 1
+                                         FROM "DialogServiceOwnerLabel" sl 
+                                         WHERE sl."DialogServiceOwnerContextId" = d."Id"
+                                            AND sl."Value" LIKE {pattern} 
+                                     )
+                                     """);
+            }
+            else
+            {
+                queryBuilder.Append($"""
+                                     AND EXISTS (
+                                         SELECT 1
+                                         FROM "DialogServiceOwnerLabel" sl 
+                                         WHERE sl."DialogServiceOwnerContextId" = d."Id"
+                                            AND sl."Value" = {pattern} 
+                                     )
+                                     """);
+            }
+        }
+
+        return queryBuilder;
     }
 
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
@@ -87,6 +152,37 @@ internal static class PostgresFormattableStringBuilderExtensions
 
     internal static PostgresFormattableStringBuilder ApplyPaginationLimit(this PostgresFormattableStringBuilder builder, int limit) =>
         builder.Append((string)$" LIMIT {limit + 1} ");
+
+    private static bool TryGetProcessedServiceOwnerLabels(
+        IEnumerable<string>? inputLabels,
+        out List<(string Pattern, bool IsPrefix)> results)
+    {
+        results = [];
+        if (inputLabels == null)
+        {
+            return false;
+        }
+
+        foreach (var rawLabel in inputLabels.Where(s => !string.IsNullOrWhiteSpace(s)))
+        {
+            var label = rawLabel.Trim().ToLowerInvariant();
+            var asteriskIndex = label.IndexOf('*');
+            if (asteriskIndex == -1)
+            {
+                results.Add((label, false));
+            }
+            else if (asteriskIndex == label.Length - 1)
+            {
+                results.Add((string.Concat(label.AsSpan(0, label.Length - 1), "%"), true));
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid label format: '{label}'. Wildcard '*' is only allowed at the very end of the string.");
+            }
+        }
+
+        return results.Count > 0;
+    }
 
     private static PostgresFormattableStringBuilder CreateLessThanGreaterThanPart(this PostgresFormattableStringBuilder builder, OrderPart orderPart) =>
         // Null values are excluded in greater/less than comparison in

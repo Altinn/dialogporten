@@ -12,7 +12,7 @@ public interface IUserResourceRegistry
     Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken);
     bool UserCanModifyResourceType(string serviceResourceType);
     bool IsCurrentUserServiceOwnerAdmin();
-    Task<IReadOnlyCollection<string>> GetCurrentUserOrgShortNames(CancellationToken cancellationToken);
+    Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken);
 }
 
 internal sealed class UserResourceRegistry : IUserResourceRegistry
@@ -43,7 +43,7 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
         return dic.Select(x => x.ResourceId).ToList();
     }
 
-    public async Task<IReadOnlyCollection<string>> GetCurrentUserOrgShortNames(CancellationToken cancellationToken)
+    public async Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken)
     {
         if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var orgNumber))
         {
@@ -51,7 +51,8 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
         }
 
         var dic = await _resourceRegistry.GetResourceInformationForOrg(orgNumber, cancellationToken);
-        return dic.Select(x => x.OwnOrgShortName).ToList();
+        // Each organization number can only have one short name in RR
+        return dic.Select(x => x.OwnOrgShortName).First();
     }
 
     public bool UserCanModifyResourceType(string serviceResourceType) => serviceResourceType switch
@@ -82,6 +83,6 @@ internal sealed class LocalDevelopmentUserResourceRegistryDecorator : IUserResou
     public bool UserCanModifyResourceType(string serviceResourceType) => true;
     public bool IsCurrentUserServiceOwnerAdmin() => true;
 
-    public Task<IReadOnlyCollection<string>> GetCurrentUserOrgShortNames(CancellationToken cancellationToken) =>
-        _userResourceRegistry.GetCurrentUserOrgShortNames(cancellationToken);
+    public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
+        _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
 }

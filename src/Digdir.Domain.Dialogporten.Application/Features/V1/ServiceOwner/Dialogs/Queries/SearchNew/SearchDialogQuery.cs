@@ -153,15 +153,18 @@ public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogD
 
 internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQuery, SearchDialogResult>
 {
+    private readonly IClock _clock;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogSearchRepository _searchRepository;
 
     public SearchDialogQueryHandler(
+        IClock clock,
         IUserResourceRegistry userResourceRegistry,
         IAltinnAuthorization altinnAuthorization,
         IDialogSearchRepository searchRepository)
     {
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
@@ -169,12 +172,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
-        // TODO: Get org short code instead of resource ids, and use it as the search driver for SO search
-        var orgShortNames = await _userResourceRegistry.GetCurrentUserOrgShortNames(cancellationToken);
-
-        // If the service owner impersonates an end user, we need to filter the dialogs
-        // based on the end user's authorization, not the service owner's (which is
-        // allowed to see everything about every service resource they own).
+        // If the service owner impersonates an end user, we need to additionally filter the dialogs
+        // based on the end user's authorization
         var authorizedResources = request.EndUserId is not null
             ? await _altinnAuthorization.GetAuthorizedResourcesForSearch(
                 request.Party ?? [],
@@ -182,11 +181,33 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 cancellationToken)
             : null;
 
-        // Enduser, serviceOwnerLabels
-        var dialogs = await _searchRepository.GetDialogs(
-            request.ToGetDialogsQuery(),
-            authorizedResources,
-            cancellationToken);
+        var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+        PaginatedList<DialogEntity> dialogs;
+
+        if (authorizedResources is not null)
+        {
+            if (authorizedResources.HasNoAuthorizations)
+            {
+                return PaginatedList<DialogDto>.CreateEmpty(request);
+            }
+
+            var query = request.ToGetDialogsQuery();
+            query.Org = [orgName];
+            query.VisibleBefore = _clock.UtcNow;
+            query.ExpiresAfter = _clock.UtcNow;
+
+            dialogs = await _searchRepository.GetDialogsAsEndUser(
+                query,
+                authorizedResources,
+                cancellationToken);
+        }
+        else
+        {
+            dialogs = await _searchRepository.GetDialogsAsServiceOwner(
+                request.ToGetDialogsQuery(),
+                orgName,
+                cancellationToken);
+        }
 
         var dialogIds = dialogs.Items
             .Select(x => x.Id)
@@ -255,7 +276,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 DeletedAt = dialog.DeletedAt,
                 Revision = dialog.Revision,
                 VisibleFrom = dialog.VisibleFrom,
-                // TODO: Is there always a service owner context for each dialog?
                 ServiceOwnerContext = serviceOwnerContextByDialogIdTask.Result[dialog.Id]
             };
         });
@@ -404,7 +424,6 @@ internal static class SearchDialogQueryExtensions
             UpdatedBefore = request.UpdatedBefore,
             ExternalReference = request.ExternalReference,
             ExtendedStatus = request.ExtendedStatus,
-            // Org = request.Org,
             Party = request.Party,
             ServiceResource = request.ServiceResource,
             Status = request.Status,

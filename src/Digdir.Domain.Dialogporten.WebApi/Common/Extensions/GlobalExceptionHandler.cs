@@ -25,7 +25,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             var type = exception.GetType().Name;
             var error = exception.Message;
             var logger = ctx.Resolve<ILogger<GlobalExceptionHandler>>();
-            logger.LogError(exception, "{@Http}{@Type}{@Reason}", http, type, error);
+            logger.LogError(exception, "{@Http} {@Type} {@Reason}", http, type, error);
         }
 
         await ctx.Response.WriteAsJsonAsync(response ?? ctx.DefaultResponse(), cancellationToken);

@@ -169,7 +169,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
-        // TODO: Get org short code instead of resource ids, and use it as the search driver for SO search
         var orgShortNames = await _userResourceRegistry.GetCurrentUserOrgShortNames(cancellationToken);
 
         // If the service owner impersonates an end user, we need to filter the dialogs
@@ -184,7 +183,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
         // Enduser, serviceOwnerLabels
         var dialogs = await _searchRepository.GetDialogs(
-            request.ToGetDialogsQuery(),
+            request.ToGetDialogsQuery(orgShortNames),
             authorizedResources,
             cancellationToken);
 
@@ -374,7 +373,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
 internal static class SearchDialogQueryExtensions
 {
-    public static GetDialogsQuery ToGetDialogsQuery(this SearchDialogQuery request)
+    public static GetDialogsQuery ToGetDialogsQuery(this SearchDialogQuery request, IEnumerable<string> orgShortNames)
     {
         return new GetDialogsQuery
         {
@@ -404,7 +403,7 @@ internal static class SearchDialogQueryExtensions
             UpdatedBefore = request.UpdatedBefore,
             ExternalReference = request.ExternalReference,
             ExtendedStatus = request.ExtendedStatus,
-            // Org = request.Org,
+            Org = orgShortNames.ToList(),
             Party = request.Party,
             ServiceResource = request.ServiceResource,
             Status = request.Status,

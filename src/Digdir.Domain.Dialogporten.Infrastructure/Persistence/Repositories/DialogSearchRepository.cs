@@ -66,6 +66,13 @@ internal sealed class DialogSearchRepository(DialogDbContext dbContext, ILogger<
         DialogSearchAuthorizationResult? authorizedResources,
         CancellationToken cancellationToken)
     {
+        // Authorized resources or org is designed to be the driver for the search and must be provided.
+        // Authorized resources will take precedence as the driver if both are provided.
+        if (authorizedResources is null && query.Org is null)
+        {
+            throw new InvalidOperationException("Org filter or authorized resources must be provided to fetch dialogs.");
+        }
+
         if (authorizedResources is not null && authorizedResources.HasNoAuthorizations)
         {
             return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());

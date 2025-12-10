@@ -42,17 +42,17 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by one or more extended statuses
     /// </summary>
-    public List<string>? ExtendedStatus { get; init; }
+    public List<string>? ExtendedStatus { get; set; }
 
     /// <summary>
     /// Filter by external reference
     /// </summary>
-    public string? ExternalReference { get; init; }
+    public string? ExternalReference { get; set; }
 
     /// <summary>
     /// Filter by status
     /// </summary>
-    public List<DialogStatus.Values>? Status { get; init; }
+    public List<DialogStatus.Values>? Status { get; set; }
 
     private DeletedFilter? _deleted = DeletedFilter.Exclude;
 
@@ -118,7 +118,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by process
     /// </summary>
-    public string? Process { get; init; }
+    public string? Process { get; set; }
 
     /// <summary>
     /// Filter by Display state
@@ -128,7 +128,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Whether to exclude API-only dialogs from the results. Defaults to false.
     /// </summary>
-    public bool? ExcludeApiOnly { get; init; }
+    public bool? ExcludeApiOnly { get; set; }
 
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate

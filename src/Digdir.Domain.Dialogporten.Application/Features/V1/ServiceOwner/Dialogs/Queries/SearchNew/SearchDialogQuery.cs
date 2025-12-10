@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common;
+﻿using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
@@ -153,18 +154,15 @@ public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogD
 
 internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQuery, SearchDialogResult>
 {
-    private readonly IClock _clock;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogSearchRepository _searchRepository;
 
     public SearchDialogQueryHandler(
-        IClock clock,
         IUserResourceRegistry userResourceRegistry,
         IAltinnAuthorization altinnAuthorization,
         IDialogSearchRepository searchRepository)
     {
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
@@ -193,8 +191,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
             var query = request.ToGetDialogsQuery();
             query.Org = [orgName];
-            query.VisibleBefore = _clock.UtcNow;
-            query.ExpiresAfter = _clock.UtcNow;
 
             dialogs = await _searchRepository.GetDialogsAsEndUser(
                 query,
@@ -272,7 +268,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                     .Select(g => g.OrderByDescending(x => x.SeenAt).First())
                     .ToList() ?? [],
                 EndUserContext = endUserContextByDialogIdTask.Result[dialog.Id],
-                Content = contentByDialogIdTask.Result[dialog.Id],
+                Content = contentByDialogIdTask.Result.GetValueOrDefault(dialog.Id),
                 DeletedAt = dialog.DeletedAt,
                 Revision = dialog.Revision,
                 VisibleFrom = dialog.VisibleFrom,

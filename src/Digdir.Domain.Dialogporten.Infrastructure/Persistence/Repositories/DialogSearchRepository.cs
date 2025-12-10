@@ -136,11 +136,6 @@ internal sealed class DialogSearchRepository(
             return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());
         }
 
-        if (query.VisibleAfter is null || query.ExpiresAfter is null)
-        {
-            throw new InvalidOperationException("End user dialog queries must specify VisibleAfter and ExpiresAfter to ensure only visible dialogs are returned.");
-        }
-
         var partiesAndServices = authorizedResources.ResourcesByParties
             .Select(x => (party: x.Key, services: x.Value))
             .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
@@ -181,11 +176,12 @@ internal sealed class DialogSearchRepository(
                 AND d."ServiceResource" = ANY(ppm.allowed_services)
 
                 """)
-            .Append($""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
-            .Append($""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresAfter}::timestamptz) """)
+
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
+            .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
+            .AppendIf(query.ExpiresAfter is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresAfter}::timestamptz) """)
             .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
             .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """).AppendIf(!query.Status.IsNullOrEmpty(), $""" AND d."StatusId" = ANY({query.Status}::int[]) """)
             .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)

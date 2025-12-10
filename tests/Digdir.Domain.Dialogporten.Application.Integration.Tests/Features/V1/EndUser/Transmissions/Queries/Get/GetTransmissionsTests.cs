@@ -44,7 +44,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                     x.Id = transmissionId;
                     x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1));
                 }))
-            .SetApplicationClockSkew(TimeSpan.FromDays(2))
+            .OverrideUtc(TimeSpan.FromDays(2))
             .SendCommand((_, ctx) => new GetTransmissionQuery
             {
                 DialogId = ctx.GetDialogId(),

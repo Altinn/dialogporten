@@ -65,7 +65,6 @@ static void BuildAndRun(string[] args)
             additionalTracing: x =>
             {
                 x.AddAspNetCoreInstrumentationExcludingHealthPaths();
-                x.AddSource(DiagnosticHeaders.DefaultListenerName); // MassTransit ActivitySource
             })
         .AddAzureAppConfiguration()
         .AddApplication(builder.Configuration, builder.Environment)

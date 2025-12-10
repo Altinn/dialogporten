@@ -51,7 +51,7 @@ public static class ClaimsPrincipalExtensions
     public static bool TryGetOrganizationShortName(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgShortName)
     {
         orgShortName = claimsPrincipal.FindFirst(AltinnOrgClaim)?.Value;
-        return orgShortName is not null;
+        return !string.IsNullOrWhiteSpace(orgShortName);
     }
 
     public static bool TryGetPid(this Claim? pidClaim, [NotNullWhen(true)] out string? pid)

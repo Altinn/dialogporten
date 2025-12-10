@@ -48,6 +48,11 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
 
     public async Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken)
     {
+        if (_user.GetPrincipal().TryGetOrganizationShortName(out var shortName))
+        {
+            return shortName;
+        }
+
         if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var orgNumber))
         {
             throw new UnreachableException();

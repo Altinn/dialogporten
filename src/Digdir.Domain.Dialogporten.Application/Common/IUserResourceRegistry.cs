@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common;
 
@@ -19,11 +20,13 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
 {
     private readonly IUser _user;
     private readonly IResourceRegistry _resourceRegistry;
+    private readonly ILogger<UserResourceRegistry> _logger;
 
-    public UserResourceRegistry(IUser user, IResourceRegistry resourceRegistry)
+    public UserResourceRegistry(IUser user, IResourceRegistry resourceRegistry, ILogger<UserResourceRegistry> logger)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken)
@@ -51,8 +54,23 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
         }
 
         var dic = await _resourceRegistry.GetResourceInformationForOrg(orgNumber, cancellationToken);
-        // Each organization number can only have one short name in RR
-        return dic.Select(x => x.OwnOrgShortName).First();
+
+        var orgShortNames = dic
+            .Select(x => x.OwnOrgShortName)
+            .Distinct()
+            .ToArray();
+
+        if (orgShortNames.Length > 1)
+        {
+            _logger.LogWarning("More than one short name found for org number {OrgNumber}: {ShortNames}", orgNumber, string.Join(", ", orgShortNames));
+        }
+
+        // Each organization number should only have one short name in RR
+        var name = orgShortNames.FirstOrDefault();
+
+        return string.IsNullOrWhiteSpace(name)
+            ? throw new InvalidOperationException("Could not find organization short name for org number " + orgNumber)
+            : name;
     }
 
     public bool UserCanModifyResourceType(string serviceResourceType) => serviceResourceType switch

@@ -12,7 +12,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    [Theory, ClassData(typeof(DialogVisibleFromFilterTestData))]
+    [Theory, ClassData(typeof(DataSet))]
     public async Task Should_Filter_On_ExpiresAt(
         List<DialogData> dataSet,
         DateTimeOffset searchTime,
@@ -45,12 +45,12 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
             activities: [],
             transmissions: []);
 
-    private sealed class DialogVisibleFromFilterTestData : TheoryData<List<DialogData>, DateTimeOffset, List<string>>
+    private sealed class DataSet : TheoryData<List<DialogData>, DateTimeOffset, List<string>>
     {
         private static readonly DateTimeOffset Jan1 = DateTimeOffset.Parse("2020-01-01T10:00:00Z", CultureInfo.InvariantCulture);
         private static readonly DateTimeOffset Feb1 = DateTimeOffset.Parse("2020-02-01T10:00:00Z", CultureInfo.InvariantCulture);
 
-        public DialogVisibleFromFilterTestData()
+        public DataSet()
         {
             var dialogDataSet = Enumerable.Range(0, 10)
                 .Select(i => new DialogData(

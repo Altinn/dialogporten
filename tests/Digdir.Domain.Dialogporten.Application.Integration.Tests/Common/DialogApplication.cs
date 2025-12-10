@@ -68,7 +68,6 @@ public class DialogApplication : IAsyncLifetime
         await EnsureDatabaseAsync();
         await BuildRespawnState();
 
-        Console.WriteLine(_dbContainer.GetConnectionString());
     }
 
     /// <summary>

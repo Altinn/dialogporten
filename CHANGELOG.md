@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.95.2](https://github.com/Altinn/dialogporten/compare/v1.95.1...v1.95.2) (2025-12-11)
+
+
+### Miscellaneous Chores
+
+* **e2e:** Various fixes ([#3124](https://github.com/Altinn/dialogporten/issues/3124)) ([0818fdc](https://github.com/Altinn/dialogporten/commit/0818fdcd3c800aa839a5878e15749f3c208f5d60))
+
 ## [1.95.1](https://github.com/Altinn/dialogporten/compare/v1.95.0...v1.95.1) (2025-12-11)
 
 

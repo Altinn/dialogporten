@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.95.1](https://github.com/Altinn/dialogporten/compare/v1.95.0...v1.95.1) (2025-12-11)
+
+
+### Miscellaneous Chores
+
+* **ci:** update az cli to 2.81.0 ([#3107](https://github.com/Altinn/dialogporten/issues/3107)) ([1ab5d23](https://github.com/Altinn/dialogporten/commit/1ab5d2365fa4b2cc00ca04ef9785b2bdea7d4c2b))
+* **deps:** update dotnet monorepo ([#3111](https://github.com/Altinn/dialogporten/issues/3111)) ([f454387](https://github.com/Altinn/dialogporten/commit/f4543871f4b5e36901e7b1a4c2557116e2c0d85f))
+* **deps:** update googleapis/release-please-action action to v4.4.0 ([#3114](https://github.com/Altinn/dialogporten/issues/3114)) ([e66b05c](https://github.com/Altinn/dialogporten/commit/e66b05cb4140887cbe8c703e7a5f5d9e7eb5a5ae))
+* **deps:** update grafana/loki docker tag to v3.6.2 ([#3115](https://github.com/Altinn/dialogporten/issues/3115)) ([9e18bf2](https://github.com/Altinn/dialogporten/commit/9e18bf2f9e1f1b2bfeca6568953955f0dbf1a50b))
+* **deps:** update jaegertracing/all-in-one docker tag to v1.75.0 ([#3116](https://github.com/Altinn/dialogporten/issues/3116)) ([74788ca](https://github.com/Altinn/dialogporten/commit/74788caf6b8a69a78358a28bdc418df4a0ad6f24))
+* **deps:** update step-security/harden-runner action to v2.13.3 ([#3112](https://github.com/Altinn/dialogporten/issues/3112)) ([62726a6](https://github.com/Altinn/dialogporten/commit/62726a6d9a8853cf560db7a18030ae44c60b38a7))
+* **perf:** Improve service owner search ([#3110](https://github.com/Altinn/dialogporten/issues/3110)) ([9ae1f1e](https://github.com/Altinn/dialogporten/commit/9ae1f1e7536f8ef6ccfc2f1f6d8e4cfdb4f32ba3))
+* **service:** remove masstransit otel tracing ([#3121](https://github.com/Altinn/dialogporten/issues/3121)) ([8e4dd90](https://github.com/Altinn/dialogporten/commit/8e4dd90c36c88bf7b6536dfd8e7463b6561206fc)), closes [#3085](https://github.com/Altinn/dialogporten/issues/3085)
+
 ## [1.95.0](https://github.com/Altinn/dialogporten/compare/v1.94.0...v1.95.0) (2025-12-08)
 
 

@@ -23,6 +23,7 @@ import {
 
 import {default as dialogToInsert} from '../serviceowner/testdata/01-create-dialog.js';
 import {getDefaultEnduserOrgNo, getDefaultEnduserSsn} from '../../common/token.js';
+import {sleep} from 'k6';
 
 export default function () {
 
@@ -129,6 +130,7 @@ export default function () {
     });
 
     describe('Search for title', () => {
+        sleep(2); // wait for indexing
         let r = getEU('dialogs/' + defaultFilter + '&Search=' + titleToSearchFor);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();

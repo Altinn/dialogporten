@@ -1,35 +1,27 @@
+﻿using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using MediatR;
 using OneOf;
-
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchNew;
 
 public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, DialogEntity>, IRequest<SearchDialogResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
-    private readonly string? _searchLanguageCode;
-
-    /// <summary>
-    /// Filter by one or more service owner codes
-    /// </summary>
-    public List<string>? Org { get; init; }
+    private string? _searchLanguageCode;
 
     /// <summary>
     /// Filter by one or more service resources
@@ -42,19 +34,35 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public List<string>? Party { get; set; }
 
     /// <summary>
+    /// Filter by end user id
+    /// </summary>
+    public string? EndUserId { get; set; }
+
+    /// <summary>
     /// Filter by one or more extended statuses
     /// </summary>
-    public List<string>? ExtendedStatus { get; init; }
+    public List<string>? ExtendedStatus { get; set; }
 
     /// <summary>
     /// Filter by external reference
     /// </summary>
-    public string? ExternalReference { get; init; }
+    public string? ExternalReference { get; set; }
 
     /// <summary>
     /// Filter by status
     /// </summary>
-    public List<DialogStatus.Values>? Status { get; init; }
+    public List<DialogStatus.Values>? Status { get; set; }
+
+    private DeletedFilter? _deleted = DeletedFilter.Exclude;
+
+    /// <summary>
+    /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
+    /// </summary>
+    public DeletedFilter? Deleted
+    {
+        get => _deleted;
+        set => _deleted = value ?? DeletedFilter.Exclude;
+    }
 
     /// <summary>
     /// Only return dialogs created after this date
@@ -97,9 +105,19 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public DateTimeOffset? DueBefore { get; set; }
 
     /// <summary>
+    /// Only return dialogs with visible-from date after this date
+    /// </summary>
+    public DateTimeOffset? VisibleAfter { get; set; }
+
+    /// <summary>
+    /// Only return dialogs with visible-from date before this date
+    /// </summary>
+    public DateTimeOffset? VisibleBefore { get; set; }
+
+    /// <summary>
     /// Filter by process
     /// </summary>
-    public string? Process { get; init; }
+    public string? Process { get; set; }
 
     /// <summary>
     /// Filter by Display state
@@ -109,12 +127,17 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Whether to exclude API-only dialogs from the results. Defaults to false.
     /// </summary>
-    public bool? ExcludeApiOnly { get; init; }
+    public bool? ExcludeApiOnly { get; set; }
 
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
     /// </summary>
     public string? Search { get; set; }
+
+    /// <summary>
+    /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
+    /// </summary>
+    public List<string>? ServiceOwnerLabels { get; set; }
 
     /// <summary>
     /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
@@ -124,54 +147,63 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
         get => _searchLanguageCode;
         init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
     }
-
-    /// <summary>
-    /// Accepted languages for localization filtering, sorted by preference
-    /// </summary>
-    public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
 [GenerateOneOf]
-public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogDto>, ValidationError, Forbidden>;
+public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogDto>, ValidationError>;
 
 internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQuery, SearchDialogResult>
 {
-    private readonly IClock _clock;
-    private readonly IUserRegistry _userRegistry;
+    private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogSearchRepository _searchRepository;
-    private readonly IUser _user;
 
     public SearchDialogQueryHandler(
-        IClock clock,
-        IUserRegistry userRegistry,
+        IUserResourceRegistry userResourceRegistry,
         IAltinnAuthorization altinnAuthorization,
-        IDialogSearchRepository searchRepository,
-        IUser user)
+        IDialogSearchRepository searchRepository)
     {
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
-        _user = user ?? throw new ArgumentNullException(nameof(user));
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
-        var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
-            request.Party ?? [],
-            request.ServiceResource ?? [],
-            cancellationToken: cancellationToken);
+        // If the service owner impersonates an end user, we need to additionally filter the dialogs
+        // based on the end user's authorization
+        var authorizedResources = request.EndUserId is not null
+            ? await _altinnAuthorization.GetAuthorizedResourcesForSearch(
+                request.Party ?? [],
+                request.ServiceResource ?? [],
+                cancellationToken)
+            : null;
 
-        if (authorizedResources.HasNoAuthorizations)
+        var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+        PaginatedList<DialogEntity> dialogs;
+
+        if (authorizedResources is not null)
         {
-            return PaginatedList<DialogDto>.CreateEmpty(request);
-        }
+            if (authorizedResources.HasNoAuthorizations)
+            {
+                return PaginatedList<DialogDto>.CreateEmpty(request);
+            }
 
-        var dialogs = await _searchRepository.GetDialogsAsEndUser(
-            request.ToGetDialogsQuery(_clock.UtcNowOffset),
-            authorizedResources,
-            cancellationToken);
+            var query = request.ToGetDialogsQuery();
+            query.Org = [orgName];
+
+            dialogs = await _searchRepository.GetDialogsAsEndUser(
+                query,
+                authorizedResources,
+                cancellationToken);
+        }
+        else
+        {
+            dialogs = await _searchRepository.GetDialogsAsServiceOwner(
+                request.ToGetDialogsQuery(),
+                orgName,
+                cancellationToken);
+        }
 
         var dialogIds = dialogs.Items
             .Select(x => x.Id)
@@ -185,26 +217,16 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         var guiAttachmentCountByDialogIdTask = FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
         var contentByDialogIdTask = FetchContentByDialogId(dialogIds, cancellationToken);
         var endUserContextByDialogIdTask = FetchEndUserContextByDialogId(dialogIds, cancellationToken);
-        var seenLogsByDialogIdTask = FetchSeenLogByDialogId(dialogIds, cancellationToken);
+        var seenLogsByDialogIdTask = FetchSeenLogByDialogId(dialogIds, request.EndUserId, cancellationToken);
         var latestActivitiesByDialogIdTask = FetchLatestActivitiesByDialogId(dialogIds, cancellationToken);
+        var serviceOwnerContextByDialogIdTask = FetchServiceOwnerContextByDialogId(dialogIds, cancellationToken);
         await Task.WhenAll(
             guiAttachmentCountByDialogIdTask,
             contentByDialogIdTask,
             endUserContextByDialogIdTask,
             seenLogsByDialogIdTask,
-            latestActivitiesByDialogIdTask);
-        MaskActorIdentifiers(seenLogsByDialogIdTask.Result, latestActivitiesByDialogIdTask.Result);
-
-        var localizationSets = Enumerable.Empty<List<LocalizationDto>>()
-            .Concat(contentByDialogIdTask.Result.Values.Select(x => x.ExtendedStatus?.Value))
-            .Concat(contentByDialogIdTask.Result.Values.Select(x => x.SenderName?.Value))
-            .Concat(contentByDialogIdTask.Result.Values.Select(x => x.Summary?.Value))
-            .Concat(contentByDialogIdTask.Result.Values.Select(x => x.Title.Value))
-            .Concat(latestActivitiesByDialogIdTask.Result.Values.Select(x => x?.Description));
-        foreach (var localizationSet in localizationSets)
-        {
-            localizationSet.PruneLocalizations(request.AcceptedLanguages);
-        }
+            latestActivitiesByDialogIdTask,
+            serviceOwnerContextByDialogIdTask);
 
         var result = dialogs.ConvertTo(dialog =>
         {
@@ -246,23 +268,27 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                     .Select(g => g.OrderByDescending(x => x.SeenAt).First())
                     .ToList() ?? [],
                 EndUserContext = endUserContextByDialogIdTask.Result[dialog.Id],
-                Content = contentByDialogIdTask.Result[dialog.Id],
+                Content = contentByDialogIdTask.Result.GetValueOrDefault(dialog.Id),
+                DeletedAt = dialog.DeletedAt,
+                Revision = dialog.Revision,
+                VisibleFrom = dialog.VisibleFrom,
+                ServiceOwnerContext = serviceOwnerContextByDialogIdTask.Result[dialog.Id]
             };
         });
 
         return result;
     }
 
-    private static void MaskActorIdentifiers(Dictionary<Guid, List<DialogSeenLogDto>> seenLogsByDialogId, Dictionary<Guid, DialogActivityDto> latestActivitiesByDialogId)
+    private async Task<Dictionary<Guid, DialogServiceOwnerContextDto>> FetchServiceOwnerContextByDialogId(Guid[] dialogIds, CancellationToken cancellationToken)
     {
-        foreach (var item in seenLogsByDialogId.Values
-                     .SelectMany(x => x)
-                     .Select(x => x.SeenBy)
-                     .Concat(latestActivitiesByDialogId.Values
-                         .Select(x => x.PerformedBy)))
+        var result = await _searchRepository.FetchServiceOwnerContextByDialogId(dialogIds, cancellationToken);
+        return result.ToDictionary(x => x.Key, x => new DialogServiceOwnerContextDto
         {
-            item.ActorId = IdentifierMasker.GetMaybeMaskedIdentifier(item.ActorId);
-        }
+            Revision = x.Value.Revision,
+            ServiceOwnerLabels = x.Value.Labels
+                .Select(label => new ServiceOwnerLabelDto { Value = label })
+                .ToList()
+        });
     }
 
     private async Task<Dictionary<Guid, DialogActivityDto>> FetchLatestActivitiesByDialogId(Guid[] dialogIds,
@@ -293,10 +319,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     }
 
     private async Task<Dictionary<Guid, List<DialogSeenLogDto>>> FetchSeenLogByDialogId(Guid[] dialogIds,
+        string? endUserId,
         CancellationToken cancellationToken)
     {
-        var currentUserId = _userRegistry.GetCurrentUserId().ExternalIdWithPrefix;
-        var result = await _searchRepository.FetchSeenLogByDialogId(dialogIds, currentUserId, cancellationToken);
+        var result = await _searchRepository.FetchSeenLogByDialogId(dialogIds, currentUserId: endUserId, cancellationToken);
         return result.ToDictionary(x => x.Key, x => x.Value.Select(seenLog => new DialogSeenLogDto
         {
             SeenAt = seenLog.SeenAt,
@@ -325,8 +351,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
     private async Task<Dictionary<Guid, ContentDto>> FetchContentByDialogId(Guid[] dialogIds, CancellationToken cancellationToken)
     {
-        var userAuthLevel = _user.GetPrincipal().GetAuthenticationLevel();
-        var result = await _searchRepository.FetchContentByDialogId(dialogIds, userAuthLevel, cancellationToken);
+        var result = await _searchRepository.FetchContentByDialogId(dialogIds, userAuthLevel: 0, cancellationToken);
         return result.ToDictionary(x => x.Key, x => ToContentDto(x.Value));
         static ContentDto ToContentDto(DataContentDto dataContent)
         {
@@ -365,13 +390,18 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
 internal static class SearchDialogQueryExtensions
 {
-    public static GetDialogsQuery ToGetDialogsQuery(this SearchDialogQuery request, DateTimeOffset nowUtc)
+    public static GetDialogsQuery ToGetDialogsQuery(this SearchDialogQuery request)
     {
         return new GetDialogsQuery
         {
-            VisibleAfter = nowUtc,
-            ExpiresAfter = nowUtc,
-            Deleted = false,
+            VisibleAfter = request.VisibleAfter,
+            Deleted = request.Deleted switch
+            {
+                DeletedFilter.Include => null,
+                DeletedFilter.Only => true,
+                DeletedFilter.Exclude => false,
+                _ => throw new ArgumentOutOfRangeException($"{nameof(request)}.{nameof(request.Deleted)}")
+            },
             OrderBy = request.OrderBy.DefaultIfNull(),
             ContinuationToken = request.ContinuationToken,
             Limit = request.Limit!.Value,
@@ -390,10 +420,11 @@ internal static class SearchDialogQueryExtensions
             UpdatedBefore = request.UpdatedBefore,
             ExternalReference = request.ExternalReference,
             ExtendedStatus = request.ExtendedStatus,
-            Org = request.Org,
             Party = request.Party,
             ServiceResource = request.ServiceResource,
             Status = request.Status,
+            VisibleBefore = request.VisibleBefore,
+            ServiceOwnerLabels = request.ServiceOwnerLabels,
         };
     }
 }

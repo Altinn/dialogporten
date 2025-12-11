@@ -14,6 +14,7 @@ public sealed class ApplicationSettings
 public sealed class FeatureToggle
 {
     public bool UseOptimizedEndUserDialogSearch { get; init; }
+    public bool UseOptimizedServiceOwnerDialogSearch { get; init; }
 }
 
 public sealed class DialogportenSettings

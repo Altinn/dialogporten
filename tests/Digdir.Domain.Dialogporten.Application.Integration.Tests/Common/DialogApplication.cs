@@ -67,6 +67,7 @@ public class DialogApplication : IAsyncLifetime
         await _dbContainer.StartAsync();
         await EnsureDatabaseAsync();
         await BuildRespawnState();
+
     }
 
     /// <summary>
@@ -175,7 +176,8 @@ public class DialogApplication : IAsyncLifetime
             {
                 FeatureToggle = new FeatureToggle
                 {
-                    UseOptimizedEndUserDialogSearch = true
+                    UseOptimizedEndUserDialogSearch = true,
+                    UseOptimizedServiceOwnerDialogSearch = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

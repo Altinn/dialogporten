@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.95.3](https://github.com/Altinn/dialogporten/compare/v1.95.2...v1.95.3) (2025-12-11)
+
+
+### Miscellaneous Chores
+
+* **performance:** Fix orgname and remove search for perf-search-tag ([#3126](https://github.com/Altinn/dialogporten/issues/3126)) ([16ac227](https://github.com/Altinn/dialogporten/commit/16ac227cda08a22dc14bc8298eb79f45c8d7a081))
+
 ## [1.95.2](https://github.com/Altinn/dialogporten/compare/v1.95.1...v1.95.2) (2025-12-11)
 
 

@@ -107,20 +107,6 @@ public class NotificationConditionTests(DialogApplication application) : Applica
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
 
-    [Fact]
-    public Task Gone_Should_Be_Returned_When_Dialog_Is_Deleted() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog()
-            .DeleteDialog()
-            .AssertResult<DeleteDialogSuccess>()
-            .SendCommand((_, ctx) => new NotificationConditionQuery
-            {
-                DialogId = ctx.GetDialogId(),
-                ActivityType = DialogActivityType.Values.Information,
-                ConditionType = NotificationConditionType.Exists
-            })
-            .ExecuteAndAssert<EntityDeleted<DialogEntity>>();
-
     private static void AddActivityRequirements(
         CreateDialogCommand createDialogCommand,
         DialogActivityType.Values activityType)

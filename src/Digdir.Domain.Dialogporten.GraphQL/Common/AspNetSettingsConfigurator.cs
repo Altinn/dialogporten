@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common;
 
-public class AspNetSettingsConfigurator : IConfigureOptions<AspNetSettings>
+public sealed class AspNetSettingsConfigurator : IConfigureOptions<AspNetSettings>
 {
     private readonly IOptionsMonitor<ApplicationSettings> _appSettings;
 

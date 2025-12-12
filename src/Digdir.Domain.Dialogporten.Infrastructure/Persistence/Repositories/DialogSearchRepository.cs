@@ -26,6 +26,14 @@ internal sealed class DialogSearchRepository(
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {
+        // SUPER HACK: Skip dialog with known problematic content that
+        // causes the full-text search indexing to fail. Until we have
+        // a better solution for handling such cases, we just skip it.
+        if (dialogId.ToString() == "019b0856-2a49-746c-8ed6-a1f349054314")
+        {
+            return;
+        }
+
         await _db.Database.ExecuteSqlAsync($@"SELECT search.""UpsertDialogSearchOne""({dialogId})", cancellationToken);
     }
 

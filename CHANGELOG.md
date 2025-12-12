@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.95.4](https://github.com/Altinn/dialogporten/compare/v1.95.3...v1.95.4) (2025-12-12)
+
+
+### Miscellaneous Chores
+
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.21.0 ([#3113](https://github.com/Altinn/dialogporten/issues/3113)) ([036d28b](https://github.com/Altinn/dialogporten/commit/036d28b50f08aff03d807ae3f75c52ae5ffdb82c))
+* **graphql:** refactor EdDSA signature validation and key management ([#3106](https://github.com/Altinn/dialogporten/issues/3106)) ([73f8982](https://github.com/Altinn/dialogporten/commit/73f89825ac8f89951770b499e38eb94575fb4ade))
+* **perf:** Improve notification check ([#3132](https://github.com/Altinn/dialogporten/issues/3132)) ([3985162](https://github.com/Altinn/dialogporten/commit/39851628b8240b679ef9cb828e55b6540f763dee))
+* **tests:** Remove no longer needed test ([#3136](https://github.com/Altinn/dialogporten/issues/3136)) ([8f2afc9](https://github.com/Altinn/dialogporten/commit/8f2afc9e7f9f28984e7afd5e6b7441300152247b))
+* **webapi:** Enable sql statement logging in webapi ([#3131](https://github.com/Altinn/dialogporten/issues/3131)) ([c1d38b8](https://github.com/Altinn/dialogporten/commit/c1d38b872c1a2d00541c00c9b3d3ac20e0b0e886))
+
 ## [1.95.3](https://github.com/Altinn/dialogporten/compare/v1.95.2...v1.95.3) (2025-12-11)
 
 

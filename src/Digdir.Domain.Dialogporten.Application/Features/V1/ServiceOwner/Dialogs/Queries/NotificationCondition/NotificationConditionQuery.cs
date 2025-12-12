@@ -37,28 +37,23 @@ internal sealed class NotificationConditionQueryHandler : IRequestHandler<Notifi
 
     public async Task<NotificationConditionResult> Handle(NotificationConditionQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+        var hasMatchingActivity = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
             dbCtx.Dialogs
                 .AsNoTracking()
-                .Include(x => x.Activities
-                    .Where(x => request.TransmissionId == null || x.TransmissionId == request.TransmissionId)
-                    .Where(x => x.TypeId == request.ActivityType))
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                    cancellationToken: ct),
+                .Where(d => d.Id == request.DialogId)
+                .Select(d => (bool?)d.Activities
+                    .Where(a => a.TypeId == request.ActivityType)
+                    .Any(a => request.TransmissionId == null || a.TransmissionId == request.TransmissionId))
+                .FirstOrDefaultAsync(ct),
             cancellationToken);
 
-        if (dialog is null)
+        if (hasMatchingActivity is null)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        if (dialog.Deleted)
-        {
-            return new EntityDeleted<DialogEntity>(request.DialogId);
-        }
-
-        var conditionMet = dialog.Activities.Count == 0
+        var conditionMet = !hasMatchingActivity.Value
             ? request.ConditionType == NotificationConditionType.NotExists
             : request.ConditionType == NotificationConditionType.Exists;
 

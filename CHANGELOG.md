@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.95.5](https://github.com/Altinn/dialogporten/compare/v1.95.4...v1.95.5) (2025-12-12)
+
+
+### Miscellaneous Chores
+
+* **logging:** Enable parties and services count logging in GQL ([#3137](https://github.com/Altinn/dialogporten/issues/3137)) ([67d9249](https://github.com/Altinn/dialogporten/commit/67d924911020eeba65b96732c1a9ee44aafe1836))
+
 ## [1.95.4](https://github.com/Altinn/dialogporten/compare/v1.95.3...v1.95.4) (2025-12-12)
 
 

@@ -80,25 +80,31 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
-        if (!TryParse(externalIdWithPrefix, out var nameLookup))
+        const string apiUrl = "register/api/v1/dialogporten/parties/query";
+
+        if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
         {
             return null;
         }
 
-        var name = await LookupName(nameLookup, cancellationToken);
-
-        if (name is null)
+        // We do not have any information about system users, self-identified users or feide users in the party name registry
+        switch (partyIdentifier)
         {
-            // This is PII, but this is an error condition (probably due to missing Altinn profile)
-            _logger.LogError("Failed to get name from party name registry for external id {ExternalId}", externalIdWithPrefix);
+            case AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier:
+                return partyIdentifier.Id;
+            case FeideUserIdentifier:
+                return $"Feide User ({partyIdentifier.Id[..6]})";
+            case SystemUserIdentifier:
+                return "System User"; // TODO! Replace with a lookup to Altinn System registry
+            default:
+                // Handle below
+                break;
         }
 
-        return name;
-    }
-
-    private async Task<string?> LookupName(NameLookup nameLookup, CancellationToken cancellationToken)
-    {
-        const string apiUrl = "register/api/v1/parties/nameslookup";
+        if (!TryGetLookupDto(partyIdentifier, out var nameLookup))
+        {
+            return null;
+        }
 
         var nameLookupResult = await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
             apiUrl,
@@ -106,22 +112,25 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             serializerOptions: SerializerOptions,
             cancellationToken: cancellationToken);
 
-        var name = nameLookupResult.PartyNames.FirstOrDefault()?.Name;
+        var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
+        if (name is null)
+        {
+            // This is PII, but this is an error condition (probably due to missing Altinn profile)
+            _logger.LogError("Failed to get name from party name registry for external id {ExternalId}", externalIdWithPrefix);
+        }
+
+        throw new NotImplementedException("FEATURE FLAG AND FLIP");
+
         return name;
     }
 
-    private static bool TryParse(string externalIdWithPrefix, [NotNullWhen(true)] out NameLookup? nameLookup)
+    private static bool TryGetLookupDto(IPartyIdentifier partyIdentifier, [NotNullWhen(true)] out NameLookup? nameLookup)
     {
-        if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
-        {
-            nameLookup = null;
-            return false;
-        }
 
         nameLookup = partyIdentifier switch
         {
-            NorwegianPersonIdentifier personIdentifier => new() { Parties = [new() { Ssn = personIdentifier.Id }] },
-            NorwegianOrganizationIdentifier organizationIdentifier => new() { Parties = [new() { OrgNo = organizationIdentifier.Id }] },
+            NorwegianPersonIdentifier personIdentifier => new() { Data = [personIdentifier.FullId] },
+            NorwegianOrganizationIdentifier organizationIdentifier => new() { Data = [organizationIdentifier.FullId] },
             _ => null
         };
 
@@ -130,19 +139,17 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private sealed class NameLookup
     {
-        public List<NameLookupParty> Parties { get; set; } = null!;
+        public List<string> Data { get; set; } = null!;
     }
 
     private sealed class NameLookupResult
     {
-        public List<NameLookupParty> PartyNames { get; set; } = null!;
+        public List<NameLookupEntry> Data { get; set; } = null!;
     }
 
-    private sealed class NameLookupParty
+    private sealed class NameLookupEntry
     {
-        public string Ssn { get; set; } = null!;
-        public string OrgNo { get; set; } = null!;
-        public string? Name { get; set; }
+        public string? DisplayName { get; set; }
     }
 }
 

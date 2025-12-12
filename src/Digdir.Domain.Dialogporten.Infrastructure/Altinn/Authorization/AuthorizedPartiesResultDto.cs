@@ -5,6 +5,7 @@ internal sealed class AuthorizedPartiesResultDto
     public required string Name { get; set; }
     public required string OrganizationNumber { get; set; }
     public string? PersonId { get; set; }
+    public string? DateOfBirth { get; set; }
     public required int PartyId { get; set; }
     public required Guid PartyUuid { get; set; }
     public required string Type { get; set; }

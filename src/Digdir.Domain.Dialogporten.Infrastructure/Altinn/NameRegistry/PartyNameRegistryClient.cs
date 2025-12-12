@@ -46,6 +46,38 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             token: cancellationToken);
     }
 
+    public async Task<string?> GetOrgName(string orgNumber, CancellationToken cancellationToken)
+    {
+        return await _cache.GetOrSetAsync<string?>(
+            $"OrgName_{orgNumber}",
+            async (ctx, ct) =>
+            {
+                var name = await GetOrgNameFromRegister(orgNumber, ct);
+                if (name is null)
+                {
+                    // Short negative cache
+                    ctx.Options.Duration = TimeSpan.FromSeconds(10);
+                }
+
+                return name;
+            },
+            token: cancellationToken);
+    }
+
+    private async Task<string?> GetOrgNameFromRegister(string orgNumber, CancellationToken cancellationToken)
+    {
+        NameLookup nameLookup = new() { Parties = [new() { OrgNo = orgNumber }] };
+
+        var name = await LookupName(nameLookup, cancellationToken);
+
+        if (name is null)
+        {
+            _logger.LogError("Failed to get name from party name registry for organisation {Org}", orgNumber);
+        }
+
+        return name;
+    }
+
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
         const string apiUrl = "register/api/v1/dialogporten/parties/query";
@@ -87,6 +119,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             _logger.LogError("Failed to get name from party name registry for external id {ExternalId}", externalIdWithPrefix);
         }
 
+        throw new NotImplementedException("FEATURE FLAG AND FLIP");
+
         return name;
     }
 
@@ -122,4 +156,5 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 internal sealed class LocalPartNameRegistryClient : IPartyNameRegistry
 {
     public Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Gunnarson");
+    public Task<string?> GetOrgName(string orgNumber, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Org");
 }

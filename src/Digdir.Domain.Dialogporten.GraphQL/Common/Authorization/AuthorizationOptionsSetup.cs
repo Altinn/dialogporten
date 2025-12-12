@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Extensions.HotChocolate;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using static Digdir.Domain.Dialogporten.GraphQL.Common.Authentication.AuthenticationBuilderExtensions;
 using AuthorizationOptions = Microsoft.AspNetCore.Authorization.AuthorizationOptions;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
@@ -23,6 +24,7 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .Authentication
             .JwtBearerTokenSchemas
             .Select(x => x.Name)
+            .Append(DialogportenAuthenticationSchemaName)
             .ToArray();
 
         options.DefaultPolicy = new AuthorizationPolicyBuilder()
@@ -57,7 +59,7 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .RequireScope(AuthorizationScope.Testing));
 
         options.AddPolicy(AuthorizationPolicy.EndUserSubscription, policy => policy
-            .Combine(options.GetPolicy(AuthorizationPolicy.EndUser)!)
+            .Combine(options.DefaultPolicy)
             .RequireAssertion(context =>
                 context.TryGetDialogEventsSubscriptionDialogId(out var dialogIdTopic)
                 && context.User.TryGetClaimValue(DialogTokenClaimTypes.DialogId, out var dialogIdClaimValue)

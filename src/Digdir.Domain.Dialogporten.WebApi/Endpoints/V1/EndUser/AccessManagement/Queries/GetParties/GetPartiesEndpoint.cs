@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Queries.GetParties;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.PreProcessors;
 using FastEndpoints;
 using MediatR;
 
@@ -17,6 +18,7 @@ public sealed class GetPartiesEndpoint : EndpointWithoutRequest<PartiesDto>
     public override void Configure()
     {
         Get("parties");
+        PreProcessor<RequireJsonAcceptPreProcessor>();
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 

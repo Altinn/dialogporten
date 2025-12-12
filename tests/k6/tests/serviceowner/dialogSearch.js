@@ -22,6 +22,8 @@ import {
     purgeSO
 } from '../../common/testimports.js'
 
+import { default as sentinelCheck } from '../../common/sentinel.js';
+
 import {default as dialogToInsert} from './testdata/01-create-dialog.js';
 
 import {getDefaultEnduserOrgNo, getDefaultEnduserSsn} from "../../common/token.js";
@@ -173,11 +175,13 @@ export default function () {
     });
 
     describe('List with custom orderBy', () => {
+        sentinelCheck();
         let titleForDueAtItem = uuidv4();
         let titleForUpdatedItem = uuidv4();
         let titleForLastItem = uuidv4();
 
         let dialogIds = createDialogs(10, (dialog, index) => {
+            setVisibleFrom(dialog, null);
             if (index == 3) {
                 setTitle(dialog, titleForDueAtItem);
                 setDueAt(dialog, new Date("2033-12-07T10:13:00Z"));
@@ -200,11 +204,14 @@ export default function () {
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&Limit=3&OrderBy=dueAt_desc,updatedAt_desc');
         expectStatusFor(r).to.equal(200);
+
         expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'response json').to.have.property("items").with.lengthOf(3);
-        expect(r.json().items[0], 'first dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForDueAtItem);
-        expect(r.json().items[1], 'second dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForUpdatedItem);
-        expect(r.json().items[2], 'third dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForLastItem);
+        let jsonResponse = r.json();
+
+        expect(jsonResponse, 'response json').to.have.property("items").with.lengthOf(3);
+        expect(jsonResponse.items[0], 'first dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForDueAtItem);
+        expect(jsonResponse.items[1], 'second dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForUpdatedItem);
+        expect(jsonResponse.items[2], 'third dialog title').to.haveContentOfType("title").that.hasLocalizedText(titleForLastItem);
 
         r = getSO('dialogs/' + defaultFilter + '&Limit=3&OrderBy=dueAt_asc,updatedAt_desc');
         expectStatusFor(r).to.equal(200);
@@ -285,15 +292,17 @@ export default function () {
 
     describe('List with process', () => {
         // Arrange
-        let processToSeachFor = "urn:test:process:1";
-        let dialogIds = createDialogs(10);
+        let processToSearchFor = "urn:test:listsearch:1";
+        let dialogIds = createDialogs(10, (dialog, index) => {
+            setProcess(dialog, "urn:test:listsearch:" + (index + 1));
+        });
 
         // Assert
-        let r = getSO('dialogs/' + defaultFilter + '&process=' + processToSeachFor);
+        let r = getSO('dialogs/' + defaultFilter + '&process=' + processToSearchFor);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
-        expect(r.json().items[0], 'process').to.have.property("process").that.equals(processToSeachFor);
+        expect(r.json().items[0], 'process').to.have.property("process").that.equals(processToSearchFor);
 
         // Clean up
         dialogIds.forEach((d) => {
@@ -350,7 +359,6 @@ function createDialogs(count, modify) {
     for (let i = 0; i < count; i++) {
         let d = dialogToInsert();
         setTitle(d, "e2e-test-dialog #" + (i + 1), "nn_NO");
-        setProcess(d, "urn:test:process:" + (i + 1));
         if (modify) {
             modify(d, i);
         }

@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
@@ -71,7 +72,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         var relevantActorNameEntities = actorNameEntities
-            .Where(x => x.ActorId is not null)
+            .Where(x => x.ActorId is not null && !x.ActorId.StartsWith(SystemUserIdentifier.Prefix, StringComparison.InvariantCultureIgnoreCase))
             .ToList();
 
         var actorNameById = (await Task.WhenAll(relevantActorNameEntities
@@ -87,7 +88,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             // We don't want to fail the save operation if we are unable to look up the
             // name for this particular actor, as it is used on enduser get operations.
             if (!string.IsNullOrWhiteSpace(actorName.Name)
-                || actorName.ActorEntities.All(x => x is DialogSeenLogSeenByActor))
+             || actorName.ActorEntities.All(x => x is DialogSeenLogSeenByActor))
             {
                 continue;
             }

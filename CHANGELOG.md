@@ -1,5 +1,239 @@
 # Changelog
 
+## [1.95.1](https://github.com/Altinn/dialogporten/compare/v1.95.0...v1.95.1) (2025-12-11)
+
+
+### Miscellaneous Chores
+
+* **ci:** update az cli to 2.81.0 ([#3107](https://github.com/Altinn/dialogporten/issues/3107)) ([1ab5d23](https://github.com/Altinn/dialogporten/commit/1ab5d2365fa4b2cc00ca04ef9785b2bdea7d4c2b))
+* **deps:** update dotnet monorepo ([#3111](https://github.com/Altinn/dialogporten/issues/3111)) ([f454387](https://github.com/Altinn/dialogporten/commit/f4543871f4b5e36901e7b1a4c2557116e2c0d85f))
+* **deps:** update googleapis/release-please-action action to v4.4.0 ([#3114](https://github.com/Altinn/dialogporten/issues/3114)) ([e66b05c](https://github.com/Altinn/dialogporten/commit/e66b05cb4140887cbe8c703e7a5f5d9e7eb5a5ae))
+* **deps:** update grafana/loki docker tag to v3.6.2 ([#3115](https://github.com/Altinn/dialogporten/issues/3115)) ([9e18bf2](https://github.com/Altinn/dialogporten/commit/9e18bf2f9e1f1b2bfeca6568953955f0dbf1a50b))
+* **deps:** update jaegertracing/all-in-one docker tag to v1.75.0 ([#3116](https://github.com/Altinn/dialogporten/issues/3116)) ([74788ca](https://github.com/Altinn/dialogporten/commit/74788caf6b8a69a78358a28bdc418df4a0ad6f24))
+* **deps:** update step-security/harden-runner action to v2.13.3 ([#3112](https://github.com/Altinn/dialogporten/issues/3112)) ([62726a6](https://github.com/Altinn/dialogporten/commit/62726a6d9a8853cf560db7a18030ae44c60b38a7))
+* **perf:** Improve service owner search ([#3110](https://github.com/Altinn/dialogporten/issues/3110)) ([9ae1f1e](https://github.com/Altinn/dialogporten/commit/9ae1f1e7536f8ef6ccfc2f1f6d8e4cfdb4f32ba3))
+* **service:** remove masstransit otel tracing ([#3121](https://github.com/Altinn/dialogporten/issues/3121)) ([8e4dd90](https://github.com/Altinn/dialogporten/commit/8e4dd90c36c88bf7b6536dfd8e7463b6561206fc)), closes [#3085](https://github.com/Altinn/dialogporten/issues/3085)
+
+## [1.95.0](https://github.com/Altinn/dialogporten/compare/v1.94.0...v1.95.0) (2025-12-08)
+
+
+### Features
+
+* **graphql:** enable cors ([#3102](https://github.com/Altinn/dialogporten/issues/3102)) ([3b862d8](https://github.com/Altinn/dialogporten/commit/3b862d8bcf21a73881180865f8d6f681a7a73fc3))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency medo.uuid7 to 3.2.0 ([#3095](https://github.com/Altinn/dialogporten/issues/3095)) ([16ddd6a](https://github.com/Altinn/dialogporten/commit/16ddd6aa12839046058d3dfa63370810810865d8))
+* **deps:** update dependency testcontainers.postgresql to 4.9.0 ([#3096](https://github.com/Altinn/dialogporten/issues/3096)) ([a8715f1](https://github.com/Altinn/dialogporten/commit/a8715f18815601284e3bf1e04be28f56d39cf37d))
+* **deps:** update docker/metadata-action action to v5.10.0 ([#3097](https://github.com/Altinn/dialogporten/issues/3097)) ([a7ccec0](https://github.com/Altinn/dialogporten/commit/a7ccec0f9c3f2449d7a64a26523ae2488fc78d13))
+* **deps:** update masstransit monorepo to 8.5.7 ([#3094](https://github.com/Altinn/dialogporten/issues/3094)) ([9771505](https://github.com/Altinn/dialogporten/commit/97715055b403995e65af4bbbe57821290078795f))
+* **graphql:** remove unnecessary tracing ([#3088](https://github.com/Altinn/dialogporten/issues/3088)) ([d57f9ee](https://github.com/Altinn/dialogporten/commit/d57f9eec730ed30f9674dc6b9d04c0083bc16902))
+* **logging:** Enable logging of party/services tuples ([#3101](https://github.com/Altinn/dialogporten/issues/3101)) ([0ad2d40](https://github.com/Altinn/dialogporten/commit/0ad2d40154cb1c1d8bb737475b8f432d4f9d8555))
+
+## [1.94.0](https://github.com/Altinn/dialogporten/compare/v1.93.1...v1.94.0) (2025-12-05)
+
+
+### Features
+
+* **graphql:** remove EndUser base policy from subscription policy ([#3082](https://github.com/Altinn/dialogporten/issues/3082)) ([b1ae372](https://github.com/Altinn/dialogporten/commit/b1ae3727f793d82bd3541bd4481c06b723819c2f))
+
+## [1.93.1](https://github.com/Altinn/dialogporten/compare/v1.93.0...v1.93.1) (2025-12-04)
+
+
+### Bug Fixes
+
+* **infra:** Use TryCreate on extended type to avoid exception on invalid data ([#3086](https://github.com/Altinn/dialogporten/issues/3086)) ([8f3b540](https://github.com/Altinn/dialogporten/commit/8f3b540342dc5ed88ac88f8074eaa2287a23ccab))
+
+## [1.93.0](https://github.com/Altinn/dialogporten/compare/v1.92.3...v1.93.0) (2025-12-04)
+
+
+### Features
+
+* systemuser_org as actorname for systemusers ([#3063](https://github.com/Altinn/dialogporten/issues/3063)) ([0d31c91](https://github.com/Altinn/dialogporten/commit/0d31c91774d75c6a12d4dbd1fbd77c18de88eea6))
+
+
+### Bug Fixes
+
+* **DialogSearch:** Fix json parsing of search query ([#3080](https://github.com/Altinn/dialogporten/issues/3080)) ([be27be5](https://github.com/Altinn/dialogporten/commit/be27be5bab5049d70d59b41b2ee272316a63bfdc))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-dotnet action to v5.0.1 ([#3074](https://github.com/Altinn/dialogporten/issues/3074)) ([4c5e5e4](https://github.com/Altinn/dialogporten/commit/4c5e5e467a4d43a201ee045e8b4dbe89094e2f53))
+* **deps:** update dependency altinn.authorization.abac to 0.1.1 ([#2990](https://github.com/Altinn/dialogporten/issues/2990)) ([b5dab61](https://github.com/Altinn/dialogporten/commit/b5dab61ab7c30b5b483ba8aa12dc792c4530117c))
+* **deps:** update docker/metadata-action action to v5.9.0 ([#3070](https://github.com/Altinn/dialogporten/issues/3070)) ([408697d](https://github.com/Altinn/dialogporten/commit/408697daa4321af3d805da96a01bba8442e65a44))
+* **deps:** update masstransit monorepo to 8.5.6 ([#3075](https://github.com/Altinn/dialogporten/issues/3075)) ([0a60a28](https://github.com/Altinn/dialogporten/commit/0a60a2837c33f860d9d20ec0b332aaeb9c8a73f3))
+* **logging:** Add parties and services count logging ([#3072](https://github.com/Altinn/dialogporten/issues/3072)) ([222c0e4](https://github.com/Altinn/dialogporten/commit/222c0e4d8b1f74069b00a87cd36746f56b3ddee8))
+* **logging:** Don't treat empty party list as error if party filter is supplied ([#3076](https://github.com/Altinn/dialogporten/issues/3076)) ([c66351f](https://github.com/Altinn/dialogporten/commit/c66351f74fc7904113e42ecdff3a8b22991e5ea4))
+* **perf:** Add covering indexes for AF ([#3056](https://github.com/Altinn/dialogporten/issues/3056)) ([ad56336](https://github.com/Altinn/dialogporten/commit/ad563368c8a08e062eed13ddf39d7676e2309178))
+* **perf:** Optimize enduser sub queries ([#3045](https://github.com/Altinn/dialogporten/issues/3045)) ([8b2eb3c](https://github.com/Altinn/dialogporten/commit/8b2eb3c7637af47aed79213ca3365510a7b393a4))
+
+## [1.92.3](https://github.com/Altinn/dialogporten/compare/v1.92.2...v1.92.3) (2025-11-28)
+
+
+### Miscellaneous Chores
+
+* **graphql:** enable psql statement logging in prod ([#3065](https://github.com/Altinn/dialogporten/issues/3065)) ([71206fc](https://github.com/Altinn/dialogporten/commit/71206fc322f3b7d7ffe1e972fb9ee11cc0fc7052))
+
+## [1.92.2](https://github.com/Altinn/dialogporten/compare/v1.92.1...v1.92.2) (2025-11-26)
+
+
+### Bug Fixes
+
+* **janitor:** Fix deletion/internal URL issues ([#3061](https://github.com/Altinn/dialogporten/issues/3061)) ([f1627e7](https://github.com/Altinn/dialogporten/commit/f1627e740fe50552bc617e62ea1358b897e7bef8))
+
+## [1.92.1](https://github.com/Altinn/dialogporten/compare/v1.92.0...v1.92.1) (2025-11-26)
+
+
+### Miscellaneous Chores
+
+* enable info logs on npsql ([#3059](https://github.com/Altinn/dialogporten/issues/3059)) ([18dbe97](https://github.com/Altinn/dialogporten/commit/18dbe973917cc00da99c20f3b1d7c303490e09a9))
+
+## [1.92.0](https://github.com/Altinn/dialogporten/compare/v1.91.2...v1.92.0) (2025-11-26)
+
+
+### Features
+
+* **app:** add ExpiresAt on attachments ([#3013](https://github.com/Altinn/dialogporten/issues/3013)) ([9d13506](https://github.com/Altinn/dialogporten/commit/9d135062761ed97b095e0fef27de5abe698ce225))
+
+
+### Bug Fixes
+
+* **breaking:** Sync UpdatedAt fields with VisibleFrom ([#3004](https://github.com/Altinn/dialogporten/issues/3004)) ([fb96686](https://github.com/Altinn/dialogporten/commit/fb966860f95b0173a000a774becf9f369677f9bf))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency refitter.sourcegenerator to 1.7.0 ([#3053](https://github.com/Altinn/dialogporten/issues/3053)) ([2442c65](https://github.com/Altinn/dialogporten/commit/2442c657832285189649b1c909c409e20c9ecc63))
+* **deps:** update opentelemetry dependencies  to 1.14.0 ([#3042](https://github.com/Altinn/dialogporten/issues/3042)) ([d12cac7](https://github.com/Altinn/dialogporten/commit/d12cac7b635b751ccf14770d599353693ddd4b27))
+
+## [1.91.2](https://github.com/Altinn/dialogporten/compare/v1.91.1...v1.91.2) (2025-11-25)
+
+
+### Miscellaneous Chores
+
+* **perf:** Undo use of calculated column, use late materialization ([#3048](https://github.com/Altinn/dialogporten/issues/3048)) ([d62515f](https://github.com/Altinn/dialogporten/commit/d62515f9a015545a28c6f1974ca3e9dff978f5d3))
+
+## [1.91.1](https://github.com/Altinn/dialogporten/compare/v1.91.0...v1.91.1) (2025-11-25)
+
+
+### Miscellaneous Chores
+
+* **perf:** Add party column, GIN index to DialogSearch ([#3046](https://github.com/Altinn/dialogporten/issues/3046)) ([736be92](https://github.com/Altinn/dialogporten/commit/736be926922e04ee77a8db3f0c74613c56d5fda8))
+
+## [1.91.0](https://github.com/Altinn/dialogporten/compare/v1.90.5...v1.91.0) (2025-11-25)
+
+
+### Features
+
+* **infra:** add parameter logging for postgresql ([#3044](https://github.com/Altinn/dialogporten/issues/3044)) ([4488ddd](https://github.com/Altinn/dialogporten/commit/4488dddc32ff6dec93936fd47afbb4e750de19ee))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v5.0.1 ([#3039](https://github.com/Altinn/dialogporten/issues/3039)) ([530874c](https://github.com/Altinn/dialogporten/commit/530874c7295f9dc893a4b2a0b4cbcd66d451f961))
+
+## [1.90.5](https://github.com/Altinn/dialogporten/compare/v1.90.4...v1.90.5) (2025-11-22)
+
+
+### Bug Fixes
+
+* **search:** add limit to search query for improved performance ([#3036](https://github.com/Altinn/dialogporten/issues/3036)) ([6878e12](https://github.com/Altinn/dialogporten/commit/6878e12f316234d5aa72db5590467153bf34b69c))
+* system-label-query ([#3038](https://github.com/Altinn/dialogporten/issues/3038)) ([39b0b81](https://github.com/Altinn/dialogporten/commit/39b0b81acacadb81485aeb3d4c1dfd9dd9999b68))
+
+## [1.90.4](https://github.com/Altinn/dialogporten/compare/v1.90.3...v1.90.4) (2025-11-22)
+
+
+### Miscellaneous Chores
+
+* **infra:** Add postgres statement logging in yt01 ([#3034](https://github.com/Altinn/dialogporten/issues/3034)) ([3730ee3](https://github.com/Altinn/dialogporten/commit/3730ee3002af957a65fda39eb8ae621929434bff))
+
+## [1.90.3](https://github.com/Altinn/dialogporten/compare/v1.90.2...v1.90.3) (2025-11-21)
+
+
+### Bug Fixes
+
+* **infra:** handle empty lists when building search query ([#3033](https://github.com/Altinn/dialogporten/issues/3033)) ([763f79d](https://github.com/Altinn/dialogporten/commit/763f79d6bd1860e2c3cde4f8b3cb7998bb9bfb8e))
+
+
+### Miscellaneous Chores
+
+* **ci:** upgrade azure cli to 2.80.0 ([#3025](https://github.com/Altinn/dialogporten/issues/3025)) ([9f7cf16](https://github.com/Altinn/dialogporten/commit/9f7cf16197cfce9eb9907dcfd4085107509361c4))
+* **perf:** Improve SQL query for dialog search retrieval ([#3030](https://github.com/Altinn/dialogporten/issues/3030)) ([e0f089e](https://github.com/Altinn/dialogporten/commit/e0f089e5c618fcd44c8443f9da7b052b9d3e9334))
+
+## [1.90.2](https://github.com/Altinn/dialogporten/compare/v1.90.1...v1.90.2) (2025-11-19)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency fluentvalidation.dependencyinjectionextensions to 12.1.0 ([#3020](https://github.com/Altinn/dialogporten/issues/3020)) ([6d064dc](https://github.com/Altinn/dialogporten/commit/6d064dc651d726a13c28c891de98ea1e6c62cae1))
+* **deps:** update dotnet monorepo ([#3017](https://github.com/Altinn/dialogporten/issues/3017)) ([5ba04af](https://github.com/Altinn/dialogporten/commit/5ba04afe6ffe0f64f5b00e9c462c50355febb64b))
+* **deps:** update microsoft dependencies ([#3018](https://github.com/Altinn/dialogporten/issues/3018)) ([66060fa](https://github.com/Altinn/dialogporten/commit/66060fad482725079ee2214c117bd6d000f2838c))
+* **deps:** update step-security/harden-runner action to v2.13.2 ([#3019](https://github.com/Altinn/dialogporten/issues/3019)) ([becbfc3](https://github.com/Altinn/dialogporten/commit/becbfc350b4d44fa970718b86c5cf8d059b79d5d))
+* **infra:** Use flags and party filter against authorizedparties ([#3022](https://github.com/Altinn/dialogporten/issues/3022)) ([4cc6a1b](https://github.com/Altinn/dialogporten/commit/4cc6a1b6d7f99f0a66d3c9ef42c064b585854427))
+
+## [1.90.1](https://github.com/Altinn/dialogporten/compare/v1.90.0...v1.90.1) (2025-11-19)
+
+
+### Miscellaneous Chores
+
+* **app:** use IClock for future/past validation extensions ([#3015](https://github.com/Altinn/dialogporten/issues/3015)) ([6c162b0](https://github.com/Altinn/dialogporten/commit/6c162b0aa47bae22d7d8f014216895ae31644f3b))
+* **webapi:** temporary set request size limit to 20Mb ([#3014](https://github.com/Altinn/dialogporten/issues/3014)) ([6d4078b](https://github.com/Altinn/dialogporten/commit/6d4078be115065e27e58c6d923addfeec0309795))
+
+## [1.90.0](https://github.com/Altinn/dialogporten/compare/v1.89.5...v1.90.0) (2025-11-17)
+
+
+### Features
+
+* **app:** add date of birth to authorized parties ([#3003](https://github.com/Altinn/dialogporten/issues/3003)) ([f0165f9](https://github.com/Altinn/dialogporten/commit/f0165f97082434554ebc1331c59a596747b2e382))
+
+
+### Bug Fixes
+
+* fix string formatting for order conditions ([#3007](https://github.com/Altinn/dialogporten/issues/3007)) ([1bce1bd](https://github.com/Altinn/dialogporten/commit/1bce1bdb6d97aaed2fe40f76172c9adae840016c))
+
+
+### Miscellaneous Chores
+
+* **deps:** update grafana/loki docker tag to v3.5.7 ([#3011](https://github.com/Altinn/dialogporten/issues/3011)) ([d4d6440](https://github.com/Altinn/dialogporten/commit/d4d6440984e7901fa82a5ad53eca553f7ffdaaf4))
+* **deps:** update nginx docker tag to v1.29.3 ([#3012](https://github.com/Altinn/dialogporten/issues/3012)) ([61d276f](https://github.com/Altinn/dialogporten/commit/61d276fb32ccd5dfc7653f0ddf4da7b1e6731399))
+* fix open api spec namespace typo ([#3002](https://github.com/Altinn/dialogporten/issues/3002)) ([a1bbab1](https://github.com/Altinn/dialogporten/commit/a1bbab192346761cb75610af918ad0c1ec0b0e11))
+* **graphql:** remove VisibleFrom from dialog dto ([#3010](https://github.com/Altinn/dialogporten/issues/3010)) ([65e8f81](https://github.com/Altinn/dialogporten/commit/65e8f81c7b623e3a6986ce89ef263a80f113e04a))
+* **tests:** improve test isolation when failing ([#3006](https://github.com/Altinn/dialogporten/issues/3006)) ([5b761c1](https://github.com/Altinn/dialogporten/commit/5b761c1846818c98216d6803db95ed207acc8d48))
+* **webapi:** Validate Accept header on well-known and parties endpoints ([#3009](https://github.com/Altinn/dialogporten/issues/3009)) ([b6a981c](https://github.com/Altinn/dialogporten/commit/b6a981c65ab22be6274701b46a3db84faaebfb0c))
+
+## [1.89.5](https://github.com/Altinn/dialogporten/compare/v1.89.4...v1.89.5) (2025-11-13)
+
+
+### Bug Fixes
+
+* **graphql:** keep default value if orderBy input is not provided on search ([#3000](https://github.com/Altinn/dialogporten/issues/3000)) ([1be3d02](https://github.com/Altinn/dialogporten/commit/1be3d020055637c1f08ebc0fadff1e1ee9489e10))
+* **infra:** ensure index tuning is enabled if set to true ([#2962](https://github.com/Altinn/dialogporten/issues/2962)) ([76055fe](https://github.com/Altinn/dialogporten/commit/76055fe74f23603418267ec44e25746a75d45c92))
+* **webapi:** prevent 500 error when removing lists via PATCH ([#3001](https://github.com/Altinn/dialogporten/issues/3001)) ([0e30f65](https://github.com/Altinn/dialogporten/commit/0e30f65adc7612b5bcba529b96d74082295f1792))
+
+
+### Miscellaneous Chores
+
+* **ci:** update azure cli to 2.79.0 ([#2998](https://github.com/Altinn/dialogporten/issues/2998)) ([801b39d](https://github.com/Altinn/dialogporten/commit/801b39d0c08fd3c0e0e496296be13a855197cef1))
+
+## [1.89.4](https://github.com/Altinn/dialogporten/compare/v1.89.3...v1.89.4) (2025-11-12)
+
+
+### Bug Fixes
+
+* **ci:** pin migration docker image dotnet-ef tool version 9.0.10 ([#2995](https://github.com/Altinn/dialogporten/issues/2995)) ([24b6e14](https://github.com/Altinn/dialogporten/commit/24b6e141776281a8855c395a22fa64ab33ae8ec6))
+
+## [1.89.3](https://github.com/Altinn/dialogporten/compare/v1.89.2...v1.89.3) (2025-11-12)
+
+
+### Miscellaneous Chores
+
+* **app:** Improve search performance for end user search ([#2948](https://github.com/Altinn/dialogporten/issues/2948)) ([bf1c64e](https://github.com/Altinn/dialogporten/commit/bf1c64e62278778c85f48e106b631bdd8ed30c2f))
+* **deps:** update dependency uuidnext to 4.2.2 ([#2980](https://github.com/Altinn/dialogporten/issues/2980)) ([15c7e00](https://github.com/Altinn/dialogporten/commit/15c7e007fe8895831b59a2139a2ad86fcce26279))
+* **deps:** update dotnet monorepo ([#2991](https://github.com/Altinn/dialogporten/issues/2991)) ([06dd57c](https://github.com/Altinn/dialogporten/commit/06dd57ca09801bc078275bc77c6f90b5370e30a2))
+* **deps:** update prom/prometheus docker tag to v3.7.3 ([#2981](https://github.com/Altinn/dialogporten/issues/2981)) ([78ffcab](https://github.com/Altinn/dialogporten/commit/78ffcab8d2904e607db2582acb37dab638bafe03))
+
 ## [1.89.2](https://github.com/Altinn/dialogporten/compare/v1.89.1...v1.89.2) (2025-11-10)
 
 

@@ -9,7 +9,8 @@ import {
     uuidv4,
     uuidv7,
     setActivities,
-    addActivity
+    addActivity,
+    setVisibleFrom
 } from '../../common/testimports.js'
 import {default as dialogToInsert} from './testdata/01-create-dialog.js';
 
@@ -22,14 +23,15 @@ export default function () {
     let newApiActionEndpointUrl = null;
 
     describe('Perform dialog create', () => {
-        let r = postSO('dialogs', dialogToInsert());
+        let d = dialogToInsert();
+        setVisibleFrom(d, null);
+        let r = postSO('dialogs', d);
         expectStatusFor(r).to.equal(201);
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
 
         dialogId = r.json();
     });
-
 
     describe('Perform dialog create with specifed attachmentId', () => {
         let dialog = dialogToInsert();
@@ -56,12 +58,13 @@ export default function () {
         let r = getSO('dialogs/' + dialogId);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
-        expect(r.json(), 'dialog').to.have.property("id").to.equal(dialogId);
-        expect(r.json(), 'dialog').to.have.property("createdAt");
-        expect(r.json().createdAt, 'createdAt').to.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{7}Z$/);
-        expect(r.json(), 'dialog').to.have.property("updatedAt");
-        expect(r.json().updatedAt, 'updatedAt').to.equal(r.json().createdAt);
-        expect(r.json(), 'dialog').to.have.property('revision');
+
+        let rJson = r.json();
+        expect(rJson, 'dialog').to.have.property("id").to.equal(dialogId);
+        expect(rJson, 'dialog').to.have.property("createdAt");
+        expect(rJson.createdAt, 'createdAt').to.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{7}Z$/);
+        expect(rJson, 'dialog').to.have.property("updatedAt");
+        expect(rJson, 'dialog').to.have.property('revision');
 
         eTag = r.json()["revision"];
     });
@@ -213,6 +216,42 @@ export default function () {
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property('errors');
     });
+
+    describe('Remove List properties with Patch', () => {
+
+            let d = dialogToInsert();
+            let post = postSO("dialogs", d);
+            expectStatusFor(post).to.equal(201);
+            expect(post, 'response').to.have.validJsonBody();
+
+            let dialogId = post.json();
+
+            let patchDocument = [
+                {
+                    "op": "remove",
+                    "path": "/guiActions"
+                },
+                {
+                    "op": "remove",
+                    "path": "/apiActions"
+                },
+                {
+                    "op": "remove",
+                    "path": "/searchTags"
+                },
+                {
+                    "op": "remove",
+                    "path": "/Attachments"
+                }
+            ];
+
+            let patch = patchSO('dialogs/' + dialogId, patchDocument);
+            expectStatusFor(patch).to.equal(204);
+
+            let purge = purgeSO('dialogs/' + dialogId);
+            expectStatusFor(purge).to.equal(204);
+        }
+    )
 
     describe('Clean up', () => {
         for (let i = 0; i < dialogIds.length; i++) {

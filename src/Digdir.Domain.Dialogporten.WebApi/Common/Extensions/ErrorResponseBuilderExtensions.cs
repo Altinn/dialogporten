@@ -65,6 +65,15 @@ internal static class ErrorResponseBuilderExtensions
                 Instance = ctx.Request.Path,
                 Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
             },
+            StatusCodes.Status406NotAcceptable => new ValidationProblemDetails(errors)
+            {
+                Title = "Requested content type is not acceptable.",
+                Detail = "The Accept header must allow JSON responses.",
+                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.6",
+                Status = statusCode,
+                Instance = ctx.Request.Path,
+                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
+            },
             StatusCodes.Status409Conflict => new ValidationProblemDetails(errors)
             {
                 Title = "Conflict.",

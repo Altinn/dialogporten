@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Get;
 
@@ -63,6 +64,33 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.EndUserContext.Revision.Should().NotBeEmpty());
 
     [Fact]
+    public Task Get_Dialog_Should_Mask_Expired_Attachment_Urls() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
+                x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
+
+                x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
+                x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
+            })
+            .OverrideUtc(TimeSpan.FromDays(2))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Transmissions.Should().NotBeEmpty()
+                    .And.AllSatisfy(x => x.Attachments.Should().NotBeEmpty()
+                        .And.AllSatisfy(x => x.Urls.Should().NotBeEmpty()
+                            .And.AllSatisfy(url => url.Url.Should().NotBeNull()
+                                .And.Be(Constants.ExpiredUri))));
+
+                x.Attachments.Should().NotBeEmpty()
+                    .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
+                        .And.AllSatisfy(url => url.Url.Should().NotBeNull()
+                            .And.Be(Constants.ExpiredUri)));
+            });
+
+    [Fact]
     public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -74,7 +102,6 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened));
-
 
     [Fact]
     [Obsolete("Testing obsolete SystemLabel, will be removed in future versions.")]

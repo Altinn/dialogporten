@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
@@ -9,6 +10,7 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
@@ -146,6 +148,26 @@ public static class IFlowStepExtensions
             step.Context.Application.ConfigureServices(configure);
             return x;
         });
+
+    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, TimeSpan skew) =>
+        step.Select(x =>
+        {
+            DialogApplication.Clock.OverrideUtc(skew);
+            return x;
+        });
+
+    public static IFlowStep OverrideUtc(this IFlowStep step, TimeSpan skew) =>
+        step.Do(_ => DialogApplication.Clock.OverrideUtc(skew));
+
+    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, DateTimeOffset time) =>
+        step.Select(x =>
+        {
+            DialogApplication.Clock.OverrideUtc(time);
+            return x;
+        });
+
+    public static IFlowStep OverrideUtc(this IFlowStep step, DateTimeOffset time) =>
+        step.Do(_ => DialogApplication.Clock.OverrideUtc(time));
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()

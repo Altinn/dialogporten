@@ -20,6 +20,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -39,6 +40,8 @@ public class DialogApplication : IAsyncLifetime
     private ServiceProvider _rootProvider = null!;
     private ServiceProvider _fixtureRootProvider = null!;
     private readonly List<object> _publishedEvents = [];
+
+    internal static TestClock Clock { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
         .WithImage("postgres:16.9")
@@ -64,6 +67,7 @@ public class DialogApplication : IAsyncLifetime
         await _dbContainer.StartAsync();
         await EnsureDatabaseAsync();
         await BuildRespawnState();
+
     }
 
     /// <summary>
@@ -100,8 +104,9 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
+            .AddSingleton<NpgsqlDataSource>(_ => new NpgsqlDataSourceBuilder(_dbContainer.GetConnectionString() + ";Include Error Detail=true").Build())
             .AddDbContext<DialogDbContext>((services, options) =>
-                options.UseNpgsql(_dbContainer.GetConnectionString() + ";Include Error Detail=true", o =>
+                options.UseNpgsql(services.GetRequiredService<NpgsqlDataSource>(), o =>
                     {
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     })
@@ -114,7 +119,8 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
             .AddScoped<IServiceOwnerNameRegistry>(_ => CreateServiceOwnerNameRegistrySubstitute())
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
-            .AddScoped<IOptions<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
+            .AddScoped<IOptionsSnapshot<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
+            .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>())
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
@@ -123,6 +129,8 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
+            .RemoveAll<IClock>()
+            .AddSingleton<IClock>(Clock)
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
@@ -142,9 +150,9 @@ public class DialogApplication : IAsyncLifetime
 
     private static string Base64UrlEncode(byte[] input) => Convert.ToBase64String(input).Replace("+", "-").Replace("/", "_").TrimEnd('=');
 
-    private static IOptions<ApplicationSettings> CreateApplicationSettingsSubstitute()
+    private static IOptionsSnapshot<ApplicationSettings> CreateApplicationSettingsSubstitute()
     {
-        var applicationSettingsSubstitute = Substitute.For<IOptions<ApplicationSettings>>();
+        var applicationSettingsSubstitute = Substitute.For<IOptionsSnapshot<ApplicationSettings>>();
 
         using var primaryKeyPair = Key.Create(SignatureAlgorithm.Ed25519,
             new KeyCreationParameters
@@ -166,6 +174,11 @@ public class DialogApplication : IAsyncLifetime
             .Value
             .Returns(new ApplicationSettings
             {
+                FeatureToggle = new FeatureToggle
+                {
+                    UseOptimizedEndUserDialogSearch = true,
+                    UseOptimizedServiceOwnerDialogSearch = true
+                },
                 Dialogporten = new DialogportenSettings
                 {
                     BaseUri = new Uri("https://integration.test"),
@@ -222,6 +235,7 @@ public class DialogApplication : IAsyncLifetime
 
     public async Task ResetState()
     {
+        Clock.Reset();
         _publishedEvents.Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();

@@ -22,7 +22,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
 {
     private const string AuthorizeUrl = "authorization/api/v1/authorize";
-    private const string AuthorizedPartiesUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties?includeAltinn2=true";
+    private const string AuthorizedPartiesBaseUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties";
 
     private readonly HttpClient _httpClient;
     private readonly IFusionCache _pdpCache;
@@ -129,6 +129,14 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult([authorizedPartiesResultDto], authorizedPartiesRequest);
         }
 
+        return await GetAuthorizedPartiesInternal(authorizedPartiesRequest, flatten, cancellationToken);
+    }
+
+    private async Task<AuthorizedPartiesResult> GetAuthorizedPartiesInternal(
+        AuthorizedPartiesRequest authorizedPartiesRequest,
+        bool flatten,
+        CancellationToken cancellationToken)
+    {
         AuthorizedPartiesResult authorizedParties;
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
@@ -190,6 +198,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             {
                 Party = party.Party,
                 PartyId = party.PartyId,
+                DateOfBirth = party.DateOfBirth,
                 ParentParty = null,
                 AuthorizedResources = party.AuthorizedResources.Count > 0
                     ? [.. party.AuthorizedResources]
@@ -213,6 +222,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
                     Party = subParty.Party,
                     PartyId = subParty.PartyId,
                     ParentParty = party.Party,
+                    DateOfBirth = subParty.DateOfBirth,
                     AuthorizedResources = subParty.AuthorizedResources.Count > 0
                         ? [.. subParty.AuthorizedResources]
                         : EmptyStringList,
@@ -237,9 +247,12 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         CancellationToken cancellationToken)
     {
         var authorizedPartiesDto = await SendAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken);
-        // System users might have no rights whatsoever, which is not an error condition
-        // Other user types (persons, SI users) will always be able to represent themselves as a minimum
-        if (authorizedPartiesDto is null || (authorizedPartiesDto.Count == 0 && authorizedPartiesRequest.Type != SystemUserIdentifier.Prefix))
+        // System users might have no rights whatsoever, which is not an error condition. Other user types (persons, SI users)
+        // will always be able to represent themselves as a minimum, unless a party filter is supplied
+        if (authorizedPartiesDto is null || (
+                authorizedPartiesDto.Count == 0
+                && authorizedPartiesRequest.Type != SystemUserIdentifier.Prefix
+                && authorizedPartiesRequest.PartyFilter.Count == 0))
         {
             _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.Type, authorizedPartiesRequest.Value);
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
@@ -251,7 +264,18 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)
     {
         var partyIdentifier = request.Claims.GetEndUserPartyIdentifier() ?? throw new UnreachableException();
-        var authorizedParties = await GetAuthorizedParties(partyIdentifier, flatten: true, cancellationToken: cancellationToken);
+        var authorizedPartiesRequest = new AuthorizedPartiesRequest(
+            partyIdentifier,
+            includeAccessPackages: true,
+            includeRoles: true,
+            includeResources: true,
+            includeInstances: true,
+            partyFilter: CreatePartyFilters(request.ConstraintParties));
+
+        var authorizedParties = await GetAuthorizedPartiesInternal(
+            authorizedPartiesRequest,
+            flatten: true,
+            cancellationToken);
 
         var result = await AuthorizationHelper.ResolveDialogSearchAuthorization(
             authorizedParties,
@@ -287,6 +311,41 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             },
             token: cancellationToken);
 
+    private static List<AuthorizedPartyFilter> CreatePartyFilters(List<string> constraintParties)
+    {
+        if (constraintParties.Count == 0)
+        {
+            return [];
+        }
+
+        var filters = new List<AuthorizedPartyFilter>(constraintParties.Count);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var party in constraintParties)
+        {
+            if (string.IsNullOrWhiteSpace(party)
+                || !PartyIdentifier.TryParse(party.AsSpan(), out var identifier))
+            {
+                continue;
+            }
+
+            var type = identifier.Prefix();
+            var filterKey = $"{type}:{identifier.Id}";
+            if (!seen.Add(filterKey))
+            {
+                continue;
+            }
+
+            filters.Add(new AuthorizedPartyFilter
+            {
+                Type = type,
+                Value = identifier.Id
+            });
+        }
+
+        return filters;
+    }
+
     private async Task<DialogDetailsAuthorizationResult> PerformDialogDetailsAuthorization(
         DialogDetailsAuthorizationRequest request, CancellationToken cancellationToken)
     {
@@ -317,7 +376,16 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     private async Task<List<AuthorizedPartiesResultDto>?> SendAuthorizedPartiesRequest(
         AuthorizedPartiesRequest authorizedPartiesRequest, CancellationToken cancellationToken) =>
         await SendRequest<List<AuthorizedPartiesResultDto>>(
-            AuthorizedPartiesUrl, authorizedPartiesRequest, cancellationToken);
+            BuildAuthorizedPartiesUrl(authorizedPartiesRequest), authorizedPartiesRequest, cancellationToken);
+
+    private static string BuildAuthorizedPartiesUrl(AuthorizedPartiesRequest request)
+    {
+        return $"{AuthorizedPartiesBaseUrl}?includeAltinn2=true" +
+               $"&includeAccessPackages={(request.IncludeAccessPackages ? "true" : "false")}" +
+               $"&includeRoles={(request.IncludeRoles ? "true" : "false")}" +
+               $"&includeResources={(request.IncludeResources ? "true" : "false")}" +
+               $"&includeInstances={(request.IncludeInstances ? "true" : "false")}";
+    }
 
     private async Task<T?> SendRequest<T>(string url, object request, CancellationToken cancellationToken)
     {

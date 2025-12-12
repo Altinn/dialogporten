@@ -103,6 +103,23 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Fact]
+    public Task VisibleFrom_Should_Control_Timestamps_On_Create()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(3);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.VisibleFrom = visibleFrom)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+            {
+                dialog.VisibleFrom.Should().BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1));
+                dialog.CreatedAt.Should().Be(dialog.VisibleFrom);
+                dialog.UpdatedAt.Should().Be(dialog.VisibleFrom);
+                dialog.ContentUpdatedAt.Should().Be(dialog.VisibleFrom);
+            });
+    }
+
+    [Fact]
     public Task Can_Create_Dialog_With_Empty_Content_Summary() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.Content!.Summary = null)

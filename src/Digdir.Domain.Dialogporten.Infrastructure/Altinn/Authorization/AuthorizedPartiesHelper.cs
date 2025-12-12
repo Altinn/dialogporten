@@ -50,6 +50,7 @@ internal static class AuthorizedPartiesHelper
             PartyUuid = dto.PartyUuid,
             PartyId = dto.PartyId,
             Name = dto.Name,
+            DateOfBirth = dto.DateOfBirth,
             PartyType = dto.Type switch
             {
                 PartyTypeOrganization => AuthorizedPartyType.Organization,

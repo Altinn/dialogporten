@@ -40,5 +40,5 @@ JOIN "Localization"   l     ON l."LocalizationSetId" = dcls."Id"
 
 UNION ALL
 -- Search tags are language-agnostic keywords; force the simple configuration.
-SELECT dst."DialogId", 'D', 'simple', dst."Value"
+SELECT dst."DialogId", 'D', 'simple'::varchar(15), dst."Value"::varchar(4095)
 FROM "DialogSearchTag" dst;

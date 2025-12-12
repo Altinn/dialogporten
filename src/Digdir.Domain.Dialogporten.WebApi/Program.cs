@@ -97,6 +97,7 @@ static void BuildAndRun(string[] args)
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
+        .AddSingleton<IConfigureOptions<AspNetSettings>, AspNetSettingsConfigurator>()
         .Configure<FeatureMetricOptions>(builder.Configuration.GetSection("FeatureMetrics"))
 
         // Clean architecture projects
@@ -177,6 +178,7 @@ static void BuildAndRun(string[] args)
 
     app.UseHttpsRedirection()
         .UseDefaultExceptionHandler()
+        .UsePresentationLayerMaintenance()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()

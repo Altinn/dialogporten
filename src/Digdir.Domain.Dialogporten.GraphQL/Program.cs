@@ -82,6 +82,7 @@ static void BuildAndRun(string[] args)
     builder.Services
         // Options setup
         .ConfigureOptions<AuthorizationOptionsSetup>()
+        .AddSingleton<IConfigureOptions<AspNetSettings>, AspNetSettingsConfigurator>()
 
         // Clean architecture projects
         .AddApplication(builder.Configuration, builder.Environment)
@@ -147,6 +148,7 @@ static void BuildAndRun(string[] args)
 
     app.UseCors();
     app.MapAspNetHealthChecks()
+        .UsePresentationLayerMaintenance()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()

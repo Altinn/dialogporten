@@ -12,6 +12,9 @@ public sealed class DialogportenGqlActivityEnricher(
 {
     private const string ActivityName = "gql.activity";
     private const string HttpRoute = "http.route";
+    private const string Prefix = "GQL: ";
+    private const int PrefixLength = 5;
+    private const int MaxLength = 50;
 
     public override void EnrichExecuteRequest(IRequestContext context, Activity activity)
     {
@@ -30,21 +33,30 @@ public sealed class DialogportenGqlActivityEnricher(
     /// </summary>
     public static void RenameOperationName(Activity activity)
     {
-        var activityName = activity.GetTagItem(ActivityName)?.ToString();
-        if (activityName == null)
+        var tagValue = activity.GetTagItem(ActivityName);
+        var rawName = tagValue as string ?? tagValue?.ToString();
+
+        if (rawName == null)
         {
             return;
         }
 
-        // As this contains user input, sanitize and truncate
-        activityName = activityName.Replace("\r", " ").Replace("\n", " ").Trim();
-        if (activityName.Length > 50)
+        // Sanitize, truncate and add a prefix. Avoid allocations as this is a fairly hot path.
+        var inputLimit = Math.Min(rawName.Length, MaxLength);
+        var finalName = string.Create(PrefixLength + inputLimit, (rawName, inputLimit), (span, state) =>
         {
-            activityName = activityName[..50];
-        }
+            Prefix.AsSpan().CopyTo(span);
+            var targetSlice = span[PrefixLength..];
+            var sourceSlice = state.rawName.AsSpan(0, state.inputLimit);
+            for (var i = 0; i < sourceSlice.Length; i++)
+            {
+                var c = sourceSlice[i];
+                targetSlice[i] = (c is '\r' or '\n') ? ' ' : c;
+            }
+        });
 
-        activity.SetTag(HttpRoute, "GQL: " + activityName);
-        activity.DisplayName = activityName;
+        activity.SetTag(HttpRoute, finalName);
+        activity.DisplayName = finalName;
     }
 
     private static Activity GetRootActivity(Activity activity)

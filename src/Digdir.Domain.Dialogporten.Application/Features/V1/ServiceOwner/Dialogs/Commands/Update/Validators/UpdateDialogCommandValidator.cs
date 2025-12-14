@@ -18,13 +18,14 @@ internal sealed class UpdateDialogCommandValidator : AbstractValidator<UpdateDia
         RuleFor(x => x.Dto)
             .NotEmpty()
             .SetValidator(updateDialogDtoValidator)
-            .When(DialogIsPreloaded);
+            .WhenAsync(DialogExistsAsync);
     }
 
     public static bool IsApiOnly<T>(T _, IValidationContext context)
         => context.RootContextData.TryGetValue(IsApiOnlyKey, out var isApiOnly) && (bool)isApiOnly;
 
-    private static bool DialogIsPreloaded<T>(T _, IValidationContext context)
-        => context.RootContextData.TryGetValue(UpdateDialogDataLoader.Key, out var dialog) &&
-           dialog is not null;
+    private static async Task<bool> DialogExistsAsync(
+        UpdateDialogCommand _,
+        ValidationContext<UpdateDialogCommand> context,
+        CancellationToken cancellationToken) => await UpdateDialogExistsDataLoader.GetPreloadedDataAsync(context);
 }

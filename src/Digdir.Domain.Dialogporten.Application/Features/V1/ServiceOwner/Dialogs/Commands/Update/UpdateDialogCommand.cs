@@ -81,7 +81,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
-        var dialog = UpdateDialogDataLoader.GetPreloadedData(_dataLoaderContext);
+        var dialog = await UpdateDialogDataLoader.GetPreloadedDataAsync(_dataLoaderContext);
 
         if (dialog is null)
         {

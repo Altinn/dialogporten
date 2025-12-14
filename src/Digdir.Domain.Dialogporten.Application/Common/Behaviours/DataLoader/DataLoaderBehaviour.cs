@@ -25,10 +25,14 @@ internal sealed class DataLoaderBehaviour<TRequest, TResponse>
         // ConcurrentDictionary<string, object?>
         foreach (var loader in _loaders)
         {
-            _context.Set(loader.GetKey(), await loader.Load(request, cancellationToken));
+            var lazyResult = new Lazy<Task<object?>>(
+                () =>
+                    loader.Load(request, cancellationToken),
+                LazyThreadSafetyMode.ExecutionAndPublication);
+
+            _context.Set(loader.GetKey(), lazyResult);
         }
 
         return await next(cancellationToken);
     }
 }
-

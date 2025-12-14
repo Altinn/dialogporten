@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 
@@ -49,8 +51,15 @@ internal interface ITypedDataLoader<in TRequest, TResponse, TData> :
     /// Retrieves preloaded data from the provided context.
     /// </summary>
     /// <param name="context">The context containing preloaded data.</param>
-    /// <returns>The preloaded data of type <typeparamref name="TData"/>, or null if not found.</returns>
-    static abstract TData? GetPreloadedData(IDataLoaderContext context);
+    /// <returns>A task containing the preloaded data of type <typeparamref name="TData"/>, or null if not found.</returns>
+    static abstract ValueTask<TData?> GetPreloadedDataAsync(IDataLoaderContext context);
+
+    /// <summary>
+    /// Retrieves preloaded data from the provided validation context.
+    /// </summary>
+    /// <param name="context">The validation context containing preloaded data.</param>
+    /// <returns>A task containing the preloaded data of type <typeparamref name="TData"/>, or null if not found.</returns>
+    static abstract ValueTask<TData?> GetPreloadedDataAsync(IValidationContext context);
 }
 
 /// <summary>
@@ -79,8 +88,35 @@ internal abstract class TypedDataLoader<TRequest, TResponse, TData, TSelf> :
     public abstract Task<TData?> Load(TRequest request, CancellationToken cancellationToken);
 
     /// <inheritdoc/>
-    public static TData? GetPreloadedData(IDataLoaderContext context) => (TData?)context.Get(Key);
+    public static ValueTask<TData?> GetPreloadedDataAsync(IDataLoaderContext context) =>
+        ResolveAsync(context.Get(Key));
 
     /// <inheritdoc/>
-    public static TData? GetPreloadedData(IValidationContext context) => (TData?)context.RootContextData[Key];
+    public static ValueTask<TData?> GetPreloadedDataAsync(IValidationContext context) =>
+        context.RootContextData.TryGetValue(Key, out var value)
+            ? ResolveAsync(value)
+            : ValueTask.FromResult<TData?>(default);
+
+    private static ValueTask<TData?> ResolveAsync(object? storedValue) =>
+        storedValue switch
+        {
+            null => ValueTask.FromResult<TData?>(default),
+            TData typedValue => ValueTask.FromResult<TData?>(typedValue),
+            Lazy<Task<object?>> lazyResult => AwaitLazyAsync(lazyResult),
+            Task<object?> task => AwaitTaskAsync(task),
+            _ => throw new InvalidOperationException(
+                $"Unsupported data loader value type '{storedValue.GetType().FullName}'.")
+        };
+
+    private static async ValueTask<TData?> AwaitLazyAsync(Lazy<Task<object?>> lazyResult)
+    {
+        var result = await lazyResult.Value.ConfigureAwait(false);
+        return (TData?)result;
+    }
+
+    private static async ValueTask<TData?> AwaitTaskAsync(Task<object?> task)
+    {
+        var result = await task.ConfigureAwait(false);
+        return (TData?)result;
+    }
 }

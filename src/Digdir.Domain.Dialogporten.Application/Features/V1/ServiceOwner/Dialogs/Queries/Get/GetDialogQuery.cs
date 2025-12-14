@@ -49,7 +49,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
     public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
     {
-        var dialog = GetDialogDataLoader.GetPreloadedData(_dataLoaderContext);
+        var dialog = await GetDialogDataLoader.GetPreloadedDataAsync(_dataLoaderContext);
 
         if (dialog is null)
         {

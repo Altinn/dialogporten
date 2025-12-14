@@ -43,7 +43,8 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
     public async Task<UpdateDialogServiceOwnerContextResult> Handle(UpdateDialogServiceOwnerContextCommand request,
         CancellationToken cancellationToken)
     {
-        var serviceOwnerContext = UpdateServiceOwnerContextDataLoader.GetPreloadedData(_dataLoaderContext);
+        var serviceOwnerContext = await UpdateServiceOwnerContextDataLoader
+            .GetPreloadedDataAsync(_dataLoaderContext);
 
         if (serviceOwnerContext is null)
         {

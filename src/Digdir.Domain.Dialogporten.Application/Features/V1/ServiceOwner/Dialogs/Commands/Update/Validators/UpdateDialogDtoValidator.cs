@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -36,7 +37,8 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .IsInEnum();
 
         RuleFor(x => x.Transmissions)
-            .Must((_, transmissions, context) => transmissions.Count + GetTransmissionCount(context) <= 5000)
+            .MustAsync(async (_, transmissions, context, _) =>
+                transmissions.Count + await GetTransmissionCountAsync(context) <= 5000)
                 .WithMessage("Maximum 5000 transmissions allowed.")
             .UniqueBy(x => x.Id);
 
@@ -53,9 +55,11 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
                     .SetValidator(contentValidator);
 
                 RuleFor(x => x.Transmissions)
-                    .Must((_, _, ctx) => UpdateDialogDataLoader
-                        .GetPreloadedData(ctx)!.Transmissions
-                        .All(x => x.Content.Count != 0))
+                    .MustAsync(async (_, _, ctx, _) =>
+                    {
+                        var dialog = await UpdateDialogDataLoader.GetPreloadedDataAsync(ctx);
+                        return dialog?.Transmissions.All(x => x.Content.Count != 0) ?? true;
+                    })
                     .WithMessage(
                         $"This dialog is locked to {nameof(DialogDto.IsApiOnly)}=true, as one or " +
                         $"more of the existing immutable transmissions do not have content.");
@@ -63,22 +67,20 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
 
         const string visibleFromErrorMessage = "{PropertyName} must be greater than or equal to VisibleFrom.";
         RuleFor(x => x.DueAt)
-            .Must((_, dueAt, context) =>
+            .MustAsync(async (_, dueAt, context, _) =>
             {
-                var visibleFrom = GetVisibleFrom(context);
+                var visibleFrom = await GetVisibleFromAsync(context);
                 return visibleFrom is null || dueAt is null || dueAt >= visibleFrom;
             })
-            .WithMessage(visibleFromErrorMessage)
-            .When(DialogHasVisibleFrom);
+            .WithMessage(visibleFromErrorMessage);
 
         RuleFor(x => x.ExpiresAt)
-            .Must((_, expiresAt, context) =>
+            .MustAsync(async (_, expiresAt, context, _) =>
             {
-                var visibleFrom = GetVisibleFrom(context);
+                var visibleFrom = await GetVisibleFromAsync(context);
                 return visibleFrom is null || expiresAt is null || expiresAt >= visibleFrom;
             })
-            .WithMessage(visibleFromErrorMessage)
-            .When(DialogHasVisibleFrom);
+            .WithMessage(visibleFromErrorMessage);
 
         RuleForEach(x => x.Transmissions)
             .SetValidator(transmissionValidator);
@@ -136,12 +138,12 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .MaximumLength(Constants.DefaultMaxUriLength)
             .When(x => x.PrecedingProcess is not null);
     }
-    private static bool DialogHasVisibleFrom<T>(T _, IValidationContext context) =>
-        GetVisibleFrom(context).HasValue;
+    private static async ValueTask<DateTimeOffset?> GetVisibleFromAsync(IValidationContext context)
+    {
+        var dialog = await UpdateDialogDataLoader.GetPreloadedDataAsync(context);
+        return dialog?.VisibleFrom;
+    }
 
-    private static DateTimeOffset? GetVisibleFrom(IValidationContext context) =>
-        UpdateDialogDataLoader.GetPreloadedData(context)?.VisibleFrom;
-
-    private static int GetTransmissionCount(IValidationContext context) =>
-        UpdateDialogDataLoader.GetPreloadedData(context)?.Transmissions.Count ?? 0;
+    private static async ValueTask<int> GetTransmissionCountAsync(IValidationContext context)
+        => await DialogTransmissionCountDataLoader.GetPreloadedDataAsync(context);
 }

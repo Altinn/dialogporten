@@ -14,7 +14,7 @@ public sealed class DialogportenGqlActivityEnricher(
     private const string HttpRoute = "http.route";
     private const string Prefix = "GQL: ";
     private const int PrefixLength = 5;
-    private const int MaxLength = 50;
+    private const int MaxLength = 100;
 
     public override void EnrichExecuteRequest(IRequestContext context, Activity activity)
     {

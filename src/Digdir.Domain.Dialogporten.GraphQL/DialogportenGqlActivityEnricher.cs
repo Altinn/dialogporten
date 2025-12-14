@@ -36,6 +36,13 @@ public sealed class DialogportenGqlActivityEnricher(
             return;
         }
 
+        // As this contains user input, sanitize and truncate
+        activityName = activityName.Replace("\r", " ").Replace("\n", " ").Trim();
+        if (activityName.Length > 50)
+        {
+            activityName = activityName[..50];
+        }
+
         activity.SetTag(HttpRoute, "GQL: " + activityName);
         activity.DisplayName = activityName;
     }

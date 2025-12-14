@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application;
@@ -119,7 +120,13 @@ static void BuildAndRun(string[] args)
                 .AddSource("Dialogporten.GraphQL")
                 .AddFusionCacheInstrumentation()
                 .AddHotChocolateInstrumentation()
-                .AddAspNetCoreInstrumentationExcludingHealthPaths())
+                .AddAspNetCoreInstrumentationExcludingHealthPaths(o =>
+                {
+                    o.EnrichWithHttpResponse = (activity, _) =>
+                    {
+                        DialogportenGqlActivityEnricher.RenameOperationName(activity);
+                    };
+                }))
 
         // Add health checks with the well-known URLs
         .AddAspNetHealthChecks((x, y) => x.HealthCheckSettings.HttpGetEndpointsToCheck = y

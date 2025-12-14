@@ -6,7 +6,7 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Digdir.Domain.Dialogporten.GraphQL;
 
-public class DialogportenGqlActivityEnricher(
+public sealed class DialogportenGqlActivityEnricher(
     ObjectPool<StringBuilder> stringBuilderPool,
     InstrumentationOptions options) : ActivityEnricher(stringBuilderPool, options)
 {
@@ -24,7 +24,7 @@ public class DialogportenGqlActivityEnricher(
     /// Renames the root activity's operation name
     ///
     /// Without this method, the name would be "/graphql/{**slug}" for any request, making it harder to differentiate various GQL operations in Application Insights.
-    /// With this method, the name will be something like "GQL:query { dialogById }"
+    /// With this method, the name will be something like "GQL: query { dialogById }"
     ///
     /// This implementation is mostly copied from https://github.com/danhalvorsen/Energy/blob/db4c4e39f90b1f8f9cf074e20241695651cd3af3/src/Cch.MobileApi/Telemetry/CchTelemetryExtensions.cs#L105
     /// </summary>
@@ -36,7 +36,7 @@ public class DialogportenGqlActivityEnricher(
             return;
         }
 
-        activity.SetTag(HttpRoute, "GQL:" + activityName);
+        activity.SetTag(HttpRoute, "GQL: " + activityName);
         activity.DisplayName = activityName;
     }
 

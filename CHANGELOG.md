@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.95.6](https://github.com/Altinn/dialogporten/compare/v1.95.5...v1.95.6) (2025-12-14)
+
+
+### Miscellaneous Chores
+
+* **logging:** Add prefix to GQL displayname ([#3143](https://github.com/Altinn/dialogporten/issues/3143)) ([7931de7](https://github.com/Altinn/dialogporten/commit/7931de782d9c42c4447a2a5e2d7e9cb4aeb8529f))
+* **logging:** Increase max length for gql operation name ([#3145](https://github.com/Altinn/dialogporten/issues/3145)) ([2817285](https://github.com/Altinn/dialogporten/commit/28172852e33db2cdbc8282b0a590119c30ee206c))
+* **logging:** Rename GQL operations in OTEL ([#3141](https://github.com/Altinn/dialogporten/issues/3141)) ([19619c9](https://github.com/Altinn/dialogporten/commit/19619c94244e72da3b5f75513c7d9589079afde0))
+
 ## [1.95.5](https://github.com/Altinn/dialogporten/compare/v1.95.4...v1.95.5) (2025-12-12)
 
 

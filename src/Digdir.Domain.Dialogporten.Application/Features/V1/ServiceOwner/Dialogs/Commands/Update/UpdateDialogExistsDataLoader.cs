@@ -21,8 +21,8 @@ internal sealed class UpdateDialogExistsDataLoader(
 
         if (!userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
-            var resourceIds = await userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-            query = query.Where(x => resourceIds.Contains(x.ServiceResource));
+            var org = await userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+            query = query.Where(x => x.Org == org);
         }
 
         return await query.AnyAsync(cancellationToken);

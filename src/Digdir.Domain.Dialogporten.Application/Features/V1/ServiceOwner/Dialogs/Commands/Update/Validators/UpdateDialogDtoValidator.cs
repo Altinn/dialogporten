@@ -37,9 +37,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .IsInEnum();
 
         RuleFor(x => x.Transmissions)
-            .MustAsync(async (_, transmissions, context, _) =>
-                transmissions.Count + await GetTransmissionCountAsync(context) <= 5000)
-                .WithMessage("Maximum 5000 transmissions allowed.")
             .UniqueBy(x => x.Id);
 
         // When IsApiOnly is set to true, we only validate content if it's provided
@@ -143,7 +140,4 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         var dialog = await UpdateDialogDataLoader.GetPreloadedDataAsync(context);
         return dialog?.VisibleFrom;
     }
-
-    private static async ValueTask<int> GetTransmissionCountAsync(IValidationContext context)
-        => await DialogTransmissionCountDataLoader.GetPreloadedDataAsync(context);
 }

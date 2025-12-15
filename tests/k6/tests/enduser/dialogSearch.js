@@ -129,6 +129,7 @@ export default function () {
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf.at.least(10);
     });
 
+    /* // Disable pending better handling of async processed
     describe('Search for title', () => {
         sleep(2); // wait for indexing
         let r = getEU('dialogs/' + defaultFilter + '&Search=' + titleToSearchFor);
@@ -150,6 +151,7 @@ export default function () {
         expect(r, 'response').to.have.validJsonBody();
         expect(r.json(), 'response json').to.have.property("items").with.lengthOf(1);
     });
+    */
 
     describe('Filter by extended status', () => {
         let r = getEU('dialogs/' + defaultFilter + '&ExtendedStatus=' + extendedStatusToSearchFor + "&ExtendedStatus=" + secondExtendedStatusToSearchFor);

@@ -82,6 +82,8 @@ static void BuildAndRun(string[] args)
 
     builder.Services
         // Options setup
+        .AddAspNetCommon(builder.Configuration.GetSection(GraphQlSettings.SectionName)
+            .GetSection(WebHostCommonSettings.SectionName))
         .ConfigureOptions<AuthorizationOptionsSetup>()
 
         // Clean architecture projects
@@ -154,6 +156,7 @@ static void BuildAndRun(string[] args)
 
     app.UseCors();
     app.MapAspNetHealthChecks()
+        .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()

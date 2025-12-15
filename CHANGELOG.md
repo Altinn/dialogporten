@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.95.7](https://github.com/Altinn/dialogporten/compare/v1.95.6...v1.95.7) (2025-12-15)
+
+
+### Bug Fixes
+
+* **api:** Add preliminary limit to transmissions count ([#3144](https://github.com/Altinn/dialogporten/issues/3144)) ([8894b75](https://github.com/Altinn/dialogporten/commit/8894b7512eec146c000cb59ad1c4d8d6cb22f15b))
+
+## [1.95.6](https://github.com/Altinn/dialogporten/compare/v1.95.5...v1.95.6) (2025-12-14)
+
+
+### Miscellaneous Chores
+
+* **logging:** Add prefix to GQL displayname ([#3143](https://github.com/Altinn/dialogporten/issues/3143)) ([7931de7](https://github.com/Altinn/dialogporten/commit/7931de782d9c42c4447a2a5e2d7e9cb4aeb8529f))
+* **logging:** Increase max length for gql operation name ([#3145](https://github.com/Altinn/dialogporten/issues/3145)) ([2817285](https://github.com/Altinn/dialogporten/commit/28172852e33db2cdbc8282b0a590119c30ee206c))
+* **logging:** Rename GQL operations in OTEL ([#3141](https://github.com/Altinn/dialogporten/issues/3141)) ([19619c9](https://github.com/Altinn/dialogporten/commit/19619c94244e72da3b5f75513c7d9589079afde0))
+
+## [1.95.5](https://github.com/Altinn/dialogporten/compare/v1.95.4...v1.95.5) (2025-12-12)
+
+
+### Miscellaneous Chores
+
+* **logging:** Enable parties and services count logging in GQL ([#3137](https://github.com/Altinn/dialogporten/issues/3137)) ([67d9249](https://github.com/Altinn/dialogporten/commit/67d924911020eeba65b96732c1a9ee44aafe1836))
+
+## [1.95.4](https://github.com/Altinn/dialogporten/compare/v1.95.3...v1.95.4) (2025-12-12)
+
+
+### Miscellaneous Chores
+
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.21.0 ([#3113](https://github.com/Altinn/dialogporten/issues/3113)) ([036d28b](https://github.com/Altinn/dialogporten/commit/036d28b50f08aff03d807ae3f75c52ae5ffdb82c))
+* **graphql:** refactor EdDSA signature validation and key management ([#3106](https://github.com/Altinn/dialogporten/issues/3106)) ([73f8982](https://github.com/Altinn/dialogporten/commit/73f89825ac8f89951770b499e38eb94575fb4ade))
+* **perf:** Improve notification check ([#3132](https://github.com/Altinn/dialogporten/issues/3132)) ([3985162](https://github.com/Altinn/dialogporten/commit/39851628b8240b679ef9cb828e55b6540f763dee))
+* **tests:** Remove no longer needed test ([#3136](https://github.com/Altinn/dialogporten/issues/3136)) ([8f2afc9](https://github.com/Altinn/dialogporten/commit/8f2afc9e7f9f28984e7afd5e6b7441300152247b))
+* **webapi:** Enable sql statement logging in webapi ([#3131](https://github.com/Altinn/dialogporten/issues/3131)) ([c1d38b8](https://github.com/Altinn/dialogporten/commit/c1d38b872c1a2d00541c00c9b3d3ac20e0b0e886))
+
 ## [1.95.3](https://github.com/Altinn/dialogporten/compare/v1.95.2...v1.95.3) (2025-12-11)
 
 

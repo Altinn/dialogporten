@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.96.0](https://github.com/Altinn/dialogporten/compare/v1.95.7...v1.96.0) (2025-12-15)
+
+
+### Features
+
+* presentation layer maintenance mode ([#3130](https://github.com/Altinn/dialogporten/issues/3130)) ([6dc3913](https://github.com/Altinn/dialogporten/commit/6dc391345c649dd9a57651058bac0af9b92ec653))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency fluentvalidation.dependencyinjectionextensions to 12.1.1 ([#3139](https://github.com/Altinn/dialogporten/issues/3139)) ([09ed4ff](https://github.com/Altinn/dialogporten/commit/09ed4ff409514fb6619a6027172c33d344caea2d))
+* **deps:** update jaegertracing/all-in-one docker tag to v1.76.0 ([#3140](https://github.com/Altinn/dialogporten/issues/3140)) ([8efa4bd](https://github.com/Altinn/dialogporten/commit/8efa4bd85dc1f7eb2b6d8a5c997eaac11c9c671c))
+* **e2e:** Disable FTS e2e tests pending handling of async indexing ([#3152](https://github.com/Altinn/dialogporten/issues/3152)) ([54a7eb0](https://github.com/Altinn/dialogporten/commit/54a7eb03fa2a474724569fca1112271ff10da7de))
+* Revert "fix(api): Add preliminary limit to transmissions count ([#3144](https://github.com/Altinn/dialogporten/issues/3144))" ([#3150](https://github.com/Altinn/dialogporten/issues/3150)) ([f581b5c](https://github.com/Altinn/dialogporten/commit/f581b5cab6e587c77eeac0b1b68edcc7ba3d0874))
+
 ## [1.95.7](https://github.com/Altinn/dialogporten/compare/v1.95.6...v1.95.7) (2025-12-15)
 
 

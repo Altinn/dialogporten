@@ -348,7 +348,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
 
     private static string BuildAuthorizedPartiesUrl(AuthorizedPartiesRequest request)
     {
-        return $"{AuthorizedPartiesBaseUrl}?includeAltinn2=true" +
+        return $"{AuthorizedPartiesBaseUrl}?includeAltinn2=true&includePartiesViaKeyRoles=auto&includeSubParties=auto&includeInactiveParties=auto" +
                $"&includeAccessPackages={(request.IncludeAccessPackages ? "true" : "false")}" +
                $"&includeRoles={(request.IncludeRoles ? "true" : "false")}" +
                $"&includeResources={(request.IncludeResources ? "true" : "false")}" +

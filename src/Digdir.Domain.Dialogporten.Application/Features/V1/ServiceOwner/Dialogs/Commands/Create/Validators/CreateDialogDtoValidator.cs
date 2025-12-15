@@ -119,8 +119,6 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .SetValidator(attachmentValidator);
 
         RuleFor(x => x.Transmissions)
-            .Must(x => x.Count <= 5000)
-                .WithMessage("Maximum 5000 transmissions allowed.")
             .UniqueBy(x => x.Id);
 
         RuleForEach(x => x.Transmissions)

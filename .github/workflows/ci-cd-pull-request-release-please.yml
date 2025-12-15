@@ -141,10 +141,10 @@ jobs:
 
       - name: Trim slackified content if necessary
         id: trim-slackified
+        env:
+          SLACKIFIED_CONTENT: ${{ steps.slackify.outputs.text }}
+          MAX_LENGTH: ${{ env.MAX_BODY_LENGTH }}
         run: |
-          SLACKIFIED_CONTENT="${{ steps.slackify.outputs.text }}"
-          MAX_LENGTH=${{ env.MAX_BODY_LENGTH }}
-          
           if [ ${#SLACKIFIED_CONTENT} -gt $MAX_LENGTH ]; then
             # Account for the trimming message length to ensure we stay under limit
             TRIM_MESSAGE="... (content trimmed due to length)"

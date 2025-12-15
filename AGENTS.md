@@ -38,6 +38,8 @@ Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v
 - Target latest language features available in the solution (.NET 9 / C# 13).
 - Prefer pattern matching (`switch` expressions, property patterns) over `if/else` chains.
 - Prefer switch expressions over statement-based `switch`.
+- Prefer `if/else` chains over statement-based `switch`.
+- Prefer `if` with early returns over `if/else` chains 
 - Prefer records or record structs for immutable data models.
 - Use collection expressions (`[]`) instead of `new List<T>()` or `new[] { }` where applicable.
 - Prefer target-typed `new()` when the type is obvious.

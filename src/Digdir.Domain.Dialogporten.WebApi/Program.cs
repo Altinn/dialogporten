@@ -96,8 +96,9 @@ static void BuildAndRun(string[] args)
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
         // Options setup
+        .AddAspNetCommon(builder.Configuration.GetSection(WebApiSettings.SectionName)
+            .GetSection(WebHostCommonSettings.SectionName))
         .ConfigureOptions<AuthorizationOptionsSetup>()
-        .AddSingleton<IConfigureOptions<AspNetSettings>, AspNetSettingsConfigurator>()
         .Configure<FeatureMetricOptions>(builder.Configuration.GetSection("FeatureMetrics"))
 
         // Clean architecture projects
@@ -178,7 +179,7 @@ static void BuildAndRun(string[] args)
 
     app.UseHttpsRedirection()
         .UseDefaultExceptionHandler()
-        .UsePresentationLayerMaintenance()
+        .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()

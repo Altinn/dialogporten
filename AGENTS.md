@@ -27,6 +27,28 @@ Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v
 - Enable nullable reference types and keep entities immutable. Use OneOf for union returns when applicable.
 - Tests use xUnit with the fixture pattern and Verify for snapshot tests.
 
+### LINQ & Collection Style
+- Prefer LINQ over manual loops (`foreach`, `for`) for transformations, filtering, grouping, and projections.
+- Prefer `FirstOrDefault()` / `SingleOrDefault()` with explicit null handling over index-based access.
+- Use `Select`, `Where`, `GroupBy`, `ToDictionary`, `ToLookup` instead of building collections imperatively.
+- Avoid materializing collections early (`ToList`, `ToArray`) unless required for correctness or performance.
+- Prefer immutable LINQ pipelines over mutating existing collections.
+
+### Modern C# Syntax (Required)
+- Target latest language features available in the solution (.NET 9 / C# 13).
+- Prefer pattern matching (`switch` expressions, property patterns) over `if/else` chains.
+- Prefer switch expressions over statement-based `switch`.
+- Prefer records or record structs for immutable data models.
+- Use collection expressions (`[]`) instead of `new List<T>()` or `new[] { }` where applicable.
+- Prefer target-typed `new()` when the type is obvious.
+- Prefer `with` expressions for non-destructive mutation.
+
+### Nullability & Guards
+- Do not suppress nullable warnings (`!`) unless strictly justified.
+- Prefer pattern matching (`is not null`) over `!= null`.
+- Prefer early returns over nested null checks.
+- Use `ArgumentNullException.ThrowIfNull()` for public API guards.
+
 ## Pull Requests
 - PR titles must follow the [Conventional Commits](https://www.conventionalcommits.org/) format, and must be prefixed such that the title is <type>[optional scope]: <description>. The title will be used as the squash commit message.
 - Do not manually modify `CHANGELOG.md` or `version.txt`; these files are managed by automation.

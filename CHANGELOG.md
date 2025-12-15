@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.95.7](https://github.com/Altinn/dialogporten/compare/v1.95.6...v1.95.7) (2025-12-15)
+
+
+### Bug Fixes
+
+* **api:** Add preliminary limit to transmissions count ([#3144](https://github.com/Altinn/dialogporten/issues/3144)) ([8894b75](https://github.com/Altinn/dialogporten/commit/8894b7512eec146c000cb59ad1c4d8d6cb22f15b))
+
 ## [1.95.6](https://github.com/Altinn/dialogporten/compare/v1.95.5...v1.95.6) (2025-12-14)
 
 

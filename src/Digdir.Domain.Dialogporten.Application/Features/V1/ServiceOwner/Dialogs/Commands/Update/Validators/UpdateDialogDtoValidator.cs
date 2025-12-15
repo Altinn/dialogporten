@@ -36,8 +36,6 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .IsInEnum();
 
         RuleFor(x => x.Transmissions)
-            .Must((_, transmissions, context) => transmissions.Count + GetTransmissionCount(context) <= 5000)
-                .WithMessage("Maximum 5000 transmissions allowed.")
             .UniqueBy(x => x.Id);
 
         // When IsApiOnly is set to true, we only validate content if it's provided
@@ -141,7 +139,4 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
 
     private static DateTimeOffset? GetVisibleFrom(IValidationContext context) =>
         UpdateDialogDataLoader.GetPreloadedData(context)?.VisibleFrom;
-
-    private static int GetTransmissionCount(IValidationContext context) =>
-        UpdateDialogDataLoader.GetPreloadedData(context)?.Transmissions.Count ?? 0;
 }

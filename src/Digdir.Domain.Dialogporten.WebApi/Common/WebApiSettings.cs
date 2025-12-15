@@ -1,5 +1,4 @@
 ﻿using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
-using Digdir.Library.Utils.AspNet;
 using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common;

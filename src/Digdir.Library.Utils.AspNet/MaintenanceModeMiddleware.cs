@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Digdir.Library.Utils.AspNet;
 
-public class MaintenanceModeMiddleware
+internal sealed class MaintenanceModeMiddleware
 {
     private readonly RequestDelegate _next;
 

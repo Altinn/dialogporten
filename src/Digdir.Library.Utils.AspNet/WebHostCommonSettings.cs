@@ -9,6 +9,6 @@ public sealed class WebHostCommonSettings
 
 public sealed class MaintenanceMode
 {
-    public bool Enabled { get; set; }
-    public DateTimeOffset? RetryAt { get; set; }
+    public bool Enabled { get; init; }
+    public DateTimeOffset? RetryAt { get; init; }
 }

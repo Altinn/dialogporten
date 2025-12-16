@@ -341,7 +341,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         await _transmissionHierarchyValidator.ValidateNewTransmissionsAsync(
             dialog.Id,
             newDialogTransmissions,
-            nameof(UpdateDialogDto.Transmissions),
             cancellationToken);
 
         var appendResult = _dialogTransmissionAppender.Append(dialog, newDialogTransmissions);

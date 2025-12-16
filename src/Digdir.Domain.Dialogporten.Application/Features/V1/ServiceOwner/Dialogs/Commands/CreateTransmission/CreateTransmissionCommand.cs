@@ -105,7 +105,6 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         await _transmissionHierarchyValidator.ValidateNewTransmissionsAsync(
             dialog.Id,
             newTransmissions,
-            nameof(CreateTransmissionCommand.Transmissions),
             cancellationToken);
 
         var appendResult = _dialogTransmissionAppender.Append(dialog, newTransmissions);

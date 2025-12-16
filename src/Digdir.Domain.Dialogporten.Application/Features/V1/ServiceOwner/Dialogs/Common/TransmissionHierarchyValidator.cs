@@ -9,12 +9,11 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 internal interface ITransmissionHierarchyValidator
 {
-    void ValidateWholeAggregate(DialogEntity dialog, string propertyName);
+    void ValidateWholeAggregate(DialogEntity dialog);
 
     Task ValidateNewTransmissionsAsync(
         Guid dialogId,
         IReadOnlyCollection<DialogTransmission> newTransmissions,
-        string propertyName,
         CancellationToken cancellationToken);
 }
 
@@ -34,12 +33,12 @@ internal sealed class TransmissionHierarchyValidator : ITransmissionHierarchyVal
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
     }
 
-    public void ValidateWholeAggregate(DialogEntity dialog, string propertyName)
+    public void ValidateWholeAggregate(DialogEntity dialog)
     {
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             x => x.Id,
             x => x.RelatedTransmissionId,
-            propertyName,
+            nameof(DialogEntity.Transmissions),
             MaxHierarchyDepth,
             MaxHierarchyWidth));
     }
@@ -47,7 +46,6 @@ internal sealed class TransmissionHierarchyValidator : ITransmissionHierarchyVal
     public async Task ValidateNewTransmissionsAsync(
         Guid dialogId,
         IReadOnlyCollection<DialogTransmission> newTransmissions,
-        string propertyName,
         CancellationToken cancellationToken)
     {
         if (newTransmissions.Count == 0)
@@ -92,7 +90,7 @@ internal sealed class TransmissionHierarchyValidator : ITransmissionHierarchyVal
         _domainContext.AddErrors(nodes.Values.ToList().ValidateReferenceHierarchy(
             x => x.Id,
             x => x.ParentId,
-            propertyName,
+            nameof(DialogEntity.Transmissions),
             MaxHierarchyDepth,
             MaxHierarchyWidth));
     }

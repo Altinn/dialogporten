@@ -116,7 +116,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
-        _transmissionHierarchyValidator.ValidateWholeAggregate(dialog, nameof(CreateDialogDto.Transmissions));
+        _transmissionHierarchyValidator.ValidateWholeAggregate(dialog);
 
         var (fromParty, fromServiceOwner) = dialog.Transmissions.GetTransmissionCounts();
         dialog.FromPartyTransmissionsCount = checked((short)fromParty);

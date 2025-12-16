@@ -1,5 +1,5 @@
 import { serviceownerPartySearch, emptySearchThresholds } from '../../performancetest_common/simpleSearch.js'
-import { serviceOwners, parties } from '../../performancetest_common/readTestdata.js';
+import { serviceOwners, getParties } from '../../performancetest_common/readTestdata.js';
 import { randomItem } from '../../../common/k6-utils.js';
 const tag_name = 'serviceowner party filter';
 const traceCalls = (__ENV.traceCalls ?? 'false') === 'true';
@@ -13,7 +13,12 @@ export let options = {
     }
 };
 
+export function setup() {
+    const parties = getParties();
+    return parties;
+}
 
-export default function(data) {
+
+export default function(parties) {
     serviceownerPartySearch(serviceOwners[0], randomItem(parties), tag_name, traceCalls);
 }

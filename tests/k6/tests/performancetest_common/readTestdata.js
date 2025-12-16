@@ -6,10 +6,26 @@
  * @module readTestdata
  */
 
+import http from 'k6/http';
 import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 import { SharedArray } from 'k6/data';
 import exec from 'k6/execution';
-import { file } from 'k6/http';
+
+
+/**
+ * Function to parse CSV data from a string.
+ * @param {string} csvData - The CSV data as a string.
+ * @returns {Array} - Parsed data as an array of objects.
+ */
+function parseCsvData(csvData) {
+  try {
+    return papaparse.parse(csvData, { header: true, skipEmptyLines: true }).data;
+  } catch (error) {
+    console.log(`Error reading CSV file: ${error}`);
+    return [];
+  }
+}
+
 /**
  * Function to read the CSV file specified by the filename parameter.
  * @param {} filename
@@ -30,7 +46,6 @@ if (!__ENV.API_ENVIRONMENT) {
 const filenameEndusers = `../performancetest_data/endusers-${__ENV.API_ENVIRONMENT}.csv`;
 const filenameServiceowners = `../performancetest_data/serviceowners-${__ENV.API_ENVIRONMENT}.csv`;
 const filenameDialogsWithTransmissions = `../performancetest_data/dialogs-with-transmissions-${__ENV.API_ENVIRONMENT}.csv`;
-const filenameParties = `../performancetest_data/parties-${__ENV.API_ENVIRONMENT}.csv`;
 
 /**
  * SharedArray variable that stores the service owners data.
@@ -56,16 +71,13 @@ export const endUsers = new SharedArray('endUsers', function () {
 });
 
 /**
- * SharedArray variable that stores the parties data.
- * The data is parsed from the CSV file specified by the filenameEndusers variable.
- * The filenameEndusers variable is dynamically generated based on the value of the API_ENVIRONMENT environment variable.
- *
- * @name endUsers
- * @type {SharedArray}
+ * Reads the enduser data from github raw CSV file.
+ * @returns {Array} endUsers - Array of end users read from CSV file.
  */
-export const parties = new SharedArray('parties', function () {
-  return readCsv(filenameParties);
-});
+export function getParties(){
+  const res = http.get(`https://raw.githubusercontent.com/Altinn/dialogporten/refs/heads/performance/fix-so-tests/tests/k6/tests/performancetest_data/parties-${__ENV.API_ENVIRONMENT}.csv`);
+  return parseCsvData(res.body);
+}
 
 export const dialogsWithTransmissions = new SharedArray('dialogsWithTransmissions', function () {
   return readCsv(filenameDialogsWithTransmissions);

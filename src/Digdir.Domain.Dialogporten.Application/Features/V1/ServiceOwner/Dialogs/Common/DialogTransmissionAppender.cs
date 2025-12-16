@@ -44,8 +44,8 @@ internal sealed class DialogTransmissionAppender : IDialogTransmissionAppender
 
         var (fromParty, fromServiceOwner) = newTransmissions.GetTransmissionCounts();
 
-        dialog.FromPartyTransmissionsCount += (short)fromParty;
-        dialog.FromServiceOwnerTransmissionsCount += (short)fromServiceOwner;
+        dialog.FromPartyTransmissionsCount = checked((short)(dialog.FromPartyTransmissionsCount + fromParty));
+        dialog.FromServiceOwnerTransmissionsCount = checked((short)(dialog.FromServiceOwnerTransmissionsCount + fromServiceOwner));
 
         dialog.Transmissions.AddRange(newTransmissions);
         _db.DialogTransmissions.AddRange(newTransmissions);

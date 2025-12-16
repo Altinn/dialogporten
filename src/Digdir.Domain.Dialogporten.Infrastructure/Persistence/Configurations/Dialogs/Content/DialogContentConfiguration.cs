@@ -12,7 +12,8 @@ internal sealed class DialogContentConfiguration
         => builder.HasIndex(x => new { x.DialogId, x.TypeId }).IsUnique();
 }
 
-internal sealed class TransmissionContentConfiguration : IEntityTypeConfiguration<DialogTransmissionContent>
+internal sealed class TransmissionContentConfiguration
+    : IEntityTypeConfiguration<DialogTransmissionContent>
 {
     public void Configure(EntityTypeBuilder<DialogTransmissionContent> builder)
         => builder.HasIndex(x => new { x.TransmissionId, x.TypeId }).IsUnique();

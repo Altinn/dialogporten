@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { serviceOwners, endUsers } from '../../performancetest_common/readTestdata.js';
+import { serviceOwners, endUsers, parties } from '../../performancetest_common/readTestdata.js';
 import { randomItem, uuidv4, URL} from '../../../common/k6-utils.js';
 import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
@@ -22,8 +22,6 @@ const filter_combos = [
     {label: "search-serviceresource-enduserid-createdafter", filters: ["Search", "serviceResource", "endUserId", "createdAfter"]},
     {label: "search-enduser-createdafter-party-nohit", filters: ["Search", "endUserId", "createdAfter", "party"]},
 ];
-
-const orgNos = ["713431400"]
 
 export let options = {
     summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(95)', 'p(99)', 'p(99.5)', 'p(99.9)', 'count'],
@@ -51,7 +49,7 @@ function get_filter_value(filter, label) {
     switch (filter) {
         case "endUserId": return "urn:altinn:person:identifier-no:" +randomItem(endUsers).ssn;
         case "serviceResource": return "urn:altinn:resource:" +randomItem(resources);
-        case "party": return "urn:altinn:organization:identifier-no:" +randomItem(orgNos);
+        case "party": return "urn:altinn:organization:identifier-no:" +randomItem(parties).partyId;
         case "status": return "NotApplicable";
         case "deleted": return "Exclude";
         case "createdAfter": return new Date(Date.now() - 7*24*60*60*1000).toISOString();

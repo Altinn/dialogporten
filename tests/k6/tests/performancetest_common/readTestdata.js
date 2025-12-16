@@ -9,6 +9,7 @@
 import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 import { SharedArray } from 'k6/data';
 import exec from 'k6/execution';
+import { file } from 'k6/http';
 /**
  * Function to read the CSV file specified by the filename parameter.
  * @param {} filename
@@ -29,6 +30,7 @@ if (!__ENV.API_ENVIRONMENT) {
 const filenameEndusers = `../performancetest_data/endusers-${__ENV.API_ENVIRONMENT}.csv`;
 const filenameServiceowners = `../performancetest_data/serviceowners-${__ENV.API_ENVIRONMENT}.csv`;
 const filenameDialogsWithTransmissions = `../performancetest_data/dialogs-with-transmissions-${__ENV.API_ENVIRONMENT}.csv`;
+const filenameParties = `../performancetest_data/parties-${__ENV.API_ENVIRONMENT}.csv`;
 
 /**
  * SharedArray variable that stores the service owners data.
@@ -51,6 +53,18 @@ export const serviceOwners = new SharedArray('serviceOwners', function () {
  */
 export const endUsers = new SharedArray('endUsers', function () {
   return readCsv(filenameEndusers);
+});
+
+/**
+ * SharedArray variable that stores the parties data.
+ * The data is parsed from the CSV file specified by the filenameEndusers variable.
+ * The filenameEndusers variable is dynamically generated based on the value of the API_ENVIRONMENT environment variable.
+ *
+ * @name endUsers
+ * @type {SharedArray}
+ */
+export const parties = new SharedArray('parties', function () {
+  return readCsv(filenameParties);
 });
 
 export const dialogsWithTransmissions = new SharedArray('dialogsWithTransmissions', function () {

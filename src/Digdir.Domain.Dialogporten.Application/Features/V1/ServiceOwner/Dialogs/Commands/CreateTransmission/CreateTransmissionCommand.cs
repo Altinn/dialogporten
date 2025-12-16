@@ -158,5 +158,5 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             ActorType.Values.ServiceOwner);
     }
 
-    private sealed record TransmissionHierarchyNode(Guid Id, Guid? ParentId);
+}
 }

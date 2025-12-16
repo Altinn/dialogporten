@@ -119,8 +119,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _transmissionHierarchyValidator.ValidateWholeAggregate(dialog, nameof(CreateDialogDto.Transmissions));
 
         var (fromParty, fromServiceOwner) = dialog.Transmissions.GetTransmissionCounts();
-        dialog.FromPartyTransmissionsCount = (short)fromParty;
-        dialog.FromServiceOwnerTransmissionsCount = (short)fromServiceOwner;
+        dialog.FromPartyTransmissionsCount = checked((short)fromParty);
+        dialog.FromServiceOwnerTransmissionsCount = checked((short)fromServiceOwner);
 
         if (dialog.Transmissions.ContainsTransmissionByEndUser())
         {

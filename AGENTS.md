@@ -12,9 +12,14 @@ This file describes how AI coding agents should interact with the repository.
 - **Run K6 functional tests**: `./tests/k6/run.sh -e localdev -a v1 -u "$TOKENGENERATOR_USERNAME" -p "$TOKENGENERATOR_PASSWORD" suites/all-single-pass.js`
 - Do **not** run performance test suites. All K6 tests requires internet connectivity.
 
-Always run `dotnet build` and `dotnet test` after making changes. Running integration tests require Docker, so in environments without a running Docker engine (ie. Codex), use `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'` to skip them. All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyzers.
+Always run `dotnet build` and `dotnet test` after making changes. Running integration tests require Docker, so run tests outside any sandbox. 
 
-Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v1/*verified*.json` files. Use the corresponding `*received*.json` files, which are generated upon build, for synchronization. The SwaggerSnapshot test will fail if these files are not identical. The SwaggerSnapshot test will fail if running the in debug configuration (must use release).
+If a sandbox is absolutely needed, use `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'` to skip them. 
+
+All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyzers.
+
+Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v1/*verified*.json` files. Use the corresponding `*received*.json` files, which are generated upon build, for synchronization. 
+The SwaggerSnapshot test will fail if these files are not identical. The SwaggerSnapshot test will fail if running the in debug configuration (must use release).
 
 ## Code Style Guidelines
 - Use file-scoped namespaces with `using` directives outside the namespace.

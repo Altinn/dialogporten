@@ -13,6 +13,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
             var scripts = new[]
             {
+                "Dialog/Search/Aggregate.TsVector_Agg.sql",
                 "Dialog/Search/View.VDialogDocument.V3.sql",
             };
 
@@ -34,6 +35,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             {
                 migrationBuilder.Sql(sql);
             }
+            
+            migrationBuilder.Sql("DROP AGGREGATE IF EXISTS public.tsvector_agg(tsvector);");
         }
     }
 }

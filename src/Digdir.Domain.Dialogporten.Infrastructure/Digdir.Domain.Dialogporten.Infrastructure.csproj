@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
         <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.1"/>
@@ -22,7 +22,7 @@
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.11" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.11" />
         <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="1.1.1"/>
-        <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.4.0"/>
+        <PackageReference Include="ZiggyCreatures.FusionCache.Locking.AsyncKeyed" Version="2.4.0" />
         <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.4.0"/>
         <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack" Version="2.4.0"/>
     </ItemGroup>

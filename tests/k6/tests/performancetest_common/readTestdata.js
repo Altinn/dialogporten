@@ -75,7 +75,7 @@ export const endUsers = new SharedArray('endUsers', function () {
  * @returns {Array} endUsers - Array of end users read from CSV file.
  */
 export function getParties(){
-  const res = http.get(`https://raw.githubusercontent.com/Altinn/dialogporten/refs/heads/performance/fix-so-tests/tests/k6/tests/performancetest_data/parties-${__ENV.API_ENVIRONMENT}.csv`);
+  const res = http.get(`https://raw.githubusercontent.com/Altinn/dialogporten/refs/heads/main/tests/k6/tests/performancetest_data/parties-${__ENV.API_ENVIRONMENT}.csv`);
   return parseCsvData(res.body);
 }
 

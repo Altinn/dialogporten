@@ -178,7 +178,8 @@ public class DialogApplication : IAsyncLifetime
                 {
                     UseOptimizedEndUserDialogSearch = true,
                     UseOptimizedServiceOwnerDialogSearch = true,
-                    UseAltinnAutoAuthorizedPartiesQueryParameters = true
+                    UseAltinnAutoAuthorizedPartiesQueryParameters = true,
+                    UseCorrectPersonNameOrdering = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

@@ -10,9 +10,9 @@ internal sealed class GetDialogQueryValidator : AbstractValidator<GetDialogQuery
     {
         RuleFor(x => x.EndUserId)
             .Must(x => PartyIdentifier.TryParse(x, out var id) &&
-                       id is NorwegianPersonIdentifier)
+                       id is NorwegianPersonIdentifier or SystemUserIdentifier)
             .WithMessage($"{{PropertyName}} must be a valid end user identifier. It must match the format " +
-                         $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}'.")
+                         $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}' or '{SystemUserIdentifier.PrefixWithSeparator}{{uuid}}'.")
             .When(x => x.EndUserId is not null);
     }
 }

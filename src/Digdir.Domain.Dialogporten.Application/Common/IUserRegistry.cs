@@ -22,7 +22,7 @@ public sealed class UserId
     {
         UserIdType.Person or UserIdType.ServiceOwnerOnBehalfOfPerson => NorwegianPersonIdentifier.PrefixWithSeparator,
         UserIdType.SystemUser => SystemUserIdentifier.PrefixWithSeparator,
-        UserIdType.IdportenSelfIdentifiedUser => IdportenSelfIdentifiedUserIdentifier.PrefixWithSeparator,
+        UserIdType.IdportenSelfIdentifiedUser => IdportenEmailUserIdentifier.PrefixWithSeparator,
         UserIdType.AltinnSelfIdentifiedUser => AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator,
         UserIdType.FeideUser => FeideUserIdentifier.PrefixWithSeparator,
         UserIdType.ServiceOwner => NorwegianOrganizationIdentifier.PrefixWithSeparator,

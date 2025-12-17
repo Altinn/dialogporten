@@ -40,7 +40,7 @@ internal static class AuthorizedPartiesHelper
             PartyTypePerson => NorwegianPersonIdentifier.PrefixWithSeparator + dto.PersonId,
 
             // We need a hack here, as we only support scenarios where the self-identified user is the authenticated user.
-            PartyTypeSelfIdentified => authenticatedUser.Type + ":" + authenticatedUser.Value,
+            PartyTypeSelfIdentified => authenticatedUser.PartyIdentifier.FullId,
             _ => throw new ArgumentOutOfRangeException(nameof(dto))
         };
 
@@ -60,7 +60,7 @@ internal static class AuthorizedPartiesHelper
             },
             IsDeleted = dto.IsDeleted,
             HasKeyRole = dto.AuthorizedRoles.Exists(role => KeyRoleCodes.Contains(role)),
-            IsCurrentEndUser = dto.PersonId == authenticatedUser.Value || dto.Type == PartyTypeSelfIdentified,
+            IsCurrentEndUser = dto.PersonId == authenticatedUser.PartyIdentifier.Id || dto.Type == PartyTypeSelfIdentified,
             IsMainAdministrator = dto.AuthorizedRoles.Contains(MainAdministratorRoleCode),
             IsAccessManager = dto.AuthorizedRoles.Contains(AccessManagerRoleCode),
             HasOnlyAccessToSubParties = dto.OnlyHierarchyElementWithNoAccess,

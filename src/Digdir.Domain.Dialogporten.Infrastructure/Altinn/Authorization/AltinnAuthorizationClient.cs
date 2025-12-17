@@ -98,12 +98,18 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     }
 
     public async Task<AuthorizedPartiesResult> GetAuthorizedParties(IPartyIdentifier authenticatedParty, bool flatten = false,
-        CancellationToken cancellationToken = default)
-    {
-        var authorizedPartiesRequest = new AuthorizedPartiesRequest(authenticatedParty);
+        CancellationToken cancellationToken = default) =>
+        await GetAuthorizedPartiesInternal(new AuthorizedPartiesRequest(authenticatedParty), flatten, cancellationToken);
 
-        if (authenticatedParty
-            is IdportenSelfIdentifiedUserIdentifier
+    private async Task<AuthorizedPartiesResult> GetAuthorizedPartiesInternal(
+        AuthorizedPartiesRequest authorizedPartiesRequest,
+        bool flatten,
+        CancellationToken cancellationToken)
+    {
+        AuthorizedPartiesResult authorizedParties;
+
+        if (authorizedPartiesRequest.PartyIdentifier
+            is IdportenEmailUserIdentifier
             or AltinnSelfIdentifiedUserIdentifier
             or FeideUserIdentifier)
         {
@@ -117,9 +123,9 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
 
             var authorizedPartiesResultDto = new AuthorizedPartiesResultDto
             {
-                PartyUuid = _user.GetPrincipal().TryGetPartyUuid(out var uuid) ? uuid : throw new UnreachableException("Expected party UUID to be present"),
-                PartyId = _user.GetPrincipal().TryGetPartyId(out var partyId) ? partyId : throw new UnreachableException("Expected party ID to be present"),
-                Name = authorizedPartiesRequest.Value,
+                PartyUuid = _user.GetPrincipal().TryGetPartyUuid(out var uuid) ? uuid : throw new UnreachableException("Expected party UUID to be present in current principal"),
+                PartyId = _user.GetPrincipal().TryGetPartyId(out var partyId) ? partyId : throw new UnreachableException("Expected party ID to be present in current principal"),
+                Name = authorizedPartiesRequest.PartyIdentifier.Id,
                 OrganizationNumber = "",
                 Type = AuthorizedPartiesHelper.PartyTypeSelfIdentified,
                 IsDeleted = false,
@@ -134,15 +140,6 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
             return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult([authorizedPartiesResultDto], authorizedPartiesRequest);
         }
 
-        return await GetAuthorizedPartiesInternal(authorizedPartiesRequest, flatten, cancellationToken);
-    }
-
-    private async Task<AuthorizedPartiesResult> GetAuthorizedPartiesInternal(
-        AuthorizedPartiesRequest authorizedPartiesRequest,
-        bool flatten,
-        CancellationToken cancellationToken)
-    {
-        AuthorizedPartiesResult authorizedParties;
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
             authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
@@ -256,10 +253,10 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         // will always be able to represent themselves as a minimum, unless a party filter is supplied
         if (authorizedPartiesDto is null || (
                 authorizedPartiesDto.Count == 0
-                && authorizedPartiesRequest.Type != SystemUserIdentifier.Prefix
+                && authorizedPartiesRequest.PartyIdentifier is not SystemUserIdentifier
                 && authorizedPartiesRequest.PartyFilter.Count == 0))
         {
-            _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.Type, authorizedPartiesRequest.Value);
+            _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.PartyIdentifier.Prefix(), authorizedPartiesRequest.PartyIdentifier.Id);
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
         }
 

@@ -72,7 +72,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         // We do not have any information about system users, self-identified users or feide users in the party name registry
         switch (partyIdentifier)
         {
-            case AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier:
+            case AltinnSelfIdentifiedUserIdentifier or IdportenEmailUserIdentifier:
                 return partyIdentifier.Id;
             case FeideUserIdentifier:
                 return $"Feide User ({partyIdentifier.Id[..6]})";

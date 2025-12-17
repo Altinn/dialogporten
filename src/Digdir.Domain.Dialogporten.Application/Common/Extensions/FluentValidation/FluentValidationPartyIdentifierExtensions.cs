@@ -16,17 +16,16 @@ public static class FluentValidationPartyIdentifierExtensions
                         is NorwegianPersonIdentifier
                         or NorwegianOrganizationIdentifier
                         or AltinnSelfIdentifiedUserIdentifier
-                // Disabled for now, as we do not fully support these user types in Altinn yet
-                //or IdportenSelfIdentifiedUserIdentifier
+                        or IdportenEmailUserIdentifier
+                // Disabled for now, as this user type is not yet addressable
                 //or FeideUserIdentifier
                 ))
             .WithMessage(
                 $"'{{PropertyName}}' must be on format '{NorwegianOrganizationIdentifier.PrefixWithSeparator}{{norwegian org-nr}}', " +
-                $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}', or " +
-                $"'{AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{username}}' " +
-
-                // Disabled for now, as we do not fully support these user types in Altinn yet
-                //$"'{IdportenSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{e-mail}}' or " +
+                $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}', " +
+                $"'{AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator}{{username}}' or " +
+                $"'{IdportenEmailUserIdentifier.PrefixWithSeparator}{{e-mail}}' " +
+                // Disabled for now, as this user type is not yet addressable
                 //$"'{FeideUserIdentifier.PrefixWithSeparator}{{subject}}' " +
                 "with valid values, respectively.");
     }

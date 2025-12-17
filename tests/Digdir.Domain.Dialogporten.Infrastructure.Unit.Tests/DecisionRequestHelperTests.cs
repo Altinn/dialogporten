@@ -191,7 +191,7 @@ public class DecisionRequestHelperTests
                 ("urn:altinn:userid", "2"),
                 ("email", "foo@bar.com")
             ),
-            $"{IdportenSelfIdentifiedUserIdentifier.PrefixWithSeparator}foo@bar.com"
+            $"{IdportenEmailUserIdentifier.PrefixWithSeparator}foo@bar.com"
         );
 
         // Act

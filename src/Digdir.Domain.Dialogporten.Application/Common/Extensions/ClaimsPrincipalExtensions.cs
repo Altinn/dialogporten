@@ -307,7 +307,7 @@ public static class ClaimsPrincipalExtensions
                 => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
                     ? systemUserId : null,
             UserIdType.IdportenSelfIdentifiedUser
-                => IdportenSelfIdentifiedUserIdentifier.TryParse(externalId, out var email)
+                => IdportenEmailUserIdentifier.TryParse(externalId, out var email)
                     ? email : null,
             UserIdType.AltinnSelfIdentifiedUser
                 => AltinnSelfIdentifiedUserIdentifier.TryParse(externalId, out var username)

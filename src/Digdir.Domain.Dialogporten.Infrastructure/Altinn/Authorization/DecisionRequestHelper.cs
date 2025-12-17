@@ -44,7 +44,7 @@ internal static class DecisionRequestHelper
         // The PDP does not support self-identified users as parties, so we need to use the party-id claim instead.
         // Eventually, the PDP should support all external party identifiers, but until then we need to special case this.
         var resourceParty = request.ClaimsPrincipal.GetEndUserPartyIdentifier()
-                is AltinnSelfIdentifiedUserIdentifier or IdportenSelfIdentifiedUserIdentifier or FeideUserIdentifier
+                is AltinnSelfIdentifiedUserIdentifier or IdportenEmailUserIdentifier or FeideUserIdentifier
                     && request.ClaimsPrincipal.TryGetPartyId(out var partyId)
             ? $"{PartyIdClaimType}:{partyId}"
             : request.Party;

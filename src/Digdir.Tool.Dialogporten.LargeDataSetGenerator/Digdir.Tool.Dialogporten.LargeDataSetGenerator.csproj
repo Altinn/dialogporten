@@ -7,7 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="DeterministicGuids" Version="1.0.6" />
-        <PackageReference Include="Npgsql" Version="9.0.4" />
+        <PackageReference Include="Npgsql" Version="9.0.4"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -29,8 +29,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Digdir.Domain.Dialogporten.Domain\Digdir.Domain.Dialogporten.Domain.csproj" />
-        <ProjectReference Include="..\Digdir.Library.Entity.Abstractions\Digdir.Library.Entity.Abstractions.csproj" />
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.Domain\Digdir.Domain.Dialogporten.Domain.csproj"/>
+        <ProjectReference Include="..\Digdir.Library.Entity.Abstractions\Digdir.Library.Entity.Abstractions.csproj"/>
     </ItemGroup>
 
 </Project>

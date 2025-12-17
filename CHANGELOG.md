@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.97.0](https://github.com/Altinn/dialogporten/compare/v1.96.0...v1.97.0) (2025-12-16)
+
+
+### Features
+
+* **auth:** Support userprofile settings for partylist ([#3147](https://github.com/Altinn/dialogporten/issues/3147)) ([6b5e5c0](https://github.com/Altinn/dialogporten/commit/6b5e5c0575d024fb81f81e4dfcc2ddc2c956d6a0))
+
+
+### Miscellaneous Chores
+
+* **auth:** Add feature toggle for auto flags to accmgmt ([#3168](https://github.com/Altinn/dialogporten/issues/3168)) ([a5e5a51](https://github.com/Altinn/dialogporten/commit/a5e5a51584f909504ba1cb6b32b235ecb65b05c1))
+* **llm:** Disable CodeRabbit docstring check ([#3164](https://github.com/Altinn/dialogporten/issues/3164)) ([47a8a7d](https://github.com/Altinn/dialogporten/commit/47a8a7d2a6b5719ade856550bfc73bfcbda939ff))
+
 ## [1.96.0](https://github.com/Altinn/dialogporten/compare/v1.95.7...v1.96.0) (2025-12-15)
 
 

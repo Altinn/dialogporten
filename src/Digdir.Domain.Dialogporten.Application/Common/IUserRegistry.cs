@@ -22,7 +22,7 @@ public sealed class UserId
     {
         UserIdType.Person or UserIdType.ServiceOwnerOnBehalfOfPerson => NorwegianPersonIdentifier.PrefixWithSeparator,
         UserIdType.SystemUser => SystemUserIdentifier.PrefixWithSeparator,
-        UserIdType.IdportenSelfIdentifiedUser => IdportenEmailUserIdentifier.PrefixWithSeparator,
+        UserIdType.IdportenEmailIdentifiedUser => IdportenEmailUserIdentifier.PrefixWithSeparator,
         UserIdType.AltinnSelfIdentifiedUser => AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator,
         UserIdType.FeideUser => FeideUserIdentifier.PrefixWithSeparator,
         UserIdType.ServiceOwner => NorwegianOrganizationIdentifier.PrefixWithSeparator,
@@ -69,7 +69,7 @@ public sealed class UserRegistry : IUserRegistry
             UserIdType.Person
                 or UserIdType.ServiceOwnerOnBehalfOfPerson
                 or UserIdType.AltinnSelfIdentifiedUser
-                or UserIdType.IdportenSelfIdentifiedUser
+                or UserIdType.IdportenEmailIdentifiedUser
                 or UserIdType.FeideUser
                 => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
 

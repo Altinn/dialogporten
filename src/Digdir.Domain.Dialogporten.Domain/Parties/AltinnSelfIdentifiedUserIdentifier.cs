@@ -26,7 +26,18 @@ public sealed record AltinnSelfIdentifiedUserIdentifier : IPartyIdentifier
 
     public static bool IsValid(ReadOnlySpan<char> value)
     {
-        var username = PartyIdentifier.GetIdPart(value);
-        return !username.IsEmpty;
+        ReadOnlySpan<char> username;
+        if (value.StartsWith(PrefixWithSeparator))
+        {
+            username = PartyIdentifier.GetIdPart(value);
+        }
+        else
+        {
+            return IsValid(string.Concat(PrefixWithSeparator, value).AsSpan());
+        }
+
+        return Uri.IsWellFormedUriString(value.ToString(), UriKind.Absolute)
+               && !string.IsNullOrWhiteSpace(Uri.UnescapeDataString(username.ToString()));
+
     }
 }

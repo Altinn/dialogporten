@@ -26,7 +26,17 @@ public sealed record FeideUserIdentifier : IPartyIdentifier
 
     public static bool IsValid(ReadOnlySpan<char> value)
     {
-        var subject = PartyIdentifier.GetIdPart(value);
-        return subject.Length == 64;
+        ReadOnlySpan<char> idPart;
+        if (value.StartsWith(PrefixWithSeparator))
+        {
+            idPart = PartyIdentifier.GetIdPart(value);
+        }
+        else
+        {
+            return IsValid(string.Concat(PrefixWithSeparator, value).AsSpan());
+        }
+
+        return Uri.IsWellFormedUriString(value.ToString(), UriKind.Absolute)
+               && Uri.UnescapeDataString(idPart.ToString()).Length == 64;
     }
 }

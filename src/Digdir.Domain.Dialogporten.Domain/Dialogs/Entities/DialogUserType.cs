@@ -37,7 +37,7 @@ public sealed class DialogUserType : AbstractLookupEntity<DialogUserType, Dialog
         /// <summary>
         /// Self-identified user from ID-porten
         /// </summary>
-        IdportenSelfIdentifiedUser = 5,
+        IdportenEmailIdentifiedUser = 5,
 
         /// <summary>
         /// Self-identified user from Altinn

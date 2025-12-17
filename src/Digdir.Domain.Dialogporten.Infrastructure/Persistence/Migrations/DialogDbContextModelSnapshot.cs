@@ -1208,7 +1208,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 5,
-                            Name = "IdportenSelfIdentifiedUser"
+                            Name = "IdportenEmailIdentifiedUser"
                         },
                         new
                         {

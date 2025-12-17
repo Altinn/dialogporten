@@ -286,7 +286,7 @@ public static class ClaimsPrincipalExtensions
 
         if (claimsPrincipal.TryGetSelfIdentifiedUserEmail(out externalId))
         {
-            return (UserIdType.IdportenSelfIdentifiedUser, externalId);
+            return (UserIdType.IdportenEmailIdentifiedUser, externalId);
         }
 
         return (UserIdType.Unknown, string.Empty);
@@ -306,7 +306,7 @@ public static class ClaimsPrincipalExtensions
             UserIdType.SystemUser
                 => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
                     ? systemUserId : null,
-            UserIdType.IdportenSelfIdentifiedUser
+            UserIdType.IdportenEmailIdentifiedUser
                 => IdportenEmailUserIdentifier.TryParse(externalId, out var email)
                     ? email : null,
             UserIdType.AltinnSelfIdentifiedUser

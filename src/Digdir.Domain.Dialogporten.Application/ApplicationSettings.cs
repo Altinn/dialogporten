@@ -17,6 +17,9 @@ public sealed class FeatureToggle
     public bool UseOptimizedServiceOwnerDialogSearch { get; init; }
     public bool UseAltinnAutoAuthorizedPartiesQueryParameters { get; init; }
     public bool UseCorrectPersonNameOrdering { get; init; }
+    public bool UseAccessManagementForAltinnSelfIdentifiedUsers { get; init; }
+    public bool UseAccessManagementForIdportenEmailUsers { get; init; }
+    public bool UseAccessManagementForFeideUsers { get; init; }
 }
 
 public sealed class DialogportenSettings

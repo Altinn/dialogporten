@@ -69,7 +69,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             return null;
         }
 
-        // We do not have any information about system users, self-identified users or feide users in the party name registry
+        // We do not have any information about system users, self-identified users or Feide users in the party name registry
         switch (partyIdentifier)
         {
             case AltinnSelfIdentifiedUserIdentifier or IdportenEmailUserIdentifier:

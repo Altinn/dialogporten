@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -172,11 +173,14 @@ public static class OpenTelemetryExtensions
             options.Protocol = protocol;
         };
 
-    public static TracerProviderBuilder AddAspNetCoreInstrumentationExcludingHealthPaths(this TracerProviderBuilder builder)
+    public static TracerProviderBuilder AddAspNetCoreInstrumentationExcludingHealthPaths(
+        this TracerProviderBuilder builder,
+        Action<AspNetCoreTraceInstrumentationOptions>? configureAspNetCoreTraceInstrumentationOptions = null)
     {
         return builder.AddAspNetCoreInstrumentation(opts =>
         {
             opts.RecordException = true;
+            configureAspNetCoreTraceInstrumentationOptions?.Invoke(opts);
         });
     }
 }

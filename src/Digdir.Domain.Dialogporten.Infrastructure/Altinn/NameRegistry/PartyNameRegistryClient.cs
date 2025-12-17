@@ -28,9 +28,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         _cache = cacheProvider.GetCache(nameof(NameRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
     }
 
-    public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
-    {
-        return await _cache.GetOrSetAsync<string?>(
+    public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>
+        await _cache.GetOrSetAsync<string?>(
             $"Name_{externalIdWithPrefix}",
             async (ctx, ct) =>
             {
@@ -44,11 +43,9 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
                 return name;
             },
             token: cancellationToken);
-    }
 
-    public async Task<string?> GetOrgName(string orgNumber, CancellationToken cancellationToken)
-    {
-        return await _cache.GetOrSetAsync<string?>(
+    public async Task<string?> GetOrgName(string orgNumber, CancellationToken cancellationToken) =>
+        await _cache.GetOrSetAsync<string?>(
             $"OrgName_{orgNumber}",
             async (ctx, ct) =>
             {
@@ -62,7 +59,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
                 return name;
             },
             token: cancellationToken);
-    }
 
     private async Task<string?> GetOrgNameFromRegister(string orgNumber, CancellationToken cancellationToken)
     {

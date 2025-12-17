@@ -5,7 +5,7 @@ import { defaultEndUserSsn, defaultServiceOwnerOrgNo, tokenGeneratorEnv, default
 
 let defaultTokenOptionsForServiceOwner = {
   scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search",
-  orgName: "digdir",
+  orgName: "ttd",
   orgNo: defaultServiceOwnerOrgNo
 };
 

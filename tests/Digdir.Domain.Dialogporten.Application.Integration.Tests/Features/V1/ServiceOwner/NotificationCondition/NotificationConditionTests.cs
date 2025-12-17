@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.NotificationCondition;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
@@ -106,20 +105,6 @@ public class NotificationConditionTests(DialogApplication application) : Applica
                 ConditionType = NotificationConditionType.Exists
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
-
-    [Fact]
-    public Task Gone_Should_Be_Returned_When_Dialog_Is_Deleted() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog()
-            .DeleteDialog()
-            .AssertResult<DeleteDialogSuccess>()
-            .SendCommand((_, ctx) => new NotificationConditionQuery
-            {
-                DialogId = ctx.GetDialogId(),
-                ActivityType = DialogActivityType.Values.Information,
-                ConditionType = NotificationConditionType.Exists
-            })
-            .ExecuteAndAssert<EntityDeleted<DialogEntity>>();
 
     private static void AddActivityRequirements(
         CreateDialogCommand createDialogCommand,

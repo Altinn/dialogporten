@@ -1,6 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.GraphQL.Common.Authentication;
 using FluentValidation;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common;
 

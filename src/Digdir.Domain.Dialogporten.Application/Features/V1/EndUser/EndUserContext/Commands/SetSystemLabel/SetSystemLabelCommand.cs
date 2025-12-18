@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
@@ -65,8 +66,9 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         }
 
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
+        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
 
-        dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, currentUserInformation.UserId.ExternalIdWithPrefix);
+        dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, performedBy);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)

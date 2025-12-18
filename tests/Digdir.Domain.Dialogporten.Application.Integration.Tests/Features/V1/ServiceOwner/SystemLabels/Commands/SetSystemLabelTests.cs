@@ -1,13 +1,18 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.SystemLabels.Commands;
@@ -109,5 +114,75 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 x.ShouldHaveErrorWithText(
                     ValidationErrorStrings.SentLabelNotAllowed));
 
+    [Fact]
+    public Task Set_Allows_PerformedBy_For_Admin() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, AdminUserResourceRegistryDecorator>())
+            .SetSystemLabelsServiceOwner(command =>
+            {
+                command.EndUserId = null;
+                command.PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorId = "urn:altinn:organization:identifier-no:912345678"
+                };
+                command.AddLabels = [SystemLabel.Values.Archive];
+            })
+            .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive));
+
+    [Fact]
+    public Task Set_PerformedBy_For_Non_Admin_Is_Forbidden() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, NonAdminUserResourceRegistryDecorator>())
+            .SetSystemLabelsServiceOwner(command =>
+            {
+                command.EndUserId = null;
+                command.PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorId = "urn:altinn:organization:identifier-no:912345678"
+                };
+                command.AddLabels = [SystemLabel.Values.Archive];
+            })
+            .ExecuteAndAssert<Forbidden>();
+
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
+}
+
+internal sealed class AdminUserResourceRegistryDecorator(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry
+{
+    public Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken) =>
+        userResourceRegistry.CurrentUserIsOwner(serviceResource, cancellationToken);
+
+    public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) =>
+        userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
+
+    public bool UserCanModifyResourceType(string serviceResourceType) =>
+        userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
+
+    public bool IsCurrentUserServiceOwnerAdmin() => true;
+
+    public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
+        userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+}
+
+internal sealed class NonAdminUserResourceRegistryDecorator(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry
+{
+    public Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken) =>
+        userResourceRegistry.CurrentUserIsOwner(serviceResource, cancellationToken);
+
+    public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) =>
+        userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
+
+    public bool UserCanModifyResourceType(string serviceResourceType) =>
+        userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
+
+    public bool IsCurrentUserServiceOwnerAdmin() => false;
+
+    public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
+        userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
 }

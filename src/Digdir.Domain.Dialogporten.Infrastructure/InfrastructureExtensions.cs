@@ -105,6 +105,7 @@ public static class InfrastructureExtensions
             // Scoped
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddScoped<IUnitOfWork, UnitOfWork>()
+            .AddScoped<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
 

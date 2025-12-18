@@ -3,23 +3,30 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
+using UpdateTransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
+using UpdateTransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionContentDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class CreateTransmissionTests : ApplicationCollectionFixture
 {
+    private const string ParentTransmissionIdKey = nameof(ParentTransmissionIdKey);
+
     public CreateTransmissionTests(DialogApplication application) : base(application) { }
 
     [Fact]
@@ -137,6 +144,59 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                     .ExternalReference
                     .Should()
                     .Be("unique-key"));
+
+    [Fact]
+    public Task Can_Create_Transmission_Related_To_Existing_Transmission() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((command, ctx) =>
+            {
+                var parentTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
+                parentTransmission.Id = parentTransmission.Id.CreateVersion7IfDefault();
+                var parentId = parentTransmission.Id!.Value;
+                ctx.Bag[ParentTransmissionIdKey] = parentId;
+                command.Dto.Transmissions = [parentTransmission];
+            })
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) =>
+            {
+                var parentId = (Guid)ctx.Bag[ParentTransmissionIdKey]!;
+                var transmission = new UpdateTransmissionDto
+                {
+                    Id = Guid.CreateVersion7(),
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    Type = DialogTransmissionType.Values.Information,
+                    RelatedTransmissionId = parentId,
+                    Sender = new ActorDto
+                    {
+                        ActorType = Digdir.Domain.Dialogporten.Domain.Actors.ActorType.Values.ServiceOwner
+                    },
+                    Content = new UpdateTransmissionContentDto
+                    {
+                        Title = new ContentValueDto
+                        {
+                            Value = [new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "Ny melding"
+                            }]
+                        }
+                    }
+                };
+
+                return new CreateTransmissionCommand
+                {
+                    DialogId = ctx.GetDialogId(),
+                    Transmissions = [transmission]
+                };
+            })
+            .AssertResult<CreateTransmissionSuccess>()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(result =>
+            {
+                result.Transmissions.Should().HaveCount(2);
+                result.Transmissions.Last().RelatedTransmissionId.Should()
+                    .Be(result.Transmissions.First().Id);
+            });
 
     [Fact]
     public Task Cannot_Create_Transmission_With_ExternalReference_Over_Max_Length() =>

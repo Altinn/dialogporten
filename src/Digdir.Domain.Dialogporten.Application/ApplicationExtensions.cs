@@ -16,6 +16,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchNew;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SearchDialogQueryEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;

@@ -22,27 +22,25 @@ internal sealed class TransmissionHierarchyRepository(DialogDbContext dbContext)
 
         const string sql = """
             WITH RECURSIVE ancestors AS (
-                SELECT "Id", "RelatedTransmissionId" AS "ParentId"
-                FROM "DialogTransmission"
-                WHERE "DialogId" = {0} AND "Id" = ANY({1})
+                (
+                    SELECT "Id", "RelatedTransmissionId" AS "ParentId"
+                    FROM "DialogTransmission"
+                    WHERE "DialogId" = {0} AND "RelatedTransmissionId" = ANY({1})
+                )
+                UNION
+                (
+                    SELECT "Id", "RelatedTransmissionId" AS "ParentId"
+                    FROM "DialogTransmission"
+                    WHERE "DialogId" = {0} AND "Id" = ANY({1})
+                )
                 UNION ALL
                 SELECT parent."Id", parent."RelatedTransmissionId" AS "ParentId"
-                FROM "DialogTransmission" parent
-                INNER JOIN ancestors a ON parent."Id" = a."ParentId"
+                FROM ancestors a
+                INNER JOIN "DialogTransmission" parent ON parent."Id" = a."ParentId"
                 WHERE parent."DialogId" = {0}
-            ),
-            hierarchy AS (
-                SELECT DISTINCT "Id", "ParentId"
-                FROM ancestors
-                WHERE "ParentId" IS NULL
-                UNION ALL
-                SELECT child."Id", child."RelatedTransmissionId" AS "ParentId"
-                FROM "DialogTransmission" child
-                INNER JOIN hierarchy h ON child."RelatedTransmissionId" = h."Id"
-                WHERE child."DialogId" = {0}
             )
-            SELECT "Id", "ParentId"
-            FROM hierarchy;
+            SELECT DISTINCT "Id", "ParentId"
+            FROM ancestors;
             """;
 
         var nodes = await dbContext.Database

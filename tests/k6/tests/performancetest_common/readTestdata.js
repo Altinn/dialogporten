@@ -6,9 +6,26 @@
  * @module readTestdata
  */
 
+import http from 'k6/http';
 import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 import { SharedArray } from 'k6/data';
 import exec from 'k6/execution';
+
+
+/**
+ * Function to parse CSV data from a string.
+ * @param {string} csvData - The CSV data as a string.
+ * @returns {Array} - Parsed data as an array of objects.
+ */
+function parseCsvData(csvData) {
+  try {
+    return papaparse.parse(csvData, { header: true, skipEmptyLines: true }).data;
+  } catch (error) {
+    console.log(`Error reading CSV file: ${error}`);
+    return [];
+  }
+}
+
 /**
  * Function to read the CSV file specified by the filename parameter.
  * @param {} filename
@@ -52,6 +69,15 @@ export const serviceOwners = new SharedArray('serviceOwners', function () {
 export const endUsers = new SharedArray('endUsers', function () {
   return readCsv(filenameEndusers);
 });
+
+/**
+ * Reads the enduser data from github raw CSV file.
+ * @returns {Array} endUsers - Array of end users read from CSV file.
+ */
+export function getParties(){
+  const res = http.get(`https://raw.githubusercontent.com/Altinn/dialogporten/refs/heads/main/tests/k6/tests/performancetest_data/parties-${__ENV.API_ENVIRONMENT}.csv`);
+  return parseCsvData(res.body);
+}
 
 export const dialogsWithTransmissions = new SharedArray('dialogsWithTransmissions', function () {
   return readCsv(filenameDialogsWithTransmissions);

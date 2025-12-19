@@ -44,7 +44,7 @@ public class DialogApplication : IAsyncLifetime
     internal static TestClock Clock { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16.9")
+        .WithImage("postgres:16.10")
         .Build();
 
     public async Task InitializeAsync()
@@ -178,7 +178,8 @@ public class DialogApplication : IAsyncLifetime
                 FeatureToggle = new FeatureToggle
                 {
                     UseOptimizedEndUserDialogSearch = true,
-                    UseOptimizedServiceOwnerDialogSearch = true
+                    UseOptimizedServiceOwnerDialogSearch = true,
+                    UseAltinnAutoAuthorizedPartiesQueryParameters = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

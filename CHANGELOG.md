@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.97.1](https://github.com/Altinn/dialogporten/compare/v1.97.0...v1.97.1) (2025-12-21)
+
+
+### Bug Fixes
+
+* **perf:** Minor optimizations in caching memory locker and UUID generation, cleaning and consolidation of packages ([#3167](https://github.com/Altinn/dialogporten/issues/3167)) ([5265302](https://github.com/Altinn/dialogporten/commit/526530228c16d6c1f05bb14b00101694f3720d80))
+
+
+### Miscellaneous Chores
+
+* **deps:** Top-level dependency for AsyncKeyedLock ([#3173](https://github.com/Altinn/dialogporten/issues/3173)) ([0cd5fb9](https://github.com/Altinn/dialogporten/commit/0cd5fb90f6dbad86961c5d186c0d7feb8555677b))
+* **deps:** Update DeterministicGuids package version to 1.0.7 ([#3175](https://github.com/Altinn/dialogporten/issues/3175)) ([82d77bd](https://github.com/Altinn/dialogporten/commit/82d77bde5691dd025194814c22f18838e2d934a1))
+* **deps:** update grafana/loki docker tag to v3.6.3 ([#3181](https://github.com/Altinn/dialogporten/issues/3181)) ([1b9b9cf](https://github.com/Altinn/dialogporten/commit/1b9b9cf1768664d07f797009cab7b9750580dbb9))
+* **deps:** update nginx docker tag to v1.29.4 ([#3182](https://github.com/Altinn/dialogporten/issues/3182)) ([1c799ee](https://github.com/Altinn/dialogporten/commit/1c799ee5264a1c89db428edbc15698fad50bce6f))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.141.0 ([#3169](https://github.com/Altinn/dialogporten/issues/3169)) ([895cede](https://github.com/Altinn/dialogporten/commit/895cede47cdc160c54b0867f9b3a729916ad7f17))
+* **deps:** update postgres docker tag to v16.10 ([#3170](https://github.com/Altinn/dialogporten/issues/3170)) ([4411262](https://github.com/Altinn/dialogporten/commit/44112621951da89c470f3ee39182bc1de791d14f))
+* **performance:** fix serviceowner tests ([#3176](https://github.com/Altinn/dialogporten/issues/3176)) ([e423c76](https://github.com/Altinn/dialogporten/commit/e423c7669b9f0431d7ef9a91a8325ee9808f4502))
+
 ## [1.97.0](https://github.com/Altinn/dialogporten/compare/v1.96.0...v1.97.0) (2025-12-16)
 
 

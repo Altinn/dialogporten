@@ -3,7 +3,8 @@ using HotChocolate.Authorization;
 using Constants = Digdir.Domain.Dialogporten.Infrastructure.GraphQL.GraphQlSubscriptionConstants;
 
 // ReSharper disable ClassNeverInstantiated.Global
-#pragma warning disable CA2264
+// ReSharper disable once EntityNameCapturedOnly.Global
+#pragma warning disable IDE0060
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 
@@ -14,11 +15,5 @@ public sealed class Subscriptions
     [GraphQLDescription("Requires a dialog token in the 'Authorization' header.")]
     [Topic($"{Constants.DialogEventsTopic}{{{nameof(dialogId)}}}")]
     public DialogEventPayload DialogEvents(Guid dialogId,
-        [EventMessage] DialogEventPayload eventMessage)
-    {
-        ArgumentNullException.ThrowIfNull(dialogId);
-        ArgumentNullException.ThrowIfNull(eventMessage);
-
-        return eventMessage;
-    }
+        [EventMessage] DialogEventPayload eventMessage) => eventMessage;
 }

@@ -1,28 +1,24 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
+using System.Linq;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetTransnission;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using FastEndpoints;
 using MediatR;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
-using IMapper = AutoMapper.IMapper;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 
 public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissionRequest>
 {
-    private readonly IMapper _mapper;
     private readonly ISender _sender;
 
-    public CreateDialogTransmissionEndpoint(ISender sender, IMapper mapper)
+    public CreateDialogTransmissionEndpoint(ISender sender)
     {
         _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-        _mapper = mapper;
     }
 
     public override void Configure()
@@ -42,41 +38,23 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
 
     public override async Task HandleAsync(CreateTransmissionRequest req, CancellationToken ct)
     {
-        var dialogQueryResult = await _sender.Send(new GetDialogQuery { DialogId = req.DialogId }, ct);
-        if (!dialogQueryResult.TryPickT0(out var dialog, out var errors))
+        var command = new CreateTransmissionCommand
         {
-            await errors.Match(
-                notFound => this.NotFoundAsync(notFound, cancellationToken: ct),
-                validationError => this.BadRequestAsync(validationError, ct));
-            return;
-        }
-
-        // Remove all existing transmissions, since this list is append only and
-        // existing transmissions should not be considered in the new update request.
-        dialog.Transmissions.Clear();
-
-        var updateDialogDto = _mapper.Map<UpdateDialogDto>(dialog);
-
-        req.Id = req.Id.CreateVersion7IfDefault();
-
-        updateDialogDto.Transmissions.Add(req);
-
-        var updateDialogCommand = new UpdateDialogCommand
-        {
-            Id = req.DialogId,
+            DialogId = req.DialogId,
             IfMatchDialogRevision = req.IfMatchDialogRevision,
-            Dto = updateDialogDto,
             IsSilentUpdate = req.IsSilentUpdate ?? false,
+            Transmissions = [req]
         };
 
-        var result = await _sender.Send(updateDialogCommand, ct);
+        var result = await _sender.Send(command, ct);
 
         await result.Match(
             success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
+                var transmissionId = success.TransmissionIds.First();
                 return SendCreatedAtAsync<GetDialogTransmissionEndpoint>(
-                    new GetTransmissionQuery { DialogId = dialog.Id, TransmissionId = req.Id.Value }, req.Id,
+                    new GetTransmissionQuery { DialogId = req.DialogId, TransmissionId = transmissionId }, transmissionId,
                     cancellation: ct);
             },
             notFound => this.NotFoundAsync(notFound, ct),

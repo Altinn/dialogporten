@@ -15,6 +15,8 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureToggle;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchNew;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SearchDialogQueryEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
@@ -72,6 +74,8 @@ public static class ApplicationExtensions
             .AddTransient<IUserRegistry, UserRegistry>()
             .AddTransient<IUserParties, UserParties>()
             .AddTransient<IClock, Clock>()
+            .AddTransient<IDialogTransmissionAppender, DialogTransmissionAppender>()
+            .AddTransient<ITransmissionHierarchyValidator, TransmissionHierarchyValidator>()
             .AddTransient<IApplicationFeatureToggle<SearchDialogQueryEu, SearchDialogResultEu>, OptimizedEndUserDialogSearchFeatureToggle>()
             .AddTransient<IApplicationFeatureToggle<SearchDialogQuerySo, SearchDialogResultSo>, OptimizedServiceOwnerDialogSearchFeatureToggle>()
             .AddDataLoaders()

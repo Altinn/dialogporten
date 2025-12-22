@@ -25,7 +25,7 @@ public static class IdentifierMasker
 
         var hashBytes = SHA256.HashData(buffer);
 
-        return BitConverter.ToString(hashBytes, 0, StringLength / 2).Replace("-", "").ToLowerInvariant();
+        return Convert.ToHexStringLower(hashBytes, 0, StringLength / 2);
     }
 
     public static string? GetMaybeMaskedIdentifier(string? identifier) =>

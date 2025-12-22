@@ -22,8 +22,8 @@ public class NotificationConditionTests(DialogApplication application) : Applica
 
     public static IEnumerable<object[]> NotificationConditionTestData() =>
         from bool expectedSendNotificationValue in ExpectedSendNotificationsValues
-        from DialogActivityType.Values activityType in Enum.GetValues(typeof(DialogActivityType.Values))
-        from NotificationConditionType conditionType in Enum.GetValues(typeof(NotificationConditionType))
+        from DialogActivityType.Values activityType in Enum.GetValues<DialogActivityType.Values>()
+        from NotificationConditionType conditionType in Enum.GetValues<NotificationConditionType>()
         select new object[] { activityType, conditionType, expectedSendNotificationValue };
 
     [Theory, MemberData(nameof(NotificationConditionTestData))]
@@ -84,8 +84,7 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         public TransmissionNotificationConditionTestData()
         {
             var invalidActivityTypes = Enum
-                .GetValues(typeof(DialogActivityType.Values))
-                .Cast<DialogActivityType.Values>()
+                .GetValues<DialogActivityType.Values>()
                 .Where(x => x != DialogActivityType.Values.TransmissionOpened);
 
             foreach (var activityType in invalidActivityTypes)

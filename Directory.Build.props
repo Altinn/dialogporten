@@ -12,7 +12,7 @@
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <AnalysisMode>Recommended</AnalysisMode>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
-        <AnalysisLevel>8</AnalysisLevel>
+        <AnalysisLevel>9</AnalysisLevel>
     </PropertyGroup>
 
 </Project>

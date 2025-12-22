@@ -3,6 +3,7 @@ using HotChocolate.Authorization;
 using Constants = Digdir.Domain.Dialogporten.Infrastructure.GraphQL.GraphQlSubscriptionConstants;
 
 // ReSharper disable ClassNeverInstantiated.Global
+#pragma warning disable CA2264
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 

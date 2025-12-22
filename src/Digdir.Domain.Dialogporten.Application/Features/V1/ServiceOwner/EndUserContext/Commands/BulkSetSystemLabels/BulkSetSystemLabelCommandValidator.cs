@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using FluentValidation;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.ValidationErrorStrings;
@@ -9,9 +10,19 @@ internal sealed class BulkSetSystemLabelCommandValidator : AbstractValidator<Bul
 {
     public BulkSetSystemLabelCommandValidator(IValidator<BulkSetSystemLabelDto> dtoValidator)
     {
-        RuleFor(x => x.EndUserId)
-            .NotEmpty()
-            .WithMessage("EnduserId is required");
+        When(x => x.Dto?.PerformedBy is null, () =>
+        {
+            RuleFor(x => x.EndUserId)
+                .NotEmpty()
+                .WithMessage("EnduserId is required");
+        });
+
+        When(x => x.Dto?.PerformedBy is not null, () =>
+        {
+            RuleFor(x => x.EndUserId)
+                .Empty()
+                .WithMessage("EnduserId must be omitted when performedBy is supplied.");
+        });
 
         RuleFor(x => x.Dto)
             .NotNull()
@@ -23,7 +34,7 @@ internal sealed class BulkSetSystemLabelDtoValidator : AbstractValidator<BulkSet
 {
     private const int MaxDialogsPerRequest = 200;
 
-    public BulkSetSystemLabelDtoValidator()
+    public BulkSetSystemLabelDtoValidator(IValidator<ActorDto> actorValidator)
     {
         RuleFor(x => x.Dialogs)
             .NotNull()
@@ -38,5 +49,11 @@ internal sealed class BulkSetSystemLabelDtoValidator : AbstractValidator<BulkSet
         RuleForEach(x => x.RemoveLabels)
             .Must(label => label != SystemLabel.Values.Sent)
             .WithMessage(SentLabelNotAllowed);
+
+        When(x => x.PerformedBy is not null, () =>
+        {
+            RuleFor(x => x.PerformedBy!)
+                .SetValidator(actorValidator);
+        });
     }
 }

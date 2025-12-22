@@ -2,8 +2,12 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -12,7 +16,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUse
 
 public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
-    public string EndUserId { get; set; } = null!; // See ServiceOwnerOnBehalfOfPersonMiddleware
+    public string? EndUserId { get; set; } // See ServiceOwnerOnBehalfOfPersonMiddleware
     public BulkSetSystemLabelDto Dto { get; set; } = new();
 }
 
@@ -26,17 +30,20 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
     private readonly IDialogDbContext _db;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
+    private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
     public BulkSetSystemLabelCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
         IUserRegistry userRegistry,
+        IUserResourceRegistry userResourceRegistry,
         IAltinnAuthorization altinnAuthorization)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
@@ -58,14 +65,18 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new Forbidden().WithInvalidDialogIds(missing);
         }
 
-        var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
+        var (performedBy, forbidden) = await TryCreatePerformedByActor(request, cancellationToken);
+        if (forbidden is not null)
+        {
+            return forbidden;
+        }
 
         foreach (var dialog in dialogs)
         {
             dialog.EndUserContext.UpdateSystemLabels(
                 request.Dto.AddLabels,
                 request.Dto.RemoveLabels,
-                userInfo.UserId.ExternalIdWithPrefix);
+                performedBy!);
 
             _unitOfWork.EnableConcurrencyCheck(dialog.EndUserContext, request.Dto.Dialogs.Single(x => x.DialogId == dialog.Id).EndUserContextRevision);
         }
@@ -75,5 +86,27 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             _ => new BulkSetSystemLabelSuccess(),
             domainError => domainError,
             concurrencyError => concurrencyError);
+    }
+
+    private async Task<(LabelAssignmentLogActor? Actor, Forbidden? Error)> TryCreatePerformedByActor(
+        BulkSetSystemLabelCommand request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Dto.PerformedBy is not null)
+        {
+            if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+            {
+                return (null, new Forbidden("performedBy is only allowed for admin-integrations."));
+            }
+
+            var actor = LabelAssignmentLogActorFactory.Create(
+                request.Dto.PerformedBy.ActorType,
+                request.Dto.PerformedBy.ActorId,
+                request.Dto.PerformedBy.ActorName);
+            return (actor, null);
+        }
+
+        var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
+        return (LabelAssignmentLogActorFactory.FromUserInformation(userInfo), null);
     }
 }

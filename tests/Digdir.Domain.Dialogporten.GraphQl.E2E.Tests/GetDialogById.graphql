@@ -1,0 +1,216 @@
+query GetDialogById($dialogId: UUID!) {
+  dialogById(dialogId: $dialogId) {
+    dialog {
+      id
+      dialogToken
+      activities {
+        createdAt
+        extendedType
+        id
+        transmissionId
+        type
+        description {
+          languageCode
+          value
+        }
+        performedBy {
+          actorId
+          actorName
+          actorType
+        }
+      }
+      apiActions {
+        action
+        authorizationAttribute
+        id
+        isAuthorized
+        name
+        endpoints {
+          deprecated
+          documentationUrl
+          httpMethod
+          id
+          requestSchema
+          responseSchema
+          sunsetAt
+          url
+          version
+        }
+      }
+      attachments {
+        expiresAt
+        id
+        displayName {
+          languageCode
+          value
+        }
+        urls {
+          consumerType
+          id
+          mediaType
+          url
+        }
+      }
+      content {
+        additionalInfo {
+          mediaType
+        }
+        extendedStatus {
+          mediaType
+        }
+        mainContentReference {
+          mediaType
+          value {
+            languageCode
+            value
+          }
+        }
+        senderName {
+          mediaType
+        }
+        summary {
+          mediaType
+          value {
+            languageCode
+            value
+          }
+        }
+        title {
+          mediaType
+          value {
+            languageCode
+            value
+          }
+        }
+      }
+      contentUpdatedAt
+      createdAt
+      dueAt
+      endUserContext {
+        revision
+        systemLabels
+      }
+      expiresAt
+      extendedStatus
+      fromPartyTransmissionsCount
+      externalReference
+      fromServiceOwnerTransmissionsCount
+      guiActions {
+        action
+        authorizationAttribute
+        httpMethod
+        id
+        isAuthorized
+        isDeleteDialogAction
+        priority
+        url
+      }
+      hasUnopenedContent
+      isApiOnly
+      org
+      party
+      precedingProcess
+      process
+      progress
+      revision
+      seenSinceLastContentUpdate {
+        id
+        isCurrentEndUser
+        isViaServiceOwner
+        seenAt
+        seenBy {
+          actorId
+          actorName
+          actorType
+        }
+      }
+      seenSinceLastUpdate {
+        id
+        isCurrentEndUser
+        isViaServiceOwner
+        seenAt
+        seenBy {
+          actorId
+          actorName
+          actorType
+        }
+      }
+      serviceResource
+      serviceResourceType
+      status
+      transmissions {
+        authorizationAttribute
+        createdAt
+        extendedType
+        externalReference
+        id
+        isAuthorized
+        isOpened
+        relatedTransmissionId
+        type
+        attachments {
+          expiresAt
+          id
+          displayName {
+            languageCode
+            value
+          }
+          urls {
+            consumerType
+            id
+            mediaType
+            url
+          }
+        }
+        content {
+          contentReference {
+            mediaType
+            value {
+              languageCode
+              value
+            }
+          }
+          summary {
+            mediaType
+            value {
+              languageCode
+              value
+            }
+          }
+          title {
+            mediaType
+            value {
+              languageCode
+              value
+            }
+          }
+        }
+        sender {
+          actorId
+          actorName
+          actorType
+        }
+      }
+      updatedAt
+    }
+    errors {
+      message
+      ... on DialogByIdDeleted {
+        message
+      }
+      ... on DialogByIdForbidden {
+        message
+      }
+      ... on DialogByIdForbiddenAuthLevelTooLow {
+        message
+      }
+      ... on DialogByIdNotFound {
+        message
+      }
+      ... on DialogByIdNotVisible {
+        message
+        visibleFrom
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "../../docs/schema/V1/schema.verified.graphql",
+  "documents": "**/*.graphql",
+  "extensions": {
+    "strawberryShake": {
+      "name": "DialogportenGraphQlTestClient",
+      "url": "http://localhost:5181/graphql/",
+      "records": {
+        "inputs": false,
+        "entities": false
+      },
+      "transportProfiles": [
+        {
+          "default": "Http",
+          "subscription": "WebSocket"
+        }
+      ]
+    }
+  }
+}

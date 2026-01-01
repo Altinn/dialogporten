@@ -16,7 +16,6 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -34,37 +33,40 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
     private sealed class CreateDialogWithSpecifiedDialogIdTestData : TheoryData<string, Guid, Type>
     {
+        public static DateTimeOffset FixedUtcNow => new(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
+
         public CreateDialogWithSpecifiedDialogIdTestData()
         {
             Add("Validations for UUIDv4 format",
-                Guid.NewGuid(),
-                typeof(ValidationError));
+            Guid.NewGuid(),
+            typeof(ValidationError));
 
             Add("Validations for UUIDv7 format, big endian",
-                Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
-                typeof(ValidationError));
+            Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
+            typeof(ValidationError));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(1)),
-                typeof(CreateDialogSuccess));
+            IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(1)),
+            typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(14)),
-                typeof(CreateDialogSuccess));
+            IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(14)),
+            typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(16)),
-                typeof(ValidationError));
+            IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(36)),
+            typeof(ValidationError));
 
             Add("Can create a dialog with a valid UUIDv7 format",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(-1)),
-                typeof(CreateDialogSuccess));
+            IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(-1)),
+            typeof(CreateDialogSuccess));
         }
     }
 
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedDialogIdTestData))]
     public Task Create_Dialog_With_Specified_DialogId_Tests(string _, Guid guidInput, Type assertType) =>
         FlowBuilder.For(Application)
+            .OverrideUtc(CreateDialogWithSpecifiedDialogIdTestData.FixedUtcNow)
             .CreateSimpleDialog(x => x.Dto.Id = guidInput)
             .ExecuteAndAssert(assertType);
 

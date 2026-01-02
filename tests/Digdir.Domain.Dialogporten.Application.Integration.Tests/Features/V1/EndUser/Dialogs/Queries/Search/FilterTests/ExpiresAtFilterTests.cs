@@ -21,7 +21,9 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
         var createDialogCommands = dataSet
             .Select(CreateDialogCommand)
             .ToArray();
+
         var creationTime = createDialogCommands.Max(x => x.Dto.CreatedAt)!.Value;
+
         await FlowBuilder.For(Application)
             .OverrideUtc(creationTime)
             .CreateDialogs(createDialogCommands)
@@ -54,7 +56,7 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
         {
             var dialogDataSet = Enumerable.Range(0, 10)
                 .Select(i => new DialogData(
-                    Id: Tests.Common.Common.NewUuidV7(),
+                    Id: Tests.Common.Common.NewUuidV7(Jan1.AddDays(i)),
                     Reference: i.ToString(CultureInfo.InvariantCulture),
                     CreatedAt: Jan1.AddDays(i),
                     ExpiresAt: Feb1.AddDays(i)))

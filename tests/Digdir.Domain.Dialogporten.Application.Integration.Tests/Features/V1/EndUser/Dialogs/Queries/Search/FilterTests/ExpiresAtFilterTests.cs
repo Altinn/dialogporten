@@ -21,7 +21,9 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
         var createDialogCommands = dataSet
             .Select(CreateDialogCommand)
             .ToArray();
+
         var creationTime = createDialogCommands.Max(x => x.Dto.CreatedAt)!.Value;
+
         await FlowBuilder.For(Application)
             .OverrideUtc(creationTime)
             .CreateDialogs(createDialogCommands)
@@ -33,17 +35,17 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
                 .BeEquivalentTo(expectedReferences));
     }
 
-    private static CreateDialogCommand CreateDialogCommand(DialogData data) =>
-        DialogGenerator.GenerateFakeCreateDialogCommand(
-            id: data.Id,
-            party: Tests.Common.Common.Party,
-            externalReference: data.Reference,
-            createdAt: data.CreatedAt,
-            updatedAt: data.CreatedAt,
-            expiresAt: data.ExpiresAt,
-            dueAt: data.ExpiresAt.AddDays(-1),
-            activities: [],
-            transmissions: []);
+    private static CreateDialogCommand CreateDialogCommand(DialogData data)
+    {
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(data.Id);
+        createDialogCommand.Dto.Party = Tests.Common.Common.Party;
+        createDialogCommand.Dto.ExternalReference = data.Reference;
+        createDialogCommand.Dto.CreatedAt = data.CreatedAt;
+        createDialogCommand.Dto.UpdatedAt = data.CreatedAt;
+        createDialogCommand.Dto.ExpiresAt = data.ExpiresAt;
+        createDialogCommand.Dto.DueAt = data.ExpiresAt.AddDays(-1);
+        return createDialogCommand;
+    }
 
     private sealed class DataSet : TheoryData<List<DialogData>, DateTimeOffset, List<string>>
     {
@@ -54,7 +56,7 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
         {
             var dialogDataSet = Enumerable.Range(0, 10)
                 .Select(i => new DialogData(
-                    Id: Tests.Common.Common.NewUuidV7(),
+                    Id: Tests.Common.Common.NewUuidV7(Jan1.AddDays(i)),
                     Reference: i.ToString(CultureInfo.InvariantCulture),
                     CreatedAt: Jan1.AddDays(i),
                     ExpiresAt: Feb1.AddDays(i)))

@@ -35,17 +35,17 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
                 .BeEquivalentTo(expectedReferences));
     }
 
-    private static CreateDialogCommand CreateDialogCommand(DialogData data) =>
-        DialogGenerator.GenerateFakeCreateDialogCommand(
-            id: data.Id,
-            party: Tests.Common.Common.Party,
-            externalReference: data.Reference,
-            createdAt: data.CreatedAt,
-            updatedAt: data.CreatedAt,
-            expiresAt: data.ExpiresAt,
-            dueAt: data.ExpiresAt.AddDays(-1),
-            activities: [],
-            transmissions: []);
+    private static CreateDialogCommand CreateDialogCommand(DialogData data)
+    {
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(data.Id);
+        createDialogCommand.Dto.Party = Tests.Common.Common.Party;
+        createDialogCommand.Dto.ExternalReference = data.Reference;
+        createDialogCommand.Dto.CreatedAt = data.CreatedAt;
+        createDialogCommand.Dto.UpdatedAt = data.CreatedAt;
+        createDialogCommand.Dto.ExpiresAt = data.ExpiresAt;
+        createDialogCommand.Dto.DueAt = data.ExpiresAt.AddDays(-1);
+        return createDialogCommand;
+    }
 
     private sealed class DataSet : TheoryData<List<DialogData>, DateTimeOffset, List<string>>
     {

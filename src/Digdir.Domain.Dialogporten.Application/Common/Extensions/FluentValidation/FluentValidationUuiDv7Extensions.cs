@@ -49,8 +49,7 @@ internal sealed class IsValidUuidV7TimestampValidator<T> : PropertyValidator<T, 
         context.MessageFormatter.AppendArgument("date", date.ToString("o"));
 
         // Allow up to 15s in the future
-        var success = date < _clock.UtcNow.AddSeconds(15);
-        return success;
+        return date < _clock.UtcNow.AddSeconds(15);
     }
 
     public override string Name { get; } = "Uuid7TimestampValidator";

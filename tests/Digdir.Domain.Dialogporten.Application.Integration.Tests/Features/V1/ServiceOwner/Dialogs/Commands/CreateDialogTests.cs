@@ -38,28 +38,28 @@ public class CreateDialogTests : ApplicationCollectionFixture
         public CreateDialogWithSpecifiedDialogIdTestData()
         {
             Add("Validations for UUIDv4 format",
-            Guid.NewGuid(),
-            typeof(ValidationError));
+                Guid.NewGuid(),
+                typeof(ValidationError));
 
             Add("Validations for UUIDv7 format, big endian",
-            Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
-            typeof(ValidationError));
+                Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
+                typeof(ValidationError));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-            IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(1)),
-            typeof(CreateDialogSuccess));
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(1)),
+                typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-            IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(14)),
-            typeof(CreateDialogSuccess));
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(14)),
+                typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-            IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(36)),
-            typeof(ValidationError));
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(16)),
+                typeof(ValidationError));
 
             Add("Can create a dialog with a valid UUIDv7 format",
-            IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(-1)),
-            typeof(CreateDialogSuccess));
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(-1)),
+                typeof(CreateDialogSuccess));
         }
     }
 

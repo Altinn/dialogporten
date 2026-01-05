@@ -201,7 +201,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     PerformedBy = new ActorDto
                     {
                         ActorType = ActorType.Values.PartyRepresentative,
-                        ActorId = "urn:altinn:organization:identifier-no:912345678"
+                        ActorId = "urn:altinn:organization:identifier-no:991825827"
                     }
                 };
             })
@@ -224,7 +224,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     PerformedBy = new ActorDto
                     {
                         ActorType = ActorType.Values.PartyRepresentative,
-                        ActorId = "urn:altinn:organization:identifier-no:912345678"
+                        ActorId = "urn:altinn:organization:identifier-no:991825827"
                     }
                 };
             })

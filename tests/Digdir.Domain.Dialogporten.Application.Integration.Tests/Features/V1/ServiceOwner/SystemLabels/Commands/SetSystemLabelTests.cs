@@ -125,7 +125,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 command.PerformedBy = new ActorDto
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
-                    ActorId = "urn:altinn:organization:identifier-no:912345678"
+                    ActorId = "urn:altinn:organization:identifier-no:991825827"
                 };
                 command.AddLabels = [SystemLabel.Values.Archive];
             })
@@ -144,7 +144,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 command.PerformedBy = new ActorDto
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
-                    ActorId = "urn:altinn:organization:identifier-no:912345678"
+                    ActorId = "urn:altinn:organization:identifier-no:991825827"
                 };
                 command.AddLabels = [SystemLabel.Values.Archive];
             })

@@ -2,12 +2,11 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -49,14 +48,34 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
 
     public async Task<BulkSetSystemLabelResult> Handle(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
     {
-        var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch([], [], cancellationToken);
+        var (performedBy, forbidden) = await TryCreatePerformedByActor(request, cancellationToken);
+        if (forbidden is not null)
+        {
+            return forbidden;
+        }
 
-        var dialogs = await _db.Dialogs
-            .PrefilterAuthorizedDialogs(authorizedResources)
-            .Include(x => x.EndUserContext)
+        List<DialogEntity> dialogs;
+
+        if (_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            dialogs = await _db.Dialogs
+                .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-            .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
-            .ToListAsync(cancellationToken);
+                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
+                .ToListAsync(cancellationToken);
+        }
+        else
+        {
+            var authorizedResources =
+                await _altinnAuthorization.GetAuthorizedResourcesForSearch([], [], cancellationToken);
+
+            dialogs = await _db.Dialogs
+                .PrefilterAuthorizedDialogs(authorizedResources)
+                .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
+                .ToListAsync(cancellationToken);
+        }
 
         if (dialogs.Count != request.Dto.Dialogs.Count)
         {
@@ -65,11 +84,6 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new Forbidden().WithInvalidDialogIds(missing);
         }
 
-        var (performedBy, forbidden) = await TryCreatePerformedByActor(request, cancellationToken);
-        if (forbidden is not null)
-        {
-            return forbidden;
-        }
 
         foreach (var dialog in dialogs)
         {

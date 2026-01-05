@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -71,16 +70,19 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
-        if (!authorizationResult.HasAccessToMainResource())
-        {
-            return new EntityNotFound<DialogEntity>(request.DialogId);
-        }
-
         var (performedBy, forbidden) = await TryCreatePerformedByActor(request, cancellationToken);
         if (forbidden is not null)
         {
             return forbidden;
+        }
+
+        if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
+            if (!authorizationResult.HasAccessToMainResource())
+            {
+                return new EntityNotFound<DialogEntity>(request.DialogId);
+            }
         }
 
         dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, performedBy!);

@@ -3,7 +3,7 @@
   "version": "1.0.11",
   "description": "GraphQl schema and OpenAPI spec for Dialogporten",
   "engines": {
-    "node": "22"
+    "node": "24"
   },
   "author": "DigDir",
   "main": "src/index.js",

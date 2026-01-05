@@ -298,8 +298,6 @@ public class DialogApplication : IAsyncLifetime
             .ToList()
             .AsReadOnly();
     }
-
-    public static void OverrideUtc(DateTimeOffset dateTimeOffset) => Clock.OverrideUtc(dateTimeOffset);
 }
 
 /// <summary>

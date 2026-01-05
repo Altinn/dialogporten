@@ -10,9 +10,11 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.EntityFrameworkCore;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.SystemLabels.Commands;
@@ -20,6 +22,8 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class SetSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
+    private const string AdminPerformedByActorId = "urn:altinn:organization:identifier-no:991825827";
+
     [Fact]
     public Task Set_Updates_System_Label() =>
         FlowBuilder.For(Application)
@@ -115,8 +119,9 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                     ValidationErrorStrings.SentLabelNotAllowed));
 
     [Fact]
-    public Task Set_Allows_PerformedBy_For_Admin() =>
-        FlowBuilder.For(Application)
+    public async Task Set_Allows_PerformedBy_For_Admin()
+    {
+        await FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ConfigureServices(x => x.Decorate<IUserResourceRegistry, AdminUserResourceRegistryDecorator>())
             .SetSystemLabelsServiceOwner(command =>
@@ -125,13 +130,16 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 command.PerformedBy = new ActorDto
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
-                    ActorId = "urn:altinn:organization:identifier-no:991825827"
+                    ActorId = AdminPerformedByActorId
                 };
                 command.AddLabels = [SystemLabel.Values.Archive];
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive));
+
+        await AssertPerformedByActorAsync();
+    }
 
     [Fact]
     public Task Set_PerformedBy_For_Non_Admin_Is_Forbidden() =>
@@ -144,13 +152,29 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 command.PerformedBy = new ActorDto
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
-                    ActorId = "urn:altinn:organization:identifier-no:991825827"
+                    ActorId = AdminPerformedByActorId
                 };
                 command.AddLabels = [SystemLabel.Values.Archive];
             })
             .ExecuteAndAssert<Forbidden>();
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
+
+    private async Task AssertPerformedByActorAsync()
+    {
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IDialogDbContext>();
+        var expectedLabelName = SystemLabel.Values.Archive.ToNamespacedName();
+
+        var log = await dbContext.LabelAssignmentLogs
+            .Include(x => x.PerformedBy)
+            .ThenInclude(x => x.ActorNameEntity)
+            .SingleAsync(x => x.Name == expectedLabelName);
+
+        log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
+        log.PerformedBy.ActorNameEntity.Should().NotBeNull();
+        log.PerformedBy.ActorNameEntity!.ActorId.Should().Be(AdminPerformedByActorId);
+    }
 }
 
 internal sealed class AdminUserResourceRegistryDecorator(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry

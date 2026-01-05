@@ -12,9 +12,10 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.EntityFrameworkCore;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 
@@ -23,6 +24,8 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class BulkSetSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
+    private const string AdminPerformedByActorId = "urn:altinn:organization:identifier-no:991825827";
+
     [Fact]
     public async Task BulkSet_Updates_System_Labels()
     {
@@ -187,8 +190,9 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     ValidationErrorStrings.SentLabelNotAllowed));
 
     [Fact]
-    public Task BulkSet_Allows_PerformedBy_For_Admin() =>
-        FlowBuilder.For(Application)
+    public async Task BulkSet_Allows_PerformedBy_For_Admin()
+    {
+        await FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ConfigureServices(x => x.Decorate<IUserResourceRegistry, AdminUserResourceRegistryDecorator>())
             .BulkSetSystemLabelServiceOwner((command, ctx) =>
@@ -201,13 +205,16 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     PerformedBy = new ActorDto
                     {
                         ActorType = ActorType.Values.PartyRepresentative,
-                        ActorId = "urn:altinn:organization:identifier-no:991825827"
+                        ActorId = AdminPerformedByActorId
                     }
                 };
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive));
+
+        await AssertPerformedByActorAsync();
+    }
 
     [Fact]
     public Task BulkSet_PerformedBy_For_Non_Admin_Is_Forbidden() =>
@@ -224,13 +231,29 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     PerformedBy = new ActorDto
                     {
                         ActorType = ActorType.Values.PartyRepresentative,
-                        ActorId = "urn:altinn:organization:identifier-no:991825827"
+                        ActorId = AdminPerformedByActorId
                     }
                 };
             })
             .ExecuteAndAssert<Forbidden>();
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
+
+    private async Task AssertPerformedByActorAsync()
+    {
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IDialogDbContext>();
+        var expectedLabelName = SystemLabel.Values.Archive.ToNamespacedName();
+
+        var log = await dbContext.LabelAssignmentLogs
+            .Include(x => x.PerformedBy)
+            .ThenInclude(x => x.ActorNameEntity)
+            .SingleAsync(x => x.Name == expectedLabelName);
+
+        log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
+        log.PerformedBy.ActorNameEntity.Should().NotBeNull();
+        log.PerformedBy.ActorNameEntity!.ActorId.Should().Be(AdminPerformedByActorId);
+    }
 
     private static void AssertOneLabelWithValue(DialogDto dialog, SystemLabel.Values value)
     {

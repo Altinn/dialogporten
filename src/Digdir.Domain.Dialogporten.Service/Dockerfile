@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0.11@sha256:5df8845a131ee13af686c2096ac2d8b1e91b537288cb5a63c5325b2df4f7d184 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0.11@sha256:f872f90df526f0282401c9be23a0b863ecd48fd452e4b413e74a5c321d2627b5 AS base
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0.307@sha256:cdb198f8fc1dfd714c798f609582dedfe397c03318b820eecbefdea06934da14 AS build

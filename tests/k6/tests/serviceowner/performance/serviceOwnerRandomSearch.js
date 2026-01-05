@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { serviceOwners, endUsers } from '../../performancetest_common/readTestdata.js';
+import { serviceOwners, endUsers, getParties } from '../../performancetest_common/readTestdata.js';
 import { randomItem, uuidv4, URL} from '../../../common/k6-utils.js';
 import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
@@ -23,8 +23,6 @@ const filter_combos = [
     {label: "search-enduser-createdafter-party-nohit", filters: ["Search", "endUserId", "createdAfter", "party"]},
 ];
 
-const orgNos = ["713431400"]
-
 export let options = {
     summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(95)', 'p(99)', 'p(99.5)', 'p(99.9)', 'count'],
     thresholds: {
@@ -37,21 +35,21 @@ for (var filter of filter_combos) {
     options.thresholds[[`http_req_failed{name:${filter.label}}`]] = ['rate<=0.0'];
 }
 
-function get_query_params() {
+function get_query_params(parties) {
     var search_params = {};
     var filter_combo = randomItem(filter_combos);
     var label = filter_combo.label
     for (var filter of filter_combo.filters) {
-        search_params[filter] = get_filter_value(filter, label)
+        search_params[filter] = get_filter_value(filter, label, parties)
     }
     return [search_params, label];
 }
 
-function get_filter_value(filter, label) {
+function get_filter_value(filter, label, parties) {
     switch (filter) {
         case "endUserId": return "urn:altinn:person:identifier-no:" +randomItem(endUsers).ssn;
         case "serviceResource": return "urn:altinn:resource:" +randomItem(resources);
-        case "party": return "urn:altinn:organization:identifier-no:" +randomItem(orgNos);
+        case "party": return "urn:altinn:organization:identifier-no:" +randomItem(parties).partyId;
         case "status": return "NotApplicable";
         case "deleted": return "Exclude";
         case "createdAfter": return new Date(Date.now() - 7*24*60*60*1000).toISOString();
@@ -61,8 +59,13 @@ function get_filter_value(filter, label) {
     }
 }
 
-export default function() {
-    const [queryParams, label] = get_query_params();
+export function setup() {
+  const parties = getParties();
+  return parties;
+}
+
+export default function(parties) {
+    const [queryParams, label] = get_query_params(parties);
     const serviceowner = serviceOwners[0];
     const traceparent = uuidv4();
     const paramsWithToken = {

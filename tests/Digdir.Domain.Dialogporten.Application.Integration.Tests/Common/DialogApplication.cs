@@ -47,7 +47,7 @@ public class DialogApplication : IAsyncLifetime
         .WithImage("postgres:16.10")
         .Build();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var config = new MapperConfiguration(cfg =>
         {
@@ -204,6 +204,7 @@ public class DialogApplication : IAsyncLifetime
 
         return applicationSettingsSubstitute;
     }
+
     private static IServiceOwnerNameRegistry CreateServiceOwnerNameRegistrySubstitute()
     {
         var organizationRegistrySubstitute = Substitute.For<IServiceOwnerNameRegistry>();
@@ -221,11 +222,12 @@ public class DialogApplication : IAsyncLifetime
 
     public IMapper GetMapper() => _mapper!;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _rootProvider.DisposeAsync();
         await _fixtureRootProvider.DisposeAsync();
         await _dbContainer.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
@@ -235,7 +237,7 @@ public class DialogApplication : IAsyncLifetime
         return await mediator.Send(request, cancellationToken);
     }
 
-    public async Task ResetState()
+    public async ValueTask ResetState()
     {
         Clock.Reset();
         _publishedEvents.Clear();

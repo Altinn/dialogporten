@@ -1,4 +1,3 @@
-using System.Linq;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;

@@ -47,46 +47,28 @@ internal sealed class TransmissionHierarchyValidator : ITransmissionHierarchyVal
         IReadOnlyCollection<DialogTransmission> newTransmissions,
         CancellationToken cancellationToken)
     {
-        if (newTransmissions.Count == 0)
-        {
-            return;
-        }
+        if (newTransmissions.Count == 0) return;
 
-        var nodes = new Dictionary<Guid, TransmissionHierarchyNode>();
+        var newIds = newTransmissions.Select(x => x.Id);
 
-        foreach (var transmission in newTransmissions)
-        {
-            nodes.TryAdd(transmission.Id, new TransmissionHierarchyNode
-            {
-                Id = transmission.Id,
-                ParentId = transmission.RelatedTransmissionId
-            });
-        }
-
-        var parentIds = newTransmissions
+        var existingParentIds = newTransmissions
             .Select(x => x.RelatedTransmissionId)
             .Where(x => x.HasValue)
             .Select(x => x!.Value)
-            .ToHashSet();
+            .Distinct()
+            .Except(newIds)
+            .ToArray();
 
-        var newIds = newTransmissions
-            .Select(x => x.Id)
-            .ToHashSet();
+        var existingNodes = existingParentIds.Length != 0
+            ? await _hierarchyRepository.GetHierarchyNodes(dialogId, existingParentIds, cancellationToken)
+            : [];
 
-        var existingParentIds = parentIds
-            .Where(x => !newIds.Contains(x))
-            .ToHashSet();
+        var nodes = newTransmissions
+            .Select(x => new TransmissionHierarchyNode(x.Id, x.RelatedTransmissionId))
+            .Concat(existingNodes)
+            .ToList();
 
-        if (existingParentIds.Count != 0)
-        {
-            var existingNodes = await _hierarchyRepository.GetHierarchyNodes(dialogId, existingParentIds, cancellationToken);
-            foreach (var node in existingNodes)
-            {
-                nodes.TryAdd(node.Id, node);
-            }
-        }
-
-        _domainContext.AddErrors(nodes.Values.ToList().ValidateReferenceHierarchy(
+        _domainContext.AddErrors(nodes.ValidateReferenceHierarchy(
             x => x.Id,
             x => x.ParentId,
             nameof(DialogEntity.Transmissions),

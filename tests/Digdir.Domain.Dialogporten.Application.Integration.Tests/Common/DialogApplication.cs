@@ -128,7 +128,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
-            .AddScoped<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
+            .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()

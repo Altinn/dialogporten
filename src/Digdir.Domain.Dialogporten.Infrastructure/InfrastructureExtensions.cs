@@ -106,12 +106,12 @@ public static class InfrastructureExtensions
             // Scoped
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddScoped<IUnitOfWork, UnitOfWork>()
-            .AddScoped<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))

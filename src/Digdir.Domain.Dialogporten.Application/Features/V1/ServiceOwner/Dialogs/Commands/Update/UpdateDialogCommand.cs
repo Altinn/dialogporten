@@ -104,6 +104,18 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         foreach (var transmission in request.Dto.Transmissions)
         {
             transmission.Id = transmission.Id.CreateVersion7IfDefault();
+
+            // Ensure transmission attachments have a UUIDv7 ID, needed to guarantee deterministic order of attachments.
+            foreach (var transmissionAttachment in transmission.Attachments)
+            {
+                transmissionAttachment.Id = transmissionAttachment.Id.CreateVersion7IfDefault();
+            }
+        }
+
+        // Ensure attachments have a UUIDv7 ID, needed to guarantee deterministic order of attachments.
+        foreach (var attachment in request.Dto.Attachments)
+        {
+            attachment.Id = attachment.Id.CreateVersion7IfDefault();
         }
 
         // Update primitive properties

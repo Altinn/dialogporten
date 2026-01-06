@@ -109,6 +109,18 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         foreach (var transmission in dialog.Transmissions)
         {
             transmission.Id = transmission.Id.CreateVersion7IfDefault();
+
+            // Ensure transmission attachments have a UUIDv7 ID, needed to guarantee deterministic order of attachments.
+            foreach (var transmissionAttachment in transmission.Attachments)
+            {
+                transmissionAttachment.Id = transmissionAttachment.Id.CreateVersion7IfDefault();
+            }
+        }
+
+        // Ensure attachments have a UUIDv7 ID, needed to guarantee deterministic order of attachments.
+        foreach (var attachment in dialog.Attachments)
+        {
+            attachment.Id = attachment.Id.CreateVersion7IfDefault();
         }
 
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);

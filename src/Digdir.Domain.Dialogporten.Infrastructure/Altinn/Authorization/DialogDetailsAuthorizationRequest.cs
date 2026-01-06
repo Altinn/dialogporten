@@ -31,7 +31,7 @@ internal static class DialogDetailsAuthorizationRequestExtensions
         var rawKey = $"{request.DialogId}||{claimsKey}|{actionsKey}";
 
         var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
-        var hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+        var hashString = Convert.ToHexStringLower(hashBytes);
 
         return $"auth:details:{hashString}";
     }

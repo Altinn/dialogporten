@@ -39,7 +39,7 @@ public class SchemaSnapshotTests
         var requestExecutor =
             await app.Services
                 .GetRequiredService<IRequestExecutorResolver>()
-                .GetRequestExecutorAsync();
+                .GetRequestExecutorAsync(null, TestContext.Current.CancellationToken);
 
         // Act
         var schema = requestExecutor.Schema.Print();

@@ -102,8 +102,6 @@ var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
 var postgresServerName = uniqueResourceName('${namePrefix}-postgres', postgresServerNameMaxLength)
 
-// Storage account names cannot contain hyphens; the `storageAccount` module already sanitizes `namePrefix`.
-// Use a suffix to avoid collisions with any other storage accounts created in the same resource group.
 var backupVaultNamePrefix = '${namePrefix}-backupvault'
 var restoreContainerName = toLower('${namePrefix}-postgresql-restore')
 

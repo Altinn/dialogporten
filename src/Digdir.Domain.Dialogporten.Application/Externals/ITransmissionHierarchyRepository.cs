@@ -10,8 +10,4 @@ public interface ITransmissionHierarchyRepository
         CancellationToken cancellationToken);
 }
 
-public sealed class TransmissionHierarchyNode
-{
-    public Guid Id { get; init; }
-    public Guid? ParentId { get; init; }
-}
+public sealed record TransmissionHierarchyNode(Guid Id, Guid? ParentId);

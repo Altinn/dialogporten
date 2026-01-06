@@ -19,7 +19,7 @@ namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceO
 public class ActivityValidatorTests
 {
     public static IEnumerable<object[]> ActivityTypes() =>
-        from DialogActivityType.Values activityType in Enum.GetValues(typeof(DialogActivityType.Values))
+        from DialogActivityType.Values activityType in Enum.GetValues<DialogActivityType.Values>()
         select new object[] { activityType, };
 
     [Theory, MemberData(nameof(ActivityTypes))]

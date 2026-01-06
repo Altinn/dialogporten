@@ -48,6 +48,9 @@ param appInsightsPurgeDataOn30Days bool = false
 @description('Whether zone redundancy should be enabled for the container app environment')
 param containerAppEnvZoneRedundancyEnabled bool
 
+@description('Whether to provision Azure Backup Vault for PostgreSQL restores.')
+param enableBackupVault bool = false
+
 @description('Workload profiles to enable in the container app environment')
 param workloadProfiles array = [
   {
@@ -238,6 +241,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     highAvailability: postgresConfiguration.?highAvailability
     backupRetentionDays: postgresConfiguration.backupRetentionDays
     availabilityZone: postgresConfiguration.availabilityZone
+    enableBackupVault: enableBackupVault
     deployerPrincipalName: deployerPrincipalName
     tags: tags
   }

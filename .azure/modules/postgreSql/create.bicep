@@ -22,6 +22,9 @@ param vnetId string
 @description('Tags to apply to resources')
 param tags object
 
+@description('Whether to provision Azure Backup Vault for PostgreSQL. (This does not create an Azure Backup vault/RSV for now.)')
+param enableBackupVault bool = false
+
 @export()
 type Sku = {
   name: 'Standard_B1ms' | 'Standard_B2s' | 'Standard_B4ms' | 'Standard_B8ms' | 'Standard_B12ms' | 'Standard_B16ms' | 'Standard_B20ms' | 'Standard_D4ads_v5' | 'Standard_D8ads_v5' | 'Standard_D16ads_v5' | 'Standard_D32ads_v5' | 'Standard_D48ads_v5' | 'Standard_D64ads_v5'
@@ -98,6 +101,32 @@ var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
 var postgresServerName = uniqueResourceName('${namePrefix}-postgres', postgresServerNameMaxLength)
+
+// Storage account names cannot contain hyphens; the `storageAccount` module already sanitizes `namePrefix`.
+// Use a suffix to avoid collisions with any other storage accounts created in the same resource group.
+var backupVaultNamePrefix = '${namePrefix}-backupvault'
+var restoreContainerName = toLower('${namePrefix}-postgresql-restore')
+
+// Note: This provisions only the storage primitives used for PostgreSQL restores. The actual Azure Backup vault/RSV is clickopsed for now.
+module backupVaultStorageAccount '../storageAccount/main.bicep' = if (enableBackupVault) {
+  name: 'backupVaultStorageAccount'
+  params: {
+    namePrefix: backupVaultNamePrefix
+    location: location
+    tags: tags
+    allowBlobPublicAccess: false
+    enableHierarchicalNamespace: false
+  }
+}
+
+module backupVaultRestoreContainer '../storageContainer/main.bicep' = if (enableBackupVault) {
+  name: 'backupVaultRestoreContainer'
+  params: {
+    storageAccountName: backupVaultStorageAccount.outputs.storageAccountName
+    containerName: restoreContainerName
+    publicAccess: 'None'
+  }
+}
 
 module saveAdmPassword '../keyvault/upsertSecret.bicep' = {
   name: 'Save_${srcKeyVaultAdministratorLoginPasswordKey}'

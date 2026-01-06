@@ -123,6 +123,8 @@ module backupVaultRestoreContainer '../storageContainer/main.bicep' = if (enable
     storageAccountName: backupVaultStorageAccount.outputs.storageAccountName
     containerName: restoreContainerName
     publicAccess: 'None'
+    enableBlobSoftDelete: true
+    blobSoftDeleteRetentionDays: 30
   }
 }
 

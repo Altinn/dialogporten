@@ -2,7 +2,6 @@ using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
-using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -17,6 +16,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
@@ -38,7 +38,7 @@ public sealed record CreateTransmissionSuccess(Guid Revision, IReadOnlyCollectio
 
 internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateTransmissionCommand, CreateTransmissionResult>
 {
-    private readonly IDataLoaderContext _dataLoaderContext;
+    private readonly IDialogDbContext _db;
     private readonly IDomainContext _domainContext;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
@@ -49,7 +49,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
     private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
 
     public CreateTransmissionCommandHandler(
-        IDataLoaderContext dataLoaderContext,
+        IDialogDbContext db,
         IDomainContext domainContext,
         IMapper mapper,
         IUnitOfWork unitOfWork,
@@ -59,7 +59,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         IDialogTransmissionAppender dialogTransmissionAppender,
         ITransmissionHierarchyValidator transmissionHierarchyValidator)
     {
-        _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
+        _db = db ?? throw new ArgumentNullException(nameof(db));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -72,7 +72,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
 
     public async Task<CreateTransmissionResult> Handle(CreateTransmissionCommand request, CancellationToken cancellationToken)
     {
-        var dialog = CreateTransmissionDataLoader.GetPreloadedData(_dataLoaderContext);
+        var dialog = await LoadDialogAsync(request.DialogId, cancellationToken);
         if (dialog is null)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
@@ -139,6 +139,23 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             success => new CreateTransmissionSuccess(dialog.Revision, newTransmissions.Select(x => x.Id).ToArray()),
             domainError => domainError,
             concurrencyError => concurrencyError);
+    }
+
+    private async Task<DialogEntity?> LoadDialogAsync(Guid dialogId, CancellationToken cancellationToken)
+    {
+        var isAdmin = _userResourceRegistry.IsCurrentUserServiceOwnerAdmin();
+        var org = string.Empty;
+        if (!isAdmin)
+        {
+            org = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+        }
+
+        return await _db.Dialogs
+            .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .IgnoreQueryFilters()
+            .WhereIf(!isAdmin, x => x.Org == org)
+            .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);
     }
 
     private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)

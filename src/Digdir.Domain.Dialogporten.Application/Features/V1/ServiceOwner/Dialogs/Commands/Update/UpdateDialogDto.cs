@@ -109,7 +109,7 @@ public sealed class UpdateDialogDto
 public sealed class TransmissionDto
 {
     /// <summary>
-    /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+    /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
     /// If not supplied, a new UUIDv7 will be generated.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
@@ -249,7 +249,7 @@ public sealed class SearchTagDto
 public class ActivityDto
 {
     /// <summary>
-    /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+    /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
     /// If not supplied, a new UUIDv7 will be generated.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>

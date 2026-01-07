@@ -9,7 +9,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 public class CreateTransmissionDto
 {
     /// <summary>
-    /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+    /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
     /// If not supplied, a new UUIDv7 will be generated.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>

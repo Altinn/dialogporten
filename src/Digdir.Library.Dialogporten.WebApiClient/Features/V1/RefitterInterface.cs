@@ -3599,7 +3599,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -3926,7 +3926,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -3978,7 +3978,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -4131,7 +4131,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]

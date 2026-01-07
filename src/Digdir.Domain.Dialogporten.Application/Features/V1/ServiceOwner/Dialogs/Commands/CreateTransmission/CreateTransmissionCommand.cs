@@ -18,7 +18,6 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using OneOf;
-using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 
@@ -26,7 +25,7 @@ public sealed class CreateTransmissionCommand : IRequest<CreateTransmissionResul
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
-    public List<TransmissionDto> Transmissions { get; set; } = [];
+    public List<CreateTransmissionDto> Transmissions { get; set; } = [];
     public bool IsSilentUpdate { get; set; }
 
     Guid IFeatureMetricServiceResourceThroughDialogIdRequest.DialogId => DialogId;

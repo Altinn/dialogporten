@@ -7,7 +7,6 @@ using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Querie
 using FastEndpoints;
 using MediatR;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
-using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 
@@ -65,7 +64,7 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
     }
 }
 
-public sealed class CreateTransmissionRequest : TransmissionDto
+public sealed class CreateTransmissionRequest : CreateTransmissionDto
 {
     public Guid DialogId { get; set; }
 

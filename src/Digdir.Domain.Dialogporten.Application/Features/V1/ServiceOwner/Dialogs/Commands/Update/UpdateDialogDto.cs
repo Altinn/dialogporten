@@ -106,7 +106,7 @@ public sealed class UpdateDialogDto
     public List<ActivityDto> Activities { get; set; } = [];
 }
 
-public class TransmissionDto
+public sealed class TransmissionDto
 {
     /// <summary>
     /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.

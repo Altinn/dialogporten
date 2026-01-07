@@ -17,8 +17,9 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
-using UpdateTransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
-using UpdateTransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionContentDto;
+using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionDto;
+using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
+using CreateTransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission.TransmissionContentDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -160,7 +161,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .SendCommand((_, ctx) =>
             {
                 var parentId = (Guid)ctx.Bag[ParentTransmissionIdKey]!;
-                var transmission = new UpdateTransmissionDto
+                var transmission = new CreateTransmissionDto
                 {
                     Id = Guid.CreateVersion7(),
                     CreatedAt = DateTimeOffset.UtcNow,
@@ -170,7 +171,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                     {
                         ActorType = Digdir.Domain.Dialogporten.Domain.Actors.ActorType.Values.ServiceOwner
                     },
-                    Content = new UpdateTransmissionContentDto
+                    Content = new CreateTransmissionContentDto
                     {
                         Title = new ContentValueDto
                         {

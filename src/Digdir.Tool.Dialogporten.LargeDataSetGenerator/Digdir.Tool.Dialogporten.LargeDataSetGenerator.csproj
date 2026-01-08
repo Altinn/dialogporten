@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="UUIDNext" Version="4.2.2"/>
+        <PackageReference Include="DeterministicGuids" Version="1.0.7" />
         <PackageReference Include="Npgsql" Version="9.0.4"/>
     </ItemGroup>
 

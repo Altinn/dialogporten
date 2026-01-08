@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.Authorization.ABAC.Xacml.JsonProfile;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -15,6 +16,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
@@ -32,6 +34,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     private readonly IDialogDbContext _db;
     private readonly ILogger _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IOptionsMonitor<ApplicationSettings> _applicationSettings;
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -45,7 +48,8 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         IUser user,
         IDialogDbContext db,
         ILogger<AltinnAuthorizationClient> logger,
-        IServiceScopeFactory serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory,
+        IOptionsMonitor<ApplicationSettings> applicationSettings)
     {
         _httpClient = client ?? throw new ArgumentNullException(nameof(client));
         _pdpCache = cacheProvider.GetCache(nameof(Authorization)) ?? throw new ArgumentNullException(nameof(cacheProvider));
@@ -55,6 +59,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+        _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
     }
 
     public async Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
@@ -346,9 +351,14 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         await SendRequest<List<AuthorizedPartiesResultDto>>(
             BuildAuthorizedPartiesUrl(authorizedPartiesRequest), authorizedPartiesRequest, cancellationToken);
 
-    private static string BuildAuthorizedPartiesUrl(AuthorizedPartiesRequest request)
+    private string BuildAuthorizedPartiesUrl(AuthorizedPartiesRequest request)
     {
-        return $"{AuthorizedPartiesBaseUrl}?includeAltinn2=true" +
+        var featureToggle = _applicationSettings.CurrentValue.FeatureToggle;
+        var autoQueryParams = featureToggle.UseAltinnAutoAuthorizedPartiesQueryParameters
+            ? "&includePartiesViaKeyRoles=auto&includeSubParties=auto&includeInactiveParties=auto"
+            : string.Empty;
+
+        return $"{AuthorizedPartiesBaseUrl}?includeAltinn2=true{autoQueryParams}" +
                $"&includeAccessPackages={(request.IncludeAccessPackages ? "true" : "false")}" +
                $"&includeRoles={(request.IncludeRoles ? "true" : "false")}" +
                $"&includeResources={(request.IncludeResources ? "true" : "false")}" +

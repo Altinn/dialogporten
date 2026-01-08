@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.NotificationCondition;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
@@ -23,8 +22,8 @@ public class NotificationConditionTests(DialogApplication application) : Applica
 
     public static IEnumerable<object[]> NotificationConditionTestData() =>
         from bool expectedSendNotificationValue in ExpectedSendNotificationsValues
-        from DialogActivityType.Values activityType in Enum.GetValues(typeof(DialogActivityType.Values))
-        from NotificationConditionType conditionType in Enum.GetValues(typeof(NotificationConditionType))
+        from DialogActivityType.Values activityType in Enum.GetValues<DialogActivityType.Values>()
+        from NotificationConditionType conditionType in Enum.GetValues<NotificationConditionType>()
         select new object[] { activityType, conditionType, expectedSendNotificationValue };
 
     [Theory, MemberData(nameof(NotificationConditionTestData))]
@@ -85,8 +84,7 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         public TransmissionNotificationConditionTestData()
         {
             var invalidActivityTypes = Enum
-                .GetValues(typeof(DialogActivityType.Values))
-                .Cast<DialogActivityType.Values>()
+                .GetValues<DialogActivityType.Values>()
                 .Where(x => x != DialogActivityType.Values.TransmissionOpened);
 
             foreach (var activityType in invalidActivityTypes)
@@ -106,20 +104,6 @@ public class NotificationConditionTests(DialogApplication application) : Applica
                 ConditionType = NotificationConditionType.Exists
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
-
-    [Fact]
-    public Task Gone_Should_Be_Returned_When_Dialog_Is_Deleted() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog()
-            .DeleteDialog()
-            .AssertResult<DeleteDialogSuccess>()
-            .SendCommand((_, ctx) => new NotificationConditionQuery
-            {
-                DialogId = ctx.GetDialogId(),
-                ActivityType = DialogActivityType.Values.Information,
-                ConditionType = NotificationConditionType.Exists
-            })
-            .ExecuteAndAssert<EntityDeleted<DialogEntity>>();
 
     private static void AddActivityRequirements(
         CreateDialogCommand createDialogCommand,

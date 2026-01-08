@@ -25,7 +25,9 @@ public class TokenIssuerCacheTests
 
         // Act
         var allTasks = Task.WhenAll(tasks);
-        var completed = await Task.WhenAny(allTasks, Task.Delay(TimeSpan.FromSeconds(1)));
+        var completed = await Task.WhenAny(allTasks,
+            Task.Delay(TimeSpan.FromSeconds(1),
+                TestContext.Current.CancellationToken));
 
         // Assert
         Assert.Same(allTasks, completed);

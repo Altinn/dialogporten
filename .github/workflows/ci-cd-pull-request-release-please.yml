@@ -137,7 +137,7 @@ jobs:
         id: slackify
         uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1
         with:
-          text: ${{ env.PR_BODY }}
+          text: $PR_BODY
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
 

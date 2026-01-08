@@ -1253,6 +1253,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
+        /// <summary>
+        /// Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.
+        /// </summary>
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -1273,6 +1279,43 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Sent")]
         Sent = 4,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerCommonActors_Actor
+    {
+
+        /// <summary>
+        /// The type of actor; either the service owner, or someone representing the party.
+        /// </summary>
+        [JsonPropertyName("actorType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
+        public Actors_ActorType ActorType { get; set; }
+
+        /// <summary>
+        /// The name of the actor.
+        /// </summary>
+        [JsonPropertyName("actorName")]
+        public string ActorName { get; set; }
+
+        /// <summary>
+        /// The identifier (national identity number or organization number) of the actor.
+        /// </summary>
+        [JsonPropertyName("actorId")]
+        public string ActorId { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Actors_ActorType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
+        PartyRepresentative = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
+        ServiceOwner = 1,
 
     }
 
@@ -1307,6 +1350,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("removeLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
+
+        /// <summary>
+        /// Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.
+        /// </summary>
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
 
     }
 
@@ -1428,43 +1477,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Correction")]
         Correction = 7,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerCommonActors_Actor
-    {
-
-        /// <summary>
-        /// The type of actor; either the service owner, or someone representing the party.
-        /// </summary>
-        [JsonPropertyName("actorType")]
-        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
-        public Actors_ActorType ActorType { get; set; }
-
-        /// <summary>
-        /// The name of the actor.
-        /// </summary>
-        [JsonPropertyName("actorName")]
-        public string ActorName { get; set; }
-
-        /// <summary>
-        /// The identifier (national identity number or organization number) of the actor.
-        /// </summary>
-        [JsonPropertyName("actorId")]
-        public string ActorId { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Actors_ActorType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
-        PartyRepresentative = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
-        ServiceOwner = 1,
 
     }
 

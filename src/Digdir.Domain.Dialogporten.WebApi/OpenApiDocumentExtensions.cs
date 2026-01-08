@@ -75,7 +75,7 @@ public static class OpenApiDocumentExtensions
             {
                 response.Headers[headerName] = new OpenApiHeader
                 {
-                    Description = "Delay before retrying the request.",
+                    Description = "Delay before retrying the request. Datetime format RFC1123",
                     IsNullableRaw = true,
                     Schema = new JsonSchema
                     {

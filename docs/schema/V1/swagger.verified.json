@@ -5792,7 +5792,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -5834,7 +5834,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6137,7 +6137,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6225,7 +6225,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6316,7 +6316,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6413,7 +6413,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6495,7 +6495,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6628,7 +6628,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6707,7 +6707,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6792,7 +6792,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6886,7 +6886,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -6986,7 +6986,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -7075,7 +7075,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -7133,7 +7133,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -7473,7 +7473,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -7574,7 +7574,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -7684,7 +7684,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -7767,7 +7767,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -7910,7 +7910,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8039,7 +8039,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8149,7 +8149,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8237,7 +8237,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8325,7 +8325,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8424,7 +8424,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8503,7 +8503,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8645,7 +8645,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8733,7 +8733,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8802,7 +8802,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -8908,7 +8908,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -9013,7 +9013,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -9154,7 +9154,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -9236,7 +9236,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -9324,7 +9324,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -9406,7 +9406,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -9548,7 +9548,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -9636,7 +9636,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"
@@ -9735,7 +9735,7 @@
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
-                "description": "Delay before retrying the request.",
+                "description": "Delay before retrying the request. Datetime format RFC1123",
                 "nullable": true,
                 "schema": {
                   "type": "string"

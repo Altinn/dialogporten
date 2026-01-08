@@ -221,6 +221,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json")]
@@ -260,6 +264,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
@@ -295,6 +303,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>412</term>
         /// <description>A server side error occurred.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -348,6 +360,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
@@ -388,6 +404,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
@@ -423,6 +443,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -480,6 +504,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
@@ -516,6 +544,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
@@ -547,6 +579,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -604,6 +640,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
@@ -634,6 +674,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>401</term>
         /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -683,6 +727,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
@@ -711,6 +759,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>403</term>
         /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -748,6 +800,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
@@ -783,6 +839,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -820,6 +880,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/json, application/problem+json")]
@@ -856,6 +920,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -909,6 +977,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/problem+json", "Content-Type: application/json")]
@@ -959,6 +1031,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -1013,6 +1089,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
+        /// </item>
         /// </list>
         /// </returns>
         [Headers("Accept: application/json", "Content-Type: application/json")]
@@ -1048,6 +1128,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -1088,6 +1172,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -1135,6 +1223,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable</description>
         /// </item>
         /// </list>
         /// </returns>

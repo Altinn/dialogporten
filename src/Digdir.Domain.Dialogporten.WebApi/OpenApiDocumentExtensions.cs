@@ -43,6 +43,37 @@ public static class OpenApiDocumentExtensions
         }
     }
 
+    public static void AddServiceUnavailableResponse(this OpenApiDocument openApiDocument)
+    {
+        const string statusCode = "503";
+        const string headerName = "Retry-After";
+
+        foreach (var operation in openApiDocument.Paths.SelectMany(path => path.Value.Values))
+        {
+            if (!operation.Responses.TryGetValue(statusCode, out var response))
+            {
+                response = new OpenApiResponse
+                {
+                    Description = "Service Unavailable"
+                };
+                operation.Responses[statusCode] = response;
+            }
+
+            if (!response.Headers.ContainsKey(headerName))
+            {
+                response.Headers[headerName] = new OpenApiHeader
+                {
+                    Description = "Delay before retrying the request.",
+                    IsNullableRaw = true,
+                    Schema = new JsonSchema
+                    {
+                        Type = JsonObjectType.String
+                    }
+                };
+            }
+        }
+    }
+
     /// <summary>
     /// When generating ProblemDetails and ProblemDetails_Error, there is a bug/weird behavior in NSwag or FastEndpoints
     /// which results in certain 'Description' properties being generated when running on f.ex. MacOS,

@@ -54,8 +54,20 @@ public static class OpenApiDocumentExtensions
             {
                 response = new OpenApiResponse
                 {
-                    Description = "Service Unavailable"
+                    Description = "Service Unavailable",
+                    Content =
+                    {
+                        ["text/plain"] = new OpenApiMediaType
+                        {
+                            Schema = new JsonSchema
+                            {
+                                Type = JsonObjectType.String,
+                                Example = "Service Unavailable"
+                            }
+                        }
+                    }
                 };
+
                 operation.Responses[statusCode] = response;
             }
 

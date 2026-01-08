@@ -5781,6 +5781,14 @@
             "description": "The OAuth 2.0 Authorization Server Metadata"
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -5815,6 +5823,14 @@
             "description": "The OAuth 2.0 Authorization Server Metadata"
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6110,6 +6126,14 @@
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6190,6 +6214,14 @@
             "description": "The given dialog ID was not found."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6273,6 +6305,14 @@
             "description": "The given dialog ID was not found."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6362,6 +6402,14 @@
             "description": "The specified dialog ID or activity ID was not found."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6436,6 +6484,14 @@
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6561,6 +6617,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6632,6 +6696,14 @@
             "description": "Not Found"
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6709,6 +6781,14 @@
             "description": "Not Found"
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6795,6 +6875,14 @@
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6887,6 +6975,14 @@
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -6968,6 +7064,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -7018,6 +7122,14 @@
             "description": "Forbidden"
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -7350,6 +7462,14 @@
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.search\u0022."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -7443,6 +7563,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -7545,6 +7673,14 @@
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -7620,6 +7756,14 @@
             "description": "The given dialog ID was not found."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -7755,6 +7899,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -7876,6 +8028,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -7978,6 +8138,14 @@
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8058,6 +8226,14 @@
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8138,6 +8314,14 @@
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8229,6 +8413,14 @@
             "description": "Forbidden"
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8300,6 +8492,14 @@
             "description": "The given dialog ID was not found."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8434,6 +8634,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8514,6 +8722,14 @@
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8575,6 +8791,14 @@
             "description": "The given dialog ID was not found."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8673,6 +8897,14 @@
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8770,6 +9002,14 @@
             "description": ""
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8903,6 +9143,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -8977,6 +9225,14 @@
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -9057,6 +9313,14 @@
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -9131,6 +9395,14 @@
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -9265,6 +9537,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -9345,6 +9625,14 @@
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {
@@ -9436,6 +9724,14 @@
             "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
             "description": "Service Unavailable",
             "headers": {
               "Retry-After": {

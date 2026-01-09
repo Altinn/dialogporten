@@ -3081,7 +3081,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3247,7 +3247,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3302,7 +3302,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3817,7 +3817,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,

@@ -3611,7 +3611,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -3938,7 +3938,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -3990,7 +3990,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -4049,13 +4049,92 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The transmission unstructured text content.
         /// </summary>
         [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
+        public V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent Content { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.
         /// </summary>
         [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
+        public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment> Attachments { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent
+    {
+
+        /// <summary>
+        /// The transmission title. Must be text/plain.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public V1CommonContent_ContentValue Title { get; set; }
+
+        /// <summary>
+        /// The transmission summary.
+        /// </summary>
+        [JsonPropertyName("summary")]
+        public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
+        /// </summary>
+        [JsonPropertyName("contentReference")]
+        public V1CommonContent_ContentValue ContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment
+    {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// The display name of the attachment that should be used in GUIs.
+        /// </summary>
+        [JsonPropertyName("displayName")]
+        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
+        /// </summary>
+        [JsonPropertyName("urls")]
+        public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl> Urls { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl
+    {
+
+        /// <summary>
+        /// The fully qualified URL of the attachment.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The media type of the attachment.
+        /// </summary>
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// The type of consumer the URL is intended for.
+        /// </summary>
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
+        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
@@ -4064,7 +4143,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]

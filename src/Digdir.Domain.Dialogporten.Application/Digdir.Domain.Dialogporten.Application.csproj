@@ -29,6 +29,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Application.Integration.Tests"/>
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Application.Unit.Tests"/>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
 
 </Project>

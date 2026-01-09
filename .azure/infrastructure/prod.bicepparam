@@ -63,6 +63,7 @@ param postgresConfiguration = {
   }
   backupRetentionDays: 32
   availabilityZone: '3'
+  enableBackupVault: true
 }
 
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'

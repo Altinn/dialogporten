@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using NSubstitute;
@@ -31,6 +32,7 @@ public class CreateDialogTests
         var userSub = Substitute.For<IUser>();
         var clock = new Clock();
 
+        var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         serviceAuthorizationSub
@@ -43,7 +45,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub);
+            resourceRegistrySub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);
@@ -68,6 +70,7 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
+        var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var clock = new Clock();
 
@@ -81,7 +84,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub);
+            resourceRegistrySub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);

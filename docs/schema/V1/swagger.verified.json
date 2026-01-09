@@ -5703,6 +5703,15 @@
             "nullable": true,
             "type": "array"
           },
+          "performedBy": {
+            "description": "Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
+          },
           "removeLabels": {
             "description": "List of system labels to remove from the target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
             "items": {
@@ -5751,6 +5760,15 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "performedBy": {
+            "description": "Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
           },
           "removeLabels": {
             "description": "List of system labels to remove from target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
@@ -8544,8 +8562,8 @@
           {
             "in": "query",
             "name": "enduserId",
-            "required": true,
             "schema": {
+              "nullable": true,
               "type": "string"
             }
           },
@@ -9038,8 +9056,8 @@
           {
             "in": "query",
             "name": "enduserId",
-            "required": true,
             "schema": {
+              "nullable": true,
               "type": "string"
             }
           }

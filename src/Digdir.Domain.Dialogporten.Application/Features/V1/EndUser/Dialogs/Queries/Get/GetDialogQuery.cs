@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
@@ -151,11 +152,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             currentUserInformation.UserId.Type,
             currentUserInformation.Name);
 
+        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
+
         dialog.EndUserContext.UpdateSystemLabels(
             addLabels: [],
             removeLabels: [SystemLabel.Values.MarkedAsUnopened],
-            userId: currentUserInformation.UserId.ExternalIdWithPrefix
-        );
+            performedBy);
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()

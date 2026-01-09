@@ -275,6 +275,35 @@
         },
         "type": "object"
       },
+      "PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem": {
+        "additionalProperties": false,
+        "properties": {
+          "continuationToken": {
+            "description": "The continuation token to be used to fetch the next page of items",
+            "example": "createdat_2024-07-31T09:09:03.0257090Z,id_0c089101-b7cf-a476-955c-f00a78d74a4e",
+            "nullable": true,
+            "type": "string"
+          },
+          "hasNextPage": {
+            "description": "Whether there are more items available that can be fetched by supplying the continuation token",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "The paginated list of items",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orderBy": {
+            "description": "The current sorting order of the items",
+            "example": "createdat_desc,id_desc",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ProblemDetails": {
         "additionalProperties": false,
         "properties": {
@@ -5390,6 +5419,27 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogId": {
+            "format": "guid",
+            "type": "string"
+          },
+          "endUserContextRevision": {
+            "format": "guid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog": {
         "additionalProperties": false,
         "properties": {
@@ -8933,6 +8983,115 @@
           }
         ],
         "summary": "Gets a single dialog transmission",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/endusercontext": {
+      "get": {
+        "description": "Performs a search for dialog end user context labels, returning a paginated list of dialogs.\n\n* Party is required.\n* System labels are matched with OR semantics.\n* See \\\u0022continuationToken\\\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
+        "operationId": "V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContext",
+        "parameters": [
+          {
+            "description": "Filter by one or more owning parties",
+            "example": [
+              ""
+            ],
+            "explode": true,
+            "in": "query",
+            "name": "party",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Filter by end user id",
+            "in": "query",
+            "name": "endUserId",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by one or more system labels",
+            "explode": true,
+            "in": "query",
+            "name": "label",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
+                }
+              ]
+            }
+          },
+          {
+            "description": "Supply \u0022continuationToken\u0022 for the response to get the next page of results, if hasNextPage is true",
+            "in": "query",
+            "name": "continuationToken",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
+                }
+              ]
+            }
+          },
+          {
+            "description": "Limit the number of results per page (1-1000, default: 100)",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "nullable": true,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog list."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.search\u0022."
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Gets end user context system labels for dialogs",
         "tags": [
           "Serviceowner"
         ]

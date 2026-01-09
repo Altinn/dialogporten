@@ -29,6 +29,7 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
+        var clock = new Clock();
 
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
@@ -40,7 +41,7 @@ public class CreateDialogTests
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
-        var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
+        var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
             resourceRegistrySub, serviceAuthorizationSub);
 
@@ -68,6 +69,7 @@ public class CreateDialogTests
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var clock = new Clock();
 
         serviceAuthorizationSub
             .AuthorizeServiceResources(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
@@ -77,7 +79,7 @@ public class CreateDialogTests
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
-        var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
+        var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
             resourceRegistrySub, serviceAuthorizationSub);
 

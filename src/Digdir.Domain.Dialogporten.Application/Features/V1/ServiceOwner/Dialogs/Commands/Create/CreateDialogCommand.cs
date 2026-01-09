@@ -100,7 +100,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         if (!request.IsSilentUpdate)
         {
-            return ValidateTimeFields(request.Dto);
+            ValidateTimeFields(request.Dto);
         }
 
         CreateDialogEndUserContext(request, dialog);
@@ -132,11 +132,13 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         dialog.FromPartyTransmissionsCount = (short)dialog.Transmissions
             .Count(x => x.TypeId
-                is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
+                is DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction);
 
         dialog.FromServiceOwnerTransmissionsCount = (short)dialog.Transmissions
             .Count(x => x.TypeId is not
-                (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
+                (DialogTransmissionType.Values.Submission
+                or DialogTransmissionType.Values.Correction));
 
         if (dialog.Transmissions.ContainsTransmissionByEndUser())
         {
@@ -151,30 +153,23 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             domainError => domainError,
             concurrencyError => throw new UnreachableException("Should never get a concurrency error when creating a new dialog"));
     }
-    private CreateDialogResult ValidateTimeFields(CreateDialogDto dto)
+    private void ValidateTimeFields(CreateDialogDto dto)
     {
-        List<ValidationFailure> validationFailures = [];
+        const string errorMessage = "Must be in the future";
 
         if (dto.DueAt <= _clock.UtcNow)
         {
-            validationFailures.Add(ErrorMessage(nameof(dto.DueAt)));
+            _domainContext.AddError(nameof(CreateDialogCommand.Dto.DueAt), errorMessage);
         }
 
         if (dto.ExpiresAt <= _clock.UtcNow)
         {
-            validationFailures.Add(ErrorMessage(nameof(dto.ExpiresAt)));
+            _domainContext.AddError(nameof(CreateDialogCommand.Dto.ExpiresAt), errorMessage);
         }
 
         if (dto.VisibleFrom <= _clock.UtcNow)
         {
-            validationFailures.Add(ErrorMessage(nameof(dto.VisibleFrom)));
-        }
-
-        return new ValidationError(validationFailures);
-
-        static ValidationFailure ErrorMessage(string propertyName)
-        {
-            return new ValidationFailure(propertyName, $"'{propertyName}' must be in the future.");
+            _domainContext.AddError(nameof(CreateDialogCommand.Dto.VisibleFrom), errorMessage);
         }
     }
 

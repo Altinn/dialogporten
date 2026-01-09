@@ -20,6 +20,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using FluentValidation.Results;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -47,9 +48,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private readonly IResourceRegistry _resourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly IUser _user;
+    private readonly IClock _clock;
 
     public CreateDialogCommandHandler(
         IUser user,
+        IClock clock,
         IDialogDbContext db,
         IMapper mapper,
         IUnitOfWork unitOfWork,
@@ -64,6 +67,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
 
     public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
@@ -92,6 +96,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         if (dialogId is not null)
         {
             return new Conflict(nameof(dialog.IdempotentKey), $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
+        }
+
+        if (!request.IsSilentUpdate)
+        {
+            return ValidateTimeFields(request.Dto);
         }
 
         CreateDialogEndUserContext(request, dialog);
@@ -123,13 +132,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         dialog.FromPartyTransmissionsCount = (short)dialog.Transmissions
             .Count(x => x.TypeId
-                is DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction);
+                is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
 
         dialog.FromServiceOwnerTransmissionsCount = (short)dialog.Transmissions
             .Count(x => x.TypeId is not
-                (DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction));
+                (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
         if (dialog.Transmissions.ContainsTransmissionByEndUser())
         {
@@ -143,6 +150,32 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             success => new CreateDialogSuccess(dialog.Id, dialog.Revision),
             domainError => domainError,
             concurrencyError => throw new UnreachableException("Should never get a concurrency error when creating a new dialog"));
+    }
+    private CreateDialogResult ValidateTimeFields(CreateDialogDto dto)
+    {
+        List<ValidationFailure> validationFailures = [];
+
+        if (dto.DueAt <= _clock.UtcNow)
+        {
+            validationFailures.Add(ErrorMessage(nameof(dto.DueAt)));
+        }
+
+        if (dto.ExpiresAt <= _clock.UtcNow)
+        {
+            validationFailures.Add(ErrorMessage(nameof(dto.ExpiresAt)));
+        }
+
+        if (dto.VisibleFrom <= _clock.UtcNow)
+        {
+            validationFailures.Add(ErrorMessage(nameof(dto.VisibleFrom)));
+        }
+
+        return new ValidationError(validationFailures);
+
+        static ValidationFailure ErrorMessage(string propertyName)
+        {
+            return new ValidationFailure(propertyName, $"'{propertyName}' must be in the future.");
+        }
     }
 
     private async Task<Guid?> GetExistingDialogIdByIdempotentKey(DialogEntity dialog, CancellationToken cancellationToken)

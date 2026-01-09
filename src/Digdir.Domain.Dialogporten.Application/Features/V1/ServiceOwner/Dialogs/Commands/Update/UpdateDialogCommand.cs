@@ -109,7 +109,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
-        ValidateTimeFields(dialog);
+
+        if (!request.IsSilentUpdate)
+        {
+            ValidateTimeFields(dialog);
+        }
 
         AppendActivity(dialog, request.Dto);
 
@@ -213,14 +217,14 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private void ValidateTimeFields(DialogTransmissionAttachment attachment)
     {
         if (!_db.MustWhenAdded(attachment,
-                propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > _clock.UtcNowOffset || x == null))
+            propertyExpression: x => x.ExpiresAt,
+            predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id})";
 
             _domainContext.AddError($"{nameof(UpdateDialogDto.Transmissions)}." +
-                                    $"{nameof(UpdateDialogDto.Attachments)}." +
-                                    $"{nameof(AttachmentDto.ExpiresAt)}",
+                $"{nameof(UpdateDialogDto.Attachments)}." +
+                $"{nameof(AttachmentDto.ExpiresAt)}",
                 $"Must be in future or null, got '{attachment.ExpiresAt}'.{idString}");
         }
     }
@@ -228,22 +232,22 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private void ValidateTimeFields(DialogAttachment attachment)
     {
         if (!_db.MustWhenModified(attachment,
-                propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > _clock.UtcNowOffset || x == null))
+            propertyExpression: x => x.ExpiresAt,
+            predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
-                                    $"{nameof(AttachmentDto.ExpiresAt)}",
+                $"{nameof(AttachmentDto.ExpiresAt)}",
                 $"Must be in future, current value, or null. (Id: {attachment.Id})");
             return;
         }
 
         if (!_db.MustWhenAdded(attachment,
-                propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > _clock.UtcNowOffset || x == null))
+            propertyExpression: x => x.ExpiresAt,
+            predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id})";
             _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
-                                    $"{nameof(AttachmentDto.ExpiresAt)}",
+                $"{nameof(AttachmentDto.ExpiresAt)}",
                 $"Must be in future or null, got '{attachment.ExpiresAt}'.{idString}");
         }
     }

@@ -395,3 +395,6 @@ FodyWeavers.xsd
 
 # Claude Code configuration file
 CLAUDE.md
+
+# Bicep build output (compiled ARM template)
+.azure/infrastructure/main.json

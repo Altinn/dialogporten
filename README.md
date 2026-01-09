@@ -17,6 +17,7 @@
 #### Prerequisites
 
 - [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) (see [global.json](global.json) for the currently required version)
+  - Remember to install and trust the dotnet dev certificates: `dotnet dev-certs https --trust`
 
 #### Installing Podman (Mac)
 

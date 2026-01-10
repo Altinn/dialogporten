@@ -3,8 +3,11 @@ using System.Text.Json;
 using Dapper;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -131,6 +134,142 @@ internal sealed class DialogSearchRepository(
             cancellationToken);
 
         return dialogs;
+    }
+
+    public async Task<PaginatedList<DataDialogEndUserContextListItemDto>> SearchDialogEndUserContextsAsServiceOwner(
+        string orgName,
+        List<string> parties,
+        List<SystemLabel.Values>? systemLabels,
+        IContinuationTokenSet? continuationToken,
+        int limit,
+        DialogSearchAuthorizationResult? authorizedResources,
+        CancellationToken cancellationToken)
+    {
+        var orderSet = OrderSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>.Default;
+        var systemLabelValues = systemLabels?
+            .Select(x => (int)x)
+            .ToArray();
+
+        if (authorizedResources is not null && authorizedResources.HasNoAuthorizations)
+        {
+            return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, continuationToken?.Raw, orderSet.GetOrderString());
+        }
+
+        var queryBuilder = new PostgresFormattableStringBuilder();
+
+        if (authorizedResources is null)
+        {
+            queryBuilder
+                .Append(
+                    $"""
+                     SELECT d."Id" AS "DialogId"
+                          , c."Revision" AS "EndUserContextRevision"
+                          , d."ContentUpdatedAt"
+                          , ARRAY_AGG(sl."SystemLabelId" ORDER BY sl."SystemLabelId") AS "SystemLabels"
+                     FROM "Dialog" d
+                     INNER JOIN "DialogEndUserContext" c ON c."DialogId" = d."Id"
+                     INNER JOIN "DialogEndUserContextSystemLabel" sl ON c."Id" = sl."DialogEndUserContextId"
+                     WHERE d."Org" = {orgName}
+                       AND NOT d."Deleted"
+                       AND d."Party" = ANY({parties}::text[])
+                     """);
+        }
+        else
+        {
+            var partiesAndServices = authorizedResources.ResourcesByParties
+                .Select(x => (party: x.Key, services: x.Value))
+                .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
+                .Select(x => new PartiesAndServices(
+                    x.Select(k => k.party)
+                        .Where(p => parties.Contains(p))
+                        .ToArray(),
+                    x.Key.ToArray()))
+                .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
+                .ToList();
+
+            if (partiesAndServices.Count == 0)
+            {
+                return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, continuationToken?.Raw, orderSet.GetOrderString());
+            }
+
+            LogPartiesAndServicesCount(logger, partiesAndServices);
+
+            queryBuilder
+                .Append(
+                    $"""
+                     WITH raw_permissions AS (
+                         SELECT p.party, s.service
+                         FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
+                         CROSS JOIN LATERAL unnest(x."Services") AS s(service)
+                         CROSS JOIN LATERAL unnest(x."Parties") AS p(party)
+                     ),
+                     party_permission_map AS (
+                         SELECT party
+                              , ARRAY_AGG(service) AS allowed_services
+                         FROM raw_permissions
+                         GROUP BY party
+                     )
+                     SELECT d."Id" AS "DialogId"
+                          , c."Revision" AS "EndUserContextRevision"
+                          , d."ContentUpdatedAt"
+                          , ARRAY_AGG(sl."SystemLabelId" ORDER BY sl."SystemLabelId") AS "SystemLabels"
+                     FROM party_permission_map ppm
+                     INNER JOIN "Dialog" d ON d."Party" = ppm.party AND d."ServiceResource" = ANY(ppm.allowed_services)
+                     INNER JOIN "DialogEndUserContext" c ON c."DialogId" = d."Id"
+                     INNER JOIN "DialogEndUserContextSystemLabel" sl ON c."Id" = sl."DialogEndUserContextId"
+                     WHERE d."Org" = {orgName}
+                       AND NOT d."Deleted"
+                     """);
+        }
+
+        queryBuilder
+            .AppendIf(systemLabelValues is not null && systemLabelValues.Length != 0,
+                $"""
+                 AND EXISTS (
+                     SELECT 1
+                     FROM "DialogEndUserContextSystemLabel" sl_filter
+                     WHERE sl_filter."DialogEndUserContextId" = c."Id"
+                       AND sl_filter."SystemLabelId" = ANY({systemLabelValues}::int[])
+                 )
+                 """)
+            .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
+            .Append(
+                """
+                GROUP BY d."Id", c."Revision", d."ContentUpdatedAt"
+                """)
+            .ApplyPaginationOrder(orderSet, alias: "d")
+            .ApplyPaginationLimit(limit);
+
+        var (query, parameters) = queryBuilder.ToDynamicParameters();
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var rawRows = await connection.QueryAsync<RawEndUserContextListItemRow>(query, parameters);
+
+        var items = rawRows
+            .Select(row =>
+            {
+                var contentUpdatedAt = DateTime.SpecifyKind(row.ContentUpdatedAt, DateTimeKind.Utc);
+                return new DataDialogEndUserContextListItemDto(
+                    row.DialogId,
+                    row.EndUserContextRevision,
+                    new DateTimeOffset(contentUpdatedAt),
+                    row.SystemLabels.Select(x => (SystemLabel.Values)x).ToList());
+            })
+            .ToList();
+
+        var hasNextPage = items.Count > limit;
+        if (hasNextPage)
+        {
+            items = items.Take(limit).ToList();
+        }
+
+        var lastItem = items.LastOrDefault();
+        var nextContinuationToken = orderSet.GetContinuationTokenFrom(lastItem) ?? continuationToken?.Raw;
+
+        return new PaginatedList<DataDialogEndUserContextListItemDto>(
+            items,
+            hasNextPage,
+            nextContinuationToken,
+            orderSet.GetOrderString());
     }
 
     [SuppressMessage("Style", "IDE0037:Use inferred member name")]
@@ -545,6 +684,13 @@ internal sealed class DialogSearchRepository(
     private sealed record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
         string LanguageCode, string Value);
     private sealed record RawEndUserContextRow(Guid DialogId, Guid Revision, SystemLabel.Values SystemLabelId);
+    private sealed class RawEndUserContextListItemRow
+    {
+        public Guid DialogId { get; set; }
+        public Guid EndUserContextRevision { get; set; }
+        public DateTime ContentUpdatedAt { get; set; }
+        public int[] SystemLabels { get; set; } = [];
+    }
     private sealed record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner,
         ActorType.Values ActorType, string? ActorId, string? ActorName, bool IsCurrentEndUser);
     private sealed record RawActivityRow(Guid DialogId, Guid ActivityId, DateTime CreatedAt,

@@ -31,6 +31,15 @@ public interface IDialogSearchRepository
         string orgName,
         CancellationToken cancellationToken);
 
+    Task<PaginatedList<DataDialogEndUserContextListItemDto>> SearchDialogEndUserContextsAsServiceOwner(
+        string orgName,
+        List<string> parties,
+        List<SystemLabel.Values>? systemLabels,
+        IContinuationTokenSet? continuationToken,
+        int limit,
+        DialogSearchAuthorizationResult? authorizedResources,
+        CancellationToken cancellationToken);
+
     Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
         CancellationToken cancellationToken);
 
@@ -204,6 +213,13 @@ public sealed record DataContentDto(DataContentValueDto Title, DataContentValueD
 public sealed record DataContentValueDto(DialogContentType.Values TypeId, string MediaType, List<DataLocalizationDto> Value);
 public sealed record DataLocalizationDto(string LanguageCode, string Value);
 public sealed record DataDialogEndUserContextDto(Guid Revision, List<SystemLabel.Values> SystemLabels);
+/// <summary>
+/// Internal projection for pagination/ordering; not exposed directly from the API.
+/// </summary>
+public sealed record DataDialogEndUserContextListItemDto(Guid DialogId, Guid EndUserContextRevision, DateTimeOffset ContentUpdatedAt, List<SystemLabel.Values> SystemLabels)
+{
+    public Guid Id => DialogId;
+}
 public sealed record DataDialogSeenLogDto(Guid SeenLogId, Guid DialogId, DateTimeOffset SeenAt, bool IsViaServiceOwner, bool IsCurrentEndUser, DataActorDto SeenBy);
 public sealed record DataActorDto(ActorType.Values ActorType, string? ActorId, string? ActorName);
 public sealed record DataDialogActivityDto(Guid ActivityId, DateTimeOffset? CreatedAt, DialogActivityType.Values Type, Uri? ExtendedType, Guid? TransmissionId, DataActorDto PerformedBy, List<DataLocalizationDto> Description);

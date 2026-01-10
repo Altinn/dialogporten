@@ -6,11 +6,6 @@ on:
     paths-ignore:
       - "tests/k6/**"
 
-permissions:
-  contents: read
-  pull-requests: read
-  id-token: write
-
 jobs:
   verify-release-please-branch:
     if: startsWith(github.head_ref, 'release-please-')
@@ -21,21 +16,31 @@ jobs:
   get-current-version:
     name: Get current version
     needs: [verify-release-please-branch]
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-get-current-version.yml
 
   check-for-changes:
     name: Check for changes
     needs: [verify-release-please-branch]
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-check-for-changes.yml
 
   generate-git-short-sha:
     name: Generate git short sha
     needs: [verify-release-please-branch]
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-generate-git-short-sha.yml
 
   dry-run-deploy-infra-staging:
     name: Deploy infra to staging (dry run)
     needs: [generate-git-short-sha, get-current-version, check-for-changes]
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
     uses: ./.github/workflows/workflow-deploy-infra.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -54,6 +59,10 @@ jobs:
   dry-run-deploy-apps-staging:
     name: Deploy apps to staging (dry run)
     needs: [generate-git-short-sha, get-current-version, check-for-changes]
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}

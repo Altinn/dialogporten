@@ -11,14 +11,12 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
@@ -151,22 +149,11 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
 
     private static void ConfigureReadOnlyAuthorization(IServiceCollection services)
     {
-        services.ConfigureAltinnAuthorization(altinnAuthorization =>
+        var authorizationResult = new DialogDetailsAuthorizationResult
         {
-            var authorizationResult = new DialogDetailsAuthorizationResult
-            {
-                AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
-            };
-
-            altinnAuthorization.GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult(authorizationResult));
-            altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(true);
-            altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
-                .Returns(true);
-            altinnAuthorization.HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
-                .Returns(true);
-        });
+            AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+        };
+        services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }
 
     [Theory]

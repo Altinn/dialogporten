@@ -19,7 +19,8 @@ public class AuthorizationTests : GraphQlE2EFixture
         var result = await GetDialog(dialogId);
 
         // Assert
-        result.Errors.Should().NotBeNullOrEmpty();
+        result.Errors.Should().ContainSingle()
+            .Which.Message.Should().Contain("401 (Unauthorized)");
     }
 
     [Fact(Explicit = true)]

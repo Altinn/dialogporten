@@ -75,8 +75,9 @@ public class DialogByIdTests : GraphQlE2EFixture
 
         createDialogResponse.Content.Should().NotBeNull();
 
-        var dialogId = createDialogResponse.Content
-            .Replace("\"", string.Empty);
+        var dialogId = createDialogResponse
+            .Content
+            .Trim('"');
 
         return Guid.Parse(dialogId);
     }

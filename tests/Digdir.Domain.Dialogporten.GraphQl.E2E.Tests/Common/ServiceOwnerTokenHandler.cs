@@ -43,10 +43,10 @@ public class ServiceOwnerTokenHandler : DelegatingHandler
             $"&orgNo={Uri.EscapeDataString(orgNumber)}" +
             $"&ttl={DefaultTokenTtl}";
 
-        var tokenRequest = new HttpRequestMessage(HttpMethod.Get, $"{TestTokenBaseUrl}{requestPath}");
+        using var tokenRequest = new HttpRequestMessage(HttpMethod.Get, $"{TestTokenBaseUrl}{requestPath}");
         tokenRequest.Headers.Authorization = new AuthenticationHeaderValue("Basic", _encodedCredentials);
 
-        var tokenResult = await _httpClient.SendAsync(tokenRequest, cancellationToken);
+        using var tokenResult = await _httpClient.SendAsync(tokenRequest, cancellationToken);
         tokenResult.EnsureSuccessStatusCode();
 
         return await tokenResult.Content.ReadAsStringAsync(cancellationToken);

@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Microsoft.Extensions.Options;
 using static Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common.TestTokenConstants;
 
@@ -34,14 +35,14 @@ public class EndUserTokenHandler : DelegatingHandler
         var requestPath =
             "/GetPersonalToken" +
             $"?env={tokenEnvironment}" +
-            $"&scopes={Uri.EscapeDataString("foobar")}" +
+            $"&scopes={Uri.EscapeDataString(AuthorizationScope.EndUser)}" +
             $"&pid={Uri.EscapeDataString(DefaultEndUserSsn)}" +
             $"&ttl={DefaultTokenTtl}";
 
-        var tokenRequest = new HttpRequestMessage(HttpMethod.Get, $"{TestTokenBaseUrl}{requestPath}");
+        using var tokenRequest = new HttpRequestMessage(HttpMethod.Get, $"{TestTokenBaseUrl}{requestPath}");
         tokenRequest.Headers.Authorization = new AuthenticationHeaderValue("Basic", _encodedCredentials);
 
-        var tokenResult = await _httpClient.SendAsync(tokenRequest, cancellationToken);
+        using var tokenResult = await _httpClient.SendAsync(tokenRequest, cancellationToken);
         tokenResult.EnsureSuccessStatusCode();
 
         return await tokenResult.Content.ReadAsStringAsync(cancellationToken);

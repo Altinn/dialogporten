@@ -41,9 +41,9 @@ public sealed class JwtSchemeSelectorMiddleware
             context.Items[Constants.CurrentTokenIssuer] = jwtToken.Issuer;
             return _next(context);
         }
-        catch (Exception)
+        catch (ArgumentException)
         {
-            return context.Response.SendErrorsAsync([new ValidationFailure("BearerToken", "Malformed token")]);
+            return _next(context);
         }
     }
 }

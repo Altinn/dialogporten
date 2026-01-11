@@ -8,7 +8,6 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -270,29 +269,13 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         foreach (var dialogTransmission in dto.Transmissions.Where(e => !e.IsAuthorized))
         {
-            ReplaceUnauthorizedContentReference(dialogTransmission.Content.ContentReference);
+            dialogTransmission.Content.ContentReference.ReplaceUnauthorizedContentReference();
             var urls = dialogTransmission.Attachments.SelectMany(a => a.Urls).ToList();
             foreach (var url in urls)
             {
                 url.Url = Constants.UnauthorizedUri;
             }
         }
-    }
-
-    private static void ReplaceUnauthorizedContentReference(ContentValueDto? contentReference)
-    {
-        if (contentReference is null)
-        {
-            return;
-        }
-
-        contentReference.Value = contentReference.Value
-            .Select(localization => new LocalizationDto
-            {
-                LanguageCode = localization.LanguageCode,
-                Value = Constants.UnauthorizedUri.ToString()
-            })
-            .ToList();
     }
 
     private void ReplaceExpiredAttachmentUrls(DialogDto dto)

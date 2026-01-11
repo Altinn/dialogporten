@@ -12,6 +12,7 @@ namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
 public class GraphQlE2EFixture : IAsyncLifetime
 {
     private ServiceProvider? _serviceProvider;
+    private ITokenOverridesAccessor? _tokenOverridesAccessor;
 
     public IDialogportenGraphQlTestClient GraphQlClient { get; private set; } = null!;
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
@@ -33,8 +34,8 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
         var services = new ServiceCollection();
 
-        services.AddHttpClient<ServiceOwnerTokenHandler>();
-        services.AddHttpClient<EndUserTokenHandler>();
+        services.AddHttpClient<TestTokenHandler>();
+        services.AddSingleton<ITokenOverridesAccessor, TokenOverridesAccessor>();
         services.AddSingleton<IConfiguration>(configuration);
         services.AddOptions();
         services.Configure<E2ESettings>(configuration);
@@ -45,7 +46,6 @@ public class GraphQlE2EFixture : IAsyncLifetime
         };
 
         services
-            .AddSingleton<ServiceOwnerTokenHandler>()
             .AddRefitClient<IServiceownerApi>(new RefitSettings
             {
                 ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
@@ -55,14 +55,14 @@ public class GraphQlE2EFixture : IAsyncLifetime
                 {
                     Port = settings.WebAPiPort
                 }.Uri)
-            .AddHttpMessageHandler<ServiceOwnerTokenHandler>();
+            .AddHttpMessageHandler(serviceProvider =>
+                ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.ServiceOwner));
 
         var graphQlBaseAddress = settings.GraphQlPort is -1
             ? settings.DialogportenBaseUri
             : settings.DialogportenBaseUri.Replace("https", "http");
 
         services
-            .AddSingleton<EndUserTokenHandler>()
             .AddDialogportenGraphQlTestClient()
             .ConfigureHttpClient(x => x.BaseAddress =
                     new UriBuilder(graphQlBaseAddress)
@@ -70,12 +70,14 @@ public class GraphQlE2EFixture : IAsyncLifetime
                         Path = "/graphql",
                         Port = settings.GraphQlPort
                     }.Uri,
-                builder => builder.AddHttpMessageHandler<EndUserTokenHandler>());
+                builder => builder.AddHttpMessageHandler(serviceProvider =>
+                    ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser)));
 
         _serviceProvider = services.BuildServiceProvider();
 
         GraphQlClient = _serviceProvider.GetRequiredService<IDialogportenGraphQlTestClient>();
         ServiceownerApi = _serviceProvider.GetRequiredService<IServiceownerApi>();
+        _tokenOverridesAccessor = _serviceProvider.GetRequiredService<ITokenOverridesAccessor>();
 
         return ValueTask.CompletedTask;
     }
@@ -86,4 +88,24 @@ public class GraphQlE2EFixture : IAsyncLifetime
         GC.SuppressFinalize(this);
         return ValueTask.CompletedTask;
     }
+
+    public IDisposable UseTokenOverrides(TokenOverrides overrides) =>
+        _tokenOverridesAccessor is null
+            ? throw new InvalidOperationException("Token override accessor not initialized.")
+            : new TokenOverrideScope(_tokenOverridesAccessor, overrides);
+
+    public IDisposable UseEndUserTokenOverrides(
+        string? ssn = null,
+        string? scopes = null,
+        string? tokenOverride = null) =>
+        UseTokenOverrides(new TokenOverrides(
+            EndUser: new EndUserTokenOverrides(ssn, scopes, tokenOverride)));
+
+    public IDisposable UseServiceOwnerTokenOverrides(
+        string? orgNumber = null,
+        string? orgName = null,
+        string? scopes = null,
+        string? tokenOverride = null) =>
+        UseTokenOverrides(new TokenOverrides(
+            ServiceOwner: new ServiceOwnerTokenOverrides(orgNumber, orgName, scopes, tokenOverride)));
 }

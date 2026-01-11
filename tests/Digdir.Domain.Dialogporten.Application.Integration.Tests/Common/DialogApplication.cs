@@ -43,8 +43,8 @@ public class DialogApplication : IAsyncLifetime
 
     internal static TestClock Clock { get; } = new();
 
-    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16.10")
+    private readonly PostgreSqlContainer _dbContainer =
+        new PostgreSqlBuilder("postgres:16.10")
         .Build();
 
     public async ValueTask InitializeAsync()

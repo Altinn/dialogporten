@@ -5,8 +5,10 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using MediatR;
@@ -111,7 +113,25 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
             url.Url = Constants.UnauthorizedUri;
         }
 
+        ReplaceUnauthorizedContentReference(dto.Content.ContentReference);
+
         return dto;
+    }
+
+    private static void ReplaceUnauthorizedContentReference(ContentValueDto? contentReference)
+    {
+        if (contentReference is null)
+        {
+            return;
+        }
+
+        contentReference.Value = contentReference.Value
+            .Select(localization => new LocalizationDto
+            {
+                LanguageCode = localization.LanguageCode,
+                Value = Constants.UnauthorizedUri.ToString()
+            })
+            .ToList();
     }
 
     private void ReplaceExpiredAttachmentUrls(TransmissionDto dto)
@@ -127,4 +147,3 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         }
     }
 }
-

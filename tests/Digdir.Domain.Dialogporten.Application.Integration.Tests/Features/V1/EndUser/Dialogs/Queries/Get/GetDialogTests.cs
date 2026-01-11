@@ -1,18 +1,24 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
@@ -54,6 +60,34 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Transmissions.Should().ContainSingle()
                     .Which.ExternalReference.Should().Be("ext"));
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>
+        FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";
+                    transmission.Content!.ContentReference = new ContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        Value = [new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = "https://example.com/secret"
+                        }]
+                    };
+                }))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var transmission = x.Transmissions.Single();
+                transmission.IsAuthorized.Should().BeFalse();
+                transmission.Content.ContentReference.Should().NotBeNull();
+                transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
+                    .And.AllSatisfy(localization =>
+                        localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+            });
 
     [Fact]
     public Task Get_Should_Populate_EnduserContextRevision() =>
@@ -114,6 +148,26 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     .Be(SystemLabel.Values.Default));
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
+
+    private static void ConfigureReadOnlyAuthorization(IServiceCollection services)
+    {
+        services.ConfigureAltinnAuthorization(altinnAuthorization =>
+        {
+            var authorizationResult = new DialogDetailsAuthorizationResult
+            {
+                AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+            };
+
+            altinnAuthorization.GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(authorizationResult));
+            altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(true);
+            altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
+                .Returns(true);
+            altinnAuthorization.HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                .Returns(true);
+        });
+    }
 
     [Theory]
     [InlineData(DialogActivityType.Values.CorrespondenceOpened, false)]

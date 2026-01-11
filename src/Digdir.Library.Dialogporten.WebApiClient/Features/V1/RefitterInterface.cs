@@ -223,7 +223,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -266,7 +266,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -306,7 +306,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -362,7 +362,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -406,7 +406,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -446,7 +446,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -506,7 +506,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -546,7 +546,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -582,7 +582,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -642,7 +642,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -677,7 +677,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -729,7 +729,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -762,7 +762,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -802,7 +802,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -842,7 +842,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -882,7 +882,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -923,7 +923,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -979,7 +979,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -1034,7 +1034,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -1091,7 +1091,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -1131,7 +1131,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -1175,7 +1175,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
@@ -1226,7 +1226,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>503</term>
-        /// <description>Service Unavailable</description>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>

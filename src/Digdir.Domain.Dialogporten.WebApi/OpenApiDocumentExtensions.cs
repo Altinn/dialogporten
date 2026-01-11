@@ -54,7 +54,7 @@ public static class OpenApiDocumentExtensions
             {
                 response = new OpenApiResponse
                 {
-                    Description = "Service Unavailable",
+                    Description = "Service Unavailable, used when Dialogporten is in maintenance mode",
                     Content =
                     {
                         ["text/plain"] = new OpenApiMediaType

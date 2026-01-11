@@ -5789,7 +5789,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -5830,7 +5830,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6132,7 +6132,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6219,7 +6219,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6309,7 +6309,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6405,7 +6405,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6486,7 +6486,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6618,7 +6618,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6696,7 +6696,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6780,7 +6780,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6873,7 +6873,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -6972,7 +6972,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -7060,7 +7060,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -7117,7 +7117,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -7456,7 +7456,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -7556,7 +7556,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -7665,7 +7665,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -7747,7 +7747,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -7889,7 +7889,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8017,7 +8017,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8126,7 +8126,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8213,7 +8213,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8300,7 +8300,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8398,7 +8398,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8476,7 +8476,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8617,7 +8617,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8704,7 +8704,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8772,7 +8772,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8877,7 +8877,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -8981,7 +8981,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -9121,7 +9121,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -9202,7 +9202,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -9289,7 +9289,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -9370,7 +9370,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -9511,7 +9511,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -9598,7 +9598,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",
@@ -9696,7 +9696,7 @@
                 }
               }
             },
-            "description": "Service Unavailable",
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
             "headers": {
               "Retry-After": {
                 "description": "Delay before retrying the request. Datetime format RFC1123",

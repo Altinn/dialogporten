@@ -6,5 +6,3 @@ public sealed class GraphQlE2EAssemblyMarker
 {
     public static readonly Assembly Assembly = typeof(GraphQlE2EAssemblyMarker).Assembly;
 }
-
-

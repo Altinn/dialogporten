@@ -3110,7 +3110,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3141,13 +3141,105 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "The transmission summary.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The transmission title. Must be text/plain.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest": {
         "additionalProperties": false,
         "properties": {
           "attachments": {
             "description": "The transmission-level attachments.",
             "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment"
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment"
             },
             "nullable": true,
             "type": "array"
@@ -3163,7 +3255,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent"
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent"
               }
             ]
           },
@@ -3184,7 +3276,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3239,7 +3331,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3754,7 +3846,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -5661,6 +5753,15 @@
             "nullable": true,
             "type": "array"
           },
+          "performedBy": {
+            "description": "Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
+          },
           "removeLabels": {
             "description": "List of system labels to remove from the target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
             "items": {
@@ -5709,6 +5810,15 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "performedBy": {
+            "description": "Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
           },
           "removeLabels": {
             "description": "List of system labels to remove from target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
@@ -8502,8 +8612,8 @@
           {
             "in": "query",
             "name": "enduserId",
-            "required": true,
             "schema": {
+              "nullable": true,
               "type": "string"
             }
           },
@@ -9094,8 +9204,8 @@
           {
             "in": "query",
             "name": "enduserId",
-            "required": true,
             "schema": {
+              "nullable": true,
               "type": "string"
             }
           }

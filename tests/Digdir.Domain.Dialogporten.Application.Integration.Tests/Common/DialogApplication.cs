@@ -43,8 +43,8 @@ public class DialogApplication : IAsyncLifetime
 
     internal static TestClock Clock { get; } = new();
 
-    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16.10")
+    private readonly PostgreSqlContainer _dbContainer =
+        new PostgreSqlBuilder("postgres:16.10")
         .Build();
 
     public async ValueTask InitializeAsync()
@@ -128,6 +128,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
+            .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()

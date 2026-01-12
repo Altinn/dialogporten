@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
@@ -34,6 +35,11 @@ public sealed class BulkSetSystemLabelDto
     /// List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
     /// </summary>
     public IReadOnlyCollection<SystemLabel.Values> RemoveLabels { get; init; } = [];
+
+    /// <summary>
+    /// Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.
+    /// </summary>
+    public ActorDto? PerformedBy { get; init; }
 }
 
 public sealed class DialogRevisionDto

@@ -9,8 +9,10 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -45,6 +47,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private readonly IDomainContext _domainContext;
     private readonly IResourceRegistry _resourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
+    private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
     private readonly IUser _user;
 
     public CreateDialogCommandHandler(
@@ -54,7 +57,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IResourceRegistry resourceRegistry,
-        IServiceResourceAuthorizer serviceResourceAuthorizer)
+        IServiceResourceAuthorizer serviceResourceAuthorizer,
+        ITransmissionHierarchyValidator transmissionHierarchyValidator)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -63,6 +67,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
+        _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
     }
 
     public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
@@ -112,23 +117,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
+        _transmissionHierarchyValidator.ValidateWholeAggregate(dialog);
 
-        _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
-            keySelector: x => x.Id,
-            parentKeySelector: x => x.RelatedTransmissionId,
-            propertyName: nameof(CreateDialogDto.Transmissions),
-            maxDepth: 20,
-            maxWidth: 20));
-
-        dialog.FromPartyTransmissionsCount = (short)dialog.Transmissions
-            .Count(x => x.TypeId
-                is DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction);
-
-        dialog.FromServiceOwnerTransmissionsCount = (short)dialog.Transmissions
-            .Count(x => x.TypeId is not
-                (DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction));
+        var (fromParty, fromServiceOwner) = dialog.Transmissions.GetTransmissionCounts();
+        dialog.FromPartyTransmissionsCount = checked((short)fromParty);
+        dialog.FromServiceOwnerTransmissionsCount = checked((short)fromServiceOwner);
 
         if (dialog.Transmissions.ContainsTransmissionByEndUser())
         {
@@ -184,11 +177,15 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return;
         }
 
+        var performedBy = LabelAssignmentLogActorFactory.Create(
+            ActorType.Values.ServiceOwner,
+            actorId: $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
+            actorName: null);
+
         dialog.EndUserContext.UpdateSystemLabels(
             addLabels: [labelToAdd],
             removeLabels: [],
-            $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
-            ActorType.Values.ServiceOwner);
+            performedBy);
     }
 
     private void CreateDialogServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)

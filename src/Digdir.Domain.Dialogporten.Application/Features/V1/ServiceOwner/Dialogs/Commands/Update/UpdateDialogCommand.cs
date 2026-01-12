@@ -10,8 +10,9 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -54,6 +55,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private readonly IResourceRegistry _resourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly IDataLoaderContext _dataLoaderContext;
+    private readonly IDialogTransmissionAppender _dialogTransmissionAppender;
+    private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
 
     public UpdateDialogCommandHandler(
         IDialogDbContext db,
@@ -65,7 +68,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         IUserResourceRegistry userResourceRegistry,
         IResourceRegistry resourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
-        IDataLoaderContext dataLoaderContext)
+        IDataLoaderContext dataLoaderContext,
+        IDialogTransmissionAppender dialogTransmissionAppender,
+        ITransmissionHierarchyValidator transmissionHierarchyValidator)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
@@ -77,6 +82,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
+        _dialogTransmissionAppender = dialogTransmissionAppender ?? throw new ArgumentNullException(nameof(dialogTransmissionAppender));
+        _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
     }
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
@@ -121,7 +128,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden(errorMessage);
         }
 
-        AppendTransmission(dialog, request.Dto);
+        await AppendTransmission(dialog, request.Dto, cancellationToken);
 
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
@@ -198,26 +205,15 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
+        var performedBy = LabelAssignmentLogActorFactory.Create(
+            ActorType.Values.ServiceOwner,
+            actorId: $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
+            actorName: null);
+
         dialog.EndUserContext.UpdateSystemLabels(
             addLabels: [labelToAdd],
             removeLabels: [],
-            $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
-            ActorType.Values.ServiceOwner);
-    }
-
-    private void ValidateTimeFields(DialogTransmissionAttachment attachment)
-    {
-        if (!_db.MustWhenAdded(attachment,
-                propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > _clock.UtcNowOffset || x == null))
-        {
-            var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id})";
-
-            _domainContext.AddError($"{nameof(UpdateDialogDto.Transmissions)}." +
-                                    $"{nameof(UpdateDialogDto.Attachments)}." +
-                                    $"{nameof(AttachmentDto.ExpiresAt)}",
-                $"Must be in future or null, got '{attachment.ExpiresAt}'.{idString}");
-        }
+            performedBy);
     }
 
     private void ValidateTimeFields(DialogAttachment attachment)
@@ -311,7 +307,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
     }
 
-    private void AppendTransmission(DialogEntity dialog, UpdateDialogDto dto)
+    private async Task AppendTransmission(DialogEntity dialog, UpdateDialogDto dto, CancellationToken cancellationToken)
     {
         var newDialogTransmissions = _mapper.Map<List<DialogTransmission>>(dto.Transmissions);
 
@@ -326,14 +322,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingIds));
             return;
         }
-
-        dialog.FromPartyTransmissionsCount += (short)newDialogTransmissions
-            .Count(x => x.TypeId
-                is DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction);
-
-        dialog.FromServiceOwnerTransmissionsCount += (short)newDialogTransmissions
-            .Count(x => x.TypeId is not
-                (DialogTransmissionType.Values.Submission or DialogTransmissionType.Values.Correction));
 
         var newAttachments = newDialogTransmissions
             .SelectMany(x => x.Attachments)
@@ -355,18 +343,16 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
-        if (newDialogTransmissions.ContainsTransmissionByEndUser())
+        await _transmissionHierarchyValidator.ValidateNewTransmissionsAsync(
+            dialog.Id,
+            newDialogTransmissions,
+            cancellationToken);
+
+        var appendResult = _dialogTransmissionAppender.Append(dialog, newDialogTransmissions);
+
+        if (appendResult.ContainsEndUserTransmission)
         {
             AddSystemLabel(dialog, SystemLabel.Values.Sent);
-        }
-
-        dialog.Transmissions.AddRange(newDialogTransmissions);
-        // Tell ef explicitly to add transmissions as new to the database.
-        _db.DialogTransmissions.AddRange(newDialogTransmissions);
-
-        foreach (var attachment in newAttachments)
-        {
-            ValidateTimeFields(attachment);
         }
     }
 

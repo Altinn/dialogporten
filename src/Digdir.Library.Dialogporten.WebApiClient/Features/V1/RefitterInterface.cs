@@ -39,9 +39,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Query(CollectionFormat.Multi)] 
         public IEnumerable<DialogEndUserContextsEntities_SystemLabel> Label { get; set; }
 
-        [Query] 
-        public OrderSetOfTOrderDefinitionAndTTarget OrderBy { get; set; }
-
                 /// <summary>
                 /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
                 /// </summary>
@@ -1767,21 +1764,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class OrderSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
     {
 
@@ -2294,6 +2276,21 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("sendNotification")]
         public bool SendNotification { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class OrderSetOfTOrderDefinitionAndTTarget
+    {
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
 
     }
 

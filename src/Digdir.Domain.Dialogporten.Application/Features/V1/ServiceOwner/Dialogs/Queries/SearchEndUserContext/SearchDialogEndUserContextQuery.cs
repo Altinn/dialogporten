@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Common;
@@ -11,7 +12,7 @@ using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
 
-public sealed class SearchDialogEndUserContextQuery : SortablePaginationParameter<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>, IRequest<SearchDialogEndUserContextResult>, IFeatureMetricServiceResourceIgnoreRequest
+public sealed class SearchDialogEndUserContextQuery : PaginationParameter<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>, IRequest<SearchDialogEndUserContextResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     /// <summary>
     /// Filter by one or more owning parties
@@ -79,7 +80,11 @@ internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<S
 
             if (authorizedResources.HasNoAuthorizations)
             {
-                return PaginatedList<DialogEndUserContextItemDto>.CreateEmpty(request);
+                return new PaginatedList<DialogEndUserContextItemDto>(
+                    [],
+                    hasNextPage: false,
+                    request.ContinuationToken?.Raw,
+                    OrderSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>.Default.GetOrderString());
             }
         }
 

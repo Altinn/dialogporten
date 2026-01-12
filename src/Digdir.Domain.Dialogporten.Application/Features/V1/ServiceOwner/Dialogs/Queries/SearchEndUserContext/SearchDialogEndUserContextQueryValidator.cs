@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
@@ -33,9 +32,5 @@ internal sealed class SearchDialogEndUserContextQueryValidator : AbstractValidat
         RuleForEach(x => x.Label)
             .IsInEnum();
 
-        RuleFor(x => x.OrderBy)
-            .Must(orderBy => orderBy is null || orderBy.GetOrderString() ==
-                OrderSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>.Default.GetOrderString())
-            .WithMessage("'OrderBy' must use the default ordering (contentUpdatedAt desc, id desc).");
     }
 }

@@ -9034,18 +9034,6 @@
             "style": "form"
           },
           {
-            "in": "query",
-            "name": "orderBy",
-            "schema": {
-              "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
-            }
-          },
-          {
             "description": "Supply \u0022continuationToken\u0022 for the response to get the next page of results, if hasNextPage is true",
             "in": "query",
             "name": "continuationToken",

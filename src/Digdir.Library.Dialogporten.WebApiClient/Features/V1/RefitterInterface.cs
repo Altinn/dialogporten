@@ -620,9 +620,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>401</term>
         /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json")]
+        [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/endusercontext")]
         Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem>> V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContext([Query] V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams queryParams, CancellationToken cancellationToken = default);
 

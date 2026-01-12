@@ -279,15 +279,13 @@ public static class IFlowStepExtensions
         Action<SearchDialogEndUserContextQuery> modify) => step.SearchServiceOwnerDialogEndUserContexts((query, _) => modify(query));
 
     public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(this IFlowStep step,
-        Action<SearchDialogEndUserContextQuery, FlowContext> modify)
-    {
-        return step.SendCommand(_ =>
+        Action<SearchDialogEndUserContextQuery, FlowContext> modify) =>
+        step.SendCommand(_ =>
         {
             var query = new SearchDialogEndUserContextQuery();
             modify(query, step.Context);
             return query;
         });
-    }
 
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
         Action<SearchDialogQueryEU> modify) => step.SearchEndUserDialogs((query, _) => modify(query));

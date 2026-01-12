@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -268,6 +269,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         foreach (var dialogTransmission in dto.Transmissions.Where(e => !e.IsAuthorized))
         {
+            dialogTransmission.Content.ContentReference.ReplaceUnauthorizedContentReference();
             var urls = dialogTransmission.Attachments.SelectMany(a => a.Urls).ToList();
             foreach (var url in urls)
             {

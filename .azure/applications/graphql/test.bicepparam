@@ -3,7 +3,8 @@ using './main.bicep'
 param environment = 'test'
 param location = 'norwayeast'
 param whitelistedIPs = [
-  '51.13.79.23'
+  '51.13.79.23' // altinn-at23-api
+  '51.120.88.69' // altinn-dev-api
 ]
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param revisionSuffix = readEnvironmentVariable('REVISION_SUFFIX')

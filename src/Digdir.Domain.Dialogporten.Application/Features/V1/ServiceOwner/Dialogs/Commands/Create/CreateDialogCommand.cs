@@ -149,17 +149,19 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     {
         const string errorMessage = "Must be in the future";
 
-        if (dto.DueAt <= _clock.UtcNow)
+        var clockUtcNow = _clock.UtcNow;
+
+        if (dto.DueAt <= clockUtcNow)
         {
             _domainContext.AddError(nameof(CreateDialogCommand.Dto.DueAt), errorMessage);
         }
 
-        if (dto.ExpiresAt <= _clock.UtcNow)
+        if (dto.ExpiresAt <= clockUtcNow)
         {
             _domainContext.AddError(nameof(CreateDialogCommand.Dto.ExpiresAt), errorMessage);
         }
 
-        if (dto.VisibleFrom <= _clock.UtcNow)
+        if (dto.VisibleFrom <= clockUtcNow)
         {
             _domainContext.AddError(nameof(CreateDialogCommand.Dto.VisibleFrom), errorMessage);
         }

@@ -352,12 +352,24 @@ public static class IFlowStepExtensions
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null)
         => step.AssertResult(assert).ExecuteAsync();
 
+    public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
+        => step.AssertResult(assert).ExecuteAsync();
+
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>
         step.Select(result =>
         {
             var typedResult = result.Value.Should().BeOfType<T>().Subject;
             typedResult.Should().NotBeNull();
             assert?.Invoke(typedResult);
+            return typedResult;
+        });
+
+    public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert) =>
+        step.Select((result, context) =>
+        {
+            var typedResult = result.Value.Should().BeOfType<T>().Subject;
+            typedResult.Should().NotBeNull();
+            assert(typedResult, context);
             return typedResult;
         });
 

@@ -27,8 +27,18 @@ public sealed class JwtSchemeSelectorMiddleware
         if (!handler.CanReadToken(token))
             return _next(context);
 
-        var jwtToken = handler.ReadJwtToken(token);
-        context.Items[Constants.CurrentTokenIssuer] = jwtToken.Issuer;
+        try
+        {
+            var jwtToken = handler.ReadJwtToken(token);
+            context.Items[Constants.CurrentTokenIssuer] = jwtToken.Issuer;
+        }
+        catch (Exception)
+        {
+            // Could not read token, continue
+            // This will be handled later in the
+            // pipeline and will result in a 401 Unauthorized
+        }
+
         return _next(context);
     }
 }

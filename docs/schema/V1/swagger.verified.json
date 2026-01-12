@@ -5939,6 +5939,25 @@
               }
             },
             "description": "The OAuth 2.0 Authorization Server Metadata"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "summary": "Gets the JSON Web Key Set (JWKS) containing the public keys used to verify dialog token signatures",
@@ -5961,6 +5980,25 @@
               }
             },
             "description": "The OAuth 2.0 Authorization Server Metadata"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "summary": "Gets the OAuth 2.0 Metadata for automatic configuration of clients verifying dialog tokens",
@@ -6244,6 +6282,25 @@
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6312,6 +6369,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6383,6 +6459,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6460,6 +6555,25 @@
               }
             },
             "description": "The specified dialog ID or activity ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6522,6 +6636,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6635,6 +6768,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6694,6 +6846,25 @@
               }
             },
             "description": "Not Found"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6759,6 +6930,25 @@
               }
             },
             "description": "Not Found"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6833,6 +7023,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6913,6 +7122,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6982,6 +7210,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7020,6 +7267,25 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7340,6 +7606,25 @@
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.search\u0022."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7421,6 +7706,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7511,6 +7815,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7574,6 +7897,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7697,6 +8039,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7806,6 +8167,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7896,6 +8276,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7964,6 +8363,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8032,6 +8450,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8111,6 +8548,25 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8170,6 +8626,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8292,6 +8767,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8360,6 +8854,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8409,6 +8922,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8495,6 +9027,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8580,6 +9131,25 @@
               }
             },
             "description": ""
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8701,6 +9271,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8763,6 +9352,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8831,6 +9439,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8893,6 +9520,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -9015,6 +9661,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -9083,6 +9748,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -9260,6 +9944,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [

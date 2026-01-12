@@ -130,6 +130,7 @@ static void BuildAndRun(string[] args)
                     document.MakeCollectionsNullable();
                     document.FixJwtBearerCasing();
                     document.RemoveSystemStringHeaderTitles();
+                    document.AddServiceUnavailableResponse();
                 };
                 s.Title = "Dialogporten";
                 s.Description = Constants.SwaggerSummary.GlobalDescription;

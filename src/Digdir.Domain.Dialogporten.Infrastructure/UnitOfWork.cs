@@ -18,13 +18,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure;
 
 internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 {
-    // Fetch the db revision and retry
+    // Refresh the original values from the database before retrying
     // https://learn.microsoft.com/en-us/ef/core/saving/concurrency?tabs=data-annotations#resolving-concurrency-conflicts
     private static readonly AsyncPolicy ConcurrencyRetryPolicy = Policy
         .Handle<DbUpdateConcurrencyException>()
         .WaitAndRetryAsync(
-            sleepDurations: Backoff.ConstantBackoff(TimeSpan.FromMilliseconds(200), 25),
-            onRetryAsync: FetchCurrentRevision);
+            sleepDurations: Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(200), 25),
+            onRetryAsync: RefreshConcurrencyEntries);
 
     private readonly DialogDbContext _dialogDbContext;
     private readonly ITransactionTime _transactionTime;
@@ -142,7 +142,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
                 // Attempt to save changes without a concurrency check
                 : ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken));
         }
-        catch (DbUpdateConcurrencyException) when (_enableConcurrencyCheck)
+        catch (DbUpdateConcurrencyException)
         {
             return new ConcurrencyError();
         }
@@ -209,7 +209,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         _transaction = null;
     }
 
-    private static async Task FetchCurrentRevision(Exception exception, TimeSpan _)
+    private static async Task RefreshConcurrencyEntries(Exception exception, TimeSpan _)
     {
         if (exception is not DbUpdateConcurrencyException concurrencyException)
         {
@@ -218,19 +218,13 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
         foreach (var entry in concurrencyException.Entries)
         {
-            if (entry.Entity is not IVersionableEntity)
-            {
-                continue;
-            }
-
             var dbValues = await entry.GetDatabaseValuesAsync();
-            if (dbValues == null)
+            if (dbValues is null)
             {
                 continue;
             }
 
-            var currentRevision = dbValues[nameof(IVersionableEntity.Revision)]!;
-            entry.Property(nameof(IVersionableEntity.Revision)).OriginalValue = currentRevision;
+            entry.OriginalValues.SetValues(dbValues);
         }
     }
 

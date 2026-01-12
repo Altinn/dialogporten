@@ -30,7 +30,6 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
-        var clock = new Clock();
 
         var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
@@ -43,7 +42,7 @@ public class CreateDialogTests
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
-        var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
+        var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
             resourceRegistrySub, serviceAuthorizationSub, hierarchyValidatorSub);
 
@@ -72,7 +71,6 @@ public class CreateDialogTests
         var userSub = Substitute.For<IUser>();
         var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-        var clock = new Clock();
 
         serviceAuthorizationSub
             .AuthorizeServiceResources(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
@@ -82,7 +80,7 @@ public class CreateDialogTests
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
-        var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
+        var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
             resourceRegistrySub, serviceAuthorizationSub, hierarchyValidatorSub);
 

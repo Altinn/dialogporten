@@ -50,11 +50,9 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
     private readonly IUser _user;
-    private readonly IClock _clock;
 
     public CreateDialogCommandHandler(
         IUser user,
-        IClock clock,
         IDialogDbContext db,
         IMapper mapper,
         IUnitOfWork unitOfWork,
@@ -70,7 +68,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
     }
 
@@ -100,11 +97,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         if (dialogId is not null)
         {
             return new Conflict(nameof(dialog.IdempotentKey), $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
-        }
-
-        if (!request.IsSilentUpdate)
-        {
-            ValidateTimeFields(request.Dto);
         }
 
         CreateDialogEndUserContext(request, dialog);
@@ -144,27 +136,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             success => new CreateDialogSuccess(dialog.Id, dialog.Revision),
             domainError => domainError,
             concurrencyError => throw new UnreachableException("Should never get a concurrency error when creating a new dialog"));
-    }
-    private void ValidateTimeFields(CreateDialogDto dto)
-    {
-        const string errorMessage = "Must be in the future";
-
-        var clockUtcNow = _clock.UtcNowOffset;
-
-        if (dto.DueAt.HasValue && dto.DueAt <= clockUtcNow)
-        {
-            _domainContext.AddError(nameof(CreateDialogCommand.Dto.DueAt), errorMessage);
-        }
-
-        if (dto.ExpiresAt.HasValue && dto.ExpiresAt <= clockUtcNow)
-        {
-            _domainContext.AddError(nameof(CreateDialogCommand.Dto.ExpiresAt), errorMessage);
-        }
-
-        if (dto.VisibleFrom.HasValue && dto.VisibleFrom <= clockUtcNow)
-        {
-            _domainContext.AddError(nameof(CreateDialogCommand.Dto.VisibleFrom), errorMessage);
-        }
     }
 
     private async Task<Guid?> GetExistingDialogIdByIdempotentKey(DialogEntity dialog, CancellationToken cancellationToken)

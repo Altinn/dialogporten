@@ -62,7 +62,7 @@ internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<S
         IDialogSearchRepository searchRepository)
     {
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _altinnAuthorization = altinnAuthorization;
+        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
     }
 

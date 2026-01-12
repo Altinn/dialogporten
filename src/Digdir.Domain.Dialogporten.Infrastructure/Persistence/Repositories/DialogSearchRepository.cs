@@ -262,8 +262,7 @@ internal sealed class DialogSearchRepository(
             items = items.Take(limit).ToList();
         }
 
-        var lastItem = items.LastOrDefault();
-        var nextContinuationToken = orderSet.GetContinuationTokenFrom(lastItem) ?? continuationToken?.Raw;
+        var nextContinuationToken = hasNextPage ? orderSet.GetContinuationTokenFrom(items.Last()) : null;
 
         return new PaginatedList<DataDialogEndUserContextListItemDto>(
             items,

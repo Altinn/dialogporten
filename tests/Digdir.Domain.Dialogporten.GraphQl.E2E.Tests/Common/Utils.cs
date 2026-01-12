@@ -4,7 +4,7 @@ public static class Utils
 {
     internal static string GetTokenGeneratorEnvironment()
     {
-        var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development";
 
         return env switch
         {

@@ -19,8 +19,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
     public ValueTask InitializeAsync()
     {
-        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-        environment.Should().NotBeNull();
+        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development";
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)

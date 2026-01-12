@@ -1,10 +1,13 @@
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
-using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using FluentValidation;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.Validators;
 
@@ -18,7 +21,8 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         IValidator<SearchTagDto> searchTagValidator,
         IValidator<ContentDto?> contentValidator,
         IValidator<DialogServiceOwnerContextDto?> serviceOwnerContextValidator,
-        IClock clock)
+        IClock clock,
+        IUser user)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
@@ -37,7 +41,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .GreaterThanOrEqualTo(x => x.CreatedAt)
             .WithMessage($"'{{PropertyName}}' must be greater than or equal to '{nameof(CreateDialogDto.CreatedAt)}'.")
             .When(x => x.CreatedAt.HasValue && x.CreatedAt != default(DateTimeOffset) &&
-                       x.UpdatedAt.HasValue && x.UpdatedAt != default(DateTimeOffset));
+                x.UpdatedAt.HasValue && x.UpdatedAt != default(DateTimeOffset));
 
         RuleFor(x => x.IdempotentKey)
             .MaximumLength(36);
@@ -65,6 +69,8 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .MaximumLength(Constants.DefaultMaxStringLength);
 
         RuleFor(x => x.ExpiresAt)
+            .IsInFuture(clock)
+            .When(_ => !HasServiceOwnerAdminScope(user))
             .GreaterThanOrEqualTo(x => x.DueAt)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
             .When(x => x.DueAt.HasValue, ApplyConditionTo.CurrentValidator)
@@ -73,9 +79,15 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
 
         RuleFor(x => x.DueAt)
+            .IsInFuture(clock)
+            .When(_ => !HasServiceOwnerAdminScope(user))
             .GreaterThanOrEqualTo(x => x.VisibleFrom)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
             .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
+
+        RuleFor(x => x.VisibleFrom)
+            .IsInFuture(clock)
+            .When(_ => !HasServiceOwnerAdminScope(user));
 
         RuleFor(x => x.Status)
             .IsInEnum()
@@ -168,4 +180,5 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .When(x => x.SystemLabel is not null)
             .WithMessage($"{{PropertyName}} must be {SystemLabel.Values.Default}, {SystemLabel.Values.Bin} or {SystemLabel.Values.Archive}.");
     }
+    private static bool HasServiceOwnerAdminScope(IUser user) => user.GetPrincipal().HasScope(AuthorizationScope.ServiceOwnerAdminScope);
 }

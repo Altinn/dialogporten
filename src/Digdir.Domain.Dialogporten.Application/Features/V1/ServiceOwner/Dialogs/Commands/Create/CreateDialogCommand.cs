@@ -149,7 +149,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     {
         const string errorMessage = "Must be in the future";
 
-        var clockUtcNow = _clock.UtcNow;
+        var clockUtcNow = _clock.UtcNowOffset;
 
         if (dto.DueAt.HasValue && dto.DueAt <= clockUtcNow)
         {

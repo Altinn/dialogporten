@@ -154,15 +154,17 @@ param userAssignedIdentityId string
 // Container app revision name does not allow '.' character
 var cleanedRevisionSuffix = replace(revisionSuffix, '.', '-')
 
+var whitelistedIpSecurityRestrictions = [
+  for (ip, i) in whitelistedIPs: {
+    name: 'whitelist-${i}'
+    action: 'Allow'
+    ipAddressRange: ip
+  }
+]
+
 var ipSecurityRestrictions = empty(whitelistedIPs)
   ? []
-  : [
-      for (ip, i) in whitelistedIPs: {
-        name: 'whitelist-${i}'
-        action: 'Allow'
-        ipAddressRange: ip
-      }
-    ]
+  : whitelistedIpSecurityRestrictions
 
 var ingress = {
   targetPort: port

@@ -13,8 +13,8 @@ param name string
 @description('The image to be used for the container app')
 param image string
 
-@description('The IP address of the API Management instance')
-param apimIp string?
+@description('List of IP address ranges allowed to access the container app ingress (e.g. APIM public IPs)')
+param whitelistedIPs array = []
 
 @description('The ID of the container app environment')
 param containerAppEnvId string
@@ -154,13 +154,13 @@ param userAssignedIdentityId string
 // Container app revision name does not allow '.' character
 var cleanedRevisionSuffix = replace(revisionSuffix, '.', '-')
 
-var ipSecurityRestrictions = empty(apimIp)
+var ipSecurityRestrictions = empty(whitelistedIPs)
   ? []
   : [
-      {
-        name: 'apim'
+      for (ip, i) in whitelistedIPs: {
+        name: 'whitelist-${i}'
         action: 'Allow'
-        ipAddressRange: apimIp!
+        ipAddressRange: ip
       }
     ]
 

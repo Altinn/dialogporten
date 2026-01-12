@@ -83,7 +83,7 @@ internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<S
                 return new PaginatedList<DialogEndUserContextItemDto>(
                     [],
                     hasNextPage: false,
-                    request.ContinuationToken?.Raw,
+                    null,
                     OrderSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>.Default.GetOrderString());
             }
         }

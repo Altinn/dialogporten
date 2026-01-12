@@ -32,7 +32,10 @@ public sealed class JwtSchemeSelectorMiddleware
             var jwtToken = handler.ReadJwtToken(token);
             context.Items[Constants.CurrentTokenIssuer] = jwtToken.Issuer;
         }
-        catch (ArgumentException) { }
+        catch (Exception)
+        {
+            // Could not read token, continue
+        }
 
         return _next(context);
     }

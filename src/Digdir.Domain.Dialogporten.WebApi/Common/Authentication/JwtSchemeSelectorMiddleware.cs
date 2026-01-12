@@ -39,12 +39,10 @@ public sealed class JwtSchemeSelectorMiddleware
         {
             var jwtToken = handler.ReadJwtToken(token);
             context.Items[Constants.CurrentTokenIssuer] = jwtToken.Issuer;
-            return _next(context);
         }
-        catch (ArgumentException)
-        {
-            return _next(context);
-        }
+        catch (ArgumentException) { }
+
+        return _next(context);
     }
 }
 

@@ -152,7 +152,7 @@ internal sealed class DialogSearchRepository(
 
         if (authorizedResources is not null && authorizedResources.HasNoAuthorizations)
         {
-            return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, continuationToken?.Raw, orderSet.GetOrderString());
+            return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
         }
 
         var queryBuilder = new PostgresFormattableStringBuilder();
@@ -189,7 +189,7 @@ internal sealed class DialogSearchRepository(
 
             if (partiesAndServices.Count == 0)
             {
-                return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, continuationToken?.Raw, orderSet.GetOrderString());
+                return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
             }
 
             LogPartiesAndServicesCount(logger, partiesAndServices);

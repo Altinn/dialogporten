@@ -242,7 +242,8 @@ internal sealed class DialogSearchRepository(
 
         var (query, parameters) = queryBuilder.ToDynamicParameters();
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawEndUserContextListItemRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawEndUserContextListItemRow>(command);
 
         var items = rawRows
             .Select(row =>
@@ -425,7 +426,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var result = await connection.QueryAsync<(Guid Id, int GuiAttachmentCount)>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var result = await connection.QueryAsync<(Guid Id, int GuiAttachmentCount)>(command);
         return result.ToDictionary(x => x.Id, x => x.GuiAttachmentCount);
     }
 
@@ -454,7 +456,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawContentRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawContentRow>(command);
         return rawRows
             .GroupBy(x => new { x.DialogId, x.AuthLevel })
             .ToDictionary(x => x.Key.DialogId, row =>
@@ -499,7 +502,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawEndUserContextRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawEndUserContextRow>(command);
         return rawRows
             .GroupBy(x => new { x.DialogId, x.Revision })
             .ToDictionary(x => x.Key.DialogId, row => new DataDialogEndUserContextDto(
@@ -544,7 +548,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawSeenLogRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawSeenLogRow>(command);
         return rawRows
             .GroupBy(x => x.DialogId)
             .ToDictionary(x => x.Key, x => x.Select(row => new DataDialogSeenLogDto(
@@ -599,7 +604,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawActivityRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawActivityRow>(command);
         return rawRows
             .GroupBy(x => x.DialogId)
             .ToDictionary(x => x.Key, x => x
@@ -640,7 +646,8 @@ internal sealed class DialogSearchRepository(
                  """)
             .ToDynamicParameters();
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<(Guid DialogId, Guid Revision, string Value)>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<(Guid DialogId, Guid Revision, string Value)>(command);
         return rawRows.GroupBy(x => new { x.DialogId, x.Revision })
             .ToDictionary(x => x.Key.DialogId,
                 row => new DataDialogServiceOwnerContextDto(

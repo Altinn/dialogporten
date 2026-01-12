@@ -89,6 +89,7 @@ export function getEndUserTokens(count, tokenOptions = null) {
   let fullTokenOptions = extend({}, defaultTokenOptionsForEndUser, tokenOptions);
   const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&bulkCount=${count}&ttl=${tokenTtl}`;
   tokenRequestOptions.timeout = 600000;
+  console.log(url)
   let response = http.get(url, tokenRequestOptions);
   if (response.status != 200) {
     throw new Error(`Failed getting tokens: ${response.status_text}`);

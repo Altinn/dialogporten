@@ -1,4 +1,5 @@
 import { default as run, options as _options } from "./serviceowner-search.js";
+export { setup } from "./serviceowner-search.js";
 
 export let options = {
     summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(95)', 'p(99)', 'p(99.5)', 'p(99.9)', 'count'],

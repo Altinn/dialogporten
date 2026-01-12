@@ -1,4 +1,4 @@
-const localBaseUrl = "https://localhost:7214/";
+const localBaseUrl = "http://localhost:7214/";
 const localDockerBaseUrl = "https://host.docker.internal:7214/";
 const testBaseUrl = "https://altinn-dev-api.azure-api.net/dialogporten/";
 const yt01BaseUrl = "https://platform.yt01.altinn.cloud/dialogporten/";

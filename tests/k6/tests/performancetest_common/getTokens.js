@@ -4,6 +4,9 @@ const tokenGeneratorEnv = __ENV.API_ENVIRONMENT || 'yt01';
 const tokenTtl = __ENV.TTL || 3600;
 
 export function getEnterpriseToken(serviceOwner) {
+    if (tokenGeneratorEnv === 'localdev') {
+        return 'local-dev-token';
+    }
     const tokenOptions = {
         scopes: serviceOwner.scopes,
         orgName: serviceOwner.org,
@@ -14,6 +17,9 @@ export function getEnterpriseToken(serviceOwner) {
 }
 
 export function getPersonalToken(endUser) {
+    if (tokenGeneratorEnv === 'localdev') {
+        return 'local-dev-token';
+}
     const tokenOptions = {
         scopes: endUser.scopes,
         ssn: endUser.ssn

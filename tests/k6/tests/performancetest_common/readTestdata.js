@@ -74,8 +74,12 @@ export const endUsers = new SharedArray('endUsers', function () {
  * Reads the enduser data from github raw CSV file.
  * @returns {Array} endUsers - Array of end users read from CSV file.
  */
-export function getParties(){
-  const res = http.get(`https://raw.githubusercontent.com/Altinn/dialogporten/refs/heads/main/tests/k6/tests/performancetest_data/parties-${__ENV.API_ENVIRONMENT}.csv`);
+export function getParties() {
+  let env = __ENV.API_ENVIRONMENT;
+  if (env === 'localdev' || env === 'localdev_docker') {
+    env = 'yt01';
+  }
+  const res = http.get(`https://raw.githubusercontent.com/Altinn/dialogporten/refs/heads/main/tests/k6/tests/performancetest_data/parties-${env}.csv`);
   return parseCsvData(res.body);
 }
 
@@ -105,16 +109,20 @@ export function setup() {
   const totalVus = exec.test.options.scenarios.default.vus ?? __ENV.stages_target ?? 10;
   let parts = [];
   for (let i = 1; i <= totalVus; i++) {
-      parts.push(endUsersPart(totalVus, i));
+      if (i <= endUsers.length) {
+        parts.push(endUsersPart(totalVus, i));
+      }
   }
   return parts;
 }
 
 export function validateTestData(data, serviceOwners=null) {
-    if (!Array.isArray(data) || !data[exec.vu.idInTest - 1]) {
+    const ix = (exec.vu.idInTest - 1) % data.length;
+    if (!Array.isArray(data) || !data[ix]) {
         throw new Error('Invalid data structure: expected array of end users');
     }
-    const myEndUsers = data[exec.vu.idInTest - 1];
+    
+    const myEndUsers = data[ix];
     if (!Array.isArray(myEndUsers) || myEndUsers.length === 0) {
         throw new Error('Invalid end users array: expected non-empty array');
     }

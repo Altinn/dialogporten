@@ -151,17 +151,17 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         var clockUtcNow = _clock.UtcNow;
 
-        if (dto.DueAt <= clockUtcNow)
+        if (dto.DueAt.HasValue && dto.DueAt <= clockUtcNow)
         {
             _domainContext.AddError(nameof(CreateDialogCommand.Dto.DueAt), errorMessage);
         }
 
-        if (dto.ExpiresAt <= clockUtcNow)
+        if (dto.ExpiresAt.HasValue && dto.ExpiresAt <= clockUtcNow)
         {
             _domainContext.AddError(nameof(CreateDialogCommand.Dto.ExpiresAt), errorMessage);
         }
 
-        if (dto.VisibleFrom <= clockUtcNow)
+        if (dto.VisibleFrom.HasValue && dto.VisibleFrom <= clockUtcNow)
         {
             _domainContext.AddError(nameof(CreateDialogCommand.Dto.VisibleFrom), errorMessage);
         }

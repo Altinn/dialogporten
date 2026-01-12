@@ -43,6 +43,8 @@ public sealed class JwtSchemeSelectorMiddleware
         catch (Exception)
         {
             // Could not read token, continue
+            // This will be handled later in the
+            // pipeline and will result in a 401 Unauthorized
         }
 
         return _next(context);

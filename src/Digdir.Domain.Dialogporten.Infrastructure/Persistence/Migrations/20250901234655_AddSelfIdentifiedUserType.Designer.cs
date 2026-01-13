@@ -1159,7 +1159,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 5,
-                            Name = "SelfIdentifiedUser"
+                            Name = "IdportenSelfIdentifiedUser"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "AltinnSelfIdentifiedUser"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "FeideUser"
                         });
                 });
 

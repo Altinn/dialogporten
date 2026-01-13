@@ -13,7 +13,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.InsertData(
                 table: "DialogUserType",
                 columns: new[] { "Id", "Name" },
-                values: new object[] { 5, "LegacySelfIdentifiedUser" });
+                values: new object[,]
+                {
+                    { 5, "IdportenEmailIdentifiedUser" },
+                    { 6, "AltinnSelfIdentifiedUser" },
+                    { 7, "FeideUser" }
+                });
         }
 
         /// <inheritdoc />
@@ -23,6 +28,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 table: "DialogUserType",
                 keyColumn: "Id",
                 keyValue: 5);
+
+            migrationBuilder.DeleteData(
+                table: "DialogUserType",
+                keyColumn: "Id",
+                keyValue: 6);
+
+            migrationBuilder.DeleteData(
+                table: "DialogUserType",
+                keyColumn: "Id",
+                keyValue: 7);
         }
     }
 }

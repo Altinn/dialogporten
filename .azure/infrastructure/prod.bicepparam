@@ -58,7 +58,7 @@ param postgresConfiguration = {
     enabled: false
   }
   highAvailability: {
-    mode: 'ZoneRedundant'
+    mode: 'Disabled'
     standbyAvailabilityZone: '2'
   }
   backupRetentionDays: 32

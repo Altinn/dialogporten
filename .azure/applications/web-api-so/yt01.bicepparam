@@ -2,7 +2,9 @@ using './main.bicep'
 
 param environment = 'yt01'
 param location = 'norwayeast'
-param apimIp = '51.13.85.197'
+param whitelistedIPs = [
+  '51.13.85.197'
+]
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param revisionSuffix = readEnvironmentVariable('REVISION_SUFFIX')
 param resources = {

@@ -43,7 +43,7 @@ param appInsightsSku = {
 param postgresConfiguration = {
   sku: {
     name: 'Standard_E16ads_v5'
-    tier: 'GeneralPurpose'
+    tier: 'MemoryOptimized'
   }
   storage: {
     storageSizeGB: 4096

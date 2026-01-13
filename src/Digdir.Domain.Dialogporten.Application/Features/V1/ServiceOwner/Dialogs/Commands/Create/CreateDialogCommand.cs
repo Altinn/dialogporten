@@ -51,6 +51,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
     private readonly IUser _user;
     private readonly IClock _clock;
+    private readonly IUserResourceRegistry _userResourceRegistry;
 
     public CreateDialogCommandHandler(
         IUser user,
@@ -60,6 +61,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IResourceRegistry resourceRegistry,
+        IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
         ITransmissionHierarchyValidator transmissionHierarchyValidator)
     {
@@ -69,6 +71,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
@@ -102,7 +105,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return new Conflict(nameof(dialog.IdempotentKey), $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
         }
 
-        if (!request.IsSilentUpdate)
+        if (!request.IsSilentUpdate || _userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
             ValidateTimeFields(request.Dto);
         }

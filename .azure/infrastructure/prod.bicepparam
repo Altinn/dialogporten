@@ -42,7 +42,7 @@ param appInsightsSku = {
 }
 param postgresConfiguration = {
   sku: {
-    name: 'Standard_D16ads_v5'
+    name: 'Standard_E16ads_v5'
     tier: 'GeneralPurpose'
   }
   storage: {

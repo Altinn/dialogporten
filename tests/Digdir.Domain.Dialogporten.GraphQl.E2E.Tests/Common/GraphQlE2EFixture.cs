@@ -3,6 +3,7 @@ using Altinn.ApiClients.Dialogporten.Features.V1;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Refit;
 using Xunit;
 using static System.Text.Json.Serialization.JsonIgnoreCondition;
@@ -19,7 +20,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
     public ValueTask InitializeAsync()
     {
-        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development";
+        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? Environments.Development;
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
@@ -61,14 +62,17 @@ public class GraphQlE2EFixture : IAsyncLifetime
             ? settings.DialogportenBaseUri
             : settings.DialogportenBaseUri.Replace("https", "http");
 
+
+        var graphQlPath = environment == Environments.Development ? "/graphql" : "/dialogporten/graphql";
+        var graphQlUri = new UriBuilder(graphQlBaseAddress)
+        {
+            Path = graphQlPath,
+            Port = settings.GraphQlPort
+        }.Uri;
+
         services
             .AddDialogportenGraphQlTestClient()
-            .ConfigureHttpClient(x => x.BaseAddress =
-                    new UriBuilder(graphQlBaseAddress)
-                    {
-                        Path = "/graphql",
-                        Port = settings.GraphQlPort
-                    }.Uri,
+            .ConfigureHttpClient(x => x.BaseAddress = graphQlUri,
                 builder => builder.AddHttpMessageHandler(serviceProvider =>
                     ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser)));
 

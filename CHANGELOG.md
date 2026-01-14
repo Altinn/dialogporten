@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.98.1](https://github.com/Altinn/dialogporten/compare/v1.98.0...v1.98.1) (2026-01-14)
+
+
+### Bug Fixes
+
+* **ci:** use correct apim url in at23 ([#3248](https://github.com/Altinn/dialogporten/issues/3248)) ([6755982](https://github.com/Altinn/dialogporten/commit/67559821fe85c7993f2799edb5586939c79fb683))
+* use correct base uri for dev environment ([#3245](https://github.com/Altinn/dialogporten/issues/3245)) ([0382dd7](https://github.com/Altinn/dialogporten/commit/0382dd7bdaf7aeb8b8dc360dc5c0d3f29710251c))
+
+
+### Miscellaneous Chores
+
+* **ci:** set prod db sku to Standard_E16ads_v5 ([#3250](https://github.com/Altinn/dialogporten/issues/3250)) ([70c49f2](https://github.com/Altinn/dialogporten/commit/70c49f20d64cf4ca703b8b16b2d013ebde434bc3))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.143.1 ([#3252](https://github.com/Altinn/dialogporten/issues/3252)) ([7614d01](https://github.com/Altinn/dialogporten/commit/7614d01cb0128fa635a333bfedc82b4ce1976c61))
+* **deps:** update prom/prometheus docker tag to v3.9.0 ([#3253](https://github.com/Altinn/dialogporten/issues/3253)) ([841b1ed](https://github.com/Altinn/dialogporten/commit/841b1ede4cac0454fe1c77316984c1479c0ece4c))
+
 ## [1.98.0](https://github.com/Altinn/dialogporten/compare/v1.97.1...v1.98.0) (2026-01-12)
 
 

@@ -111,6 +111,7 @@ public static class InfrastructureExtensions
 
             // Transient
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))

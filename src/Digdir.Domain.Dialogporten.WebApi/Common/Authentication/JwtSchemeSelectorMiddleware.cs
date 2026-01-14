@@ -39,12 +39,15 @@ public sealed class JwtSchemeSelectorMiddleware
         {
             var jwtToken = handler.ReadJwtToken(token);
             context.Items[Constants.CurrentTokenIssuer] = jwtToken.Issuer;
-            return _next(context);
         }
         catch (Exception)
         {
-            return context.Response.SendErrorsAsync([new ValidationFailure("BearerToken", "Malformed token")]);
+            // Could not read token, continue
+            // This will be handled later in the
+            // pipeline and will result in a 401 Unauthorized
         }
+
+        return _next(context);
     }
 }
 

@@ -8,7 +8,13 @@ namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
 [Collection(nameof(GraphQlTestCollectionFixture))]
 public class DialogByIdTests : GraphQlE2EFixture
 {
-    [Fact(Explicit = true)]
+    public DialogByIdTests()
+    {
+        PreflightCheck();
+    }
+
+    // [Fact(Explicit = true)]
+    [Fact]
     public async Task Should_Return_Typed_NotFound_Error_For_Invalid_DialogId()
     {
         // Arrange

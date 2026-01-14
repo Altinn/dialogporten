@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
@@ -35,6 +36,7 @@ public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<Set
         {
             DialogId = req.DialogId,
             EndUserId = req.EnduserId,
+            PerformedBy = req.PerformedBy,
             AddLabels = req.AddLabels,
             RemoveLabels = req.RemoveLabels,
             IfMatchEndUserContextRevision = req.IfMatchEnduserContextRevision
@@ -49,6 +51,7 @@ public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<Set
             },
             notFound => this.NotFoundAsync(notFound, ct),
             deleted => this.GoneAsync(deleted, ct),
+            forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),
             concurrencyError => this.PreconditionFailed(ct));
@@ -63,7 +66,7 @@ public sealed class SetDialogSystemLabelRequest
     public Guid? IfMatchEnduserContextRevision { get; set; }
 
     [QueryParam]
-    public string EnduserId { get; init; } = string.Empty;
+    public string? EnduserId { get; init; }
 
     public Guid DialogId { get; set; }
 
@@ -90,4 +93,9 @@ public sealed class SetDialogSystemLabelRequest
     /// List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
     /// </summary>
     public IReadOnlyCollection<SystemLabel.Values> RemoveLabels { get; init; } = [];
+
+    /// <summary>
+    /// Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.
+    /// </summary>
+    public ActorDto? PerformedBy { get; init; }
 }

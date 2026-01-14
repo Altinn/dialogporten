@@ -221,9 +221,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
         Task<IApiResponse> V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
 
@@ -260,9 +264,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
         Task<IApiResponse> V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -296,9 +304,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>A server side error occurred.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Delete("/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}")]
         Task<IApiResponse> V1ServiceOwnerServiceOwnerContextCommandsDeleteServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -348,9 +360,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels")]
         Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -388,9 +404,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
         Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
 
@@ -424,9 +444,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission>>> V1ServiceOwnerDialogsQueriesSearchTransmissionsDialogTransmission(System.Guid dialogId, CancellationToken cancellationToken = default);
 
@@ -480,9 +504,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(System.Guid dialogId, [Body, AliasAs("CreateTransmissionRequest")] V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest createTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -516,9 +544,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog>>> V1ServiceOwnerDialogsQueriesSearchSeenLogsDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
 
@@ -548,9 +580,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchActivities_Activity>>> V1ServiceOwnerDialogsQueriesSearchActivitiesDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
 
@@ -604,9 +640,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(System.Guid dialogId, [Body, AliasAs("CreateActivityRequest")] V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest createActivityRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -635,9 +675,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>401</term>
         /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json")]
+        [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs")]
         Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsQueriesSearchDialog([Query] V1ServiceOwnerDialogsQueriesSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
 
@@ -683,9 +727,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs")]
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
 
@@ -712,9 +760,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>403</term>
         /// <description>Forbidden</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json")]
+        [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition>> V1ServiceOwnerDialogsQueriesNotificationConditionNotificationCondition(System.Guid dialogId, [Query] V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams queryParams, CancellationToken cancellationToken = default);
 
@@ -748,9 +800,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
@@ -784,9 +840,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog>> V1ServiceOwnerDialogsQueriesGetSeenLogDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
 
@@ -820,9 +880,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetActivity_Activity>> V1ServiceOwnerDialogsQueriesGetActivityDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
 
@@ -857,9 +921,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> V1ServiceOwnerDialogsQueriesGetDialog(System.Guid dialogId, [Query] string endUserId, CancellationToken cancellationToken = default);
 
@@ -909,9 +977,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsUpdateDialog(System.Guid dialogId, [Body] V1ServiceOwnerDialogsCommandsUpdate_Dialog dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -960,9 +1032,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Delete("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsDeleteDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -1013,9 +1089,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json", "Content-Type: application/json")]
+        [Headers("Accept: application/json, text/plain", "Content-Type: application/json")]
         [Patch("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse> V1ServiceOwnerDialogsPatchDialog(System.Guid dialogId, [Body] IEnumerable<JsonPatchOperations_Operation> patchDocument, [Header("If-Match")] System.Guid? etag, CancellationToken cancellationToken = default);
 
@@ -1049,9 +1129,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/restore")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsRestoreDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -1089,9 +1173,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/purge")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsPurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -1136,9 +1224,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsFreezeFreezeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
     }
@@ -1253,6 +1345,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
+        /// <summary>
+        /// Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.
+        /// </summary>
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -1273,6 +1371,43 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Sent")]
         Sent = 4,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerCommonActors_Actor
+    {
+
+        /// <summary>
+        /// The type of actor; either the service owner, or someone representing the party.
+        /// </summary>
+        [JsonPropertyName("actorType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
+        public Actors_ActorType ActorType { get; set; }
+
+        /// <summary>
+        /// The name of the actor.
+        /// </summary>
+        [JsonPropertyName("actorName")]
+        public string ActorName { get; set; }
+
+        /// <summary>
+        /// The identifier (national identity number or organization number) of the actor.
+        /// </summary>
+        [JsonPropertyName("actorId")]
+        public string ActorId { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Actors_ActorType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
+        PartyRepresentative = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
+        ServiceOwner = 1,
 
     }
 
@@ -1307,6 +1442,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("removeLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
+
+        /// <summary>
+        /// Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.
+        /// </summary>
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
 
     }
 
@@ -1428,43 +1569,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Correction")]
         Correction = 7,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerCommonActors_Actor
-    {
-
-        /// <summary>
-        /// The type of actor; either the service owner, or someone representing the party.
-        /// </summary>
-        [JsonPropertyName("actorType")]
-        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
-        public Actors_ActorType ActorType { get; set; }
-
-        /// <summary>
-        /// The name of the actor.
-        /// </summary>
-        [JsonPropertyName("actorName")]
-        public string ActorName { get; set; }
-
-        /// <summary>
-        /// The identifier (national identity number or organization number) of the actor.
-        /// </summary>
-        [JsonPropertyName("actorId")]
-        public string ActorId { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Actors_ActorType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
-        PartyRepresentative = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
-        ServiceOwner = 1,
 
     }
 
@@ -3599,7 +3703,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -3926,7 +4030,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -3978,7 +4082,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -4037,13 +4141,92 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The transmission unstructured text content.
         /// </summary>
         [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
+        public V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent Content { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.
         /// </summary>
         [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
+        public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment> Attachments { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent
+    {
+
+        /// <summary>
+        /// The transmission title. Must be text/plain.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public V1CommonContent_ContentValue Title { get; set; }
+
+        /// <summary>
+        /// The transmission summary.
+        /// </summary>
+        [JsonPropertyName("summary")]
+        public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
+        /// </summary>
+        [JsonPropertyName("contentReference")]
+        public V1CommonContent_ContentValue ContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment
+    {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// The display name of the attachment that should be used in GUIs.
+        /// </summary>
+        [JsonPropertyName("displayName")]
+        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
+        /// </summary>
+        [JsonPropertyName("urls")]
+        public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl> Urls { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl
+    {
+
+        /// <summary>
+        /// The fully qualified URL of the attachment.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The media type of the attachment.
+        /// </summary>
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// The type of consumer the URL is intended for.
+        /// </summary>
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
+        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
 
     }
 
@@ -4052,7 +4235,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]

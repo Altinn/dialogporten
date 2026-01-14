@@ -54,7 +54,7 @@ internal static class AuthorizedPartiesRequestExtensions
         var rawKey = $"{request.PartyIdentifier.FullId}|{optionsKey}|{partyFilterKey}";
 
         var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
-        var hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+        var hashString = Convert.ToHexStringLower(hashBytes);
 
         return $"auth:parties:{hashString}";
     }

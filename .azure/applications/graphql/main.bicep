@@ -14,9 +14,9 @@ param environment string
 @minLength(3)
 param location string
 
-@description('The IP address of the API Management instance')
-@minLength(3)
-param apimIp string
+@description('List of IP address ranges allowed to access the container app ingress (e.g. APIM public IPs)')
+@minLength(1)
+param whitelistedIPs string[]
 
 @description('The suffix for the revision of the container app')
 @minLength(3)
@@ -147,7 +147,7 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     location: location
     envVariables: containerAppEnvVars
     containerAppEnvId: containerAppEnvironment.id
-    apimIp: apimIp
+    whitelistedIPs: whitelistedIPs
     tags: tags
     resources: resources
     revisionSuffix: revisionSuffix

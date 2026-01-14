@@ -46,7 +46,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
 public sealed class BulkSetDialogSystemLabelsRequest
 {
     [QueryParam]
-    public string EnduserId { get; init; } = string.Empty;
+    public string? EnduserId { get; init; }
 
     [FromBody]
     public BulkSetSystemLabelDto Dto { get; set; } = null!;

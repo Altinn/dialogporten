@@ -14,7 +14,7 @@ internal sealed class CreateDialogTransmissionAttachmentDtoValidator : AbstractV
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
-            .UuidV7TimestampIsInPast();
+            .UuidV7TimestampIsInPast(clock);
 
         RuleFor(x => x.DisplayName)
             .SetValidator(localizationsValidator);

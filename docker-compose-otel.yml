@@ -31,7 +31,7 @@ services:
 
   # Prometheus for metrics
   prometheus:
-    image: prom/prometheus:v3.8.1
+    image: prom/prometheus:v3.9.0
     volumes:
       - ./local-otel-configuration/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:

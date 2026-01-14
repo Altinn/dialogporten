@@ -15,10 +15,10 @@ public class GraphQlE2EFixture : IAsyncLifetime
     private ServiceProvider? _serviceProvider;
     private ITokenOverridesAccessor? _tokenOverridesAccessor;
 
-    private PreflightState PreflightState { get; set; } = null!;
+    private PreflightState? PreflightState { get; set; }
 
-    protected IDialogportenGraphQlTestClient GraphQlClient { get; private set; } = null!;
-    protected IServiceownerApi ServiceownerApi { get; private set; } = null!;
+    public IDialogportenGraphQlTestClient GraphQlClient { get; private set; } = null!;
+    public IServiceownerApi ServiceownerApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -84,8 +84,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
         ServiceownerApi = _serviceProvider.GetRequiredService<IServiceownerApi>();
         _tokenOverridesAccessor = _serviceProvider.GetRequiredService<ITokenOverridesAccessor>();
 
-        var preflight = await CreatePreflightState(graphQlUri, webApiUri);
-        PreflightState = preflight;
+        PreflightState = await CreatePreflightState(graphQlUri, webApiUri);
     }
 
     public ValueTask DisposeAsync()
@@ -115,9 +114,14 @@ public class GraphQlE2EFixture : IAsyncLifetime
         UseTokenOverrides(new TokenOverrides(
             ServiceOwner: new ServiceOwnerTokenOverrides(orgNumber, orgName, scopes, tokenOverride)));
 
-    protected void PreflightCheck()
+    public void PreflightCheck()
     {
         var issues = new List<string>();
+
+        if (PreflightState is null)
+        {
+            throw new InvalidOperationException("Preflight state is not initialized.");
+        }
 
         if (PreflightState.GraphQlError is not null)
         {
@@ -131,7 +135,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
         if (issues.Count != 0)
         {
-            throw SkipException.ForSkip($"GraphQL E2E preflight failed: {Environment.NewLine} {string.Join("; ", issues)}");
+            throw SkipException.ForSkip($"GraphQL E2E preflight failed:{Environment.NewLine}{string.Join($"{Environment.NewLine}", issues)}");
         }
     }
 

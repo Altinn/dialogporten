@@ -6,15 +6,17 @@ using Xunit;
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
 
 [Collection(nameof(GraphQlTestCollectionFixture))]
-public class DialogByIdTests : GraphQlE2EFixture
+public class DialogByIdTests
 {
-    public DialogByIdTests()
+    private readonly GraphQlE2EFixture _fixture;
+
+    public DialogByIdTests(GraphQlE2EFixture fixture)
     {
-        PreflightCheck();
+        _fixture = fixture;
+        _fixture.PreflightCheck();
     }
 
-    // [Fact(Explicit = true)]
-    [Fact]
+    [Fact(Explicit = true)]
     public async Task Should_Return_Typed_NotFound_Error_For_Invalid_DialogId()
     {
         // Arrange
@@ -53,7 +55,7 @@ public class DialogByIdTests : GraphQlE2EFixture
     public async Task Should_Return_401_Unauthorized_With_Invalid_EndUser_Token()
     {
         // Arrange
-        using var _ = UseEndUserTokenOverrides(tokenOverride: "invalid.jwt.token");
+        using var _ = _fixture.UseEndUserTokenOverrides(tokenOverride: "invalid.jwt.token");
         var dialogId = Guid.NewGuid();
 
         // Act
@@ -74,7 +76,7 @@ public class DialogByIdTests : GraphQlE2EFixture
         // Fetching dialog with default EndUser, should return dialog
         var authorizedResult = await GetDialog(dialogId);
 
-        using var _ = UseEndUserTokenOverrides(ssn: "27069815400");
+        using var _ = _fixture.UseEndUserTokenOverrides(ssn: "27069815400");
         var unauthorizedResult = await GetDialog(dialogId);
 
         // Assert
@@ -89,12 +91,12 @@ public class DialogByIdTests : GraphQlE2EFixture
     }
 
     private Task<IOperationResult<IGetDialogByIdResult>> GetDialog(Guid dialogId) =>
-        GraphQlClient.GetDialogById.ExecuteAsync(dialogId, TestContext.Current.CancellationToken);
+        _fixture.GraphQlClient.GetDialogById.ExecuteAsync(dialogId, TestContext.Current.CancellationToken);
 
     private async Task<Guid> CreateSimpleDialog()
     {
         var createDialogResponse =
-            await ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
+            await _fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
                 DialogTestData.CreateDialog(
                     serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
                     party: $"urn:altinn:person:identifier-no:{TestTokenConstants.DefaultEndUserSsn}",

@@ -155,12 +155,11 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
     private static async Task<string?> TryPing(HttpClient httpClient, Uri uri)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        using var request = new HttpRequestMessage(HttpMethod.Head, uri);
 
         try
         {
-            using var result = await httpClient.SendAsync(request);
-            result.EnsureSuccessStatusCode();
+            using var _ = await httpClient.SendAsync(request);
             return null;
         }
         catch (Exception exception)

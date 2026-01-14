@@ -1,6 +1,6 @@
 const localBaseUrl = "https://localhost:7214/";
 const localDockerBaseUrl = "https://host.docker.internal:7214/";
-const testBaseUrl = "https://altinn-dev-api.azure-api.net/dialogporten/";
+const testBaseUrl = "https://platform.at23.altinn.cloud/dialogporten/";
 const yt01BaseUrl = "https://platform.yt01.altinn.cloud/dialogporten/";
 const stagingBaseUrl = "https://platform.tt02.altinn.no/dialogporten/";
 const prodBaseUrl = "https://platform.altinn.no/dialogporten/";
@@ -50,7 +50,7 @@ export const otherOrg = (() => {
     switch (__ENV.API_ENVIRONMENT) {
         case 'test':
         case 'localdev':
-        case 'localdev_docker':    
+        case 'localdev_docker':
             return {
                 orgNo: '974760673',
                 name: 'brg',
@@ -59,16 +59,16 @@ export const otherOrg = (() => {
         case 'yt01':
             return {
                 orgNo: '974761076',
-                name: 'skd', 
+                name: 'skd',
                 serviceResource: 'app_skd_formueinntekt-skattemelding-v2'
             };
         case 'staging':
-        case 'prod':    
+        case 'prod':
             return {
                 orgNo: '889640782',
                 name: 'nav',
                 serviceResource: 'app_nav_barnehagelister'
-            }; 
+            };
         default:
             throw new Error(`Invalid API environment: ${__ENV.API_ENVIRONMENT}. Please ensure it's set correctly in your environment variables.`);
     }

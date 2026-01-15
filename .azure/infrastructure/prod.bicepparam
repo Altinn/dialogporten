@@ -42,8 +42,8 @@ param appInsightsSku = {
 }
 param postgresConfiguration = {
   sku: {
-    name: 'Standard_D16ads_v5'
-    tier: 'GeneralPurpose'
+    name: 'Standard_E16ads_v5'
+    tier: 'MemoryOptimized'
   }
   storage: {
     storageSizeGB: 4096
@@ -58,7 +58,7 @@ param postgresConfiguration = {
     enabled: false
   }
   highAvailability: {
-    mode: 'ZoneRedundant'
+    mode: 'Disabled'
     standbyAvailabilityZone: '2'
   }
   backupRetentionDays: 32

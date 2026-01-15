@@ -253,5 +253,11 @@ Note: set `minReplicaCount` from env overlays (prod uses 2 for web-api-so, web-a
 - Each environment folder must contain a `kustomization.yaml` entry point.
 Tagging: use the same version tags as application images (`<semver>` for releases, `<semver>-<sha>` for main/test).
 
+## Platform gaps to plan for
+- KEDA is not referenced in the platform repo; confirm if DIS provides it or add it (else use HPA).
+- No RoleAssignment CR examples in platform Flux; we need to define our own `authorization.azure.com` RoleAssignments.
+- No internal Traefik entrypoint exists; internal-only access must be enforced via allowlists on `http`/`https`.
+- GHCR OCIRepositorys are not used in platform; confirm Flux auth for GHCR or use ACR if required.
+
 ## Open questions
 - None.

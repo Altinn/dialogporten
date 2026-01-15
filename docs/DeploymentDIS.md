@@ -130,3 +130,9 @@ We keep release-please for versioning and image publishing, and add a syncroot b
 - External Secrets store name, Key Vault URL, and service account name per environment.
 - Whether `AZURE_CLIENT_ID` is injected automatically from the ServiceAccount annotation.
 - ASO RoleAssignment schema details (principal reference vs principalId).
+
+## Platform gaps to plan for
+- KEDA is not present in the platform repo; confirm if DIS provides it or add it (else use HPA).
+- No existing RoleAssignment CRs in platform Flux; we need to define our own `authorization.azure.com` RoleAssignments for app identities.
+- No internal Traefik entrypoint exists; internal-only access must be enforced via allowlists on `http`/`https`.
+- GHCR OCIRepositorys are not used in platform; confirm Flux auth for GHCR or use ACR if required.

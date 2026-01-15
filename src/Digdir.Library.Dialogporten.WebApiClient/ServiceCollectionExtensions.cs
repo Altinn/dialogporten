@@ -1,5 +1,7 @@
 using System.CodeDom.Compiler;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.Common;
 using Altinn.ApiClients.Dialogporten.Infrastructure;
 using Altinn.ApiClients.Dialogporten.Services;
@@ -32,10 +34,18 @@ public static class ServiceCollectionExtensions
                 x.GetCustomAttribute<GeneratedCodeAttribute>()?.Tool == "Refitter")
             .ToList();
 
+        var jsonSerializerOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
         foreach (var refitClient in refitClients)
         {
             services
-                .AddRefitClient(refitClient)
+                .AddRefitClient(refitClient, new RefitSettings
+                {
+                    ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
+                })
                 .ConfigureHttpClient(c => c.BaseAddress = new Uri(settings.BaseUri))
                 .AddMaskinportenHttpMessageHandler<SettingsJwkClientDefinition>(ClientDefinitionKey);
         }

@@ -1,5 +1,5 @@
-import { customConsole as console } from './console.js';
-import { sentinelValue } from './config.js';
+import {customConsole as console} from './console.js';
+import {sentinelValue} from './config.js';
 
 export function setIsApiOnly(dialog, isApiOnly = true) {
     dialog.isApiOnly = isApiOnly;
@@ -20,18 +20,16 @@ export function setContent(dialog, type, value, language = "nb") {
 
     dialog.content = dialog.content || {};
 
-    if(dialog.content[`${type}`]) {
+    if (dialog.content[`${type}`]) {
         const lang_index = dialog.content[`${type}`].value.findIndex(t => t.languageCode === language);
         if (lang_index !== -1) {
             dialog.content[`${type}`].value[lang_index].value = value;
+        } else {
+            dialog.content[`${type}`].value.push({languageCode: language, value: value});
         }
-        else {
-            dialog.content[`${type}`].value.push({ languageCode: language, value: value });
-        }
-    }
-    else {
+    } else {
         dialog.content[`${type}`] = {
-            value: [ { languageCode: language, value: value } ]
+            value: [{languageCode: language, value: value}]
         }
     }
 }
@@ -42,7 +40,7 @@ export function setSearchTags(dialog, searchTags) {
     }
     let tags = [];
     searchTags.forEach((t) => {
-        tags.push({ "value": t });
+        tags.push({"value": t});
     })
 
     dialog.searchTags = tags;
@@ -145,10 +143,11 @@ export function setVisibleFrom(dialog, visibleFrom) {
 
     dialog.visibleFrom = visibleFrom;
 }
+
 export function setSystemLabel(dialog, systemLabel) {
     let validLabels = ['Default', 'Bin', 'Archive']
     if (!validLabels.includes(systemLabel)) {
-       throw new Error("Invalid systemLabel provided.");
+        throw new Error("Invalid systemLabel provided.");
     }
     dialog.systemLabel = systemLabel;
 }
@@ -159,15 +158,33 @@ export function setServiceOwnerLabels(dialog, serviceOwnerLabels) {
     }
     let labels = [];
     serviceOwnerLabels.forEach((l) => {
-        labels.push({ "value": l });
+        labels.push({"value": l});
     })
 
     dialog.serviceOwnerContext = dialog.serviceOwnerContext || {};
 
     // Always add the sentinel value to the labels to ensure dialogs are cleaned up
-    labels.push({ "value": sentinelValue });
+    labels.push({"value": sentinelValue});
 
     dialog.serviceOwnerContext.ServiceOwnerLabels = labels;
+}
+
+export function setAttachments(dialog, attachments) {
+    if (attachments == null) {
+        delete dialog.attachments;
+        return;
+    }
+    dialog.attachments = attachments;
+}
+
+export function addAttachment(dialog, attachment) {
+    if (attachment == null) {
+        return;
+    }
+    if (dialog.attachments == null) {
+        dialog.attachments = [];
+    }
+    dialog.attachments.push(attachment);
 }
 
 export function setActivities(dialog, activities) {
@@ -179,11 +196,11 @@ export function setActivities(dialog, activities) {
 }
 
 export function addActivity(dialog, activity) {
-   if (activity == null) return;
-   if (dialog.activities == null) {
+    if (activity == null) return;
+    if (dialog.activities == null) {
         dialog.activities = [];
-   }
-   dialog.activities.push(activity);
+    }
+    dialog.activities.push(activity);
 }
 
 function dateToUTCString(date) {

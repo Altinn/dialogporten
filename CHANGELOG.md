@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.98.2](https://github.com/Altinn/dialogporten/compare/v1.98.1...v1.98.2) (2026-01-15)
+
+
+### Miscellaneous Chores
+
+* **infra:** enable more sku types for psql ([#3257](https://github.com/Altinn/dialogporten/issues/3257)) ([ba5c553](https://github.com/Altinn/dialogporten/commit/ba5c55312f9451e5d4124c899f3b1a84e191a229))
+
 ## [1.98.1](https://github.com/Altinn/dialogporten/compare/v1.98.0...v1.98.1) (2026-01-14)
 
 

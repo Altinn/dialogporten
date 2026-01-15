@@ -107,13 +107,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden("User cannot modify frozen dialog");
         }
 
-        // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
-        // and to guarantee deterministic order of input to output dtos.
-        dialog.Transmissions.Cast<IIdentifiableEntity>()
-            .Concat(dialog.Transmissions.SelectMany(x => x.Attachments))
-            .Concat(dialog.Attachments)
-            .EnsureIds();
-
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
         ValidateTimeFields(dialog);

@@ -55,6 +55,11 @@ public sealed class SetSystemLabelValidationError : ISetSystemLabelError
     public string Message { get; set; } = null!;
 }
 
+public sealed class SetSystemLabelConflictError : ISetSystemLabelError
+{
+    public string Message { get; set; } = null!;
+}
+
 public sealed class BulkSetSystemLabelInput
 {
     public List<DialogRevisionInput> Dialogs { get; set; } = [];
@@ -100,6 +105,11 @@ public sealed class BulkSetSystemLabelValidationError : IBulkSetSystemLabelError
 }
 
 public sealed class BulkSetSystemLabelConcurrencyError : IBulkSetSystemLabelError
+{
+    public string Message { get; set; } = null!;
+}
+
+public sealed class BulkSetSystemLabelConflictError : IBulkSetSystemLabelError
 {
     public string Message { get; set; } = null!;
 }

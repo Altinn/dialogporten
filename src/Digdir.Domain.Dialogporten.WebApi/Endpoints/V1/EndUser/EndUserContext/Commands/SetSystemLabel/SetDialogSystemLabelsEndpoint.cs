@@ -50,7 +50,8 @@ public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<Set
             deleted => this.GoneAsync(deleted, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

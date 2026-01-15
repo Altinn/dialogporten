@@ -37,6 +37,7 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
                 return SendOkAsync(dto, ct);
             },
             notFound => this.NotFoundAsync(notFound, ct),
-            validationError => this.BadRequestAsync(validationError, ct));
+            validationError => this.BadRequestAsync(validationError, ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }

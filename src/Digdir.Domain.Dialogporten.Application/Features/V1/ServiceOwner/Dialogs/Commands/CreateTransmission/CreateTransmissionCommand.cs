@@ -33,7 +33,7 @@ public sealed class CreateTransmissionCommand : IRequest<CreateTransmissionResul
 }
 
 [GenerateOneOf]
-public sealed partial class CreateTransmissionResult : OneOfBase<CreateTransmissionSuccess, EntityNotFound, EntityDeleted, ValidationError, Forbidden, DomainError, ConcurrencyError>;
+public sealed partial class CreateTransmissionResult : OneOfBase<CreateTransmissionSuccess, EntityNotFound, EntityDeleted, ValidationError, Forbidden, DomainError, ConcurrencyError, Conflict>;
 
 public sealed record CreateTransmissionSuccess(Guid Revision, IReadOnlyCollection<Guid> TransmissionIds);
 
@@ -139,7 +139,8 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         return saveResult.Match<CreateTransmissionResult>(
             success => new CreateTransmissionSuccess(dialog.Revision, newTransmissions.Select(x => x.Id).ToArray()),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 
     private async Task<DialogEntity?> LoadDialogAsync(Guid dialogId, CancellationToken cancellationToken)

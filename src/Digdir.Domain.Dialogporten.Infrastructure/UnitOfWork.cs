@@ -152,16 +152,16 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
-        catch (ReferenceConstraintException)
+        catch (ReferenceConstraintException ex)
         {
             // A request triggers loading of exising data, but before it's saved,
             // another request removes it — causing the save attempt to fail.
             // On a retry, the client will get a "proper" error message
-            return new ConcurrencyError();
+            return new Conflict(ex.ConstraintName, ex.Message);
         }
         catch (Exception ex) when (IsSerializationFailure(ex))
         {
-            return new ConcurrencyError();
+            return new Conflict("Property?", ex.Message);
         }
 
         // Interceptors can add domain errors, so check again

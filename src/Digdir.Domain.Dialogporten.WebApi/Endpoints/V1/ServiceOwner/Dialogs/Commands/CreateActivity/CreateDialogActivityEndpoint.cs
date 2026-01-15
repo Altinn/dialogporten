@@ -47,7 +47,8 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
         {
             await errors.Match(
                 notFound => this.NotFoundAsync(notFound, cancellationToken: ct),
-                validationError => this.BadRequestAsync(validationError, ct));
+                validationError => this.BadRequestAsync(validationError, ct),
+                conflict => this.ConflictAsync(conflict, ct));
             return;
         }
 
@@ -86,7 +87,8 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
             validationError => this.BadRequestAsync(validationError, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
-            concurrencyError => this.PreconditionFailed(cancellationToken: ct));
+            concurrencyError => this.PreconditionFailed(cancellationToken: ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

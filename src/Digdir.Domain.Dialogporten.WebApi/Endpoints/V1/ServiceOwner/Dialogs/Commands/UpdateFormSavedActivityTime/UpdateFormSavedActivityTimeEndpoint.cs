@@ -40,7 +40,8 @@ public sealed class UpdateFormSavedActivityTimeEndpoint(ISender sender) : Endpoi
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             notFound => this.NotFoundAsync(notFound, ct),
-            concurrencyError => this.PreconditionFailed(ct)
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct)
         );
     }
 }

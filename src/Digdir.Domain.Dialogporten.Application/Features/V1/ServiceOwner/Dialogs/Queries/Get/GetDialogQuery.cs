@@ -24,7 +24,7 @@ public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricSe
 }
 
 [GenerateOneOf]
-public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, ValidationError>;
+public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, ValidationError, Conflict>;
 
 internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, GetDialogResult>
 {
@@ -87,7 +87,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             saveResult.Switch(
                 success => { },
                 domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
-                concurrencyError => throw new UnreachableException("Should not get concurrencyError when updating SeenAt."));
+                concurrencyError => throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
+                conflict => throw new UnreachableException("Should not get conflict when updating SeenAt.")
+            );
 
             DecorateWithAuthorization(dialogDto, authorizationResult);
         }

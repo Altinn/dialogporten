@@ -39,7 +39,7 @@ public sealed class UpdateDialogCommand : IRequest<UpdateDialogResult>, ISilentU
 }
 
 [GenerateOneOf]
-public sealed partial class UpdateDialogResult : OneOfBase<UpdateDialogSuccess, EntityNotFound, EntityDeleted, ValidationError, Forbidden, DomainError, ConcurrencyError>;
+public sealed partial class UpdateDialogResult : OneOfBase<UpdateDialogSuccess, EntityNotFound, EntityDeleted, ValidationError, Forbidden, DomainError, ConcurrencyError, Conflict>;
 
 public sealed record UpdateDialogSuccess(Guid Revision);
 
@@ -194,7 +194,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         return saveResult.Match<UpdateDialogResult>(
             success => new UpdateDialogSuccess(dialog.Revision),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 
     private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)

@@ -45,7 +45,9 @@ public sealed class Mutations
                 Errors = domainError.Errors.Select(x => new SetSystemLabelDomainError { Message = x.ErrorMessage })
                     .Cast<ISetSystemLabelError>().ToList()
             },
-            concurrencyError => new SetSystemLabelPayload { Errors = [] });
+            concurrencyError => new SetSystemLabelPayload { Errors = [] },
+            conflict => new SetSystemLabelPayload { Errors = [new SetSystemLabelConflictError { Message = conflict.ErrorMessage }] }
+        );
     }
 
     public async Task<BulkSetSystemLabelPayload> BulkSetSystemLabels(
@@ -76,6 +78,7 @@ public sealed class Mutations
                     .Cast<IBulkSetSystemLabelError>()
                     .ToList()
             },
-            concurrencyError => new BulkSetSystemLabelPayload { Errors = [] });
+            concurrencyError => new BulkSetSystemLabelPayload { Errors = [] },
+            conflict => new BulkSetSystemLabelPayload { Errors = [new BulkSetSystemLabelConflictError { Message = conflict.ErrorMessage }] });
     }
 }

@@ -27,7 +27,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IFea
 public sealed record SetSystemLabelSuccess(Guid Revision);
 
 [GenerateOneOf]
-public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, EntityDeleted, Forbidden, DomainError, ValidationError, ConcurrencyError>;
+public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, EntityDeleted, Forbidden, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLabelCommand, SetSystemLabelResult>
 {
@@ -94,7 +94,8 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         return saveResult.Match<SetSystemLabelResult>(
             _ => new SetSystemLabelSuccess(dialog.EndUserContext.Revision),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 
     private async Task<(LabelAssignmentLogActor? Actor, Forbidden? Error)> TryCreatePerformedByActor(

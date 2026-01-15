@@ -49,7 +49,8 @@ public sealed class DeleteDialogEndpoint : Endpoint<DeleteDialogRequest>
             notFound => this.NotFoundAsync(notFound, ct),
             gone => this.GoneAsync(gone, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

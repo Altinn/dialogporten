@@ -22,7 +22,7 @@ public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResul
 public sealed record BulkSetSystemLabelSuccess;
 
 [GenerateOneOf]
-public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, Forbidden, DomainError, ValidationError, ConcurrencyError>;
+public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, Forbidden, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSetSystemLabelCommand, BulkSetSystemLabelResult>
 {
@@ -99,7 +99,8 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         return saveResult.Match<BulkSetSystemLabelResult>(
             _ => new BulkSetSystemLabelSuccess(),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 
     private async Task<(LabelAssignmentLogActor? Actor, Forbidden? Error)> TryCreatePerformedByActor(

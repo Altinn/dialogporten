@@ -1,5 +1,6 @@
 using System.Reflection;
 using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests;
+using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
 using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Architecture.Tests;
@@ -15,8 +16,8 @@ public class GraphQlE2EFactAttributeUsageTest
             .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public))
             .Where(m =>
                 m.GetCustomAttributes(inherit: true)
-                    .Any(a => a is FactAttribute { Explicit: false } or
-                            TheoryAttribute { Explicit: false }))
+                    .Any(a => a is GraphQlE2EFactAttribute { Explicit: false } or
+                        GraphQlE2ETheoryAttribute { Explicit: false }))
             .Select(m => $"{m.DeclaringType?.FullName}.{m.Name}")
             .OrderBy(name => name)
             .ToArray();
@@ -24,6 +25,7 @@ public class GraphQlE2EFactAttributeUsageTest
         nonExplicitTests
             .Should()
             .BeEmpty(
-                "All [Fact] and [Theory] attributes in the GraphQL E2E test project must be marked as Explicit = true.");
+                "All tests in the GraphQl E2E project needs to use the attribute " +
+                $"{nameof(GraphQlE2EFactAttribute)} or {nameof(GraphQlE2ETheoryAttribute)}");
     }
 }

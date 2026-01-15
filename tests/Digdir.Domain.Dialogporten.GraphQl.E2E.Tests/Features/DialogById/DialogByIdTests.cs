@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
+﻿using Altinn.ApiClients.Dialogporten.Features.V1;
+using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
 using FluentAssertions;
 using StrawberryShake;
 using Xunit;
@@ -6,17 +7,20 @@ using Xunit;
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
 
 [Collection(nameof(GraphQlTestCollectionFixture))]
-public class DialogByIdTests
+public class DialogByIdTests : IGraphQlE2ETestHooks
 {
     private readonly GraphQlE2EFixture _fixture;
 
     public DialogByIdTests(GraphQlE2EFixture fixture)
     {
         _fixture = fixture;
-        _fixture.PreflightCheck();
     }
 
-    [Fact(Explicit = true)]
+    void IGraphQlE2ETestHooks.BeforeTest() => _fixture.PreflightCheck();
+
+    void IGraphQlE2ETestHooks.AfterTest() => _fixture.CleanupAfterTest();
+
+    [GraphQlE2EFact(Explicit = true)]
     public async Task Should_Return_Typed_NotFound_Error_For_Invalid_DialogId()
     {
         // Arrange
@@ -34,7 +38,8 @@ public class DialogByIdTests
         error.Message.Should().Contain(dialogId.ToString());
     }
 
-    [Fact(Explicit = true)]
+    // [GraphQlE2EFact(Explicit = true)]
+    [Fact]
     public async Task Should_Return_Dialog_For_Valid_DialogId()
     {
         // Arrange
@@ -51,7 +56,7 @@ public class DialogByIdTests
         dialog.Id.Should().Be(dialogId);
     }
 
-    [Fact(Explicit = true)]
+    [GraphQlE2EFact(Explicit = true)]
     public async Task Should_Return_401_Unauthorized_With_Invalid_EndUser_Token()
     {
         // Arrange
@@ -66,7 +71,7 @@ public class DialogByIdTests
             .Which.Message.Should().Contain("401 (Unauthorized)");
     }
 
-    [Fact(Explicit = true)]
+    [Fact]
     public async Task Should_Return_Typed_NotFound_Result_When_Using_Unauthorized_Party()
     {
         // Arrange
@@ -122,10 +127,17 @@ public class DialogByIdTests
 
         createDialogResponse.Content.Should().NotBeNull();
 
-        var dialogId = createDialogResponse
+        var dialogIdRaw = createDialogResponse
             .Content
             .Trim('"');
 
-        return Guid.Parse(dialogId);
+        if (!Guid.TryParse(dialogIdRaw, out var dialogId))
+        {
+            Assert.Fail($"Could not parse create dialog response, {dialogIdRaw}");
+        }
+
+        dialogId.Should().NotBe(Guid.Empty);
+
+        return dialogId;
     }
 }

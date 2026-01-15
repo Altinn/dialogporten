@@ -1,5 +1,7 @@
 using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.Features.V1;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -137,6 +139,45 @@ public class GraphQlE2EFixture : IAsyncLifetime
         {
             throw SkipException.ForSkip($"GraphQL E2E preflight failed:{Environment.NewLine}{string.Join($"{Environment.NewLine}", issues)}");
         }
+    }
+
+    public void CleanupAfterTest()
+    {
+        _tokenOverridesAccessor = new TokenOverridesAccessor()
+        {
+            Current = new TokenOverrides()
+            {
+                ServiceOwner = new()
+                {
+                    Scopes = TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
+                }
+            }
+        };
+
+        // foreach (var dialogId in dialogIds)
+        // {
+        //     try
+        //     {
+        //         var cancellationToken = TestContext.Current?.CancellationToken ?? CancellationToken.None;
+        //         var result = ServiceownerApi
+        //             .V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null, cancellationToken)
+        //             .GetAwaiter()
+        //             .GetResult();
+        //
+        //         result.IsSuccessful.Should().BeTrue();
+        //     }
+        //     catch (Exception exception)
+        //     {
+        //         TestContext.Current?.AddWarning(
+        //             $"Failed to delete dialog {dialogId}: {exception.GetBaseException().Message}");
+        //     }
+        // }
+
+        // Search, use serviceResource from CreateDialog in DialogByIdTests.cs
+        // There is a continuation token, and limit on the number of items. Lookup RefitterInterface.cs in the repo
+        // Go through each returned dialog and purge them, do/while loop until "HasNextPage" is false.
+        // For every dialog that cannot be deleted, add the dialogId to TestContext.Current.AddWarning (or something like it, should be something on the test content)
+
     }
 
     private static async Task<PreflightState> CreatePreflightState(Uri graphQlUri, Uri webApiUri)

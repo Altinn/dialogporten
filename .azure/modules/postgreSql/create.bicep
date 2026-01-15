@@ -27,7 +27,7 @@ param enableBackupVault bool = false
 
 @export()
 type Sku = {
-  name: 'Standard_B1ms' | 'Standard_B2s' | 'Standard_B4ms' | 'Standard_B8ms' | 'Standard_B12ms' | 'Standard_B16ms' | 'Standard_B20ms' | 'Standard_D4ads_v5' | 'Standard_D8ads_v5' | 'Standard_D16ads_v5' | 'Standard_D32ads_v5' | 'Standard_D48ads_v5' | 'Standard_D64ads_v5'
+  name: 'Standard_B1ms' | 'Standard_B2s' | 'Standard_B4ms' | 'Standard_B8ms' | 'Standard_B12ms' | 'Standard_B16ms' | 'Standard_B20ms' | 'Standard_D4ads_v5' | 'Standard_D8ads_v5' | 'Standard_D16ads_v5' | 'Standard_D32ads_v5' | 'Standard_D48ads_v5' | 'Standard_D64ads_v5' | 'Standard_E2ads_v5' | 'Standard_E4ads_v5' | 'Standard_E8ads_v5' | 'Standard_E16ads_v5' | 'Standard_E32ads_v5' | 'Standard_E48ads_v5' | 'Standard_E64ads_v5'
   tier: 'Burstable' | 'GeneralPurpose' | 'MemoryOptimized'
 }
 

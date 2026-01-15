@@ -1,3 +1,4 @@
+using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -55,6 +56,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
             distinctParties, distinctServiceResources, cancellationToken);
 
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var dialogs = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
             .Include(x => x.EndUserContext)

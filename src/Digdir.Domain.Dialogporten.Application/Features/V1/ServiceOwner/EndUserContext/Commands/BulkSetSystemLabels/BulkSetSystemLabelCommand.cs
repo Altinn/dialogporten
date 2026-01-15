@@ -1,3 +1,4 @@
+using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -56,6 +57,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
 
         List<DialogEntity> dialogs;
 
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         if (_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
             dialogs = await _db.Dialogs

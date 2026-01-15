@@ -1,3 +1,4 @@
+using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -55,6 +56,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         SetSystemLabelCommand request,
         CancellationToken cancellationToken)
     {
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var dialog = await _db.Dialogs
             .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)

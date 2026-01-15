@@ -48,7 +48,8 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
         {
             await errors.Match(
                 notFound => this.NotFoundAsync(notFound, cancellationToken: ct),
-                validationError => this.BadRequestAsync(validationError, ct));
+                validationError => this.BadRequestAsync(validationError, ct),
+                conflict => this.ConflictAsync(conflict, ct));
             return;
         }
 

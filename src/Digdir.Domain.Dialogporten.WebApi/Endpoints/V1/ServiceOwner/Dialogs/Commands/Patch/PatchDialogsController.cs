@@ -78,7 +78,8 @@ public sealed class PatchDialogsController : ControllerBase
                     notFound.ToValidationResults())),
                 validationFailed =>
                     BadRequest(HttpContext.GetResponseOrDefault(StatusCodes.Status400BadRequest,
-                        validationFailed.Errors.ToList())));
+                        validationFailed.Errors.ToList())),
+                conflict => Conflict(conflict.ToValidationResults()));
         }
 
         var updateDialogDto = _mapper.Map<UpdateDialogDto>(dialog);

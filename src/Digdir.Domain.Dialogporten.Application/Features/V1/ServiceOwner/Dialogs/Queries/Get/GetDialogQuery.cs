@@ -24,7 +24,7 @@ public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricSe
 }
 
 [GenerateOneOf]
-public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, ValidationError>;
+public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, ValidationError, Conflict>;
 
 internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, GetDialogResult>
 {

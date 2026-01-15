@@ -152,6 +152,96 @@ public class DecisionRequestHelperTests
     }
 
     [Fact]
+    public void CreateDialogDetailsRequestShouldReturnCorrectRequestForAltinn2SiUser()
+    {
+        // Arrange
+        var request = CreateDialogDetailsAuthorizationRequest(
+            GetAsClaims(
+                ("urn:altinn:partyid", "1"),
+                ("urn:altinn:userid", "2"),
+                ("urn:altinn:username", "someusername")
+            ),
+            $"{AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator}someusername"
+        );
+
+        // Act
+        var result = DecisionRequestHelper.CreateDialogDetailsRequest(request);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.Request);
+        Assert.NotNull(result.Request.Resource);
+
+        var accessResource = result.Request.Resource.First();
+        Assert.Contains(accessResource.Attribute, a => a.AttributeId == "urn:altinn:partyid" && a.Value == "1");
+
+        var accessSubject = result.Request.AccessSubject.First();
+        Assert.Equal("s1", accessSubject.Id);
+        Assert.Contains(accessSubject.Attribute, a => a.AttributeId == "urn:altinn:userid" && a.Value == "2");
+        Assert.Single(accessSubject.Attribute);
+    }
+
+    [Fact]
+    public void CreateDialogDetailsRequestShouldReturnCorrectRequestForIdPortenEmailUser()
+    {
+        // Arrange
+        var request = CreateDialogDetailsAuthorizationRequest(
+            GetAsClaims(
+                ("urn:altinn:partyid", "1"),
+                ("urn:altinn:userid", "2"),
+                ("email", "foo@bar.com")
+            ),
+            $"{IdportenEmailUserIdentifier.PrefixWithSeparator}foo@bar.com"
+        );
+
+        // Act
+        var result = DecisionRequestHelper.CreateDialogDetailsRequest(request);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.Request);
+        Assert.NotNull(result.Request.Resource);
+
+        var accessResource = result.Request.Resource.First();
+        Assert.Contains(accessResource.Attribute, a => a.AttributeId == "urn:altinn:partyid" && a.Value == "1");
+
+        var accessSubject = result.Request.AccessSubject.First();
+        Assert.Equal("s1", accessSubject.Id);
+        Assert.Contains(accessSubject.Attribute, a => a.AttributeId == "urn:altinn:userid" && a.Value == "2");
+        Assert.Single(accessSubject.Attribute);
+    }
+
+    [Fact]
+    public void CreateDialogDetailsRequestShouldReturnCorrectRequestForFeideUser()
+    {
+        // Arrange
+        var request = CreateDialogDetailsAuthorizationRequest(
+            GetAsClaims(
+                ("urn:altinn:partyid", "1"),
+                ("urn:altinn:userid", "2"),
+                ("orgsub", "33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551")
+            ),
+            $"{FeideUserIdentifier.PrefixWithSeparator}33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551"
+        );
+
+        // Act
+        var result = DecisionRequestHelper.CreateDialogDetailsRequest(request);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.Request);
+        Assert.NotNull(result.Request.Resource);
+
+        var accessResource = result.Request.Resource.First();
+        Assert.Contains(accessResource.Attribute, a => a.AttributeId == "urn:altinn:partyid" && a.Value == "1");
+
+        var accessSubject = result.Request.AccessSubject.First();
+        Assert.Equal("s1", accessSubject.Id);
+        Assert.Contains(accessSubject.Attribute, a => a.AttributeId == "urn:altinn:userid" && a.Value == "2");
+        Assert.Single(accessSubject.Attribute);
+    }
+
+    [Fact]
     public void CreateDialogDetailsRequestShouldReturnCorrectRequestForOverriddenResource()
     {
         // Arrange
@@ -281,7 +371,7 @@ public class DecisionRequestHelperTests
         allClaims.AddRange(principalClaims);
         return new DialogDetailsAuthorizationRequest
         {
-            Claims = allClaims,
+            ClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(allClaims)),
             ServiceResource = isApp ? "urn:altinn:app:app_ttd_some-app_with_underscores" : "urn:altinn:resource:some-service",
             DialogId = Guid.NewGuid(),
 

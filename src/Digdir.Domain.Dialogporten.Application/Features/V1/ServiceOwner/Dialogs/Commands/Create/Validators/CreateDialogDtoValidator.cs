@@ -21,8 +21,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         IValidator<SearchTagDto> searchTagValidator,
         IValidator<ContentDto?> contentValidator,
         IValidator<DialogServiceOwnerContextDto?> serviceOwnerContextValidator,
-        IClock clock,
-        IUser user)
+        IClock clock)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
@@ -173,5 +172,4 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .When(x => x.SystemLabel is not null)
             .WithMessage($"{{PropertyName}} must be {SystemLabel.Values.Default}, {SystemLabel.Values.Bin} or {SystemLabel.Values.Archive}.");
     }
-    private static bool HasServiceOwnerAdminScope(IUser user) => user.GetPrincipal().HasScope(AuthorizationScope.ServiceOwnerAdminScope);
 }

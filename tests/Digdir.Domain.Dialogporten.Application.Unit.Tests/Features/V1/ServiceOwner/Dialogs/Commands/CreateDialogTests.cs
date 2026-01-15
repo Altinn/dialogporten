@@ -29,6 +29,7 @@ public class CreateDialogTests
         var domainContextSub = Substitute.For<IDomainContext>();
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
+        var userResourceSub = Substitute.For<IUserResourceRegistry>();
         var userSub = Substitute.For<IUser>();
         var clock = new Clock();
 
@@ -45,7 +46,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub, hierarchyValidatorSub);
+            resourceRegistrySub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);
@@ -70,6 +71,7 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
+        var userResourceSub = Substitute.For<IUserResourceRegistry>();
         var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
         var clock = new Clock();
@@ -84,7 +86,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub, hierarchyValidatorSub);
+            resourceRegistrySub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);

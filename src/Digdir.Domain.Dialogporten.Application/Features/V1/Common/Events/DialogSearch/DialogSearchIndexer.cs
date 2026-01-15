@@ -7,7 +7,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.Dialo
 
 internal sealed class DialogSearchIndexer(IDialogSearchRepository db) : INotificationHandler<DialogCreatedDomainEvent>, INotificationHandler<DialogUpdatedDomainEvent>
 {
-    private static readonly AsyncKeyedLocker<string> Semaphore = new();
+    private static readonly AsyncKeyedLocker<Guid> Semaphore = new();
     private readonly IDialogSearchRepository _db = db ?? throw new ArgumentNullException(nameof(db));
 
     public Task Handle(DialogCreatedDomainEvent notification, CancellationToken cancellationToken) =>
@@ -18,7 +18,7 @@ internal sealed class DialogSearchIndexer(IDialogSearchRepository db) : INotific
 
     private async Task UpdateIndex(Guid dialogId, CancellationToken cancellationToken)
     {
-        using var _ = await Semaphore.LockAsync(dialogId.ToString(), cancellationToken);
+        using var _ = await Semaphore.LockAsync(dialogId, cancellationToken);
         await _db.UpsertFreeTextSearchIndex(dialogId, cancellationToken);
     }
 }

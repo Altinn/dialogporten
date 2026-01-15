@@ -2,7 +2,6 @@
 
     <ItemGroup>
         <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.1" />
-        <PackageReference Include="AsyncKeyedLock" Version="8.0.0" />
         <PackageReference Include="Dapper" Version="2.1.66" />
         <PackageReference Include="EntityFrameworkCore.Exceptions.PostgreSQL" Version="8.1.3" />
         <PackageReference Include="HotChocolate.Subscriptions.Redis" Version="15.1.11" />

@@ -107,23 +107,12 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden("User cannot modify frozen dialog");
         }
 
-        // Ensure transmissions have a UUIDv7 ID, needed for the transmission hierarchy validation.
-        foreach (var transmission in request.Dto.Transmissions)
-        {
-            transmission.Id = transmission.Id.CreateVersion7IfDefault();
-
-            // Ensure transmission attachments have a UUIDv7 ID, needed to guarantee deterministic order of attachments.
-            foreach (var transmissionAttachment in transmission.Attachments)
-            {
-                transmissionAttachment.Id = transmissionAttachment.Id.CreateVersion7IfDefault();
-            }
-        }
-
-        // Ensure attachments have a UUIDv7 ID, needed to guarantee deterministic order of attachments.
-        foreach (var attachment in request.Dto.Attachments)
-        {
-            attachment.Id = attachment.Id.CreateVersion7IfDefault();
-        }
+        // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
+        // and to guarantee deterministic order of input to output dtos.
+        dialog.Transmissions.Cast<IIdentifiableEntity>()
+            .Concat(dialog.Transmissions.SelectMany(x => x.Attachments))
+            .Concat(dialog.Attachments)
+            .EnsureIds();
 
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
@@ -323,6 +312,12 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         var newDialogTransmissions = _mapper.Map<List<DialogTransmission>>(dto.Transmissions);
 
+        // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
+        // and to guarantee deterministic order of input to output dtos.
+        newDialogTransmissions.Cast<IIdentifiableEntity>()
+            .Concat(newDialogTransmissions.SelectMany(x => x.Attachments))
+            .EnsureIds();
+
         var existingIds = _db.DialogTransmissions
             .Local
             .Select(x => x.Id)
@@ -407,6 +402,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         return creatables.Select(attachmentDto =>
         {
             var attachment = _mapper.Map<DialogAttachment>(attachmentDto);
+            // Ensure attachments have a UUIDv7 ID, needed to guarantee deterministic order of input to output dtos.
+            attachment.EnsureId();
             attachment.Urls = _mapper.Map<List<AttachmentUrl>>(attachmentDto.Urls);
             _db.DialogAttachments.Add(attachment);
             ValidateTimeFields(attachment);

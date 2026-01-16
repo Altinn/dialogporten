@@ -145,16 +145,12 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
     public void CleanupAfterTest()
     {
-        if (_tokenOverridesAccessor != null)
-        {
-            _tokenOverridesAccessor.Current = new()
-            {
-                ServiceOwner = new()
-                {
-                    Scopes = TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
-                }
-            };
-        }
+        var overridesAccessor = _tokenOverridesAccessor ?? new TokenOverridesAccessor();
+        _tokenOverridesAccessor ??= overridesAccessor;
+
+        overridesAccessor.Current = new TokenOverrides(
+            ServiceOwner: new ServiceOwnerTokenOverrides(
+                Scopes: TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope));
 
         var cancellationToken = TestContext.Current.CancellationToken;
         var queryParams = new V1ServiceOwnerDialogsQueriesSearchDialogQueryParams

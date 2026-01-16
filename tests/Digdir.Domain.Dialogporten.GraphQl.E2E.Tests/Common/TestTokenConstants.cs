@@ -11,7 +11,7 @@ public static class TestTokenConstants
 
     public const string Yt01ServiceOwnerOrgNr = "713431400";
 
-    public const int DefaultTokenTtl = 600;
+    public const int DefaultTokenTtl = 1800;
 
     public const string ServiceOwnerScopes =
         AuthorizationScope.ServiceProvider + " " +

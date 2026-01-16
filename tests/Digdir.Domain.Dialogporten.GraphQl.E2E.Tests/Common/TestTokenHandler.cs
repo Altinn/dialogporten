@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.Options;
@@ -13,6 +14,7 @@ public enum TokenKind
 
 public sealed class TestTokenHandler : DelegatingHandler
 {
+    private static readonly ConcurrentDictionary<string, string> TokenCache = new();
     private readonly TokenKind _kind;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ITokenOverridesAccessor _overridesAccessor;
@@ -66,6 +68,11 @@ public sealed class TestTokenHandler : DelegatingHandler
             _ => throw new InvalidOperationException($"Unsupported token kind: {_kind}")
         };
 
+        if (TokenCache.TryGetValue(requestPath, out var cachedToken))
+        {
+            return cachedToken;
+        }
+
         using var tokenRequest = new HttpRequestMessage(HttpMethod.Get, $"{TestTokenBaseUrl}{requestPath}");
         tokenRequest.Headers.Authorization = new AuthenticationHeaderValue("Basic", _encodedCredentials);
 
@@ -73,7 +80,9 @@ public sealed class TestTokenHandler : DelegatingHandler
         using var tokenResult = await httpClient.SendAsync(tokenRequest, cancellationToken);
         tokenResult.EnsureSuccessStatusCode();
 
-        return await tokenResult.Content.ReadAsStringAsync(cancellationToken);
+        var token = await tokenResult.Content.ReadAsStringAsync(cancellationToken);
+        TokenCache[requestPath] = token;
+        return token;
     }
 
     private static string BuildEndUserRequestPath(
@@ -112,4 +121,5 @@ public sealed class TestTokenHandler : DelegatingHandler
         tokenEnvironment == "yt01"
             ? Yt01ServiceOwnerOrgNr
             : DefaultServiceOwnerOrgNr;
+
 }

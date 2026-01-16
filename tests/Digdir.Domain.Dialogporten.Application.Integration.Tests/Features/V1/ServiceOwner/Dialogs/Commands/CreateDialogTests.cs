@@ -12,6 +12,8 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
@@ -70,15 +72,36 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x => x.Dto.Id = guidInput)
             .ExecuteAndAssert(assertType);
 
-    [Fact]
-    public async Task Creates_Dialog_When_Dialog_Is_Simple()
+    private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<string, string>
+    {
+        public CreateDialogWithSpecifiedPartyTestData()
+        {
+            Add("Can create dialog with OrganizationIdentifier as Party", "urn:altinn:organization:identifier-no:974760673");
+            Add("Can create dialog with PersonalIdentifier as Party", "urn:altinn:person:identifier-no:15915299854");
+            Add("Can create dialog with A2 SI User as Party", "urn:altinn:person:legacy-selfidentified:someusername");
+            Add("Can create dialog with ID-Porten email as Party", "urn:altinn:person:idporten-email:foo@bar.com");
+            // Not supported yet
+            //Add("Can create dialog with Feide orgsub", "urn:altinn:feide-subject:33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551");
+        }
+    }
+
+    [Theory, ClassData(typeof(CreateDialogWithSpecifiedPartyTestData))]
+    public async Task Creates_Dialog_When_Dialog_Is_Simple_For_All_PartyTypes(string _, string party)
     {
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = expectedDialogId)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.Id = expectedDialogId;
+                x.Dto.Party = party;
+            })
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.Id.Should().Be(expectedDialogId));
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Id.Should().Be(expectedDialogId);
+                x.Party.Should().Be(party);
+            });
     }
 
     [Fact]

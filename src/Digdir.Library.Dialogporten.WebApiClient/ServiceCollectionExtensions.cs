@@ -36,7 +36,8 @@ public static class ServiceCollectionExtensions
 
         var jsonSerializerOptions = new JsonSerializerOptions
         {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new JsonStringEnumConverter() }
         };
 
         foreach (var refitClient in refitClients)

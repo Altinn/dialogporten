@@ -185,6 +185,9 @@ export function createTransmission(dialogId, relatedTransmissionId, serviceOwner
     let newRelatedTransmissionId;
     describe('create transmission', () => {
         let r = postSO('dialogs/' + dialogId + '/transmissions', transmission, paramsWithToken);
+        if (r.status !== 201) {
+            console.log('Failed to create transmission. Status: ' + r.status + ', body: ' + r.body);
+        }
         expect(r.status, 'response status').to.equal(201);
         newRelatedTransmissionId = r.json();
     });

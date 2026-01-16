@@ -142,7 +142,7 @@ fi
 # Create the config.yml file from a string
 arguments="--out experimental-prometheus-rw --vus=$vus --duration=$duration --tag testid=$testid --log-output=none"
 if $breakpoint; then
-    arguments="--out experimental-prometheus-rw --tag testid=$testid --log-output=none"
+    arguments="--out experimental-prometheus-rw --tag testid=$testid"
 fi
 cat <<EOF > config.yml
 apiVersion: k6.io/v1alpha1

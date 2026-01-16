@@ -39,12 +39,11 @@ on:
         description: "Schema package content or infrastructure has changed"
         value: ${{ jobs.check-for-changes.outputs.hasSchemaPackageChanges }}
 
-permissions:
-  contents: read
-
 jobs:
   check-for-changes:
     name: Filter
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       hasInfraChanges: ${{ steps.filter.outputs.azure_any_modified == 'true' || steps.filter.outputs.github_workflows_any_modified == 'true' }}

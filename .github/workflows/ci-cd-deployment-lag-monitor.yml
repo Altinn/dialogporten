@@ -8,9 +8,6 @@ on:
     # Run weekdays at 12pm Norway time (11am UTC)
     - cron: '0 11 * * 1-5'
 
-permissions:
-  contents: read
-
 env:
   DEFAULT_DAYS_THRESHOLD: 3
   DEFAULT_RELEASES_THRESHOLD: 3
@@ -18,6 +15,8 @@ env:
 jobs:
   get-staging-versions:
     name: Get Latest Deployed Version Info from GitHub (Staging)
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
     with:
       environment: staging
@@ -26,6 +25,8 @@ jobs:
 
   get-prod-versions:
     name: Get Latest Deployed Version Info from GitHub (Production)
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
     with:
       environment: prod
@@ -36,6 +37,8 @@ jobs:
     name: Compare Staging and Production Deployments
     needs: [get-staging-versions, get-prod-versions]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       should_notify: ${{ steps.check-thresholds.outputs.should_notify }}
       staging_version: ${{ steps.extract-versions.outputs.staging_version }}
@@ -181,6 +184,8 @@ jobs:
     needs: [compare-deployments]
     if: needs.compare-deployments.outputs.should_notify == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       commits_json: ${{ steps.get-commits.outputs.commits_json }}
       commit_authors: ${{ steps.get-commits.outputs.commit_authors }}
@@ -233,6 +238,8 @@ jobs:
     name: Send Slack Notification
     needs: [compare-deployments, get-commit-details]
     if: needs.compare-deployments.outputs.should_notify == 'true'
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-send-deployment-lag-slack-message.yml
     with:
       staging_version: ${{ needs.compare-deployments.outputs.staging_version }}

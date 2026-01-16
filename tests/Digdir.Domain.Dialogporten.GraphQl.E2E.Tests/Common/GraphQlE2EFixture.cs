@@ -34,7 +34,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
             .Build();
 
         var settings = configuration.Get<E2ESettings>()
-            ?? throw new InvalidOperationException("E2E settings are missing.");
+                       ?? throw new InvalidOperationException("E2E settings are missing.");
 
         var services = new ServiceCollection();
 
@@ -138,22 +138,23 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
         if (issues.Count != 0)
         {
-            throw SkipException.ForSkip($"GraphQL E2E preflight failed:{Environment.NewLine}{string.Join($"{Environment.NewLine}", issues)}");
+            throw SkipException.ForSkip(
+                $"GraphQL E2E preflight failed:{Environment.NewLine}{string.Join($"{Environment.NewLine}", issues)}");
         }
     }
 
     public void CleanupAfterTest()
     {
-        _tokenOverridesAccessor = new TokenOverridesAccessor
+        if (_tokenOverridesAccessor != null)
         {
-            Current = new()
+            _tokenOverridesAccessor.Current = new()
             {
                 ServiceOwner = new()
                 {
                     Scopes = TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
                 }
-            }
-        };
+            };
+        }
 
         var cancellationToken = TestContext.Current?.CancellationToken ?? CancellationToken.None;
         var queryParams = new V1ServiceOwnerDialogsQueriesSearchDialogQueryParams

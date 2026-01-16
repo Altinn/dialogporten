@@ -22,6 +22,7 @@ public sealed class SearchDialogEndUserContextEndpointSummary : Summary<SearchDi
                       """;
 
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("list");
+        Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[StatusCodes.Status401Unauthorized] =
             Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope
                 .ServiceProviderSearch);

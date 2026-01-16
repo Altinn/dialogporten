@@ -248,12 +248,11 @@ internal sealed class DialogSearchRepository(
         var items = rawRows
             .Select(row =>
             {
-                var contentUpdatedAt = DateTime.SpecifyKind(row.ContentUpdatedAt, DateTimeKind.Utc);
                 return new DataDialogEndUserContextListItemDto(
                     row.DialogId,
                     row.EndUserContextRevision,
-                    new DateTimeOffset(contentUpdatedAt),
-                    row.SystemLabels.Select(x => (SystemLabel.Values)x).ToList());
+                    new DateTimeOffset(row.ContentUpdatedAt),
+                    row.SystemLabels.ToList());
             })
             .ToList();
 
@@ -695,7 +694,7 @@ internal sealed class DialogSearchRepository(
         public Guid DialogId { get; set; }
         public Guid EndUserContextRevision { get; set; }
         public DateTime ContentUpdatedAt { get; set; }
-        public int[] SystemLabels { get; set; } = [];
+        public SystemLabel.Values[] SystemLabels { get; set; } = [];
     }
     private sealed record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner,
         ActorType.Values ActorType, string? ActorId, string? ActorName, bool IsCurrentEndUser);

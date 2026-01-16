@@ -1,7 +1,7 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -46,7 +46,8 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
         var jsonSerializerOptions = new JsonSerializerOptions
         {
-            DefaultIgnoreCondition = WhenWritingNull
+            DefaultIgnoreCondition = WhenWritingNull,
+            Converters = { new JsonStringEnumConverter() }
         };
 
         var webApiUri = new UriBuilder(settings.DialogportenBaseUri)
@@ -143,9 +144,9 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
     public void CleanupAfterTest()
     {
-        _tokenOverridesAccessor = new TokenOverridesAccessor()
+        _tokenOverridesAccessor = new TokenOverridesAccessor
         {
-            Current = new TokenOverrides()
+            Current = new()
             {
                 ServiceOwner = new()
                 {
@@ -154,30 +155,67 @@ public class GraphQlE2EFixture : IAsyncLifetime
             }
         };
 
-        // foreach (var dialogId in dialogIds)
-        // {
-        //     try
-        //     {
-        //         var cancellationToken = TestContext.Current?.CancellationToken ?? CancellationToken.None;
-        //         var result = ServiceownerApi
-        //             .V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null, cancellationToken)
-        //             .GetAwaiter()
-        //             .GetResult();
-        //
-        //         result.IsSuccessful.Should().BeTrue();
-        //     }
-        //     catch (Exception exception)
-        //     {
-        //         TestContext.Current?.AddWarning(
-        //             $"Failed to delete dialog {dialogId}: {exception.GetBaseException().Message}");
-        //     }
-        // }
+        var cancellationToken = TestContext.Current?.CancellationToken ?? CancellationToken.None;
+        var queryParams = new V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
+        {
+            ServiceResource = ["urn:altinn:resource:ttd-dialogporten-automated-tests"],
+            Limit = 1
+        };
 
-        // Search, use serviceResource from CreateDialog in DialogByIdTests.cs
-        // There is a continuation token, and limit on the number of items. Lookup RefitterInterface.cs in the repo
-        // Go through each returned dialog and purge them, do/while loop until "HasNextPage" is false.
-        // For every dialog that cannot be deleted, add the dialogId to TestContext.Current.AddWarning (or something like it, should be something on the test content)
+        PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog? page;
+        do
+        {
+            var searchResult = ServiceownerApi
+                .V1ServiceOwnerDialogsQueriesSearchDialog(queryParams, cancellationToken)
+                .GetAwaiter()
+                .GetResult();
 
+            if (!searchResult.IsSuccessful || searchResult.Content is null)
+            {
+                TestContext.Current?.AddWarning(
+                    $"Failed to search dialogs for cleanup: {searchResult.Error?.Message ?? "unknown error"}");
+                TestContext.Current?.AddWarning($"{searchResult.Error?.Message ?? "unknown error"}");
+                return;
+            }
+
+            page = searchResult.Content;
+
+            var numitems = page.Items?.Count ?? null;
+            TestContext.Current?.AddWarning($"about to page: {numitems}");
+
+            foreach (var dialog in page.Items ?? [])
+            {
+                try
+                {
+                    var purgeResult = ServiceownerApi
+                        .V1ServiceOwnerDialogsCommandsPurgeDialog(dialog.Id, if_Match: null, cancellationToken)
+                        .GetAwaiter()
+                        .GetResult();
+
+                    if (!purgeResult.IsSuccessful)
+                    {
+                        TestContext.Current?.AddWarning(
+                            $"Failed to delete dialog {dialog.Id}: {purgeResult.Error?.Message ?? "unknown error"}");
+                    }
+                }
+                catch (Exception exception)
+                {
+                    TestContext.Current?.AddWarning(
+                        $"Failed to delete dialog {dialog.Id}: {exception.GetBaseException().Message}");
+                }
+            }
+
+            if (page.HasNextPage)
+            {
+                queryParams.ContinuationToken = new()
+                {
+                    AdditionalProperties = new Dictionary<string, object>
+                    {
+                        ["continuationToken"] = page.ContinuationToken
+                    }
+                };
+            }
+        } while (page.HasNextPage);
     }
 
     private static async Task<PreflightState> CreatePreflightState(Uri graphQlUri, Uri webApiUri)

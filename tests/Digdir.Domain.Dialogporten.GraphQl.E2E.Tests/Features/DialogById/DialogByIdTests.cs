@@ -1,5 +1,4 @@
-﻿using Altinn.ApiClients.Dialogporten.Features.V1;
-using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
+﻿using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
 using FluentAssertions;
 using StrawberryShake;
 using Xunit;
@@ -76,6 +75,16 @@ public class DialogByIdTests : IGraphQlE2ETestHooks
     {
         // Arrange
         var dialogId = await CreateSimpleDialog();
+        var foo = await CreateSimpleDialog();
+        var bar = await CreateSimpleDialog();
+
+        var searchResult = await _fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(new()
+        {
+            ServiceResource = ["urn:altinn:resource:ttd-dialogporten-automated-tests"],
+        }, TestContext.Current.CancellationToken);
+        Console.WriteLine(searchResult.IsSuccessful);
+        Console.WriteLine(foo);
+        Console.WriteLine(bar);
 
         // Act
         // Fetching dialog with default EndUser, should return dialog

@@ -43,11 +43,11 @@ public class DialogApplication : IAsyncLifetime
 
     internal static TestClock Clock { get; } = new();
 
-    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16.9")
+    private readonly PostgreSqlContainer _dbContainer =
+        new PostgreSqlBuilder("postgres:16.10")
         .Build();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var config = new MapperConfiguration(cfg =>
         {
@@ -99,6 +99,8 @@ public class DialogApplication : IAsyncLifetime
 
         return serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
+            .RemoveAll<IClock>()
+            .AddSingleton<IClock>(Clock)
             .AddDistributedMemoryCache()
             .AddLogging()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
@@ -126,11 +128,11 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
+            .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
-            .RemoveAll<IClock>()
-            .AddSingleton<IClock>(Clock)
+
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
@@ -177,7 +179,9 @@ public class DialogApplication : IAsyncLifetime
                 FeatureToggle = new FeatureToggle
                 {
                     UseOptimizedEndUserDialogSearch = true,
-                    UseOptimizedServiceOwnerDialogSearch = true
+                    UseOptimizedServiceOwnerDialogSearch = true,
+                    UseAltinnAutoAuthorizedPartiesQueryParameters = true,
+                    UseCorrectPersonNameOrdering = true
                 },
                 Dialogporten = new DialogportenSettings
                 {
@@ -202,6 +206,7 @@ public class DialogApplication : IAsyncLifetime
 
         return applicationSettingsSubstitute;
     }
+
     private static IServiceOwnerNameRegistry CreateServiceOwnerNameRegistrySubstitute()
     {
         var organizationRegistrySubstitute = Substitute.For<IServiceOwnerNameRegistry>();
@@ -219,11 +224,12 @@ public class DialogApplication : IAsyncLifetime
 
     public IMapper GetMapper() => _mapper!;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _rootProvider.DisposeAsync();
         await _fixtureRootProvider.DisposeAsync();
         await _dbContainer.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
@@ -233,7 +239,7 @@ public class DialogApplication : IAsyncLifetime
         return await mediator.Send(request, cancellationToken);
     }
 
-    public async Task ResetState()
+    public async ValueTask ResetState()
     {
         Clock.Reset();
         _publishedEvents.Clear();

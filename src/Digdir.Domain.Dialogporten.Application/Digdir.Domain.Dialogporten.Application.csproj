@@ -7,9 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AsyncKeyedLock" Version="8.0.0" />
         <PackageReference Include="AutoMapper" Version="14.0.0"/>
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0"/>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.11" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.11" />
         <PackageReference Include="Npgsql" Version="9.0.4"/>
@@ -29,6 +30,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Application.Integration.Tests"/>
         <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Application.Unit.Tests"/>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
 
 </Project>

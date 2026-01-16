@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
@@ -37,6 +38,23 @@ internal static class ServiceCollectionExtensions
         configure(altinnAuthorizationSubstitute);
 
         x.AddSingleton(altinnAuthorizationSubstitute);
+    }
+
+    internal static void ConfigureDialogDetailsAuthorizationResult(
+        this IServiceCollection services,
+        DialogDetailsAuthorizationResult result)
+    {
+        services.ConfigureAltinnAuthorization(altinnAuthorization =>
+        {
+            altinnAuthorization.GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(result));
+            altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(true);
+            altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
+                .Returns(true);
+            altinnAuthorization.HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                .Returns(true);
+        });
     }
 
     /// <summary>

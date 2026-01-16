@@ -81,6 +81,8 @@ static void BuildAndRun(string[] args)
 
     builder.Services
         // Options setup
+        .AddAspNetCommon(builder.Configuration.GetSection(GraphQlSettings.SectionName)
+            .GetSection(WebHostCommonSettings.SectionName))
         .ConfigureOptions<AuthorizationOptionsSetup>()
 
         // Clean architecture projects
@@ -119,7 +121,13 @@ static void BuildAndRun(string[] args)
                 .AddSource("Dialogporten.GraphQL")
                 .AddFusionCacheInstrumentation()
                 .AddHotChocolateInstrumentation()
-                .AddAspNetCoreInstrumentationExcludingHealthPaths())
+                .AddAspNetCoreInstrumentationExcludingHealthPaths(o =>
+                {
+                    o.EnrichWithHttpResponse = (activity, _) =>
+                    {
+                        DialogportenGqlActivityEnricher.RenameOperationName(activity);
+                    };
+                }))
 
         // Add health checks with the well-known URLs
         .AddAspNetHealthChecks((x, y) => x.HealthCheckSettings.HttpGetEndpointsToCheck = y
@@ -147,6 +155,7 @@ static void BuildAndRun(string[] args)
 
     app.UseCors();
     app.MapAspNetHealthChecks()
+        .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()

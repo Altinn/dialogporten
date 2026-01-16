@@ -13,7 +13,10 @@ using OneOf;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
-public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>, ISilentUpdater, IFeatureMetricServiceResourceThroughDialogIdRequest
+
+public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>,
+    ISilentUpdater,
+    IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }

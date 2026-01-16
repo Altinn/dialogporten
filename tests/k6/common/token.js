@@ -3,6 +3,8 @@ import encoding from "k6/encoding";
 import { extend } from "./extend.js";
 import { defaultEndUserSsn, defaultServiceOwnerOrgNo, tokenGeneratorEnv, defaultSystemUserOrgNo, defaultSystemUserId} from "./config.js";
 
+const tokenGeneratorBaseUrl = "https://altinn-testtools-token-generator.azurewebsites.net/api";
+
 let defaultTokenOptionsForServiceOwner = {
   scopes: "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search",
   orgName: "ttd",
@@ -69,25 +71,25 @@ export function fetchToken(url, tokenOptions, type) {
 
 export function getServiceOwnerTokenFromGenerator(tokenOptions = null) {
   let fullTokenOptions = extend({}, defaultTokenOptionsForServiceOwner, tokenOptions);
-  const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetEnterpriseToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&org=${fullTokenOptions.orgName}&orgNo=${fullTokenOptions.orgNo}&ttl=${tokenTtl}`;
+  const url = `${tokenGeneratorBaseUrl}/GetEnterpriseToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&org=${fullTokenOptions.orgName}&orgNo=${fullTokenOptions.orgNo}&ttl=${tokenTtl}`;
   return fetchToken(url, fullTokenOptions, `service owner (orgno:${fullTokenOptions.orgNo} orgName:${fullTokenOptions.orgName} tokenGeneratorEnv:${tokenGeneratorEnv})`);
 }
 
 export function getEnduserTokenFromGenerator(tokenOptions = null) {
   let fullTokenOptions = extend({}, defaultTokenOptionsForEndUser, tokenOptions);
-  const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&pid=${fullTokenOptions.ssn}&ttl=${tokenTtl}`;
+  const url = `${tokenGeneratorBaseUrl}/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&pid=${fullTokenOptions.ssn}&ttl=${tokenTtl}`;
   return fetchToken(url, fullTokenOptions, `end user (ssn:${fullTokenOptions.ssn}, tokenGeneratorEnv:${tokenGeneratorEnv})`);
 }
 
 export function getSystemUserTokenFromGenerator(tokenOptions = null) {
     let fullTokenOptions = extend({}, defaultTokenOptionsForSystemUser, tokenOptions);
-    const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetSystemUserToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&systemUserId=${fullTokenOptions.systemUserId}&systemUserOrg=${fullTokenOptions.systemUserOrg}`;
+    const url = `${tokenGeneratorBaseUrl}/GetSystemUserToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&systemUserId=${fullTokenOptions.systemUserId}&systemUserOrg=${fullTokenOptions.systemUserOrg}`;
     return fetchToken(url, fullTokenOptions, `system user (System user ID:${fullTokenOptions.systemUserId}, tokenGeneratorEnv:${tokenGeneratorEnv})`);
 }
 
 export function getEndUserTokens(count, tokenOptions = null) {
   let fullTokenOptions = extend({}, defaultTokenOptionsForEndUser, tokenOptions);
-  const url = `http://altinn-testtools-token-generator.azurewebsites.net/api/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&bulkCount=${count}&ttl=${tokenTtl}`;
+  const url = `${tokenGeneratorBaseUrl}/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(fullTokenOptions.scopes)}&bulkCount=${count}&ttl=${tokenTtl}`;
   tokenRequestOptions.timeout = 600000;
   let response = http.get(url, tokenRequestOptions);
   if (response.status != 200) {

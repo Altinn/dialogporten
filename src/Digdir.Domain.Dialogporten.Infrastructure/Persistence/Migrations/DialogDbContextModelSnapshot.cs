@@ -1204,6 +1204,21 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 4,
                             Name = "ServiceOwnerOnBehalfOfPerson"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "IdportenEmailIdentifiedUser"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "AltinnSelfIdentifiedUser"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "FeideUser"
                         });
                 });
 

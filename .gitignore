@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Warp terminal agent file
+WARP.md
+
 # pg_dump backups
 *.dump
 
@@ -395,3 +398,6 @@ FodyWeavers.xsd
 
 # Claude Code configuration file
 CLAUDE.md
+
+# Bicep build output (compiled ARM template)
+.azure/infrastructure/main.json

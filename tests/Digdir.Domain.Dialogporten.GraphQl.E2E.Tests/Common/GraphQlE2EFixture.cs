@@ -156,11 +156,11 @@ public class GraphQlE2EFixture : IAsyncLifetime
             };
         }
 
-        var cancellationToken = TestContext.Current?.CancellationToken ?? CancellationToken.None;
+        var cancellationToken = TestContext.Current.CancellationToken;
         var queryParams = new V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
         {
             ServiceResource = ["urn:altinn:resource:ttd-dialogporten-automated-tests"],
-            Limit = 1
+            Limit = 1000
         };
 
         PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog? page;
@@ -180,10 +180,6 @@ public class GraphQlE2EFixture : IAsyncLifetime
             }
 
             page = searchResult.Content;
-
-            var numitems = page.Items?.Count ?? null;
-            TestContext.Current?.AddWarning($"about to page: {numitems}");
-
             foreach (var dialog in page.Items ?? [])
             {
                 try

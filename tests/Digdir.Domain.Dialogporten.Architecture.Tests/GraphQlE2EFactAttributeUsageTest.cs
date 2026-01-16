@@ -8,7 +8,7 @@ namespace Digdir.Domain.Dialogporten.Architecture.Tests;
 public class GraphQlE2EFactAttributeUsageTest
 {
     [Fact]
-    public void All_GraphQL_E2E_Tests_Must_Use_E2E_Base_And_Attributes()
+    public void All_GraphQL_E2E_Tests_Must_Inherit_E2E_Base()
     {
         var testMethods = GraphQlE2EAssemblyMarker
             .Assembly
@@ -31,7 +31,11 @@ public class GraphQlE2EFactAttributeUsageTest
             .Should()
             .BeEmpty(
                 $"All GraphQl E2E test classes must inherit {nameof(GraphQlE2ETestBase)}.");
+    }
 
+    [Fact]
+    public void All_GraphQL_E2E_Tests_Must_Use_Custom_Attributes()
+    {
         var nonCustomAttributeTests = GraphQlE2EAssemblyMarker
             .Assembly
             .GetTypes()

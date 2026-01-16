@@ -5,12 +5,20 @@ using Xunit.v3;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
 
+public static class GraphQlE2EExplicitOptions
+{
+    public const bool ExplicitTests = true;
+}
+
 public sealed class GraphQlE2EFactAttribute : FactAttribute, IBeforeAfterTestAttribute
 {
     public GraphQlE2EFactAttribute(
         [CallerFilePath] string? sourceFilePath = null,
         [CallerLineNumber] int sourceLineNumber = 0)
-        : base(sourceFilePath, sourceLineNumber) { }
+        : base(sourceFilePath, sourceLineNumber)
+    {
+        Explicit = GraphQlE2EExplicitOptions.ExplicitTests;
+    }
 
     public void Before(MethodInfo methodUnderTest, IXunitTest test)
     {
@@ -34,7 +42,10 @@ public sealed class GraphQlE2ETheoryAttribute : TheoryAttribute, IBeforeAfterTes
     public GraphQlE2ETheoryAttribute(
         [CallerFilePath] string? sourceFilePath = null,
         [CallerLineNumber] int sourceLineNumber = 0)
-        : base(sourceFilePath, sourceLineNumber) { }
+        : base(sourceFilePath, sourceLineNumber)
+    {
+        Explicit = GraphQlE2EExplicitOptions.ExplicitTests;
+    }
 
     public void Before(MethodInfo methodUnderTest, IXunitTest test)
     {

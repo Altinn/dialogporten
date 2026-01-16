@@ -47,6 +47,8 @@ dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests To
 ## Run tests
 These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile this project, so you get compile-time checks even when the E2E tests do not run.
 
+To enable these tests locally for debugging, set `GraphQlE2EExplicitOptions.ExplicitTests` to `true`.
+
 Use the xUnit explicit switch:
 - `dotnet test -- xUnit.Explicit=off` (default; do not run explicit tests)
 - `dotnet test -- xUnit.Explicit=on` (run all tests, including explicit)

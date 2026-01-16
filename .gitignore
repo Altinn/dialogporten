@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Warp terminal agent file
+WARP.md
+
 # pg_dump backups
 *.dump
 

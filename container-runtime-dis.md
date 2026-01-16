@@ -136,14 +136,14 @@ spec:
 
 ## Kustomize (apps)
 Use Kustomize for application workloads:
-- Deployments, Services, IngressRoutes, KEDA ScaledObjects, Jobs/CronJobs.
+- Deployments, Services, IngressRoutes, HorizontalPodAutoscalers, Jobs/CronJobs.
 - ApplicationIdentity resources (DIS operator) + ServiceAccounts per app/job.
 - ConfigMaps or Secrets references (actual secrets via External Secrets).
 - Namespace manifest with `linkerd.io/inject: enabled`.
 
 Per-environment overrides (from `container-runtime.md`):
 - IP allowlists per app.
-- Replica counts and KEDA min/max.
+- HPA min/max and CPU/memory utilization targets.
 - Resource requests/limits.
 - Workload profile mapping (dedicated node pool vs default).
 - OTEL trace sampler ratio.
@@ -214,29 +214,35 @@ spec:
         key: dialogportenRedisConnectionString
 ```
 
-## KEDA ScaledObject skeletons (CPU/memory)
-ACA uses KEDA-style CPU/memory utilization rules. Mirror those rules in KEDA ScaledObjects and set min/max replicas per environment (from `.azure/applications/*/*.bicepparam`).
+## HPA skeletons (CPU/memory)
+ACA defines CPU/memory utilization rules per app. Mirror those rules with HPA and set min/max replicas per environment (from `.azure/applications/*/*.bicepparam`).
 
 Template:
 ```yaml
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
 metadata:
   name: <app-name>
 spec:
   scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
     name: <deployment-name>
-  minReplicaCount: <min-replicas>
-  maxReplicaCount: <max-replicas>
-  triggers:
-    - type: cpu
-      metadata:
-        type: Utilization
-        value: "<cpu-percent>"
-    - type: memory
-      metadata:
-        type: Utilization
-        value: "<memory-percent>"
+  minReplicas: <min-replicas>
+  maxReplicas: <max-replicas>
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: <cpu-percent>
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: <memory-percent>
 ```
 
 Per-app values (match current Bicep):
@@ -254,7 +260,6 @@ Note: set `minReplicaCount` from env overlays (prod uses 2 for web-api-so, web-a
 Tagging: use the same version tags as application images (`<semver>` for releases, `<semver>-<sha>` for main/test).
 
 ## Platform gaps to plan for
-- KEDA is not referenced in the platform repo; confirm if DIS provides it or add it (else use HPA).
 - No RoleAssignment CR examples in platform Flux; we need to define our own `authorization.azure.com` RoleAssignments.
 - No internal Traefik entrypoint exists; internal-only access must be enforced via allowlists on `http`/`https`.
 - GHCR OCIRepositorys are not used in platform; confirm Flux auth for GHCR or use ACR if required.

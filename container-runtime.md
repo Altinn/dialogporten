@@ -32,7 +32,7 @@ This document inventories the current Azure Container Apps configuration in this
   - Startup: `/health/startup`, period 10s, delay 10s, timeout 2s.
   - Readiness: `/health/readiness`, period 5s, delay 15s, timeout 2s.
   - Liveness: `/health/liveness`, period 5s, delay 20s, timeout 2s.
-- Scaling: min/max replicas plus CPU/memory utilization rules (KEDA-style) per app.
+- Scaling: min/max replicas plus CPU/memory utilization rules per app.
 - Resources: optional `cpu` and `memory`.
 - Identity: user-assigned per app; `AZURE_CLIENT_ID` passed to workloads.
 - Revision suffix: `REVISION_SUFFIX` cleaned to form ACA revision name.
@@ -174,9 +174,9 @@ All items below are the environment-specific differences defined in `.azure/infr
 - Not deployed in test/yt01.
 
 ## Azure Container Apps vs AKS (differences that matter here)
-- Abstraction level: ACA is fully managed (ingress, autoscaling, revisions); AKS requires explicit control plane setup (ingress controller, HPA/KEDA, rollout strategy).
+- Abstraction level: ACA is fully managed (ingress, autoscaling, revisions); AKS requires explicit control plane setup (ingress controller, HPA, rollout strategy).
 - Revisions/traffic splitting: ACA has built-in revision management; AKS uses Deployment rollout history and optional progressive delivery.
-- Autoscaling: ACA uses KEDA-based rules per app (CPU/memory in this repo); AKS should use KEDA ScaledObjects for CPU/memory or HPA if KEDA is not available.
+- Autoscaling: ACA uses CPU/memory utilization rules per app (as defined in this repo); AKS should use HPA (autoscaling/v2) with CPU/memory targets.
 - Jobs: ACA has first-class Jobs (manual/scheduled); AKS uses CronJobs and Jobs, with separate RBAC and scheduling controls.
 - Networking: ACA ingress is managed and IP allowlists are per app; AKS needs Ingress or LoadBalancer configuration plus NetworkPolicy or ingress annotations to enforce allowlists.
 - Identity/secrets: ACA uses managed identities and Key Vault references; AKS should use Workload Identity plus Key Vault CSI or External Secrets.
@@ -210,7 +210,7 @@ All items below are the environment-specific differences defined in `.azure/infr
   - web-api-so, web-api-eu, graphql, service
   - Configure probes with the same paths and timing from ACA.
   - Set resource requests and limits matching the `resources` overrides per environment.
-  - KEDA ScaledObject per app using CPU/memory targets and min/max replicas matching ACA scale settings (fallback to HPA if KEDA is unavailable).
+  - HPA per app using CPU/memory targets and min/max replicas matching ACA scale settings.
   - Use nodeSelector or affinity to map `Dedicated-D8` workloads to the dedicated node pool.
 - CronJobs:
   - sync-resource-policy-information-job
@@ -224,7 +224,7 @@ All items below are the environment-specific differences defined in `.azure/infr
 
 ### Per-environment configuration surfaces (keep in config or overlays)
 - Ingress IP allowlists.
-- minReplicas, maxReplicas, CPU/memory utilization targets (KEDA CPU/memory scalers).
+- minReplicas, maxReplicas, CPU/memory utilization targets (HPA resource metrics).
 - Resource requests and limits (CPU/memory).
 - Workload profile mapping (dedicated node pool vs consumption).
 - OTEL trace sampler ratio.

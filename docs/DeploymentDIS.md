@@ -59,7 +59,7 @@ Recommended internal layout:
 - `service` exposed via Traefik on `http`/`https` entrypoints with allowlist (no internal entrypoint configured in platform Traefik).
 - External Secrets for `dialogportenAdoConnectionString` and `dialogportenRedisConnectionString` via `SecretStore` + WorkloadIdentity `serviceAccountRef`.
 - ApplicationIdentity operator creates Workload Identity ServiceAccounts per app/job.
-- KEDA ScaledObject for CPU/memory (matching ACA scale rules).
+- HPA for CPU/memory (matching ACA scale rules).
 - Resource requests/limits per environment (from `container-runtime.md`).
 
 ## Azure RBAC permissions
@@ -109,7 +109,7 @@ We keep release-please for versioning and image publishing, and add a syncroot b
 - Flux should reconcile the latest tag or semver range as configured by DIS.
 
 ## Implementation plan
-1. Create Kustomize base resources for apps and jobs (Deployments, Services, IngressRoutes, KEDA ScaledObject, CronJobs/Jobs).
+1. Create Kustomize base resources for apps and jobs (Deployments, Services, IngressRoutes, HorizontalPodAutoscaler, CronJobs/Jobs).
 2. Add ApplicationIdentity resources and External Secrets resources.
 3. Add Traefik ingress and middleware resources:
    - IP allowlists for public apps.
@@ -132,7 +132,6 @@ We keep release-please for versioning and image publishing, and add a syncroot b
 - ASO RoleAssignment schema details (principal reference vs principalId).
 
 ## Platform gaps to plan for
-- KEDA is not present in the platform repo; confirm if DIS provides it or add it (else use HPA).
 - No existing RoleAssignment CRs in platform Flux; we need to define our own `authorization.azure.com` RoleAssignments for app identities.
 - No internal Traefik entrypoint exists; internal-only access must be enforced via allowlists on `http`/`https`.
 - GHCR OCIRepositorys are not used in platform; confirm Flux auth for GHCR or use ACR if required.

@@ -88,7 +88,7 @@ For env-specific overlays, patch `spec.path` in each `syncroot/<env>/kustomizati
 - `ApplicationIdentity` resource per app/job (DIS operator).
 - ServiceAccount per app/job created by the operator (same name as `ApplicationIdentity`).
 - External Secrets for Key Vault integration.
-- KEDA ScaledObject resources mirroring ACA scale rules.
+- HPA resources mirroring ACA scale rules.
 - Traefik `http`/`https` entrypoints with allowlist for `service` (no internal entrypoint configured in platform Traefik).
 
 Identity details from DIS operator:
@@ -114,31 +114,39 @@ Implementation approach:
 - Scope the role assignment to the target resource (App Config, Service Bus, App Insights, Storage).
 TODO: confirm the exact ASO RoleAssignment schema (principal reference vs principalId) in DIS.
 
-### KEDA ScaledObject skeleton (CPU/memory)
+### HPA skeleton (CPU/memory)
 Match the ACA CPU/memory utilization rules from `.azure/modules/containerApp/main.bicep` and app-specific overrides.
 
 ```yaml
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
 metadata:
   name: <app-name>
 spec:
   scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
     name: <deployment-name>
-  minReplicaCount: <min-replicas>
-  maxReplicaCount: <max-replicas>
-  triggers:
-    - type: cpu
-      metadata:
-        type: Utilization
-        value: "<cpu-percent>"
-    - type: memory
-      metadata:
-        type: Utilization
-        value: "<memory-percent>"
+  minReplicas: <min-replicas>
+  maxReplicas: <max-replicas>
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: <cpu-percent>
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: <memory-percent>
 ```
 
-Per-app values (match current Bicep):
+Decision: use per-app HPA manifests under `flux/dialogporten/base/apps/<app>/hpa.yaml`. The thresholds differ per app, so a shared HPA base adds more patching than it saves.
+
+Confirmed per-app values (from `.azure/applications/*/main.bicep`):
 - `web-api-so`: max 10, cpu 70, memory 70.
 - `web-api-eu`: max 20, cpu 50, memory 70.
 - `graphql`: max 10, cpu 70, memory 70.
@@ -149,26 +157,32 @@ Per-environment mins (from `.azure/applications/*/*.bicepparam`):
 - `staging`, `test`, `yt01`: default min 1 unless overridden.
 
 ### Kustomize overlay examples (per-environment patches)
-Base ScaledObject (example for `web-api-eu`, match ACA values):
+Base HPA (example for `web-api-eu`, match ACA values):
 ```yaml
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
 metadata:
   name: web-api-eu
 spec:
   scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
     name: web-api-eu
-  minReplicaCount: 1
-  maxReplicaCount: 20
-  triggers:
-    - type: cpu
-      metadata:
-        type: Utilization
-        value: "50"
-    - type: memory
-      metadata:
-        type: Utilization
-        value: "70"
+  minReplicas: 1
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70
 ```
 
 Prod overlay patch (min replicas to 2):
@@ -179,15 +193,15 @@ resources:
   - ../../base
 patches:
   - target:
-      kind: ScaledObject
+      kind: HorizontalPodAutoscaler
       name: web-api-eu
     patch: |-
-      apiVersion: keda.sh/v1alpha1
-      kind: ScaledObject
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
       metadata:
         name: web-api-eu
       spec:
-        minReplicaCount: 2
+        minReplicas: 2
 ```
 
 Repeat the same patch pattern for `web-api-so`, `graphql`, and `service` in `prod` to match min=2. For `at23` and `tt02`, keep min=1 (base default) unless overridden.
@@ -212,10 +226,10 @@ Required additions:
 
 ## Implementation steps
 1. Create `flux/dialogporten/base` with app and job resources.
-2. Add `ApplicationIdentity`, ServiceAccounts, External Secrets, and KEDA ScaledObject resources.
+2. Add `ApplicationIdentity`, ServiceAccounts, External Secrets, and HPA resources.
 3. Add Traefik IngressRoutes and IP allowlist middleware for public apps.
 4. Add overlays per env (at23, tt02, yt01, prod) with:
-   - replicas, resource requests/limits, KEDA CPU/memory thresholds
+   - replicas, resource requests/limits, HPA CPU/memory targets
    - IP allowlists
    - schedules/timeouts for jobs
    - OTEL sampling ratio
@@ -237,7 +251,6 @@ Required additions:
 - Confirm the ASO RoleAssignment schema (principal reference vs principalId) in DIS.
 
 ## Platform gaps to plan for
-- KEDA is not referenced in the platform repo; confirm if DIS provides it or add it (else use HPA).
 - No RoleAssignment CR examples in platform Flux; we need to define our own `authorization.azure.com` RoleAssignments.
 - No internal Traefik entrypoint exists; internal-only access must be enforced via allowlists on `http`/`https`.
 - GHCR OCIRepositorys are not used in platform; confirm Flux auth for GHCR or use ACR if required.

@@ -224,7 +224,8 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
                 continue;
             }
 
-            entry.OriginalValues.SetValues(dbValues);
+            var currentRevision = dbValues[nameof(IVersionableEntity.Revision)]!;
+            entry.Property(nameof(IVersionableEntity.Revision)).OriginalValue = currentRevision;
         }
     }
 
@@ -258,4 +259,5 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         public bool EnableIdentifiableFilter { get; } = true;
         public bool EnableAggregateFilter { get; set; } = true;
     }
+
 }

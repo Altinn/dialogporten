@@ -3,25 +3,26 @@ using System;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using NpgsqlTypes;
 
 #nullable disable
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    partial class DialogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250901234655_AddSelfIdentifiedUserType")]
+    partial class AddSelfIdentifiedUserType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gin");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -139,9 +140,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
-
-                    b.Property<DateTimeOffset?>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -909,9 +907,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Property<short>("FromServiceOwnerTransmissionsCount")
                         .HasColumnType("smallint");
 
-                    b.Property<bool>("Frozen")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("HasUnopenedContent")
                         .HasColumnType("boolean");
 
@@ -989,11 +984,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ExternalReference");
 
-                    b.HasIndex("Id")
-                        .HasDatabaseName("IX_Dialog_Id_Covering");
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Id"), new[] { "ServiceResource", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt", "ContentUpdatedAt" });
-
                     b.HasIndex("IsApiOnly");
 
                     b.HasIndex("Org");
@@ -1013,45 +1003,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("Org", "IdempotentKey")
                         .IsUnique()
                         .HasFilter("\"IdempotentKey\" is not null");
-
-                    b.HasIndex("Org", "ContentUpdatedAt", "Id")
-                        .IsDescending(false, true, true);
-
-                    b.HasIndex("Org", "CreatedAt", "Id")
-                        .IsDescending(false, true, true);
-
-                    b.HasIndex("Org", "UpdatedAt", "Id")
-                        .IsDescending(false, true, true);
-
-                    b.HasIndex("Party", "ContentUpdatedAt", "Id")
-                        .IsDescending(false, true, true)
-                        .HasDatabaseName("IX_Dialog_Party_ContentUpdatedAt_Id_Covering");
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ContentUpdatedAt", "Id"), new[] { "ServiceResource", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt" });
-
-                    b.HasIndex("Party", "CreatedAt", "Id")
-                        .IsDescending(false, true, true)
-                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "CreatedAt", "Id"), new[] { "ServiceResource" });
-
-                    b.HasIndex("Party", "DueAt", "Id")
-                        .IsDescending(false, true, true)
-                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "DueAt", "Id"), new[] { "ServiceResource" });
-
-                    b.HasIndex("Party", "UpdatedAt", "Id")
-                        .IsDescending(false, true, true)
-                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "UpdatedAt", "Id"), new[] { "ServiceResource" });
-
-                    b.HasIndex("Org", "Party", "ContentUpdatedAt", "Id")
-                        .IsDescending(false, false, true, true);
-
-                    b.HasIndex("Org", "ServiceResource", "ContentUpdatedAt", "Id")
-                        .IsDescending(false, false, true, true);
 
                     b.ToTable("Dialog", (string)null);
                 });
@@ -1208,7 +1159,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = 5,
-                            Name = "IdportenEmailIdentifiedUser"
+                            Name = "IdportenSelfIdentifiedUser"
                         },
                         new
                         {
@@ -1585,204 +1536,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("SubjectResource");
-                });
-
-            modelBuilder.Entity("Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search.DialogSearch", b =>
-                {
-                    b.Property<Guid>("DialogId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Party")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<NpgsqlTsVector>("SearchVector")
-                        .IsRequired()
-                        .HasColumnType("tsvector");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("DialogId");
-
-                    b.HasIndex("SearchVector");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SearchVector"), "GIN");
-
-                    b.HasIndex("Party", "SearchVector");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Party", "SearchVector"), "GIN");
-
-                    b.ToTable("DialogSearch", "search");
-                });
-
-            modelBuilder.Entity("Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search.Iso639TsVectorMap", b =>
-                {
-                    b.Property<string>("IsoCode")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("TsConfigName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("IsoCode");
-
-                    b.ToTable("Iso639TsVectorMap", "search");
-
-                    b.HasData(
-                        new
-                        {
-                            IsoCode = "ar",
-                            TsConfigName = "arabic"
-                        },
-                        new
-                        {
-                            IsoCode = "hy",
-                            TsConfigName = "armenian"
-                        },
-                        new
-                        {
-                            IsoCode = "eu",
-                            TsConfigName = "basque"
-                        },
-                        new
-                        {
-                            IsoCode = "ca",
-                            TsConfigName = "catalan"
-                        },
-                        new
-                        {
-                            IsoCode = "da",
-                            TsConfigName = "danish"
-                        },
-                        new
-                        {
-                            IsoCode = "nl",
-                            TsConfigName = "dutch"
-                        },
-                        new
-                        {
-                            IsoCode = "en",
-                            TsConfigName = "english"
-                        },
-                        new
-                        {
-                            IsoCode = "fi",
-                            TsConfigName = "finnish"
-                        },
-                        new
-                        {
-                            IsoCode = "fr",
-                            TsConfigName = "french"
-                        },
-                        new
-                        {
-                            IsoCode = "de",
-                            TsConfigName = "german"
-                        },
-                        new
-                        {
-                            IsoCode = "el",
-                            TsConfigName = "greek"
-                        },
-                        new
-                        {
-                            IsoCode = "hi",
-                            TsConfigName = "hindi"
-                        },
-                        new
-                        {
-                            IsoCode = "hu",
-                            TsConfigName = "hungarian"
-                        },
-                        new
-                        {
-                            IsoCode = "id",
-                            TsConfigName = "indonesian"
-                        },
-                        new
-                        {
-                            IsoCode = "ga",
-                            TsConfigName = "irish"
-                        },
-                        new
-                        {
-                            IsoCode = "it",
-                            TsConfigName = "italian"
-                        },
-                        new
-                        {
-                            IsoCode = "lt",
-                            TsConfigName = "lithuanian"
-                        },
-                        new
-                        {
-                            IsoCode = "ne",
-                            TsConfigName = "nepali"
-                        },
-                        new
-                        {
-                            IsoCode = "nb",
-                            TsConfigName = "norwegian"
-                        },
-                        new
-                        {
-                            IsoCode = "nn",
-                            TsConfigName = "norwegian"
-                        },
-                        new
-                        {
-                            IsoCode = "no",
-                            TsConfigName = "norwegian"
-                        },
-                        new
-                        {
-                            IsoCode = "pt",
-                            TsConfigName = "portuguese"
-                        },
-                        new
-                        {
-                            IsoCode = "ro",
-                            TsConfigName = "romanian"
-                        },
-                        new
-                        {
-                            IsoCode = "ru",
-                            TsConfigName = "russian"
-                        },
-                        new
-                        {
-                            IsoCode = "sr",
-                            TsConfigName = "serbian"
-                        },
-                        new
-                        {
-                            IsoCode = "es",
-                            TsConfigName = "spanish"
-                        },
-                        new
-                        {
-                            IsoCode = "sv",
-                            TsConfigName = "swedish"
-                        },
-                        new
-                        {
-                            IsoCode = "ta",
-                            TsConfigName = "tamil"
-                        },
-                        new
-                        {
-                            IsoCode = "tr",
-                            TsConfigName = "turkish"
-                        },
-                        new
-                        {
-                            IsoCode = "yi",
-                            TsConfigName = "yiddish"
-                        });
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications.NotificationAcknowledgement", b =>
@@ -2429,17 +2182,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("LocalizationSet");
-                });
-
-            modelBuilder.Entity("Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search.DialogSearch", b =>
-                {
-                    b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity", "Dialog")
-                        .WithOne()
-                        .HasForeignKey("Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search.DialogSearch", "DialogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Dialog");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>

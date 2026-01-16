@@ -8,6 +8,12 @@ namespace Digdir.Domain.Dialogporten.Architecture.Tests;
 public class GraphQlE2EFactAttributeUsageTest
 {
     [Fact]
+    public void GraphQl_E2E_ExplicitOption_Must_Be_Enabled() =>
+        GraphQlE2EExplicitOptions.ExplicitTests
+            .Should()
+            .BeTrue("GraphQl E2E tests must remain explicit in CI/CD.");
+
+    [Fact]
     public void All_GraphQL_E2E_Tests_Must_Inherit_E2E_Base()
     {
         var testMethods = GraphQlE2EAssemblyMarker

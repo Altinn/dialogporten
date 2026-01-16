@@ -73,6 +73,13 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     {
         var dialog = _mapper.Map<DialogEntity>(request.Dto);
 
+        // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
+        // and to guarantee deterministic order of input to output dtos.
+        dialog.Transmissions.Cast<IIdentifiableEntity>()
+            .Concat(dialog.Transmissions.SelectMany(x => x.Attachments))
+            .Concat(dialog.Attachments)
+            .EnsureIds();
+
         await _serviceResourceAuthorizer.SetResourceType(dialog, cancellationToken);
         var serviceResourceAuthorizationResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
         if (serviceResourceAuthorizationResult.Value is Forbidden forbiddenResult)
@@ -107,12 +114,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         if (!ActivityTypeAuthorization.UsingAllowedActivityTypes(activityTypes, _user, out var errorMessage))
         {
             return new Forbidden(errorMessage);
-        }
-
-        // Ensure transmissions have a UUIDv7 ID, needed for the transmission hierarchy validation.
-        foreach (var transmission in dialog.Transmissions)
-        {
-            transmission.Id = transmission.Id.CreateVersion7IfDefault();
         }
 
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);

@@ -44,6 +44,12 @@ dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests To
 dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests TokenGeneratorPassword "<password>"
 ```
 
+## Writing tests
+Use the shared E2E base class and custom attributes so hooks and explicit behavior are consistent:
+- Inherit `GraphQlE2ETestBase` and keep tests under `Features/*`.
+- Use `[GraphQlE2EFact]` or `[GraphQlE2ETheory]` on every test (do not use `[Fact]`/`[Theory]`).
+- Explicit behavior is centralized in `GraphQlE2EExplicitOptions` in `Common/GraphQlE2ETestAttributes.cs`.
+
 ## Run tests
 These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile this project, so you get compile-time checks even when the E2E tests do not run.
 

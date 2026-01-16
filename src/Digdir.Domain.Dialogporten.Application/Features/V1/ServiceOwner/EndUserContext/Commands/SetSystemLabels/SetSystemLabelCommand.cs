@@ -1,3 +1,4 @@
+using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -27,7 +28,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IFea
 public sealed record SetSystemLabelSuccess(Guid Revision);
 
 [GenerateOneOf]
-public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, EntityDeleted, Forbidden, DomainError, ValidationError, ConcurrencyError>;
+public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, EntityDeleted, Forbidden, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLabelCommand, SetSystemLabelResult>
 {
@@ -55,6 +56,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         SetSystemLabelCommand request,
         CancellationToken cancellationToken)
     {
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var dialog = await _db.Dialogs
             .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
@@ -94,7 +96,8 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         return saveResult.Match<SetSystemLabelResult>(
             _ => new SetSystemLabelSuccess(dialog.EndUserContext.Revision),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 
     private async Task<(LabelAssignmentLogActor? Actor, Forbidden? Error)> TryCreatePerformedByActor(

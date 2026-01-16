@@ -26,7 +26,7 @@ public sealed class UpdateFormSavedActivityTimeCommand : IRequest<UpdateFormSave
 public sealed record UpdateFormSavedActivityTimeSuccess(Guid Revision);
 
 [GenerateOneOf]
-public sealed partial class UpdateFormSavedActivityTimeResult : OneOfBase<UpdateFormSavedActivityTimeSuccess, Forbidden, DomainError, EntityNotFound, ConcurrencyError>;
+public sealed partial class UpdateFormSavedActivityTimeResult : OneOfBase<UpdateFormSavedActivityTimeSuccess, Forbidden, DomainError, EntityNotFound, ConcurrencyError, Conflict>;
 
 internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWork unitOfWork, IUserResourceRegistry userResourceRegistry)
     : IRequestHandler<UpdateFormSavedActivityTimeCommand, UpdateFormSavedActivityTimeResult>
@@ -77,7 +77,8 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
         return result.Match<UpdateFormSavedActivityTimeResult>(
             _ => new UpdateFormSavedActivityTimeSuccess(activity.Dialog.Revision),
             domainError => domainError,
-            concurrencyError => concurrencyError
+            concurrencyError => concurrencyError,
+            conflict => conflict
         );
     }
 }

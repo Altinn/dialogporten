@@ -38,7 +38,8 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
             notFound => this.NotFoundAsync(notFound, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),
-            _ => this.PreconditionFailed(ct));
+            _ => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

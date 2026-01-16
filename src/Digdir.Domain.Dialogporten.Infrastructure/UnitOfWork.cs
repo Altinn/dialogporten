@@ -157,11 +157,11 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             // A request triggers loading of exising data, but before it's saved,
             // another request removes it — causing the save attempt to fail.
             // On a retry, the client will get a "proper" error message
-            return new ConcurrencyError();
+            return Conflict.Empty;
         }
         catch (Exception ex) when (IsSerializationFailure(ex))
         {
-            return new ConcurrencyError();
+            return Conflict.Empty;
         }
 
         // Interceptors can add domain errors, so check again

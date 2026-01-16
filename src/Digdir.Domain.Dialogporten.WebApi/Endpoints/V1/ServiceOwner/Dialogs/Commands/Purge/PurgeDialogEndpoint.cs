@@ -46,7 +46,8 @@ public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
             notFound => this.NotFoundAsync(notFound, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             concurrencyError => this.PreconditionFailed(ct),
-            validationError => this.BadRequestAsync(validationError, ct));
+            validationError => this.BadRequestAsync(validationError, ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

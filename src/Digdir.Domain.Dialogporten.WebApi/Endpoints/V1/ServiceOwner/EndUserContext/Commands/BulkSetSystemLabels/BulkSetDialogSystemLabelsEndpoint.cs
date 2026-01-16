@@ -39,7 +39,8 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

@@ -80,7 +80,8 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
             validationError => this.BadRequestAsync(validationError, ct),
             notFound => this.NotFoundAsync(notFound, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

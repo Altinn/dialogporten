@@ -60,7 +60,8 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
             validationError => this.BadRequestAsync(validationError, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
-            concurrencyError => this.PreconditionFailed(cancellationToken: ct));
+            concurrencyError => this.PreconditionFailed(cancellationToken: ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

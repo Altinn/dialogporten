@@ -2,12 +2,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Refit;
 using Xunit;
-using Xunit.Sdk;
 using static System.Text.Json.Serialization.JsonIgnoreCondition;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
@@ -119,7 +119,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
     public void PreflightCheck()
     {
-        var issues = new List<string>();
+        var preFlightIssues = new List<string>();
 
         if (PreflightState is null)
         {
@@ -128,19 +128,17 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
         if (PreflightState.GraphQlError is not null)
         {
-            issues.Add($"GraphQL not reachable at {PreflightState.GraphQlUri}. Error: {PreflightState.GraphQlError}");
+            preFlightIssues.Add($"GraphQL not reachable at {PreflightState.GraphQlUri}. Error: {PreflightState.GraphQlError}");
         }
 
         if (PreflightState.WebApiError is not null)
         {
-            issues.Add($"WebAPI not reachable at {PreflightState.WebApiUri}. Error: {PreflightState.WebApiError}");
+            preFlightIssues.Add($"WebAPI not reachable at {PreflightState.WebApiUri}. Error: {PreflightState.WebApiError}");
         }
 
-        if (issues.Count != 0)
-        {
-            throw SkipException.ForSkip(
-                $"GraphQL E2E preflight failed:{Environment.NewLine}{string.Join($"{Environment.NewLine}", issues)}");
-        }
+        preFlightIssues.Should()
+            .BeEmpty($"GraphQL E2E preflight failed:{Environment.NewLine}" +
+                     $"{string.Join($"{Environment.NewLine}", preFlightIssues)}");
     }
 
     public void CleanupAfterTest()

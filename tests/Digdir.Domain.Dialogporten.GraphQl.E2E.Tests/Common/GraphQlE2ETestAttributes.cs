@@ -7,6 +7,8 @@ namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
 
 public static class GraphQlE2EExplicitOptions
 {
+    // Flip to false when you want to
+    // run/debug E2E tests in your IDE
     public const bool ExplicitTests = true;
 }
 

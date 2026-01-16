@@ -13,6 +13,46 @@ using System.Threading.Tasks;
 
 namespace Altinn.ApiClients.Dialogporten.Features.V1
 {
+    public class V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams
+    {
+        public V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams(IEnumerable<string> party)
+        {
+            
+            Party = party;
+        }
+        
+                /// <summary>
+                /// Filter by one or more owning parties
+                /// </summary>
+        [Query(CollectionFormat.Multi)] 
+        public IEnumerable<string> Party { get; set; }
+
+                /// <summary>
+                /// Filter by end user id
+                /// </summary>
+        [Query] 
+        public string EndUserId { get; set; }
+
+                /// <summary>
+                /// Filter by one or more system labels
+                /// </summary>
+        [Query(CollectionFormat.Multi)] 
+        public IEnumerable<DialogEndUserContextsEntities_SystemLabel> Label { get; set; }
+
+                /// <summary>
+                /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
+                /// </summary>
+        [Query] 
+        public ContinuationTokenSetOfTOrderDefinitionAndTTarget ContinuationToken { get; set; }
+
+                /// <summary>
+                /// Limit the number of results per page (1-1000, default: 100)
+                /// </summary>
+        [Query] 
+        public int? Limit { get; set; }
+
+    }
+
     public class V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
     {
         
@@ -553,6 +593,42 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog>>> V1ServiceOwnerDialogsQueriesSearchSeenLogsDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets end user context system labels for dialogs</summary>
+        /// <remarks>
+        /// Performs a search for dialog end user context labels, returning a paginated list of dialogs.
+        /// 
+        /// * Party is required.
+        /// * System labels are matched with OR semantics.
+        /// * See \"continuationToken\" in the response for how to get the next page of results.
+        /// * hasNextPage will be set to true if there are more items to get.
+        /// </remarks>
+        /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog list.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/serviceowner/dialogs/endusercontext")]
+        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem>> V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContext([Query] V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams queryParams, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -1725,6 +1801,52 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem
+    {
+
+        /// <summary>
+        /// The paginated list of items
+        /// </summary>
+        [JsonPropertyName("items")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem> Items { get; set; }
+
+        /// <summary>
+        /// Whether there are more items available that can be fetched by supplying the continuation token
+        /// </summary>
+        [JsonPropertyName("hasNextPage")]
+        public bool HasNextPage { get; set; }
+
+        /// <summary>
+        /// The continuation token to be used to fetch the next page of items
+        /// </summary>
+        [JsonPropertyName("continuationToken")]
+        public string ContinuationToken { get; set; }
+
+        /// <summary>
+        /// The current sorting order of the items
+        /// </summary>
+        [JsonPropertyName("orderBy")]
+        public string OrderBy { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem
+    {
+
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; }
+
+        [JsonPropertyName("endUserContextRevision")]
+        public System.Guid EndUserContextRevision { get; set; }
+
+        [JsonPropertyName("systemLabels")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchActivities_Activity
     {
 
@@ -1746,6 +1868,21 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
+    {
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
 
     }
 
@@ -2252,21 +2389,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class OrderSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
     {
 
         private IDictionary<string, object> _additionalProperties;
@@ -3703,7 +3825,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// A UUIDv7 may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -4030,7 +4152,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -4082,7 +4204,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// A UUIDv7 may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -4235,7 +4357,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The UUIDv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]

@@ -9,6 +9,7 @@ namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
 public class DialogByIdTests : IGraphQlE2ETestHooks
 {
     private readonly GraphQlE2EFixture _fixture;
+    private const bool ExplicitTests = false;
 
     public DialogByIdTests(GraphQlE2EFixture fixture)
     {
@@ -19,7 +20,7 @@ public class DialogByIdTests : IGraphQlE2ETestHooks
 
     void IGraphQlE2ETestHooks.AfterTest() => _fixture.CleanupAfterTest();
 
-    [GraphQlE2EFact(Explicit = true)]
+    [GraphQlE2EFact(Explicit = ExplicitTests)]
     public async Task Should_Return_Typed_NotFound_Error_For_Invalid_DialogId()
     {
         // Arrange
@@ -37,8 +38,8 @@ public class DialogByIdTests : IGraphQlE2ETestHooks
         error.Message.Should().Contain(dialogId.ToString());
     }
 
-    // [GraphQlE2EFact(Explicit = true)]
-    [Fact]
+    [GraphQlE2EFact(Explicit = ExplicitTests)]
+    // [Fact]
     public async Task Should_Return_Dialog_For_Valid_DialogId()
     {
         // Arrange
@@ -55,7 +56,7 @@ public class DialogByIdTests : IGraphQlE2ETestHooks
         dialog.Id.Should().Be(dialogId);
     }
 
-    [GraphQlE2EFact(Explicit = true)]
+    [GraphQlE2EFact(Explicit = ExplicitTests)]
     public async Task Should_Return_401_Unauthorized_With_Invalid_EndUser_Token()
     {
         // Arrange
@@ -70,7 +71,7 @@ public class DialogByIdTests : IGraphQlE2ETestHooks
             .Which.Message.Should().Contain("401 (Unauthorized)");
     }
 
-    [Fact]
+    [GraphQlE2EFact(Explicit = ExplicitTests)]
     public async Task Should_Return_Typed_NotFound_Result_When_Using_Unauthorized_Party()
     {
         // Arrange

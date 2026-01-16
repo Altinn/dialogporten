@@ -121,5 +121,4 @@ public sealed class TestTokenHandler : DelegatingHandler
         tokenEnvironment == "yt01"
             ? Yt01ServiceOwnerOrgNr
             : DefaultServiceOwnerOrgNr;
-
 }

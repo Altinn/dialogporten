@@ -24,7 +24,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         .Handle<DbUpdateConcurrencyException>()
         .WaitAndRetryAsync(
             sleepDurations: Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(200), 25),
-            onRetryAsync: RefreshConcurrencyEntries);
+            onRetryAsync: FetchCurrentRevision);
 
     private readonly DialogDbContext _dialogDbContext;
     private readonly ITransactionTime _transactionTime;
@@ -209,7 +209,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         _transaction = null;
     }
 
-    private static async Task RefreshConcurrencyEntries(Exception exception, TimeSpan _)
+    private static async Task FetchCurrentRevision(Exception exception, TimeSpan _)
     {
         if (exception is not DbUpdateConcurrencyException concurrencyException)
         {

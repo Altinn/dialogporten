@@ -218,6 +218,11 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
         foreach (var entry in concurrencyException.Entries)
         {
+            if (entry.Entity is not IVersionableEntity)
+            {
+                continue;
+            }
+
             var dbValues = await entry.GetDatabaseValuesAsync();
             if (dbValues is null)
             {

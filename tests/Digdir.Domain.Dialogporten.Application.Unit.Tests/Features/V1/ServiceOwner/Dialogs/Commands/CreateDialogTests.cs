@@ -29,7 +29,9 @@ public class CreateDialogTests
         var domainContextSub = Substitute.For<IDomainContext>();
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
+        var userResourceSub = Substitute.For<IUserResourceRegistry>();
         var userSub = Substitute.For<IUser>();
+        var clock = new Clock();
 
         var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
@@ -42,9 +44,9 @@ public class CreateDialogTests
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
-        var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
+        var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub, hierarchyValidatorSub);
+            resourceRegistrySub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);
@@ -69,8 +71,10 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
+        var userResourceSub = Substitute.For<IUserResourceRegistry>();
         var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var clock = new Clock();
 
         serviceAuthorizationSub
             .AuthorizeServiceResources(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
@@ -80,9 +84,9 @@ public class CreateDialogTests
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
-        var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
+        var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub, hierarchyValidatorSub);
+            resourceRegistrySub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);

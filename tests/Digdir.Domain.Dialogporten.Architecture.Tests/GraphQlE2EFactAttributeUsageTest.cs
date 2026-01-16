@@ -8,24 +8,47 @@ namespace Digdir.Domain.Dialogporten.Architecture.Tests;
 public class GraphQlE2EFactAttributeUsageTest
 {
     [Fact]
-    public void All_GraphQL_E2E_Tests_Must_Be_Explicit()
+    public void All_GraphQL_E2E_Tests_Must_Use_E2E_Base_And_Attributes()
     {
-        var nonExplicitTests = GraphQlE2EAssemblyMarker
+        var testMethods = GraphQlE2EAssemblyMarker
             .Assembly
             .GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
             .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public))
-            .Where(m =>
-                m.GetCustomAttributes(inherit: true)
-                    .Any(a => a is GraphQlE2EFactAttribute { Explicit: false } or
-                        GraphQlE2ETheoryAttribute { Explicit: false }))
+            .Where(m => m.GetCustomAttributes(inherit: true)
+                .Any(a => a is GraphQlE2EFactAttribute or GraphQlE2ETheoryAttribute))
+            .ToArray();
+
+        var nonBaseClasses = testMethods
+            .Select(m => m.DeclaringType)
+            .Where(t => t is not null && !t.IsSubclassOf(typeof(GraphQlE2ETestBase)))
+            .Distinct()
+            .Select(t => t!.FullName!)
+            .OrderBy(name => name)
+            .ToArray();
+
+        nonBaseClasses
+            .Should()
+            .BeEmpty(
+                $"All GraphQl E2E test classes must inherit {nameof(GraphQlE2ETestBase)}.");
+
+        var nonCustomAttributeTests = GraphQlE2EAssemblyMarker
+            .Assembly
+            .GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
+            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public))
+            .Where(m => m.GetCustomAttributes(inherit: true)
+                .Any(a => a is FactAttribute or TheoryAttribute))
+            .Where(m => m.GetCustomAttributes(inherit: true)
+                .All(a => a is not GraphQlE2EFactAttribute and not GraphQlE2ETheoryAttribute))
             .Select(m => $"{m.DeclaringType?.FullName}.{m.Name}")
             .OrderBy(name => name)
             .ToArray();
 
-        nonExplicitTests
+        nonCustomAttributeTests
             .Should()
             .BeEmpty(
-                "All tests in the GraphQl E2E project needs to use the attribute " +
-                $"{nameof(GraphQlE2EFactAttribute)} or {nameof(GraphQlE2ETheoryAttribute)}");
+                $"All tests in the GraphQl E2E project must use {nameof(GraphQlE2EFactAttribute)} " +
+                $"or {nameof(GraphQlE2ETheoryAttribute)}.");
     }
 }

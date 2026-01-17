@@ -18,12 +18,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure;
 
 internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 {
-    // Fetch the db revision and retry
+    // Refresh the original values from the database before retrying
     // https://learn.microsoft.com/en-us/ef/core/saving/concurrency?tabs=data-annotations#resolving-concurrency-conflicts
     private static readonly AsyncPolicy ConcurrencyRetryPolicy = Policy
         .Handle<DbUpdateConcurrencyException>()
         .WaitAndRetryAsync(
-            sleepDurations: Backoff.ConstantBackoff(TimeSpan.FromMilliseconds(200), 25),
+            sleepDurations: Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(200), 25),
             onRetryAsync: FetchCurrentRevision);
 
     private readonly DialogDbContext _dialogDbContext;
@@ -142,13 +142,13 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
                 // Attempt to save changes without a concurrency check
                 : ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken));
         }
-        catch (DbUpdateConcurrencyException) when (_enableConcurrencyCheck)
+        catch (DbUpdateConcurrencyException)
         {
             return new ConcurrencyError();
         }
         catch (UniqueConstraintException ex) when
             (ex.InnerException?.Data["Detail"] is string message &&
-             ex.InnerException.Data["TableName"] is string tableName)
+            ex.InnerException.Data["TableName"] is string tableName)
         {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
@@ -224,7 +224,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             }
 
             var dbValues = await entry.GetDatabaseValuesAsync();
-            if (dbValues == null)
+            if (dbValues is null)
             {
                 continue;
             }
@@ -264,4 +264,5 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         public bool EnableIdentifiableFilter { get; } = true;
         public bool EnableAggregateFilter { get; set; } = true;
     }
+
 }

@@ -143,70 +143,88 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
     public void CleanupAfterTest()
     {
-        var overridesAccessor = _tokenOverridesAccessor ?? new TokenOverridesAccessor();
-        _tokenOverridesAccessor ??= overridesAccessor;
+        var originalAccessor = _tokenOverridesAccessor;
+        var originalCurrent = originalAccessor?.Current;
+        _tokenOverridesAccessor = originalAccessor ?? new TokenOverridesAccessor();
 
-        overridesAccessor.Current = new TokenOverrides(
-            ServiceOwner: new ServiceOwnerTokenOverrides(
-                Scopes: TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope));
-
-        var cancellationToken = TestContext.Current.CancellationToken;
-        var queryParams = new V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
+        try
         {
-            ServiceResource = ["urn:altinn:resource:ttd-dialogporten-automated-tests"],
-            Limit = 1000
-        };
+            _tokenOverridesAccessor.Current = new TokenOverrides(
+                ServiceOwner: new ServiceOwnerTokenOverrides(
+                    Scopes: TestTokenConstants.ServiceOwnerScopes + " "
+                            + AuthorizationScope.ServiceOwnerAdminScope));
 
-        PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog? page;
-        do
-        {
-            var searchResult = ServiceownerApi
-                .V1ServiceOwnerDialogsQueriesSearchDialog(queryParams, cancellationToken)
-                .GetAwaiter()
-                .GetResult();
-
-            if (!searchResult.IsSuccessful || searchResult.Content is null)
+            var cancellationToken = TestContext.Current.CancellationToken;
+            var queryParams = new V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
             {
-                TestContext.Current?.AddWarning(
-                    $"Failed to search dialogs for cleanup: {searchResult.Error?.Message ?? "unknown error"}");
-                TestContext.Current?.AddWarning($"{searchResult.Error?.Message ?? "unknown error"}");
-                return;
-            }
+                ServiceResource = ["urn:altinn:resource:ttd-dialogporten-automated-tests"],
+                Limit = 1000
+            };
 
-            page = searchResult.Content;
-            foreach (var dialog in page.Items ?? [])
+            PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog? page;
+            do
             {
-                try
-                {
-                    var purgeResult = ServiceownerApi
-                        .V1ServiceOwnerDialogsCommandsPurgeDialog(dialog.Id, if_Match: null, cancellationToken)
-                        .GetAwaiter()
-                        .GetResult();
+                var searchResult = ServiceownerApi
+                    .V1ServiceOwnerDialogsQueriesSearchDialog(
+                        queryParams, cancellationToken)
+                    .GetAwaiter()
+                    .GetResult();
 
-                    if (!purgeResult.IsSuccessful)
-                    {
-                        TestContext.Current?.AddWarning(
-                            $"Failed to delete dialog {dialog.Id}: {purgeResult.Error?.Message ?? "unknown error"}");
-                    }
-                }
-                catch (Exception exception)
+                if (!searchResult.IsSuccessful || searchResult.Content is null)
                 {
                     TestContext.Current?.AddWarning(
-                        $"Failed to delete dialog {dialog.Id}: {exception.GetBaseException().Message}");
+                        "Failed to search dialogs for cleanup: " +
+                        $"{searchResult.Error?.Message ?? "unknown error"}");
+                    return;
                 }
+
+                page = searchResult.Content;
+                foreach (var dialog in page.Items ?? [])
+                {
+                    try
+                    {
+                        var purgeResult = ServiceownerApi
+                            .V1ServiceOwnerDialogsCommandsPurgeDialog(
+                                dialog.Id, if_Match: null, cancellationToken)
+                            .GetAwaiter()
+                            .GetResult();
+
+                        if (!purgeResult.IsSuccessful)
+                        {
+                            TestContext.Current?.AddWarning(
+                                $"Failed to delete dialog {dialog.Id}: " +
+                                $"{purgeResult.Error?.Message ?? "unknown error"}");
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        TestContext.Current?.AddWarning(
+                            $"Failed to delete dialog {dialog.Id}: " +
+                            $"{exception.GetBaseException().Message}");
+                    }
+                }
+
+                if (page.HasNextPage)
+                {
+                    queryParams.ContinuationToken = new()
+                    {
+                        AdditionalProperties = new Dictionary<string, object>
+                        {
+                            ["continuationToken"] = page.ContinuationToken
+                        }
+                    };
+                }
+            } while (page.HasNextPage);
+        }
+        finally
+        {
+            if (originalAccessor is not null)
+            {
+                originalAccessor.Current = originalCurrent;
             }
 
-            if (page.HasNextPage)
-            {
-                queryParams.ContinuationToken = new()
-                {
-                    AdditionalProperties = new Dictionary<string, object>
-                    {
-                        ["continuationToken"] = page.ContinuationToken
-                    }
-                };
-            }
-        } while (page.HasNextPage);
+            _tokenOverridesAccessor = originalAccessor;
+        }
     }
 
     private static async Task<PreflightState> CreatePreflightState(Uri graphQlUri, Uri webApiUri)

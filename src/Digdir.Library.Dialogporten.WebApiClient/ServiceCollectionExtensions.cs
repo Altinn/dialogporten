@@ -60,6 +60,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<DefaultEdDsaSecurityKeysCache>();
         services.TryAddSingleton<IEdDsaSecurityKeysCache>(x => x.GetRequiredService<DefaultEdDsaSecurityKeysCache>());
         services.TryAddTransient<IClock, DefaultClock>();
+
         return services;
     }
 

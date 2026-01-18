@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using UserIdType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
 
 namespace Digdir.Domain.Dialogporten.Application.Common;
@@ -21,6 +22,9 @@ public sealed class UserId
     {
         UserIdType.Person or UserIdType.ServiceOwnerOnBehalfOfPerson => NorwegianPersonIdentifier.PrefixWithSeparator,
         UserIdType.SystemUser => SystemUserIdentifier.PrefixWithSeparator,
+        UserIdType.IdportenEmailIdentifiedUser => IdportenEmailUserIdentifier.PrefixWithSeparator,
+        UserIdType.AltinnSelfIdentifiedUser => AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator,
+        UserIdType.FeideUser => FeideUserIdentifier.PrefixWithSeparator,
         UserIdType.ServiceOwner => NorwegianOrganizationIdentifier.PrefixWithSeparator,
         UserIdType.Unknown => string.Empty,
         _ => throw new UnreachableException("Unknown UserIdType")
@@ -62,8 +66,16 @@ public sealed class UserRegistry : IUserRegistry
         var userId = GetCurrentUserId();
         var name = userId.Type switch
         {
-            UserIdType.Person or UserIdType.ServiceOwnerOnBehalfOfPerson => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
-            UserIdType.SystemUser => await _partyNameRegistry.GetOrgName(GetSystemUserOrg(), cancellationToken),
+            UserIdType.Person
+                or UserIdType.ServiceOwnerOnBehalfOfPerson
+                or UserIdType.AltinnSelfIdentifiedUser
+                or UserIdType.IdportenEmailIdentifiedUser
+                or UserIdType.FeideUser
+                => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
+
+            // We need a hack here, since we have no way of looking up a systemuser name. Since we have a claims principal
+            // we instead look up the system user organization number.
+            UserIdType.SystemUser => await _partyNameRegistry.GetName(GetSystemUserOrg(), cancellationToken),
             UserIdType.Unknown => throw new UnreachableException(),
             UserIdType.ServiceOwner => throw new UnreachableException(),
             _ => throw new UnreachableException()
@@ -75,11 +87,10 @@ public sealed class UserRegistry : IUserRegistry
         };
     }
 
-    private string GetSystemUserOrg() => _user
-        .GetPrincipal()
-        .TryGetSystemUserOrgNumber(out var orgNumber)
-        ? orgNumber
-        : throw new InvalidOperationException("System user org number not found");
+    private string GetSystemUserOrg() =>
+        _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
+            ? NorwegianOrganizationIdentifier.PrefixWithSeparator + systemOrgNumber
+            : throw new InvalidOperationException("Systemuser organization number not found");
 }
 
 internal sealed class LocalDevelopmentUserRegistryDecorator : IUserRegistry

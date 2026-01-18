@@ -3,6 +3,7 @@ using System;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -12,9 +13,11 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    partial class DialogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251211131459_AddDialogSearchTagToSearchVector")]
+    partial class AddDialogSearchTagToSearchVector
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1204,21 +1207,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 4,
                             Name = "ServiceOwnerOnBehalfOfPerson"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "IdportenEmailIdentifiedUser"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "AltinnSelfIdentifiedUser"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "FeideUser"
                         });
                 });
 

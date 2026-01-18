@@ -13,8 +13,14 @@ internal sealed class AuthorizedPartiesRequest(
     bool includeInstances = false,
     IEnumerable<AuthorizedPartyFilter>? partyFilter = null)
 {
-    public string Type { get; } = partyIdentifier.Prefix();
-    public string Value { get; } = partyIdentifier.Id;
+    [JsonIgnore]
+    public IPartyIdentifier PartyIdentifier => partyIdentifier;
+
+    [JsonPropertyName("type")]
+    public string Type => PartyIdentifier.Prefix();
+
+    [JsonPropertyName("value")]
+    public string Value => PartyIdentifier.Id;
 
     [JsonPropertyName("partyFilter")]
     public List<AuthorizedPartyFilter> PartyFilter { get; } =
@@ -52,7 +58,7 @@ internal static class AuthorizedPartiesRequestExtensions
                 .ThenBy(filter => filter.Value, StringComparer.Ordinal)
                 .Select(filter => $"{filter.Type}:{filter.Value}"));
 
-        var rawKey = $"{request.Type}:{request.Value}|{optionsKey}|{partyFilterKey}";
+        var rawKey = $"{request.PartyIdentifier.FullId}|{optionsKey}|{partyFilterKey}";
 
         var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
         var hashString = Convert.ToHexStringLower(hashBytes);

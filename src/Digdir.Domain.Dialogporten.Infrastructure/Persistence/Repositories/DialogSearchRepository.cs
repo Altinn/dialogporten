@@ -3,8 +3,11 @@ using System.Text.Json;
 using Dapper;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -131,6 +134,141 @@ internal sealed class DialogSearchRepository(
             cancellationToken);
 
         return dialogs;
+    }
+
+    public async Task<PaginatedList<DataDialogEndUserContextListItemDto>> SearchDialogEndUserContextsAsServiceOwner(
+        string orgName,
+        List<string> parties,
+        List<SystemLabel.Values>? systemLabels,
+        IContinuationTokenSet? continuationToken,
+        int limit,
+        DialogSearchAuthorizationResult? authorizedResources,
+        CancellationToken cancellationToken)
+    {
+        var orderSet = OrderSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>.Default;
+        var systemLabelValues = systemLabels?
+            .Select(x => (int)x)
+            .ToArray();
+
+        if (authorizedResources is not null && authorizedResources.HasNoAuthorizations)
+        {
+            return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
+        }
+
+        var queryBuilder = new PostgresFormattableStringBuilder();
+
+        if (authorizedResources is null)
+        {
+            queryBuilder
+                .Append(
+                    $"""
+                     SELECT d."Id" AS "DialogId"
+                          , c."Revision" AS "EndUserContextRevision"
+                          , d."ContentUpdatedAt"
+                          , ARRAY_AGG(sl."SystemLabelId" ORDER BY sl."SystemLabelId") AS "SystemLabels"
+                     FROM "Dialog" d
+                     INNER JOIN "DialogEndUserContext" c ON c."DialogId" = d."Id"
+                     INNER JOIN "DialogEndUserContextSystemLabel" sl ON c."Id" = sl."DialogEndUserContextId"
+                     WHERE d."Org" = {orgName}
+                       AND NOT d."Deleted"
+                       AND d."Party" = ANY({parties}::text[])
+                     """);
+        }
+        else
+        {
+            var partiesAndServices = authorizedResources.ResourcesByParties
+                .Select(x => (party: x.Key, services: x.Value))
+                .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
+                .Select(x => new PartiesAndServices(
+                    x.Select(k => k.party)
+                        .Where(p => parties.Contains(p))
+                        .ToArray(),
+                    x.Key.ToArray()))
+                .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
+                .ToList();
+
+            if (partiesAndServices.Count == 0)
+            {
+                return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
+            }
+
+            LogPartiesAndServicesCount(logger, partiesAndServices);
+
+            queryBuilder
+                .Append(
+                    $"""
+                     WITH raw_permissions AS (
+                         SELECT p.party, s.service
+                         FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
+                         CROSS JOIN LATERAL unnest(x."Services") AS s(service)
+                         CROSS JOIN LATERAL unnest(x."Parties") AS p(party)
+                     ),
+                     party_permission_map AS (
+                         SELECT party
+                              , ARRAY_AGG(service) AS allowed_services
+                         FROM raw_permissions
+                         GROUP BY party
+                     )
+                     SELECT d."Id" AS "DialogId"
+                          , c."Revision" AS "EndUserContextRevision"
+                          , d."ContentUpdatedAt"
+                          , ARRAY_AGG(sl."SystemLabelId" ORDER BY sl."SystemLabelId") AS "SystemLabels"
+                     FROM party_permission_map ppm
+                     INNER JOIN "Dialog" d ON d."Party" = ppm.party AND d."ServiceResource" = ANY(ppm.allowed_services)
+                     INNER JOIN "DialogEndUserContext" c ON c."DialogId" = d."Id"
+                     INNER JOIN "DialogEndUserContextSystemLabel" sl ON c."Id" = sl."DialogEndUserContextId"
+                     WHERE d."Org" = {orgName}
+                       AND NOT d."Deleted"
+                     """);
+        }
+
+        queryBuilder
+            .AppendIf(systemLabelValues is not null && systemLabelValues.Length != 0,
+                $"""
+                 AND EXISTS (
+                     SELECT 1
+                     FROM "DialogEndUserContextSystemLabel" sl_filter
+                     WHERE sl_filter."DialogEndUserContextId" = c."Id"
+                       AND sl_filter."SystemLabelId" = ANY({systemLabelValues}::int[])
+                 )
+                 """)
+            .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
+            .Append(
+                """
+                GROUP BY d."Id", c."Revision", d."ContentUpdatedAt"
+                """)
+            .ApplyPaginationOrder(orderSet, alias: "d")
+            .ApplyPaginationLimit(limit);
+
+        var (query, parameters) = queryBuilder.ToDynamicParameters();
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawEndUserContextListItemRow>(command);
+
+        var items = rawRows
+            .Select(row =>
+            {
+                return new DataDialogEndUserContextListItemDto(
+                    row.DialogId,
+                    row.EndUserContextRevision,
+                    new DateTimeOffset(row.ContentUpdatedAt),
+                    row.SystemLabels.ToList());
+            })
+            .ToList();
+
+        var hasNextPage = items.Count > limit;
+        if (hasNextPage)
+        {
+            items = items.Take(limit).ToList();
+        }
+
+        var nextContinuationToken = hasNextPage ? orderSet.GetContinuationTokenFrom(items.Last()) : null;
+
+        return new PaginatedList<DataDialogEndUserContextListItemDto>(
+            items,
+            hasNextPage,
+            nextContinuationToken,
+            orderSet.GetOrderString());
     }
 
     [SuppressMessage("Style", "IDE0037:Use inferred member name")]
@@ -287,7 +425,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var result = await connection.QueryAsync<(Guid Id, int GuiAttachmentCount)>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var result = await connection.QueryAsync<(Guid Id, int GuiAttachmentCount)>(command);
         return result.ToDictionary(x => x.Id, x => x.GuiAttachmentCount);
     }
 
@@ -316,7 +455,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawContentRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawContentRow>(command);
         return rawRows
             .GroupBy(x => new { x.DialogId, x.AuthLevel })
             .ToDictionary(x => x.Key.DialogId, row =>
@@ -361,7 +501,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawEndUserContextRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawEndUserContextRow>(command);
         return rawRows
             .GroupBy(x => new { x.DialogId, x.Revision })
             .ToDictionary(x => x.Key.DialogId, row => new DataDialogEndUserContextDto(
@@ -406,7 +547,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawSeenLogRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawSeenLogRow>(command);
         return rawRows
             .GroupBy(x => x.DialogId)
             .ToDictionary(x => x.Key, x => x.Select(row => new DataDialogSeenLogDto(
@@ -461,7 +603,8 @@ internal sealed class DialogSearchRepository(
             .ToDynamicParameters();
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<RawActivityRow>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<RawActivityRow>(command);
         return rawRows
             .GroupBy(x => x.DialogId)
             .ToDictionary(x => x.Key, x => x
@@ -502,7 +645,8 @@ internal sealed class DialogSearchRepository(
                  """)
             .ToDynamicParameters();
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var rawRows = await connection.QueryAsync<(Guid DialogId, Guid Revision, string Value)>(query, parameters);
+        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<(Guid DialogId, Guid Revision, string Value)>(command);
         return rawRows.GroupBy(x => new { x.DialogId, x.Revision })
             .ToDictionary(x => x.Key.DialogId,
                 row => new DataDialogServiceOwnerContextDto(
@@ -545,6 +689,13 @@ internal sealed class DialogSearchRepository(
     private sealed record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
         string LanguageCode, string Value);
     private sealed record RawEndUserContextRow(Guid DialogId, Guid Revision, SystemLabel.Values SystemLabelId);
+    private sealed class RawEndUserContextListItemRow
+    {
+        public Guid DialogId { get; set; }
+        public Guid EndUserContextRevision { get; set; }
+        public DateTime ContentUpdatedAt { get; set; }
+        public SystemLabel.Values[] SystemLabels { get; set; } = [];
+    }
     private sealed record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner,
         ActorType.Values ActorType, string? ActorId, string? ActorName, bool IsCurrentEndUser);
     private sealed record RawActivityRow(Guid DialogId, Guid ActivityId, DateTime CreatedAt,

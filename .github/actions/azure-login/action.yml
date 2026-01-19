@@ -1,5 +1,5 @@
-name: 'Azure Login with Bicep Upgrade'
-description: 'Login to Azure and upgrade Bicep CLI'
+name: 'Azure Login'
+description: 'Login to Azure'
 
 inputs:
   client-id:
@@ -29,7 +29,3 @@ runs:
         tenant-id: ${{ inputs.tenant-id }}
         subscription-id: ${{ inputs.allow-no-subscriptions == 'true' && '' || inputs.subscription-id }}
         allow-no-subscriptions: ${{ inputs.allow-no-subscriptions }}
-
-    - name: Upgrade Azure Bicep
-      shell: bash
-      run: az bicep upgrade

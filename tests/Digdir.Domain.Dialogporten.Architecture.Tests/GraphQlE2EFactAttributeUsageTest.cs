@@ -20,7 +20,7 @@ public class GraphQlE2EFactAttributeUsageTest
             .Assembly
             .GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
-            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public))
+            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             .Where(m => m.GetCustomAttributes(inherit: true)
                 .Any(a => a is GraphQlE2EFactAttribute or GraphQlE2ETheoryAttribute))
             .ToArray();
@@ -46,7 +46,7 @@ public class GraphQlE2EFactAttributeUsageTest
             .Assembly
             .GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
-            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public))
+            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             .Where(m => m.GetCustomAttributes(inherit: true)
                 .Any(a => a is FactAttribute or TheoryAttribute))
             .Where(m => m.GetCustomAttributes(inherit: true)

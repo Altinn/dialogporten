@@ -64,16 +64,19 @@ public class GraphQlE2EFixture : IAsyncLifetime
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.ServiceOwner));
 
-        var graphQlBaseAddress = settings.GraphQlPort is -1
-            ? settings.DialogportenBaseUri
-            : settings.DialogportenBaseUri.Replace("https", "http");
-
         var graphQlPath = environment == Environments.Development ? "/graphql" : "/dialogporten/graphql";
-        var graphQlUri = new UriBuilder(graphQlBaseAddress)
+        var graphQlUriBuilder = new UriBuilder(settings.DialogportenBaseUri)
         {
-            Path = graphQlPath,
-            Port = settings.GraphQlPort
-        }.Uri;
+            Path = graphQlPath
+        };
+
+        if (settings.GraphQlPort is not -1)
+        {
+            graphQlUriBuilder.Scheme = "http";
+            graphQlUriBuilder.Port = settings.GraphQlPort;
+        }
+
+        var graphQlUri = graphQlUriBuilder.Uri;
 
         services
             .AddDialogportenGraphQlTestClient()

@@ -8,7 +8,7 @@ on:
         type: string
       ref:
         description: "The branch or tag ref to run the tests on. Using default checkout ref if not provided."
-        required: false
+        required: true
         default: ${{ github.ref }}
         type: string
     secrets:
@@ -16,17 +16,6 @@ on:
         required: true
       TOKEN_GENERATOR_PASSWORD:
         required: true
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "DOTNET_ENVIRONMENT value to run tests against."
-        required: true
-        type: string
-      ref:
-        description: "Branch or tag ref to run the tests on."
-        required: false
-        default: ${{ github.ref }}
-        type: string
 
 jobs:
   graphql-e2e-tests:

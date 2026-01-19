@@ -251,7 +251,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
 
         try
         {
-            using var _ = await httpClient.SendAsync(request);
+            using var _ = await httpClient.SendAsync(request, TestContext.Current.CancellationToken);
             return null;
         }
         catch (Exception exception)

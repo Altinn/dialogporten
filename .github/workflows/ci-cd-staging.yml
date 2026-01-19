@@ -164,6 +164,7 @@ jobs:
       infra_status: ${{ needs.deploy-infra.result }}
       apps_status: ${{ needs.deploy-apps.result }}
       e2e_tests_status: ${{ needs.run-e2e-tests.result }}
+      graphql_e2e_tests_status: ${{ needs.run-graphql-e2e-tests.result }}
       schema_npm_status: ${{ needs.publish-schema-npm.result }}
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

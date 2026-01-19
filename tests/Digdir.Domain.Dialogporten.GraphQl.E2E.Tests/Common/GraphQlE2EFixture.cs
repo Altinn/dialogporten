@@ -31,6 +31,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
             .AddJsonFile("appsettings.json", optional: true)
             .AddJsonFile($"appsettings.{environment}.json", optional: true)
             .AddUserSecrets<E2ESettings>(optional: true)
+            .AddEnvironmentVariables()
             .Build();
 
         var settings = configuration.Get<E2ESettings>()

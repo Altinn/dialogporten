@@ -162,7 +162,7 @@ jobs:
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [deploy-infra, deploy-apps, run-e2e-tests, run-performance-tests]
+    needs: [deploy-infra, deploy-apps, run-e2e-tests, run-graphql-e2e-tests, run-performance-tests]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:

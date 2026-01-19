@@ -162,6 +162,7 @@ jobs:
       deploy-infra,
       deploy-apps,
       run-e2e-tests,
+      run-graphql-e2e-tests,
       publish-schema-npm,
       publish,
       build-and-test,

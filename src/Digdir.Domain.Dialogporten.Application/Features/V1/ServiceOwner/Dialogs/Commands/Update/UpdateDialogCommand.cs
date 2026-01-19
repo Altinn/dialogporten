@@ -102,7 +102,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new EntityDeleted<DialogEntity>(request.Id);
         }
 
-        if (dialog.Frozen && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        var isCurrentUserServiceOwnerAdmin = _userResourceRegistry.IsCurrentUserServiceOwnerAdmin();
+        if (dialog.Frozen && !isCurrentUserServiceOwnerAdmin)
         {
             return new Forbidden("User cannot modify frozen dialog");
         }
@@ -110,7 +111,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
 
-        if (!request.IsSilentUpdate)
+        if (!request.IsSilentUpdate || !isCurrentUserServiceOwnerAdmin)
         {
             ValidateTimeFields(dialog);
         }

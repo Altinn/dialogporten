@@ -112,7 +112,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return new Conflict(nameof(dialog.IdempotentKey), $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
         }
 
-        if (!request.IsSilentUpdate || _userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        if (!request.IsSilentUpdate || !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
             ValidateTimeFields(request.Dto);
         }

@@ -36,6 +36,10 @@ public sealed class CustomMetricsService
                 await collector.CollectAndRecordAsync(cancellationToken);
                 _logger.LogDebug("Collected metric: {MetricName}", collector.MetricName);
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to collect metric {MetricName}", collector.MetricName);

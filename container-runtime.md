@@ -187,6 +187,9 @@ All items below are the environment-specific differences defined in `.azure/infr
 ### Cluster-level setup
 - AKS cluster in the existing VNet (subnet sizing comparable to ACA `/23` for apps; separate subnets for nodes and ingress as needed).
 - System node pool plus a dedicated node pool matching `Dedicated-D8`; use taints and labels for scheduling.
+- Platform AKS module (`altinn-platform/infrastructure/modules/aks`) currently provisions two pools (`syspool`, `workpool`) with a single `vm_size` per pool via `pool_configs`.
+  - Map `Dedicated-D8` workloads to the `workpool` size if that matches expectations.
+  - If we need more than one worker machine size (for example a small pool plus a D8 pool), the AKS module must support multiple worker pools.
 - OpenTelemetry Collector configured to send traces/logs to the App Insights instance per environment and metrics to Azure Monitor Workspace (Prometheus remote write).
 
 ### Ingress and networking

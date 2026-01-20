@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -38,6 +39,8 @@ public static class OpenTelemetryExtensions
         };
 
         var endpoint = new Uri(configuration[OtelExporterOtlpEndpoint]!);
+        var infrastructureSection = configuration.GetSection("Infrastructure");
+        var enabledSqlStatementLogging = infrastructureSection.GetValue("EnableSqlStatementLogging", false);
 
         return services.AddOpenTelemetry()
             .ConfigureResource(resource =>
@@ -52,7 +55,8 @@ public static class OpenTelemetryExtensions
                     tracing.SetSampler(new AlwaysOnSampler());
                 }
 
-                tracing.AddProcessor(new PostgresFilter());
+                tracing.AddProcessor(new PostgresFilter(enabledSqlStatementLogging));
+                tracing.AddProcessor(new GraphQLFilter());
                 tracing.AddProcessor(new HealthCheckFilter());
                 tracing.AddProcessor(new FusionCacheFilter());
 
@@ -169,11 +173,14 @@ public static class OpenTelemetryExtensions
             options.Protocol = protocol;
         };
 
-    public static TracerProviderBuilder AddAspNetCoreInstrumentationExcludingHealthPaths(this TracerProviderBuilder builder)
+    public static TracerProviderBuilder AddAspNetCoreInstrumentationExcludingHealthPaths(
+        this TracerProviderBuilder builder,
+        Action<AspNetCoreTraceInstrumentationOptions>? configureAspNetCoreTraceInstrumentationOptions = null)
     {
         return builder.AddAspNetCoreInstrumentation(opts =>
         {
             opts.RecordException = true;
+            configureAspNetCoreTraceInstrumentationOptions?.Invoke(opts);
         });
     }
 }

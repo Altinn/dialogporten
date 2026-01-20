@@ -275,6 +275,35 @@
         },
         "type": "object"
       },
+      "PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem": {
+        "additionalProperties": false,
+        "properties": {
+          "continuationToken": {
+            "description": "The continuation token to be used to fetch the next page of items",
+            "example": "createdat_2024-07-31T09:09:03.0257090Z,id_0c089101-b7cf-a476-955c-f00a78d74a4e",
+            "nullable": true,
+            "type": "string"
+          },
+          "hasNextPage": {
+            "description": "Whether there are more items available that can be fetched by supplying the continuation token",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "The paginated list of items",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orderBy": {
+            "description": "The current sorting order of the items",
+            "example": "createdat_desc,id_desc",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ProblemDetails": {
         "additionalProperties": false,
         "properties": {
@@ -338,6 +367,12 @@
       "V1AccessManagementQueriesGetParties_AuthorizedParty": {
         "additionalProperties": false,
         "properties": {
+          "dateOfBirth": {
+            "description": "The date of birth of the party, if a person.",
+            "example": "1977-12-26",
+            "nullable": true,
+            "type": "string"
+          },
           "hasKeyRole": {
             "description": "Whether the authenticated user has a key role in the party.\n            \nRead more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#n\u00F8kkelroller",
             "type": "boolean"
@@ -940,6 +975,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -1211,6 +1252,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -1375,6 +1422,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
@@ -1954,6 +2007,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -2450,6 +2509,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent creation of attachments. If not provided, a new UUIDv7 will be generated.",
             "format": "guid",
@@ -2940,6 +3005,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent creation of transmission attachments. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
@@ -3039,7 +3110,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3070,13 +3141,105 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "The transmission summary.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The transmission title. Must be text/plain.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest": {
         "additionalProperties": false,
         "properties": {
           "attachments": {
             "description": "The transmission-level attachments.",
             "items": {
-              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment"
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment"
             },
             "nullable": true,
             "type": "array"
@@ -3092,7 +3255,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent"
+                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent"
               }
             ]
           },
@@ -3113,7 +3276,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3168,7 +3331,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3306,6 +3469,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent additions of attachments. If not provided, a new UUIDv7 will be generated.",
@@ -3545,13 +3714,6 @@
             },
             "nullable": true,
             "type": "array"
-          },
-          "visibleFrom": {
-            "description": "The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be\nimmediately available.",
-            "example": "2022-12-31T23:59:59Z",
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
           }
         },
         "type": "object"
@@ -3684,7 +3846,7 @@
             "type": "string"
           },
           "id": {
-            "description": "The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3725,6 +3887,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.",
@@ -4278,6 +4446,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -4566,6 +4740,12 @@
             "nullable": true,
             "type": "array"
           },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
@@ -4729,6 +4909,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
@@ -5325,6 +5511,27 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogId": {
+            "format": "guid",
+            "type": "string"
+          },
+          "endUserContextRevision": {
+            "format": "guid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog": {
         "additionalProperties": false,
         "properties": {
@@ -5356,6 +5563,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
@@ -5512,6 +5725,15 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetDialogSystemLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
@@ -5530,6 +5752,15 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "performedBy": {
+            "description": "Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
           },
           "removeLabels": {
             "description": "List of system labels to remove from the target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
@@ -5569,15 +5800,6 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerEndUserContextCommandsBulkSetSystenLabels_BulkSetDialogSystemLabelsRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "dto": {
-            "$ref": "#/components/schemas/V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
-          }
-        },
-        "type": "object"
-      },
       "V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest": {
         "additionalProperties": false,
         "properties": {
@@ -5588,6 +5810,15 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "performedBy": {
+            "description": "Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
           },
           "removeLabels": {
             "description": "List of system labels to remove from target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
@@ -5708,6 +5939,25 @@
               }
             },
             "description": "The OAuth 2.0 Authorization Server Metadata"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "summary": "Gets the JSON Web Key Set (JWKS) containing the public keys used to verify dialog token signatures",
@@ -5730,6 +5980,25 @@
               }
             },
             "description": "The OAuth 2.0 Authorization Server Metadata"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "summary": "Gets the OAuth 2.0 Metadata for automatic configuration of clients verifying dialog tokens",
@@ -6013,6 +6282,25 @@
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6081,6 +6369,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6152,6 +6459,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6229,6 +6555,25 @@
               }
             },
             "description": "The specified dialog ID or activity ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6291,6 +6636,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6404,6 +6768,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6463,6 +6846,25 @@
               }
             },
             "description": "Not Found"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6528,6 +6930,25 @@
               }
             },
             "description": "Not Found"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6602,6 +7023,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6682,6 +7122,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6751,6 +7210,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6789,6 +7267,25 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7109,6 +7606,25 @@
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.search\u0022."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7190,6 +7706,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7280,6 +7815,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7343,6 +7897,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7466,6 +8039,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7575,6 +8167,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7665,6 +8276,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7733,6 +8363,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7801,6 +8450,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7880,6 +8548,25 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7939,6 +8626,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8061,6 +8767,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8129,6 +8854,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8178,6 +8922,25 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8264,6 +9027,25 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8349,6 +9131,25 @@
               }
             },
             "description": ""
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8381,8 +9182,8 @@
           {
             "in": "query",
             "name": "enduserId",
-            "required": true,
             "schema": {
+              "nullable": true,
               "type": "string"
             }
           },
@@ -8470,6 +9271,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8532,6 +9352,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8600,6 +9439,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8662,6 +9520,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8784,6 +9661,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8852,6 +9748,25 @@
           },
           "410": {
             "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -8867,16 +9782,133 @@
         ]
       }
     },
+    "/api/v1/serviceowner/dialogs/endusercontext": {
+      "get": {
+        "description": "Performs a search for dialog end user context labels, returning a paginated list of dialogs.\n\n* Party is required.\n* System labels are matched with OR semantics.\n* See \\\u0022continuationToken\\\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
+        "operationId": "V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContext",
+        "parameters": [
+          {
+            "description": "Filter by one or more owning parties",
+            "example": [
+              ""
+            ],
+            "explode": true,
+            "in": "query",
+            "name": "party",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Filter by end user id",
+            "in": "query",
+            "name": "endUserId",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by one or more system labels",
+            "explode": true,
+            "in": "query",
+            "name": "label",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Supply \u0022continuationToken\u0022 for the response to get the next page of results, if hasNextPage is true",
+            "in": "query",
+            "name": "continuationToken",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
+                }
+              ]
+            }
+          },
+          {
+            "description": "Limit the number of results per page (1-1000, default: 100)",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "nullable": true,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog list."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.search\u0022."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider",
+              "digdir:dialogporten.serviceprovider.search"
+            ]
+          }
+        ],
+        "summary": "Gets end user context system labels for dialogs",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
     "/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset": {
       "post": {
         "description": "Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.",
-        "operationId": "V1ServiceOwnerEndUserContextCommandsBulkSetSystenLabels_BulkSetDialogSystemLabels",
+        "operationId": "V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetDialogSystemLabels",
         "parameters": [
           {
             "in": "query",
             "name": "enduserId",
-            "required": true,
             "schema": {
+              "nullable": true,
               "type": "string"
             }
           }
@@ -8931,6 +9963,25 @@
               }
             },
             "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [

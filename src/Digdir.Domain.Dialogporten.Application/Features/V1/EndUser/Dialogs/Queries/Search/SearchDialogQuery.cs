@@ -133,9 +133,9 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<Intermed
 {
     public static IOrderOptions<IntermediateDialogDto> Configure(IOrderOptionsBuilder<IntermediateDialogDto> options) =>
         options.AddId(x => x.Id)
-            .AddDefault("createdAt", x => x.CreatedAt)
+            .AddDefault("contentUpdatedAt", x => x.ContentUpdatedAt)
             .AddOption("updatedAt", x => x.UpdatedAt)
-            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
+            .AddOption("createdAt", x => x.CreatedAt)
             .AddOption("dueAt", x => x.DueAt)
             .Build();
 }
@@ -178,7 +178,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
-        var paginatedList = await _db.Dialogs
+        var paginatedList = await _db.WrapWithRepeatableRead((dbCtx, ct) => dbCtx.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
             .AsNoTracking()
             .Include(x => x.Content)
@@ -211,7 +211,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             .Where(x => !x.VisibleFrom.HasValue || _clock.UtcNowOffset > x.VisibleFrom)
             .Where(x => !x.ExpiresAt.HasValue || x.ExpiresAt > _clock.UtcNowOffset)
             .ProjectTo<IntermediateDialogDto>(_mapper.ConfigurationProvider)
-            .ToPaginatedListAsync(request, cancellationToken: cancellationToken);
+            .ToPaginatedListAsync(request, cancellationToken: ct),
+            cancellationToken);
 
         paginatedList.Items.ForEach(x => x.FilterLocalizations(request.AcceptedLanguages));
 

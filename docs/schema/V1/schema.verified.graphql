@@ -79,6 +79,8 @@ type Attachment {
   displayName: [Localization!]!
   "The URLs associated with the attachment, each referring to a different representation of the attachment."
   urls: [AttachmentUrl!]!
+  "The UTC timestamp when the attachment expires and is no longer available."
+  expiresAt: DateTime
 }
 
 type AttachmentUrl {
@@ -99,6 +101,7 @@ type AuthorizedParty {
   partyUuid: UUID!
   partyId: Int!
   name: String!
+  dateOfBirth: String
   partyType: String!
   isDeleted: Boolean!
   hasKeyRole: Boolean!
@@ -112,6 +115,7 @@ type AuthorizedSubParty {
   partyUuid: UUID!
   partyId: Int!
   name: String!
+  dateOfBirth: String
   partyType: String!
   isDeleted: Boolean!
   hasKeyRole: Boolean!
@@ -184,8 +188,6 @@ type Dialog {
   extendedStatus: String
   "Arbitrary string with a service-specific reference to an external system or service. Refer to the service-specific documentation provided by the service owner for details (if in use)."
   externalReference: String
-  "The date and time when the dialog becomes visible to the end user."
-  visibleFrom: DateTime
   "The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available. Example: 2022-12-31T23:59:59Z"
   dueAt: DateTime
   "The expiration date for the dialog. This is the last date when the dialog is available for the end user. After this date is passed, the dialog will be considered expired and no longer available for the end user in any API. If not supplied, the dialog will be considered to never expire. This field can be changed by the service owner after the dialog has been created. Example: 2022-12-31T23:59:59Z"
@@ -438,7 +440,7 @@ type SetSystemLabelValidationError implements SetSystemLabelError {
 }
 
 type Subscriptions {
-  "Requires a dialog token in the 'DigDir-Dialog-Token' header."
+  "Requires a dialog token in the 'Authorization' header."
   dialogEvents(dialogId: UUID!): DialogEventPayload! @authorize(policy: "enduserSubscription", apply: VALIDATION)
 }
 

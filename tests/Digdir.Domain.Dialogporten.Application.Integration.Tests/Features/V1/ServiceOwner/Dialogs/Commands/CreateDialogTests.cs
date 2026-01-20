@@ -12,11 +12,12 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -34,6 +35,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
     private sealed class CreateDialogWithSpecifiedDialogIdTestData : TheoryData<string, Guid, Type>
     {
+        public static DateTimeOffset FixedUtcNow => new(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
+
         public CreateDialogWithSpecifiedDialogIdTestData()
         {
             Add("Validations for UUIDv4 format",
@@ -45,19 +48,19 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 typeof(ValidationError));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(1)),
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(1)),
                 typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(14)),
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(14)),
                 typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(16)),
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(16)),
                 typeof(ValidationError));
 
             Add("Can create a dialog with a valid UUIDv7 format",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(-1)),
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(-1)),
                 typeof(CreateDialogSuccess));
         }
     }
@@ -65,18 +68,57 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedDialogIdTestData))]
     public Task Create_Dialog_With_Specified_DialogId_Tests(string _, Guid guidInput, Type assertType) =>
         FlowBuilder.For(Application)
+            .OverrideUtc(CreateDialogWithSpecifiedDialogIdTestData.FixedUtcNow)
             .CreateSimpleDialog(x => x.Dto.Id = guidInput)
             .ExecuteAndAssert(assertType);
 
-    [Fact]
-    public async Task Creates_Dialog_When_Dialog_Is_Simple()
+    private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<string, string>
+    {
+        public CreateDialogWithSpecifiedPartyTestData()
+        {
+            Add("Can create dialog with OrganizationIdentifier as Party", "urn:altinn:organization:identifier-no:974760673");
+            Add("Can create dialog with PersonalIdentifier as Party", "urn:altinn:person:identifier-no:15915299854");
+            Add("Can create dialog with A2 SI User as Party", "urn:altinn:person:legacy-selfidentified:someusername");
+            Add("Can create dialog with ID-Porten email as Party", "urn:altinn:person:idporten-email:foo@bar.com");
+            // Not supported yet
+            //Add("Can create dialog with Feide orgsub", "urn:altinn:feide-subject:33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551");
+        }
+    }
+
+    [Theory, ClassData(typeof(CreateDialogWithSpecifiedPartyTestData))]
+    public async Task Creates_Dialog_When_Dialog_Is_Simple_For_All_PartyTypes(string _, string party)
     {
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = expectedDialogId)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.Id = expectedDialogId;
+                x.Dto.Party = party;
+            })
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.Id.Should().Be(expectedDialogId));
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Id.Should().Be(expectedDialogId);
+                x.Party.Should().Be(party);
+            });
+    }
+
+    [Fact]
+    public Task VisibleFrom_Should_Control_Timestamps_On_Create()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(3);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.VisibleFrom = visibleFrom)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+            {
+                dialog.VisibleFrom.Should().BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1));
+                dialog.CreatedAt.Should().Be(dialog.VisibleFrom);
+                dialog.UpdatedAt.Should().Be(dialog.VisibleFrom);
+                dialog.ContentUpdatedAt.Should().Be(dialog.VisibleFrom);
+            });
     }
 
     [Fact]

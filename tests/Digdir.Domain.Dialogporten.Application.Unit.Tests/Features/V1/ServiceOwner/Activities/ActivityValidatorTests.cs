@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.Validators;
@@ -18,7 +19,7 @@ namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceO
 public class ActivityValidatorTests
 {
     public static IEnumerable<object[]> ActivityTypes() =>
-        from DialogActivityType.Values activityType in Enum.GetValues(typeof(DialogActivityType.Values))
+        from DialogActivityType.Values activityType in Enum.GetValues<DialogActivityType.Values>()
         select new object[] { activityType, };
 
     [Theory, MemberData(nameof(ActivityTypes))]
@@ -34,8 +35,9 @@ public class ActivityValidatorTests
         var localizationValidator = new LocalizationDtosValidator();
         var actorValidator = new ActorValidator();
 
-        var createValidator = new CreateDialogDialogActivityDtoValidator(localizationValidator, actorValidator);
-        var updateValidator = new UpdateDialogDialogActivityDtoValidator(localizationValidator, actorValidator);
+        var clock = new Clock();
+        var createValidator = new CreateDialogDialogActivityDtoValidator(localizationValidator, actorValidator, clock);
+        var updateValidator = new UpdateDialogDialogActivityDtoValidator(localizationValidator, actorValidator, clock);
 
         // Act
         var createValidation = createValidator.Validate(activity);

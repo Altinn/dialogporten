@@ -1,9 +1,11 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -27,32 +29,36 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
     private readonly IDialogDbContext _db;
     private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
+    private readonly IClock _clock;
 
-    public SearchTransmissionQueryHandler(IDialogDbContext db, IMapper mapper, IAltinnAuthorization altinnAuthorization)
+    public SearchTransmissionQueryHandler(IDialogDbContext db, IMapper mapper, IAltinnAuthorization altinnAuthorization, IClock clock)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
 
     public async Task<SearchTransmissionResult> Handle(SearchTransmissionQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _db.Dialogs
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
-                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-            .Include(x => x.Transmissions)
-                .ThenInclude(x => x.Sender)
-                .ThenInclude(x => x.ActorNameEntity)
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId,
-                cancellationToken: cancellationToken);
+        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs
+                .AsNoTracking()
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Content.OrderBy(x => x.Id).ThenBy(x => x.CreatedAt))
+                    .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId,
+                    cancellationToken: ct), cancellationToken);
 
         if (dialog is null)
         {
@@ -87,15 +93,34 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
         {
             transmission.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
 
-            if (transmission.IsAuthorized) continue;
+            if (transmission.IsAuthorized)
+            {
+                ReplaceExpiredAttachmentUrls(transmission);
+                continue;
+            }
 
             var urls = transmission.Attachments.SelectMany(a => a.Urls).ToList();
             foreach (var url in urls)
             {
                 url.Url = Constants.UnauthorizedUri;
             }
+
+            transmission.Content.ContentReference.ReplaceUnauthorizedContentReference();
         }
 
         return dto;
+    }
+
+    private void ReplaceExpiredAttachmentUrls(TransmissionDto dto)
+    {
+        var expiredTransmissionAttachmentUrls = dto
+            .Attachments
+            .Where(x => x.ExpiresAt < _clock.UtcNowOffset)
+            .SelectMany(x => x.Urls);
+
+        foreach (var url in expiredTransmissionAttachmentUrls)
+        {
+            url.Url = Constants.ExpiredUri;
+        }
     }
 }

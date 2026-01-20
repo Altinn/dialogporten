@@ -111,15 +111,15 @@ public class FeatureMetricBehaviourTests : ApplicationCollectionFixture
         var recorder = scope.ServiceProvider.GetRequiredService<FeatureMetricRecorder>();
 
         var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
-        await mediator.Send(createCommand1);
+        await mediator.Send(createCommand1, TestContext.Current.CancellationToken);
 
         var getCommand1 = new GetDialogQuery { DialogId = firstDialogId };
-        await mediator.Send(getCommand1);
+        await mediator.Send(getCommand1, TestContext.Current.CancellationToken);
 
-        await mediator.Send(createCommand2);
+        await mediator.Send(createCommand2, TestContext.Current.CancellationToken);
 
         var getCommand2 = new GetDialogQuery { DialogId = secondDialogId };
-        await mediator.Send(getCommand2);
+        await mediator.Send(getCommand2, TestContext.Current.CancellationToken);
 
         // Assert
         var metrics = recorder.Records.ToList();

@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -10,14 +11,15 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
     public CreateDialogDialogTransmissionDtoValidator(
         IValidator<ActorDto> actorValidator,
         IValidator<TransmissionContentDto?> contentValidator,
-        IValidator<TransmissionAttachmentDto> attachmentValidator)
+        IValidator<TransmissionAttachmentDto> attachmentValidator,
+        IClock clock)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
-            .UuidV7TimestampIsInPast();
+            .UuidV7TimestampIsInPast(clock);
 
         RuleFor(x => x.CreatedAt)
-            .IsInPast();
+            .IsInPast(clock);
 
         RuleFor(x => x.ExtendedType)
             .IsValidUri()

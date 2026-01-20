@@ -58,7 +58,7 @@ static void BuildAndRun(string[] args)
 
     builder.WebHost.ConfigureKestrel(kestrelOptions =>
     {
-        kestrelOptions.Limits.MaxRequestBodySize = Constants.MaxRequestBodySize;
+        kestrelOptions.Limits.MaxRequestBodySize = Constants.MaxRequestBodySizeInBytes;
     });
 
     builder.Configuration
@@ -96,6 +96,8 @@ static void BuildAndRun(string[] args)
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths())
         // Options setup
+        .AddAspNetCommon(builder.Configuration.GetSection(WebApiSettings.SectionName)
+            .GetSection(WebHostCommonSettings.SectionName))
         .ConfigureOptions<AuthorizationOptionsSetup>()
         .Configure<FeatureMetricOptions>(builder.Configuration.GetSection("FeatureMetrics"))
 
@@ -128,6 +130,7 @@ static void BuildAndRun(string[] args)
                     document.MakeCollectionsNullable();
                     document.FixJwtBearerCasing();
                     document.RemoveSystemStringHeaderTitles();
+                    document.AddServiceUnavailableResponse();
                 };
                 s.Title = "Dialogporten";
                 s.Description = Constants.SwaggerSummary.GlobalDescription;
@@ -177,6 +180,7 @@ static void BuildAndRun(string[] args)
 
     app.UseHttpsRedirection()
         .UseDefaultExceptionHandler()
+        .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()

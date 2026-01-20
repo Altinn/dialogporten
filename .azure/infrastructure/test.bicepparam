@@ -37,10 +37,15 @@ param postgresConfiguration = {
     type: 'Premium_LRS'
     tier: 'P4'
   }
+  // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: false
   enableQueryPerformanceInsight: true
+  parameterLogging: {
+    enabled: false
+  }
   backupRetentionDays: 7
   availabilityZone: '1'
+  enableBackupVault: false
 }
 
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Dev'
@@ -60,4 +65,4 @@ param serviceBusSku = {
 // Altinn Product Dialogporten: Developers Dev
 param sshJumperAdminLoginGroupObjectId = 'c12e51e3-5cbd-4229-8a31-5394c423fb5f'
 
-param apimUrl = 'https://altinn-dev-api.azure-api.net/dialogporten'
+param apimUrl = 'https://platform.at23.altinn.cloud/dialogporten'

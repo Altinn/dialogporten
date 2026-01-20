@@ -1,0 +1,255 @@
+﻿[
+  {
+    Items: [
+      {
+        Content: {
+          Title: {
+            Value: [
+              {
+                Value: Dette er en tittel, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          },
+          Summary: {
+            Value: [
+              {
+                Value: Dette er et sammendrag, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          }
+        },
+        Id: Guid_1,
+        Org: ttd,
+        ServiceResource: urn:altinn:resource:1337,
+        ServiceResourceType: localresourcetype,
+        Party: urn:altinn:person:identifier-no:22834498646,
+        Progress: 22,
+        Process: some-process,
+        PrecedingProcess: some-preceding-process,
+        GuiAttachmentCount: 1,
+        ExtendedStatus: ext-status,
+        ExternalReference: external-ref,
+        CreatedAt: 2023-01-05 +0,
+        UpdatedAt: 2023-01-05 +0,
+        ContentUpdatedAt: 2023-01-05 +0,
+        DueAt: 2127-01-01 +0,
+        Status: NotApplicable,
+        HasUnopenedContent: true,
+        IsApiOnly: false,
+        FromServiceOwnerTransmissionsCount: 1,
+        EndUserContext: {
+          Revision: Guid_2,
+          SystemLabels: [
+            Default
+          ]
+        }
+      },
+      {
+        Content: {
+          Title: {
+            Value: [
+              {
+                Value: Dette er en tittel, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          },
+          Summary: {
+            Value: [
+              {
+                Value: Dette er et sammendrag, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          }
+        },
+        Id: Guid_3,
+        Org: ttd,
+        ServiceResource: urn:altinn:resource:1337,
+        ServiceResourceType: localresourcetype,
+        Party: urn:altinn:person:identifier-no:22834498646,
+        Progress: 22,
+        Process: some-process,
+        PrecedingProcess: some-preceding-process,
+        GuiAttachmentCount: 1,
+        ExtendedStatus: ext-status,
+        ExternalReference: external-ref,
+        CreatedAt: 2023-01-04 +0,
+        UpdatedAt: 2023-01-04 +0,
+        ContentUpdatedAt: 2023-01-04 +0,
+        DueAt: 2126-01-01 +0,
+        Status: NotApplicable,
+        HasUnopenedContent: true,
+        IsApiOnly: false,
+        FromServiceOwnerTransmissionsCount: 1,
+        EndUserContext: {
+          Revision: Guid_4,
+          SystemLabels: [
+            Default
+          ]
+        }
+      }
+    ],
+    HasNextPage: true,
+    OrderBy: updatedat_desc,id_desc
+  },
+  {
+    Items: [
+      {
+        Content: {
+          Title: {
+            Value: [
+              {
+                Value: Dette er en tittel, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          },
+          Summary: {
+            Value: [
+              {
+                Value: Dette er et sammendrag, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          }
+        },
+        Id: Guid_5,
+        Org: ttd,
+        ServiceResource: urn:altinn:resource:1337,
+        ServiceResourceType: localresourcetype,
+        Party: urn:altinn:person:identifier-no:22834498646,
+        Progress: 22,
+        Process: some-process,
+        PrecedingProcess: some-preceding-process,
+        GuiAttachmentCount: 1,
+        ExtendedStatus: ext-status,
+        ExternalReference: external-ref,
+        CreatedAt: 2023-01-03 +0,
+        UpdatedAt: 2023-01-03 +0,
+        ContentUpdatedAt: 2023-01-03 +0,
+        DueAt: 2125-01-01 +0,
+        Status: NotApplicable,
+        HasUnopenedContent: true,
+        IsApiOnly: false,
+        FromServiceOwnerTransmissionsCount: 1,
+        EndUserContext: {
+          Revision: Guid_6,
+          SystemLabels: [
+            Default
+          ]
+        }
+      },
+      {
+        Content: {
+          Title: {
+            Value: [
+              {
+                Value: Dette er en tittel, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          },
+          Summary: {
+            Value: [
+              {
+                Value: Dette er et sammendrag, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          }
+        },
+        Id: Guid_7,
+        Org: ttd,
+        ServiceResource: urn:altinn:resource:1337,
+        ServiceResourceType: localresourcetype,
+        Party: urn:altinn:person:identifier-no:22834498646,
+        Progress: 22,
+        Process: some-process,
+        PrecedingProcess: some-preceding-process,
+        GuiAttachmentCount: 1,
+        ExtendedStatus: ext-status,
+        ExternalReference: external-ref,
+        CreatedAt: 2023-01-02 +0,
+        UpdatedAt: 2023-01-02 +0,
+        ContentUpdatedAt: 2023-01-02 +0,
+        DueAt: 2124-01-01 +0,
+        Status: NotApplicable,
+        HasUnopenedContent: true,
+        IsApiOnly: false,
+        FromServiceOwnerTransmissionsCount: 1,
+        EndUserContext: {
+          Revision: Guid_8,
+          SystemLabels: [
+            Default
+          ]
+        }
+      }
+    ],
+    HasNextPage: true,
+    OrderBy: updatedat_desc,id_desc
+  },
+  {
+    Items: [
+      {
+        Content: {
+          Title: {
+            Value: [
+              {
+                Value: Dette er en tittel, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          },
+          Summary: {
+            Value: [
+              {
+                Value: Dette er et sammendrag, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          }
+        },
+        Id: Guid_9,
+        Org: ttd,
+        ServiceResource: urn:altinn:resource:1337,
+        ServiceResourceType: localresourcetype,
+        Party: urn:altinn:person:identifier-no:22834498646,
+        Progress: 22,
+        Process: some-process,
+        PrecedingProcess: some-preceding-process,
+        GuiAttachmentCount: 1,
+        ExtendedStatus: ext-status,
+        ExternalReference: external-ref,
+        CreatedAt: 2023-01-01 +0,
+        UpdatedAt: 2023-01-01 +0,
+        ContentUpdatedAt: 2023-01-01 +0,
+        DueAt: 2123-01-01 +0,
+        Status: NotApplicable,
+        HasUnopenedContent: true,
+        IsApiOnly: false,
+        FromServiceOwnerTransmissionsCount: 1,
+        EndUserContext: {
+          Revision: Guid_10,
+          SystemLabels: [
+            Default
+          ]
+        }
+      }
+    ],
+    HasNextPage: false,
+    OrderBy: updatedat_desc,id_desc
+  }
+]

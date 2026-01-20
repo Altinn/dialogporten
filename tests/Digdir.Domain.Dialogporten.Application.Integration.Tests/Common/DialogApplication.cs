@@ -20,6 +20,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -40,11 +41,13 @@ public class DialogApplication : IAsyncLifetime
     private ServiceProvider _fixtureRootProvider = null!;
     private readonly List<object> _publishedEvents = [];
 
-    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16.9")
+    internal static TestClock Clock { get; } = new();
+
+    private readonly PostgreSqlContainer _dbContainer =
+        new PostgreSqlBuilder("postgres:16.10")
         .Build();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var config = new MapperConfiguration(cfg =>
         {
@@ -64,6 +67,7 @@ public class DialogApplication : IAsyncLifetime
         await _dbContainer.StartAsync();
         await EnsureDatabaseAsync();
         await BuildRespawnState();
+
     }
 
     /// <summary>
@@ -95,13 +99,16 @@ public class DialogApplication : IAsyncLifetime
 
         return serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
+            .RemoveAll<IClock>()
+            .AddSingleton<IClock>(Clock)
             .AddDistributedMemoryCache()
             .AddLogging()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
+            .AddSingleton<NpgsqlDataSource>(_ => new NpgsqlDataSourceBuilder(_dbContainer.GetConnectionString() + ";Include Error Detail=true").Build())
             .AddDbContext<DialogDbContext>((services, options) =>
-                options.UseNpgsql(_dbContainer.GetConnectionString() + ";Include Error Detail=true", o =>
+                options.UseNpgsql(services.GetRequiredService<NpgsqlDataSource>(), o =>
                     {
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     })
@@ -114,15 +121,18 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
             .AddScoped<IServiceOwnerNameRegistry>(_ => CreateServiceOwnerNameRegistrySubstitute())
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
-            .AddScoped<IOptions<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
+            .AddScoped<IOptionsSnapshot<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
+            .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>())
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
+            .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
+
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
@@ -142,9 +152,9 @@ public class DialogApplication : IAsyncLifetime
 
     private static string Base64UrlEncode(byte[] input) => Convert.ToBase64String(input).Replace("+", "-").Replace("/", "_").TrimEnd('=');
 
-    private static IOptions<ApplicationSettings> CreateApplicationSettingsSubstitute()
+    private static IOptionsSnapshot<ApplicationSettings> CreateApplicationSettingsSubstitute()
     {
-        var applicationSettingsSubstitute = Substitute.For<IOptions<ApplicationSettings>>();
+        var applicationSettingsSubstitute = Substitute.For<IOptionsSnapshot<ApplicationSettings>>();
 
         using var primaryKeyPair = Key.Create(SignatureAlgorithm.Ed25519,
             new KeyCreationParameters
@@ -166,6 +176,13 @@ public class DialogApplication : IAsyncLifetime
             .Value
             .Returns(new ApplicationSettings
             {
+                FeatureToggle = new FeatureToggle
+                {
+                    UseOptimizedEndUserDialogSearch = true,
+                    UseOptimizedServiceOwnerDialogSearch = true,
+                    UseAltinnAutoAuthorizedPartiesQueryParameters = true,
+                    UseCorrectPersonNameOrdering = true
+                },
                 Dialogporten = new DialogportenSettings
                 {
                     BaseUri = new Uri("https://integration.test"),
@@ -189,6 +206,7 @@ public class DialogApplication : IAsyncLifetime
 
         return applicationSettingsSubstitute;
     }
+
     private static IServiceOwnerNameRegistry CreateServiceOwnerNameRegistrySubstitute()
     {
         var organizationRegistrySubstitute = Substitute.For<IServiceOwnerNameRegistry>();
@@ -206,11 +224,12 @@ public class DialogApplication : IAsyncLifetime
 
     public IMapper GetMapper() => _mapper!;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _rootProvider.DisposeAsync();
         await _fixtureRootProvider.DisposeAsync();
         await _dbContainer.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
@@ -220,8 +239,9 @@ public class DialogApplication : IAsyncLifetime
         return await mediator.Send(request, cancellationToken);
     }
 
-    public async Task ResetState()
+    public async ValueTask ResetState()
     {
+        Clock.Reset();
         _publishedEvents.Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();

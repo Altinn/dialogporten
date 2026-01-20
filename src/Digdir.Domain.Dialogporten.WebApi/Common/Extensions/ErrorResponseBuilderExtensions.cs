@@ -35,7 +35,7 @@ internal static class ErrorResponseBuilderExtensions
         {
             StatusCodes.Status413PayloadTooLarge => new ProblemDetails
             {
-                Title = $"Payload too large. The maximum allowed size is {Constants.MaxRequestBodySize} bytes.",
+                Title = $"Payload too large. The maximum allowed size is {Constants.MaxRequestBodySizeInBytes} bytes.",
                 Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.11",
                 Status = statusCode,
                 Instance = ctx.Request.Path,
@@ -61,6 +61,15 @@ internal static class ErrorResponseBuilderExtensions
             {
                 Title = "Resource not found.",
                 Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4",
+                Status = statusCode,
+                Instance = ctx.Request.Path,
+                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
+            },
+            StatusCodes.Status406NotAcceptable => new ValidationProblemDetails(errors)
+            {
+                Title = "Requested content type is not acceptable.",
+                Detail = "The Accept header must allow JSON responses.",
+                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.6",
                 Status = statusCode,
                 Instance = ctx.Request.Path,
                 Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }

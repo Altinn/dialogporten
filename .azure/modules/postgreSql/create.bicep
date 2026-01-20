@@ -22,9 +22,12 @@ param vnetId string
 @description('Tags to apply to resources')
 param tags object
 
+@description('Whether to provision Azure Backup Vault for PostgreSQL. (This does not create an Azure Backup vault/RSV for now.)')
+param enableBackupVault bool = false
+
 @export()
 type Sku = {
-  name: 'Standard_B1ms' | 'Standard_B2s' | 'Standard_B4ms' | 'Standard_B8ms' | 'Standard_B12ms' | 'Standard_B16ms' | 'Standard_B20ms' | 'Standard_D4ads_v5' | 'Standard_D8ads_v5' | 'Standard_D16ads_v5' | 'Standard_D32ads_v5' | 'Standard_D48ads_v5' | 'Standard_D64ads_v5'
+  name: 'Standard_B1ms' | 'Standard_B2s' | 'Standard_B4ms' | 'Standard_B8ms' | 'Standard_B12ms' | 'Standard_B16ms' | 'Standard_B20ms' | 'Standard_D4ads_v5' | 'Standard_D8ads_v5' | 'Standard_D16ads_v5' | 'Standard_D32ads_v5' | 'Standard_D48ads_v5' | 'Standard_D64ads_v5' | 'Standard_E2ads_v5' | 'Standard_E4ads_v5' | 'Standard_E8ads_v5' | 'Standard_E16ads_v5' | 'Standard_E20ads_v5' | 'Standard_E32ads_v5' | 'Standard_E48ads_v5' | 'Standard_E64ads_v5' | 'Standard_E96ads_v5'
   tier: 'Burstable' | 'GeneralPurpose' | 'MemoryOptimized'
 }
 
@@ -50,6 +53,17 @@ param enableQueryPerformanceInsight bool
 
 @description('Enable index tuning')
 param enableIndexTuning bool
+
+@export()
+type ParameterLoggingConfiguration = {
+  @description('Enable parameter logging for queries')
+  enabled: bool
+  @description('Minimum query duration in milliseconds to log. Defaults to 5000ms (5 seconds). Set to 0 to log all queries.')
+  logMinDurationStatementMs: int?
+}
+
+@description('Parameter logging configuration. Logs query parameters for slow queries which can be useful for debugging but increases log volume.')
+param parameterLogging ParameterLoggingConfiguration
 
 @description('The name of the Application Insights workspace')
 param appInsightWorkspaceName string
@@ -87,6 +101,32 @@ var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
 var postgresServerName = uniqueResourceName('${namePrefix}-postgres', postgresServerNameMaxLength)
+
+var backupVaultNamePrefix = '${namePrefix}-backupvault'
+var restoreContainerName = toLower('${namePrefix}-postgresql-restore')
+
+// Note: This provisions only the storage primitives used for PostgreSQL restores. The actual Azure Backup vault/RSV is clickopsed for now.
+module backupVaultStorageAccount '../storageAccount/main.bicep' = if (enableBackupVault) {
+  name: 'backupVaultStorageAccount'
+  params: {
+    namePrefix: backupVaultNamePrefix
+    location: location
+    tags: tags
+    allowBlobPublicAccess: false
+    enableHierarchicalNamespace: false
+  }
+}
+
+module backupVaultRestoreContainer '../storageContainer/main.bicep' = if (enableBackupVault) {
+  name: 'backupVaultRestoreContainer'
+  params: {
+    storageAccountName: backupVaultStorageAccount.outputs.storageAccountName
+    containerName: restoreContainerName
+    publicAccess: 'None'
+    enableBlobSoftDelete: true
+    blobSoftDeleteRetentionDays: 30
+  }
+}
 
 module saveAdmPassword '../keyvault/upsertSecret.bicep' = {
   name: 'Save_${srcKeyVaultAdministratorLoginPasswordKey}'
@@ -175,7 +215,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     parent: postgres
     name: 'azure.extensions'
     properties: {
-      value: 'PG_TRGM'
+      value: 'PG_TRGM,BTREE_GIN'
       source: 'user-override'
     }
     dependsOn: [postgresAdministrators]
@@ -191,7 +231,10 @@ resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/co
   dependsOn: [enable_extensions]
 }
 
-resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {
+// Enable Query Store when either index tuning or query performance insight is enabled
+var enableQueryStore = enableIndexTuning || enableQueryPerformanceInsight
+
+resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryStore) {
   parent: postgres
   name: 'track_io_timing'
   properties: {
@@ -201,7 +244,7 @@ resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configuratio
   dependsOn: [idle_transactions_timeout]
 }
 
-resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {
+resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryStore) {
   parent: postgres
   name: 'pg_qs.query_capture_mode'
   properties: {
@@ -228,7 +271,38 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     value: 'report'
     source: 'user-override'
   }
-  dependsOn: [pgms_wait_sampling_query_capture_mode]
+  dependsOn: [pg_qs_query_capture_mode]
+}
+
+// Parameter logging configuration (independent of Query Store)
+resource log_min_duration_statement 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (parameterLogging.enabled) {
+  parent: postgres
+  name: 'log_min_duration_statement'
+  properties: {
+    value: string(parameterLogging.?logMinDurationStatementMs ?? 5000)
+    source: 'user-override'
+  }
+  dependsOn: [idle_transactions_timeout]
+}
+
+resource log_statement 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (parameterLogging.enabled) {
+  parent: postgres
+  name: 'log_statement'
+  properties: {
+    value: 'none'  // Only log queries that exceed log_min_duration_statement
+    source: 'user-override'
+  }
+  dependsOn: [log_min_duration_statement]
+}
+
+resource log_duration 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (parameterLogging.enabled) {
+  parent: postgres
+  name: 'log_duration'
+  properties: {
+    value: 'on'  // Log duration of completed statements
+    source: 'user-override'
+  }
+  dependsOn: [log_statement]
 }
 
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
@@ -250,7 +324,7 @@ var diagnosticLogCategories = [
   'PostgreSQLFlexDatabaseXacts'
 ]
 
-resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (enableQueryPerformanceInsight) {
+resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (enableQueryStore) {
   name: 'PostgreSQLDiagnosticSetting'
   scope: postgres
   properties: {
@@ -269,7 +343,7 @@ resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
       }
     ]
   }
-  dependsOn: [pgms_wait_sampling_query_capture_mode]
+  dependsOn: [pg_qs_query_capture_mode]
 }
 
 module adoConnectionString '../keyvault/upsertSecret.bicep' = {

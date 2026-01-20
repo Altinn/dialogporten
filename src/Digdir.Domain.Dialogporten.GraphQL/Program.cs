@@ -2,21 +2,21 @@ using System.Globalization;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.GraphQL;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Authentication;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
-using Digdir.Domain.Dialogporten.GraphQL;
 using Digdir.Library.Utils.AspNet;
-using Serilog;
 using FluentValidation;
 using HotChocolate.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Serilog;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -73,8 +73,16 @@ static void BuildAndRun(string[] args)
 
     var thisAssembly = Assembly.GetExecutingAssembly();
 
+    // CORS allowed origins by environment in order for GraphQL streams to work from Arbeidsflate directly through APIM
+    var allowedOrigins = builder.Configuration
+        .GetSection(GraphQlSettings.SectionName)
+        .Get<GraphQlSettings>()
+        ?.Cors.AllowedOrigins.ToArray() ?? [];
+
     builder.Services
         // Options setup
+        .AddAspNetCommon(builder.Configuration.GetSection(GraphQlSettings.SectionName)
+            .GetSection(WebHostCommonSettings.SectionName))
         .ConfigureOptions<AuthorizationOptionsSetup>()
 
         // Clean architecture projects
@@ -87,6 +95,17 @@ static void BuildAndRun(string[] args)
         .AddScoped<IUser, ApplicationUser>()
         .AddValidatorsFromAssembly(thisAssembly, ServiceLifetime.Transient, includeInternalTypes: true)
         .AddAzureAppConfiguration()
+
+        // CORS
+        .AddCors(options =>
+        {
+            options.AddPolicy(GraphQlCorsOptions.PolicyName, policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        })
 
         // Graph QL
         .AddDialogportenGraphQl()
@@ -102,7 +121,13 @@ static void BuildAndRun(string[] args)
                 .AddSource("Dialogporten.GraphQL")
                 .AddFusionCacheInstrumentation()
                 .AddHotChocolateInstrumentation()
-                .AddAspNetCoreInstrumentationExcludingHealthPaths())
+                .AddAspNetCoreInstrumentationExcludingHealthPaths(o =>
+                {
+                    o.EnrichWithHttpResponse = (activity, _) =>
+                    {
+                        DialogportenGqlActivityEnricher.RenameOperationName(activity);
+                    };
+                }))
 
         // Add health checks with the well-known URLs
         .AddAspNetHealthChecks((x, y) => x.HealthCheckSettings.HttpGetEndpointsToCheck = y
@@ -128,15 +153,16 @@ static void BuildAndRun(string[] args)
 
     var app = builder.Build();
 
-    app.MapAspNetHealthChecks();
-
-    app.UseJwtSchemeSelector()
+    app.UseCors();
+    app.MapAspNetHealthChecks()
+        .UseMaintenanceMode()
+        .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()
-        .UseMiddleware<DialogTokenMiddleware>()
         .UseAzureConfiguration();
 
     app.MapGraphQL()
+        .RequireCors(GraphQlCorsOptions.PolicyName)
         .RequireAuthorization()
         .WithOptions(new GraphQLServerOptions
         {

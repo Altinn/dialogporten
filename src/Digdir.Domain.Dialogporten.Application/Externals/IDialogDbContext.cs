@@ -54,6 +54,25 @@ public interface IDialogDbContext
 
     /// <summary>
     /// Validate a property on the <typeparamref name="TEntity"/> using a lambda
+    /// expression to specify the predicate only when the entity is added.
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TProperty"></typeparam>
+    /// <param name="entity"></param>
+    /// <param name="propertyExpression"></param>
+    /// <param name="predicate"></param>
+    /// <returns>
+    ///     <para>False if the property is added and the predicate returns false.</para>
+    ///     <para>True if the property is not added or the predicate returns true.</para>
+    /// </returns>
+    bool MustWhenAdded<TEntity, TProperty>(
+        TEntity entity,
+        Expression<Func<TEntity, TProperty>> propertyExpression,
+        Func<TProperty, bool> predicate)
+        where TEntity : class;
+
+    /// <summary>
+    /// Validate a property on the <typeparamref name="TEntity"/> using a lambda
     /// expression to specify the predicate only when the property is modified.
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
@@ -74,4 +93,18 @@ public interface IDialogDbContext
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken)
         where TEntity : class, IIdentifiableEntity;
+
+    /// <summary>
+    /// Only use this for split queries where data consistency is critical.
+    /// For all other use cases, use IUnitOfWork.BeginTransactionAsync.
+    /// Wraps the query in a transaction with isolation level Repeatable Read.
+    ///
+    /// </summary>
+    /// <param name="queryFunc"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    Task<T> WrapWithRepeatableRead<T>(
+        Func<IDialogDbContext, CancellationToken, Task<T>> queryFunc,
+        CancellationToken cancellationToken);
 }

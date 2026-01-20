@@ -68,15 +68,18 @@ param appInsightsSku AppInsightsSku
 import { Sku as PostgresSku } from '../modules/postgreSql/create.bicep'
 import { StorageConfiguration as PostgresStorageConfig } from '../modules/postgreSql/create.bicep'
 import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from '../modules/postgreSql/create.bicep'
+import { ParameterLoggingConfiguration as PostgresParameterLoggingConfig } from '../modules/postgreSql/create.bicep'
 
 param postgresConfiguration {
   sku: PostgresSku
   storage: PostgresStorageConfig
   enableIndexTuning: bool
   enableQueryPerformanceInsight: bool
+  parameterLogging: PostgresParameterLoggingConfig
   highAvailability: PostgresHighAvailabilityConfig?
   backupRetentionDays: int
   availabilityZone: string
+  enableBackupVault: bool
 }
 
 param deployerPrincipalName string
@@ -230,11 +233,13 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     appInsightWorkspaceName: appInsights.outputs.appInsightsWorkspaceName
     enableIndexTuning: postgresConfiguration.enableIndexTuning
     enableQueryPerformanceInsight: postgresConfiguration.enableQueryPerformanceInsight
+    parameterLogging: postgresConfiguration.parameterLogging
     subnetId: vnet.outputs.postgresqlSubnetId
     vnetId: vnet.outputs.virtualNetworkId
     highAvailability: postgresConfiguration.?highAvailability
     backupRetentionDays: postgresConfiguration.backupRetentionDays
     availabilityZone: postgresConfiguration.availabilityZone
+    enableBackupVault: postgresConfiguration.enableBackupVault
     deployerPrincipalName: deployerPrincipalName
     tags: tags
   }

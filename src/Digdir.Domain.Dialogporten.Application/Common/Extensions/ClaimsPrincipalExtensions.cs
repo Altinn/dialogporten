@@ -23,10 +23,15 @@ public static class ClaimsPrincipalExtensions
     private const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
-    public const string AltinnOrgClaim = "urn:altinn:org";
-    public const string ScopeClaim = "scope";
+    private const string IdportenEmailClaim = "email";
+    private const string AltinnUsernameClaim = "urn:altinn:username";
+    private const string FeideSubjectClaim = "orgsub";
+    private const string PartyUuidClaim = "urn:altinn:party:uuid";
+    private const string PartyIdClaim = "urn:altinn:partyid";
     private const char ScopeClaimSeparator = ' ';
     private const string PidClaim = "pid";
+    public const string ScopeClaim = "scope";
+    public const string AltinnOrgClaim = "urn:altinn:org";
 
     public static bool TryGetClaimValue(this ClaimsPrincipal claimsPrincipal, string claimType,
         [NotNullWhen(true)] out string? value)
@@ -51,7 +56,7 @@ public static class ClaimsPrincipalExtensions
     public static bool TryGetOrganizationShortName(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgShortName)
     {
         orgShortName = claimsPrincipal.FindFirst(AltinnOrgClaim)?.Value;
-        return orgShortName is not null;
+        return !string.IsNullOrWhiteSpace(orgShortName);
     }
 
     public static bool TryGetPid(this Claim? pidClaim, [NotNullWhen(true)] out string? pid)
@@ -145,6 +150,39 @@ public static class ClaimsPrincipalExtensions
         }
     }
 
+    public static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
+        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email);
+
+    public static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? username)
+        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username);
+
+    public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
+        => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);
+
+    public static bool TryGetPartyUuid(this ClaimsPrincipal claimsPrincipal, out Guid partyUuid)
+    {
+        if (claimsPrincipal.TryGetClaimValue(PartyUuidClaim, out var s) && Guid.TryParse(s, out var id))
+        {
+            partyUuid = id;
+            return true;
+        }
+
+        partyUuid = Guid.Empty;
+        return false;
+    }
+
+    public static bool TryGetPartyId(this ClaimsPrincipal claimsPrincipal, out int partyId)
+    {
+        if (claimsPrincipal.TryGetClaimValue(PartyIdClaim, out var s) && int.TryParse(s, out var id))
+        {
+            partyId = id;
+            return true;
+        }
+
+        partyId = 0;
+        return false;
+    }
+
     public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
     {
         if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level) && level >= 0)
@@ -180,6 +218,10 @@ public static class ClaimsPrincipalExtensions
 
         var identifyingClaims = claimsList.Where(c =>
             c.Type == PidClaim ||
+            c.Type == AltinnUsernameClaim ||
+            c.Type == IdportenEmailClaim ||
+            c.Type == IdportenAuthLevelClaim ||
+            c.Type == FeideSubjectClaim ||
             c.Type == ConsumerClaim ||
             c.Type == SupplierClaim ||
             c.Type == IdportenAuthLevelClaim ||
@@ -197,6 +239,20 @@ public static class ClaimsPrincipalExtensions
         return identifyingClaims;
     }
 
+    /// <summary>
+    /// This is the main method for determining the user type of the current user.
+    /// The order of checks is important, as some claims may be present in multiple user types.
+    /// The order is:
+    /// 1. Person (has pid claim)
+    /// 2. System user (has authorization_details claim with type urn:altinn:systemuser)
+    /// 3. Service owner (has consumer claim and service_owner scope)
+    /// 4. Feide user (has orgsub claim)
+    /// 5. Altinn self-identified user (has urn:altinn:username claim with SelfIdentified auth method)
+    /// 6. Idporten self-identified user (has email claim)
+    /// 7. Unknown (none of the above)
+    /// </summary>
+    /// <param name="claimsPrincipal"></param>
+    /// <returns></returns>
     public static (UserIdType, string externalId) GetUserType(this ClaimsPrincipal claimsPrincipal)
     {
         if (claimsPrincipal.TryGetPid(out var externalId))
@@ -218,6 +274,21 @@ public static class ClaimsPrincipalExtensions
             return (UserIdType.ServiceOwner, externalId);
         }
 
+        if (claimsPrincipal.TryGetFeideSubject(out externalId))
+        {
+            return (UserIdType.FeideUser, externalId);
+        }
+
+        if (claimsPrincipal.TryGetSelfIdentifiedUsername(out externalId))
+        {
+            return (UserIdType.AltinnSelfIdentifiedUser, externalId);
+        }
+
+        if (claimsPrincipal.TryGetSelfIdentifiedUserEmail(out externalId))
+        {
+            return (UserIdType.IdportenEmailIdentifiedUser, externalId);
+        }
+
         return (UserIdType.Unknown, string.Empty);
     }
 
@@ -235,6 +306,15 @@ public static class ClaimsPrincipalExtensions
             UserIdType.SystemUser
                 => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
                     ? systemUserId : null,
+            UserIdType.IdportenEmailIdentifiedUser
+                => IdportenEmailUserIdentifier.TryParse(externalId, out var email)
+                    ? email : null,
+            UserIdType.AltinnSelfIdentifiedUser
+                => AltinnSelfIdentifiedUserIdentifier.TryParse(externalId, out var username)
+                    ? username : null,
+            UserIdType.FeideUser
+                => FeideUserIdentifier.TryParse(externalId, out var feideSubject)
+                    ? feideSubject : null,
             UserIdType.Unknown => null,
             UserIdType.ServiceOwner => null,
             _ => null

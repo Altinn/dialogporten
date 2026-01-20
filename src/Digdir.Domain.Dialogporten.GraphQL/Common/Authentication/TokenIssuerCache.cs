@@ -1,6 +1,7 @@
-﻿using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Protocols;
+﻿using AsyncKeyedLock;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common.Authentication;
 
@@ -12,7 +13,7 @@ public interface ITokenIssuerCache
 public sealed class TokenIssuerCache : ITokenIssuerCache, IDisposable
 {
     private readonly Dictionary<string, string> _issuerMappings = [];
-    private readonly SemaphoreSlim _initializationSemaphore = new(1, 1);
+    private readonly AsyncNonKeyedLocker _initializationSemaphore = new(1);
     private bool _initialized;
     private readonly IReadOnlyCollection<JwtBearerTokenSchemasOptions> _jwtTokenSchemas;
 
@@ -40,29 +41,21 @@ public sealed class TokenIssuerCache : ITokenIssuerCache, IDisposable
             return;
         }
 
-        await _initializationSemaphore.WaitAsync();
-
-        try
+        using var _ = await _initializationSemaphore.LockAsync();
+        if (_initialized)
         {
-            if (_initialized)
-            {
-                return;
-            }
-
-            foreach (var schema in _jwtTokenSchemas)
-            {
-                var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-                    schema.WellKnown, new OpenIdConnectConfigurationRetriever());
-                var config = await configManager.GetConfigurationAsync();
-                _issuerMappings[schema.Name] = config.Issuer;
-            }
-
-            _initialized = true;
+            return;
         }
-        finally
+
+        foreach (var schema in _jwtTokenSchemas)
         {
-            _initializationSemaphore.Release();
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                schema.WellKnown, new OpenIdConnectConfigurationRetriever());
+            var config = await configManager.GetConfigurationAsync();
+            _issuerMappings[schema.Name] = config.Issuer;
         }
+
+        _initialized = true;
     }
 
     public void Dispose() => _initializationSemaphore.Dispose();

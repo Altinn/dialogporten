@@ -30,6 +30,39 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class UpdateDialogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
+    public Task UpdateDialogCommand_Should_Update_Correct_Dialog()
+    {
+        Guid? id = null;
+        const string expectedExternalReference = "I've been updated!";
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.Id = id = NewUuidV7();
+                x.Dto.ExternalReference = "I'm so original...";
+            })
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+            {
+                x.Id = id!.Value;
+                x.IfMatchDialogRevision = null;
+                x.Dto.ExternalReference = expectedExternalReference;
+            })
+            .AssertSuccess()
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .SendCommand(_ => new GetDialogQuery { DialogId = id!.Value })
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Id.Should().Be(id!.Value);
+                x.ExternalReference.Should().Be(expectedExternalReference);
+            });
+    }
+
+    [Fact]
     public async Task UpdateDialogCommand_Should_Set_New_Revision_If_IsSilentUpdate_Is_Set()
     {
         Guid? revision = null!;
@@ -47,7 +80,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         updateSuccess.Revision.Should().NotBeEmpty();
         updateSuccess.Revision.Should().NotBe(revision!.Value);
     }
-
 
     [Fact]
     public async Task UpdateDialogCommand_Should_Not_Set_SystemLabel_If_IsSilentUpdate_Is_Set()
@@ -395,7 +427,6 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             Add($"{baseDesc} process changes", x => x.Dto.Process = "some:process");
             Add($"{baseDesc} dueAt changes", x => x.Dto.DueAt = DateTimeOffset.UtcNow.AddYears(10));
             Add($"{baseDesc} expiresAt changes", x => x.Dto.ExpiresAt = DateTimeOffset.UtcNow.AddYears(10));
-            Add($"{baseDesc} visibleFrom changes", x => x.Dto.VisibleFrom = x.Dto.DueAt!.Value.AddDays(-2));
             Add($"{baseDesc} progress changes", x => x.Dto.Progress = (x.Dto.Progress % 100) + 1);
             Add($"{baseDesc} isApiOnly changes", x => x.Dto.IsApiOnly = !x.Dto.IsApiOnly);
             Add($"{baseDesc} activities are added", x => x.AddActivity());
@@ -414,6 +445,62 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.ContentUpdatedAt.Should().Be(x.CreatedAt);
                 x.ContentUpdatedAt.Should().NotBe(x.UpdatedAt);
             });
+
+    [Fact]
+    public Task Future_VisibleFrom_Should_Control_Timestamps_On_Update()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(7);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.Progress = 36;
+            })
+            .AssertSuccessAndUpdateDialog(x => x.Dto.Progress = 37)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+            {
+                dialog.VisibleFrom.Should().BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1));
+                dialog.CreatedAt.Should().Be(dialog.VisibleFrom);
+                dialog.UpdatedAt.Should().Be(dialog.VisibleFrom);
+                dialog.ContentUpdatedAt.Should().Be(dialog.VisibleFrom);
+            });
+    }
+
+    [Fact]
+    public Task Cannot_Set_DueAt_Before_Saved_VisibleFrom()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(2);
+            })
+            .UpdateDialog(x => x.Dto.DueAt = visibleFrom.AddDays(-1))
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText(nameof(UpdateDialogDto.DueAt)));
+    }
+
+    [Fact]
+    public Task Cannot_Set_ExpiresAt_Before_Saved_VisibleFrom()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(5);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(2);
+            })
+            .UpdateDialog(x => x.Dto.ExpiresAt = visibleFrom.AddDays(-1))
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText(nameof(UpdateDialogDto.ExpiresAt)));
+    }
 
     private sealed class ContentNotUpdatedAtSilentUpdateTestData : TheoryData<string, Action<UpdateDialogCommand>>
     {

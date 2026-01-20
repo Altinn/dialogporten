@@ -39,10 +39,16 @@ param postgresConfiguration = {
     type: 'Premium_LRS'
     tier: 'P50'
   }
+  // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true
   enableQueryPerformanceInsight: true
+  parameterLogging: {
+    enabled: true
+    logMinDurationStatementMs: 5000
+  }
   backupRetentionDays: 7
   availabilityZone: '1'
+  enableBackupVault: false
 }
 
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Dev'

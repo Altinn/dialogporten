@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -77,40 +78,47 @@ internal static class DialogExtensions
     public static void FilterLocalizations(this DialogActivity activity, List<AcceptedLanguage>? acceptedLanguages) =>
             activity.Description?.Localizations.PruneLocalizations(acceptedLanguages);
 
-    private static void PruneLocalizations(this List<Localization>? localizations, List<AcceptedLanguage>? acceptedLanguages)
+    public static void PruneLocalizations(this List<Localization>? localizations, List<AcceptedLanguage>? acceptedLanguages)
     {
-        if (localizations is null || acceptedLanguages is null)
-        {
-            return;
-        }
-        var orderByDescending = acceptedLanguages.OrderByDescending(x => x.Weight);
-        Localization? localization = null;
-        foreach (var acceptedLanguage in orderByDescending)
-        {
-            localization = localizations.FirstOrDefault(x => x.LanguageCode == acceptedLanguage.LanguageCode);
-            if (localization is not null)
-            {
-                localizations.Clear();
-                localizations.Add(localization);
-                return;
-            }
-        }
+        if (localizations is null || acceptedLanguages is null) return;
 
-        // Fallbacks
-        if (acceptedLanguages.Select(x => x.LanguageCode).Any(x => x is "sv" or "da"))
-        {
-            localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "nb");
-        }
+        var danishOrSwedish = acceptedLanguages
+            .Select(x => x.LanguageCode)
+            .Any(x => x is "sv" or "da");
 
-        localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "en");
-        localization ??= localizations.FirstOrDefault(x => x.LanguageCode == "nb");
+        var preferredLanguage = acceptedLanguages
+            .OrderByDescending(l => l.Weight)
+            .Select(x => x.LanguageCode)
+            .Concat(danishOrSwedish ? ["nb", "en"] : ["en", "nb"])
+            .Distinct() // order is preserved, keep first occurrence
+            .Join(localizations, x => x, x => x.LanguageCode, (_, y) => y) // Order is preserved from outer side
+            .FirstOrDefault();
 
-        if (localization is null)
-        {
-            return;
-        }
+        if (preferredLanguage is null) return;
 
         localizations.Clear();
-        localizations.Add(localization);
+        localizations.Add(preferredLanguage);
+    }
+
+    public static void PruneLocalizations(this List<LocalizationDto>? localizations, List<AcceptedLanguage>? acceptedLanguages)
+    {
+        if (localizations is null || acceptedLanguages is null) return;
+
+        var danishOrSwedish = acceptedLanguages
+            .Select(x => x.LanguageCode)
+            .Any(x => x is "sv" or "da");
+
+        var preferredLanguage = acceptedLanguages
+            .OrderByDescending(l => l.Weight)
+            .Select(x => x.LanguageCode)
+            .Concat(danishOrSwedish ? ["nb", "en"] : ["en", "nb"])
+            .Distinct() // order is preserved, keep first occurrence
+            .Join(localizations, x => x, x => x.LanguageCode, (_, y) => y) // Order is preserved from outer side
+            .FirstOrDefault();
+
+        if (preferredLanguage is null) return;
+
+        localizations.Clear();
+        localizations.Add(preferredLanguage);
     }
 }

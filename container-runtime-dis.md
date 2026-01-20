@@ -6,12 +6,14 @@ This document captures what we need to provide to deploy Dialogporten on DIS usi
 - Platform-managed Kubernetes cluster with Flux and common components (ingress controller, service mesh, shared operators).
 - A container registry namespace for the team to push OCI images.
 - Reconciliation of a team "syncroot" OCI image per environment.
+- Platform OpenTelemetry Collector (see `altinn-platform/flux/otel-collector`) with OTLP receivers and Azure Monitor exports.
 
 ## What we must provide
 - A signed, immutable syncroot OCI image that contains our Kubernetes configuration.
 - A folder at the root of the image for each environment, each containing `kustomization.yaml`.
 - Kustomize overlays for application workloads.
 - Helm releases for non-app resources (only if not already provided by DIS).
+- OTLP exporter configuration in workloads so metrics, logs, and traces flow to the platform collector.
 
 ## Required OCI image layout
 DIS reconciles the `kustomization.yaml` in the folder matching the environment name. The root folders must match the DIS environment names.
@@ -148,6 +150,18 @@ Per-environment overrides (from `container-runtime.md`):
 - Workload profile mapping (dedicated node pool vs default).
 - OTEL trace sampler ratio.
 - Job schedules and timeouts.
+
+## OpenTelemetry metrics (DIS)
+DIS uses a shared OpenTelemetry Collector defined in `altinn-platform/flux/otel-collector`.
+- Receivers: OTLP gRPC (`4317`) and OTLP HTTP (`4318`).
+- Exporters:
+  - Traces/logs -> Azure Application Insights (collector uses `APPLICATIONINSIGHTS_CONNECTION_STRING` from Key Vault).
+  - Metrics -> Azure Monitor Workspace via Prometheus remote write (`AMW_WRITE_ENDPOINT` + `azureauth` workload identity).
+- Workload requirements:
+  - Set `OTEL_EXPORTER_OTLP_ENDPOINT` to the collector service in the `monitoring` namespace.
+  - Set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc`.
+  - Provide `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` as needed.
+  - Do not set `APPLICATIONINSIGHTS_CONNECTION_STRING` on app/job pods in DIS; it causes metrics to bypass OTLP and go directly to App Insights.
 
 ## ApplicationIdentity (DIS operator)
 The DIS identity operator creates:

@@ -180,14 +180,14 @@ All items below are the environment-specific differences defined in `.azure/infr
 - Jobs: ACA has first-class Jobs (manual/scheduled); AKS uses CronJobs and Jobs, with separate RBAC and scheduling controls.
 - Networking: ACA ingress is managed and IP allowlists are per app; AKS needs Ingress or LoadBalancer configuration plus NetworkPolicy or ingress annotations to enforce allowlists.
 - Identity/secrets: ACA uses managed identities and Key Vault references; AKS should use Workload Identity plus Key Vault CSI or External Secrets.
-- Observability: ACA provides managed OpenTelemetry integration; AKS needs Azure Monitor for containers and or an OTEL Collector deployment.
+- Observability: ACA provides managed OpenTelemetry integration; AKS needs an OpenTelemetry Collector (plus Azure Monitor for containers if desired) to handle traces, logs, and metrics.
 
 ## Translation to AKS (what we need)
 
 ### Cluster-level setup
 - AKS cluster in the existing VNet (subnet sizing comparable to ACA `/23` for apps; separate subnets for nodes and ingress as needed).
 - System node pool plus a dedicated node pool matching `Dedicated-D8`; use taints and labels for scheduling.
-- Azure Monitor for containers and or OpenTelemetry Collector configured to send logs and traces to the App Insights instance per environment.
+- OpenTelemetry Collector configured to send traces/logs to the App Insights instance per environment and metrics to Azure Monitor Workspace (Prometheus remote write).
 
 ### Ingress and networking
 - Ingress controller: Traefik with a public LoadBalancer IP for external endpoints.
@@ -204,6 +204,19 @@ All items below are the environment-specific differences defined in `.azure/infr
   - `dialogportenAdoConnectionString`
   - `dialogportenRedisConnectionString`
 - App Configuration access via `AZURE_APPCONFIG_URI` and Workload Identity (keep `AZURE_CLIENT_ID`).
+
+### OpenTelemetry metrics (AKS/DIS)
+The platform OTEL collector in `flux/otel-collector` is the source of truth for how metrics are handled in AKS/DIS.
+- Collector receives OTLP (gRPC 4317 / HTTP 4318) and exports:
+  - Traces/logs -> Azure Application Insights (via `APPLICATIONINSIGHTS_CONNECTION_STRING` on the collector).
+  - Metrics -> Azure Monitor Workspace via Prometheus remote write (`AMW_WRITE_ENDPOINT` + `azureauth` workload identity).
+- Workloads must export OTLP to the collector:
+  - `OTEL_EXPORTER_OTLP_ENDPOINT` -> collector service endpoint (monitoring namespace).
+  - `OTEL_EXPORTER_OTLP_PROTOCOL=grpc`.
+  - `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` as needed.
+- Metrics exporter behavior in code:
+  - If `APPLICATIONINSIGHTS_CONNECTION_STRING` is set in the workload, metrics go directly to App Insights and bypass the OTLP metrics pipeline.
+  - For AKS/DIS, omit `APPLICATIONINSIGHTS_CONNECTION_STRING` from app/job pods to ensure metrics flow to the collector.
 
 ### Workloads
 - Deployments:

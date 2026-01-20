@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.99.0](https://github.com/Altinn/dialogporten/compare/v1.98.2...v1.99.0) (2026-01-16)
+
+
+### Features
+
+* **api:** Implement SO-enduser context search feature ([#3226](https://github.com/Altinn/dialogporten/issues/3226)) ([974dfa6](https://github.com/Altinn/dialogporten/commit/974dfa6cab8d23f86ad712c693ec319868123a3a))
+* **api:** Support self registered users/Feide users ([#2861](https://github.com/Altinn/dialogporten/issues/2861)) ([7efd396](https://github.com/Altinn/dialogporten/commit/7efd396fca14a51db0e37f63c732f457b5cbfac9))
+* determenistic attachment order ([#3210](https://github.com/Altinn/dialogporten/issues/3210)) ([7dbc04d](https://github.com/Altinn/dialogporten/commit/7dbc04da60c68a4404e498f71f63955123a21d1e))
+* **sdk:** ignore null values when serializing ([#3263](https://github.com/Altinn/dialogporten/issues/3263)) ([1f9ae8f](https://github.com/Altinn/dialogporten/commit/1f9ae8fe69697c8204a2ab131907ae15739d57ea))
+
+
+### Bug Fixes
+
+* Add required fields to authorized parties-DTO ([#3269](https://github.com/Altinn/dialogporten/issues/3269)) ([113db16](https://github.com/Altinn/dialogporten/commit/113db162c98bd994f705834de1e1a177f7e4c9f2))
+* **sdk:** add enum converter ([#3271](https://github.com/Altinn/dialogporten/issues/3271)) ([6c001a5](https://github.com/Altinn/dialogporten/commit/6c001a53d1c8882ec2ead146bb4c39fece4bd92e))
+
+
+### Miscellaneous Chores
+
+* Added AsyncKeyedLock on Update search index ([#3258](https://github.com/Altinn/dialogporten/issues/3258)) ([d3930f8](https://github.com/Altinn/dialogporten/commit/d3930f8f22ec59117d14ae3a82e10897fc54acca))
+
 ## [1.98.2](https://github.com/Altinn/dialogporten/compare/v1.98.1...v1.98.2) (2026-01-15)
 
 

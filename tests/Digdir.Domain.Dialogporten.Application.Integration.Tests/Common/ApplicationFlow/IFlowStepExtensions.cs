@@ -21,6 +21,8 @@ using GetDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.Serv
 using GetDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
 using SearchDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
 using SearchDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+using SearchDialogEndUserContextResult = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextResult;
+using SearchDialogEndUserContextQuery = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextQuery;
 using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
 using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
@@ -272,6 +274,18 @@ public static class IFlowStepExtensions
             return query;
         });
     }
+
+    public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(this IFlowStep step,
+        Action<SearchDialogEndUserContextQuery> modify) => step.SearchServiceOwnerDialogEndUserContexts((query, _) => modify(query));
+
+    public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(this IFlowStep step,
+        Action<SearchDialogEndUserContextQuery, FlowContext> modify) =>
+        step.SendCommand(_ =>
+        {
+            var query = new SearchDialogEndUserContextQuery();
+            modify(query, step.Context);
+            return query;
+        });
 
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
         Action<SearchDialogQueryEU> modify) => step.SearchEndUserDialogs((query, _) => modify(query));

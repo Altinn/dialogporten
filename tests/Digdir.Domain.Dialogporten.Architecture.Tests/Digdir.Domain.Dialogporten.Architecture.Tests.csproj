@@ -30,6 +30,7 @@
         <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"/>
         <ProjectReference Include="..\..\src\Digdir.Library.Entity.Abstractions\Digdir.Library.Entity.Abstractions.csproj"/>
         <ProjectReference Include="..\..\src\Digdir.Library.Entity.EntityFrameworkCore\Digdir.Library.Entity.EntityFrameworkCore.csproj"/>
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.GraphQl.E2E.Tests\Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.csproj" />
     </ItemGroup>
 
 </Project>

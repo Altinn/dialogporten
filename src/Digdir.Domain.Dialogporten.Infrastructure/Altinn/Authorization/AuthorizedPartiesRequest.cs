@@ -13,7 +13,14 @@ internal sealed class AuthorizedPartiesRequest(
     bool includeInstances = false,
     IEnumerable<AuthorizedPartyFilter>? partyFilter = null)
 {
+    [JsonIgnore]
     public IPartyIdentifier PartyIdentifier => partyIdentifier;
+
+    [JsonPropertyName("type")]
+    public string Type => PartyIdentifier.Prefix();
+
+    [JsonPropertyName("value")]
+    public string Value => PartyIdentifier.Id;
 
     [JsonPropertyName("partyFilter")]
     public List<AuthorizedPartyFilter> PartyFilter { get; } =

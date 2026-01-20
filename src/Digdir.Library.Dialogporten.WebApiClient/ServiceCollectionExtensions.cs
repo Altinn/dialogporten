@@ -36,7 +36,8 @@ public static class ServiceCollectionExtensions
 
         var jsonSerializerOptions = new JsonSerializerOptions
         {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new JsonStringEnumConverter() }
         };
 
         foreach (var refitClient in refitClients)
@@ -59,6 +60,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<DefaultEdDsaSecurityKeysCache>();
         services.TryAddSingleton<IEdDsaSecurityKeysCache>(x => x.GetRequiredService<DefaultEdDsaSecurityKeysCache>());
         services.TryAddTransient<IClock, DefaultClock>();
+
         return services;
     }
 

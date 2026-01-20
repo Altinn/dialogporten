@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -119,6 +120,16 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
         _transmissionHierarchyValidator.ValidateWholeAggregate(dialog);
+
+        var idempotentKeyHashSet = new HashSet<string>();
+        foreach (var transmission in dialog.Transmissions)
+        {
+            if (transmission.IdempotentKey != null && !idempotentKeyHashSet.Add(transmission.IdempotentKey))
+            {
+                return new Conflict(nameof(transmission.IdempotentKey),
+                    $"Duplicate of transmission idempotentKey '{transmission.IdempotentKey}'");
+            }
+        }
 
         var (fromParty, fromServiceOwner) = dialog.Transmissions.GetTransmissionCounts();
         dialog.FromPartyTransmissionsCount = checked((short)fromParty);

@@ -142,6 +142,9 @@ public sealed class Transmission
     [GraphQLDescription("The unique identifier for the transmission in UUIDv7 format.")]
     public Guid Id { get; set; }
 
+    [GraphQLDescription("An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.")]
+    public string? IdempotentKey { get; set; }
+
     [GraphQLDescription("The date and time when the transmission was created.")]
     public DateTimeOffset CreatedAt { get; set; }
 

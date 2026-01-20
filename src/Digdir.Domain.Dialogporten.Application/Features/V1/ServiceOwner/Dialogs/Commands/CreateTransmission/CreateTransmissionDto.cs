@@ -16,6 +16,11 @@ public class CreateTransmissionDto
     public Guid? Id { get; set; }
 
     /// <summary>
+    /// An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
+
+    /// <summary>
     /// If supplied, overrides the creating date and time for the transmission.
     /// If not supplied, the current date /time will be used.
     /// </summary>

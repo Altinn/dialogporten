@@ -1556,6 +1556,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -2428,6 +2434,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -3015,6 +3027,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
 
         /// <summary>
         /// The date and time when the transmission was created.
@@ -3832,6 +3850,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
@@ -4209,6 +4233,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
@@ -4734,6 +4764,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.

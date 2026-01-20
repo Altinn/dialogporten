@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -33,7 +34,7 @@ public sealed class CreateTransmissionCommand : IRequest<CreateTransmissionResul
 }
 
 [GenerateOneOf]
-public sealed partial class CreateTransmissionResult : OneOfBase<CreateTransmissionSuccess, EntityNotFound, EntityDeleted, ValidationError, Forbidden, DomainError, ConcurrencyError>;
+public sealed partial class CreateTransmissionResult : OneOfBase<CreateTransmissionSuccess, EntityNotFound, EntityDeleted, ValidationError, Forbidden, DomainError, ConcurrencyError, Conflict>;
 
 public sealed record CreateTransmissionSuccess(Guid Revision, IReadOnlyCollection<Guid> TransmissionIds);
 
@@ -96,10 +97,25 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
 
         // Map incoming DTOs to domain entities without loading existing transmissions.
         var newTransmissions = _mapper.Map<List<DialogTransmission>>(request.Transmissions);
+        var idempotentKeyHashSet = new HashSet<string>();
         foreach (var transmission in newTransmissions)
         {
             transmission.DialogId = dialog.Id;
             transmission.Dialog = dialog;
+
+            if (transmission.IdempotentKey != null && !idempotentKeyHashSet.Add(transmission.IdempotentKey))
+            {
+                return new Conflict(nameof(transmission.IdempotentKey),
+                    $"Duplicate of transmission idempotentKey '{transmission.IdempotentKey}'");
+            }
+        }
+
+        var conflictingTransmission =
+            await GetFirstTransmissionWithReusedIdempotentKey(newTransmissions, cancellationToken);
+        if (conflictingTransmission is not null)
+        {
+            return new Conflict(nameof(conflictingTransmission.IdempotentKey),
+                $"'{conflictingTransmission.IdempotentKey}' already exists with DialogId '{dialog.Id}'");
         }
 
         await _transmissionHierarchyValidator.ValidateNewTransmissionsAsync(
@@ -178,4 +194,16 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             performedBy);
     }
 
+    private async Task<DialogTransmission?> GetFirstTransmissionWithReusedIdempotentKey(List<DialogTransmission> transmissions,
+        CancellationToken cancellationToken)
+    {
+        var idempotentKeys = transmissions.Select(i => i.IdempotentKey).OfType<string>().ToList();
+        if (idempotentKeys.IsNullOrEmpty()) return null;
+
+        var transmission = await _db.DialogTransmissions
+            .Where(x => x.IdempotentKey != null && x.DialogId == transmissions.First().DialogId && idempotentKeys.Contains(x.IdempotentKey))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return transmission;
+    }
 }

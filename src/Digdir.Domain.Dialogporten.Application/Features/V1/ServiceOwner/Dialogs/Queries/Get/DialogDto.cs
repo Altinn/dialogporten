@@ -259,6 +259,11 @@ public sealed class DialogTransmissionDto
     public Guid Id { get; set; }
 
     /// <summary>
+    /// An optional key to ensure idempotency in transmission creation. If provided, it allows for the safe re-submission of the same transmission creation request without creating duplicate entries.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
+
+    /// <summary>
     /// The date and time when the transmission was created.
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; }

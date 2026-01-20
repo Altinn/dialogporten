@@ -7,6 +7,8 @@ This document captures what we need to provide to deploy Dialogporten on DIS usi
 - A container registry namespace for the team to push OCI images.
 - Reconciliation of a team "syncroot" OCI image per environment.
 - Platform OpenTelemetry Collector (see `altinn-platform/flux/otel-collector`) with OTLP receivers and Azure Monitor exports.
+- AKS node pool configuration is owned by the platform; current module provisions `syspool` and `workpool` with a single `vm_size` per pool.
+  - If Dialogporten needs more than one worker machine size, the platform must support multiple worker pools.
 
 ## What we must provide
 - A signed, immutable syncroot OCI image that contains our Kubernetes configuration.

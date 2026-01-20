@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -17,6 +18,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -108,7 +110,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         var dialogId = await GetExistingDialogIdByIdempotentKey(dialog, cancellationToken);
         if (dialogId is not null)
         {
-            return new Conflict(nameof(dialog.IdempotentKey), $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
+            return new Conflict(nameof(DialogEntity.IdempotentKey),
+                $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
         }
 
         if (!request.IsSilentUpdate || !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
@@ -130,6 +133,19 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
         _transmissionHierarchyValidator.ValidateWholeAggregate(dialog);
+
+        var duplicatedKey = dialog.Transmissions
+            .Where(x => !string.IsNullOrWhiteSpace(x.IdempotentKey))
+            .GroupBy(x => x.IdempotentKey)
+            .Where(x => x.Count() > 1)
+            .Select(g => g.Key)
+            .FirstOrDefault();
+
+        if (duplicatedKey != null)
+        {
+            return new Conflict(nameof(DialogTransmission.IdempotentKey),
+                $"Duplicate of transmission idempotentKey '{duplicatedKey}'");
+        }
 
         var (fromParty, fromServiceOwner) = dialog.Transmissions.GetTransmissionCounts();
         dialog.FromPartyTransmissionsCount = checked((short)fromParty);

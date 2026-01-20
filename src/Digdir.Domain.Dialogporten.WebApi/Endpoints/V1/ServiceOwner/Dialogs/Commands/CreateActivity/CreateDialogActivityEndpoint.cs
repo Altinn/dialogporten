@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity;
@@ -35,7 +36,6 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
             StatusCodes.Status201Created,
             StatusCodes.Status400BadRequest,
             StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
             StatusCodes.Status410Gone,
             StatusCodes.Status412PreconditionFailed,
             StatusCodes.Status422UnprocessableEntity));
@@ -88,7 +88,7 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             concurrencyError => this.PreconditionFailed(cancellationToken: ct),
-            conflict => this.ConflictAsync(conflict, ct));
+            conflict => throw new UnreachableException("Should not create conflict when creating activities"));
     }
 }
 

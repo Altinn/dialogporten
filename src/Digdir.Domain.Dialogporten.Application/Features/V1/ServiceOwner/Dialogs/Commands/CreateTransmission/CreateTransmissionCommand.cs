@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -102,6 +103,25 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             transmission.Dialog = dialog;
         }
 
+        var duplicatedKey = newTransmissions.Where(t => !string.IsNullOrWhiteSpace(t.IdempotentKey))
+            .GroupBy(t => t.IdempotentKey)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .FirstOrDefault();
+        if (duplicatedKey != null)
+        {
+            return new Conflict(nameof(DialogTransmission.IdempotentKey),
+                $"Duplicate of transmission idempotentKey '{duplicatedKey}'");
+        }
+
+        var conflictingTransmission =
+            await GetFirstTransmissionWithReusedIdempotentKey(dialog.Id, newTransmissions, cancellationToken);
+        if (conflictingTransmission is not null)
+        {
+            return new Conflict(nameof(DialogTransmission.IdempotentKey),
+                $"'{conflictingTransmission.IdempotentKey}' already exists with DialogId '{dialog.Id}'");
+        }
+
         await _transmissionHierarchyValidator.ValidateNewTransmissionsAsync(
             dialog.Id,
             newTransmissions,
@@ -179,4 +199,16 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             performedBy);
     }
 
+    private async Task<DialogTransmission?> GetFirstTransmissionWithReusedIdempotentKey(Guid dialogId, List<DialogTransmission> transmissions,
+        CancellationToken cancellationToken)
+    {
+        var idempotentKeys = transmissions.Select(i => i.IdempotentKey).OfType<string>().ToList();
+        if (idempotentKeys.IsNullOrEmpty()) return null;
+
+        var transmission = await _db.DialogTransmissions
+            .Where(x => !string.IsNullOrEmpty(x.IdempotentKey) && x.DialogId == dialogId && idempotentKeys.Contains(x.IdempotentKey))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return transmission;
+    }
 }

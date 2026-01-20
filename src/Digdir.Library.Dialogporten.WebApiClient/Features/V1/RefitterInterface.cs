@@ -725,10 +725,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
-        /// <term>409</term>
-        /// <description>Conflict occurred while processing the request.</description>
-        /// </item>
-        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -1604,6 +1600,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -2476,6 +2478,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -3063,6 +3071,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
 
         /// <summary>
         /// The date and time when the transmission was created.
@@ -3880,6 +3894,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
@@ -4257,6 +4277,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
@@ -4782,6 +4808,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.

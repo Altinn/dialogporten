@@ -25,7 +25,7 @@ public sealed class CustomMetricsService
     public async Task CollectAllMetricsAsync(CancellationToken cancellationToken)
     {
         var collectorList = _collectors.ToList();
-        _logger.LogInformation(
+        _logger.LogDebug(
             "Starting custom metrics collection with {CollectorCount} registered collectors",
             collectorList.Count);
 
@@ -34,7 +34,7 @@ public sealed class CustomMetricsService
             try
             {
                 await collector.CollectAndRecordAsync(cancellationToken);
-                _logger.LogInformation("Collected metric: {MetricName}", collector.MetricName);
+                _logger.LogDebug("Collected metric: {MetricName}", collector.MetricName);
             }
             catch (Exception ex)
             {
@@ -42,6 +42,6 @@ public sealed class CustomMetricsService
             }
         }
 
-        _logger.LogInformation("Custom metrics collection completed.");
+        _logger.LogDebug("Custom metrics collection completed.");
     }
 }

@@ -137,8 +137,8 @@ static void BuildAndRun(string[] args)
     builder.Services.AddSingleton<CostMetricsAggregationOrchestrator>();
 
     // Add custom metrics collection services
-    builder.Services.AddScoped<IMetricCollector, OutboxQueueSizeMetricCollector>();
-    builder.Services.AddScoped<CustomMetricsService>();
+    builder.Services.AddSingleton<IMetricCollector, OutboxQueueSizeMetricCollector>();
+    builder.Services.AddSingleton<CustomMetricsService>();
 
     var app = builder.Build();
 

@@ -26,7 +26,7 @@ public sealed class OutboxQueueSizeMetricCollector : IMetricCollector
         _logger = logger;
 
         // Using UpDownCounter (push-based) instead of ObservableGauge (pull-based) because
-        // in short-lived jobs, the app exits before the SDK can poll ObservableGauge callbacks.
+        // in short-lived jobs, the app exits before the OpenTelemetry SDK can poll ObservableGauge callbacks.
         _counter = CustomMetrics.Meter.CreateUpDownCounter<long>(
             MetricName,
             unit: "items",

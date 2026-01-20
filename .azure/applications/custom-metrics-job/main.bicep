@@ -125,6 +125,3 @@ module customMetricsJob '../../modules/containerAppJob/main.bicep' = {
     workloadProfileName: workloadProfileName
   }
 }
-
-output identityPrincipalId string = managedIdentity.properties.principalId
-output name string = customMetricsJob.outputs.name

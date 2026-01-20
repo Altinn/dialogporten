@@ -147,7 +147,9 @@ Use Kustomize for application workloads:
 We must support both patterns in DIS:
 - Scheduled jobs -> Kubernetes `CronJob` (sync-resource-policy-information, sync-subject-resource-mappings, aggregate-cost-metrics).
 - Manual jobs -> Kubernetes `Job` with no schedule (web-api-migration, reindex-dialogsearch).
-Manual jobs should be triggered via `kubectl create job --from=cronjob/...` (if a template CronJob is used) or a CI workflow that applies a Job manifest on demand.
+Manual jobs should be triggered via CI:
+- `web-api-migration` is run in the CI pipeline.
+- `reindex-dialogsearch` is triggered via workflow dispatch.
 
 Per-environment overrides (from `container-runtime.md`):
 - IP allowlists per app.

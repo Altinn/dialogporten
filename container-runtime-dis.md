@@ -163,6 +163,20 @@ DIS uses a shared OpenTelemetry Collector defined in `altinn-platform/flux/otel-
   - Provide `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` as needed.
   - Do not set `APPLICATIONINSIGHTS_CONNECTION_STRING` on app/job pods in DIS; it causes metrics to bypass OTLP and go directly to App Insights.
 
+Example env var injection (Deployment/CronJob):
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://<otel-collector-service>.monitoring.svc:4317
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: grpc
+  - name: OTEL_SERVICE_NAME
+    value: dialogporten-web-api
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: service.namespace=dialogporten,service.version=<image-tag>
+```
+Note: replace `<otel-collector-service>` with the actual Service name created by the platform (OTEL CR name is `otel`).
+
 ## ApplicationIdentity (DIS operator)
 The DIS identity operator creates:
 - A user-assigned managed identity named `<namespace>-<applicationidentity-name>`.

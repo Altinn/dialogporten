@@ -23,7 +23,7 @@
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "*Job Status:*\n• Infrastructure: ${{ env.INFRA_STATUS }}\n• Apps: ${{ env.APPS_STATUS }}\n• E2E Tests: ${{ env.E2E_TESTS_STATUS }}\n• Performance Tests: ${{ env.PERFORMANCE_TESTS_STATUS }}\n• Schema NPM: ${{ env.SCHEMA_NPM_STATUS }}\n• Publish: ${{ env.PUBLISH_STATUS }}"
+            "text": "*Job Status:*\n• Infrastructure: ${{ env.INFRA_STATUS }}\n• Apps: ${{ env.APPS_STATUS }}\n• E2E Tests: ${{ env.E2E_TESTS_STATUS }}\n• GraphQL E2E Tests: ${{ env.GRAPHQL_E2E_TESTS_STATUS }}\n• Performance Tests: ${{ env.PERFORMANCE_TESTS_STATUS }}\n• Schema NPM: ${{ env.SCHEMA_NPM_STATUS }}\n• Publish: ${{ env.PUBLISH_STATUS }}"
           }
         },
         {

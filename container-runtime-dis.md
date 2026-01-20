@@ -143,6 +143,12 @@ Use Kustomize for application workloads:
 - ConfigMaps or Secrets references (actual secrets via External Secrets).
 - Namespace manifest with `linkerd.io/inject: enabled`.
 
+### Jobs vs scheduled jobs
+We must support both patterns in DIS:
+- Scheduled jobs -> Kubernetes `CronJob` (sync-resource-policy-information, sync-subject-resource-mappings, aggregate-cost-metrics).
+- Manual jobs -> Kubernetes `Job` with no schedule (web-api-migration, reindex-dialogsearch).
+Manual jobs should be triggered via `kubectl create job --from=cronjob/...` (if a template CronJob is used) or a CI workflow that applies a Job manifest on demand.
+
 Per-environment overrides (from `container-runtime.md`):
 - IP allowlists per app.
 - HPA min/max and CPU/memory utilization targets.

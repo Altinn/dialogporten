@@ -157,7 +157,7 @@ DIS uses a shared OpenTelemetry Collector defined in `altinn-platform/flux/otel-
 - Exporters:
   - Traces/logs -> Azure Application Insights (collector uses `APPLICATIONINSIGHTS_CONNECTION_STRING` from Key Vault).
   - Metrics -> Azure Monitor Workspace via Prometheus remote write (`AMW_WRITE_ENDPOINT` + `azureauth` workload identity).
-- Workload requirements:
+- Workload requirements (ACA injects these; in DIS we must set them explicitly):
   - Set `OTEL_EXPORTER_OTLP_ENDPOINT` to the collector service in the `monitoring` namespace.
   - Set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc`.
   - Provide `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` as needed.

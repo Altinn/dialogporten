@@ -210,7 +210,7 @@ The platform OTEL collector in `flux/otel-collector` is the source of truth for 
 - Collector receives OTLP (gRPC 4317 / HTTP 4318) and exports:
   - Traces/logs -> Azure Application Insights (via `APPLICATIONINSIGHTS_CONNECTION_STRING` on the collector).
   - Metrics -> Azure Monitor Workspace via Prometheus remote write (`AMW_WRITE_ENDPOINT` + `azureauth` workload identity).
-- Workloads must export OTLP to the collector:
+- Workloads must export OTLP to the collector (ACA injects these automatically; AKS/DIS must set them explicitly):
   - `OTEL_EXPORTER_OTLP_ENDPOINT` -> collector service endpoint (monitoring namespace).
   - `OTEL_EXPORTER_OTLP_PROTOCOL=grpc`.
   - `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` as needed.

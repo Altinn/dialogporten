@@ -29,14 +29,6 @@ internal sealed class DialogSearchRepository(
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {
-        // SUPER HACK: Skip dialog with known problematic content that
-        // causes the full-text search indexing to fail. Until we have
-        // a better solution for handling such cases, we just skip it.
-        if (dialogId.ToString() == "019b0856-2a49-746c-8ed6-a1f349054314")
-        {
-            return;
-        }
-
         await _db.Database.ExecuteSqlAsync($@"SELECT search.""UpsertDialogSearchOne""({dialogId})", cancellationToken);
     }
 
@@ -403,29 +395,36 @@ internal sealed class DialogSearchRepository(
         return dialogs;
     }
 
-    public async Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
+    public async Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(
+        Guid[] dialogIds,
         CancellationToken cancellationToken)
     {
-        var (query, parameters) = new PostgresFormattableStringBuilder()
-            .Append(
-                $"""
-                 SELECT a."DialogId"
-                      , COUNT(a."Id") AS "GuiAttachmentCount"
-                 FROM "Attachment" AS a
-                 WHERE a."Discriminator" = 'DialogAttachment'
-                   AND a."DialogId" = ANY ({dialogIds}::uuid[])
-                   AND EXISTS (
-                     SELECT 1
-                     FROM "AttachmentUrl" AS au
-                     WHERE au."AttachmentId" = a."Id"
-                       AND au."ConsumerTypeId" = 1 -- GUI
-                 )
-                 GROUP BY a."DialogId";
-                 """)
-            .ToDynamicParameters();
+        var parameters = new
+        {
+            DialogIds = new PostgresArray<Guid>(dialogIds)
+        };
+
+        const string sql =
+            """
+            WITH TargetDialogs (DialogId) AS (
+                SELECT unnest(@DialogIds)
+            )
+            SELECT a."DialogId" AS Id
+                 , COUNT(a."Id") AS GuiAttachmentCount
+            FROM TargetDialogs td
+            INNER JOIN "Attachment" AS a ON a."DialogId" = td.DialogId
+            WHERE a."Discriminator" = 'DialogAttachment'
+              AND EXISTS (
+                SELECT 1
+                FROM "AttachmentUrl" AS au
+                WHERE au."AttachmentId" = a."Id"
+                  AND au."ConsumerTypeId" = 1 -- GUI
+              )
+            GROUP BY a."DialogId";
+            """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
         var result = await connection.QueryAsync<(Guid Id, int GuiAttachmentCount)>(command);
         return result.ToDictionary(x => x.Id, x => x.GuiAttachmentCount);
     }
@@ -435,27 +434,34 @@ internal sealed class DialogSearchRepository(
         int userAuthLevel,
         CancellationToken cancellationToken)
     {
-        var (query, parameters) = new PostgresFormattableStringBuilder()
-            .Append(
-                $"""
-                 SELECT d."Id" AS dialogId
-                      , COALESCE(r."MinimumAuthenticationLevel", 0) AS authLevel
-                      , c."TypeId"
-                      , c."MediaType"
-                      , l."LanguageCode"
-                      , l."Value"
-                 FROM "Dialog" d
-                 LEFT JOIN "ResourcePolicyInformation" AS r ON d."ServiceResource" = r."Resource"
-                 INNER JOIN "DialogContent" AS c ON c."DialogId" = d."Id"
-                 INNER JOIN "DialogContentType" AS ct ON c."TypeId" = ct."Id" AND ct."OutputInList"
-                 INNER JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogContentValue' AND ls."DialogContentId" = c."Id"
-                 INNER JOIN "Localization" l ON l."LocalizationSetId" = ls."Id"
-                 WHERE d."Id" = ANY ({dialogIds}::uuid[]);
-                 """)
-            .ToDynamicParameters();
+        var parameters = new
+        {
+            DialogIds = new PostgresArray<Guid>(dialogIds),
+            AuthLevel = userAuthLevel
+        };
+
+        const string sql =
+            """
+            WITH TargetDialogs (DialogId) AS (
+                SELECT unnest(@DialogIds)
+            )
+            SELECT d."Id" AS dialogId
+                 , COALESCE(r."MinimumAuthenticationLevel", 0) AS authLevel
+                 , c."TypeId"
+                 , c."MediaType"
+                 , l."LanguageCode"
+                 , l."Value"
+            FROM TargetDialogs td
+            INNER JOIN "Dialog" d ON d."Id" = td.DialogId
+            LEFT JOIN "ResourcePolicyInformation" AS r ON d."ServiceResource" = r."Resource"
+            INNER JOIN "DialogContent" AS c ON c."DialogId" = d."Id"
+            INNER JOIN "DialogContentType" AS ct ON c."TypeId" = ct."Id" AND ct."OutputInList"
+            INNER JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogContentValue' AND ls."DialogContentId" = c."Id"
+            INNER JOIN "Localization" l ON l."LocalizationSetId" = ls."Id"
+            """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
         var rawRows = await connection.QueryAsync<RawContentRow>(command);
         return rawRows
             .GroupBy(x => new { x.DialogId, x.AuthLevel })
@@ -488,21 +494,28 @@ internal sealed class DialogSearchRepository(
         Guid[] dialogIds,
         CancellationToken cancellationToken)
     {
-        var (query, parameters) = new PostgresFormattableStringBuilder()
-            .Append(
-                $"""
-                 SELECT c."DialogId"
-                      , c."Revision"
-                      , cl."SystemLabelId"
-                 FROM "DialogEndUserContext" AS c
-                 INNER JOIN "DialogEndUserContextSystemLabel" AS cl ON c."Id" = cl."DialogEndUserContextId"
-                 WHERE c."DialogId" = ANY ({dialogIds}::uuid[])
-                 """)
-            .ToDynamicParameters();
+        var parameters = new
+        {
+            DialogIds = new PostgresArray<Guid>(dialogIds)
+        };
+
+        const string sql =
+            """
+            WITH TargetDialogs (DialogId) AS (
+                SELECT unnest(@DialogIds)
+            )
+            SELECT c."DialogId"
+                 , c."Revision"
+                 , cl."SystemLabelId"
+            FROM TargetDialogs td
+            INNER JOIN "DialogEndUserContext" AS c ON c."DialogId" = td.DialogId
+            INNER JOIN "DialogEndUserContextSystemLabel" AS cl ON c."Id" = cl."DialogEndUserContextId";
+            """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
         var rawRows = await connection.QueryAsync<RawEndUserContextRow>(command);
+
         return rawRows
             .GroupBy(x => new { x.DialogId, x.Revision })
             .ToDictionary(x => x.Key.DialogId, row => new DataDialogEndUserContextDto(
@@ -516,39 +529,38 @@ internal sealed class DialogSearchRepository(
         string? currentUserId,
         CancellationToken cancellationToken)
     {
-        var (query, parameters) = new PostgresFormattableStringBuilder()
-            .Append(
-                $"""
-                 SELECT sl."DialogId"
-                      , sl."Id" AS "SeenLogId"
-                      , sl."CreatedAt" AS "SeenAt"
-                      , sl."IsViaServiceOwner"
-                      , a."ActorTypeId" AS "ActorType"
-                      , an."ActorId"
-                      , an."Name" AS "ActorName"
-                 """)
-            .AppendIf(currentUserId is not null,
-                $"""
-                 , an."ActorId" IS NOT NULL AND an."ActorId" = {currentUserId}::text AS "IsCurrentEndUser"
-                 """)
-            .AppendIf(currentUserId is null,
-                """
-                , FALSE AS "IsCurrentEndUser"
-                """)
-            .Append(
-                $"""
-                 FROM "Dialog" d
-                 INNER JOIN "DialogSeenLog" sl ON d."Id" = sl."DialogId"
-                 INNER JOIN "Actor" a ON a."Discriminator" = 'DialogSeenLogSeenByActor' AND sl."Id" = a."DialogSeenLogId"
-                 LEFT JOIN "ActorName" an ON a."ActorNameEntityId" = an."Id"
-                 WHERE d."Id" = ANY ({dialogIds}::uuid[])
-                   AND sl."CreatedAt" >= d."ContentUpdatedAt";
-                 """)
-            .ToDynamicParameters();
+        var parameters = new
+        {
+            DialogIds = new PostgresArray<Guid>(dialogIds),
+            CurrentUserId = currentUserId
+        };
+
+        const string sql =
+            """
+            WITH TargetDialogs (DialogId) AS (
+                SELECT unnest(@DialogIds)
+            )
+            SELECT sl."DialogId"
+                 , sl."Id" AS "SeenLogId"
+                 , sl."CreatedAt" AS "SeenAt"
+                 , sl."IsViaServiceOwner"
+                 , a."ActorTypeId" AS "ActorType"
+                 , an."ActorId"
+                 , an."Name" AS "ActorName"
+                 , COALESCE(an."ActorId" = @CurrentUserId, FALSE) AS "IsCurrentEndUser"
+            FROM TargetDialogs td
+            INNER JOIN "Dialog" d ON d."Id" = td.DialogId
+            INNER JOIN "DialogSeenLog" sl ON d."Id" = sl."DialogId"
+            INNER JOIN "Actor" a ON a."Discriminator" = 'DialogSeenLogSeenByActor' AND sl."Id" = a."DialogSeenLogId"
+            LEFT JOIN "ActorName" an ON a."ActorNameEntityId" = an."Id"
+            WHERE sl."CreatedAt" >= d."ContentUpdatedAt";
+            """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+
+        var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
         var rawRows = await connection.QueryAsync<RawSeenLogRow>(command);
+
         return rawRows
             .GroupBy(x => x.DialogId)
             .ToDictionary(x => x.Key, x => x.Select(row => new DataDialogSeenLogDto(
@@ -567,44 +579,50 @@ internal sealed class DialogSearchRepository(
         Guid[] dialogIds,
         CancellationToken cancellationToken)
     {
-        var (query, parameters) = new PostgresFormattableStringBuilder()
-            .Append(
-                $"""
-                 WITH
-                     latestActivity AS (
-                         SELECT DISTINCT ON (da."DialogId") 
-                             da."DialogId"
-                             , da."Id" AS "ActivityId"
-                             , da."CreatedAt"
-                             , da."TypeId"
-                             , da."ExtendedType"
-                             , da."TransmissionId"
-                         FROM "DialogActivity" da
-                         WHERE da."DialogId" = ANY ({dialogIds}::uuid[])
-                         ORDER BY da."DialogId", da."CreatedAt" DESC, da."Id" DESC
-                     )
-                 SELECT la."DialogId"
-                      , la."ActivityId"
-                      , la."CreatedAt"
-                      , la."TypeId"
-                      , la."ExtendedType"
-                      , la."TransmissionId"
-                      , a."ActorTypeId" AS "ActorType"
-                      , an."ActorId"
-                      , an."Name"       AS "ActorName"
-                      , l."LanguageCode"
-                      , l."Value"       AS "Description"
-                 FROM latestActivity la
-                 INNER JOIN "Actor" a ON a."Discriminator" = 'DialogActivityPerformedByActor' AND a."ActivityId" = la."ActivityId"
-                 LEFT JOIN "ActorName" an ON an."Id" = a."ActorNameEntityId"
-                 LEFT JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogActivityDescription' AND ls."ActivityId" = la."ActivityId"
-                 LEFT JOIN "Localization" l ON l."LocalizationSetId" = ls."Id";
-                 """)
-            .ToDynamicParameters();
+        var parameters = new
+        {
+            DialogIds = new PostgresArray<Guid>(dialogIds)
+        };
+
+        const string sql =
+            """
+            WITH TargetDialogs (DialogId) AS (
+                SELECT unnest(@DialogIds)
+            ),
+            latestActivity AS (
+                SELECT DISTINCT ON (da."DialogId") 
+                    da."DialogId"
+                    , da."Id" AS "ActivityId"
+                    , da."CreatedAt"
+                    , da."TypeId"
+                    , da."ExtendedType"
+                    , da."TransmissionId"
+                FROM TargetDialogs td
+                INNER JOIN "DialogActivity" da ON da."DialogId" = td.DialogId
+                ORDER BY da."DialogId", da."CreatedAt" DESC, da."Id" DESC
+            )
+            SELECT la."DialogId"
+                 , la."ActivityId"
+                 , la."CreatedAt"
+                 , la."TypeId"
+                 , la."ExtendedType"
+                 , la."TransmissionId"
+                 , a."ActorTypeId" AS "ActorType"
+                 , an."ActorId"
+                 , an."Name"       AS "ActorName"
+                 , l."LanguageCode"
+                 , l."Value"       AS "Description"
+            FROM latestActivity la
+            INNER JOIN "Actor" a ON a."Discriminator" = 'DialogActivityPerformedByActor' AND a."ActivityId" = la."ActivityId"
+            LEFT JOIN "ActorName" an ON an."Id" = a."ActorNameEntityId"
+            LEFT JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogActivityDescription' AND ls."ActivityId" = la."ActivityId"
+            LEFT JOIN "Localization" l ON l."LocalizationSetId" = ls."Id";
+            """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
+        var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
         var rawRows = await connection.QueryAsync<RawActivityRow>(command);
+
         return rawRows
             .GroupBy(x => x.DialogId)
             .ToDictionary(x => x.Key, x => x
@@ -632,26 +650,40 @@ internal sealed class DialogSearchRepository(
             );
     }
 
-    public async Task<Dictionary<Guid, DataDialogServiceOwnerContextDto>> FetchServiceOwnerContextByDialogId(Guid[] dialogIds,
+    public async Task<Dictionary<Guid, DataDialogServiceOwnerContextDto>> FetchServiceOwnerContextByDialogId(
+        Guid[] dialogIds,
         CancellationToken cancellationToken)
     {
-        var (query, parameters) = new PostgresFormattableStringBuilder()
-            .Append(
-                $"""
-                 SELECT c."DialogId", c."Revision", l."Value"
-                 FROM "DialogServiceOwnerContext" c
-                 LEFT JOIN "DialogServiceOwnerLabel" l ON c."DialogId" = l."DialogServiceOwnerContextId"
-                 WHERE c."DialogId" = ANY ({dialogIds}::uuid[])
-                 """)
-            .ToDynamicParameters();
+        var parameters = new
+        {
+            DialogIds = new PostgresArray<Guid>(dialogIds)
+        };
+
+        const string sql =
+            """
+            WITH TargetDialogs (DialogId) AS (
+                SELECT unnest(@DialogIds)
+            )
+            SELECT c."DialogId"
+                 , c."Revision"
+                 , l."Value"
+            FROM TargetDialogs td
+            INNER JOIN "DialogServiceOwnerContext" c ON c."DialogId" = td.DialogId
+            LEFT JOIN "DialogServiceOwnerLabel" l ON c."DialogId" = l."DialogServiceOwnerContextId";
+            """;
+
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var command = new CommandDefinition(query, parameters, cancellationToken: cancellationToken);
-        var rawRows = await connection.QueryAsync<(Guid DialogId, Guid Revision, string Value)>(command);
-        return rawRows.GroupBy(x => new { x.DialogId, x.Revision })
+        var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
+        var rawRows = await connection.QueryAsync<(Guid DialogId, Guid Revision, string? Value)>(command);
+
+        return rawRows
+            .GroupBy(x => new { x.DialogId, x.Revision })
             .ToDictionary(x => x.Key.DialogId,
                 row => new DataDialogServiceOwnerContextDto(
                     row.Key.Revision,
-                    row.Where(x => !x.Value.IsNullOrEmpty()).Select(x => x.Value).ToList()));
+                    row.Where(x => !string.IsNullOrEmpty(x.Value))
+                        .Select(x => x.Value!)
+                        .ToList()));
     }
 
     [SuppressMessage("Style", "IDE0072:Add missing cases")]

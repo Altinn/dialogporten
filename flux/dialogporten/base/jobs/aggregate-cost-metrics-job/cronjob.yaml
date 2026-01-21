@@ -42,8 +42,8 @@ spec:
                 - name: APPLICATIONINSIGHTS_CONNECTION_STRING
                   value: ${DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING}
                 - name: MetricsAggregation__StorageAccountName
-                  value: set-by-env
+                  value: ${DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME}
                 - name: MetricsAggregation__StorageContainerName
                   value: costmetrics
                 - name: MetricsAggregation__SubscriptionId
-                  value: set-by-env
+                  value: ${DIALOGPORTEN_AZURE_SUBSCRIPTION_ID}

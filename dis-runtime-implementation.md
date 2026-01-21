@@ -61,10 +61,11 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Traefik internal-only access pattern for `service` without an internal entrypoint.
 - How to manage secret material (App Insights/App Config/Service Bus host) in Flux without leaking values.
 - Replace `set-by-env` placeholders in manifests with real sources (ConfigMap/Secret/ExternalSecret/EnvFrom).
-- Determine storage account name/source for `aggregate-cost-metrics-job` (currently `set-by-env`).
+- Determine storage account name/source for `aggregate-cost-metrics-job` (now requires env substitution).
 - CI must inject App Config/App Insights/Service Bus/Key Vault values into OCI build via envsubst.
   - Required envs: `DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING`, `DIALOGPORTEN_AZURE_APPCONFIG_URI`, `DIALOGPORTEN_SERVICEBUS_HOST`, `DIALOGPORTEN_KEY_VAULT_URL`.
   - Service Bus format: `sb://<namespace>.servicebus.windows.net/`.
+  - Cost metrics envs: `DIALOGPORTEN_AZURE_SUBSCRIPTION_ID`, `DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME`.
 
 ## Not supported / blocked
 - RoleAssignment resources are blocked until DIS ASO schema is confirmed.

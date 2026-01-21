@@ -11,6 +11,9 @@ on:
       GCR_PASSWORD:
         description: "Password for GitHub Container Registry"
         required: true
+      AZURE_SUBSCRIPTION_ID:
+        description: "Azure subscription id"
+        required: true
       AZURE_APP_INSIGHTS_CONNECTION_STRING:
         description: "Application Insights connection string"
         required: true
@@ -23,6 +26,9 @@ on:
       AZURE_SERVICE_BUS_NAMESPACE_NAME:
         description: "Service Bus namespace name"
         required: true
+      AZURE_COST_METRICS_STORAGE_ACCOUNT_NAME:
+        description: "Storage account name for cost metrics (staging/prod)"
+        required: false
 
 jobs:
   build-app-config:
@@ -57,6 +63,8 @@ jobs:
           DIALOGPORTEN_AZURE_APPCONFIG_URI: https://${{ secrets.AZURE_APP_CONFIGURATION_NAME }}.azconfig.io
           DIALOGPORTEN_SERVICEBUS_HOST: sb://${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}.servicebus.windows.net/
           DIALOGPORTEN_KEY_VAULT_URL: https://${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}.vault.azure.net
+          DIALOGPORTEN_AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_COST_METRICS_STORAGE_ACCOUNT_NAME }}
         run: |
           tmp_dir=$(mktemp -d)
           cp -R flux/dialogporten "${tmp_dir}/dialogporten"
@@ -64,7 +72,9 @@ jobs:
           export DIALOGPORTEN_AZURE_APPCONFIG_URI
           export DIALOGPORTEN_SERVICEBUS_HOST
           export DIALOGPORTEN_KEY_VAULT_URL
-          vars='${DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING} ${DIALOGPORTEN_AZURE_APPCONFIG_URI} ${DIALOGPORTEN_SERVICEBUS_HOST} ${DIALOGPORTEN_KEY_VAULT_URL}'
+          export DIALOGPORTEN_AZURE_SUBSCRIPTION_ID
+          export DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME
+          vars='${DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING} ${DIALOGPORTEN_AZURE_APPCONFIG_URI} ${DIALOGPORTEN_SERVICEBUS_HOST} ${DIALOGPORTEN_KEY_VAULT_URL} ${DIALOGPORTEN_AZURE_SUBSCRIPTION_ID} ${DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME}'
           find "${tmp_dir}/dialogporten" -type f -name '*.yaml' -print0 | xargs -0 -I{} sh -c 'envsubst "$2" < "$1" > "$1.tmp" && mv "$1.tmp" "$1"' _ {} "$vars"
           flux push artifact oci://ghcr.io/altinn/dialogporten-config:${{ inputs.version }} \
             --path="${tmp_dir}/dialogporten" \

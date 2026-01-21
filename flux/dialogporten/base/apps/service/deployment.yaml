@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service
+  labels:
+    app.kubernetes.io/name: service
+    app.kubernetes.io/part-of: dialogporten
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: service
+        app.kubernetes.io/part-of: dialogporten
+    spec:
+      serviceAccountName: service
+      containers:
+        - name: service
+          image: ghcr.io/altinn/dialogporten-service:set-by-ci
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: set-by-env
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              value: set-by-env
+            - name: AZURE_APPCONFIG_URI
+              value: set-by-env
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: AZURE_CLIENT_ID
+              value: set-by-env
+            - name: Infrastructure__MassTransit__Host
+              value: set-by-env
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_traceidratio
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: set-by-env
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 2

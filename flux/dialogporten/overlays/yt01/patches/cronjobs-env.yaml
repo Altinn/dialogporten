@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: web-api-migration-job
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: web-api-migration-job
+              env:
+                - name: DOTNET_ENVIRONMENT
+                  value: yt01
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sync-resource-policy-information-job
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sync-resource-policy-information-job
+              env:
+                - name: DOTNET_ENVIRONMENT
+                  value: yt01
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sync-subject-resource-mappings-job
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sync-subject-resource-mappings-job
+              env:
+                - name: DOTNET_ENVIRONMENT
+                  value: yt01
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reindex-dialogsearch-job
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: reindex-dialogsearch-job
+              env:
+                - name: DOTNET_ENVIRONMENT
+                  value: yt01

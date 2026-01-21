@@ -1,0 +1,11 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: service-ip-allowlist
+  labels:
+    app.kubernetes.io/name: service
+    app.kubernetes.io/part-of: dialogporten
+spec:
+  ipAllowList:
+    sourceRange:
+      - 0.0.0.0/32

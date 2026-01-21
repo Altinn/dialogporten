@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql
+  labels:
+    app.kubernetes.io/name: graphql
+    app.kubernetes.io/part-of: dialogporten
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: graphql
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

@@ -5,9 +5,9 @@ This document tracks the detailed plan, progress, and open issues for implementi
 ## Plan (with progress)
 - [x] Capture ACA -> DIS runtime requirements from `container-runtime.md` and `.azure/*/*.bicepparam`.
 - [x] Create initial Flux layout skeleton for app-config and syncroot images under `flux/`.
-- [ ] Add base manifests for apps and jobs (Deployment/Service/IngressRoute/HPA/CronJob/Job).
+- [x] Add base manifests for apps and jobs (Deployment/Service/IngressRoute/HPA/CronJob/Job).
 - [ ] Add ApplicationIdentity, External Secrets, and RoleAssignment resources.
-- [ ] Add environment overlays for replicas/resources/allowlists/schedules/OTEL.
+- [ ] Add environment overlays for replicas/resources/allowlists/schedules/OTEL (initial patches in place; placeholders remain).
 - [ ] Add syncroot environment patches for app-config tag wiring.
 - [ ] Implement CI workflows for app-config and syncroot OCI images.
 - [ ] Validate `kustomize build` per env and run `dotnet build` + `dotnet test`.
@@ -53,16 +53,22 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Does DIS bridge ApplicationIdentity annotations to workload identity env var injection (AZURE_CLIENT_ID)?
 - Are GHCR OCIRepositories supported in DIS, or must we use ACR?
 - Which Flux API versions (v1beta2 vs v1) are required by DIS?
+- What are the canonical hostnames and paths for Traefik IngressRoute rules per app/environment?
+- Where should `AZURE_APPCONFIG_URI`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, and `Infrastructure__MassTransit__Host` be sourced in DIS?
 
 ## Needs more consideration
 - Workload profile mapping to node pools (Dedicated-D8 scheduling) and required labels/taints in DIS.
 - OTEL collector endpoint and required env vars for DIS workloads (and whether to omit App Insights connection string).
 - Strategy for manual job triggers (migration/reindex) in DIS.
 - Traefik internal-only access pattern for `service` without an internal entrypoint.
+- How to manage secret material (App Insights/App Config/Service Bus host) in Flux without leaking values.
+- Replace `set-by-env` placeholders in manifests with real sources (ConfigMap/Secret/ExternalSecret/EnvFrom).
 
 ## Not supported / blocked
 - RoleAssignment resources are blocked until DIS ASO schema is confirmed.
 - Workload identity env var injection is blocked until DIS confirms bridging behavior.
+- ApplicationIdentity resources are blocked until the CRD schema is confirmed.
 
 ## Progress log
 - 2026-01-21: Created `flux/` skeleton for app-config and syncroot images.
+- 2026-01-21: Added base app/job manifests and initial per-env overlay patches (allowlists, schedules, OTEL ratios, resources).

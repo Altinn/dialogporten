@@ -1,0 +1,5 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: aggregate-cost-metrics-job
+$patch: delete

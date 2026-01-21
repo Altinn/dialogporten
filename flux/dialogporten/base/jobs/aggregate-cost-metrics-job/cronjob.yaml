@@ -41,8 +41,6 @@ spec:
                   value: set-by-env
                 - name: APPLICATIONINSIGHTS_CONNECTION_STRING
                   value: set-by-env
-                - name: AZURE_CLIENT_ID
-                  value: set-by-env
                 - name: MetricsAggregation__StorageAccountName
                   value: set-by-env
                 - name: MetricsAggregation__StorageContainerName

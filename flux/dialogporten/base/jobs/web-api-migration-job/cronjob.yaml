@@ -31,5 +31,3 @@ spec:
                     secretKeyRef:
                       name: dialogporten-secrets
                       key: dialogportenAdoConnectionString
-                - name: AZURE_CLIENT_ID
-                  value: set-by-env

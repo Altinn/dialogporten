@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - applicationidentity-secrets.yaml
   - external-secrets.yaml
+  - runtime-config.yaml

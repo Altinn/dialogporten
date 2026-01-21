@@ -28,11 +28,12 @@ spec:
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               value: set-by-env
             - name: AZURE_APPCONFIG_URI
-              value: set-by-env
+              valueFrom:
+                configMapKeyRef:
+                  name: dialogporten-runtime
+                  key: AZURE_APPCONFIG_URI
             - name: ASPNETCORE_URLS
               value: http://+:8080
-            - name: AZURE_CLIENT_ID
-              value: set-by-env
             - name: OTEL_TRACES_SAMPLER
               value: parentbased_traceidratio
             - name: OTEL_TRACES_SAMPLER_ARG

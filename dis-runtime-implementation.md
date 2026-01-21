@@ -50,7 +50,6 @@ This document tracks the detailed plan, progress, and open issues for implementi
 
 ## Open questions
 - What is the exact ASO RoleAssignment schema in DIS (principal reference vs principalId)?
-- Does DIS bridge ApplicationIdentity annotations to workload identity env var injection (AZURE_CLIENT_ID)?
 - Are GHCR OCIRepositories supported in DIS, or must we use ACR?
 - What are the canonical hostnames and paths for Traefik IngressRoute rules per app/environment?
 - Where should `AZURE_APPCONFIG_URI`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, and `Infrastructure__MassTransit__Host` be sourced in DIS?
@@ -73,3 +72,5 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - 2026-01-21: Added ExternalSecrets scaffolding and APIM-aligned ingress path rules.
 - 2026-01-21: Added ApplicationIdentity resources for all apps/jobs and the SecretStore ServiceAccount.
 - 2026-01-21: Aligned syncroot Flux API versions with platform (v1).
+- 2026-01-21: Removed explicit `AZURE_CLIENT_ID` env vars, relying on DIS identity injection.
+- 2026-01-21: Introduced `dialogporten-runtime` ConfigMap for App Config URI and Service Bus host placeholders.

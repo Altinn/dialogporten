@@ -52,7 +52,6 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - What is the exact ASO RoleAssignment schema in DIS (principal reference vs principalId)?
 - Does DIS bridge ApplicationIdentity annotations to workload identity env var injection (AZURE_CLIENT_ID)?
 - Are GHCR OCIRepositories supported in DIS, or must we use ACR?
-- Which Flux API versions (v1beta2 vs v1) are required by DIS?
 - What are the canonical hostnames and paths for Traefik IngressRoute rules per app/environment?
 - Where should `AZURE_APPCONFIG_URI`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, and `Infrastructure__MassTransit__Host` be sourced in DIS?
 
@@ -63,7 +62,6 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Traefik internal-only access pattern for `service` without an internal entrypoint.
 - How to manage secret material (App Insights/App Config/Service Bus host) in Flux without leaking values.
 - Replace `set-by-env` placeholders in manifests with real sources (ConfigMap/Secret/ExternalSecret/EnvFrom).
-- Confirm SecretStore identity approach (currently `dialogporten-secrets` ApplicationIdentity).
 
 ## Not supported / blocked
 - RoleAssignment resources are blocked until DIS ASO schema is confirmed.
@@ -74,3 +72,4 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - 2026-01-21: Added base app/job manifests and initial per-env overlay patches (allowlists, schedules, OTEL ratios, resources).
 - 2026-01-21: Added ExternalSecrets scaffolding and APIM-aligned ingress path rules.
 - 2026-01-21: Added ApplicationIdentity resources for all apps/jobs and the SecretStore ServiceAccount.
+- 2026-01-21: Aligned syncroot Flux API versions with platform (v1).

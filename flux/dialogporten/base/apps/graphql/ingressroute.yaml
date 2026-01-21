@@ -11,7 +11,8 @@ spec:
     - https
   routes:
     - kind: Rule
-      match: Host(`placeholder.invalid`)
+      match: Host(`placeholder.invalid`) && PathPrefix(`/dialogporten/graphql`)
+      priority: 20
       middlewares:
         - name: graphql-ip-allowlist
       services:

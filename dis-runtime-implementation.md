@@ -55,6 +55,7 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Which Flux API versions (v1beta2 vs v1) are required by DIS?
 - What are the canonical hostnames and paths for Traefik IngressRoute rules per app/environment?
 - Where should `AZURE_APPCONFIG_URI`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, and `Infrastructure__MassTransit__Host` be sourced in DIS?
+- Which ServiceAccount should back the Key Vault SecretStore (dedicated vs per-app identity)?
 
 ## Needs more consideration
 - Workload profile mapping to node pools (Dedicated-D8 scheduling) and required labels/taints in DIS.
@@ -72,3 +73,4 @@ This document tracks the detailed plan, progress, and open issues for implementi
 ## Progress log
 - 2026-01-21: Created `flux/` skeleton for app-config and syncroot images.
 - 2026-01-21: Added base app/job manifests and initial per-env overlay patches (allowlists, schedules, OTEL ratios, resources).
+- 2026-01-21: Added ExternalSecrets scaffolding and APIM-aligned ingress path rules.

@@ -11,7 +11,8 @@ spec:
     - https
   routes:
     - kind: Rule
-      match: Host(`placeholder.invalid`)
+      match: Host(`placeholder.invalid`) && PathPrefix(`/dialogporten/enduser`)
+      priority: 10
       middlewares:
         - name: web-api-eu-ip-allowlist
       services:

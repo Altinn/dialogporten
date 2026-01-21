@@ -11,7 +11,8 @@ spec:
     - https
   routes:
     - kind: Rule
-      match: Host(`placeholder.invalid`)
+      match: Host(`placeholder.invalid`) && PathPrefix(`/dialogporten/service`)
+      priority: 5
       middlewares:
         - name: service-ip-allowlist
       services:

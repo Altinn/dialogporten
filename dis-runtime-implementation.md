@@ -6,7 +6,7 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - [x] Capture ACA -> DIS runtime requirements from `container-runtime.md` and `.azure/*/*.bicepparam`.
 - [x] Create initial Flux layout skeleton for app-config and syncroot images under `flux/`.
 - [x] Add base manifests for apps and jobs (Deployment/Service/IngressRoute/HPA/CronJob/Job).
-- [ ] Add ApplicationIdentity, External Secrets, and RoleAssignment resources.
+- [~] Add ApplicationIdentity, External Secrets, and RoleAssignment resources (ApplicationIdentity + External Secrets done; RoleAssignments pending).
 - [ ] Add environment overlays for replicas/resources/allowlists/schedules/OTEL (initial patches in place; placeholders remain).
 - [ ] Add syncroot environment patches for app-config tag wiring.
 - [ ] Implement CI workflows for app-config and syncroot OCI images.
@@ -55,7 +55,6 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Which Flux API versions (v1beta2 vs v1) are required by DIS?
 - What are the canonical hostnames and paths for Traefik IngressRoute rules per app/environment?
 - Where should `AZURE_APPCONFIG_URI`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, and `Infrastructure__MassTransit__Host` be sourced in DIS?
-- Which ServiceAccount should back the Key Vault SecretStore (dedicated vs per-app identity)?
 
 ## Needs more consideration
 - Workload profile mapping to node pools (Dedicated-D8 scheduling) and required labels/taints in DIS.
@@ -64,13 +63,14 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Traefik internal-only access pattern for `service` without an internal entrypoint.
 - How to manage secret material (App Insights/App Config/Service Bus host) in Flux without leaking values.
 - Replace `set-by-env` placeholders in manifests with real sources (ConfigMap/Secret/ExternalSecret/EnvFrom).
+- Confirm SecretStore identity approach (currently `dialogporten-secrets` ApplicationIdentity).
 
 ## Not supported / blocked
 - RoleAssignment resources are blocked until DIS ASO schema is confirmed.
 - Workload identity env var injection is blocked until DIS confirms bridging behavior.
-- ApplicationIdentity resources are blocked until the CRD schema is confirmed.
 
 ## Progress log
 - 2026-01-21: Created `flux/` skeleton for app-config and syncroot images.
 - 2026-01-21: Added base app/job manifests and initial per-env overlay patches (allowlists, schedules, OTEL ratios, resources).
 - 2026-01-21: Added ExternalSecrets scaffolding and APIM-aligned ingress path rules.
+- 2026-01-21: Added ApplicationIdentity resources for all apps/jobs and the SecretStore ServiceAccount.

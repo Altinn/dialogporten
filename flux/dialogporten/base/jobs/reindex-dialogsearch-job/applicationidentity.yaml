@@ -1,0 +1,8 @@
+apiVersion: application.dis.altinn.cloud/v1alpha1
+kind: ApplicationIdentity
+metadata:
+  name: reindex-dialogsearch-job
+  labels:
+    app.kubernetes.io/name: reindex-dialogsearch-job
+    app.kubernetes.io/part-of: dialogporten
+spec: {}

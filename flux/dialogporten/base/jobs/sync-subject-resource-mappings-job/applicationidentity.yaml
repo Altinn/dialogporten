@@ -1,0 +1,8 @@
+apiVersion: application.dis.altinn.cloud/v1alpha1
+kind: ApplicationIdentity
+metadata:
+  name: sync-subject-resource-mappings-job
+  labels:
+    app.kubernetes.io/name: sync-subject-resource-mappings-job
+    app.kubernetes.io/part-of: dialogporten
+spec: {}

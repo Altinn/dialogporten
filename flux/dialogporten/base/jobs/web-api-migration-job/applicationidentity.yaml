@@ -1,0 +1,8 @@
+apiVersion: application.dis.altinn.cloud/v1alpha1
+kind: ApplicationIdentity
+metadata:
+  name: web-api-migration-job
+  labels:
+    app.kubernetes.io/name: web-api-migration-job
+    app.kubernetes.io/part-of: dialogporten
+spec: {}

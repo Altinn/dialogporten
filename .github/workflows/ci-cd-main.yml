@@ -55,6 +55,7 @@ jobs:
     needs: [ publish, get-current-version, generate-git-short-sha, check-for-changes ]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     uses: ./.github/workflows/workflow-build-app-config.yml
+    environment: test
     secrets:
       GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}

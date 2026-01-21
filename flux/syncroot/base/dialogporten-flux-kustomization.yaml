@@ -1,0 +1,13 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: dialogporten
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./overlays/at23
+  prune: true
+  sourceRef:
+    kind: OCIRepository
+    name: dialogporten-config
+  targetNamespace: dialogporten

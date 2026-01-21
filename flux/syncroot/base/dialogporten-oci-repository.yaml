@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: dialogporten-config
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: oci://ghcr.io/altinn/dialogporten-config
+  ref:
+    tag: set-by-ci

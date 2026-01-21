@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.99.1](https://github.com/Altinn/dialogporten/compare/v1.99.0...v1.99.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* Match request identifier with SI identifier in PDP request short circuit ([#3295](https://github.com/Altinn/dialogporten/issues/3295)) ([44b94fa](https://github.com/Altinn/dialogporten/commit/44b94faf7291cb2e738858e9f5e27b2a62fb0841))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-dotnet action to v5.1.0 ([#3289](https://github.com/Altinn/dialogporten/issues/3289)) ([d3248f7](https://github.com/Altinn/dialogporten/commit/d3248f756528aefb66d3e79082743da416d2a8a4))
+* **deps:** update dependency azure.storage.blobs to 12.27.0 ([#3275](https://github.com/Altinn/dialogporten/issues/3275)) ([a0002d3](https://github.com/Altinn/dialogporten/commit/a0002d3c8cc57f6bca23c2fdbd00661a968a4f70))
+* **deps:** update dependency verify.xunitv3 to 31.9.4 ([#3286](https://github.com/Altinn/dialogporten/issues/3286)) ([29af9ba](https://github.com/Altinn/dialogporten/commit/29af9bafb409f9d491cc40ceea3309feefb0e44c))
+* **deps:** update microsoft dependencies to 9.0.12 ([#3288](https://github.com/Altinn/dialogporten/issues/3288)) ([2ac7961](https://github.com/Altinn/dialogporten/commit/2ac79618fd9fe0168fcb9c933b313375fa50732c))
+* **deps:** update prom/prometheus docker tag to v3.9.1 ([#3274](https://github.com/Altinn/dialogporten/issues/3274)) ([5a66dd8](https://github.com/Altinn/dialogporten/commit/5a66dd84a97f443dbf92952049af14529d3db40e))
+* update az cli to 2.82.0 ([#3283](https://github.com/Altinn/dialogporten/issues/3283)) ([bdfa500](https://github.com/Altinn/dialogporten/commit/bdfa50067a5219d99ad87e3e2cbd7bf7ea99720a))
+
 ## [1.99.0](https://github.com/Altinn/dialogporten/compare/v1.98.2...v1.99.0) (2026-01-16)
 
 

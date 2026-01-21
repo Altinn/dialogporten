@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -100,6 +101,25 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
                 x.ErrorMessage.Should().Contain(idempotentKey));
     }
 
+    [Fact]
+    public async Task Cannot_Use_Duplicate_Transmission_IdempotentKey_When_Creating_Dialog()
+    {
+        var idempotentKey = NewUuidV7().ToString();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey)
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey))
+            .ExecuteAndAssert<Conflict>(x => x
+                .ErrorMessage.Should().Contain(idempotentKey));
+    }
+
+    [Fact]
+    public async Task Cannot_Exceed_Transmission_IdempotentKey_Length_When_Creating_Dialog()
+        ...
+
     #endregion
 
     # region Update
@@ -128,6 +148,14 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithText(originalTransmission.Id.ToString()!));
     }
+
+    [Fact]
+    public async Task Cannot_Use_Duplicate_Transmission_IdempotentKey_When_Updating_Dialog()
+        ...
+
+    [Fact]
+    public async Task Cannot_Exceed_Transmission_IdempotentKey_Length_When_Updating_Dialog()
+        ...
 
     [Fact]
     public async Task Cannot_Append_Activity_With_Existing_Id()

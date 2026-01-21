@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <IsTestProject>true</IsTestProject>
@@ -18,17 +18,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="appsettings.test.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="appsettings.staging.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="appsettings.yt01.json" CopyToOutputDirectory="PreserveNewest" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Digdir.Library.Dialogporten.E2E.Common\Digdir.Library.Dialogporten.E2E.Common.csproj" />
-      <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj" />
-      <ProjectReference Include="..\..\src\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
+        <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj" />
+        <ProjectReference Include="..\..\src\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
     </ItemGroup>
 
 </Project>

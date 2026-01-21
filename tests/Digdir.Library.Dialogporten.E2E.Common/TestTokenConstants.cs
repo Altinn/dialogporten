@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 
-namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
+namespace Digdir.Library.Dialogporten.E2E.Common;
 
 public static class TestTokenConstants
 {

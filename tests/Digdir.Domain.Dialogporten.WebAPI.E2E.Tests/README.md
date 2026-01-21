@@ -1,4 +1,4 @@
-# GraphQL E2E Tests
+# WebAPI E2E Tests
 
 End-to-end tests that call Dialogporten GraphQL and WebAPI endpoints using test tokens from the token generator.
 
@@ -40,8 +40,8 @@ Ask the team on Slack if you do not have them.
 This can be done in the Solution Explorer in JetBrains Rider, right-click on the project, select `Tools => .NET User Secrets`  
 Or use the command line:
 ```bash
-dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests TokenGeneratorUser "<user>"
-dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests TokenGeneratorPassword "<password>"
+dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests TokenGeneratorUser "<user>"
+dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests TokenGeneratorPassword "<password>"
 ```
 
 ## Writing tests

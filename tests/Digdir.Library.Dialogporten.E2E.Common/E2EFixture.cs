@@ -10,9 +10,9 @@ using Refit;
 using Xunit;
 using static System.Text.Json.Serialization.JsonIgnoreCondition;
 
-namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
+namespace Digdir.Library.Dialogporten.E2E.Common;
 
-public class GraphQlE2EFixture : IAsyncLifetime
+public class E2EFixture : IAsyncLifetime
 {
     private ServiceProvider? _serviceProvider;
     private ITokenOverridesAccessor? _tokenOverridesAccessor;

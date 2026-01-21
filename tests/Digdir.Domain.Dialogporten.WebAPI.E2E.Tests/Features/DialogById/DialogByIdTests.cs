@@ -3,7 +3,7 @@ using FluentAssertions;
 using StrawberryShake;
 using Xunit;
 
-namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.DialogById;
 
 [Collection(nameof(TestCollectionFixture))]
 public class DialogByIdTests : E2ETestBase

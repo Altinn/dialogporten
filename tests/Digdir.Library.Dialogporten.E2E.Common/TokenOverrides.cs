@@ -1,4 +1,4 @@
-namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
+namespace Digdir.Library.Dialogporten.E2E.Common;
 
 public sealed record EndUserTokenOverrides(
     string? Ssn = null,

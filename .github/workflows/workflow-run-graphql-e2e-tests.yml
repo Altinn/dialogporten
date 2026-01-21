@@ -1,0 +1,48 @@
+name: Run GraphQL E2E tests
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      ref:
+        description: "The branch or tag ref to run the tests on. Using default checkout ref if not provided."
+        required: false
+        default: ${{ github.ref }}
+        type: string
+    secrets:
+      TOKEN_GENERATOR_USERNAME:
+        required: true
+      TOKEN_GENERATOR_PASSWORD:
+        required: true
+
+jobs:
+  graphql-e2e-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
+        with:
+          global-json-file: ./global.json
+
+      - name: Run GraphQL E2E tests
+        env:
+          DOTNET_ENVIRONMENT: ${{ inputs.environment }}
+          TokenGeneratorUser: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
+          TokenGeneratorPassword: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+        run: |
+          dotnet test tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.csproj \
+            --configuration Release \
+            -- xUnit.Explicit=only

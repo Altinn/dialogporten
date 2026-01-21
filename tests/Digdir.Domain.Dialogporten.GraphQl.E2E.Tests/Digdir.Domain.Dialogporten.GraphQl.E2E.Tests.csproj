@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsTestProject>true</IsTestProject>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="6.0.4" />
+        <PackageReference Include="FluentAssertions" Version="7.2.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.12" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.12" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.12" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+        <PackageReference Include="StrawberryShake.Server" Version="15.1.11" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+        <PackageReference Include="xunit.v3" Version="3.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.test.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.staging.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.yt01.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj" />
+      <ProjectReference Include="..\..\src\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
+    </ItemGroup>
+
+</Project>

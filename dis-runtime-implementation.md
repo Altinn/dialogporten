@@ -64,6 +64,7 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Determine storage account name/source for `aggregate-cost-metrics-job` (currently `set-by-env`).
 - CI must inject App Config/App Insights/Service Bus/Key Vault values into OCI build via envsubst.
   - Required envs: `DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING`, `DIALOGPORTEN_AZURE_APPCONFIG_URI`, `DIALOGPORTEN_SERVICEBUS_HOST`, `DIALOGPORTEN_KEY_VAULT_URL`.
+  - Service Bus format: `sb://<namespace>.servicebus.windows.net/`.
 
 ## Not supported / blocked
 - RoleAssignment resources are blocked until DIS ASO schema is confirmed.

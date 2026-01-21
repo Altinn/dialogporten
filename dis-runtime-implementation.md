@@ -61,6 +61,9 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Traefik internal-only access pattern for `service` without an internal entrypoint.
 - How to manage secret material (App Insights/App Config/Service Bus host) in Flux without leaking values.
 - Replace `set-by-env` placeholders in manifests with real sources (ConfigMap/Secret/ExternalSecret/EnvFrom).
+- Determine storage account name/source for `aggregate-cost-metrics-job` (currently `set-by-env`).
+- CI must inject App Config/App Insights/Service Bus/Key Vault values into OCI build via envsubst.
+  - Required envs: `DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING`, `DIALOGPORTEN_AZURE_APPCONFIG_URI`, `DIALOGPORTEN_SERVICEBUS_HOST`, `DIALOGPORTEN_KEY_VAULT_URL`.
 
 ## Not supported / blocked
 - RoleAssignment resources are blocked until DIS ASO schema is confirmed.
@@ -74,3 +77,4 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - 2026-01-21: Aligned syncroot Flux API versions with platform (v1).
 - 2026-01-21: Removed explicit `AZURE_CLIENT_ID` env vars, relying on DIS identity injection.
 - 2026-01-21: Introduced `dialogporten-runtime` ConfigMap for App Config URI and Service Bus host placeholders.
+- 2026-01-21: Added app-config + syncroot build workflows and CI envsubst placeholders.

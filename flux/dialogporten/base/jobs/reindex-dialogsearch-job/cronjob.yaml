@@ -48,4 +48,4 @@ spec:
                 - name: DOTNET_ENVIRONMENT
                   value: set-by-env
                 - name: APPLICATIONINSIGHTS_CONNECTION_STRING
-                  value: set-by-env
+                  value: ${DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING}

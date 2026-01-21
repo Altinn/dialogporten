@@ -5,5 +5,5 @@ metadata:
   labels:
     app.kubernetes.io/part-of: dialogporten
 data:
-  AZURE_APPCONFIG_URI: set-by-env
-  Infrastructure__MassTransit__Host: set-by-env
+  AZURE_APPCONFIG_URI: ${DIALOGPORTEN_AZURE_APPCONFIG_URI}
+  Infrastructure__MassTransit__Host: ${DIALOGPORTEN_SERVICEBUS_HOST}

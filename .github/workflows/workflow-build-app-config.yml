@@ -1,0 +1,71 @@
+name: Build app-config OCI image
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version tag for the OCI artifact"
+        required: true
+        type: string
+    secrets:
+      GCR_PASSWORD:
+        description: "Password for GitHub Container Registry"
+        required: true
+      AZURE_APP_INSIGHTS_CONNECTION_STRING:
+        description: "Application Insights connection string"
+        required: true
+      AZURE_APP_CONFIGURATION_NAME:
+        description: "App Configuration store name"
+        required: true
+      AZURE_ENVIRONMENT_KEY_VAULT_NAME:
+        description: "Environment Key Vault name"
+        required: true
+      AZURE_SERVICE_BUS_NAMESPACE_NAME:
+        description: "Service Bus namespace name"
+        required: true
+
+jobs:
+  build-app-config:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GCR_PASSWORD }}
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext
+          curl -s https://fluxcd.io/install.sh | sudo bash
+
+      - name: Render app-config with environment values
+        env:
+          DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
+          DIALOGPORTEN_AZURE_APPCONFIG_URI: https://${{ secrets.AZURE_APP_CONFIGURATION_NAME }}.azconfig.io
+          DIALOGPORTEN_SERVICEBUS_HOST: sb://${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}.servicebus.windows.net/
+          DIALOGPORTEN_KEY_VAULT_URL: https://${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}.vault.azure.net
+        run: |
+          tmp_dir=$(mktemp -d)
+          cp -R flux/dialogporten "${tmp_dir}/dialogporten"
+          export DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING
+          export DIALOGPORTEN_AZURE_APPCONFIG_URI
+          export DIALOGPORTEN_SERVICEBUS_HOST
+          export DIALOGPORTEN_KEY_VAULT_URL
+          find "${tmp_dir}/dialogporten" -type f -name '*.yaml' -print0 | xargs -0 -I{} sh -c 'envsubst < "$1" > "$1.tmp" && mv "$1.tmp" "$1"' _ {}
+          flux push artifact oci://ghcr.io/altinn/dialogporten-config:${{ inputs.version }} \
+            --path="${tmp_dir}/dialogporten" \
+            --source="${{ github.server_url }}/${{ github.repository }}" \
+            --revision="${{ github.sha }}"

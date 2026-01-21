@@ -106,6 +106,32 @@ jobs:
       runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       ref: "refs/tags/v${{ inputs.version }}"
 
+  build-app-config:
+    name: Build app-config OCI (prod)
+    needs: [check-for-changes]
+    if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    uses: ./.github/workflows/workflow-build-app-config.yml
+    environment: prod
+    secrets:
+      GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
+      AZURE_APP_CONFIGURATION_NAME: ${{ secrets.AZURE_APP_CONFIGURATION_NAME }}
+      AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+      AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
+    with:
+      version: ${{ inputs.version }}
+
+  build-syncroot:
+    name: Build syncroot OCI (prod)
+    needs: [build-app-config, check-for-changes]
+    if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    uses: ./.github/workflows/workflow-build-syncroot.yml
+    secrets:
+      GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      version: ${{ inputs.version }}
+      configTag: ${{ inputs.version }}
+
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
     needs: [ deploy-apps, check-for-changes ]

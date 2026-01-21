@@ -7,4 +7,4 @@ spec:
   interval: 10m
   url: oci://ghcr.io/altinn/dialogporten-config
   ref:
-    tag: set-by-ci
+    tag: ${DIALOGPORTEN_CONFIG_TAG}

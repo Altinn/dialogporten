@@ -240,6 +240,50 @@ Required changes:
 - Verify health endpoints: `/health/startup`, `/health/readiness`, `/health/liveness`.
 - Roll back by reverting Git changes or pinning the GitRepository ref to a previous commit/tag.
 
+## Example: flux manifests repo image tag updates
+When `dialogporten-flux-manifests` receives a repository dispatch, it should update the image tags
+for the target environment overlay. One simple approach is to keep environment overlays with
+`images` overrides in their `kustomization.yaml`.
+
+Example repo layout:
+```
+dialogporten-flux-manifests/
+├── overlays
+│   ├── at23
+│   │   └── kustomization.yaml
+│   ├── tt02
+│   │   └── kustomization.yaml
+│   ├── yt01
+│   │   └── kustomization.yaml
+│   └── prod
+│       └── kustomization.yaml
+└── base
+    └── kustomization.yaml
+```
+
+Example `overlays/at23/kustomization.yaml` (repeat per env with the same tag when deploying
+`v.1.100.1`):
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - name: ghcr.io/altinn/dialogporten-webapi
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-graphql
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-service
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-migration-bundle
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-janitor
+    newTag: v.1.100.1
+```
+
+If you prefer patches instead of `images`, an alternative is a strategic merge patch per env that
+targets each Deployment/Job image, but the `images` stanza is the most compact for tag updates.
+
 ## TODOs
 - Confirm External Secrets store name, Key Vault URL, and service account name per environment.
 - Confirm whether `AZURE_CLIENT_ID` is injected from the ServiceAccount annotation or needs to be set explicitly.

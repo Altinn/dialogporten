@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: graphql-ip-allowlist
+spec:
+  ipAllowList:
+    sourceRange:
+      - 51.13.79.23/32
+      - 51.120.88.69/32

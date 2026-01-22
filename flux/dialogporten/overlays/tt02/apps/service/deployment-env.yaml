@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service
+spec:
+  template:
+    spec:
+      containers:
+        - name: service
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: staging
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "1"

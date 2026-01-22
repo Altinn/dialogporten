@@ -401,3 +401,6 @@ CLAUDE.md
 
 # Bicep build output (compiled ARM template)
 .azure/infrastructure/main.json
+
+# Codex related files (skills, workflows, etc.)
+.codex

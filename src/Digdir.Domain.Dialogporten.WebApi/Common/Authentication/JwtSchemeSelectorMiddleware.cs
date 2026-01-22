@@ -1,6 +1,4 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using FastEndpoints;
-using FluentValidation.Results;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 

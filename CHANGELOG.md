@@ -1,5 +1,55 @@
 # Changelog
 
+## [1.99.2](https://github.com/Altinn/dialogporten/compare/v1.99.1...v1.99.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* **infra:** issue with ha typings in bicep for postgresql ([0cff821](https://github.com/Altinn/dialogporten/commit/0cff82129cedef5bd91ee7a421977771813364c2))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dotnet monorepo ([#3287](https://github.com/Altinn/dialogporten/issues/3287)) ([d707fc1](https://github.com/Altinn/dialogporten/commit/d707fc13a3a459d8c7f3194954a94b87b2cf9519))
+
+## [1.99.1](https://github.com/Altinn/dialogporten/compare/v1.99.0...v1.99.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* Match request identifier with SI identifier in PDP request short circuit ([#3295](https://github.com/Altinn/dialogporten/issues/3295)) ([44b94fa](https://github.com/Altinn/dialogporten/commit/44b94faf7291cb2e738858e9f5e27b2a62fb0841))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-dotnet action to v5.1.0 ([#3289](https://github.com/Altinn/dialogporten/issues/3289)) ([d3248f7](https://github.com/Altinn/dialogporten/commit/d3248f756528aefb66d3e79082743da416d2a8a4))
+* **deps:** update dependency azure.storage.blobs to 12.27.0 ([#3275](https://github.com/Altinn/dialogporten/issues/3275)) ([a0002d3](https://github.com/Altinn/dialogporten/commit/a0002d3c8cc57f6bca23c2fdbd00661a968a4f70))
+* **deps:** update dependency verify.xunitv3 to 31.9.4 ([#3286](https://github.com/Altinn/dialogporten/issues/3286)) ([29af9ba](https://github.com/Altinn/dialogporten/commit/29af9bafb409f9d491cc40ceea3309feefb0e44c))
+* **deps:** update microsoft dependencies to 9.0.12 ([#3288](https://github.com/Altinn/dialogporten/issues/3288)) ([2ac7961](https://github.com/Altinn/dialogporten/commit/2ac79618fd9fe0168fcb9c933b313375fa50732c))
+* **deps:** update prom/prometheus docker tag to v3.9.1 ([#3274](https://github.com/Altinn/dialogporten/issues/3274)) ([5a66dd8](https://github.com/Altinn/dialogporten/commit/5a66dd84a97f443dbf92952049af14529d3db40e))
+* update az cli to 2.82.0 ([#3283](https://github.com/Altinn/dialogporten/issues/3283)) ([bdfa500](https://github.com/Altinn/dialogporten/commit/bdfa50067a5219d99ad87e3e2cbd7bf7ea99720a))
+
+## [1.99.0](https://github.com/Altinn/dialogporten/compare/v1.98.2...v1.99.0) (2026-01-16)
+
+
+### Features
+
+* **api:** Implement SO-enduser context search feature ([#3226](https://github.com/Altinn/dialogporten/issues/3226)) ([974dfa6](https://github.com/Altinn/dialogporten/commit/974dfa6cab8d23f86ad712c693ec319868123a3a))
+* **api:** Support self registered users/Feide users ([#2861](https://github.com/Altinn/dialogporten/issues/2861)) ([7efd396](https://github.com/Altinn/dialogporten/commit/7efd396fca14a51db0e37f63c732f457b5cbfac9))
+* determenistic attachment order ([#3210](https://github.com/Altinn/dialogporten/issues/3210)) ([7dbc04d](https://github.com/Altinn/dialogporten/commit/7dbc04da60c68a4404e498f71f63955123a21d1e))
+* **sdk:** ignore null values when serializing ([#3263](https://github.com/Altinn/dialogporten/issues/3263)) ([1f9ae8f](https://github.com/Altinn/dialogporten/commit/1f9ae8fe69697c8204a2ab131907ae15739d57ea))
+
+
+### Bug Fixes
+
+* Add required fields to authorized parties-DTO ([#3269](https://github.com/Altinn/dialogporten/issues/3269)) ([113db16](https://github.com/Altinn/dialogporten/commit/113db162c98bd994f705834de1e1a177f7e4c9f2))
+* **sdk:** add enum converter ([#3271](https://github.com/Altinn/dialogporten/issues/3271)) ([6c001a5](https://github.com/Altinn/dialogporten/commit/6c001a53d1c8882ec2ead146bb4c39fece4bd92e))
+
+
+### Miscellaneous Chores
+
+* Added AsyncKeyedLock on Update search index ([#3258](https://github.com/Altinn/dialogporten/issues/3258)) ([d3930f8](https://github.com/Altinn/dialogporten/commit/d3930f8f22ec59117d14ae3a82e10897fc54acca))
+
 ## [1.98.2](https://github.com/Altinn/dialogporten/compare/v1.98.1...v1.98.2) (2026-01-15)
 
 

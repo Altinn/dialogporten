@@ -83,6 +83,21 @@ jobs:
       version: ${{ github.event.client_payload.version }}
       runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       ref: "refs/tags/v${{ github.event.client_payload.version }}"
+
+  dispatch-flux-manifests:
+    name: Dispatch flux manifests update (yt01)
+    needs: [check-for-changes, deploy-infra]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch image tag update
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          token: ${{ secrets.FLUX_MANIFESTS_DISPATCH_TOKEN }}
+          repository: Altinn/dialogporten-flux-manifests
+          event-type: update-image-tag
+          client-payload: >-
+            {"environment":"yt01","version":"${{ github.event.client_payload.version }}"}
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
     needs: [deploy-apps]

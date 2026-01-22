@@ -60,29 +60,6 @@ jobs:
       dockerImageBaseName: ghcr.io/altinn/dialogporten-
       version: ${{ needs.release-please.outputs.version }}
 
-  dispatch-flux-manifests:
-    name: Dispatch flux manifests update (staging/yt01)
-    needs: [release-please, publish]
-    if: ${{ always() && !failure() && !cancelled() && needs.release-please.outputs.release_created == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dispatch image tag update (staging)
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
-        with:
-          token: ${{ secrets.FLUX_MANIFESTS_DISPATCH_TOKEN }}
-          repository: Altinn/dialogporten-flux-manifests
-          event-type: update-image-tag
-          client-payload: >-
-            {"environment":"staging","version":"${{ needs.release-please.outputs.version }}"}
-      - name: Dispatch image tag update (yt01)
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
-        with:
-          token: ${{ secrets.FLUX_MANIFESTS_DISPATCH_TOKEN }}
-          repository: Altinn/dialogporten-flux-manifests
-          event-type: update-image-tag
-          client-payload: >-
-            {"environment":"yt01","version":"${{ needs.release-please.outputs.version }}"}
-
   notify-release-created:
     name: Notify release created
     needs: [release-please, publish]

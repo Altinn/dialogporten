@@ -82,3 +82,4 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - 2026-01-21: Removed OCI artifact build workflows; Flux now pulls directly from Git.
 - 2026-01-22: Updated DIS docs to reflect GitRepository-based syncroot and added Flux README with RoleAssignment note.
 - 2026-01-22: Added repository-dispatch scaffolding to set image tags in `dialogporten-flux-manifests`.
+- 2026-01-22: Moved staging/yt01 dispatch to `ci-cd-staging.yml` and `ci-cd-yt01.yml` to run alongside Bicep deploys.

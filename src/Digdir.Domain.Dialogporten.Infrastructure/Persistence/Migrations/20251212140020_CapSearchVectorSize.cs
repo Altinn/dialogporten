@@ -37,6 +37,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             }
             
             migrationBuilder.Sql("DROP AGGREGATE IF EXISTS public.tsvector_agg(tsvector);");
+            migrationBuilder.Sql("DROP FUNCTION IF EXISTS public.tsvector_concat_truncated(tsvector, tsvector);");
         }
     }
 }

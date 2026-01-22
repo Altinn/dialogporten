@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.99.2](https://github.com/Altinn/dialogporten/compare/v1.99.1...v1.99.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* **infra:** issue with ha typings in bicep for postgresql ([0cff821](https://github.com/Altinn/dialogporten/commit/0cff82129cedef5bd91ee7a421977771813364c2))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dotnet monorepo ([#3287](https://github.com/Altinn/dialogporten/issues/3287)) ([d707fc1](https://github.com/Altinn/dialogporten/commit/d707fc13a3a459d8c7f3194954a94b87b2cf9519))
+
 ## [1.99.1](https://github.com/Altinn/dialogporten/compare/v1.99.0...v1.99.1) (2026-01-21)
 
 

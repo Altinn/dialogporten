@@ -18,7 +18,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "9.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gin");
@@ -832,7 +832,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 5,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            MaxLength = 20,
+                            MaxLength = 25,
                             Name = "ExtendedStatus",
                             OutputInList = true,
                             Required = false
@@ -1204,6 +1204,21 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 4,
                             Name = "ServiceOwnerOnBehalfOfPerson"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "IdportenEmailIdentifiedUser"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "AltinnSelfIdentifiedUser"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "FeideUser"
                         });
                 });
 

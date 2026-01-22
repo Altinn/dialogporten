@@ -34,9 +34,9 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
                 LocalizationValidatorConstants.NormalizationErrorMessage);
 
         RuleFor(x => x.EndUserId)
-            .Must(x => PartyIdentifier.TryParse(x, out var id) && id is NorwegianPersonIdentifier or SystemUserIdentifier)
+            .Must(x => PartyIdentifier.TryParse(x, out var id) && id is NorwegianPersonIdentifier)
             .WithMessage($"{{PropertyName}} must be a valid end user identifier. It must match the format " +
-                         $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}' or '{SystemUserIdentifier.PrefixWithSeparator}{{uuid}}'.")
+                         $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}'.")
             .Must((x, _) => !x.ServiceResource.IsNullOrEmpty() || !x.Party.IsNullOrEmpty())
             .WithMessage($"Either '{nameof(SearchDialogQuery.ServiceResource)}' or '{nameof(SearchDialogQuery.Party)}' " +
                          $"must be specified if '{nameof(SearchDialogQuery.EndUserId)}' is provided.")

@@ -81,7 +81,6 @@ public static class DialogGenerator
         // We need to handle id, serviceResource, party, and others passed as arguments
         // RuleFor cannot directly use external parameters easily. We handle these post-generation.
         // Placeholder rules are set, real values might be overridden later.
-        .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.ServiceResource, _ => GenerateFakeResource())
         .RuleFor(o => o.Party, _ => GenerateRandomParty())
         .RuleFor(o => o.Progress, f => f.Random.Number(0, 100))

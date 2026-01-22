@@ -1,4 +1,6 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using FluentAssertions;
 
@@ -6,7 +8,7 @@ namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceO
 
 public class BulkSetSystemLabelCommandValidatorTests
 {
-    private readonly BulkSetSystemLabelCommandValidator _validator = new(new BulkSetSystemLabelDtoValidator());
+    private readonly BulkSetSystemLabelCommandValidator _validator = new(new BulkSetSystemLabelDtoValidator(new ActorValidator()));
 
     [Fact]
     public void Unique_DialogIds_Should_Be_Valid()
@@ -84,6 +86,70 @@ public class BulkSetSystemLabelCommandValidatorTests
             {
                 Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
                 AddLabels = [SystemLabel.Values.Bin]
+            }
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Requires_EndUserId_When_PerformedBy_Is_Missing()
+    {
+        var command = new BulkSetSystemLabelCommand
+        {
+            Dto = new BulkSetSystemLabelDto
+            {
+                Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
+                AddLabels = [SystemLabel.Values.Bin]
+            }
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().ContainSingle(x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Rejects_EndUserId_When_PerformedBy_Is_Present()
+    {
+        var command = new BulkSetSystemLabelCommand
+        {
+            EndUserId = "urn:altinn:person:identifier-no:01020312345",
+            Dto = new BulkSetSystemLabelDto
+            {
+                Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
+                AddLabels = [SystemLabel.Values.Bin],
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorId = "urn:altinn:organization:identifier-no:912345678"
+                }
+            }
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().ContainSingle(x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Accepts_PerformedBy_When_EndUserId_Omitted()
+    {
+        var command = new BulkSetSystemLabelCommand
+        {
+            Dto = new BulkSetSystemLabelDto
+            {
+                Dialogs = [new DialogRevisionDto { DialogId = Guid.NewGuid() }],
+                AddLabels = [SystemLabel.Values.Bin],
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorId = "urn:altinn:organization:identifier-no:991825827"
+                }
             }
         };
 

@@ -36,5 +36,7 @@ export {
     addActivity,
     setSystemLabel,
     setServiceOwnerLabels,
-    setIsApiOnly
+    setIsApiOnly,
+    setAttachments,
+    addAttachment
 } from './dialog.js';

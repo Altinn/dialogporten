@@ -7,12 +7,11 @@ on:
         description: "Git short sha"
         value: ${{ jobs.generate-git-short-sha.outputs.gitShortSha }}
 
-permissions:
-  contents: read
-
 jobs:
   generate-git-short-sha:
     name: Generate git short sha
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       gitShortSha: ${{ steps.set-git-short-sha.outputs.gitShortSha }}

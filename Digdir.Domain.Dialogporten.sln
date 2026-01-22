@@ -74,6 +74,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApiClient", "WebApiClien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Library.Dialogporten.WebApiClient.Unit.Tests", "tests\Digdir.Library.Dialogporten.WebApiClient.Unit.Tests\Digdir.Library.Dialogporten.WebApiClient.Unit.Tests.csproj", "{E6CBC569-6821-4DBB-A819-AC95AA8A0682}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digdir.Domain.Dialogporten.GraphQl.E2E.Tests", "tests\Digdir.Domain.Dialogporten.GraphQl.E2E.Tests\Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.csproj", "{BAE21DD6-51E1-405E-8DA9-5B83A59FDC38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -172,6 +174,10 @@ Global
 		{E6CBC569-6821-4DBB-A819-AC95AA8A0682}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6CBC569-6821-4DBB-A819-AC95AA8A0682}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6CBC569-6821-4DBB-A819-AC95AA8A0682}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAE21DD6-51E1-405E-8DA9-5B83A59FDC38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAE21DD6-51E1-405E-8DA9-5B83A59FDC38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAE21DD6-51E1-405E-8DA9-5B83A59FDC38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAE21DD6-51E1-405E-8DA9-5B83A59FDC38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -206,6 +212,7 @@ Global
 		{21A54524-CC15-42A7-804B-1E4DEBFAA1F7} = {CADB8189-4AA1-4732-844A-C41DBF3EC8B7}
 		{020E53CD-4575-44BA-81AC-26CE948EE0E7} = {21A54524-CC15-42A7-804B-1E4DEBFAA1F7}
 		{E6CBC569-6821-4DBB-A819-AC95AA8A0682} = {020E53CD-4575-44BA-81AC-26CE948EE0E7}
+		{BAE21DD6-51E1-405E-8DA9-5B83A59FDC38} = {CADB8189-4AA1-4732-844A-C41DBF3EC8B7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2FE67FF-7622-4AFB-AD8E-961B6A39D888}

@@ -10,11 +10,6 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-  pull-requests: write
-  packages: write
-
 jobs:
   release-please:
     name: Release please
@@ -23,6 +18,9 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
       previous_release_sha: ${{ steps.get-previous-release.outputs.sha }}
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
@@ -45,6 +43,8 @@ jobs:
     name: Check for changes
     needs: [release-please]
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-check-for-changes.yml
     with:
       apps_base_sha: ${{ needs.release-please.outputs.previous_release_sha }}
@@ -53,6 +53,9 @@ jobs:
     name: Build and publish docker images
     needs: [release-please, check-for-changes]
     if: needs.release-please.outputs.release_created == 'true'
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/workflow-publish.yml
     secrets:
       GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -81,6 +84,8 @@ jobs:
     name: Send Slack message on failure
     needs: [release-please, publish, notify-release-created]
     if: ${{ always() && failure() && !cancelled() }}
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:
       environment: release-please

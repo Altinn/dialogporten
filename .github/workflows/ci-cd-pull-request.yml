@@ -6,35 +6,39 @@ on:
     paths-ignore:
       - "tests/k6/**"
 
-permissions:
-  contents: read
-  pull-requests: write
-  id-token: write
-  deployments: write
-
 jobs:
   generate-git-short-sha:
     name: Generate git short sha
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-generate-git-short-sha.yml
 
   get-current-version:
     name: Get current version
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-get-current-version.yml
 
   check-for-changes:
     name: Check for changes
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-check-for-changes.yml
 
   build:
     uses: ./.github/workflows/workflow-build-and-test.yml
     needs: [ check-for-changes ]
     if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
+    permissions:
+      contents: read
 
   validate-schema:
     name: Validate Schema
     needs: [ check-for-changes ]
     if: ${{ needs.check-for-changes.outputs.hasSchemaPackageChanges == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -48,6 +52,9 @@ jobs:
     uses: ./.github/workflows/workflow-build-infrastructure.yml
     needs: [ check-for-changes ]
     if: ${{ always() && needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
+    permissions:
+      contents: read
+      id-token: write
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -66,6 +73,10 @@ jobs:
         build-infrastructure,
       ]
     if: ${{ always() && needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -91,6 +102,10 @@ jobs:
       ]
     # we want deployment of apps to be dependent on deployment of infrastructure, but if infrastructure is skipped, we still want to deploy the apps
     if: ${{ always() && !failure() && !cancelled() && (needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasMigrationChanges == 'true') }}
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -113,5 +128,8 @@ jobs:
     uses: ./.github/workflows/workflow-delete-deployments.yml
     needs: [ dry-run-deploy-apps, dry-run-deploy-infra ]
     if: ${{ always() && !failure() && !cancelled() }}
+    permissions:
+      contents: read
+      deployments: write
     with:
       gitSha: ${{ github.event.pull_request.head.sha }}

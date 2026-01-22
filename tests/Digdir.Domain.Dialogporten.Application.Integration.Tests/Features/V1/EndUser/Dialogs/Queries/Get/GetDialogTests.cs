@@ -1,11 +1,15 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
@@ -54,6 +58,34 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Transmissions.Should().ContainSingle()
                     .Which.ExternalReference.Should().Be("ext"));
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>
+        FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";
+                    transmission.Content!.ContentReference = new ContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        Value = [new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = "https://example.com/secret"
+                        }]
+                    };
+                }))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var transmission = x.Transmissions.Single();
+                transmission.IsAuthorized.Should().BeFalse();
+                transmission.Content.ContentReference.Should().NotBeNull();
+                transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
+                    .And.AllSatisfy(localization =>
+                        localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+            });
 
     [Fact]
     public Task Get_Should_Populate_EnduserContextRevision() =>
@@ -114,6 +146,15 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     .Be(SystemLabel.Values.Default));
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
+
+    private static void ConfigureReadOnlyAuthorization(IServiceCollection services)
+    {
+        var authorizationResult = new DialogDetailsAuthorizationResult
+        {
+            AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+        };
+        services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+    }
 
     [Theory]
     [InlineData(DialogActivityType.Values.CorrespondenceOpened, false)]

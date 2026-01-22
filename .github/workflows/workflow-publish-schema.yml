@@ -17,14 +17,13 @@ on:
 env:
   WORKING_DIRECTORY: docs/schema/V1
 
-permissions:
-  contents: read
-
 jobs:
   check-published-version:
     runs-on: ubuntu-latest
     outputs:
       version-exists: ${{ steps.check-published-version.outputs.version-exists }}
+    permissions:
+      contents: read
     steps:
       - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:

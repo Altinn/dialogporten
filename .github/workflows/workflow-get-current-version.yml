@@ -8,12 +8,11 @@ on:
         description: "Version"
         value: ${{ jobs.get-current-version.outputs.version }}
 
-permissions:
-  contents: read
-
 jobs:
   get-current-version:
     name: Filter
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set-current-version.outputs.version }}

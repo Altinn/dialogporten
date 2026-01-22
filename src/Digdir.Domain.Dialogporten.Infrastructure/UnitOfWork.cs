@@ -148,7 +148,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         }
         catch (UniqueConstraintException ex) when
             (ex.InnerException?.Data["Detail"] is string message &&
-             ex.InnerException.Data["TableName"] is string tableName)
+            ex.InnerException.Data["TableName"] is string tableName)
         {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
@@ -157,11 +157,11 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             // A request triggers loading of exising data, but before it's saved,
             // another request removes it — causing the save attempt to fail.
             // On a retry, the client will get a "proper" error message
-            return Conflict.Empty;
+            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
         }
         catch (Exception ex) when (IsSerializationFailure(ex))
         {
-            return Conflict.Empty;
+            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
         }
 
         // Interceptors can add domain errors, so check again

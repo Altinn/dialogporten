@@ -19,7 +19,8 @@ jobs:
       version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
       previous_release_sha: ${{ steps.get-previous-release.outputs.sha }}
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
     steps:
       - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:

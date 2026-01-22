@@ -52,6 +52,7 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - What is the exact ASO RoleAssignment schema in DIS (principal reference vs principalId)?
 - What are the canonical hostnames and paths for Traefik IngressRoute rules per app/environment?
 - Where should `AZURE_APPCONFIG_URI`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, and `Infrastructure__MassTransit__Host` be sourced in DIS?
+- When do we create and wire the `dialogporten-flux-manifests` repo for image tag updates (repository dispatch scaffold added)?
 
 ## Needs more consideration
 - Workload profile mapping to node pools (Dedicated-D8 scheduling) and required labels/taints in DIS.
@@ -80,3 +81,4 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - 2026-01-21: Switched syncroot to GitRepository source and added Flux substitution requirements.
 - 2026-01-21: Removed OCI artifact build workflows; Flux now pulls directly from Git.
 - 2026-01-22: Updated DIS docs to reflect GitRepository-based syncroot and added Flux README with RoleAssignment note.
+- 2026-01-22: Added repository-dispatch scaffolding to set image tags in `dialogporten-flux-manifests`.

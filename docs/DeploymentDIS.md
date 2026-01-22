@@ -93,6 +93,10 @@ Note: `ci-cd-release-please.yml` is the workflow that builds and publishes relea
 - No additional workflows are needed for app-config or syncroot because Flux pulls from Git.
 - Config changes take effect when merged to `main`; Flux reconciles the new revision.
 - Image tag update strategy (workflow-driven or Flux Image Automation) is still to be decided.
+- Add repository dispatch scaffolding to update image tags in a separate `dialogporten-flux-manifests` repo.
+  - This repo must be created before the dispatch can be enabled.
+  - Requires a `FLUX_MANIFESTS_DISPATCH_TOKEN` secret with access to that repo.
+- Keep the current Bicep/ACA deploy steps in place for now; dispatch runs alongside them.
 
 ## Implementation plan
 1. Create Kustomize base resources for apps and jobs (Deployments, Services, IngressRoutes, HorizontalPodAutoscaler, CronJobs/Jobs).

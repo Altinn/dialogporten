@@ -50,6 +50,21 @@ jobs:
       dockerImageBaseName: ghcr.io/altinn/dialogporten-
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
 
+  dispatch-flux-manifests:
+    name: Dispatch flux manifests update (test)
+    needs: [ publish, check-for-changes, get-current-version, generate-git-short-sha ]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch image tag update
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          token: ${{ secrets.FLUX_MANIFESTS_DISPATCH_TOKEN }}
+          repository: Altinn/dialogporten-flux-manifests
+          event-type: update-image-tag
+          client-payload: >-
+            {"environment":"test","version":"${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}"}
+
   deploy-infra:
     name: Deploy infra to test
     needs: [ get-current-version, check-for-changes, generate-git-short-sha ]

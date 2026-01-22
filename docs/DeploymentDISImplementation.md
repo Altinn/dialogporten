@@ -207,6 +207,10 @@ Required changes:
 - No app-config or syncroot OCI workflows are required; Flux pulls directly from Git.
 - Config-only changes should merge to `main` and let Flux reconcile.
 - Image tag update strategy (workflow-driven or Flux image automation) is still an open decision.
+- Add repository dispatch scaffolding to update image tags in a separate `dialogporten-flux-manifests` repo.
+  - This repo does not exist yet and must be created before the dispatch can be enabled.
+  - Requires a `FLUX_MANIFESTS_DISPATCH_TOKEN` secret with access to that repo.
+- Keep the current Bicep/ACA deploy steps in place for now; dispatch runs alongside them.
 
 ## Implementation steps
 1. Create `flux/dialogporten/base` with app and job resources.

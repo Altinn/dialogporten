@@ -84,3 +84,4 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - 2026-01-22: Updated DIS docs to reflect GitRepository-based syncroot and added Flux README with RoleAssignment note.
 - 2026-01-22: Added repository-dispatch scaffolding to set image tags in `dialogporten-flux-manifests`.
 - 2026-01-22: Moved staging/yt01 dispatch to `ci-cd-staging.yml` and `ci-cd-yt01.yml` to run alongside Bicep deploys.
+- 2026-01-22: Added per-environment image tag overrides in `flux/dialogporten/overlays/*` (v.1.100.1) as a temporary base.

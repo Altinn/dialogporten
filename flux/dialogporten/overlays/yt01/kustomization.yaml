@@ -9,3 +9,14 @@ patchesStrategicMerge:
   - patches/delete-aggregate-cost-metrics.yaml
   - patches/deployments-env.yaml
   - patches/deployments-resources.yaml
+images:
+  - name: ghcr.io/altinn/dialogporten-webapi
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-graphql
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-service
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-migration-bundle
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-janitor
+    newTag: v.1.100.1

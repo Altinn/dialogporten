@@ -2,5 +2,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - dialogporten-namespace.yaml
-  - dialogporten-oci-repository.yaml
+  - dialogporten-git-repository.yaml
   - dialogporten-flux-kustomization.yaml

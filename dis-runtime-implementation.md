@@ -4,13 +4,13 @@ This document tracks the detailed plan, progress, and open issues for implementi
 
 ## Plan (with progress)
 - [x] Capture ACA -> DIS runtime requirements from `container-runtime.md` and `.azure/*/*.bicepparam`.
-- [x] Create initial Flux layout skeleton for app-config and syncroot images under `flux/`.
+- [x] Create initial Flux layout skeleton for app-config and syncroot under `flux/`.
 - [x] Add base manifests for apps and jobs (Deployment/Service/IngressRoute/HPA/CronJob/Job).
 - [~] Add ApplicationIdentity, External Secrets, and RoleAssignment resources (ApplicationIdentity + External Secrets done; RoleAssignments pending).
 - [ ] Add environment overlays for replicas/resources/allowlists/schedules/OTEL (initial patches in place; placeholders remain).
-- [ ] Add syncroot environment patches for app-config tag wiring.
-- [ ] Implement CI workflows for app-config and syncroot OCI images.
-- [ ] Validate `kustomize build` per env and run `dotnet build` + `dotnet test`.
+- [x] Add syncroot environment patches for GitRepository path.
+- [ ] Configure Flux substitution inputs (ConfigMap/Secret in `flux-system`) for required env values.
+- [ ] Validate `kustomize build` per env (dotnet build/test skipped per request).
 
 ## Runtime mapping summary (from `container-runtime.md`)
 ### Environments
@@ -50,7 +50,6 @@ This document tracks the detailed plan, progress, and open issues for implementi
 
 ## Open questions
 - What is the exact ASO RoleAssignment schema in DIS (principal reference vs principalId)?
-- Are GHCR OCIRepositories supported in DIS, or must we use ACR?
 - What are the canonical hostnames and paths for Traefik IngressRoute rules per app/environment?
 - Where should `AZURE_APPCONFIG_URI`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, and `Infrastructure__MassTransit__Host` be sourced in DIS?
 
@@ -63,21 +62,21 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Replace `set-by-env` placeholders in manifests with real sources (ConfigMap/Secret/ExternalSecret/EnvFrom).
 - Determine storage account name/source for `aggregate-cost-metrics-job` (now requires env substitution).
 - RoleAssignment CRs are still missing and need the DIS ASO schema before we can implement them.
-- CI must inject App Config/App Insights/Service Bus/Key Vault values into OCI build via envsubst.
-  - Required envs: `DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING`, `DIALOGPORTEN_AZURE_APPCONFIG_URI`, `DIALOGPORTEN_SERVICEBUS_HOST`, `DIALOGPORTEN_KEY_VAULT_URL`.
+- Flux `Kustomization` must substitute values from `flux-system` for app-config (ConfigMap/Secret named `dialogporten-flux-substitutions`).
+  - Required keys: `DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING`, `DIALOGPORTEN_AZURE_APPCONFIG_URI`, `DIALOGPORTEN_SERVICEBUS_HOST`, `DIALOGPORTEN_KEY_VAULT_URL`, `DIALOGPORTEN_AZURE_SUBSCRIPTION_ID`, `DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME`.
   - Service Bus format: `sb://<namespace>.servicebus.windows.net/`.
-  - Cost metrics envs: `DIALOGPORTEN_AZURE_SUBSCRIPTION_ID`, `DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME`.
 
 ## Not supported / blocked
 - RoleAssignment resources are blocked until DIS ASO schema is confirmed.
-- Workload identity env var injection is blocked until DIS confirms bridging behavior.
 
 ## Progress log
-- 2026-01-21: Created `flux/` skeleton for app-config and syncroot images.
+- 2026-01-21: Created `flux/` skeleton for app-config and syncroot.
 - 2026-01-21: Added base app/job manifests and initial per-env overlay patches (allowlists, schedules, OTEL ratios, resources).
 - 2026-01-21: Added ExternalSecrets scaffolding and APIM-aligned ingress path rules.
 - 2026-01-21: Added ApplicationIdentity resources for all apps/jobs and the SecretStore ServiceAccount.
 - 2026-01-21: Aligned syncroot Flux API versions with platform (v1).
 - 2026-01-21: Removed explicit `AZURE_CLIENT_ID` env vars, relying on DIS identity injection.
 - 2026-01-21: Introduced `dialogporten-runtime` ConfigMap for App Config URI and Service Bus host placeholders.
-- 2026-01-21: Added app-config + syncroot build workflows and CI envsubst placeholders.
+- 2026-01-21: Switched syncroot to GitRepository source and added Flux substitution requirements.
+- 2026-01-21: Removed OCI artifact build workflows; Flux now pulls directly from Git.
+- 2026-01-22: Updated DIS docs to reflect GitRepository-based syncroot and added Flux README with RoleAssignment note.

@@ -1,9 +1,9 @@
 # DIS application deployment specification
 
-This specification describes how Dialogporten applications will be deployed on DIS using Flux with OCI syncroot images. It also documents how the current GitHub Actions workflows participate in the deployment flow and what changes are needed for DIS.
+This specification describes how Dialogporten applications will be deployed on DIS using Flux with a GitRepository-based syncroot (no OCI artifacts). It also documents how the current GitHub Actions workflows participate in the deployment flow and what changes are needed for DIS.
 
 ## Goal and scope
-- Goal: Deploy Dialogporten apps and jobs to DIS-managed Kubernetes using Flux + OCI syncroot images.
+- Goal: Deploy Dialogporten apps and jobs to DIS-managed Kubernetes using Flux + GitRepository syncroot.
 - Scope: Application workloads, Traefik ingress, External Secrets, Workload Identity, Kustomize overlays, and CI/CD integration.
 - Out of scope: Cluster provisioning and platform-managed components (Flux, Traefik, service mesh).
 
@@ -13,46 +13,50 @@ This specification describes how Dialogporten applications will be deployed on D
 - External Secrets is used for Key Vault integration.
 - Kustomize for apps, Helm for non-app resources.
 - Environment mapping: `test` -> `at23`, `staging` -> `tt02`, `yt01` -> `yt01`, `prod` -> `prod`.
-- Use GHCR for app-config and syncroot OCI images unless DIS requires ACR.
+- Flux syncroot pulls app-config directly from this repository via `GitRepository` (branch `main`).
+- No app-config or syncroot OCI images are built or published.
 
 ## Inputs and sources of truth
 - App runtime requirements and per-environment overrides: `container-runtime.md`.
 - DIS-specific constraints and layouts: `container-runtime-dis.md`.
 - Existing Azure IAC parameters (to translate into overlays): `.azure/*/*.bicepparam`.
 
-## Desired configuration layout (OCI syncroot)
-The syncroot OCI image must contain an environment folder at the root, each with a `kustomization.yaml` entry point:
+## Desired configuration layout (GitRepository syncroot)
+Flux points to this repository and applies the environment overlays under `flux/dialogporten`.
 
 ```
-/
-├── at23
+flux/
+├── dialogporten
+│   ├── base
+│   │   ├── apps
+│   │   ├── jobs
+│   │   ├── common
+│   │   └── kustomization.yaml
+│   ├── overlays
+│   │   ├── at23
+│   │   ├── tt02
+│   │   ├── yt01
+│   │   └── prod
 │   └── kustomization.yaml
-├── prod
-│   └── kustomization.yaml
-├── tt02
-│   └── kustomization.yaml
-└── yt01
-    └── kustomization.yaml
+└── syncroot
+    ├── base
+    │   ├── dialogporten-namespace.yaml
+    │   ├── dialogporten-git-repository.yaml
+    │   ├── dialogporten-flux-kustomization.yaml
+    │   └── kustomization.yaml
+    ├── at23
+    │   └── kustomization.yaml
+    ├── tt02
+    │   └── kustomization.yaml
+    ├── yt01
+    │   └── kustomization.yaml
+    └── prod
+        └── kustomization.yaml
 ```
+
+`flux/syncroot/<env>/kustomization.yaml` patches the `spec.path` in the Flux `Kustomization` to point at `./flux/dialogporten/overlays/<env>`.
 
 Only `at23` is required for non-prod right now; add `at22`/`at24` only if DIS requires them later.
-
-Recommended internal layout:
-```
-/
-├── base
-│   ├── apps
-│   ├── jobs
-│   ├── common
-│   └── kustomization.yaml
-├── overlays
-│   ├── at23
-│   ├── tt02
-│   ├── yt01
-│   └── prod
-└── <env>
-    └── kustomization.yaml
-```
 
 ## Runtime requirements (summary)
 - Traefik `IngressRoute` for public apps with IP allowlists (`web-api-so`, `web-api-eu`, `graphql`).
@@ -85,53 +89,37 @@ Key workflows in this repo:
 Note: `ci-cd-release-please.yml` is the workflow that builds and publishes release images.
 
 ## Proposed DIS CI/CD integration
-We keep release-please for versioning and image publishing, and add a syncroot build and push step.
-
-### New or updated workflows (target)
-- Add a reusable workflow `workflow-build-app-config.yml` that:
-  - Builds the app-config OCI image from Kustomize overlays.
-  - Pushes to GHCR with a versioned tag.
-- Add a reusable workflow `workflow-build-syncroot.yml` that:
-  - Builds the syncroot OCI image from the Kustomize overlays.
-  - Pushes to the team registry path with a versioned tag.
-  - Optionally signs the OCI artifact (if required by DIS).
-- Update `ci-cd-main.yml`:
-  - After `workflow-publish.yml`, build and push app-config + syncroot for `at23` (test) using the same version tag.
-- Update `ci-cd-release-please.yml`:
-  - After `workflow-publish.yml`, build and push app-config + syncroot for `tt02` and `yt01` using the release version.
-- Update `ci-cd-prod.yml`:
-  - After manual version input, build and push app-config + syncroot for `prod`.
-- Optional: add `dispatch-syncroot.yml` for manual syncroot builds.
-
-### Syncroot versioning strategy
-- Use the same version tag as container images (`<semver>` or `<semver>-<sha>`).
-- Reference image tags via `images` in Kustomize overlays to keep config and version aligned.
-- Flux should reconcile the latest tag or semver range as configured by DIS.
+- Keep the existing release/test image publishing workflows for container images.
+- No additional workflows are needed for app-config or syncroot because Flux pulls from Git.
+- Config changes take effect when merged to `main`; Flux reconciles the new revision.
+- Image tag update strategy (workflow-driven or Flux Image Automation) is still to be decided.
 
 ## Implementation plan
 1. Create Kustomize base resources for apps and jobs (Deployments, Services, IngressRoutes, HorizontalPodAutoscaler, CronJobs/Jobs).
 2. Add ApplicationIdentity resources and External Secrets resources.
 3. Add Traefik ingress and middleware resources:
    - IP allowlists for public apps.
-   - Internal-only entrypoint for `service`.
+   - Internal-only access pattern for `service` via allowlists on `http`/`https`.
 4. Create environment overlays with per-env overrides (replicas, resources, allowlists, schedules, OTEL ratios).
-5. Build and publish the app-config and syncroot OCI images using Flux CLI in CI.
-6. Update GitHub Actions to publish app-config + syncroot OCI images in the same flows that publish container images.
-7. Validate the end-to-end flow by confirming Flux reconciliation and app health endpoints.
-8. Define rollback: re-publish or re-pin the previous syncroot OCI tag.
+5. Create `flux/syncroot/base` with Namespace + Flux `GitRepository` + `Kustomization`.
+6. Create `flux/syncroot/<env>` kustomizations that patch `spec.path` for each environment.
+7. Provide a `dialogporten-flux-substitutions` ConfigMap/Secret in `flux-system` for runtime values.
+8. Validate the end-to-end flow by confirming Flux reconciliation and app health endpoints.
+9. Define rollback by reverting to a previous Git revision (or pinning the GitRepository ref).
 
 ## Validation and rollback
 - Validate Kustomize output in CI (`kustomize build` per environment).
 - Validate Flux reconciliation and rollout status.
 - Verify health endpoints (`/health/startup`, `/health/readiness`, `/health/liveness`).
-- Roll back by reverting to the previous syncroot OCI tag/digest.
+- Roll back by reverting Git changes or pinning `GitRepository.spec.ref` to a previous commit/tag.
 
 ## Open items
 - External Secrets store name, Key Vault URL, and service account name per environment.
 - Whether `AZURE_CLIENT_ID` is injected automatically from the ServiceAccount annotation.
 - ASO RoleAssignment schema details (principal reference vs principalId).
+- Whether DIS requires GitRepository auth for GitHub (public vs private).
 
 ## Platform gaps to plan for
-- No existing RoleAssignment CRs in platform Flux; we need to define our own `authorization.azure.com` RoleAssignments for app identities.
+- No RoleAssignment CR examples in platform Flux; we need to define our own `authorization.azure.com` RoleAssignments.
 - No internal Traefik entrypoint exists; internal-only access must be enforced via allowlists on `http`/`https`.
-- GHCR OCIRepositorys are not used in platform; confirm Flux auth for GHCR or use ACR if required.
+- If GitRepository auth is required, syncroot must include a secret reference.

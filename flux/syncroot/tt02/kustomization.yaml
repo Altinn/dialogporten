@@ -13,4 +13,4 @@ patches:
         name: dialogporten
         namespace: flux-system
       spec:
-        path: ./overlays/tt02
+        path: ./flux/dialogporten/overlays/tt02

@@ -66,6 +66,7 @@ This document tracks the detailed plan, progress, and open issues for implementi
 - Flux `Kustomization` must substitute values from `flux-system` for app-config (ConfigMap/Secret named `dialogporten-flux-substitutions`).
   - Required keys: `DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING`, `DIALOGPORTEN_AZURE_APPCONFIG_URI`, `DIALOGPORTEN_SERVICEBUS_HOST`, `DIALOGPORTEN_KEY_VAULT_URL`, `DIALOGPORTEN_AZURE_SUBSCRIPTION_ID`, `DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME`.
   - Service Bus format: `sb://<namespace>.servicebus.windows.net/`.
+- E2E tests should run only after Flux reports a successful reconciliation; we need a Flux notification/webhook to confirm deployment success.
 
 ## Not supported / blocked
 - RoleAssignment resources are blocked until DIS ASO schema is confirmed.

@@ -211,6 +211,13 @@ Required changes:
   - This repo does not exist yet and must be created before the dispatch can be enabled.
   - Requires a `FLUX_MANIFESTS_DISPATCH_TOKEN` secret with access to that repo.
 - Keep the current Bicep/ACA deploy steps in place for now; dispatch runs alongside them.
+- Run E2E tests only after a Flux reconciliation success signal; add a Flux Alert + provider webhook to trigger E2E on success.
+  - Example Alert (spec outline):
+    - `apiVersion: notification.toolkit.fluxcd.io/v1beta3`
+    - `kind: Alert`
+    - `spec.eventSeverity: info`
+    - `spec.eventSources` referencing the app `Kustomization`
+    - `spec.inclusionList` with `Reconciliation.*succeeded`
 
 ## Implementation steps
 1. Create `flux/dialogporten/base` with app and job resources.

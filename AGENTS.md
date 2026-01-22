@@ -13,7 +13,7 @@ This file describes how AI coding agents should interact with the repository.
 - Do **not** run performance test suites. All K6 tests requires internet connectivity.
 
 Always run `dotnet build` and `dotnet test` after making changes to *.cs files in `./src/**` or `./tests/**`.  
-Running integration tests require Docker, so run tests outside any sandbox. 
+Running integration tests requires Docker, so run tests outside any sandbox. 
 
 If a sandbox is absolutely needed, use `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'` to skip them. 
 

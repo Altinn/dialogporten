@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.100.0](https://github.com/Altinn/dialogporten/compare/v1.99.2...v1.100.0) (2026-01-22)
+
+
+### Features
+
+* Lax max length of ExtendedStatus to 25 ([#3294](https://github.com/Altinn/dialogporten/issues/3294)) ([327b9cb](https://github.com/Altinn/dialogporten/commit/327b9cbab7bc1ca7f49cbd578fbc193bcb216301))
+
+
+### Bug Fixes
+
+* **app:** add future tolerance of 15s in validators ([#3303](https://github.com/Altinn/dialogporten/issues/3303)) ([3b0f0e2](https://github.com/Altinn/dialogporten/commit/3b0f0e2ab2bf7647765bec64a51f98a56307c413))
+
+
+### Miscellaneous Chores
+
+* **ci:** move permissions to job level ([#3224](https://github.com/Altinn/dialogporten/issues/3224)) ([f2240f0](https://github.com/Altinn/dialogporten/commit/f2240f086c9023ad6cf031936222436d7141f1d5))
+* Disable Npsql serilog override ([#3302](https://github.com/Altinn/dialogporten/issues/3302)) ([8fdfe9d](https://github.com/Altinn/dialogporten/commit/8fdfe9d392d7e7cbabc8bea5b98cf047ca9fda99))
+* **infra:** fix typings for postgresql ([#3298](https://github.com/Altinn/dialogporten/issues/3298)) ([0954a51](https://github.com/Altinn/dialogporten/commit/0954a51371830d0260002638b976c5aaa3aae38d))
+
 ## [1.99.2](https://github.com/Altinn/dialogporten/compare/v1.99.1...v1.99.2) (2026-01-22)
 
 

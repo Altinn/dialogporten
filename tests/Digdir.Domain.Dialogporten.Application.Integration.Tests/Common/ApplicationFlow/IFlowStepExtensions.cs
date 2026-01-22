@@ -58,7 +58,8 @@ public static class IFlowStepExtensions
         step.SendCommand(ctx =>
         {
             var command = commandSelector(ctx);
-            ctx.Bag[DialogIdKey] = command.Dto.Id = command.Dto.Id.CreateVersion7IfDefault();
+            command.Dto.Id ??= IdentifiableExtensions.CreateVersion7(DialogApplication.Clock.UtcNowOffset);
+            ctx.Bag[DialogIdKey] = command.Dto.Id;
             ctx.Bag[ServiceResource] = command.Dto.ServiceResource;
             ctx.Bag[PartyKey] = command.Dto.Party;
             return command;

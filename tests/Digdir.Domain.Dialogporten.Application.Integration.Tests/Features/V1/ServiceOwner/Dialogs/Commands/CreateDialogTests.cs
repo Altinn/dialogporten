@@ -70,6 +70,33 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x => x.Dto.Id = guidInput)
             .ExecuteAndAssert(assertType);
 
+    private sealed class CreateDialogWithSpecifiedCreatedAtTestData : TheoryData<string, DateTimeOffset, Type>
+    {
+        public static DateTimeOffset FixedUtcNow => new(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
+
+        public CreateDialogWithSpecifiedCreatedAtTestData()
+        {
+            Add("Can create dialog with CreatedAt 1 second in the future, within tolerance",
+                FixedUtcNow.AddSeconds(1),
+                typeof(CreateDialogSuccess));
+
+            Add("Can create dialog with CreatedAt 14 seconds in the future, within tolerance",
+                FixedUtcNow.AddSeconds(14),
+                typeof(CreateDialogSuccess));
+
+            Add("Cannot create dialog with CreatedAt 16 seconds in the future, beyond tolerance",
+                FixedUtcNow.AddSeconds(16),
+                typeof(ValidationError));
+        }
+    }
+
+    [Theory, ClassData(typeof(CreateDialogWithSpecifiedCreatedAtTestData))]
+    public Task Create_Dialog_With_Specified_CreatedAt_Tests(string _, DateTimeOffset createdAt, Type assertType) =>
+        FlowBuilder.For(Application)
+            .OverrideUtc(CreateDialogWithSpecifiedCreatedAtTestData.FixedUtcNow)
+            .CreateSimpleDialog(x => x.Dto.CreatedAt = createdAt)
+            .ExecuteAndAssert(assertType);
+
     private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<string, string>
     {
         public CreateDialogWithSpecifiedPartyTestData()

@@ -389,6 +389,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -435,6 +439,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>403</term>
         /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
         /// </item>
         /// <item>
         /// <term>412</term>

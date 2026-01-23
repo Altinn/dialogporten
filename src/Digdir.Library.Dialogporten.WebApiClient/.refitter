@@ -1,5 +1,5 @@
 {
-    "openApiPath": "../Digdir.Domain.Dialogporten.WebApi/bin/Release/net9.0/swagger.json",
+    "openApiPath": "../Digdir.Domain.Dialogporten.WebApi/bin/Release/net10.0/swagger.json",
     "namespace": "Altinn.ApiClients.Dialogporten.Features.V1",
     "outputFolder": "Features/V1",
     "operationNameGenerator": "SingleClientFromOperationId",

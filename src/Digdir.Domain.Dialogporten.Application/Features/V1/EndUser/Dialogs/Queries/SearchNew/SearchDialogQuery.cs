@@ -24,8 +24,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 
 public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, DialogEntity>, IRequest<SearchDialogResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
-    private readonly string? _searchLanguageCode;
-
     /// <summary>
     /// Filter by one or more service owner codes
     /// </summary>
@@ -121,8 +119,8 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public string? SearchLanguageCode
     {
-        get => _searchLanguageCode;
-        init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
+        get;
+        init => field = Localization.NormalizeCultureCode(value);
     }
 
     /// <summary>

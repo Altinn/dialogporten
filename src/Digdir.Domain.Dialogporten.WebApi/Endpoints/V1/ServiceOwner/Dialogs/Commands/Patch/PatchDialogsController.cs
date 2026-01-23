@@ -52,6 +52,7 @@ public sealed class PatchDialogsController : ControllerBase
     /// <response code="412">The supplied Revision does not match the current Revision of the dialog</response>
     /// <response code="422">Domain error occurred. See problem details for a list of errors.</response>
     [HttpPatch("{dialogId}")]
+    [Consumes("application/json", "application/json-patch+json")]
     [OpenApiOperation("V1ServiceOwnerDialogsPatchDialog")]
     [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

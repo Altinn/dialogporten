@@ -6,14 +6,13 @@ namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 public sealed class DialogSearchTag : IImmutableEntity, IIdentifiableEntity, ICreatableEntity
 {
-    private string _value = null!;
     public Guid Id { get; set; }
 
     public string Value
     {
-        get => _value;
-        set => _value = value.Trim().ToLowerInvariant();
-    }
+        get;
+        set => field = value.Trim().ToLowerInvariant();
+    } = null!;
 
     public DateTimeOffset CreatedAt { get; set; }
 

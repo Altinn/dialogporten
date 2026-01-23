@@ -6,8 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DeterministicGuids" Version="1.0.7" />
-        <PackageReference Include="Npgsql" Version="9.0.4"/>
+        <PackageReference Include="DeterministicGuids" Version="1.0.9" />
+        <PackageReference Include="Npgsql" Version="10.0.1" />
     </ItemGroup>
 
     <ItemGroup>

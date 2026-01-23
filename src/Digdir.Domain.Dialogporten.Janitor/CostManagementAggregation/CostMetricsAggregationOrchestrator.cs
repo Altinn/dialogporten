@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
-public sealed class CostMetricsAggregationOrchestrator
+public sealed partial class CostMetricsAggregationOrchestrator
 {
     private readonly IHostEnvironment _hostEnvironment;
     private readonly ILogger<CostMetricsAggregationOrchestrator> _logger;
@@ -33,7 +33,7 @@ public sealed class CostMetricsAggregationOrchestrator
         bool skipUpload,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Starting metrics aggregation for date {Date:dd.MM.yyyy}", targetDate);
+        LogStartingMetricsAggregation(targetDate);
 
         try
         {
@@ -67,12 +67,17 @@ public sealed class CostMetricsAggregationOrchestrator
     {
         var outputPath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
         await File.WriteAllBytesAsync(outputPath, parquetData, cancellationToken);
-        _logger.LogInformation("Saved parquet file to {FilePath} with {RecordCount} records ({FileSize} bytes)",
-            outputPath, recordCount, parquetData.Length);
+        LogSavedParquetFile(outputPath, recordCount, parquetData.Length);
     }
 
     public static string GetDateOnlyFileName(DateOnly date, string environment) =>
         $"Dialogporten_metrics_{environment}_{date:yyyy-MM-dd}.parquet";
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Starting metrics aggregation for date {Date:dd.MM.yyyy}")]
+    private partial void LogStartingMetricsAggregation(DateOnly date);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Saved parquet file to {FilePath} with {RecordCount} records ({FileSize} bytes)")]
+    private partial void LogSavedParquetFile(string filePath, int recordCount, int fileSize);
 }
 
 public abstract record AggregationResult

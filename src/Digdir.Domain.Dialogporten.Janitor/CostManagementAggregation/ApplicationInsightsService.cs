@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
-public sealed class ApplicationInsightsService
+public sealed partial class ApplicationInsightsService
 {
     private readonly LogsQueryClient _logsClient;
     private readonly ILogger<ApplicationInsightsService> _logger;
@@ -39,7 +39,7 @@ public sealed class ApplicationInsightsService
     {
         var resourceId = GetResourceId(environment);
 
-        _logger.LogInformation("Using Resource ID: {ResourceId}", resourceId);
+        LogUsingResourceId(resourceId);
 
         var kql = $$"""
              traces
@@ -63,8 +63,7 @@ public sealed class ApplicationInsightsService
 
         var formattedKql = string.Format(System.Globalization.CultureInfo.InvariantCulture, kql, startTime, endTime);
 
-        _logger.LogInformation("Querying Application Insights for {Environment} from {StartTime} UTC to {EndTime} UTC",
-            environment, startTime, endTime);
+        LogQueryingApplicationInsights(environment, startTime, endTime);
 
         try
         {
@@ -128,8 +127,7 @@ public sealed class ApplicationInsightsService
                 failedCount, totalRows, failureRate, environment);
         }
 
-        _logger.LogInformation("Parsed {RecordCount} feature metric records for environment {Environment}",
-            records.Count, environment);
+        LogParsedFeatureMetricRecords(records.Count, environment);
 
         return records;
     }
@@ -137,6 +135,15 @@ public sealed class ApplicationInsightsService
     private string GetResourceId(string environment) =>
         $"/subscriptions/{_options.SubscriptionId.ToLowerInvariant()}/resourceGroups/dp-be-{environment.ToLowerInvariant()}-rg" +
         $"/providers/microsoft.insights/components/dp-be-{environment.ToLowerInvariant()}-applicationInsights";
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Querying Application Insights for {Environment} from {StartTime} UTC to {EndTime} UTC")]
+    private partial void LogQueryingApplicationInsights(string environment, DateTimeOffset startTime, DateTimeOffset endTime);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Using Resource ID: {ResourceId}")]
+    private partial void LogUsingResourceId(string resourceId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Parsed {RecordCount} feature metric records for environment {Environment}")]
+    private partial void LogParsedFeatureMetricRecords(int recordCount, string environment);
 }
 
 public sealed class CostMetricRecord

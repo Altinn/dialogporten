@@ -22,10 +22,11 @@ public static class DialogGenerator
         Randomizer.Seed = new Random(123456);
     }
 
-    [ThreadStatic] private static Randomizer? _rnd;
-    [ThreadStatic] private static Faker? _faker;
-    private static Randomizer MyRandomizer => _rnd ??= new Randomizer();
-    private static Faker MyFaker => _faker ??= new Faker();
+    [field: ThreadStatic]
+    private static Randomizer MyRandomizer => field ??= new Randomizer();
+
+    [field: ThreadStatic]
+    private static Faker MyFaker => field ??= new Faker();
 
     private static readonly Faker<SearchTagDto> SearchTagFaker = new Faker<SearchTagDto>()
         .RuleFor(o => o.Value, f => f.Random.AlphaNumeric(10));

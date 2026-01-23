@@ -222,10 +222,7 @@ public class GraphQlE2EFixture : IAsyncLifetime
         }
         finally
         {
-            if (originalAccessor is not null)
-            {
-                originalAccessor.Current = originalCurrent;
-            }
+            originalAccessor?.Current = originalCurrent;
 
             _tokenOverridesAccessor = originalAccessor;
         }

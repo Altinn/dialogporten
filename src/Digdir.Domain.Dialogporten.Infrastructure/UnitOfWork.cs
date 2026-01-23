@@ -11,21 +11,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
 using OneOf.Types;
-using Polly;
-using Polly.Contrib.WaitAndRetry;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 
 internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 {
-    // Fetch the db revision and retry
-    // https://learn.microsoft.com/en-us/ef/core/saving/concurrency?tabs=data-annotations#resolving-concurrency-conflicts
-    private static readonly AsyncPolicy ConcurrencyRetryPolicy = Policy
-        .Handle<DbUpdateConcurrencyException>()
-        .WaitAndRetryAsync(
-            sleepDurations: Backoff.ConstantBackoff(TimeSpan.FromMilliseconds(200), 25),
-            onRetryAsync: FetchCurrentRevision);
-
     private readonly DialogDbContext _dialogDbContext;
     private readonly ITransactionTime _transactionTime;
     private readonly IDomainContext _domainContext;
@@ -137,14 +127,22 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
         try
         {
-            await (_enableConcurrencyCheck
-                ? _dialogDbContext.SaveChangesAsync(cancellationToken)
-                // Attempt to save changes without a concurrency check
-                : ConcurrencyRetryPolicy.ExecuteAsync(_dialogDbContext.SaveChangesAsync, cancellationToken));
+            await _dialogDbContext.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateConcurrencyException) when (_enableConcurrencyCheck)
+        catch (DbUpdateConcurrencyException)
         {
-            return new ConcurrencyError();
+            // Tidligere forsøkte vi å lagre endringene på nytt når _enableConcurrencyCheck var false. Dette kunne føre
+            // til korrupte data, fordi tilstanden til aggregatet ikke ble validert på nytt etter at vi forsøkte å
+            // «merge» endringene fra kolliderende forespørsler. Siden vi ikke har mulighet til å validere aggregatets
+            // tilstand på nytt uten omfattende omskriving, returnerer vi nå i stedet en konfliktfeil til klienten. Når
+            // _enableConcurrencyCheck er true, betyr det at klienten eksplisitt har bedt om samtidighetskontroll og
+            // derfor forventer å få 412 Precondition Failed ved en samtidighetskonflikt. Når flagget er false, har vi
+            // oppdaget en samtidighetskonflikt internt i applikasjonen uten at klienten har bedt om slik kontroll. I
+            // disse tilfellene returnerer vi 409 Conflict. I begge tilfeller signaliserer vi en konflikt til klienten,
+            // men med ulik HTTP-statuskode avhengig av om klienten har bedt om samtidighetskontroll eller ikke.
+            return _enableConcurrencyCheck
+                ? new ConcurrencyError()
+                : new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
         }
         catch (UniqueConstraintException ex) when
             (ex.InnerException?.Data["Detail"] is string message &&
@@ -207,31 +205,6 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         await _transaction.RollbackAsync(cancellationToken);
         await _transaction.DisposeAsync();
         _transaction = null;
-    }
-
-    private static async Task FetchCurrentRevision(Exception exception, TimeSpan _)
-    {
-        if (exception is not DbUpdateConcurrencyException concurrencyException)
-        {
-            return;
-        }
-
-        foreach (var entry in concurrencyException.Entries)
-        {
-            if (entry.Entity is not IVersionableEntity)
-            {
-                continue;
-            }
-
-            var dbValues = await entry.GetDatabaseValuesAsync();
-            if (dbValues == null)
-            {
-                continue;
-            }
-
-            var currentRevision = dbValues[nameof(IVersionableEntity.Revision)]!;
-            entry.Property(nameof(IVersionableEntity.Revision)).OriginalValue = currentRevision;
-        }
     }
 
     public async ValueTask DisposeAsync()

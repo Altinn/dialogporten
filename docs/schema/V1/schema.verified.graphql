@@ -128,6 +128,10 @@ type BulkSetSystemLabelConcurrencyError implements BulkSetSystemLabelError {
   message: String!
 }
 
+type BulkSetSystemLabelConflictError implements BulkSetSystemLabelError {
+  message: String!
+}
+
 type BulkSetSystemLabelDomainError implements BulkSetSystemLabelError {
   message: String!
 }
@@ -411,6 +415,10 @@ type SeenLog {
 }
 
 type SetSystemLabelConcurrencyError implements SetSystemLabelError {
+  message: String!
+}
+
+type SetSystemLabelConflictError implements SetSystemLabelError {
   message: String!
 }
 

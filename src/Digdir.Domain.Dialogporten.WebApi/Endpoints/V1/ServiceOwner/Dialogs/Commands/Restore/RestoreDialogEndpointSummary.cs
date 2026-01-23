@@ -15,6 +15,7 @@ public sealed class RestoreDialogEndpointSummary : Summary<RestoreDialogEndpoint
 
         Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Restored.FormatInvariant("aggregate");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
     }
 

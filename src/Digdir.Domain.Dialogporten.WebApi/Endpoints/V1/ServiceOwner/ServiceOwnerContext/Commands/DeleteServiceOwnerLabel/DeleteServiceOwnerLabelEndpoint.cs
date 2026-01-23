@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
+using Grpc.Core;
 using MediatR;
 using ServiceOwnerLabelDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update.
@@ -31,6 +32,7 @@ public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwne
         Description(b => b.ProducesOneOf(
             StatusCodes.Status204NoContent,
             StatusCodes.Status404NotFound,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status412PreconditionFailed));
     }
 

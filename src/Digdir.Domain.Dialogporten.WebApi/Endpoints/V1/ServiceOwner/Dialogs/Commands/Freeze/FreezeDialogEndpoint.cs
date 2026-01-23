@@ -25,6 +25,7 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
             StatusCodes.Status400BadRequest,
             StatusCodes.Status403Forbidden,
             StatusCodes.Status404NotFound,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status410Gone,
             StatusCodes.Status412PreconditionFailed));
     }

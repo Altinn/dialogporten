@@ -29,6 +29,7 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
             StatusCodes.Status201Created,
             StatusCodes.Status400BadRequest,
             StatusCodes.Status404NotFound,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status410Gone,
             StatusCodes.Status412PreconditionFailed,
             StatusCodes.Status422UnprocessableEntity));

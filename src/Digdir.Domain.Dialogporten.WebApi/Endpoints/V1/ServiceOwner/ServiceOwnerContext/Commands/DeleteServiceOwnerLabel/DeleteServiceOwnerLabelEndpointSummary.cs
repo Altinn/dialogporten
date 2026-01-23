@@ -13,5 +13,6 @@ public sealed class DeleteServiceOwnerLabelEndpointSummary : Summary<DeleteServi
         ResponseHeaders = [HttpResponseHeaderExamples.NewServiceOwnerContextETagHeader(StatusCodes.Status204NoContent)];
         Responses[StatusCodes.Status204NoContent] = "Successfully deleted the service owner label.";
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.ServiceOwnerLabelNotFound;
+        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
     }
 }

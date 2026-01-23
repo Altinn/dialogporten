@@ -31,6 +31,7 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
         Description(b => b.ProducesOneOf(
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status412PreconditionFailed));
     }
 

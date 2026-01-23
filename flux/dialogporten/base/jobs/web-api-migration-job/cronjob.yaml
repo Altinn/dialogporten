@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: web-api-migration-job
+  labels:
+    app.kubernetes.io/name: web-api-migration-job
+    app.kubernetes.io/part-of: dialogporten
+spec:
+  schedule: "0 0 1 1 *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: web-api-migration-job
+            app.kubernetes.io/part-of: dialogporten
+        spec:
+          restartPolicy: Never
+          serviceAccountName: web-api-migration-job
+          containers:
+            - name: web-api-migration-job
+              image: ghcr.io/altinn/dialogporten-migration-bundle:set-by-ci
+              env:
+                - name: Infrastructure__DialogDbConnectionString
+                  valueFrom:
+                    secretKeyRef:
+                      name: dialogporten-secrets
+                      key: dialogportenAdoConnectionString

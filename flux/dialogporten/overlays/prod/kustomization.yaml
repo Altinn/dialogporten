@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+patchesStrategicMerge:
+  - apps/web-api-so/allowlist.yaml
+  - apps/web-api-so/deployment-env.yaml
+  - apps/web-api-so/deployment-resources.yaml
+  - apps/web-api-so/hpa-min.yaml
+  - apps/web-api-eu/allowlist.yaml
+  - apps/web-api-eu/deployment-env.yaml
+  - apps/web-api-eu/deployment-resources.yaml
+  - apps/web-api-eu/hpa-min.yaml
+  - apps/graphql/allowlist.yaml
+  - apps/graphql/deployment-env.yaml
+  - apps/graphql/deployment-resources.yaml
+  - apps/graphql/hpa-min.yaml
+  - apps/service/deployment-env.yaml
+  - apps/service/deployment-resources.yaml
+  - apps/service/hpa-min.yaml
+  - jobs/web-api-migration-job/env.yaml
+  - jobs/sync-resource-policy-information-job/env.yaml
+  - jobs/sync-resource-policy-information-job/schedule.yaml
+  - jobs/sync-subject-resource-mappings-job/env.yaml
+  - jobs/reindex-dialogsearch-job/env.yaml
+  - jobs/reindex-dialogsearch-job/deadline.yaml
+  - jobs/aggregate-cost-metrics-job/env.yaml
+images:
+  - name: ghcr.io/altinn/dialogporten-webapi
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-graphql
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-service
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-migration-bundle
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-janitor
+    newTag: v.1.100.1

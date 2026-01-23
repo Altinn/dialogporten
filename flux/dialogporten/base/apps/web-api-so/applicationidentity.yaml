@@ -1,0 +1,8 @@
+apiVersion: application.dis.altinn.cloud/v1alpha1
+kind: ApplicationIdentity
+metadata:
+  name: web-api-so
+  labels:
+    app.kubernetes.io/name: web-api-so
+    app.kubernetes.io/part-of: dialogporten
+spec: {}

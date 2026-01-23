@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-api-eu
+spec:
+  template:
+    spec:
+      containers:
+        - name: web-api-eu
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: yt01
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "1"

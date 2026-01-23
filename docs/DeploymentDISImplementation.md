@@ -3,14 +3,11 @@
 This document expands on `docs/DeploymentDIS.md` and translates the DIS model into a concrete implementation plan for Dialogporten. It uses the layout and Flux pattern from `/Users/arealmaas/code/digdir/altinn-correspondence/flux` as a reference, while keeping our preferred internal structure.
 
 ## Reference pattern (altinn-correspondence)
-The correspondence repo uses two OCI images and a syncroot that bootstraps Flux:
-- `flux/syncroot/base` contains `Namespace`, `OCIRepository`, and `Kustomization` resources.
-- `flux/syncroot/<env>/kustomization.yaml` references `../base`.
-- `flux/correspondence/` contains the app deployment resources (Deployment, Service, IngressRoute, ApplicationIdentity).
+The correspondence repo uses OCI images and a syncroot that bootstraps Flux. For Dialogporten, we keep the same repository layout but use a `GitRepository` source instead of OCI artifacts.
 
 Key takeaways for Dialogporten:
-- Syncroot is responsible for wiring Flux to the app-config OCI image.
-- The app-config OCI image is separate from application container images.
+- Syncroot wires Flux to the app-config overlays.
+- App-config lives in this repo under `flux/dialogporten` (no OCI image).
 - Namespaces and app identity are defined declaratively in app config or syncroot.
 
 ## Proposed repo layout (Dialogporten)
@@ -33,8 +30,8 @@ flux/
 └── syncroot
     ├── base
     │   ├── dialogporten-namespace.yaml
-    │   ├── dialogporten-oci-repository.yaml
-    │   ├── dialogporten-flux-kustomize.yaml
+    │   ├── dialogporten-git-repository.yaml
+    │   ├── dialogporten-flux-kustomization.yaml
     │   └── kustomization.yaml
     ├── at23
     │   └── kustomization.yaml
@@ -47,40 +44,30 @@ flux/
 ```
 
 Notes:
-- `flux/dialogporten` is the app-config OCI image (Kustomize base + overlays).
-- `flux/syncroot` is the DIS syncroot OCI image (Flux wiring only).
+- `flux/dialogporten` is the app-config source (Kustomize base + overlays).
+- `flux/syncroot` defines Namespace + Flux `GitRepository` + `Kustomization` wiring.
 - Environment mapping: `test` -> `at23`, `staging` -> `tt02`, `yt01` -> `yt01`, `prod` -> `prod`.
 - Only `at23` is required for non-prod right now; add `at22`/`at24` only if DIS requires them later.
 
-## OCI images and registry convention
-We publish three kinds of OCI artifacts:
-1. Application container images (already in GHCR via `workflow-publish.yml`):
-   - `ghcr.io/altinn/dialogporten-webapi`
-   - `ghcr.io/altinn/dialogporten-graphql`
-   - `ghcr.io/altinn/dialogporten-service`
-   - `ghcr.io/altinn/dialogporten-migration-bundle`
-   - `ghcr.io/altinn/dialogporten-janitor`
-
-2. App-config OCI image (new):
-   - `ghcr.io/altinn/dialogporten-config`
-   - Built from `flux/dialogporten`.
-
-3. Syncroot OCI image (new):
-   - `ghcr.io/altinn/dialogporten-syncroot`
-   - Built from `flux/syncroot`.
-
-Registry note: these URLs are defined in the `OCIRepository` resources under `flux/syncroot`, not in Bicep. We will use GHCR unless DIS requires ACR.
-
-Tagging strategy:
-- Use the same version tag as application container images.
-- `ci-cd-main.yml` uses `<semver>-<sha>` for test; release workflows use `<semver>`.
+## Flux source and versioning
+- Flux pulls from `https://github.com/Altinn/dialogporten` (branch `main`).
+- The Flux `Kustomization` path is patched per environment to `./flux/dialogporten/overlays/<env>`.
+- No app-config or syncroot OCI artifacts are produced.
+- Rollback is handled by reverting Git commits or pinning `GitRepository.spec.ref` to a previous commit/tag.
 
 ## Flux resources in syncroot (what we need)
 - Namespace for dialogporten (include `linkerd.io/inject: enabled`).
-- `OCIRepository` referencing the app-config OCI image and tag.
-- `Kustomization` referencing the `OCIRepository` with `spec.path` pointing to the environment overlay.
+- `GitRepository` referencing this repo and branch.
+- `Kustomization` referencing the `GitRepository` with `spec.path` pointing to the environment overlay.
+- `postBuild.substituteFrom` to pull runtime values from `flux-system`.
 
-For env-specific overlays, patch `spec.path` in each `syncroot/<env>/kustomization.yaml` to point to `./overlays/<env>`.
+Required substitutions (ConfigMap or Secret `dialogporten-flux-substitutions` in `flux-system`):
+- `DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING`
+- `DIALOGPORTEN_AZURE_APPCONFIG_URI`
+- `DIALOGPORTEN_KEY_VAULT_URL`
+- `DIALOGPORTEN_SERVICEBUS_HOST` (format: `sb://<namespace>.servicebus.windows.net/`)
+- `DIALOGPORTEN_AZURE_SUBSCRIPTION_ID`
+- `DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME` (staging/prod only)
 
 ## App-config resources (what we need)
 - Deployment, Service, and Traefik IngressRoute per app.
@@ -216,13 +203,21 @@ Existing workflows:
 - `ci-cd-prod.yml`: manual production deployment.
 - `workflow-publish.yml`: builds/pushes application images.
 
-Required additions:
-- Add `workflow-build-app-config.yml` to build and push the app-config OCI image from `flux/dialogporten`.
-- Add `workflow-build-syncroot.yml` to build and push the syncroot OCI image from `flux/syncroot`, embedding the app-config tag.
-- Extend `ci-cd-main.yml` to publish app-config + syncroot for `at23` after `workflow-publish.yml`.
-- Extend `ci-cd-release-please.yml` to publish app-config + syncroot for `tt02` and `yt01` when a release is created.
-- Extend `ci-cd-prod.yml` to publish app-config + syncroot for `prod` on manual release.
-- Optional: add `dispatch-syncroot.yml` for manual syncroot pushes.
+Required changes:
+- No app-config or syncroot OCI workflows are required; Flux pulls directly from Git.
+- Config-only changes should merge to `main` and let Flux reconcile.
+- Image tag update strategy (workflow-driven or Flux image automation) is still an open decision.
+- Add repository dispatch scaffolding to update image tags in a separate `dialogporten-flux-manifests` repo.
+  - This repo does not exist yet and must be created before the dispatch can be enabled.
+  - Requires a `FLUX_MANIFESTS_DISPATCH_TOKEN` secret with access to that repo.
+- Keep the current Bicep/ACA deploy steps in place for now; dispatch runs alongside them.
+- Run E2E tests only after a Flux reconciliation success signal; add a Flux Alert + provider webhook to trigger E2E on success.
+  - Example Alert (spec outline):
+    - `apiVersion: notification.toolkit.fluxcd.io/v1beta3`
+    - `kind: Alert`
+    - `spec.eventSeverity: info`
+    - `spec.eventSources` referencing the app `Kustomization`
+    - `spec.inclusionList` with `Reconciliation.*succeeded`
 
 ## Implementation steps
 1. Create `flux/dialogporten/base` with app and job resources.
@@ -233,24 +228,69 @@ Required additions:
    - IP allowlists
    - schedules/timeouts for jobs
    - OTEL sampling ratio
-5. Create `flux/syncroot/base` with Namespace + Flux `OCIRepository` + `Kustomization`.
-6. Create `flux/syncroot/<env>` kustomizations that patch `spec.path` and `ref.tag` for each environment.
-7. Implement CI workflows to build and push app-config and syncroot images.
-8. Validate Flux reconciliation and health endpoints after each publish.
-9. Define rollback by re-pinning the syncroot to a prior app-config tag.
+5. Create `flux/syncroot/base` with Namespace + Flux `GitRepository` + `Kustomization`.
+6. Create `flux/syncroot/<env>` kustomizations that patch `spec.path` for each environment.
+7. Provide `dialogporten-flux-substitutions` in `flux-system` for runtime values.
+8. Validate Flux reconciliation and health endpoints after each merge.
+9. Define rollback by reverting Git or pinning the GitRepository to a prior commit/tag.
 
 ## Validation and rollback
 - Run `kustomize build` for each env overlay in CI.
-- Confirm Flux reconciles new tags and reports healthy status.
+- Confirm Flux reconciles new Git revisions and reports healthy status.
 - Verify health endpoints: `/health/startup`, `/health/readiness`, `/health/liveness`.
-- Roll back by re-publishing the syncroot with a previous app-config tag.
+- Roll back by reverting Git changes or pinning the GitRepository ref to a previous commit/tag.
+
+## Example: flux manifests repo image tag updates
+When `dialogporten-flux-manifests` receives a repository dispatch, it should update the image tags
+for the target environment overlay. One simple approach is to keep environment overlays with
+`images` overrides in their `kustomization.yaml`.
+
+Example repo layout:
+```
+dialogporten-flux-manifests/
+├── overlays
+│   ├── at23
+│   │   └── kustomization.yaml
+│   ├── tt02
+│   │   └── kustomization.yaml
+│   ├── yt01
+│   │   └── kustomization.yaml
+│   └── prod
+│       └── kustomization.yaml
+└── base
+    └── kustomization.yaml
+```
+
+Example `overlays/at23/kustomization.yaml` (repeat per env with the same tag when deploying
+`v.1.100.1`):
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - name: ghcr.io/altinn/dialogporten-webapi
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-graphql
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-service
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-migration-bundle
+    newTag: v.1.100.1
+  - name: ghcr.io/altinn/dialogporten-janitor
+    newTag: v.1.100.1
+```
+
+If you prefer patches instead of `images`, an alternative is a strategic merge patch per env that
+targets each Deployment/Job image, but the `images` stanza is the most compact for tag updates.
 
 ## TODOs
 - Confirm External Secrets store name, Key Vault URL, and service account name per environment.
 - Confirm whether `AZURE_CLIENT_ID` is injected from the ServiceAccount annotation or needs to be set explicitly.
 - Confirm the ASO RoleAssignment schema (principal reference vs principalId) in DIS.
+- Confirm whether GitRepository auth is required for GitHub (public vs private).
 
 ## Platform gaps to plan for
 - No RoleAssignment CR examples in platform Flux; we need to define our own `authorization.azure.com` RoleAssignments.
 - No internal Traefik entrypoint exists; internal-only access must be enforced via allowlists on `http`/`https`.
-- GHCR OCIRepositorys are not used in platform; confirm Flux auth for GHCR or use ACR if required.
+- If GitRepository auth is required, syncroot must include a secret reference.

@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sync-subject-resource-mappings-job
+  labels:
+    app.kubernetes.io/name: sync-subject-resource-mappings-job
+    app.kubernetes.io/part-of: dialogporten
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: sync-subject-resource-mappings-job
+            app.kubernetes.io/part-of: dialogporten
+        spec:
+          restartPolicy: Never
+          serviceAccountName: sync-subject-resource-mappings-job
+          containers:
+            - name: sync-subject-resource-mappings-job
+              image: ghcr.io/altinn/dialogporten-janitor:set-by-ci
+              args:
+                - sync-subject-resource-mappings
+              env:
+                - name: Infrastructure__DialogDbConnectionString
+                  valueFrom:
+                    secretKeyRef:
+                      name: dialogporten-secrets
+                      key: dialogportenAdoConnectionString
+                - name: Infrastructure__Redis__ConnectionString
+                  valueFrom:
+                    secretKeyRef:
+                      name: dialogporten-secrets
+                      key: dialogportenRedisConnectionString
+                - name: DOTNET_ENVIRONMENT
+                  value: set-by-env
+                - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+                  value: ${DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING}

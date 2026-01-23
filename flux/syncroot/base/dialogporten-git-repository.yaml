@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: dialogporten
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: https://github.com/Altinn/dialogporten
+  ref:
+    branch: main

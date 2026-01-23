@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - aggregate-cost-metrics-job
+  - reindex-dialogsearch-job
+  - sync-resource-policy-information-job
+  - sync-subject-resource-mappings-job
+  - web-api-migration-job

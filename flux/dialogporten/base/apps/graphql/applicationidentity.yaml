@@ -1,0 +1,8 @@
+apiVersion: application.dis.altinn.cloud/v1alpha1
+kind: ApplicationIdentity
+metadata:
+  name: graphql
+  labels:
+    app.kubernetes.io/name: graphql
+    app.kubernetes.io/part-of: dialogporten
+spec: {}

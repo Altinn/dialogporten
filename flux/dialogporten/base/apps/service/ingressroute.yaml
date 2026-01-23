@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: service
+  labels:
+    app.kubernetes.io/name: service
+    app.kubernetes.io/part-of: dialogporten
+spec:
+  entryPoints:
+    - http
+    - https
+  routes:
+    - kind: Rule
+      match: Host(`placeholder.invalid`) && PathPrefix(`/dialogporten/service`)
+      priority: 5
+      middlewares:
+        - name: service-ip-allowlist
+      services:
+        - name: service
+          port: 80

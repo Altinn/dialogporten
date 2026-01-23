@@ -1,0 +1,8 @@
+apiVersion: application.dis.altinn.cloud/v1alpha1
+kind: ApplicationIdentity
+metadata:
+  name: aggregate-cost-metrics-job
+  labels:
+    app.kubernetes.io/name: aggregate-cost-metrics-job
+    app.kubernetes.io/part-of: dialogporten
+spec: {}

@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: aggregate-cost-metrics-job
+  labels:
+    app.kubernetes.io/name: aggregate-cost-metrics-job
+    app.kubernetes.io/part-of: dialogporten
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 1800
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: aggregate-cost-metrics-job
+            app.kubernetes.io/part-of: dialogporten
+        spec:
+          restartPolicy: Never
+          serviceAccountName: aggregate-cost-metrics-job
+          containers:
+            - name: aggregate-cost-metrics-job
+              image: ghcr.io/altinn/dialogporten-janitor:set-by-ci
+              args:
+                - aggregate-cost-metrics
+              env:
+                - name: Infrastructure__DialogDbConnectionString
+                  valueFrom:
+                    secretKeyRef:
+                      name: dialogporten-secrets
+                      key: dialogportenAdoConnectionString
+                - name: Infrastructure__Redis__ConnectionString
+                  valueFrom:
+                    secretKeyRef:
+                      name: dialogporten-secrets
+                      key: dialogportenRedisConnectionString
+                - name: DOTNET_ENVIRONMENT
+                  value: set-by-env
+                - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+                  value: ${DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING}
+                - name: MetricsAggregation__StorageAccountName
+                  value: ${DIALOGPORTEN_COST_METRICS_STORAGE_ACCOUNT_NAME}
+                - name: MetricsAggregation__StorageContainerName
+                  value: costmetrics
+                - name: MetricsAggregation__SubscriptionId
+                  value: ${DIALOGPORTEN_AZURE_SUBSCRIPTION_ID}

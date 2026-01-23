@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reindex-dialogsearch-job
+  labels:
+    app.kubernetes.io/name: reindex-dialogsearch-job
+    app.kubernetes.io/part-of: dialogporten
+spec:
+  schedule: "0 0 1 1 *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: reindex-dialogsearch-job
+            app.kubernetes.io/part-of: dialogporten
+        spec:
+          restartPolicy: Never
+          serviceAccountName: reindex-dialogsearch-job
+          containers:
+            - name: reindex-dialogsearch-job
+              image: ghcr.io/altinn/dialogporten-janitor:set-by-ci
+              args:
+                - reindex-dialogsearch
+              resources:
+                requests:
+                  cpu: "4"
+                  memory: 8Gi
+                limits:
+                  cpu: "4"
+                  memory: 8Gi
+              env:
+                - name: Infrastructure__DialogDbConnectionString
+                  valueFrom:
+                    secretKeyRef:
+                      name: dialogporten-secrets
+                      key: dialogportenAdoConnectionString
+                - name: Infrastructure__Redis__ConnectionString
+                  valueFrom:
+                    secretKeyRef:
+                      name: dialogporten-secrets
+                      key: dialogportenRedisConnectionString
+                - name: DOTNET_ENVIRONMENT
+                  value: set-by-env
+                - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+                  value: ${DIALOGPORTEN_APPINSIGHTS_CONNECTION_STRING}

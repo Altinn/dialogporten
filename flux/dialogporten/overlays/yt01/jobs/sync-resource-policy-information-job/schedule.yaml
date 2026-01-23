@@ -1,0 +1,6 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sync-resource-policy-information-job
+spec:
+  schedule: "25 3 * * *"

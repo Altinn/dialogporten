@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dialogporten-runtime
+  labels:
+    app.kubernetes.io/part-of: dialogporten
+data:
+  AZURE_APPCONFIG_URI: ${DIALOGPORTEN_AZURE_APPCONFIG_URI}
+  Infrastructure__MassTransit__Host: ${DIALOGPORTEN_SERVICEBUS_HOST}

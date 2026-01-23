@@ -1,0 +1,8 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: web-api-eu-ip-allowlist
+spec:
+  ipAllowList:
+    sourceRange:
+      - 51.13.86.131/32

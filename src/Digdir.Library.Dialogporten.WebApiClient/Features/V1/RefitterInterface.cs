@@ -301,6 +301,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Forbidden</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
@@ -339,6 +343,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog or service owner label was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
         /// </item>
         /// <item>
         /// <term>412</term>
@@ -541,6 +549,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -711,6 +723,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
         /// </item>
         /// <item>
         /// <term>410</term>
@@ -1050,6 +1066,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -1109,6 +1129,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -1162,6 +1186,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found or is deleted</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>The dialog with the given key is removed</description>
         /// </item>
@@ -1210,6 +1238,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
@@ -1252,6 +1284,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
         /// </item>
         /// <item>
         /// <term>412</term>
@@ -1299,6 +1335,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
         /// </item>
         /// <item>
         /// <term>410</term>

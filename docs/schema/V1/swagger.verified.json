@@ -7809,6 +7809,9 @@
             },
             "description": "The given dialog ID was not found."
           },
+          "409": {
+            "description": "Conflict occurred while processing the request."
+          },
           "410": {
             "description": "Entity with the given key(s) is removed."
           },
@@ -8016,6 +8019,16 @@
             },
             "description": "The given dialog ID was not found or is deleted"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": ""
+          },
           "410": {
             "content": {
               "application/json": {
@@ -8151,6 +8164,9 @@
             },
             "description": "The given dialog ID was not found."
           },
+          "409": {
+            "description": "Conflict occurred while processing the request."
+          },
           "410": {
             "description": "Entity with the given key(s) is removed."
           },
@@ -8270,6 +8286,9 @@
             },
             "description": "The given dialog ID was not found."
           },
+          "409": {
+            "description": "Conflict occurred while processing the request."
+          },
           "410": {
             "description": "Entity with the given key(s) is removed."
           },
@@ -8360,6 +8379,9 @@
             },
             "description": "The given dialog ID was not found."
           },
+          "409": {
+            "description": "Conflict occurred while processing the request."
+          },
           "412": {
             "content": {
               "application/problem\u002Bjson": {
@@ -8446,6 +8468,9 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "409": {
+            "description": "Conflict occurred while processing the request."
           },
           "412": {
             "content": {
@@ -8751,6 +8776,9 @@
             },
             "description": "The given dialog ID was not found."
           },
+          "409": {
+            "description": "Conflict occurred while processing the request."
+          },
           "410": {
             "description": "Entity with the given key(s) is removed."
           },
@@ -9024,6 +9052,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "409": {
+            "description": "Conflict occurred while processing the request."
+          },
           "412": {
             "content": {
               "application/problem\u002Bjson": {
@@ -9127,6 +9158,9 @@
               }
             },
             "description": "The given dialog or service owner label was not found."
+          },
+          "409": {
+            "description": "Conflict occurred while processing the request."
           },
           "412": {
             "content": {
@@ -9647,6 +9681,9 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "409": {
+            "description": "Conflict occurred while processing the request."
           },
           "410": {
             "description": "Entity with the given key(s) is removed."

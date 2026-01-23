@@ -1,16 +1,18 @@
+using Altinn.ApiClients.Dialogporten.Features.V1;
 using FluentAssertions;
 using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
-public static class DialogE2EHelpers
+public static class ServiceownerApiExtensions
 {
-    public static async Task<Guid> CreateSimpleDialogAsync(E2EFixture fixture)
+    public static async Task<Guid> CreateSimpleDialogAsync(
+        this IServiceownerApi serviceownerApi)
     {
-        ArgumentNullException.ThrowIfNull(fixture);
+        ArgumentNullException.ThrowIfNull(serviceownerApi);
 
         var createDialogResponse =
-            await fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
+            await serviceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
                 DialogTestData.CreateDialog(
                     serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
                     party: $"urn:altinn:person:identifier-no:{TestTokenConstants.DefaultEndUserSsn}",

@@ -23,6 +23,7 @@ public sealed class PurgeDialogEndpointSummary : Summary<PurgeDialogEndpoint>
         Responses[StatusCodes.Status403Forbidden] =
             Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("delete");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
     }
 }

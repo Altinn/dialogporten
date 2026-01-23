@@ -28,6 +28,7 @@ public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
             .ProducesOneOf(
                 StatusCodes.Status204NoContent,
                 StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
                 StatusCodes.Status412PreconditionFailed));
     }
 
@@ -47,7 +48,8 @@ public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
                 return SendNoContentAsync(ct);
             },
             notFound => this.NotFoundAsync(notFound, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

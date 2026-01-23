@@ -1,3 +1,4 @@
+using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -22,7 +23,7 @@ public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResul
 public sealed record BulkSetSystemLabelSuccess;
 
 [GenerateOneOf]
-public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, Forbidden, DomainError, ValidationError, ConcurrencyError>;
+public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, Forbidden, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSetSystemLabelCommand, BulkSetSystemLabelResult>
 {
@@ -56,6 +57,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
 
         List<DialogEntity> dialogs;
 
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         if (_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
             dialogs = await _db.Dialogs
@@ -99,7 +101,8 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         return saveResult.Match<BulkSetSystemLabelResult>(
             _ => new BulkSetSystemLabelSuccess(),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 
     private async Task<(LabelAssignmentLogActor? Actor, Forbidden? Error)> TryCreatePerformedByActor(

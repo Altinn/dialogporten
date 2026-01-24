@@ -1,3 +1,4 @@
+using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -5,6 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
@@ -21,7 +23,7 @@ public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResul
 public sealed record BulkSetSystemLabelSuccess;
 
 [GenerateOneOf]
-public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, EntityNotFound, DomainError, ValidationError, ConcurrencyError>;
+public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, EntityNotFound, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSetSystemLabelCommand, BulkSetSystemLabelResult>
 {
@@ -54,6 +56,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
             distinctParties, distinctServiceResources, cancellationToken);
 
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var dialogs = await _db.Dialogs
             .PrefilterAuthorizedDialogs(authorizedResources)
             .Include(x => x.EndUserContext)
@@ -84,7 +87,8 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         return saveResult.Match<BulkSetSystemLabelResult>(
             _ => new BulkSetSystemLabelSuccess(),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 
     private async Task<(List<string>, List<string>)> GetDistinctPartiesAndServiceResources(
@@ -116,9 +120,10 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         CancellationToken cancellationToken)
     {
         var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
+        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(userInfo);
         foreach (var (dto, entity) in updateSets)
         {
-            entity.EndUserContext.UpdateSystemLabels(addLabels, removeLabels, userInfo.UserId.ExternalIdWithPrefix);
+            entity.EndUserContext.UpdateSystemLabels(addLabels, removeLabels, performedBy);
             _unitOfWork.EnableConcurrencyCheck(entity.EndUserContext, dto.EndUserContextRevision);
         }
     }

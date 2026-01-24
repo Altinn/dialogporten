@@ -11,12 +11,12 @@ using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -34,6 +34,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
     private sealed class CreateDialogWithSpecifiedDialogIdTestData : TheoryData<string, Guid, Type>
     {
+        public static DateTimeOffset FixedUtcNow => new(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
+
         public CreateDialogWithSpecifiedDialogIdTestData()
         {
             Add("Validations for UUIDv4 format",
@@ -45,19 +47,19 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 typeof(ValidationError));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(1)),
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(1)),
                 typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(14)),
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(14)),
                 typeof(CreateDialogSuccess));
 
             Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(16)),
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(16)),
                 typeof(ValidationError));
 
             Add("Can create a dialog with a valid UUIDv7 format",
-                IdentifiableExtensions.CreateVersion7(DateTimeOffset.UtcNow.AddSeconds(-1)),
+                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(-1)),
                 typeof(CreateDialogSuccess));
         }
     }
@@ -65,18 +67,67 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedDialogIdTestData))]
     public Task Create_Dialog_With_Specified_DialogId_Tests(string _, Guid guidInput, Type assertType) =>
         FlowBuilder.For(Application)
+            .OverrideUtc(CreateDialogWithSpecifiedDialogIdTestData.FixedUtcNow)
             .CreateSimpleDialog(x => x.Dto.Id = guidInput)
             .ExecuteAndAssert(assertType);
 
-    [Fact]
-    public async Task Creates_Dialog_When_Dialog_Is_Simple()
+    private sealed class CreateDialogWithSpecifiedCreatedAtTestData : TheoryData<string, DateTimeOffset, Type>
+    {
+        public static DateTimeOffset FixedUtcNow => new(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
+
+        public CreateDialogWithSpecifiedCreatedAtTestData()
+        {
+            Add("Can create dialog with CreatedAt 1 second in the future, within tolerance",
+                FixedUtcNow.AddSeconds(1),
+                typeof(CreateDialogSuccess));
+
+            Add("Can create dialog with CreatedAt 14 seconds in the future, within tolerance",
+                FixedUtcNow.AddSeconds(14),
+                typeof(CreateDialogSuccess));
+
+            Add("Cannot create dialog with CreatedAt 16 seconds in the future, beyond tolerance",
+                FixedUtcNow.AddSeconds(16),
+                typeof(ValidationError));
+        }
+    }
+
+    [Theory, ClassData(typeof(CreateDialogWithSpecifiedCreatedAtTestData))]
+    public Task Create_Dialog_With_Specified_CreatedAt_Tests(string _, DateTimeOffset createdAt, Type assertType) =>
+        FlowBuilder.For(Application)
+            .OverrideUtc(CreateDialogWithSpecifiedCreatedAtTestData.FixedUtcNow)
+            .CreateSimpleDialog(x => x.Dto.CreatedAt = createdAt)
+            .ExecuteAndAssert(assertType);
+
+    private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<string, string>
+    {
+        public CreateDialogWithSpecifiedPartyTestData()
+        {
+            Add("Can create dialog with OrganizationIdentifier as Party", "urn:altinn:organization:identifier-no:974760673");
+            Add("Can create dialog with PersonalIdentifier as Party", "urn:altinn:person:identifier-no:15915299854");
+            Add("Can create dialog with A2 SI User as Party", "urn:altinn:person:legacy-selfidentified:someusername");
+            Add("Can create dialog with ID-Porten email as Party", "urn:altinn:person:idporten-email:foo@bar.com");
+            // Not supported yet
+            //Add("Can create dialog with Feide orgsub", "urn:altinn:feide-subject:33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551");
+        }
+    }
+
+    [Theory, ClassData(typeof(CreateDialogWithSpecifiedPartyTestData))]
+    public async Task Creates_Dialog_When_Dialog_Is_Simple_For_All_PartyTypes(string _, string party)
     {
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = expectedDialogId)
+            .CreateSimpleDialog(x =>
+            {
+                x.Dto.Id = expectedDialogId;
+                x.Dto.Party = party;
+            })
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.Id.Should().Be(expectedDialogId));
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Id.Should().Be(expectedDialogId);
+                x.Party.Should().Be(party);
+            });
     }
 
     [Fact]
@@ -561,4 +612,52 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 Assert.True(
                     x.ContentUpdatedAt == x.UpdatedAt &&
                     x.ContentUpdatedAt == x.CreatedAt));
+
+    [Theory, ClassData(typeof(DialogContentLengthTestData))]
+    public Task Content_Length_Validation_Test(Action<CreateDialogCommand> action, Type expectedResult) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(action)
+            .ExecuteAndAssert(expectedResult);
+
+    private sealed class DialogContentLengthTestData : TheoryData<Action<CreateDialogCommand>, Type>
+    {
+        private static string Repeat(char c, int x) => new(c, x);
+        private static int GetMaxLength(DialogContentType.Values value) =>
+            DialogContentType.GetValue(value).MaxLength;
+
+        public DialogContentLengthTestData()
+        {
+            AddLengthTests((x, value) => x.Dto.Content!.Title = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.Title));
+
+            AddLengthTests((x, value) => x.Dto.Content!.SenderName = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.SenderName));
+
+            AddLengthTests((x, value) => x.Dto.Content!.Summary = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.Summary));
+
+            AddLengthTests((x, value) => x.Dto.Content!.AdditionalInfo = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.AdditionalInfo));
+
+            AddLengthTests((x, value) => x.Dto.Content!.ExtendedStatus = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.ExtendedStatus));
+
+            AddLengthTests((x, value) => x.Dto.Content!.NonSensitiveTitle = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.NonSensitiveTitle));
+
+            AddLengthTests((x, value) => x.Dto.Content!.NonSensitiveSummary = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.NonSensitiveSummary));
+        }
+
+        private void AddLengthTests(Action<CreateDialogCommand, string> applyValue, int maxLength)
+        {
+            Add(x => applyValue(x, Repeat('x', maxLength)), typeof(CreateDialogSuccess));
+            Add(x => applyValue(x, Repeat('x', maxLength + 1)), typeof(ValidationError));
+        }
+    }
+
+    private static ContentValueDto CreateContentDto(string content) => new()
+    {
+        Value = [new() { Value = content, LanguageCode = "nb" }]
+    };
 }

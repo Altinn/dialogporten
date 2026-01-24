@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
@@ -20,6 +21,8 @@ using GetDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.Serv
 using GetDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
 using SearchDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
 using SearchDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+using SearchDialogEndUserContextResult = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextResult;
+using SearchDialogEndUserContextQuery = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextQuery;
 using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
 using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
@@ -55,7 +58,8 @@ public static class IFlowStepExtensions
         step.SendCommand(ctx =>
         {
             var command = commandSelector(ctx);
-            ctx.Bag[DialogIdKey] = command.Dto.Id = command.Dto.Id.CreateVersion7IfDefault();
+            command.Dto.Id ??= IdentifiableExtensions.CreateVersion7(DialogApplication.Clock.UtcNowOffset);
+            ctx.Bag[DialogIdKey] = command.Dto.Id;
             ctx.Bag[ServiceResource] = command.Dto.ServiceResource;
             ctx.Bag[PartyKey] = command.Dto.Party;
             return command;
@@ -239,6 +243,13 @@ public static class IFlowStepExtensions
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<CreateTransmissionResult> step) =>
+        step.AssertResult<CreateTransmissionSuccess>()
+            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
+
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<CreateTransmissionSuccess> step) =>
+        step.SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
+
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateFormSavedActivityTimeResult> step) =>
         step.AssertResult<UpdateFormSavedActivityTimeSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
@@ -264,6 +275,18 @@ public static class IFlowStepExtensions
             return query;
         });
     }
+
+    public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(this IFlowStep step,
+        Action<SearchDialogEndUserContextQuery> modify) => step.SearchServiceOwnerDialogEndUserContexts((query, _) => modify(query));
+
+    public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(this IFlowStep step,
+        Action<SearchDialogEndUserContextQuery, FlowContext> modify) =>
+        step.SendCommand(_ =>
+        {
+            var query = new SearchDialogEndUserContextQuery();
+            modify(query, step.Context);
+            return query;
+        });
 
     public static IFlowExecutor<SearchDialogResultEU> SearchEndUserDialogs(this IFlowStep step,
         Action<SearchDialogQueryEU> modify) => step.SearchEndUserDialogs((query, _) => modify(query));
@@ -344,12 +367,24 @@ public static class IFlowStepExtensions
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null)
         => step.AssertResult(assert).ExecuteAsync();
 
+    public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
+        => step.AssertResult(assert).ExecuteAsync();
+
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>
         step.Select(result =>
         {
             var typedResult = result.Value.Should().BeOfType<T>().Subject;
             typedResult.Should().NotBeNull();
             assert?.Invoke(typedResult);
+            return typedResult;
+        });
+
+    public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert) =>
+        step.Select((result, context) =>
+        {
+            var typedResult = result.Value.Should().BeOfType<T>().Subject;
+            typedResult.Should().NotBeNull();
+            assert(typedResult, context);
             return typedResult;
         });
 

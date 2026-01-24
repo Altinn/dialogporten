@@ -31,7 +31,7 @@ public abstract class AbstractLookupEntity<TSelf, TEnum> : ILookupEntity<TSelf, 
     /// <param name="name">A human-readable name to identify the lookup type.</param>
     protected AbstractLookupEntity(TEnum id, string name)
     {
-        if (!Enum.IsDefined(typeof(TEnum), id))
+        if (!Enum.IsDefined(id))
         {
             throw new InvalidEnumArgumentException(nameof(id), (int)(object)id, typeof(TEnum));
         }
@@ -93,7 +93,7 @@ public abstract class AbstractLookupEntity<TSelf, TEnum> : ILookupEntity<TSelf, 
     public static IEnumerable<TSelf> GetValues()
     {
         var self = GetUninitializedSelf();
-        var enums = Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
+        var enums = Enum.GetValues<TEnum>().Cast<TEnum>();
         foreach (var @enum in enums)
         {
             yield return self.MapValue(@enum);

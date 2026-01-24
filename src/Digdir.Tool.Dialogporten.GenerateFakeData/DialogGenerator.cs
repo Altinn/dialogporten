@@ -22,8 +22,6 @@ public static class DialogGenerator
         Randomizer.Seed = new Random(123456);
     }
 
-    private static readonly DateTime RefTime = new(2026, 1, 1);
-
     [ThreadStatic] private static Randomizer? _rnd;
     [ThreadStatic] private static Faker? _faker;
     private static Randomizer MyRandomizer => _rnd ??= new Randomizer();
@@ -83,7 +81,6 @@ public static class DialogGenerator
         // We need to handle id, serviceResource, party, and others passed as arguments
         // RuleFor cannot directly use external parameters easily. We handle these post-generation.
         // Placeholder rules are set, real values might be overridden later.
-        .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.ServiceResource, _ => GenerateFakeResource())
         .RuleFor(o => o.Party, _ => GenerateRandomParty())
         .RuleFor(o => o.Progress, f => f.Random.Number(0, 100))
@@ -91,8 +88,6 @@ public static class DialogGenerator
         .RuleFor(o => o.ExternalReference, f => f.Random.AlphaNumeric(10))
         .RuleFor(o => o.CreatedAt, _ => null)
         .RuleFor(o => o.UpdatedAt, _ => null)
-        .RuleFor(o => o.DueAt, f => f.Date.Future(10, RefTime))
-        .RuleFor(o => o.ExpiresAt, f => f.Date.Future(20, RefTime.AddYears(11)))
         .RuleFor(o => o.VisibleFrom, _ => null)
         .RuleFor(o => o.Status, f => f.PickRandom<DialogStatusInput>())
         .RuleFor(o => o.Content, _ => GenerateFakeContent())

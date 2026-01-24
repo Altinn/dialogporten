@@ -21,7 +21,9 @@ public class VisibleFromFilterTests(DialogApplication application) : Application
         var createDialogCommands = dataSet
             .Select(CreateDialogCommand)
             .ToArray();
+
         var creationTime = createDialogCommands.Max(x => x.Dto.CreatedAt)!.Value;
+
         await FlowBuilder.For(Application)
             .OverrideUtc(creationTime)
             .CreateDialogs(createDialogCommands)
@@ -33,16 +35,16 @@ public class VisibleFromFilterTests(DialogApplication application) : Application
                 .BeEquivalentTo(expectedReferences));
     }
 
-    private static CreateDialogCommand CreateDialogCommand(DialogData data) =>
-        DialogGenerator.GenerateFakeCreateDialogCommand(
-            id: data.Id,
-            party: Tests.Common.Common.Party,
-            externalReference: data.Reference,
-            createdAt: data.CreatedAt,
-            updatedAt: data.CreatedAt,
-            visibleFrom: data.VisibleFrom,
-            activities: [],
-            transmissions: []);
+    private static CreateDialogCommand CreateDialogCommand(DialogData data)
+    {
+        var createDialogCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand(data.Id);
+        createDialogCommand.Dto.Party = Tests.Common.Common.Party;
+        createDialogCommand.Dto.ExternalReference = data.Reference;
+        createDialogCommand.Dto.CreatedAt = data.CreatedAt;
+        createDialogCommand.Dto.UpdatedAt = data.CreatedAt;
+        createDialogCommand.Dto.VisibleFrom = data.VisibleFrom;
+        return createDialogCommand;
+    }
 
     private sealed class DataSet : TheoryData<List<DialogData>, DateTimeOffset, List<string>>
     {
@@ -53,7 +55,7 @@ public class VisibleFromFilterTests(DialogApplication application) : Application
         {
             var dialogDataSet = Enumerable.Range(0, 10)
                 .Select(i => new DialogData(
-                    Id: Tests.Common.Common.NewUuidV7(),
+                    Id: Tests.Common.Common.NewUuidV7(Jan1.AddDays(1)),
                     Reference: i.ToString(CultureInfo.InvariantCulture),
                     CreatedAt: Jan1.AddDays(i),
                     VisibleFrom: Feb1.AddDays(i)))

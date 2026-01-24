@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
@@ -26,11 +25,8 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
     public void UpdateSystemLabels(
         IEnumerable<SystemLabel.Values> addLabels,
         IEnumerable<SystemLabel.Values> removeLabels,
-        string userId,
-        ActorType.Values actorType = ActorType.Values.PartyRepresentative)
+        LabelAssignmentLogActor performedBy)
     {
-        var performedBy = CreateLabelAssignmentLogActor(userId, actorType);
-
         var current = DialogEndUserContextSystemLabels
             .Select(x => x.SystemLabelId)
             .ToList();
@@ -85,15 +81,4 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
             PerformedBy = performedBy
         });
 
-    private static LabelAssignmentLogActor CreateLabelAssignmentLogActor(string userId, ActorType.Values actorType) =>
-        new()
-        {
-            ActorTypeId = actorType,
-            ActorNameEntity = actorType != ActorType.Values.PartyRepresentative
-                ? null
-                : new ActorName
-                {
-                    ActorId = userId
-                }
-        };
 }

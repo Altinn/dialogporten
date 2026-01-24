@@ -13,6 +13,46 @@ using System.Threading.Tasks;
 
 namespace Altinn.ApiClients.Dialogporten.Features.V1
 {
+    public class V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams
+    {
+        public V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams(IEnumerable<string> party)
+        {
+            
+            Party = party;
+        }
+        
+                /// <summary>
+                /// Filter by one or more owning parties
+                /// </summary>
+        [Query(CollectionFormat.Multi)] 
+        public IEnumerable<string> Party { get; set; }
+
+                /// <summary>
+                /// Filter by end user id
+                /// </summary>
+        [Query] 
+        public string EndUserId { get; set; }
+
+                /// <summary>
+                /// Filter by one or more system labels
+                /// </summary>
+        [Query(CollectionFormat.Multi)] 
+        public IEnumerable<DialogEndUserContextsEntities_SystemLabel> Label { get; set; }
+
+                /// <summary>
+                /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
+                /// </summary>
+        [Query] 
+        public ContinuationTokenSetOfTOrderDefinitionAndTTarget ContinuationToken { get; set; }
+
+                /// <summary>
+                /// Limit the number of results per page (1-1000, default: 100)
+                /// </summary>
+        [Query] 
+        public int? Limit { get; set; }
+
+    }
+
     public class V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
     {
         
@@ -192,11 +232,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Retrieve service owner labels for a dialog.</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.0.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.1.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Retrieve service owner labels for a dialog.</summary>
         /// <remarks>Fetches all labels associated with the service owner context of a specific dialog.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -220,9 +261,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
         Task<IApiResponse> V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
 
@@ -231,6 +276,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Add a label to the service owner context.
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -255,17 +301,26 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Forbidden</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
         Task<IApiResponse> V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Delete a service owner label for a dialog</summary>
         /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -290,12 +345,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog or service owner label was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>A server side error occurred.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Delete("/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}")]
         Task<IApiResponse> V1ServiceOwnerServiceOwnerContextCommandsDeleteServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -305,6 +368,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -333,6 +397,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -344,14 +412,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels")]
         Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -376,6 +449,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
@@ -383,14 +460,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
         Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -418,9 +500,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission>>> V1ServiceOwnerDialogsQueriesSearchTransmissionsDialogTransmission(System.Guid dialogId, CancellationToken cancellationToken = default);
 
@@ -430,6 +516,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -462,6 +549,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -473,14 +564,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(System.Guid dialogId, [Body, AliasAs("CreateTransmissionRequest")] V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest createTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -508,14 +604,55 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog>>> V1ServiceOwnerDialogsQueriesSearchSeenLogsDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
 
+        /// <summary>Gets end user context system labels for dialogs</summary>
+        /// <remarks>
+        /// Performs a search for dialog end user context labels, returning a paginated list of dialogs.
+        /// 
+        /// * Party is required.
+        /// * System labels are matched with OR semantics.
+        /// * See \"continuationToken\" in the response for how to get the next page of results.
+        /// * hasNextPage will be set to true if there are more items to get.
+        /// </remarks>
+        /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog list.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/serviceowner/dialogs/endusercontext")]
+        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem>> V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContext([Query] V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams queryParams, CancellationToken cancellationToken = default);
+
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -539,9 +676,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchActivities_Activity>>> V1ServiceOwnerDialogsQueriesSearchActivitiesDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
 
@@ -551,6 +692,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -583,6 +725,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -594,9 +740,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(System.Guid dialogId, [Body, AliasAs("CreateActivityRequest")] V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest createActivityRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -609,6 +759,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// * hasNextPage will be set to true if there are more items to get.
         /// </remarks>
         /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -624,9 +775,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>401</term>
         /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json")]
+        [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs")]
         Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsQueriesSearchDialog([Query] V1ServiceOwnerDialogsQueriesSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
 
@@ -636,6 +791,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// For detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -671,15 +827,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs")]
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
 
         /// <summary>Returns a boolean value based on conditions used to determine if a notification is to be sent</summary>
         /// <remarks>Used by Altinn Notification only. Takes a dialogId and returns a boolean value based on conditions used to determine if a notification is to be sent.</remarks>
         /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -699,14 +860,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>403</term>
         /// <description>Forbidden</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json")]
+        [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition>> V1ServiceOwnerDialogsQueriesNotificationConditionNotificationCondition(System.Guid dialogId, [Query] V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams queryParams, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog transmission</summary>
         /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -734,14 +900,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -769,14 +940,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog>> V1ServiceOwnerDialogsQueriesGetSeenLogDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -804,9 +980,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetActivity_Activity>> V1ServiceOwnerDialogsQueriesGetActivityDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
 
@@ -817,6 +997,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Note that this operation may return deleted dialogs (see the field `DeletedAt`).
         /// </remarks>
         /// <param name="endUserId">Filter by end user id</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -840,9 +1021,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> V1ServiceOwnerDialogsQueriesGetDialog(System.Guid dialogId, [Query] string endUserId, CancellationToken cancellationToken = default);
 
@@ -852,6 +1037,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -880,6 +1066,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -891,9 +1081,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json", "Content-Type: application/json")]
+        [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsUpdateDialog(System.Guid dialogId, [Body] V1ServiceOwnerDialogsCommandsUpdate_Dialog dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -906,6 +1100,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -934,6 +1129,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -941,9 +1140,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Delete("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsDeleteDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -954,6 +1157,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -982,6 +1186,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found or is deleted</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>The dialog with the given key is removed</description>
         /// </item>
@@ -993,14 +1201,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json", "Content-Type: application/json")]
+        [Headers("Accept: application/json, text/plain", "Content-Type: application/json")]
         [Patch("/api/v1/serviceowner/dialogs/{dialogId}")]
         Task<IApiResponse> V1ServiceOwnerDialogsPatchDialog(System.Guid dialogId, [Body] IEnumerable<JsonPatchOperations_Operation> patchDocument, [Header("If-Match")] System.Guid? etag, CancellationToken cancellationToken = default);
 
         /// <summary>Restore a dialog</summary>
         /// <remarks>Restore a dialog.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -1025,12 +1238,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/restore")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsRestoreDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -1040,6 +1261,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -1064,12 +1286,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/purge")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsPurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -1078,6 +1308,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Freezes a given dialog.
         /// The dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen
         /// </remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
         /// <list type="table">
@@ -1106,6 +1337,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -1113,9 +1348,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json")]
+        [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsFreezeFreezeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
     }
@@ -1124,7 +1363,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
 //----------------------
 // <auto-generated>
-//     Generated using the NSwag toolchain v14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0)) (http://NSwag.org)
+//     Generated using the NSwag toolchain v14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0)) (http://NSwag.org)
 // </auto-generated>
 //----------------------
 
@@ -1150,7 +1389,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ProblemDetails
     {
 
@@ -1177,7 +1416,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ProblemDetails_Error
     {
 
@@ -1195,7 +1434,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label
     {
 
@@ -1204,7 +1443,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
     {
 
@@ -1230,9 +1469,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
+        /// <summary>
+        /// Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.
+        /// </summary>
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
+
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogEndUserContextsEntities_SystemLabel
     {
 
@@ -1253,7 +1498,44 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerCommonActors_Actor
+    {
+
+        /// <summary>
+        /// The type of actor; either the service owner, or someone representing the party.
+        /// </summary>
+        [JsonPropertyName("actorType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
+        public Actors_ActorType ActorType { get; set; }
+
+        /// <summary>
+        /// The name of the actor.
+        /// </summary>
+        [JsonPropertyName("actorName")]
+        public string ActorName { get; set; }
+
+        /// <summary>
+        /// The identifier (national identity number or organization number) of the actor.
+        /// </summary>
+        [JsonPropertyName("actorId")]
+        public string ActorId { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Actors_ActorType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
+        PartyRepresentative = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
+        ServiceOwner = 1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel
     {
 
@@ -1285,9 +1567,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
+        /// <summary>
+        /// Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.
+        /// </summary>
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
+
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_DialogRevision
     {
 
@@ -1305,7 +1593,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission
     {
 
@@ -1378,7 +1666,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntitiesTransmissions_DialogTransmissionType
     {
 
@@ -1408,44 +1696,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerCommonActors_Actor
-    {
-
-        /// <summary>
-        /// The type of actor; either the service owner, or someone representing the party.
-        /// </summary>
-        [JsonPropertyName("actorType")]
-        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
-        public Actors_ActorType ActorType { get; set; }
-
-        /// <summary>
-        /// The name of the actor.
-        /// </summary>
-        [JsonPropertyName("actorName")]
-        public string ActorName { get; set; }
-
-        /// <summary>
-        /// The identifier (national identity number or organization number) of the actor.
-        /// </summary>
-        [JsonPropertyName("actorId")]
-        public string ActorId { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Actors_ActorType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
-        PartyRepresentative = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
-        ServiceOwner = 1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Content
     {
 
@@ -1469,7 +1720,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1CommonContent_ContentValue
     {
 
@@ -1487,7 +1738,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1CommonLocalizations_Localization
     {
 
@@ -1505,7 +1756,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment
     {
 
@@ -1535,7 +1786,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl
     {
 
@@ -1567,7 +1818,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum Attachments_AttachmentUrlConsumerType
     {
 
@@ -1579,7 +1830,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog
     {
 
@@ -1597,7 +1848,53 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem
+    {
+
+        /// <summary>
+        /// The paginated list of items
+        /// </summary>
+        [JsonPropertyName("items")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem> Items { get; set; }
+
+        /// <summary>
+        /// Whether there are more items available that can be fetched by supplying the continuation token
+        /// </summary>
+        [JsonPropertyName("hasNextPage")]
+        public bool HasNextPage { get; set; }
+
+        /// <summary>
+        /// The continuation token to be used to fetch the next page of items
+        /// </summary>
+        [JsonPropertyName("continuationToken")]
+        public string ContinuationToken { get; set; }
+
+        /// <summary>
+        /// The current sorting order of the items
+        /// </summary>
+        [JsonPropertyName("orderBy")]
+        public string OrderBy { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem
+    {
+
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; }
+
+        [JsonPropertyName("endUserContextRevision")]
+        public System.Guid EndUserContextRevision { get; set; }
+
+        [JsonPropertyName("systemLabels")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearchActivities_Activity
     {
 
@@ -1622,7 +1919,22 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
+    {
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntitiesActivities_DialogActivityType
     {
 
@@ -1679,7 +1991,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog
     {
 
@@ -1709,7 +2021,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_Dialog
     {
 
@@ -1908,7 +2220,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntities_DialogStatus
     {
 
@@ -1932,7 +2244,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogActivity
     {
 
@@ -1983,7 +2295,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog
     {
 
@@ -2021,7 +2333,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext
     {
 
@@ -2039,7 +2351,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_ServiceOwnerLabel
     {
 
@@ -2051,7 +2363,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_DialogEndUserContext
     {
 
@@ -2070,7 +2382,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesSearch_Content
     {
 
@@ -2114,7 +2426,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition
     {
 
@@ -2123,7 +2435,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class OrderSetOfTOrderDefinitionAndTTarget
     {
 
@@ -2138,22 +2450,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum V1Common_DeletedFilter
     {
 
@@ -2168,7 +2465,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Transmission
     {
 
@@ -2241,7 +2538,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType
     {
 
@@ -2253,7 +2550,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Content
     {
 
@@ -2277,7 +2574,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetTransmission_Attachment
     {
 
@@ -2307,7 +2604,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl
     {
 
@@ -2339,7 +2636,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog
     {
 
@@ -2357,7 +2654,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGetActivity_Activity
     {
 
@@ -2388,7 +2685,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_Dialog
     {
 
@@ -2628,7 +2925,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_Content
     {
 
@@ -2684,7 +2981,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_Tag
     {
 
@@ -2696,7 +2993,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogAttachment
     {
 
@@ -2726,7 +3023,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogAttachmentUrl
     {
 
@@ -2757,7 +3054,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmission
     {
 
@@ -2841,7 +3138,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent
     {
 
@@ -2865,7 +3162,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmissionAttachment
     {
 
@@ -2895,7 +3192,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmissionAttachmentUrl
     {
 
@@ -2927,7 +3224,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogGuiAction
     {
 
@@ -3001,7 +3298,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntitiesActions_DialogGuiActionPriority
     {
 
@@ -3016,7 +3313,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum Http_HttpVerb
     {
 
@@ -3049,7 +3346,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogApiAction
     {
 
@@ -3095,7 +3392,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogApiActionEndpoint
     {
 
@@ -3162,7 +3459,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogActivity
     {
 
@@ -3213,7 +3510,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogSeenLog
     {
 
@@ -3251,7 +3548,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerContext
     {
 
@@ -3269,7 +3566,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogServiceOwnerLabel
     {
 
@@ -3281,7 +3578,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsQueriesGet_DialogEndUserContext
     {
 
@@ -3300,7 +3597,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Dialog
     {
 
@@ -3412,7 +3709,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum V1ServiceOwnerCommonDialogStatuses_DialogStatusInput
     {
 
@@ -3442,7 +3739,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Content
     {
 
@@ -3498,7 +3795,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Tag
     {
 
@@ -3510,7 +3807,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Attachment
     {
 
@@ -3540,7 +3837,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl
     {
 
@@ -3571,12 +3868,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Transmission
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// A UUIDv7 may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -3645,7 +3942,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent
     {
 
@@ -3669,7 +3966,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment
     {
 
@@ -3699,7 +3996,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachmentUrl
     {
 
@@ -3724,7 +4021,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_GuiAction
     {
 
@@ -3793,7 +4090,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_ApiAction
     {
 
@@ -3833,7 +4130,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_ApiActionEndpoint
     {
 
@@ -3898,12 +4195,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdate_Activity
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -3950,12 +4247,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+        /// A UUIDv7 may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -4014,22 +4311,101 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The transmission unstructured text content.
         /// </summary>
         [JsonPropertyName("content")]
-        public V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent Content { get; set; }
+        public V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent Content { get; set; }
 
         /// <summary>
         /// The transmission-level attachments.
         /// </summary>
         [JsonPropertyName("attachments")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
+        public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment> Attachments { get; set; }
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent
+    {
+
+        /// <summary>
+        /// The transmission title. Must be text/plain.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public V1CommonContent_ContentValue Title { get; set; }
+
+        /// <summary>
+        /// The transmission summary.
+        /// </summary>
+        [JsonPropertyName("summary")]
+        public V1CommonContent_ContentValue Summary { get; set; }
+
+        /// <summary>
+        /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
+        /// </summary>
+        [JsonPropertyName("contentReference")]
+        public V1CommonContent_ContentValue ContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment
+    {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
+        /// The display name of the attachment that should be used in GUIs.
+        /// </summary>
+        [JsonPropertyName("displayName")]
+        public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The URLs associated with the attachment, each referring to a different representation of the attachment.
+        /// </summary>
+        [JsonPropertyName("urls")]
+        public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl> Urls { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the attachment expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl
+    {
+
+        /// <summary>
+        /// The fully qualified URL of the attachment.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The media type of the attachment.
+        /// </summary>
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// The type of consumer the URL is intended for.
+        /// </summary>
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
+        public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
     {
 
         /// <summary>
-        /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+        /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
@@ -4076,7 +4452,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Dialog
     {
 
@@ -4245,7 +4621,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
     {
 
@@ -4257,7 +4633,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel
     {
 
@@ -4269,7 +4645,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Content
     {
 
@@ -4330,7 +4706,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Tag
     {
 
@@ -4342,7 +4718,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Attachment
     {
 
@@ -4372,7 +4748,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
     {
 
@@ -4397,7 +4773,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Transmission
     {
 
@@ -4470,7 +4846,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
     {
 
@@ -4494,7 +4870,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
     {
 
@@ -4524,7 +4900,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
     {
 
@@ -4549,7 +4925,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_GuiAction
     {
 
@@ -4618,7 +4994,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_ApiAction
     {
 
@@ -4658,7 +5034,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_ApiActionEndpoint
     {
 
@@ -4717,7 +5093,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_Activity
     {
 
@@ -4768,7 +5144,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class JsonPatchOperations_Operation
     {
 
@@ -4790,7 +5166,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum JsonPatchOperations_OperationType
     {
 

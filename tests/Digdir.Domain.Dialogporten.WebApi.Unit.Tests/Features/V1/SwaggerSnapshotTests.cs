@@ -28,7 +28,7 @@ public class SwaggerSnapshotTests
 
         Assert.True(File.Exists(newSwaggerPath), $"Swagger file not found at {newSwaggerPath}. Make sure you have built the project in RELEASE mode.");
         // Act
-        var newSwagger = await File.ReadAllTextAsync(newSwaggerPath);
+        var newSwagger = await File.ReadAllTextAsync(newSwaggerPath, TestContext.Current.CancellationToken);
 
         // The order of the properties in the swagger.json file is not cross-platform deterministic.
         // Running Nswag on Windows and Mac will produce

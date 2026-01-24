@@ -10,7 +10,11 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Json;
 public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
 {
     private const string JwtBearerAuth = "JWTBearerAuth";
-    private const string ServiceOwnerSearchPath = "/api/v1/serviceowner/dialogs";
+    private static readonly HashSet<string> ServiceOwnerSearchPaths = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "/api/v1/serviceowner/dialogs",
+        "/api/v1/serviceowner/dialogs/endusercontext"
+    };
 
     public bool Process(OperationProcessorContext context)
     {
@@ -37,6 +41,7 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
         return true;
     }
 
-    private static bool IsServiceOwnerSearchEndpoint(OpenApiOperationDescription description)
-        => description is { Path: ServiceOwnerSearchPath, Method: OpenApiOperationMethod.Get };
+    private static bool IsServiceOwnerSearchEndpoint(OpenApiOperationDescription description) =>
+        description.Method == OpenApiOperationMethod.Get
+        && ServiceOwnerSearchPaths.Contains(description.Path);
 }

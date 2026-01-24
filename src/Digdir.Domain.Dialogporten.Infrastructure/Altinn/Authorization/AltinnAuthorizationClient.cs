@@ -68,7 +68,7 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     {
         var request = new DialogDetailsAuthorizationRequest
         {
-            Claims = _user.GetPrincipal().Claims.ToList(),
+            ClaimsPrincipal = _user.GetPrincipal(),
             ServiceResource = dialogEntity.ServiceResource,
             DialogId = dialogEntity.Id,
             Party = dialogEntity.Party,
@@ -98,12 +98,8 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
     }
 
     public async Task<AuthorizedPartiesResult> GetAuthorizedParties(IPartyIdentifier authenticatedParty, bool flatten = false,
-        CancellationToken cancellationToken = default)
-    {
-        var authorizedPartiesRequest = new AuthorizedPartiesRequest(authenticatedParty);
-
-        return await GetAuthorizedPartiesInternal(authorizedPartiesRequest, flatten, cancellationToken);
-    }
+        CancellationToken cancellationToken = default) =>
+        await GetAuthorizedPartiesInternal(new AuthorizedPartiesRequest(authenticatedParty), flatten, cancellationToken);
 
     private async Task<AuthorizedPartiesResult> GetAuthorizedPartiesInternal(
         AuthorizedPartiesRequest authorizedPartiesRequest,
@@ -111,6 +107,30 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         CancellationToken cancellationToken)
     {
         AuthorizedPartiesResult authorizedParties;
+
+
+        // Self-identified/Feide users are not currently supported in the access management API, so we need to emulate it.
+        // Assume they can only represent themselves, and have no delegated rights.
+
+        // We currently do not have any support in the Register API to resolve the name of self-identified users,
+        // so we need to get this from the request context, which means this will ONLY work in end-user contexts
+        // where there is a end-user token available, ie. not in service owner contexts (using ?EndUserId=...) or
+        // service contexts.
+        switch (authorizedPartiesRequest.PartyIdentifier)
+        {
+            case IdportenEmailUserIdentifier
+                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForIdportenEmailUsers:
+            case AltinnSelfIdentifiedUserIdentifier
+                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForAltinnSelfIdentifiedUsers:
+            case FeideUserIdentifier
+                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForFeideUsers:
+                return GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(authorizedPartiesRequest);
+
+            // ReSharper disable once RedundantEmptySwitchSection
+            default:
+                break;
+        }
+
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
             authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
@@ -118,6 +138,28 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         }
 
         return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
+    }
+
+    private AuthorizedPartiesResult GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(
+        AuthorizedPartiesRequest authorizedPartiesRequest)
+    {
+        var authorizedPartiesResultDto = new AuthorizedPartiesResultDto
+        {
+            PartyUuid = _user.GetPrincipal().TryGetPartyUuid(out var uuid) ? uuid : throw new UnreachableException("Expected party UUID to be present in current principal"),
+            PartyId = _user.GetPrincipal().TryGetPartyId(out var partyId) ? partyId : throw new UnreachableException("Expected party ID to be present in current principal"),
+            Name = authorizedPartiesRequest.PartyIdentifier.Id,
+            OrganizationNumber = "",
+            Type = AuthorizedPartiesHelper.PartyTypeSelfIdentified,
+            IsDeleted = false,
+            AuthorizedRoles = [AuthorizedPartiesHelper.SelfIdentifiedUserRoleCode],
+            OnlyHierarchyElementWithNoAccess = false,
+            AuthorizedResources = [],
+            AuthorizedAccessPackages = [],
+            AuthorizedInstances = [],
+            Subunits = []
+        };
+
+        return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult([authorizedPartiesResultDto], authorizedPartiesRequest);
     }
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
@@ -224,10 +266,10 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         // will always be able to represent themselves as a minimum, unless a party filter is supplied
         if (authorizedPartiesDto is null || (
                 authorizedPartiesDto.Count == 0
-                && authorizedPartiesRequest.Type != SystemUserIdentifier.Prefix
+                && authorizedPartiesRequest.PartyIdentifier is not SystemUserIdentifier
                 && authorizedPartiesRequest.PartyFilter.Count == 0))
         {
-            _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.Type, authorizedPartiesRequest.Value);
+            _logger.LogWarning("Empty authorized parties for party T={Type} V={Value}", authorizedPartiesRequest.PartyIdentifier.Prefix(), authorizedPartiesRequest.PartyIdentifier.Id);
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
         }
 
@@ -323,10 +365,10 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
         DialogDetailsAuthorizationRequest request, CancellationToken cancellationToken)
     {
         var xacmlJsonRequest = DecisionRequestHelper.CreateDialogDetailsRequest(request);
-        var xamlJsonResponse = await SendPdpRequest(xacmlJsonRequest, cancellationToken);
-        LogIfIndeterminate(xamlJsonResponse, xacmlJsonRequest);
+        var xacmlJsonResponse = await SendPdpRequest(xacmlJsonRequest, cancellationToken);
+        LogIfIndeterminate(xacmlJsonResponse, xacmlJsonRequest);
 
-        return DecisionRequestHelper.CreateDialogDetailsResponse(request.AltinnActions, xamlJsonResponse);
+        return DecisionRequestHelper.CreateDialogDetailsResponse(request.AltinnActions, xacmlJsonResponse);
     }
 
     private void LogIfIndeterminate(XacmlJsonResponse? response, XacmlJsonRequestRoot request)

@@ -19,6 +19,7 @@ public sealed class FreezeDialogEndpointSummary : Summary<FreezeDialogEndpoint>
         Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("freeze");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[StatusCodes.Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
         Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
     }

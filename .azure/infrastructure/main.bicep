@@ -79,6 +79,7 @@ param postgresConfiguration {
   highAvailability: PostgresHighAvailabilityConfig?
   backupRetentionDays: int
   availabilityZone: string
+  enableBackupVault: bool
 }
 
 param deployerPrincipalName string
@@ -238,6 +239,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     highAvailability: postgresConfiguration.?highAvailability
     backupRetentionDays: postgresConfiguration.backupRetentionDays
     availabilityZone: postgresConfiguration.availabilityZone
+    enableBackupVault: postgresConfiguration.enableBackupVault
     deployerPrincipalName: deployerPrincipalName
     tags: tags
   }

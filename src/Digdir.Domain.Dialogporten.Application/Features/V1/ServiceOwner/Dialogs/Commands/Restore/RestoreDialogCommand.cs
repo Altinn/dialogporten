@@ -21,7 +21,7 @@ public sealed class RestoreDialogCommand : IRequest<RestoreDialogResult>, ISilen
 }
 
 [GenerateOneOf]
-public sealed partial class RestoreDialogResult : OneOfBase<RestoreDialogSuccess, EntityNotFound, ConcurrencyError>;
+public sealed partial class RestoreDialogResult : OneOfBase<RestoreDialogSuccess, EntityNotFound, ConcurrencyError, Conflict>;
 
 public sealed record RestoreDialogSuccess(Guid Revision);
 
@@ -68,7 +68,8 @@ internal sealed class RestoreDialogCommandHandler : IRequestHandler<RestoreDialo
         return saveResult.Match<RestoreDialogResult>(
             success => new RestoreDialogSuccess(dialog.Revision),
             domainError => throw new UnreachableException("Should never get a domain error when restoring a dialog"),
-            concurrencyError => concurrencyError
+            concurrencyError => concurrencyError,
+            conflict => conflict
         );
     }
 }

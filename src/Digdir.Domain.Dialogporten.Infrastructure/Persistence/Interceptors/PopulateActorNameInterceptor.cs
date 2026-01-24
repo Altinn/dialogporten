@@ -123,7 +123,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 _ => throw new UnreachableException()
             };
 
-            mainActorName.CreateId();
+            mainActorName.EnsureId();
             mainActorName.Create(_transactionTime.Value);
             foreach (var actor in discardActorNames.SelectMany(x => x.ActorEntities))
             {

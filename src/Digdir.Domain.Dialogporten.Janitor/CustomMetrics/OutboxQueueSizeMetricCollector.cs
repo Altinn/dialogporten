@@ -11,7 +11,7 @@ namespace Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 /// Uses PostgreSQL statistics for fast estimation instead of COUNT(*).
 /// A growing queue size may indicate issues with message delivery.
 /// </summary>
-public sealed class OutboxQueueSizeMetricCollector : IMetricCollector
+public sealed partial class OutboxQueueSizeMetricCollector : IMetricCollector
 {
     private readonly string _connectionString;
     private readonly ILogger<OutboxQueueSizeMetricCollector> _logger;
@@ -54,6 +54,9 @@ public sealed class OutboxQueueSizeMetricCollector : IMetricCollector
 
         _latestValue = value;
 
-        _logger.LogDebug("Outbox queue size estimate: {Value}", value);
+        LogOutboxQueueSizeEstimateValue(value);
     }
+
+    [LoggerMessage(LogLevel.Debug, "Outbox queue size estimate: {Value}")]
+    partial void LogOutboxQueueSizeEstimateValue(long Value);
 }

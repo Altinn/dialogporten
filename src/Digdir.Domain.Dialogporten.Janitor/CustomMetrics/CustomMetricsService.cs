@@ -7,7 +7,7 @@ namespace Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 /// Service that orchestrates the collection of custom metrics.
 /// Each collector is responsible for its own instrument creation and recording.
 /// </summary>
-public sealed class CustomMetricsService
+public sealed partial class CustomMetricsService
 {
     private readonly IEnumerable<IMetricCollector> _collectors;
     private readonly ILogger<CustomMetricsService> _logger;
@@ -29,16 +29,14 @@ public sealed class CustomMetricsService
     public async Task CollectAllMetricsAsync(CancellationToken cancellationToken)
     {
         var collectorList = _collectors.ToList();
-        _logger.LogDebug(
-            "Starting custom metrics collection with {CollectorCount} registered collectors",
-            collectorList.Count);
+        LogStartingCustomMetricsCollection(collectorList.Count);
 
         foreach (var collector in collectorList)
         {
             try
             {
                 await collector.CollectAndRecordAsync(cancellationToken);
-                _logger.LogDebug("Collected metric: {MetricName}", collector.MetricName);
+                LogCollectedMetric(collector.MetricName);
             }
             catch (OperationCanceledException)
             {
@@ -53,4 +51,10 @@ public sealed class CustomMetricsService
         _meterProvider?.ForceFlush();
         _logger.LogDebug("Custom metrics collection completed.");
     }
+
+    [LoggerMessage(LogLevel.Debug, "Starting custom metrics collection with {CollectorCount} registered collectors")]
+    partial void LogStartingCustomMetricsCollection(int CollectorCount);
+
+    [LoggerMessage(LogLevel.Debug, "Collected metric: {MetricName}")]
+    partial void LogCollectedMetric(string MetricName);
 }

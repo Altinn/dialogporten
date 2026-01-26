@@ -15,7 +15,7 @@ public sealed class OutboxQueueSizeMetricCollector : IMetricCollector
 {
     private readonly string _connectionString;
     private readonly ILogger<OutboxQueueSizeMetricCollector> _logger;
-    private readonly UpDownCounter<long> _counter;
+    private long _latestValue;
 
     public OutboxQueueSizeMetricCollector(
         IConfiguration configuration,
@@ -25,10 +25,9 @@ public sealed class OutboxQueueSizeMetricCollector : IMetricCollector
             ?? throw new InvalidOperationException("Infrastructure:DialogDbConnectionString is not configured");
         _logger = logger;
 
-        // Using UpDownCounter (push-based) instead of ObservableGauge (pull-based) because
-        // in short-lived jobs, the app exits before the OpenTelemetry SDK can poll ObservableGauge callbacks.
-        _counter = CustomMetrics.Meter.CreateUpDownCounter<long>(
+        CustomMetrics.Meter.CreateObservableGauge(
             MetricName,
+            () => _latestValue,
             unit: "items",
             description: "Estimated number of pending messages in the MassTransit outbox queue");
     }
@@ -53,8 +52,7 @@ public sealed class OutboxQueueSizeMetricCollector : IMetricCollector
         var result = await command.ExecuteScalarAsync(cancellationToken);
         var value = result is long count ? count : Convert.ToInt64(result, CultureInfo.InvariantCulture);
 
-        // Record the current queue size
-        _counter.Add(value);
+        _latestValue = value;
 
         _logger.LogDebug("Outbox queue size estimate: {Value}", value);
     }

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Metrics;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 
@@ -10,13 +11,16 @@ public sealed class CustomMetricsService
 {
     private readonly IEnumerable<IMetricCollector> _collectors;
     private readonly ILogger<CustomMetricsService> _logger;
+    private readonly MeterProvider? _meterProvider;
 
     public CustomMetricsService(
         IEnumerable<IMetricCollector> collectors,
-        ILogger<CustomMetricsService> logger)
+        ILogger<CustomMetricsService> logger,
+        MeterProvider? meterProvider = null)
     {
         _collectors = collectors ?? throw new ArgumentNullException(nameof(collectors));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _meterProvider = meterProvider;
     }
 
     /// <summary>
@@ -46,6 +50,7 @@ public sealed class CustomMetricsService
             }
         }
 
+        _meterProvider?.ForceFlush();
         _logger.LogDebug("Custom metrics collection completed.");
     }
 }

@@ -124,4 +124,7 @@ module customMetricsJob '../../modules/containerAppJob/main.bicep' = {
     replicaTimeOutInSeconds: replicaTimeOutInSeconds
     workloadProfileName: workloadProfileName
   }
+  dependsOn: [
+    keyVaultReaderAccessPolicy
+  ]
 }

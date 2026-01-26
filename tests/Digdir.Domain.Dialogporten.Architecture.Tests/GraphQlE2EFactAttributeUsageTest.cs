@@ -27,7 +27,7 @@ public class GraphQlE2EFactAttributeUsageTest
 
         var nonBaseClasses = testMethods
             .Select(m => m.DeclaringType)
-            .Where(t => t is not null && !t.IsSubclassOf(typeof(E2ETestBase)))
+            .Where(t => t is not null && !InheritsFromE2ETestBase(t))
             .Distinct()
             .Select(t => t!.FullName!)
             .OrderBy(name => name)
@@ -60,5 +60,23 @@ public class GraphQlE2EFactAttributeUsageTest
             .BeEmpty(
                 $"All tests in the GraphQl E2E project must use {nameof(E2EFactAttribute)} " +
                 $"or {nameof(E2ETheoryAttribute)}.");
+    }
+
+    private static bool InheritsFromE2ETestBase(Type? type)
+    {
+        if (type is null)
+        {
+            return false;
+        }
+
+        for (var current = type; current is not null; current = current.BaseType)
+        {
+            if (current.IsGenericType && current.GetGenericTypeDefinition() == typeof(E2ETestBase<>))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

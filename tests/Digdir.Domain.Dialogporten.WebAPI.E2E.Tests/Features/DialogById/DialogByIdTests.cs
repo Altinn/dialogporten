@@ -1,90 +1,40 @@
-﻿using Digdir.Library.Dialogporten.E2E.Common;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests;
+using Digdir.Library.Dialogporten.E2E.Common;
 using FluentAssertions;
-using StrawberryShake;
 using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.DialogById;
 
-[Collection(nameof(TestCollectionFixture))]
-public class DialogByIdTests : E2ETestBase
+[Collection(nameof(WebApiTestCollectionFixture))]
+public class DialogByIdTests : E2ETestBase<WebApiE2EFixture>
 {
-
-    public DialogByIdTests(E2EFixture fixture) : base(fixture) { }
+    public DialogByIdTests(WebApiE2EFixture fixture) : base(fixture) { }
 
     [E2EFact]
-    public async Task Should_Return_Typed_NotFound_Error_For_Invalid_DialogId()
+    public async Task Should_Create_Dialog_Using_ServiceOwner_Api()
     {
-        // Arrange
-        var dialogId = Guid.NewGuid();
-
         // Act
-        var result = await GetDialog(dialogId);
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Assert
-        result.Data.Should().NotBeNull();
-
-        var error = result.Data.DialogById.Errors.Single();
-
-        error.Should().BeOfType<GetDialogById_DialogById_Errors_DialogByIdNotFound>();
-        error.Message.Should().Contain(dialogId.ToString());
+        dialogId.Should().NotBe(Guid.Empty);
     }
 
     [E2EFact]
-    public async Task Should_Return_Dialog_For_Valid_DialogId()
+    public async Task Should_Get_Dialog_By_Id_Using_ServiceOwner_Api()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var result = await GetDialog(dialogId);
+        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
+            dialogId,
+            endUserId: string.Empty,
+            TestContext.Current.CancellationToken);
 
         // Assert
-        result.Data.Should().NotBeNull();
-
-        var dialog = result.Data.DialogById.Dialog;
-        dialog.Should().NotBeNull();
-        dialog.Id.Should().Be(dialogId);
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        content.Id.Should().Be(dialogId);
     }
-
-    [E2EFact]
-    public async Task Should_Return_401_Unauthorized_With_Invalid_EndUser_Token()
-    {
-        // Arrange
-        using var _ = Fixture.UseEndUserTokenOverrides(tokenOverride: "invalid.jwt.token");
-        var dialogId = Guid.NewGuid();
-
-        // Act
-        var result = await GetDialog(dialogId);
-
-        // Assert
-        result.Errors.Should().ContainSingle()
-            .Which.Message.Should().Contain("401 (Unauthorized)");
-    }
-
-    [E2EFact]
-    public async Task Should_Return_Typed_NotFound_Result_When_Using_Unauthorized_Party()
-    {
-        // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
-
-        // Act
-        // Fetching dialog with default EndUser, should return dialog
-        var authorizedResult = await GetDialog(dialogId);
-
-        using var _ = Fixture.UseEndUserTokenOverrides(ssn: "27069815400");
-        var unauthorizedResult = await GetDialog(dialogId);
-
-        // Assert
-        authorizedResult.Data.Should().NotBeNull();
-        authorizedResult.Data.DialogById.Dialog!.Id.Should().Be(dialogId);
-
-        unauthorizedResult.Data.Should().NotBeNull();
-        var error = unauthorizedResult.Data.DialogById.Errors.Single();
-
-        error.Should().BeOfType<GetDialogById_DialogById_Errors_DialogByIdNotFound>();
-        error.Message.Should().Contain(dialogId.ToString());
-    }
-
-    private Task<IOperationResult<IGetDialogByIdResult>> GetDialog(Guid dialogId) =>
-        Fixture.GraphQlClient.GetDialogById.ExecuteAsync(dialogId, TestContext.Current.CancellationToken);
 }

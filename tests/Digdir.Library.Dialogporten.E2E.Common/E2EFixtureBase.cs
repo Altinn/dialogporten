@@ -12,14 +12,13 @@ using static System.Text.Json.Serialization.JsonIgnoreCondition;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
-public class E2EFixture : IAsyncLifetime
+public abstract class E2EFixtureBase : IAsyncLifetime
 {
     private ServiceProvider? _serviceProvider;
     private ITokenOverridesAccessor? _tokenOverridesAccessor;
 
     private PreflightState? PreflightState { get; set; }
 
-    public IDialogportenGraphQlTestClient GraphQlClient { get; private set; } = null!;
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
@@ -79,17 +78,14 @@ public class E2EFixture : IAsyncLifetime
 
         var graphQlUri = graphQlUriBuilder.Uri;
 
-        services
-            .AddDialogportenGraphQlTestClient()
-            .ConfigureHttpClient(x => x.BaseAddress = graphQlUri,
-                builder => builder.AddHttpMessageHandler(serviceProvider =>
-                    ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser)));
+        ConfigureServices(services, settings, webApiUri, graphQlUri);
 
         _serviceProvider = services.BuildServiceProvider();
 
-        GraphQlClient = _serviceProvider.GetRequiredService<IDialogportenGraphQlTestClient>();
         ServiceownerApi = _serviceProvider.GetRequiredService<IServiceownerApi>();
         _tokenOverridesAccessor = _serviceProvider.GetRequiredService<ITokenOverridesAccessor>();
+
+        AfterServiceProviderBuilt(_serviceProvider);
 
         PreflightState = await CreatePreflightState(graphQlUri, webApiUri);
     }
@@ -130,7 +126,7 @@ public class E2EFixture : IAsyncLifetime
             throw new InvalidOperationException("Preflight state is not initialized.");
         }
 
-        if (PreflightState.GraphQlError is not null)
+        if (IncludeGraphQlPreflight && PreflightState.GraphQlError is not null)
         {
             preFlightIssues.Add($"GraphQL not reachable at {PreflightState.GraphQlUri}. Error: {PreflightState.GraphQlError}");
         }
@@ -230,6 +226,20 @@ public class E2EFixture : IAsyncLifetime
             _tokenOverridesAccessor = originalAccessor;
         }
     }
+
+    protected virtual void ConfigureServices(
+        IServiceCollection services,
+        E2ESettings settings,
+        Uri webApiUri,
+        Uri graphQlUri)
+    {
+    }
+
+    protected virtual void AfterServiceProviderBuilt(ServiceProvider serviceProvider)
+    {
+    }
+
+    protected virtual bool IncludeGraphQlPreflight => true;
 
     private static async Task<PreflightState> CreatePreflightState(Uri graphQlUri, Uri webApiUri)
     {

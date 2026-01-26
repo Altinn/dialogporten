@@ -46,7 +46,7 @@ dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests Tok
 
 ## Writing tests
 Use the shared E2E base class and custom attributes so hooks and explicit behavior are consistent:
-- Inherit `E2ETestBase` and keep tests under `Features/*`.
+- Inherit `E2ETestBase<WebApiE2EFixture>` and keep tests under `Features/*`.
 - Use `[E2EFact]` or `[E2ETheory]` on every test (do not use `[Fact]`/`[Theory]`).
 - Explicit behavior is centralized in `E2EExplicitOptions` in `Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs`.
 

@@ -1,15 +1,16 @@
-﻿using Digdir.Library.Dialogporten.E2E.Common;
+﻿using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests;
+using Digdir.Library.Dialogporten.E2E.Common;
 using FluentAssertions;
 using StrawberryShake;
 using Xunit;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
 
-[Collection(nameof(TestCollectionFixture))]
-public class DialogByIdTests : E2ETestBase
+[Collection(nameof(GraphQlTestCollectionFixture))]
+public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
 {
 
-    public DialogByIdTests(E2EFixture fixture) : base(fixture) { }
+    public DialogByIdTests(GraphQlE2EFixture fixture) : base(fixture) { }
 
     [E2EFact]
     public async Task Should_Return_Typed_NotFound_Error_For_Invalid_DialogId()

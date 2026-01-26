@@ -32,7 +32,7 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
         var settings = new VerifySettings();
 
         // Timestamps and tiebreaker UUIDs on continuation token will differ on each run
-        settings.IgnoreMember(nameof(PaginatedList<DialogDto>.ContinuationToken));
+        settings.IgnoreMember(nameof(PaginatedList<>.ContinuationToken));
         settings.UseFileName($"OrderBySnapshotTests.{orderBy}");
 
         await Verify(pages, settings)

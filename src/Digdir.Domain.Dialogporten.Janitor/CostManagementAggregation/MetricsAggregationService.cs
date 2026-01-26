@@ -2,9 +2,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
-public sealed class MetricsAggregationService
+public sealed partial class MetricsAggregationService
 {
+    // Used by source-generated logging partials; analyzers don't see the generated usage.
+#pragma warning disable IDE0052
     private readonly ILogger<MetricsAggregationService> _logger;
+#pragma warning restore IDE0052
+
     private readonly CostCoefficients _costCoefficients;
 
     public MetricsAggregationService(ILogger<MetricsAggregationService> logger, CostCoefficients costCoefficients)
@@ -16,7 +20,7 @@ public sealed class MetricsAggregationService
     public List<AggregatedCostMetricsRecord> AggregateFeatureMetrics(List<CostMetricRecord> rawMetrics)
     {
         ArgumentNullException.ThrowIfNull(rawMetrics);
-        _logger.LogInformation("Aggregating {RecordCount} raw feature metric records", rawMetrics.Count);
+        LogAggregatingRawFeatureMetrics(rawMetrics.Count);
 
         // Map feature types to transaction types and filter out unmapped ones
         var mappedMetrics = rawMetrics
@@ -31,7 +35,7 @@ public sealed class MetricsAggregationService
         var excludedCount = rawMetrics.Count - mappedMetrics.Count;
         if (excludedCount > 0)
         {
-            _logger.LogInformation("Excluded {ExcludedCount} feature metrics with no transaction type mapping from cost aggregation", excludedCount);
+            LogExcludedFeatureMetrics(excludedCount);
         }
 
         // TODO: Add lookup for org short name
@@ -65,7 +69,7 @@ public sealed class MetricsAggregationService
             .ThenBy(r => r.TransactionType)
             .ToList();
 
-        _logger.LogInformation("Aggregated into {AggregatedCount} records", aggregated.Count);
+        LogAggregatedFeatureMetrics(aggregated.Count);
         return aggregated;
     }
 
@@ -78,6 +82,15 @@ public sealed class MetricsAggregationService
             "yt01" => "YT01",
             _ => azureEnvironmentName // Return as-is if unknown
         };
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Aggregating {RecordCount} raw feature metric records")]
+    private partial void LogAggregatingRawFeatureMetrics(int recordCount);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Excluded {ExcludedCount} feature metrics with no transaction type mapping from cost aggregation")]
+    private partial void LogExcludedFeatureMetrics(int excludedCount);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Aggregated into {AggregatedCount} records")]
+    private partial void LogAggregatedFeatureMetrics(int aggregatedCount);
 }
 
 public sealed class AggregatedCostMetricsRecord

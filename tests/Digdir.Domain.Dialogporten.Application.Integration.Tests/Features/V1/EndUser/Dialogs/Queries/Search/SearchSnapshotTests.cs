@@ -56,7 +56,7 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
         var settings = new VerifySettings();
 
         // Timestamps and tiebreaker UUIDs on continuation token will differ on each run
-        settings.IgnoreMember(nameof(PaginatedList<DialogDto>.ContinuationToken));
+        settings.IgnoreMember(nameof(PaginatedList<>.ContinuationToken));
 
         await Verify(searchResult, settings)
             .UseDirectory("Snapshots");

@@ -12,7 +12,7 @@
         <RootNamespace>Altinn.ApiClients.Dialogporten</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591,1573</NoWarn>
-        <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
         <BuildInParallel>false</BuildInParallel>
         <ImplicitUsings>true</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -23,14 +23,14 @@
         <None Include="../../LICENSE" Pack="true" PackagePath="/"/>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0' and '$(Configuration)' == 'Release'">
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(Configuration)' == 'Release'">
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
                           ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.1"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.12" />
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.0.1-alpha"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.2" />
         <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="Refit" Version="9.0.2" />
         <PackageReference Include="Refit.HttpClientFactory" Version="9.0.2" />

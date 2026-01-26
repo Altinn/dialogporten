@@ -17,7 +17,7 @@ public sealed class SyncSubjectMapCommand : IRequest<SyncSubjectMapResult>, IFea
 [GenerateOneOf]
 public sealed partial class SyncSubjectMapResult : OneOfBase<Success, ValidationError>;
 
-internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubjectMapCommand, SyncSubjectMapResult>
+internal sealed partial class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubjectMapCommand, SyncSubjectMapResult>
 {
     private const int DefaultBatchSize = 1000;
     private readonly IResourceRegistry _resourceRegistry;
@@ -45,7 +45,7 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
                 timeSkew: TimeSpan.FromMicroseconds(1),
                 cancellationToken: cancellationToken);
 
-        _logger.LogInformation("Fetching updated subject-resources since {LastUpdated:O}.", lastUpdated);
+        LogFetchingUpdatedSubjectResourcesSince(lastUpdated);
 
         try
         {
@@ -62,14 +62,14 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
                     .ToList();
 
                 var batchMergeCount = await _subjectResourceRepository.Merge(mergeableSubjectResources, cancellationToken);
-                _logger.LogInformation("{BatchMergeCount} subject-resources added to transaction.", batchMergeCount);
+                LogSubjectResourcesAddedToTransaction(batchMergeCount);
                 mergeCount += batchMergeCount;
             }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             if (mergeCount > 0)
             {
-                _logger.LogInformation("Successfully synced {UpdatedAmount} total subject-resources. Changes committed.", mergeCount);
+                LogSuccessfullySyncedSubjectResources(mergeCount);
             }
             else
             {
@@ -84,4 +84,13 @@ internal sealed class SyncSubjectMapCommandHandler : IRequestHandler<SyncSubject
             throw;
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Fetching updated subject-resources since {LastUpdated:O}.")]
+    private partial void LogFetchingUpdatedSubjectResourcesSince(DateTimeOffset lastUpdated);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{BatchMergeCount} subject-resources added to transaction.")]
+    private partial void LogSubjectResourcesAddedToTransaction(int batchMergeCount);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Successfully synced {UpdatedAmount} total subject-resources. Changes committed.")]
+    private partial void LogSuccessfullySyncedSubjectResources(int updatedAmount);
 }

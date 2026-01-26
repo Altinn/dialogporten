@@ -41,7 +41,8 @@ The SwaggerSnapshot test will fail if these files are not identical. The Swagger
 - Prefer immutable LINQ pipelines over mutating existing collections.
 
 ### Modern C# Syntax (Required)
-- Target latest language features available in the solution (.NET 9 / C# 13).
+- Target latest language features available in the solution (.NET 10 / C# 14).
+- Use the field keyword for auto properties
 - Prefer pattern matching (`switch` expressions, property patterns) over `if/else` chains.
 - Prefer switch expressions over statement-based `switch`.
 - Prefer `if/else` chains over statement-based `switch`.

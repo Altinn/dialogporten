@@ -29,8 +29,9 @@ public static class Program
 
     private static int _dialogCounter;
     private static readonly Stopwatch Stopwatch = new();
-    private static Randomizer MyRandomizer => _threadRandomizer ??= new Randomizer();
-    [ThreadStatic] private static Randomizer? _threadRandomizer;
+
+    [field: ThreadStatic]
+    private static Randomizer MyRandomizer => field ??= new Randomizer();
 
     private static async Task RunAsync(Options options)
     {

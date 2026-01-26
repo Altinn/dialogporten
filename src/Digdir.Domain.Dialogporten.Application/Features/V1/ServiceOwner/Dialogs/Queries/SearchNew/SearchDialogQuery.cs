@@ -20,8 +20,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, DialogEntity>, IRequest<SearchDialogResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
-    private string? _searchLanguageCode;
-
     /// <summary>
     /// Filter by one or more service resources
     /// </summary>
@@ -52,16 +50,14 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public List<DialogStatus.Values>? Status { get; set; }
 
-    private DeletedFilter? _deleted = DeletedFilter.Exclude;
-
     /// <summary>
     /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
     /// </summary>
     public DeletedFilter? Deleted
     {
-        get => _deleted;
-        set => _deleted = value ?? DeletedFilter.Exclude;
-    }
+        get;
+        set => field = value ?? DeletedFilter.Exclude;
+    } = DeletedFilter.Exclude;
 
     /// <summary>
     /// Only return dialogs created after this date
@@ -143,8 +139,8 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public string? SearchLanguageCode
     {
-        get => _searchLanguageCode;
-        init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
+        get;
+        init => field = Localization.NormalizeCultureCode(value);
     }
 }
 

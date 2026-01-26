@@ -7,13 +7,11 @@ public sealed class DialogServiceOwnerLabel : IImmutableEntity, ICreatableEntity
 {
     public const int MaxNumberOfLabels = 20;
 
-    private string _value = null!;
-
     public string Value
     {
-        get => _value;
-        set => _value = value.Trim().ToLowerInvariant();
-    }
+        get;
+        set => field = value.Trim().ToLowerInvariant();
+    } = null!;
 
     public DateTimeOffset CreatedAt { get; set; }
 

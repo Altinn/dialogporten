@@ -7974,6 +7974,14 @@
                 },
                 "type": "array"
               }
+            },
+            "application/json-patch\u002Bjson": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/JsonPatchOperations_Operation"
+                },
+                "type": "array"
+              }
             }
           },
           "required": true,

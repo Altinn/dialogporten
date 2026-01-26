@@ -140,6 +140,10 @@ internal static class Commands
                     logger.LogInformation("collect-custom-metrics command completed successfully");
                     return 0;
                 }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "collect-custom-metrics command failed with exception: {Message}", ex.Message);

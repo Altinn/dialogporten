@@ -20,7 +20,7 @@ public sealed class CustomMetricsService
     {
         _collectors = collectors ?? throw new ArgumentNullException(nameof(collectors));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _meterProvider = meterProvider;
+        _meterProvider = meterProvider ?? throw new ArgumentNullException(nameof(meterProvider));
     }
 
     /// <summary>

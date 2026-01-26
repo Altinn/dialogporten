@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.100.2](https://github.com/Altinn/dialogporten/compare/v1.100.1...v1.100.2) (2026-01-26)
+
+
+### Miscellaneous Chores
+
+* upgrade to .NET10 ([#3311](https://github.com/Altinn/dialogporten/issues/3311)) ([038ac38](https://github.com/Altinn/dialogporten/commit/038ac389a3b6f24dfbb9291a1bf4dc5b0ae258fe))
+
 ## [1.100.1](https://github.com/Altinn/dialogporten/compare/v1.100.0...v1.100.1) (2026-01-25)
 
 

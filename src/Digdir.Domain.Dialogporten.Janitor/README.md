@@ -89,3 +89,16 @@ Below are the available commands (commands are always the first argument):
 ---
 
 
+### collect-custom-metrics
+
+- **Description:**  
+  Collects custom metrics from the Dialogporten database and emits them via OpenTelemetry to Azure Monitor.
+
+- **Current Metrics:**
+  - `dialogporten.outbox.queue_size`: Count of rows in the MassTransitOutboxState table.
+
+- **Example:**
+
+  ```bash
+  janitor collect-custom-metrics
+  ```

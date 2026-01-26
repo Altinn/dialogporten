@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Comman
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Search.Commands.ReindexDialogSearch;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
+using Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -121,6 +122,31 @@ internal static partial class Commands
                 return result.Match(
                     success => 0,
                     failure => -1);
+            });
+
+        app.AddCommand("collect-custom-metrics", async (
+                [FromService] CustomMetricsService metricsService,
+                [FromService] CoconaAppContext ctx,
+                [FromService] ILogger<CoconaApp> logger)
+            =>
+            {
+                logger.LogInformation("Starting collect-custom-metrics command");
+
+                try
+                {
+                    await metricsService.CollectAllMetricsAsync(ctx.CancellationToken);
+                    logger.LogInformation("collect-custom-metrics command completed successfully");
+                    return 0;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "collect-custom-metrics command failed with exception: {Message}", ex.Message);
+                    return -1;
+                }
             });
 
         return app;

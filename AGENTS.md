@@ -19,7 +19,8 @@ If a sandbox is absolutely needed, use `dotnet test Digdir.Domain.Dialogporten.s
 
 All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyzers.
 
-Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v1/*verified*.json` files. Use the corresponding `*received*.json` files, which are generated upon build, for synchronization. 
+Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v1/*verified*.json` files. Use the corresponding `*received*.json` files, which are generated upon build, for synchronization.
+Do not edit `schema.verified.graphql` or `swagger.verified.json` directly; they are automatically built and tested are through snapshot tests.
 The SwaggerSnapshot test will fail if these files are not identical. The SwaggerSnapshot test will fail if running the in debug configuration (must use release).
 
 ## Code Style Guidelines
@@ -61,4 +62,3 @@ The SwaggerSnapshot test will fail if these files are not identical. The Swagger
 ## Pull Requests
 - PR titles must follow the [Conventional Commits](https://www.conventionalcommits.org/) format, and must be prefixed such that the title is <type>[optional scope]: <description>. The title will be used as the squash commit message.
 - Do not manually modify `CHANGELOG.md` or `version.txt`; these files are managed by automation.
-

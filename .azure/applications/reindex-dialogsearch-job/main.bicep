@@ -43,15 +43,13 @@ var baseTags = {
   JobType: 'Manual'
 }
 
-module finopsTags '../../functions/finopsTags.bicep' = {
-  name: 'finopsTags'
-  params: {
-    environment: environment
-    existingTags: baseTags
-  }
-}
-
-var tags = finopsTags.outputs.tags
+var tags = union(baseTags, {
+  finops_environment: environment
+  finops_product: 'Dialogporten'
+  repository: 'https://github.com/altinn/dialogporten'
+  finops_serviceownercode: 'digdir'
+  finops_serviceownerorgnr: '991825827'
+})
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

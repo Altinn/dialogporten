@@ -35,14 +35,23 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+
 var name = '${namePrefix}-reindex-search'
-var tags = {
+var baseTags = {
   FullName: name
-  Environment: environment
-  Product: 'Dialogporten'
   Description: 'Manual janitor job to reindex dialog search'
   JobType: 'Manual'
 }
+
+module finopsTags '../../functions/finopsTags.bicep' = {
+  name: 'finopsTags'
+  params: {
+    environment: environment
+    existingTags: baseTags
+  }
+}
+
+var tags = finopsTags.outputs.tags
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

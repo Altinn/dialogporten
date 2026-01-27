@@ -103,10 +103,17 @@ var secrets = {
 
 var namePrefix = 'dp-be-${environment}'
 
-var tags = {
-  Environment: environment
-  Product: 'Dialogporten'
+var baseTags = {}
+
+module finopsTags '../functions/finopsTags.bicep' = {
+  name: 'finopsTags'
+  params: {
+    environment: environment
+    existingTags: baseTags
+  }
 }
+
+var tags = finopsTags.outputs.tags
 
 // Create resource groups
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {

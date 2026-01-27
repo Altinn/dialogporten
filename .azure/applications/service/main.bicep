@@ -83,10 +83,18 @@ param scale Scale = {
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-var tags = {
-  Environment: environment
-  Product: 'Dialogporten'
+
+var baseTags = {}
+
+module finopsTags '../../functions/finopsTags.bicep' = {
+  name: 'finopsTags'
+  params: {
+    environment: environment
+    existingTags: baseTags
+  }
 }
+
+var tags = finopsTags.outputs.tags
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationName

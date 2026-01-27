@@ -51,13 +51,21 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 // Pattern: dp-be-{environment}-applicationInsights
 var appInsightsName = 'dp-be-${environment}-applicationInsights'
 
-var tags = {
+var baseTags = {
   FullName: '${namePrefix}-aggregate-cost-metrics'
-  Environment: environment
-  Product: 'Dialogporten'
   Description: 'Aggregates cost metrics from Application Insights across environments'
   JobType: 'Scheduled'
 }
+
+module finopsTags '../../functions/finopsTags.bicep' = {
+  name: 'finopsTags'
+  params: {
+    environment: environment
+    existingTags: baseTags
+  }
+}
+
+var tags = finopsTags.outputs.tags
 
 var name = '${namePrefix}-cost-metrics'
 

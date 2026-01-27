@@ -54,14 +54,18 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-var tags = {
-  Environment: environment
-  Product: 'Dialogporten'
+
+var baseTags = {}
+
+module finopsTags '../../functions/finopsTags.bicep' = {
+  name: 'finopsTags'
+  params: {
+    environment: environment
+    existingTags: baseTags
+  }
 }
 
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
-  name: appConfigurationName
-}
+var tags = finopsTags.outputs.tags
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

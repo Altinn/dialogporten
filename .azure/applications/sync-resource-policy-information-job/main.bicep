@@ -39,18 +39,22 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-var tags = {
+
+var baseTags = {
   FullName: '${namePrefix}-sync-resource-policy-information'
-  Environment: environment
-  Product: 'Dialogporten'
   Description: 'Synchronizes resource policy information'
   JobType: 'Scheduled'
 }
-var name = '${namePrefix}-sync-rp-info'
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
-  name: containerAppEnvironmentName
+module finopsTags '../../functions/finopsTags.bicep' = {
+  name: 'finopsTags'
+  params: {
+    environment: environment
+    existingTags: baseTags
+  }
 }
+
+var tags = finopsTags.outputs.tags
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: '${namePrefix}-sync-rp-info-identity'

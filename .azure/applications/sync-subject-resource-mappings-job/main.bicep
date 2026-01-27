@@ -39,6 +39,7 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+var name = '${namePrefix}-sync-sr-mappings'
 
 var baseTags = {
   FullName: '${namePrefix}-sync-subject-resource-mappings'
@@ -53,6 +54,10 @@ var tags = union(baseTags, {
   finops_serviceownercode: 'digdir'
   finops_serviceownerorgnr: '991825827'
 })
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: '${namePrefix}-sync-sr-mappings-identity'

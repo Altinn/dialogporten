@@ -21,7 +21,7 @@ using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
-internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
+internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 {
     private const string AuthorizeUrl = "authorization/api/v1/authorize";
     private const string AuthorizedPartiesBaseUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties";
@@ -409,7 +409,15 @@ internal sealed class AltinnAuthorizationClient : IAltinnAuthorization
 
     private async Task<T?> SendRequest<T>(string url, object request, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Authorization request to {Url}: {RequestJson}", url, JsonSerializer.Serialize(request, SerializerOptions));
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            var requestJson = JsonSerializer.Serialize(request, SerializerOptions);
+            LogAuthorizationRequest(url, requestJson);
+        }
+
         return await _httpClient.PostAsJsonEnsuredAsync<T>(url, request, serializerOptions: SerializerOptions, cancellationToken: cancellationToken);
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Authorization request to {Url}: {RequestJson}")]
+    private partial void LogAuthorizationRequest(string url, string requestJson);
 }

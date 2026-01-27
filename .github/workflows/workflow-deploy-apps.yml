@@ -256,6 +256,8 @@ jobs:
           - name: reindex-dialogsearch-job
           - name: aggregate-cost-metrics-job
             environments: ['staging', 'prod']
+          - name: custom-metrics-job
+            environments: ['test', 'staging', 'prod']
     steps:
       - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:

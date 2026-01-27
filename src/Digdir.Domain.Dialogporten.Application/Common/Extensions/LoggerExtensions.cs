@@ -53,7 +53,10 @@ public static partial class LoggerExtensions
         {
             if (_disposed) return;
             _disposed = true;
-            OperationCompleted(_logger, _operationName, Stopwatch.GetElapsedTime(_startTimestamp).TotalMilliseconds);
+            if (!_logger.IsEnabled(Level)) return;
+
+            var elapsedMilliseconds = Stopwatch.GetElapsedTime(_startTimestamp).TotalMilliseconds;
+            OperationCompleted(_logger, _operationName, elapsedMilliseconds);
         }
     }
 

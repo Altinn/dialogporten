@@ -4,8 +4,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localization
 
 public sealed class LocalizationDto
 {
-    private readonly string _languageCode = null!;
-
     /// <summary>
     /// The localized text (or URL if a front-channel embed).
     /// </summary>
@@ -17,7 +15,7 @@ public sealed class LocalizationDto
     /// <example>nb</example>
     public required string LanguageCode
     {
-        get => _languageCode;
-        init => _languageCode = Localization.NormalizeCultureCode(value)!;
-    }
+        get;
+        init => field = Localization.NormalizeCultureCode(value)!;
+    } = null!;
 }

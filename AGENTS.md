@@ -19,8 +19,9 @@ If a sandbox is absolutely needed, use `dotnet test Digdir.Domain.Dialogporten.s
 
 All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyzers.
 
-Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v1/*verified*.json` files. Use the corresponding `*received*.json` files, which are generated upon build, for synchronization. 
-The SwaggerSnapshot test will fail if these files are not identical. The SwaggerSnapshot test will fail if running the in debug configuration (must use release).
+Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v1/*verified*.json` files. Use the corresponding `*received*.json` files, which are generated upon build, for synchronization.
+Do not edit `schema.verified.graphql` or `swagger.verified.json` directly; they are automatically generated and validated via snapshot tests.
+The SwaggerSnapshot test will fail if these files are not identical. It will also fail when run in Debug configuration (must use Release).
 
 ## Code Style Guidelines
 - Use file-scoped namespaces with `using` directives outside the namespace.
@@ -41,7 +42,8 @@ The SwaggerSnapshot test will fail if these files are not identical. The Swagger
 - Prefer immutable LINQ pipelines over mutating existing collections.
 
 ### Modern C# Syntax (Required)
-- Target latest language features available in the solution (.NET 9 / C# 13).
+- Target latest language features available in the solution (.NET 10 / C# 14).
+- Use the field keyword for auto properties
 - Prefer pattern matching (`switch` expressions, property patterns) over `if/else` chains.
 - Prefer switch expressions over statement-based `switch`.
 - Prefer `if/else` chains over statement-based `switch`.
@@ -60,4 +62,3 @@ The SwaggerSnapshot test will fail if these files are not identical. The Swagger
 ## Pull Requests
 - PR titles must follow the [Conventional Commits](https://www.conventionalcommits.org/) format, and must be prefixed such that the title is <type>[optional scope]: <description>. The title will be used as the squash commit message.
 - Do not manually modify `CHANGELOG.md` or `version.txt`; these files are managed by automation.
-

@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.100.2](https://github.com/Altinn/dialogporten/compare/v1.100.1...v1.100.2) (2026-01-26)
+
+
+### Miscellaneous Chores
+
+* upgrade to .NET10 ([#3311](https://github.com/Altinn/dialogporten/issues/3311)) ([038ac38](https://github.com/Altinn/dialogporten/commit/038ac389a3b6f24dfbb9291a1bf4dc5b0ae258fe))
+
+## [1.100.1](https://github.com/Altinn/dialogporten/compare/v1.100.0...v1.100.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* improved exception handlig in UnitOfWork ([#3264](https://github.com/Altinn/dialogporten/issues/3264)) ([2b8d039](https://github.com/Altinn/dialogporten/commit/2b8d039da5e04ce3e9fe4c41dae58a6895de8e59))
+* **infra:** retry generic DbUpdateConcurrencyException conflicts ([#3244](https://github.com/Altinn/dialogporten/issues/3244)) ([c096042](https://github.com/Altinn/dialogporten/commit/c0960425949acea37df36f1a2fbbfef9994ff847))
+* **search:** Cap overly large dialog content to avoid errors when indexing dialogs. ([#3133](https://github.com/Altinn/dialogporten/issues/3133)) ([84b09cf](https://github.com/Altinn/dialogporten/commit/84b09cf266b331535f19d9ac9bb12b35b7493abd))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v6.0.2 ([#3313](https://github.com/Altinn/dialogporten/issues/3313)) ([5e62d8b](https://github.com/Altinn/dialogporten/commit/5e62d8bc40fb401b5ee641db1df6a3e470aca530))
+* **infra:** Specify permissions on Github actions where missing ([#3307](https://github.com/Altinn/dialogporten/issues/3307)) ([86bedc8](https://github.com/Altinn/dialogporten/commit/86bedc8ca90768268f01e0420e7e04851fd6f985))
+
 ## [1.100.0](https://github.com/Altinn/dialogporten/compare/v1.99.2...v1.100.0) (2026-01-22)
 
 

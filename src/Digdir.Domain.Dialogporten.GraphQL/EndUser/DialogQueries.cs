@@ -34,10 +34,7 @@ public partial class Queries
             notFound => new DialogByIdPayload { Errors = [new DialogByIdNotFound { Message = notFound.Message }] },
             notVisible =>
             {
-                if (httpContextAccessor.HttpContext != null)
-                {
-                    httpContextAccessor.HttpContext.Response.Headers.Expires = notVisible.VisibleFrom.ToString("R");
-                }
+                httpContextAccessor.HttpContext?.Response.Headers.Expires = notVisible.VisibleFrom.ToString("R");
 
                 return new DialogByIdPayload
                 {

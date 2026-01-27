@@ -102,14 +102,19 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new EntityDeleted<DialogEntity>(request.Id);
         }
 
-        if (dialog.Frozen && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        var isCurrentUserServiceOwnerAdmin = _userResourceRegistry.IsCurrentUserServiceOwnerAdmin();
+        if (dialog.Frozen && !isCurrentUserServiceOwnerAdmin)
         {
             return new Forbidden("User cannot modify frozen dialog");
         }
 
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
-        ValidateTimeFields(dialog);
+
+        if (!request.IsSilentUpdate || !isCurrentUserServiceOwnerAdmin)
+        {
+            ValidateTimeFields(dialog);
+        }
 
         AppendActivity(dialog, request.Dto);
 
@@ -214,22 +219,22 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private void ValidateTimeFields(DialogAttachment attachment)
     {
         if (!_db.MustWhenModified(attachment,
-                propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > _clock.UtcNowOffset || x == null))
+            propertyExpression: x => x.ExpiresAt,
+            predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
-                                    $"{nameof(AttachmentDto.ExpiresAt)}",
+                $"{nameof(AttachmentDto.ExpiresAt)}",
                 $"Must be in future, current value, or null. (Id: {attachment.Id})");
             return;
         }
 
         if (!_db.MustWhenAdded(attachment,
-                propertyExpression: x => x.ExpiresAt,
-                predicate: x => x > _clock.UtcNowOffset || x == null))
+            propertyExpression: x => x.ExpiresAt,
+            predicate: x => x > _clock.UtcNowOffset || x == null))
         {
             var idString = attachment.Id == Guid.Empty ? string.Empty : $" (Id: {attachment.Id})";
             _domainContext.AddError($"{nameof(UpdateDialogDto.Attachments)}." +
-                                    $"{nameof(AttachmentDto.ExpiresAt)}",
+                $"{nameof(AttachmentDto.ExpiresAt)}",
                 $"Must be in future or null, got '{attachment.ExpiresAt}'.{idString}");
         }
     }

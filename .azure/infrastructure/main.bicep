@@ -103,17 +103,13 @@ var secrets = {
 
 var namePrefix = 'dp-be-${environment}'
 
-var baseTags = {}
-
-module finopsTags '../functions/finopsTags.bicep' = {
-  name: 'finopsTags'
-  params: {
-    environment: environment
-    existingTags: baseTags
-  }
+var tags = {
+  finops_environment: environment
+  finops_product: 'Dialogporten'
+  repository: 'https://github.com/altinn/dialogporten'
+  finops_serviceownercode: 'digdir'
+  finops_serviceownerorgnr: '991825827'
 }
-
-var tags = finopsTags.outputs.tags
 
 // Create resource groups
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {

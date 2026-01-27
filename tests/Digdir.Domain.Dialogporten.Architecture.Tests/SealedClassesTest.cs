@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using NetArchTest.Rules;
 
 namespace Digdir.Domain.Dialogporten.Architecture.Tests;
@@ -30,6 +30,6 @@ public class SealedClassesTest
             .Where(x => !x.IsSealed)
             .ToList();
 
-        notSealedNorInheritedTypes.Should().BeEmpty();
+        notSealedNorInheritedTypes.ShouldBeEmpty();
     }
 }

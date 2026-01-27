@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
+using Shouldly;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
@@ -41,7 +41,7 @@ public class MiscFilterTests : ApplicationCollectionFixture
                 x.ServiceResource = [matchingServiceResource];
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
-                result.Items.Should().ContainSingle(dto => dto.Id == matchingDialogId));
+                result.Items.Count(dto => dto.Id == matchingDialogId).ShouldBe(1));
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class MiscFilterTests : ApplicationCollectionFixture
                 x.SystemLabel = [SystemLabel.Values.Bin];
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
-                result.Items.Should().ContainSingle(dto => dto.Id == matchingDialogId));
+                result.Items.Count(dto => dto.Id == matchingDialogId).ShouldBe(1));
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class MiscFilterTests : ApplicationCollectionFixture
                 x.ExtendedStatus = [targetExtendedStatus];
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
-                result.Items.Should().ContainSingle(dto => dto.Id == matchingDialogId));
+                result.Items.Count(dto => dto.Id == matchingDialogId).ShouldBe(1));
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public class MiscFilterTests : ApplicationCollectionFixture
                 x.ExternalReference = targetExternalReference;
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
-                result.Items.Should().ContainSingle(dto => dto.Id == matchingDialogId));
+                result.Items.Count(dto => dto.Id == matchingDialogId).ShouldBe(1));
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public class MiscFilterTests : ApplicationCollectionFixture
                 x.Status = [DialogStatus.Values.Completed];
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
-                result.Items.Should().ContainSingle(dto => dto.Id == matchingDialogId));
+                result.Items.Count(dto => dto.Id == matchingDialogId).ShouldBe(1));
     }
 
     [Fact]
@@ -174,7 +174,7 @@ public class MiscFilterTests : ApplicationCollectionFixture
                 x.Process = targetProcess;
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
-                result.Items.Should().ContainSingle(dto => dto.Id == matchingDialogId));
+                result.Items.Count(dto => dto.Id == matchingDialogId).ShouldBe(1));
     }
 
     [Fact]
@@ -202,7 +202,7 @@ public class MiscFilterTests : ApplicationCollectionFixture
                 x.ExcludeApiOnly = true;
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
-                result.Items.Should().ContainSingle(dto => dto.Id == normalDialogId));
+                result.Items.Count(dto => dto.Id == normalDialogId).ShouldBe(1));
     }
 
     [Fact]
@@ -230,8 +230,8 @@ public class MiscFilterTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
             {
-                result.Items.Should().ContainSingle(dto => dto.Id == deletedDialogId);
-                result.Items.Should().NotContain(dto => dto.Id == activeDialogId);
+                result.Items.Count(dto => dto.Id == deletedDialogId).ShouldBe(1);
+                result.Items.ShouldNotContain(dto => dto.Id == activeDialogId);
             });
     }
 }

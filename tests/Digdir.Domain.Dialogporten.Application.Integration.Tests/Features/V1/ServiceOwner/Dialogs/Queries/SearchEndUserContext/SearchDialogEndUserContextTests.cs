@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
 
@@ -23,10 +23,11 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
                 query.Label = [SystemLabel.Values.Archive, SystemLabel.Values.Bin];
             })
             .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>((result, ctx) =>
-                result.Items.Should().ContainSingle(item =>
-                    item.DialogId == ctx.GetDialogId() &&
-                    item.EndUserContextRevision != Guid.Empty &&
-                    item.SystemLabels.Contains(SystemLabel.Values.Archive)));
+                result.Items.Count(item =>
+                        item.DialogId == ctx.GetDialogId() &&
+                        item.EndUserContextRevision != Guid.Empty &&
+                        item.SystemLabels.Contains(SystemLabel.Values.Archive))
+                    .ShouldBe(1));
 
     [Fact]
     public Task Search_Without_Party_Returns_ValidationError() =>
@@ -48,7 +49,7 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
                 query.EndUserId = IntegrationTestUser.DefaultParty;
             })
             .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>(result =>
-                result.Items.Should().BeEmpty());
+                result.Items.ShouldBeEmpty());
 
     [Fact]
     public Task Search_Returns_All_System_Labels() =>
@@ -59,8 +60,8 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
             .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>((result, ctx) =>
             {
                 var labels = result.Items.Single(item => item.DialogId == ctx.GetDialogId()).SystemLabels;
-                labels.Should().Contain(SystemLabel.Values.Archive);
-                labels.Should().Contain(SystemLabel.Values.MarkedAsUnopened);
-                labels.Distinct().Should().HaveCount(labels.Count);
+                labels.ShouldContain(SystemLabel.Values.Archive);
+                labels.ShouldContain(SystemLabel.Values.MarkedAsUnopened);
+                labels.Distinct().Count().ShouldBe(labels.Count);
             });
 }

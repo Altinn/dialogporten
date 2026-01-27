@@ -2,7 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Act
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
 
@@ -72,8 +72,8 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeTrue();
-        result.Errors.Should().BeEmpty();
+        result.IsValid.ShouldBeTrue();
+        result.Errors.ShouldBeEmpty();
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -108,8 +108,8 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().ContainSingle(x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase));
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count(x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase)).ShouldBe(1);
     }
 
     [Fact]
@@ -132,8 +132,8 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().ContainSingle(x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase));
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count(x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase)).ShouldBe(1);
     }
 
     [Fact]
@@ -155,6 +155,6 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 }

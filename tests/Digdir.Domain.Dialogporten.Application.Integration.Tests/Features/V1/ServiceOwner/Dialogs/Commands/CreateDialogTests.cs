@@ -15,7 +15,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -125,8 +125,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Id.Should().Be(expectedDialogId);
-                x.Party.Should().Be(party);
+                x.Id.ShouldBe(expectedDialogId);
+                x.Party.ShouldBe(party);
             });
     }
 
@@ -140,10 +140,14 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
             {
-                dialog.VisibleFrom.Should().BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1));
-                dialog.CreatedAt.Should().Be(dialog.VisibleFrom);
-                dialog.UpdatedAt.Should().Be(dialog.VisibleFrom);
-                dialog.ContentUpdatedAt.Should().Be(dialog.VisibleFrom);
+                dialog.VisibleFrom.HasValue.ShouldBeTrue();
+                var visibleFromValue = dialog.VisibleFrom.Value;
+                visibleFromValue.ShouldBeInRange(
+                    visibleFrom - TimeSpan.FromSeconds(1),
+                    visibleFrom + TimeSpan.FromSeconds(1));
+                dialog.CreatedAt.ShouldBe(visibleFromValue);
+                dialog.UpdatedAt.ShouldBe(visibleFromValue);
+                dialog.ContentUpdatedAt.ShouldBe(visibleFromValue);
             });
     }
 
@@ -153,7 +157,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x => x.Dto.Content!.Summary = null)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Content!.Summary.Should().BeNull());
+                x.Content!.Summary.ShouldBeNull());
 
     [Fact]
     public async Task Create_Dialog_When_Dialog_Is_Complex()
@@ -164,7 +168,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateComplexDialog(x => x.Dto.Id = expectedDialogId)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Id.Should().Be(expectedDialogId));
+                x.Id.ShouldBe(expectedDialogId));
     }
 
     private sealed class ValidUpdatedAtTestData : TheoryData<string, DateTimeOffset?, DateTimeOffset>
@@ -201,11 +205,13 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<DialogDto>();
 
         var createdAtHasValue = createdAt.HasValue && createdAt != default(DateTimeOffset);
-        dialog.CreatedAt.Should().BeCloseTo(createdAtHasValue ? createdAt!.Value : DateTimeOffset.UtcNow,
-            precision: TimeSpan.FromSeconds(1));
+        dialog.CreatedAt.ShouldBeInRange(
+            (createdAtHasValue ? createdAt!.Value : DateTimeOffset.UtcNow) - TimeSpan.FromSeconds(1),
+            (createdAtHasValue ? createdAt!.Value : DateTimeOffset.UtcNow) + TimeSpan.FromSeconds(1));
 
-        dialog.UpdatedAt.Should().BeCloseTo(updatedAt == default ? DateTimeOffset.UtcNow : updatedAt,
-            precision: TimeSpan.FromSeconds(1));
+        dialog.UpdatedAt.ShouldBeInRange(
+            (updatedAt == default ? DateTimeOffset.UtcNow : updatedAt) - TimeSpan.FromSeconds(1),
+            (updatedAt == default ? DateTimeOffset.UtcNow : updatedAt) + TimeSpan.FromSeconds(1));
     }
 
     private sealed class InvalidUpdatedAtTestData : TheoryData<string, DateTimeOffset?, DateTimeOffset>
@@ -388,7 +394,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ExecuteAndAssert<CreateDialogSuccess>(x =>
-                x.Revision.Should().NotBeEmpty());
+                x.Revision.ShouldNotBe(Guid.Empty));
 
     [Fact]
     public async Task Can_Create_Actors_With_Same_Name_Without_ActorId()
@@ -413,7 +419,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<CreateDialogSuccess>();
 
         var actorNames = await Application.GetDbEntities<ActorName>();
-        actorNames.Should().HaveCount(1);
+        actorNames.Count.ShouldBe(1);
     }
 
     [Theory]
@@ -481,8 +487,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.FromPartyTransmissionsCount.Should().Be(fromPartyCount);
-                x.FromServiceOwnerTransmissionsCount.Should().Be(fromServiceOwnerCount);
+                x.FromPartyTransmissionsCount.ShouldBe(fromPartyCount);
+                x.FromServiceOwnerTransmissionsCount.ShouldBe(fromServiceOwnerCount);
             });
 
     [Fact]
@@ -492,8 +498,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.ContentUpdatedAt
-                    .Should()
-                    .Be(x.CreatedAt));
+                    .ShouldBe(x.CreatedAt));
 
     [Fact]
     public async Task Dialog_Has_Unopened_Content()
@@ -505,8 +510,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.HasUnopenedContent.Should().BeTrue();
-                x.Transmissions.First().IsOpened.Should().BeFalse();
+                x.HasUnopenedContent.ShouldBeTrue();
+                x.Transmissions.First().IsOpened.ShouldBeFalse();
             });
     }
 
@@ -522,12 +527,12 @@ public class CreateDialogTests : ApplicationCollectionFixture
             {
                 if (shouldAddSentLabel)
                 {
-                    x.EndUserContext.SystemLabels.Should().ContainSingle(
-                        label => label == SystemLabel.Values.Sent);
+                    x.EndUserContext.SystemLabels.Count(label => label == SystemLabel.Values.Sent)
+                        .ShouldBe(1);
                 }
                 else
                 {
-                    x.EndUserContext.SystemLabels.Should().NotContain(
+                    x.EndUserContext.SystemLabels.ShouldNotContain(
                         label => label == SystemLabel.Values.Sent);
                 }
             });
@@ -559,12 +564,12 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 if (shouldSucceed)
                 {
                     (result is CreateDialogSuccess)
-                        .Should().BeTrue();
+                        .ShouldBeTrue();
                 }
                 else
                 {
                     (result is ValidationError)
-                        .Should().BeTrue();
+                        .ShouldBeTrue();
                 }
             });
 
@@ -574,7 +579,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x => x.Dto.Status = null)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Status.Should().Be(DialogStatus.Values.NotApplicable));
+                x.Status.ShouldBe(DialogStatus.Values.NotApplicable));
 
     [Theory]
     [InlineData(null, typeof(CreateDialogSuccess))]
@@ -601,7 +606,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Dto.UpdatedAt = x.Dto.CreatedAt = DateTimeOffset.UtcNow.AddDays(-1))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.ContentUpdatedAt.Should().Be(x.UpdatedAt));
+                x.ContentUpdatedAt.ShouldBe(x.UpdatedAt));
 
     [Fact]
     public Task ContentUpdatedAt_Should_Default_To_Now_If_UpdatedAt_Not_Supplied() =>

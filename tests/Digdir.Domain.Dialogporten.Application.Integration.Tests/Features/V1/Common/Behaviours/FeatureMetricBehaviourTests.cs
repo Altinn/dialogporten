@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using FluentAssertions;
+using Shouldly;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -56,13 +56,15 @@ public class FeatureMetricBehaviourTests : ApplicationCollectionFixture
         var metrics = await ExecuteCommandAndGetMetrics(command);
 
         // Assert
-        metrics.Should().HaveCount(1);
+        metrics.Count.ShouldBe(1);
         var metric = metrics[0];
-        metric.FeatureName.Should().Be(typeof(CreateDialogCommand).FullName);
-        metric.Environment.Should().NotBeNullOrEmpty();
-        metric.CallerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
-        metric.OwnerOrg.Should().NotBeNullOrEmpty().And.NotBe("unknown");
-        metric.ServiceResource.Should().NotBeNullOrEmpty();
+        metric.FeatureName.ShouldBe(typeof(CreateDialogCommand).FullName);
+        metric.Environment.ShouldNotBeNullOrEmpty();
+        metric.CallerOrg.ShouldNotBeNullOrEmpty();
+        metric.CallerOrg.ShouldNotBe("unknown");
+        metric.OwnerOrg.ShouldNotBeNullOrEmpty();
+        metric.OwnerOrg.ShouldNotBe("unknown");
+        metric.ServiceResource.ShouldNotBeNullOrEmpty();
     }
 
     [Fact]
@@ -123,22 +125,22 @@ public class FeatureMetricBehaviourTests : ApplicationCollectionFixture
 
         // Assert
         var metrics = recorder.Records.ToList();
-        metrics.Should().HaveCount(4); // 2x CreateDialog + 2x GetDialog
+        metrics.Count.ShouldBe(4); // 2x CreateDialog + 2x GetDialog
 
 
         // All metrics should have valid service resources and owner orgs
         var serviceResources = metrics.Select(m => m.ServiceResource).ToList();
-        serviceResources.Should().AllSatisfy(sr => sr.Should().NotBeNullOrEmpty());
+        serviceResources.All(sr => !string.IsNullOrEmpty(sr)).ShouldBeTrue();
 
         var ownerOrgs = metrics.Select(m => m.OwnerOrg).ToList();
-        ownerOrgs.Should().AllSatisfy(owner => owner.Should().NotBeNullOrEmpty());
+        ownerOrgs.All(owner => !string.IsNullOrEmpty(owner)).ShouldBeTrue();
 
         // Different dialogs should have different service resources
         var createDialogMetrics = metrics.Where(m => m.FeatureName.Contains("CreateDialog")).ToList();
-        createDialogMetrics.Should().HaveCount(2);
+        createDialogMetrics.Count.ShouldBe(2);
 
         var getDialogMetrics = metrics.Where(m => m.FeatureName.Contains("GetDialog")).ToList();
-        getDialogMetrics.Should().HaveCount(2);
+        getDialogMetrics.Count.ShouldBe(2);
     }
 
 }

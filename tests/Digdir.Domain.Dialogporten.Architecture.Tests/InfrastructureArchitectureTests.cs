@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
-using FluentAssertions;
+using Shouldly;
 using FluentValidation;
 using NetArchTest.Rules;
 
@@ -30,8 +30,8 @@ public class InfrastructureArchitectureTests
             .Should().NotBePublic()
             .GetResult();
 
-        publicClasses.FailingTypes.Should().BeNullOrEmpty();
-        publicClasses.IsSuccessful.Should().BeTrue();
+        publicClasses.FailingTypes.ShouldBeEmpty();
+        publicClasses.IsSuccessful.ShouldBeTrue();
     }
 
 
@@ -49,7 +49,7 @@ public class InfrastructureArchitectureTests
             .Where(t => t.IsPublic)
             .ToList();
 
-        publicValidators.Should().BeEmpty(
+        publicValidators.ShouldBeEmpty(
             $"These validators are public but should be internal: " +
             $"{string.Join(", ", publicValidators.Select(t => t.FullName))}");
     }

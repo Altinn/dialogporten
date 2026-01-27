@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
-using FluentAssertions;
+using Shouldly;
 using ServiceOwnerLabelDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ServiceOwnerLabelDto;
 
@@ -27,8 +27,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 x.ServiceOwnerContext
                     .ServiceOwnerLabels
                     .Count
-                    .Should()
-                    .Be(3));
+                    .ShouldBe(3));
 
     [Fact]
     public Task Cannot_Create_Dialog_With_Duplicate_ServiceOwner_Labels() =>

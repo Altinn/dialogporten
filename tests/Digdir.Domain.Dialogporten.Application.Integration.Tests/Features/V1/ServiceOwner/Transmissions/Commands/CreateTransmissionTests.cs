@@ -13,7 +13,7 @@ using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
@@ -37,7 +37,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                     x.Content!.Summary = null))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x => x.Transmissions
-                .First().Content.Summary.Should().BeNull());
+                .First().Content.Summary.ShouldBeNull());
 
     [Fact]
     public Task Can_Create_Transmission_With_Embeddable_Content() =>
@@ -61,9 +61,9 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .ExecuteAndAssert<DialogDto>(result =>
             {
                 var transmission = result.Transmissions.Single();
-                transmission.Content.ContentReference!.MediaType.Should().Be(MediaTypes.EmbeddableMarkdown);
-                transmission.Content.ContentReference!.Value.Should().HaveCount(1);
-                transmission.Content.ContentReference!.Value.First().Value.Should().StartWith("https://");
+                transmission.Content.ContentReference!.MediaType.ShouldBe(MediaTypes.EmbeddableMarkdown);
+                transmission.Content.ContentReference!.Value.Count.ShouldBe(1);
+                transmission.Content.ContentReference!.Value.First().Value.ShouldStartWith("https://");
             });
 
     [Fact]
@@ -142,8 +142,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 result.Transmissions
                     .Single()
                     .ExternalReference
-                    .Should()
-                    .Be("unique-key"));
+                    .ShouldBe("unique-key"));
 
     [Fact]
     public Task Can_Create_Transmission_Related_To_Existing_Transmission() =>
@@ -193,9 +192,8 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
-                result.Transmissions.Should().HaveCount(2);
-                result.Transmissions.Last().RelatedTransmissionId.Should()
-                    .Be(result.Transmissions.First().Id);
+                result.Transmissions.Count.ShouldBe(2);
+                result.Transmissions.Last().RelatedTransmissionId.ShouldBe(result.Transmissions.First().Id);
             });
 
     [Fact]
@@ -264,7 +262,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 x.AddTransmission(createTransmission))
             .ExecuteAndAssert(x =>
             {
-                x.Should().BeOfType(expectedType);
+                x.GetType().ShouldBe(expectedType);
 
                 if (expectedType != typeof(ValidationError))
                 {
@@ -289,7 +287,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 // Deprecated media type should be converted
                 // to the new embeddable media type
                 transmission.Content.ContentReference!
-                    .MediaType.Should().Be(MediaTypes.LegacyEmbeddableHtml);
+                    .MediaType.ShouldBe(MediaTypes.LegacyEmbeddableHtml);
             });
 
     private static void SetLegacyEmbeddableHtmlDeprecated(TransmissionDto x) =>

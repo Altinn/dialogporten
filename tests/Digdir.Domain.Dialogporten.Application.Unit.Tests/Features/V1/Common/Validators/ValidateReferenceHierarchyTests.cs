@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Unit.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.Validators;
 
@@ -26,9 +26,9 @@ public class ValidateReferenceHierarchyTests
         var domainFailures = Sut(elements, maxDepth: maxDepth, maxWidth: 1);
 
         // Assert
-        domainFailures.Should().HaveCount(1);
+        domainFailures.Count.ShouldBe(1);
         var domainFailure = domainFailures.First();
-        domainFailure.ErrorMessage.Should().Contain("depth violation");
+        domainFailure.ErrorMessage.ShouldContain("depth violation");
     }
 
     [Theory]
@@ -50,9 +50,9 @@ public class ValidateReferenceHierarchyTests
         var domainFailures = Sut(elements, maxDepth: 2, maxWidth: maxWidth);
 
         // Assert
-        domainFailures.Should().HaveCount(1);
+        domainFailures.Count.ShouldBe(1);
         var domainFailure = domainFailures.First();
-        domainFailure.ErrorMessage.Should().Contain("width violation");
+        domainFailure.ErrorMessage.ShouldContain("width violation");
     }
 
     [Theory]
@@ -72,9 +72,9 @@ public class ValidateReferenceHierarchyTests
         var domainFailures = Sut(elements, maxDepth: cycleLength, maxWidth: 1);
 
         // Assert
-        domainFailures.Should().HaveCount(1);
+        domainFailures.Count.ShouldBe(1);
         var domainFailure = domainFailures.First();
-        domainFailure.ErrorMessage.Should().Contain("cyclic reference");
+        domainFailure.ErrorMessage.ShouldContain("cyclic reference");
     }
 
     [Theory]
@@ -100,10 +100,10 @@ public class ValidateReferenceHierarchyTests
         var domainFailures = Sut(elements, maxDepth: maxDepth, maxWidth: maxWidth);
 
         // Assert
-        domainFailures.Should().HaveCount(3);
-        domainFailures.Should().ContainSingle(x => x.ErrorMessage.Contains("depth violation"));
-        domainFailures.Should().ContainSingle(x => x.ErrorMessage.Contains("width violation"));
-        domainFailures.Should().ContainSingle(x => x.ErrorMessage.Contains("cyclic reference"));
+        domainFailures.Count.ShouldBe(3);
+        domainFailures.Count(x => x.ErrorMessage.Contains("depth violation")).ShouldBe(1);
+        domainFailures.Count(x => x.ErrorMessage.Contains("width violation")).ShouldBe(1);
+        domainFailures.Count(x => x.ErrorMessage.Contains("cyclic reference")).ShouldBe(1);
 
     }
 
@@ -125,7 +125,7 @@ public class ValidateReferenceHierarchyTests
         var domainFailures = Sut(elements, maxDepth: maxDepth, maxWidth: maxWidth);
 
         // Assert
-        domainFailures.Should().BeEmpty();
+        domainFailures.ShouldBeEmpty();
     }
 
     [Fact]
@@ -139,10 +139,11 @@ public class ValidateReferenceHierarchyTests
         var domainFailures = Sut([node], maxDepth: 1, maxWidth: 1);
 
         // Assert
-        domainFailures.Should().HaveCount(1);
+        domainFailures.Count.ShouldBe(1);
         var domainFailure = domainFailures.First();
-        domainFailure.ErrorMessage.Should().Contain(node.ParentId.ToString());
-        domainFailure.ErrorMessage.Should().Contain("reference violation");
+        node.ParentId.HasValue.ShouldBeTrue();
+        domainFailure.ErrorMessage.ShouldContain(node.ParentId.Value.ToString());
+        domainFailure.ErrorMessage.ShouldContain("reference violation");
     }
 
     [Fact]
@@ -158,10 +159,10 @@ public class ValidateReferenceHierarchyTests
         var domainFailures = Sut(nodes, maxDepth: 1, maxWidth: 1);
 
         // Assert
-        domainFailures.Should().HaveCount(1);
+        domainFailures.Count.ShouldBe(1);
         var domainFailure = domainFailures.First();
-        domainFailure.ErrorMessage.Should().Contain(id.ToString());
-        domainFailure.ErrorMessage.Should().Contain("cyclic reference");
+        domainFailure.ErrorMessage.ShouldContain(id.ToString());
+        domainFailure.ErrorMessage.ShouldContain("cyclic reference");
     }
 
     [Fact]
@@ -174,7 +175,7 @@ public class ValidateReferenceHierarchyTests
         var exception = Assert.Throws<InvalidOperationException>(() => Sut([node], maxDepth: 1, maxWidth: 1));
 
         // Assert
-        exception.Message.Should().Contain("non-default");
+        exception.Message.ShouldContain("non-default");
     }
 
     [Fact]
@@ -184,7 +185,7 @@ public class ValidateReferenceHierarchyTests
         var domainFailures = Sut([], maxDepth: 1, maxWidth: 1);
 
         // Assert
-        domainFailures.Should().BeEmpty();
+        domainFailures.ShouldBeEmpty();
     }
 
     private static List<DomainFailure> Sut(IReadOnlyCollection<HierarchyTestNode> nodes, int maxDepth, int maxWidth)

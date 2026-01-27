@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using FluentAssertions;
+using Shouldly;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -36,11 +36,10 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 var dialog = x.Items.Single();
 
                 // Obsolete SystemLabel
-                dialog.SystemLabel.Should().Be(SystemLabel.Values.Bin);
+                dialog.SystemLabel.ShouldBe(SystemLabel.Values.Bin);
 
-                dialog.EndUserContext.SystemLabels.Should().HaveCount(1);
-                dialog.EndUserContext.SystemLabels.Should()
-                    .ContainSingle(s => s == SystemLabel.Values.Bin);
+                dialog.EndUserContext.SystemLabels.Count.ShouldBe(1);
+                dialog.EndUserContext.SystemLabels.Count(s => s == SystemLabel.Values.Bin).ShouldBe(1);
             });
 
     [Fact]
@@ -63,7 +62,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.SystemLabel = [SystemLabel.Values.Bin, SystemLabel.Values.Archive];
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-                x.Items.Should().HaveCount(0));
+                x.Items.Count.ShouldBe(0));
 
     [Fact]
     public async Task Search_Should_Populate_EnduserContextRevision()
@@ -73,8 +72,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             .CreateSimpleDialog(x => party = x.Dto.Party)
             .SearchEndUserDialogs(x => x.Party = [party!])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-                x.Items.Should().ContainSingle(x =>
-                    x.EndUserContext.Revision != Guid.Empty));
+                x.Items.Count(item => item.EndUserContext.Revision != Guid.Empty).ShouldBe(1));
     }
 
     [Fact]
@@ -86,8 +84,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             .CreateSimpleDialog(x => party = x.Dto.Party)
             .SearchEndUserDialogs(x => x.Party = [party!])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-                x.Items.Should().ContainSingle(x =>
-                    x.SystemLabel == SystemLabel.Values.Default));
+                x.Items.Count(item => item.SystemLabel == SystemLabel.Values.Default).ShouldBe(1));
     }
 
     [Fact]
@@ -97,7 +94,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             .SearchEndUserDialogs((x, ctx) =>
                 x.Party = [ctx.GetParty()])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-                x.Items.Single().HasUnopenedContent.Should().BeFalse());
+                x.Items.Single().HasUnopenedContent.ShouldBeFalse());
 
     [Fact]
     public Task Search_Should_Return_HasUnopenedContent_True_For_Dialogs_With_Unopened_Transmission() =>
@@ -109,7 +106,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             .SearchEndUserDialogs((x, ctx) =>
                 x.Party = [ctx.GetParty()])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-                x.Items.Single().HasUnopenedContent.Should().BeTrue());
+                x.Items.Single().HasUnopenedContent.ShouldBeTrue());
 
     [Fact]
     public Task Search_Should_Return_Number_Of_Transmissions_From_Party_And_ServiceOwner() =>
@@ -121,8 +118,8 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
             {
                 var dialog = x.Items.Single();
-                dialog.FromPartyTransmissionsCount.Should().Be(1);
-                dialog.FromServiceOwnerTransmissionsCount.Should().Be(1);
+                dialog.FromPartyTransmissionsCount.ShouldBe(1);
+                dialog.FromServiceOwnerTransmissionsCount.ShouldBe(1);
             });
 
     private const string DummyService = "urn:altinn:resource:test-service";
@@ -166,17 +163,19 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
             {
-                x.Items.Should().HaveCount(2);
+                x.Items.Count.ShouldBe(2);
 
                 // Delegated dialog
-                x.Items.Should().ContainSingle(d =>
-                    d.Id == delegatedDialogId &&
-                    d.Party == delegatedDialogParty);
+                x.Items.Count(d =>
+                        d.Id == delegatedDialogId &&
+                        d.Party == delegatedDialogParty)
+                    .ShouldBe(1);
 
                 // Default integration test user dialog
-                x.Items.Should().ContainSingle(d =>
-                    d.Id != delegatedDialogId &&
-                    d.Party == IntegrationTestUser.DefaultParty);
+                x.Items.Count(d =>
+                        d.Id != delegatedDialogId &&
+                        d.Party == IntegrationTestUser.DefaultParty)
+                    .ShouldBe(1);
             });
     }
 }

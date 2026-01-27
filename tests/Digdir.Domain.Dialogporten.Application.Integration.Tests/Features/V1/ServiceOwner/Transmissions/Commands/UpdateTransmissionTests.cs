@@ -8,7 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using Shouldly;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ContentDto;
 
@@ -46,7 +46,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
             })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
-                dialog.Transmissions.Count.Should().Be(1));
+                dialog.Transmissions.Count.ShouldBe(1));
 
     [Fact]
     public Task Can_Update_Related_Transmission_With_Null_Id() =>
@@ -64,7 +64,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
             })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
-                dialog.Transmissions.Count.Should().Be(2));
+                dialog.Transmissions.Count.ShouldBe(2));
 
     [Fact]
     public Task Can_Add_Transmission_Without_Summary_On_Update() =>
@@ -76,7 +76,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
                 dialog.Transmissions
-                    .First().Content.Summary.Should().BeNull());
+                    .First().Content.Summary.ShouldBeNull());
 
     [Fact]
     public async Task Cannot_Include_Old_Transmissions_In_UpdateCommand()
@@ -128,8 +128,7 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
                 .Transmissions
                 .Single()
                 .Content
-                .Should()
-                .BeNull());
+                .ShouldBeNull());
 
     [Fact]
     public Task Should_Validate_Supplied_Transmission_Content_If_IsApiOnlyTrue_Dialog() =>

@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -22,10 +22,12 @@ public class UpdateAttachmentTests(DialogApplication application) : ApplicationC
                     DateTimeOffset.UtcNow.AddDays(1))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Attachments.Single()
-                    .ExpiresAt.Should().NotBeNull()
-                    .And.BeAfter(DateTimeOffset.UtcNow)
-                    .And.BeBefore(DateTimeOffset.UtcNow.AddDays(2)));
+            {
+                var expiresAt = x.Attachments.Single().ExpiresAt;
+                expiresAt.HasValue.ShouldBeTrue();
+                expiresAt.Value.ShouldBeGreaterThan(DateTimeOffset.UtcNow);
+                expiresAt.Value.ShouldBeLessThan(DateTimeOffset.UtcNow.AddDays(2));
+            });
 
     [Fact]
     public Task Can_Remove_Dialog_Attachment_ExpiresAt() =>
@@ -38,7 +40,7 @@ public class UpdateAttachmentTests(DialogApplication application) : ApplicationC
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Attachments.Single()
-                    .ExpiresAt.Should().BeNull());
+                    .ExpiresAt.ShouldBeNull());
 
     [Fact]
     public Task Cannot_Update_Dialog_Attachment_ExpiresAt_To_Past_Date() =>
@@ -72,9 +74,11 @@ public class UpdateAttachmentTests(DialogApplication application) : ApplicationC
                         x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1))))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Transmissions.Single().Attachments.Single()
-                    .ExpiresAt.Should().NotBeNull()
-                    .And.BeAfter(DateTimeOffset.UtcNow));
+            {
+                var expiresAt = x.Transmissions.Single().Attachments.Single().ExpiresAt;
+                expiresAt.HasValue.ShouldBeTrue();
+                expiresAt.Value.ShouldBeGreaterThan(DateTimeOffset.UtcNow);
+            });
 
     [Fact]
     public Task Cannot_Add_Transmission_Attachment_With_ExpiresAt_In_The_Past() =>

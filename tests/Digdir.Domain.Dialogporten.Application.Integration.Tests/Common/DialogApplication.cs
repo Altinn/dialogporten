@@ -13,7 +13,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
-using FluentAssertions;
+using Shouldly;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -54,13 +54,6 @@ public class DialogApplication : IAsyncLifetime
             cfg.AddMaps(Assembly.GetAssembly(typeof(ApplicationSettings)));
         });
         _mapper = config.CreateMapper();
-
-        AssertionOptions.AssertEquivalencyUsing(options =>
-        {
-            options.Using<DateTimeOffset>(ctx => ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMicroseconds(1)))
-                .WhenTypeIs<DateTimeOffset>();
-            return options;
-        });
 
         _fixtureRootProvider = _rootProvider = BuildServiceCollection().BuildServiceProvider();
 

@@ -13,7 +13,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -74,7 +74,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                 };
             })
             .ExecuteAndAssert<Forbidden>(x =>
-                x.Reasons.Should().NotBeEmpty());
+                x.Reasons.ShouldNotBeEmpty());
 
     [Fact]
     public Task BulkSet_Returns_ConcurrencyError_On_Revision_Mismatch() =>
@@ -150,7 +150,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             })
             .SendCommand(ctx => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Default));
+                x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Default));
 
 
     [Fact]
@@ -211,7 +211,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive));
+                x.EndUserContext.SystemLabels.Count(label => label == SystemLabel.Values.Archive).ShouldBe(1));
 
         await AssertPerformedByActorAsync();
     }
@@ -250,14 +250,14 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             .ThenInclude(x => x.ActorNameEntity)
             .SingleAsync(x => x.Name == expectedLabelName);
 
-        log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
-        log.PerformedBy.ActorNameEntity.Should().NotBeNull();
-        log.PerformedBy.ActorNameEntity!.ActorId.Should().Be(AdminPerformedByActorId);
+        log.PerformedBy.ActorTypeId.ShouldBe(ActorType.Values.PartyRepresentative);
+        log.PerformedBy.ActorNameEntity.ShouldNotBeNull();
+        log.PerformedBy.ActorNameEntity!.ActorId.ShouldBe(AdminPerformedByActorId);
     }
 
     private static void AssertOneLabelWithValue(DialogDto dialog, SystemLabel.Values value)
     {
-        dialog.EndUserContext.SystemLabels.Should().HaveCount(1);
-        dialog.EndUserContext.SystemLabels.First().Should().Be(value);
+        dialog.EndUserContext.SystemLabels.Count.ShouldBe(1);
+        dialog.EndUserContext.SystemLabels.First().ShouldBe(value);
     }
 }

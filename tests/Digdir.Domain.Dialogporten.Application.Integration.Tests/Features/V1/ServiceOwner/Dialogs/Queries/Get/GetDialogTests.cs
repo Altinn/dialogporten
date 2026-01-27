@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+﻿using System.Reflection;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -6,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
+using Shouldly;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -31,8 +32,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .SendCommand(_ => new GetDialogQuery { DialogId = id })
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Id.Should().Be(id);
-                x.ExternalReference.Should().Be(externalReference);
+                x.Id.ShouldBe(id);
+                x.ExternalReference.ShouldBe(externalReference);
             });
     }
 
@@ -48,15 +49,10 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var mappedStatus = Application.GetMapper()
                     .Map<DialogStatus.Values>(createDto.Status);
-                result.Status.Should().Be(mappedStatus);
+                result.Status.ShouldBe(mappedStatus);
 
-                result.Should().NotBeNull();
-                result.Should().BeEquivalentTo(createDto, options => options
-                    .Excluding(x => x.UpdatedAt)
-                    .Excluding(x => x.CreatedAt)
-                    .Excluding(x => x.SystemLabel)
-                    .Excluding(x => x.Status)
-                );
+                result.ShouldNotBeNull();
+                AssertMatchesCreateDialogDto(result, createDto);
             });
     }
 
@@ -75,16 +71,19 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Transmissions.Should().NotBeEmpty()
-                    .And.AllSatisfy(t => t.Attachments.Should().NotBeEmpty()
-                        .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
-                            .And.AllSatisfy(url => url.Url.Should().NotBeNull()
-                                .And.NotBe(Constants.ExpiredUri))));
+                x.Transmissions.ShouldNotBeEmpty();
+                x.Transmissions.All(transmission =>
+                        transmission.Attachments.Count > 0
+                        && transmission.Attachments.All(attachment =>
+                            attachment.Urls.Count > 0
+                            && attachment.Urls.All(url => url.Url is not null && url.Url != Constants.ExpiredUri)))
+                    .ShouldBeTrue();
 
-                x.Attachments.Should().NotBeEmpty()
-                    .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
-                        .And.AllSatisfy(url => url.Url.Should().NotBeNull()
-                            .And.NotBe(Constants.ExpiredUri)));
+                x.Attachments.ShouldNotBeEmpty();
+                x.Attachments.All(attachment =>
+                        attachment.Urls.Count > 0
+                        && attachment.Urls.All(url => url.Url is not null && url.Url != Constants.ExpiredUri))
+                    .ShouldBeTrue();
             });
 
     [Fact]
@@ -99,14 +98,10 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var mappedStatus = Application.GetMapper()
                     .Map<DialogStatus.Values>(createDto.Status);
-                result.Status.Should().Be(mappedStatus);
+                result.Status.ShouldBe(mappedStatus);
 
-                result.Should().NotBeNull();
-                result.Should().BeEquivalentTo(createDto, options => options
-                    .Excluding(x => x.UpdatedAt)
-                    .Excluding(x => x.CreatedAt)
-                    .Excluding(x => x.SystemLabel)
-                    .Excluding(x => x.Status));
+                result.ShouldNotBeNull();
+                AssertMatchesCreateDialogDto(result, createDto);
             });
     }
 
@@ -117,6 +112,37 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.SystemLabel.Should()
-                    .Be(SystemLabel.Values.Default));
+                x.SystemLabel.ShouldBe(SystemLabel.Values.Default));
+
+    private static void AssertMatchesCreateDialogDto(DialogDto actual, CreateDialogDto expected)
+    {
+        var excludedProperties = new HashSet<string>
+        {
+            nameof(CreateDialogDto.UpdatedAt),
+            nameof(CreateDialogDto.CreatedAt),
+            nameof(CreateDialogDto.SystemLabel),
+            nameof(CreateDialogDto.Status)
+        };
+
+        var expectedProperties = typeof(CreateDialogDto)
+            .GetProperties(BindingFlags.Instance | BindingFlags.Public);
+
+        foreach (var expectedProperty in expectedProperties)
+        {
+            if (excludedProperties.Contains(expectedProperty.Name))
+            {
+                continue;
+            }
+
+            var actualProperty = typeof(DialogDto)
+                .GetProperty(expectedProperty.Name, BindingFlags.Instance | BindingFlags.Public);
+
+            actualProperty.ShouldNotBeNull();
+
+            var expectedValue = expectedProperty.GetValue(expected);
+            var actualValue = actualProperty!.GetValue(actual);
+
+            actualValue.ShouldBeEquivalentTo(expectedValue);
+        }
+    }
 }

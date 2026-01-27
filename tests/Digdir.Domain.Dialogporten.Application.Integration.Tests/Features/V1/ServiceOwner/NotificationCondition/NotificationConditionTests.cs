@@ -9,7 +9,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -62,7 +62,7 @@ public class NotificationConditionTests(DialogApplication application) : Applica
                 TransmissionId = transmissionId
             })
             .ExecuteAndAssert<NotificationConditionDto>(x =>
-                x.SendNotification.Should().Be(expectedSendNotificationValue));
+                x.SendNotification.ShouldBe(expectedSendNotificationValue));
     }
 
     [Theory, ClassData(typeof(TransmissionNotificationConditionTestData))]

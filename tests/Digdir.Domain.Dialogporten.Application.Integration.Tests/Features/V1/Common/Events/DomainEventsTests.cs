@@ -7,7 +7,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
-using FluentAssertions;
+using Shouldly;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
@@ -46,9 +46,8 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         domainEventTypes.ForEach(domainEventType =>
         {
             Action act = () => CloudEventTypes.Get(domainEventType.Name);
-            act.Should()
-                .NotThrow(
-                    $"all domain events must have a mapping in {nameof(CloudEventTypes)} ({domainEventType.Name} is missing)");
+            act.ShouldNotThrow(
+                $"all domain events must have a mapping in {nameof(CloudEventTypes)} ({domainEventType.Name} is missing)");
         });
     }
 
@@ -62,9 +61,8 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
         allActivityTypes.ForEach(activityType =>
         {
             Action act = () => CloudEventTypes.Get(activityType.ToString());
-            act.Should()
-                .NotThrow(
-                    $"all activity types must have a mapping in {nameof(CloudEventTypes)} ({activityType} is missing)");
+            act.ShouldNotThrow(
+                $"all activity types must have a mapping in {nameof(CloudEventTypes)} ({activityType} is missing)");
         });
     }
 
@@ -98,9 +96,9 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<CreateDialogSuccess>(x =>
             {
                 var domainEvents = Application.GetPublishedEvents();
-                domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogTransmissionCreatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogActivityCreatedDomainEvent>().Should().HaveCount(activityCount);
+                domainEvents.OfType<DialogCreatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogTransmissionCreatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogActivityCreatedDomainEvent>().Count().ShouldBe(activityCount);
             });
     }
 
@@ -112,8 +110,8 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<UpdateDialogSuccess>(x =>
             {
                 var domainEvents = Application.GetPublishedEvents();
-                domainEvents.OfType<DialogUpdatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
+                domainEvents.OfType<DialogUpdatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogCreatedDomainEvent>().Count().ShouldBe(1);
             });
 
     [Fact]
@@ -131,11 +129,11 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<UpdateDialogSuccess>(_ =>
             {
                 var domainEvents = Application.GetPublishedEvents();
-                domainEvents.OfType<DialogUpdatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogActivityCreatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
+                domainEvents.OfType<DialogUpdatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogActivityCreatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogCreatedDomainEvent>().Count().ShouldBe(1);
 
-                domainEvents.Count.Should().Be(3);
+                domainEvents.Count.ShouldBe(3);
             });
 
     [Fact]
@@ -158,11 +156,11 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<UpdateDialogSuccess>(_ =>
             {
                 var domainEvents = Application.GetPublishedEvents();
-                domainEvents.OfType<DialogUpdatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogTransmissionCreatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
+                domainEvents.OfType<DialogUpdatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogTransmissionCreatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogCreatedDomainEvent>().Count().ShouldBe(1);
 
-                domainEvents.Count.Should().Be(3);
+                domainEvents.Count.ShouldBe(3);
             });
 
     [Fact]
@@ -184,10 +182,10 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<UpdateDialogSuccess>(x =>
             {
                 var domainEvents = Application.GetPublishedEvents();
-                domainEvents.OfType<DialogUpdatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
+                domainEvents.OfType<DialogUpdatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogCreatedDomainEvent>().Count().ShouldBe(1);
 
-                domainEvents.Count.Should().Be(2);
+                domainEvents.Count.ShouldBe(2);
             });
 
     [Fact]
@@ -198,10 +196,10 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<DeleteDialogSuccess>(x =>
             {
                 var domainEvents = Application.GetPublishedEvents();
-                domainEvents.OfType<DialogDeletedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
+                domainEvents.OfType<DialogDeletedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogCreatedDomainEvent>().Count().ShouldBe(1);
 
-                domainEvents.Count.Should().Be(2);
+                domainEvents.Count.ShouldBe(2);
             });
 
     [Fact]
@@ -212,10 +210,10 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<Success>(x =>
             {
                 var domainEvents = Application.GetPublishedEvents();
-                domainEvents.OfType<DialogDeletedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
+                domainEvents.OfType<DialogDeletedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogCreatedDomainEvent>().Count().ShouldBe(1);
 
-                domainEvents.Count.Should().Be(2);
+                domainEvents.Count.ShouldBe(2);
             });
 
     [Fact]
@@ -227,11 +225,11 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<RestoreDialogSuccess>(x =>
             {
                 var domainEvents = Application.GetPublishedEvents();
-                domainEvents.OfType<DialogCreatedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogDeletedDomainEvent>().Should().HaveCount(1);
-                domainEvents.OfType<DialogRestoredDomainEvent>().Should().HaveCount(1);
+                domainEvents.OfType<DialogCreatedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogDeletedDomainEvent>().Count().ShouldBe(1);
+                domainEvents.OfType<DialogRestoredDomainEvent>().Count().ShouldBe(1);
 
-                domainEvents.Count.Should().Be(3);
+                domainEvents.Count.ShouldBe(3);
             });
 
     [Fact]
@@ -263,16 +261,12 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
             {
                 var publishedEvents = Application.GetPublishedEvents();
 
-                publishedEvents
-                    .OfType<IDomainEvent>()
-                    .Should()
-                    .NotBeEmpty();
+                publishedEvents.OfType<IDomainEvent>().Any().ShouldBeTrue();
 
                 publishedEvents
                     .OfType<IDomainEvent>()
                     .All(e => e.Metadata[Constants.IsSilentUpdate] == bool.TrueString)
-                    .Should()
-                    .BeTrue();
+                    .ShouldBeTrue();
             });
 
     [Fact]
@@ -307,14 +301,13 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
                 publishedEvents
                     .OfType<IDomainEvent>()
-                    .Should()
-                    .HaveCount(2);
+                    .Count()
+                    .ShouldBe(2);
 
                 publishedEvents
                     .OfType<IDomainEvent>()
                     .All(e => e.Metadata[Constants.IsSilentUpdate] == bool.TrueString)
-                    .Should()
-                    .BeTrue();
+                    .ShouldBeTrue();
             });
 
 }

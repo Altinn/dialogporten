@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries;
 
@@ -20,5 +20,5 @@ public class DeletedDialogTests(DialogApplication application) : ApplicationColl
                 DialogId = ctx.GetDialogId()
             })
             .ExecuteAndAssert<EntityDeleted<DialogEntity>>(entityDeleted =>
-                entityDeleted.Message.Should().Contain("is removed"));
+                entityDeleted.Message.ShouldContain("is removed"));
 }

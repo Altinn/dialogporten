@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using Shouldly;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 
@@ -49,8 +49,7 @@ public class UpdatedAtFilterTests : ApplicationCollectionFixture
             {
                 result.Items
                     .Select(x => x.Id)
-                    .Should()
-                    .BeEquivalentTo(expectedDialogIds);
+                    .ShouldBeEquivalentTo(expectedDialogIds);
             });
     }
 

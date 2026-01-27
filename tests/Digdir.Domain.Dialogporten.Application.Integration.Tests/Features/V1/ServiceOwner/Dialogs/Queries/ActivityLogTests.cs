@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using Shouldly;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.ActivityDto;
@@ -26,8 +26,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
                 x.Activities.Single()
                     .PerformedBy
                     .ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
+                    .ShouldStartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
 
     [Fact]
     public Task Search_Dialog_LatestActivity_Should_Return_User_Ids_Unhashed() =>
@@ -42,8 +41,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
                     .LatestActivity!
                     .PerformedBy
                     .ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
+                    .ShouldStartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
 
     [Fact]
     public Task Get_ActivityLog_Should_Return_User_Ids_Unhashed() =>
@@ -59,8 +57,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
             .ExecuteAndAssert<ActivityDto>(x =>
                 x.PerformedBy
                     .ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
+                    .ShouldStartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
 
     private static CreateDialogCommand DialogWithActivity()
     {

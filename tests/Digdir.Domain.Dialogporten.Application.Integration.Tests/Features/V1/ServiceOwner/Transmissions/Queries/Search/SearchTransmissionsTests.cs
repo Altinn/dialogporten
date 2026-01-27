@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Queries.Search;
 
@@ -20,8 +20,10 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
                 DialogId = ctx.GetDialogId(),
             })
             .ExecuteAndAssert<List<TransmissionDto>>(x =>
-                x.Should().ContainSingle().Which
-                    .ExternalReference.Should().Be("ext"));
+            {
+                var transmission = x.Single();
+                transmission.ExternalReference.ShouldBe("ext");
+            });
 
     [Fact]
     public Task Search_Transmission_Should_Not_Mask_Expired_Attachment_Urls() =>
@@ -38,9 +40,14 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
                 DialogId = ctx.GetDialogId(),
             })
             .ExecuteAndAssert<List<TransmissionDto>>(x =>
-                x.Should().NotBeEmpty()
-                    .And.AllSatisfy(x => x.Attachments.Should().NotBeEmpty()
-                        .And.AllSatisfy(x => x.ExpiresAt.Should().NotBeNull())
-                        .And.AllSatisfy(x => x.Urls.Should().NotBeEmpty()
-                            .And.AllSatisfy(x => x.Url.Should().NotBe(Constants.ExpiredUri)))));
+            {
+                x.ShouldNotBeEmpty();
+                x.All(transmission =>
+                        transmission.Attachments.Count > 0
+                        && transmission.Attachments.All(attachment => attachment.ExpiresAt is not null)
+                        && transmission.Attachments.All(attachment =>
+                            attachment.Urls.Count > 0
+                            && attachment.Urls.All(url => url.Url != Constants.ExpiredUri)))
+                    .ShouldBeTrue();
+            });
 }

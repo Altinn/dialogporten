@@ -8,7 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
-using FluentAssertions;
+using Shouldly;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update.ServiceOwnerLabelDto;
 
@@ -40,7 +40,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 Dto = new()
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x =>
-                x.Message.Should().Contain(invalidDialogId.ToString()));
+                x.Message.ShouldContain(invalidDialogId.ToString()));
     }
 
     [Fact]
@@ -57,8 +57,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 x.ServiceOwnerContext
                     .ServiceOwnerLabels
                     .Count
-                    .Should()
-                    .Be(0));
+                    .ShouldBe(0));
 
     [Fact]
     public Task Can_Add_ServiceOwnerLabel_To_Existing_Dialog() =>
@@ -71,8 +70,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 x.ServiceOwnerContext
                     .ServiceOwnerLabels
                     .Count
-                    .Should()
-                    .Be(2));
+                    .ShouldBe(2));
 
     [Fact]
     public Task Cannot_Update_ServiceOwnerLabels_With_Duplicates() =>
@@ -118,7 +116,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             })
             .SendCommand((_, ctx) => new GetServiceOwnerLabelsQuery { DialogId = ctx.GetDialogId() })
             .ExecuteAndAssert<ServiceOwnerLabelResultDto>(x =>
-                x.Revision.Should().NotBe(originalRevision!.Value));
+                x.Revision.ShouldNotBe(originalRevision!.Value));
     }
 
     [Fact]

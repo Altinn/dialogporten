@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using FluentAssertions;
+using Shouldly;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
@@ -23,7 +23,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 x.AddLabels = [SystemLabel.Values.Bin])
             .SendCommand((x, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+                x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin));
 
     [Fact]
     public Task Set_Returns_ConcurrencyError_On_Revision_Mismatch() =>
@@ -56,7 +56,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             })
             .SendCommand(_ => GetDialog(dialogId))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+                x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin));
     }
 
     [Fact]
@@ -72,8 +72,8 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         var dialogSystemLabels = await Application
             .GetDbEntities<DialogEndUserContextSystemLabel>();
 
-        dialogSystemLabels.Should().ContainSingle(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened);
-        dialogSystemLabels.Should().ContainSingle(x => x.SystemLabelId == SystemLabel.Values.Default);
+        dialogSystemLabels.Count(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened).ShouldBe(1);
+        dialogSystemLabels.Count(x => x.SystemLabelId == SystemLabel.Values.Default).ShouldBe(1);
 
         await FlowBuilder.For(Application)
             .SendCommand(_ => new SetSystemLabelCommand
@@ -86,8 +86,8 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         dialogSystemLabels = await Application
             .GetDbEntities<DialogEndUserContextSystemLabel>();
 
-        dialogSystemLabels.Should().NotContain(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened);
-        dialogSystemLabels.Should().ContainSingle(x => x.SystemLabelId == SystemLabel.Values.Default);
+        dialogSystemLabels.ShouldNotContain(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened);
+        dialogSystemLabels.Count(x => x.SystemLabelId == SystemLabel.Values.Default).ShouldBe(1);
     }
 
     [Fact]

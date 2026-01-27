@@ -10,7 +10,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 
-using FluentAssertions;
+using Shouldly;
 #pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
@@ -37,9 +37,9 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
                 SystemLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand(_ => GetDialog(dialogId1))
-            .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin))
+            .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin))
             .SendCommand(_ => GetDialog(dialogId2))
-            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin));
     }
 
     [Fact]
@@ -76,9 +76,9 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
                 }
             })
             .SendCommand(_ => GetDialog(dialogId1))
-            .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin))
+            .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin))
             .SendCommand(_ => GetDialog(dialogId2))
-            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin));
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
                 SystemLabels = [SystemLabel.Values.Bin]
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x =>
-                x.Message.Should().NotBeEmpty());
+                x.Message.ShouldNotBeEmpty());
 
     [Fact]
     public Task BulkSet_Returns_ConcurrencyError_On_Revision_Mismatch() =>

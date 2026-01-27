@@ -13,7 +13,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
 
@@ -39,9 +39,9 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                 AddLabels = [SystemLabel.Values.Bin]
             })
             .SendCommand(_ => GetDialog(dialogId1))
-            .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin))
+            .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin))
             .SendCommand(_ => GetDialog(dialogId2))
-            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin));
     }
 
     [Fact]
@@ -78,9 +78,9 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                 }
             })
             .SendCommand(_ => GetDialog(dialogId1))
-            .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin))
+            .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin))
             .SendCommand(_ => GetDialog(dialogId2))
-            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+            .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Bin));
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                 AddLabels = [SystemLabel.Values.Bin]
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x =>
-                x.Message.Should().NotBeEmpty());
+                x.Message.ShouldNotBeEmpty());
 
     [Fact]
     public Task BulkSet_Returns_ConcurrencyError_On_Revision_Mismatch() =>
@@ -128,7 +128,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             })
             .SendCommand(ctx => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Default));
+                x.EndUserContext.SystemLabels.FirstOrDefault().ShouldBe(SystemLabel.Values.Default));
 
     [Fact]
     public Task Cannot_BulkSet_Sent_System_Label() =>

@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
@@ -14,5 +14,5 @@ public class EnduserContextRevisionTests(DialogApplication application) : Applic
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.Revision.Should().NotBeEmpty());
+                x.EndUserContext.Revision.ShouldNotBe(Guid.Empty));
 }

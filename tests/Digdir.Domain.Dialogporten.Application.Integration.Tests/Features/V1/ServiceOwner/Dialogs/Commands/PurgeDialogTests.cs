@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using FluentAssertions;
+using Shouldly;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
@@ -21,13 +21,13 @@ public class PurgeDialogTests(DialogApplication application) : ApplicationCollec
             .ExecuteAndAssert<Success>();
 
         var dialogEntities = await Application.GetDbEntities<DialogEntity>();
-        dialogEntities.Should().BeEmpty();
+        dialogEntities.ShouldBeEmpty();
 
         var dialogAttachments = await Application.GetDbEntities<DialogAttachment>();
-        dialogAttachments.Should().BeEmpty();
+        dialogAttachments.ShouldBeEmpty();
 
         var dialogActivities = await Application.GetDbEntities<DialogActivity>();
-        dialogActivities.Should().BeEmpty();
+        dialogActivities.ShouldBeEmpty();
     }
 
     [Fact]

@@ -1,5 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.Utils;
 
@@ -18,7 +18,7 @@ public class ApplicationEventHandlerUtilsTests
             .ToArray();
 
         // Assert
-        sameNameEndpoints.Should().BeEmpty(because:
+        sameNameEndpoints.ShouldBeEmpty(
             "multiple handlers with the same endpoint name will consume " +
             "the same queue, thereby competing for the same messages");
     }

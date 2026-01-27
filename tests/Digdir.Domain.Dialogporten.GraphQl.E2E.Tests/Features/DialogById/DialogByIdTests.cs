@@ -1,5 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
-using FluentAssertions;
+using Shouldly;
 using StrawberryShake;
 using Xunit;
 
@@ -21,12 +21,12 @@ public class DialogByIdTests : GraphQlE2ETestBase
         var result = await GetDialog(dialogId);
 
         // Assert
-        result.Data.Should().NotBeNull();
+        result.Data.ShouldNotBeNull();
 
         var error = result.Data.DialogById.Errors.Single();
 
-        error.Should().BeOfType<GetDialogById_DialogById_Errors_DialogByIdNotFound>();
-        error.Message.Should().Contain(dialogId.ToString());
+        error.ShouldBeOfType<GetDialogById_DialogById_Errors_DialogByIdNotFound>();
+        error.Message.ShouldContain(dialogId.ToString());
     }
 
     [GraphQlE2EFact]
@@ -39,11 +39,11 @@ public class DialogByIdTests : GraphQlE2ETestBase
         var result = await GetDialog(dialogId);
 
         // Assert
-        result.Data.Should().NotBeNull();
+        result.Data.ShouldNotBeNull();
 
         var dialog = result.Data.DialogById.Dialog;
-        dialog.Should().NotBeNull();
-        dialog.Id.Should().Be(dialogId);
+        dialog.ShouldNotBeNull();
+        dialog.Id.ShouldBe(dialogId);
     }
 
     [GraphQlE2EFact]
@@ -57,8 +57,8 @@ public class DialogByIdTests : GraphQlE2ETestBase
         var result = await GetDialog(dialogId);
 
         // Assert
-        result.Errors.Should().ContainSingle()
-            .Which.Message.Should().Contain("401 (Unauthorized)");
+        var error = result.Errors.Single();
+        error.Message.ShouldContain("401 (Unauthorized)");
     }
 
     [GraphQlE2EFact]
@@ -75,14 +75,14 @@ public class DialogByIdTests : GraphQlE2ETestBase
         var unauthorizedResult = await GetDialog(dialogId);
 
         // Assert
-        authorizedResult.Data.Should().NotBeNull();
-        authorizedResult.Data.DialogById.Dialog!.Id.Should().Be(dialogId);
+        authorizedResult.Data.ShouldNotBeNull();
+        authorizedResult.Data.DialogById.Dialog!.Id.ShouldBe(dialogId);
 
-        unauthorizedResult.Data.Should().NotBeNull();
+        unauthorizedResult.Data.ShouldNotBeNull();
         var error = unauthorizedResult.Data.DialogById.Errors.Single();
 
-        error.Should().BeOfType<GetDialogById_DialogById_Errors_DialogByIdNotFound>();
-        error.Message.Should().Contain(dialogId.ToString());
+        error.ShouldBeOfType<GetDialogById_DialogById_Errors_DialogByIdNotFound>();
+        error.Message.ShouldContain(dialogId.ToString());
     }
 
     private Task<IOperationResult<IGetDialogByIdResult>> GetDialog(Guid dialogId) =>
@@ -115,7 +115,7 @@ public class DialogByIdTests : GraphQlE2ETestBase
                             mediaType: "text/plain"))),
                 TestContext.Current.CancellationToken);
 
-        createDialogResponse.Content.Should().NotBeNull();
+        createDialogResponse.Content.ShouldNotBeNull();
 
         var dialogIdRaw = createDialogResponse
             .Content
@@ -126,7 +126,7 @@ public class DialogByIdTests : GraphQlE2ETestBase
             Assert.Fail($"Could not parse create dialog response, {dialogIdRaw}");
         }
 
-        dialogId.Should().NotBe(Guid.Empty);
+        dialogId.ShouldNotBe(Guid.Empty);
 
         return dialogId;
     }

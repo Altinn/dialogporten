@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
+using Shouldly;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.ServiceOwnerContext.Queries;
@@ -20,7 +20,7 @@ public class GetServiceOwnerLabelsTest : ApplicationCollectionFixture
             .CreateSimpleDialog(x => x
                 .AddServiceOwnerLabels("Scadrial", "Roshar", "Sel"))
             .SendCommand((_, ctx) => new GetServiceOwnerLabelsQuery { DialogId = ctx.GetDialogId() })
-            .ExecuteAndAssert<ServiceOwnerLabelResultDto>(x => x.Labels.Should().HaveCount(3));
+            .ExecuteAndAssert<ServiceOwnerLabelResultDto>(x => x.Labels.Count.ShouldBe(3));
 
     [Fact]
     public Task Get_ServiceOwnerLabels_With_Invalid_DialogId_Returns_NotFound() =>

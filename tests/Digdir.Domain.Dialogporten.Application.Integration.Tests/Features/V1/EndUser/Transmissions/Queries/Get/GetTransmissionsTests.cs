@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -34,7 +34,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                 TransmissionId = transmissionId
             })
             .ExecuteAndAssert<TransmissionDto>(x =>
-                x.ExternalReference.Should().Be("ext"));
+                x.ExternalReference.ShouldBe("ext"));
     }
 
     [Fact]
@@ -55,10 +55,12 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                 DialogId = ctx.GetDialogId(),
                 TransmissionId = transmissionId
             })
-            .ExecuteAndAssert<TransmissionDto>(x => x
-                .Attachments.Should().ContainSingle(t => t.ExpiresAt != null)
-                .Which.Urls.Should().ContainSingle()
-                .Which.Url.Should().Be(Constants.ExpiredUri));
+            .ExecuteAndAssert<TransmissionDto>(x =>
+            {
+                var attachment = x.Attachments.Single(t => t.ExpiresAt is not null);
+                var url = attachment.Urls.Single();
+                url.Url.ShouldBe(Constants.ExpiredUri);
+            });
     }
 
     [Fact]
@@ -89,11 +91,12 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
             })
             .ExecuteAndAssert<TransmissionDto>(x =>
             {
-                x.IsAuthorized.Should().BeFalse();
-                x.Content.ContentReference.Should().NotBeNull();
-                x.Content.ContentReference!.Value.Should().NotBeEmpty()
-                    .And.AllSatisfy(localization =>
-                        localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+                x.IsAuthorized.ShouldBeFalse();
+                x.Content.ContentReference.ShouldNotBeNull();
+                x.Content.ContentReference!.Value.ShouldNotBeEmpty();
+                x.Content.ContentReference!.Value
+                    .All(localization => localization.Value == Constants.UnauthorizedUri.ToString())
+                    .ShouldBeTrue();
             });
     }
 

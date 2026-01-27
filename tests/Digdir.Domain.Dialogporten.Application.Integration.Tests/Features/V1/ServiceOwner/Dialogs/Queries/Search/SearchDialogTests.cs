@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using Shouldly;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
@@ -42,8 +42,7 @@ public class SearchDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x => party = x.Dto.Party)
             .SearchServiceOwnerDialogs(x => x.Party = [party!])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-                x.Items.Should().ContainSingle(x =>
-                    x.SystemLabel == SystemLabel.Values.Default));
+                x.Items.Count(item => item.SystemLabel == SystemLabel.Values.Default).ShouldBe(1));
     }
 
     [Fact]
@@ -56,7 +55,7 @@ public class SearchDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
             {
                 var dialog = x.Items.Single();
-                dialog.FromPartyTransmissionsCount.Should().Be(1);
-                dialog.FromServiceOwnerTransmissionsCount.Should().Be(1);
+                dialog.FromPartyTransmissionsCount.ShouldBe(1);
+                dialog.FromServiceOwnerTransmissionsCount.ShouldBe(1);
             });
 }

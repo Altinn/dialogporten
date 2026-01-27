@@ -57,15 +57,17 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var baseTags = {}
 
-module finopsTags '../../functions/finopsTags.bicep' = {
-  name: 'finopsTags'
-  params: {
-    environment: environment
-    existingTags: baseTags
-  }
-}
+var tags = union(baseTags, {
+  finops_environment: environment
+  finops_product: 'Dialogporten'
+  repository: 'https://github.com/altinn/dialogporten'
+  finops_serviceownercode: 'digdir'
+  finops_serviceownerorgnr: '991825827'
+})
 
-var tags = finopsTags.outputs.tags
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
+  name: appConfigurationName
+}
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

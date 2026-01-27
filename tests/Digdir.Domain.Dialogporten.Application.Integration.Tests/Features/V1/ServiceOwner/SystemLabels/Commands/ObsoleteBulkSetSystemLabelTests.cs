@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -64,7 +63,7 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
                 };
             })
             .ExecuteAndAssert<Forbidden>(x =>
-                x.Reasons.Should().NotBeEmpty());
+                Assert.NotEmpty(x.Reasons));
 
     [Fact]
     public Task BulkSet_Returns_ConcurrencyError_On_Revision_Mismatch() =>
@@ -133,7 +132,7 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
 
     private static void AssertOneLabelWithValue(DialogDto dialog, SystemLabel.Values value)
     {
-        dialog.EndUserContext.SystemLabels.Should().HaveCount(1);
-        dialog.EndUserContext.SystemLabels.First().Should().Be(value);
+        var label = Assert.Single(dialog.EndUserContext.SystemLabels);
+        Assert.Equal(value, label);
     }
 }

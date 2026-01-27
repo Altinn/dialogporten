@@ -3,7 +3,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Queries.Get;
@@ -29,7 +28,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                 TransmissionId = transmissionId
             })
             .ExecuteAndAssert<TransmissionDto>(x =>
-                x.ExternalReference.Should().Be("ext"));
+                Assert.Equal("ext", x.ExternalReference));
     }
 
     [Fact]
@@ -51,8 +50,12 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                 TransmissionId = transmissionId
             })
             .ExecuteAndAssert<TransmissionDto>(x =>
-                x.Attachments.Should().ContainSingle(t => t.ExpiresAt != null)
-                    .Which.Urls.Should().ContainSingle()
-                    .Which.Url.Should().NotBe(Constants.ExpiredUri));
+            {
+                var attachment = Assert.Single(x.Attachments, t => t.ExpiresAt is not null);
+                var url = Assert.Single(attachment.Urls);
+                var urlValue = url.Url;
+                Assert.NotNull(urlValue);
+                Assert.NotEqual(Constants.ExpiredUri, urlValue);
+            });
     }
 }

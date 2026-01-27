@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -31,8 +30,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .SendCommand(_ => new GetDialogQuery { DialogId = id })
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Id.Should().Be(id);
-                x.ExternalReference.Should().Be(externalReference);
+                Assert.Equal(id, x.Id);
+                Assert.Equal(externalReference, x.ExternalReference);
             });
     }
 
@@ -48,15 +47,17 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var mappedStatus = Application.GetMapper()
                     .Map<DialogStatus.Values>(createDto.Status);
-                result.Status.Should().Be(mappedStatus);
+                Assert.Equal(mappedStatus, result.Status);
 
-                result.Should().NotBeNull();
-                result.Should().BeEquivalentTo(createDto, options => options
-                    .Excluding(x => x.UpdatedAt)
-                    .Excluding(x => x.CreatedAt)
-                    .Excluding(x => x.SystemLabel)
-                    .Excluding(x => x.Status)
-                );
+                Assert.NotNull(result);
+                var expected = Application.GetMapper().Map<DialogDto>(createDto);
+                expected.UpdatedAt = result.UpdatedAt;
+                expected.CreatedAt = result.CreatedAt;
+#pragma warning disable CS0618 // DialogDto.SystemLabel is obsolete in favor of EndUserContext.SystemLabels
+                expected.SystemLabel = result.SystemLabel;
+#pragma warning restore CS0618
+                expected.Status = result.Status;
+                Assert.Equivalent(expected, result);
             });
     }
 
@@ -75,16 +76,33 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Transmissions.Should().NotBeEmpty()
-                    .And.AllSatisfy(t => t.Attachments.Should().NotBeEmpty()
-                        .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
-                            .And.AllSatisfy(url => url.Url.Should().NotBeNull()
-                                .And.NotBe(Constants.ExpiredUri))));
+                Assert.NotEmpty(x.Transmissions);
+                Assert.All(x.Transmissions, transmission =>
+                {
+                    Assert.NotEmpty(transmission.Attachments);
+                    Assert.All(transmission.Attachments, attachment =>
+                    {
+                        Assert.NotEmpty(attachment.Urls);
+                        Assert.All(attachment.Urls, url =>
+                        {
+                            var urlValue = url.Url;
+                            Assert.NotNull(urlValue);
+                            Assert.NotEqual(Constants.ExpiredUri, urlValue);
+                        });
+                    });
+                });
 
-                x.Attachments.Should().NotBeEmpty()
-                    .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
-                        .And.AllSatisfy(url => url.Url.Should().NotBeNull()
-                            .And.NotBe(Constants.ExpiredUri)));
+                Assert.NotEmpty(x.Attachments);
+                Assert.All(x.Attachments, attachment =>
+                {
+                    Assert.NotEmpty(attachment.Urls);
+                    Assert.All(attachment.Urls, url =>
+                    {
+                        var urlValue = url.Url;
+                        Assert.NotNull(urlValue);
+                        Assert.NotEqual(Constants.ExpiredUri, urlValue);
+                    });
+                });
             });
 
     [Fact]
@@ -99,14 +117,17 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var mappedStatus = Application.GetMapper()
                     .Map<DialogStatus.Values>(createDto.Status);
-                result.Status.Should().Be(mappedStatus);
+                Assert.Equal(mappedStatus, result.Status);
 
-                result.Should().NotBeNull();
-                result.Should().BeEquivalentTo(createDto, options => options
-                    .Excluding(x => x.UpdatedAt)
-                    .Excluding(x => x.CreatedAt)
-                    .Excluding(x => x.SystemLabel)
-                    .Excluding(x => x.Status));
+                Assert.NotNull(result);
+                var expected = Application.GetMapper().Map<DialogDto>(createDto);
+                expected.UpdatedAt = result.UpdatedAt;
+                expected.CreatedAt = result.CreatedAt;
+#pragma warning disable CS0618 // DialogDto.SystemLabel is obsolete in favor of EndUserContext.SystemLabels
+                expected.SystemLabel = result.SystemLabel;
+#pragma warning restore CS0618
+                expected.Status = result.Status;
+                Assert.Equivalent(expected, result);
             });
     }
 
@@ -117,6 +138,5 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.SystemLabel.Should()
-                    .Be(SystemLabel.Values.Default));
+                Assert.Equal(SystemLabel.Values.Default, x.SystemLabel));
 }

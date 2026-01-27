@@ -11,7 +11,6 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -30,7 +29,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .SetSystemLabelsServiceOwner(x => x.AddLabels = [SystemLabel.Values.Bin])
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+                Assert.Equal(SystemLabel.Values.Bin, x.EndUserContext.SystemLabels.FirstOrDefault()));
 
     [Fact]
     public Task Set_Returns_ConcurrencyError_On_Revision_Mismatch() =>
@@ -67,7 +66,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             })
             .SendCommand(_ => GetDialog(dialogId))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+                Assert.Equal(SystemLabel.Values.Bin, x.EndUserContext.SystemLabels.FirstOrDefault()));
     }
 
     [Fact]
@@ -79,8 +78,8 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .AssertResult<DialogDto>(x =>
             {
-                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.MarkedAsUnopened);
-                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Default);
+                Assert.Single(x.EndUserContext.SystemLabels, x => x == SystemLabel.Values.MarkedAsUnopened);
+                Assert.Single(x.EndUserContext.SystemLabels, x => x == SystemLabel.Values.Default);
             })
             .SendCommand((_, ctx) => new SetSystemLabelCommand
             {
@@ -91,8 +90,8 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.EndUserContext.SystemLabels.Should().NotContain(x => x == SystemLabel.Values.MarkedAsUnopened);
-                x.EndUserContext.SystemLabels.Should().ContainSingle(x => x == SystemLabel.Values.Default);
+                Assert.DoesNotContain(x.EndUserContext.SystemLabels, x => x == SystemLabel.Values.MarkedAsUnopened);
+                Assert.Single(x.EndUserContext.SystemLabels, x => x == SystemLabel.Values.Default);
             });
 
     [Fact]
@@ -135,7 +134,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive));
+                Assert.Single(x.EndUserContext.SystemLabels, label => label == SystemLabel.Values.Archive));
 
         await AssertPerformedByActorAsync();
     }
@@ -170,9 +169,9 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .ThenInclude(x => x.ActorNameEntity)
             .SingleAsync(x => x.Name == expectedLabelName);
 
-        log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
-        log.PerformedBy.ActorNameEntity.Should().NotBeNull();
-        log.PerformedBy.ActorNameEntity!.ActorId.Should().Be(AdminPerformedByActorId);
+        Assert.Equal(ActorType.Values.PartyRepresentative, log.PerformedBy.ActorTypeId);
+        Assert.NotNull(log.PerformedBy.ActorNameEntity);
+        Assert.Equal(AdminPerformedByActorId, log.PerformedBy.ActorNameEntity!.ActorId);
     }
 }
 

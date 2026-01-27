@@ -8,7 +8,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
@@ -351,7 +350,7 @@ public static class IFlowStepExtensions
         Action<object>? assert) =>
         step.Select(result =>
         {
-            result.Value.Should().NotBeNull();
+            Assert.NotNull(result.Value);
             assert?.Invoke(result.Value);
             return result.Value;
         }).ExecuteAsync();
@@ -359,7 +358,7 @@ public static class IFlowStepExtensions
     public static Task<object> ExecuteAndAssert(this IFlowStep<IOneOf> step, Type type)
         => step.Select(result =>
             {
-                result.Value.Should().BeOfType(type).And.NotBeNull();
+                Assert.IsType(type, result.Value);
                 return result.Value;
             })
             .ExecuteAsync();
@@ -373,8 +372,7 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>
         step.Select(result =>
         {
-            var typedResult = result.Value.Should().BeOfType<T>().Subject;
-            typedResult.Should().NotBeNull();
+            var typedResult = Assert.IsType<T>(result.Value);
             assert?.Invoke(typedResult);
             return typedResult;
         });
@@ -382,8 +380,7 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert) =>
         step.Select((result, context) =>
         {
-            var typedResult = result.Value.Should().BeOfType<T>().Subject;
-            typedResult.Should().NotBeNull();
+            var typedResult = Assert.IsType<T>(result.Value);
             assert(typedResult, context);
             return typedResult;
         });
@@ -391,28 +388,31 @@ public static class IFlowStepExtensions
     public static IFlowStep AssertSuccess(this IFlowStep<IOneOf> step) =>
         step.Select(result =>
         {
-            result.Index.Should().Be(0);
+            Assert.Equal(0, result.Index);
             var typedResult = result.Value;
-            typedResult.Should().NotBeNull();
+            Assert.NotNull(typedResult);
             return typedResult;
         });
 
     public static Guid GetDialogId(this FlowContext ctx)
     {
-        ctx.Bag.TryGetValue(DialogIdKey, out var value).Should().BeTrue();
-        return value.Should().BeOfType<Guid>().Subject;
+        var found = ctx.Bag.TryGetValue(DialogIdKey, out var value);
+        Assert.True(found);
+        return Assert.IsType<Guid>(value);
     }
 
     public static string GetParty(this FlowContext ctx)
     {
-        ctx.Bag.TryGetValue(PartyKey, out var value).Should().BeTrue();
-        return value.Should().BeOfType<string>().Subject;
+        var found = ctx.Bag.TryGetValue(PartyKey, out var value);
+        Assert.True(found);
+        return Assert.IsType<string>(value);
     }
 
     public static string GetServiceResource(this FlowContext ctx)
     {
-        ctx.Bag.TryGetValue(ServiceResource, out var value).Should().BeTrue();
-        return value.Should().BeOfType<string>().Subject;
+        var found = ctx.Bag.TryGetValue(ServiceResource, out var value);
+        Assert.True(found);
+        return Assert.IsType<string>(value);
     }
 
     public static UpdateDialogCommand CreateUpdateDialogCommand(DialogDtoSO dto, FlowContext ctx)

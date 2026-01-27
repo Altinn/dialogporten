@@ -13,7 +13,6 @@ using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
@@ -36,8 +35,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 x.AddTransmission(x =>
                     x.Content!.Summary = null))
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.Transmissions
-                .First().Content.Summary.Should().BeNull());
+            .ExecuteAndAssert<DialogDto>(x => Assert.Null(x.Transmissions.First().Content.Summary));
 
     [Fact]
     public Task Can_Create_Transmission_With_Embeddable_Content() =>
@@ -61,9 +59,9 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .ExecuteAndAssert<DialogDto>(result =>
             {
                 var transmission = result.Transmissions.Single();
-                transmission.Content.ContentReference!.MediaType.Should().Be(MediaTypes.EmbeddableMarkdown);
-                transmission.Content.ContentReference!.Value.Should().HaveCount(1);
-                transmission.Content.ContentReference!.Value.First().Value.Should().StartWith("https://");
+                Assert.Equal(MediaTypes.EmbeddableMarkdown, transmission.Content.ContentReference!.MediaType);
+                var localization = Assert.Single(transmission.Content.ContentReference!.Value);
+                Assert.StartsWith("https://", localization.Value);
             });
 
     [Fact]
@@ -139,11 +137,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
-                result.Transmissions
-                    .Single()
-                    .ExternalReference
-                    .Should()
-                    .Be("unique-key"));
+                Assert.Equal("unique-key", result.Transmissions.Single().ExternalReference));
 
     [Fact]
     public Task Can_Create_Transmission_Related_To_Existing_Transmission() =>
@@ -193,9 +187,8 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
-                result.Transmissions.Should().HaveCount(2);
-                result.Transmissions.Last().RelatedTransmissionId.Should()
-                    .Be(result.Transmissions.First().Id);
+                Assert.True(result.Transmissions.Count == 2);
+                Assert.Equal(result.Transmissions.First().Id, result.Transmissions.Last().RelatedTransmissionId);
             });
 
     [Fact]
@@ -264,14 +257,14 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 x.AddTransmission(createTransmission))
             .ExecuteAndAssert(x =>
             {
-                x.Should().BeOfType(expectedType);
+                Assert.IsType(expectedType, x);
 
                 if (expectedType != typeof(ValidationError))
                 {
                     return;
                 }
 
-                var validationError = (ValidationError)x;
+                var validationError = Assert.IsType<ValidationError>(x);
                 validationError.ShouldHaveErrorWithText("Allowed media types");
             });
 
@@ -288,8 +281,12 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
                 // Deprecated media type should be converted
                 // to the new embeddable media type
-                transmission.Content.ContentReference!
-                    .MediaType.Should().Be(MediaTypes.LegacyEmbeddableHtml);
+                var contentReference = transmission.Content.ContentReference;
+                if (contentReference is null)
+                {
+                    Assert.Fail("Expected a content reference.");
+                }
+                Assert.Equal(MediaTypes.LegacyEmbeddableHtml, contentReference.MediaType);
             });
 
     private static void SetLegacyEmbeddableHtmlDeprecated(TransmissionDto x) =>

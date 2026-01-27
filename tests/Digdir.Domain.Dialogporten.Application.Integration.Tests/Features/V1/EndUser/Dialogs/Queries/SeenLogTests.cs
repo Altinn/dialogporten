@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using FluentAssertions;
+using Xunit;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
@@ -47,9 +47,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             })
             .ExecuteAndAssert<SeenLogDto>(result =>
             {
-                result.SeenBy.ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
+                Assert.StartsWith(NorwegianPersonIdentifier.HashPrefixWithSeparator, result.SeenBy.ActorId);
             });
 
     [Fact]
@@ -59,11 +57,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .GetEndUserDialog()
             .AssertResult<DialogDto>()
             .SendCommand(x => new SearchSeenLogQuery { DialogId = x.Id })
-            .ExecuteAndAssert<List<SearchSeenLogDto>>(result => result.Single()
-                .SeenBy
-                .ActorId
-                .Should()
-                .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator));
+            .ExecuteAndAssert<List<SearchSeenLogDto>>(result =>
+                Assert.StartsWith(NorwegianPersonIdentifier.HashPrefixWithSeparator, result.Single().SeenBy.ActorId));
 
     [Fact]
     public async Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_Different_Users()
@@ -86,7 +81,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 // Both users should be in SeenSinceLastContentUpdate
-                x.SeenSinceLastContentUpdate.Count.Should().Be(2);
+                Assert.True(x.SeenSinceLastContentUpdate.Count == 2);
 
                 // Only the new user should be in SeenSinceLastUpdate
                 x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
@@ -132,7 +127,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
             {
                 var dialog = result.Items.Single();
-                dialog.SeenSinceLastContentUpdate.Count.Should().Be(2);
+                Assert.True(dialog.SeenSinceLastContentUpdate.Count == 2);
                 dialog.SeenSinceLastUpdate.AssertSingleActorIdHashed();
             });
     }
@@ -165,18 +160,12 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
 internal static class SeenLogAssertionExtensions
 {
     public static void AssertSingleActorIdHashed(this List<DialogSeenLogDto> seenLogs) =>
-        seenLogs
-            .Single()
-            .SeenBy
-            .ActorId
-            .Should()
-            .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
+        Assert.StartsWith(
+            NorwegianPersonIdentifier.HashPrefixWithSeparator,
+            seenLogs.Single().SeenBy.ActorId);
 
     public static void AssertSingleActorIdHashed(this List<SearchDialogSeenLogDto> seenLogs) =>
-        seenLogs
-            .Single()
-            .SeenBy
-            .ActorId
-            .Should()
-            .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
+        Assert.StartsWith(
+            NorwegianPersonIdentifier.HashPrefixWithSeparator,
+            seenLogs.Single().SeenBy.ActorId);
 }

@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests;
 
@@ -61,8 +60,8 @@ public class DbSetExtensionsTests
         var (actualSql, actualParameters) = DbSetExtensions.GeneratePrefilterAuthorizedDialogsSql(authorizedResources);
 
         // Assert
-        RemoveWhitespace(actualSql).Should().Be(RemoveWhitespace(expectedSql));
-        actualParameters.Should().BeEquivalentTo(expectedParameters);
+        Assert.Equal(RemoveWhitespace(expectedSql), RemoveWhitespace(actualSql));
+        Assert.Equivalent(expectedParameters, actualParameters);
     }
 
     private static string RemoveWhitespace(string input) =>

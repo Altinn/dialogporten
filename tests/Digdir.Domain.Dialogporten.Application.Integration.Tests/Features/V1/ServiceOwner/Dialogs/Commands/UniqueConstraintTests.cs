@@ -7,7 +7,6 @@ using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionAttachmentDto;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
@@ -97,7 +96,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             .CreateSimpleDialog(x => x.Dto.IdempotentKey = idempotentKey)
             .CreateSimpleDialog(x => x.Dto.IdempotentKey = idempotentKey)
             .ExecuteAndAssert<Conflict>(x =>
-                x.ErrorMessage.Should().Contain(idempotentKey));
+                Assert.Contains(idempotentKey, x.ErrorMessage));
     }
 
     #endregion

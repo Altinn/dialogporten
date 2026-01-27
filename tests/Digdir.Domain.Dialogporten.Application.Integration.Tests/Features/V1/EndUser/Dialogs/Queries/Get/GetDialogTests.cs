@@ -14,7 +14,6 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
@@ -43,8 +42,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .SendCommand(_ => new GetDialogQuery { DialogId = id })
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Id.Should().Be(id);
-                x.ExternalReference.Should().Be(externalReference);
+                Assert.Equal(id, x.Id);
+                Assert.Equal(externalReference, x.ExternalReference);
             });
     }
 
@@ -56,8 +55,10 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     x.ExternalReference = "ext"))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Transmissions.Should().ContainSingle()
-                    .Which.ExternalReference.Should().Be("ext"));
+            {
+                var transmission = Assert.Single(x.Transmissions);
+                Assert.Equal("ext", transmission.ExternalReference);
+            });
 
     [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>
@@ -80,11 +81,12 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 var transmission = x.Transmissions.Single();
-                transmission.IsAuthorized.Should().BeFalse();
-                transmission.Content.ContentReference.Should().NotBeNull();
-                transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
-                    .And.AllSatisfy(localization =>
-                        localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+                Assert.False(transmission.IsAuthorized);
+                Assert.NotNull(transmission.Content.ContentReference);
+                var localizations = transmission.Content.ContentReference!.Value;
+                Assert.NotEmpty(localizations);
+                Assert.All(localizations, localization =>
+                    Assert.Equal(Constants.UnauthorizedUri.ToString(), localization.Value));
             });
 
     [Fact]
@@ -93,7 +95,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog()
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.Revision.Should().NotBeEmpty());
+                Assert.NotEqual(Guid.Empty, x.EndUserContext.Revision));
 
     [Fact]
     public Task Get_Dialog_Should_Mask_Expired_Attachment_Urls() =>
@@ -110,16 +112,33 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Transmissions.Should().NotBeEmpty()
-                    .And.AllSatisfy(x => x.Attachments.Should().NotBeEmpty()
-                        .And.AllSatisfy(x => x.Urls.Should().NotBeEmpty()
-                            .And.AllSatisfy(url => url.Url.Should().NotBeNull()
-                                .And.Be(Constants.ExpiredUri))));
+                Assert.NotEmpty(x.Transmissions);
+                Assert.All(x.Transmissions, transmission =>
+                {
+                    Assert.NotEmpty(transmission.Attachments);
+                    Assert.All(transmission.Attachments, attachment =>
+                    {
+                        Assert.NotEmpty(attachment.Urls);
+                        Assert.All(attachment.Urls, url =>
+                        {
+                            var urlValue = url.Url;
+                            Assert.NotNull(urlValue);
+                            Assert.Equal(Constants.ExpiredUri, urlValue);
+                        });
+                    });
+                });
 
-                x.Attachments.Should().NotBeEmpty()
-                    .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
-                        .And.AllSatisfy(url => url.Url.Should().NotBeNull()
-                            .And.Be(Constants.ExpiredUri)));
+                Assert.NotEmpty(x.Attachments);
+                Assert.All(x.Attachments, attachment =>
+                {
+                    Assert.NotEmpty(attachment.Urls);
+                    Assert.All(attachment.Urls, url =>
+                    {
+                        var urlValue = url.Url;
+                        Assert.NotNull(urlValue);
+                        Assert.Equal(Constants.ExpiredUri, urlValue);
+                    });
+                });
             });
 
     [Fact]
@@ -133,7 +152,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened));
+                Assert.DoesNotContain(SystemLabel.Values.MarkedAsUnopened, x.EndUserContext.SystemLabels));
 
     [Fact]
     [Obsolete("Testing obsolete SystemLabel, will be removed in future versions.")]
@@ -142,8 +161,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog()
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.SystemLabel.Should()
-                    .Be(SystemLabel.Values.Default));
+                Assert.Equal(SystemLabel.Values.Default, x.SystemLabel));
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 
@@ -172,7 +190,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog(x => x.AddActivity(activityType))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.HasUnopenedContent.Should().Be(expectedHasUnOpenedContent));
+                Assert.Equal(expectedHasUnOpenedContent, x.HasUnopenedContent));
 }
 
 internal sealed class TestResourceRegistry(DialogDbContext db) : LocalDevelopmentResourceRegistry(db)

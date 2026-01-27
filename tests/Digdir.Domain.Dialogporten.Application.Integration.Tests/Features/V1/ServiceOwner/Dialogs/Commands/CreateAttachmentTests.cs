@@ -4,7 +4,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
-using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -19,9 +18,11 @@ public class CreateAttachmentTests(DialogApplication application) : ApplicationC
                     x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Attachments.Single()
-                    .ExpiresAt.Should().NotBeNull()
-                    .And.BeAfter(DateTimeOffset.UtcNow));
+            {
+                var expiresAt = x.Attachments.Single().ExpiresAt;
+                Assert.True(expiresAt.HasValue);
+                Assert.True(expiresAt.Value > DateTimeOffset.UtcNow);
+            });
 
     [Fact]
     public Task Can_Create_Transmission_Attachment_With_ExpiryDate() =>
@@ -32,9 +33,11 @@ public class CreateAttachmentTests(DialogApplication application) : ApplicationC
                         x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1))))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Transmissions.Single().Attachments.Single()
-                    .ExpiresAt.Should().NotBeNull()
-                    .And.BeAfter(DateTimeOffset.UtcNow));
+            {
+                var expiresAt = x.Transmissions.Single().Attachments.Single().ExpiresAt;
+                Assert.True(expiresAt.HasValue);
+                Assert.True(expiresAt.Value > DateTimeOffset.UtcNow);
+            });
 
     [Fact]
     public Task Cannot_Create_Dialog_Attachment_With_Past_ExpiryDate() =>

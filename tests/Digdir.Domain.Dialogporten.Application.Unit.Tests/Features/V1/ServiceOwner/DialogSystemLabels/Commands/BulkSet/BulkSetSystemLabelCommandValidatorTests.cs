@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Act
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
 
@@ -72,8 +71,8 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeTrue();
-        result.Errors.Should().BeEmpty();
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Errors);
     }
 
     [Fact]
@@ -91,7 +90,7 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeTrue();
+        Assert.True(result.IsValid);
     }
 
     [Fact]
@@ -108,8 +107,8 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().ContainSingle(x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase));
+        Assert.False(result.IsValid);
+        Assert.Single(result.Errors, x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -132,8 +131,8 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().ContainSingle(x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase));
+        Assert.False(result.IsValid);
+        Assert.Single(result.Errors, x => x.ErrorMessage.Contains("EnduserId", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -155,6 +154,6 @@ public class BulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeTrue();
+        Assert.True(result.IsValid);
     }
 }

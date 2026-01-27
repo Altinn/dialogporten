@@ -8,7 +8,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update.ServiceOwnerLabelDto;
 
@@ -40,7 +39,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 Dto = new()
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x =>
-                x.Message.Should().Contain(invalidDialogId.ToString()));
+                Assert.Contains(invalidDialogId.ToString(), x.Message));
     }
 
     [Fact]
@@ -54,11 +53,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.ServiceOwnerContext
-                    .ServiceOwnerLabels
-                    .Count
-                    .Should()
-                    .Be(0));
+                Assert.Empty(x.ServiceOwnerContext.ServiceOwnerLabels));
 
     [Fact]
     public Task Can_Add_ServiceOwnerLabel_To_Existing_Dialog() =>
@@ -68,11 +63,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
                 .AddServiceOwnerLabels("Scadrial", "Roshar"))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.ServiceOwnerContext
-                    .ServiceOwnerLabels
-                    .Count
-                    .Should()
-                    .Be(2));
+                Assert.True(x.ServiceOwnerContext.ServiceOwnerLabels.Count == 2));
 
     [Fact]
     public Task Cannot_Update_ServiceOwnerLabels_With_Duplicates() =>
@@ -118,7 +109,10 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             })
             .SendCommand((_, ctx) => new GetServiceOwnerLabelsQuery { DialogId = ctx.GetDialogId() })
             .ExecuteAndAssert<ServiceOwnerLabelResultDto>(x =>
-                x.Revision.Should().NotBe(originalRevision!.Value));
+            {
+                Assert.NotNull(originalRevision);
+                Assert.True(originalRevision.Value != x.Revision);
+            });
     }
 
     [Fact]

@@ -446,10 +446,10 @@ public class ClaimsPrincipalExtensionsTests
         ]));
 
         // Act
-        var identifyingClaims = claimsPrincipal.Claims.GetIdentifyingClaims();
+        var identifyingClaims = claimsPrincipal.Claims.GetIdentifyingClaims().ToList();
 
         // Assert
-        Assert.Equal(2, identifyingClaims.Count());
+        Assert.True(identifyingClaims.Count == 2);
         Assert.Contains(identifyingClaims, c => c.Type == "urn:altinn:authlevel" && c.Value == "4");
         Assert.Contains(identifyingClaims, c => c.Type == "urn:altinn:userid" && c.Value == "12345");
     }
@@ -469,7 +469,7 @@ public class ClaimsPrincipalExtensionsTests
         var identifyingClaims = claimsPrincipal.Claims.GetIdentifyingClaims().ToList();
 
         // Assert
-        Assert.Equal(4, identifyingClaims.Count);
+        Assert.True(identifyingClaims.Count == 4);
         Assert.Equal("acr", identifyingClaims[0].Type);
         Assert.Equal("consumer", identifyingClaims[1].Type);
         Assert.Equal("pid", identifyingClaims[2].Type);
@@ -490,10 +490,10 @@ public class ClaimsPrincipalExtensionsTests
         ]));
 
         // Act
-        var identifyingClaims = claimsPrincipal.Claims.GetIdentifyingClaims();
+        var identifyingClaims = claimsPrincipal.Claims.GetIdentifyingClaims().ToList();
 
         // Assert
-        Assert.Equal(5, identifyingClaims.Count());
+        Assert.True(identifyingClaims.Count == 5);
         Assert.Contains(identifyingClaims, c => c.Type == "pid" && c.Value == "12345678901");
         Assert.Contains(identifyingClaims, c => c.Type == "consumer" && c.Value == "test-consumer");
         Assert.Contains(identifyingClaims, c => c.Type == "acr" && c.Value == Constants.IdportenLoaHigh);

@@ -4,8 +4,8 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Events;
 
@@ -21,8 +21,8 @@ public class DialogSearchIndexerTests(DialogApplication application) : Applicati
         var sut = ActivatorUtilities.CreateInstance<DialogSearchIndexer>(Application.GetServiceProvider());
         await sut.Handle(new DialogCreatedDomainEvent(result.DialogId, null!, null!, null, null), CancellationToken.None);
         var searchEntities = await Application.GetDbEntities<DialogSearch>();
-        searchEntities.Should().HaveCount(1)
-            .And.Subject.First().DialogId.Should().Be(result.DialogId);
+        var searchEntity = Assert.Single(searchEntities);
+        Assert.Equal(result.DialogId, searchEntity.DialogId);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class DialogSearchIndexerTests(DialogApplication application) : Applicati
         var sut = ActivatorUtilities.CreateInstance<DialogSearchIndexer>(Application.GetServiceProvider());
         await sut.Handle(new DialogUpdatedDomainEvent(result.DialogId, null!, null!, null, null), CancellationToken.None);
         var searchEntities = await Application.GetDbEntities<DialogSearch>();
-        searchEntities.Should().HaveCount(1)
-            .And.Subject.First().DialogId.Should().Be(result.DialogId);
+        var searchEntity = Assert.Single(searchEntities);
+        Assert.Equal(result.DialogId, searchEntity.DialogId);
     }
 }

@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
@@ -45,10 +44,8 @@ public class CreatedAtFilterTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
             {
-                result.Items
-                    .Select(x => x.Id)
-                    .Should()
-                    .BeEquivalentTo(expectedDialogIds);
+                var actualDialogIds = result.Items.Select(x => x.Id).ToList();
+                Assert.Equivalent(expectedDialogIds, actualDialogIds);
             });
     }
 
@@ -64,5 +61,5 @@ public class CreatedAtFilterTests : ApplicationCollectionFixture
                 x.CreatedAfter = CreateDateFromYear(2022);
                 x.CreatedBefore = CreateDateFromYear(2021);
             })
-            .ExecuteAndAssert<ValidationError>(result => result.Should().NotBeNull());
+            .ExecuteAndAssert<ValidationError>(Assert.NotNull);
 }

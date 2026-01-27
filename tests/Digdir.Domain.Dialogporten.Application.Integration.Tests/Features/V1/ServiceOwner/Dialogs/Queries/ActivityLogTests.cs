@@ -7,7 +7,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.ActivityDto;
@@ -23,11 +22,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
             .CreateDialog(_ => DialogWithActivity())
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.Activities.Single()
-                    .PerformedBy
-                    .ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
+                Assert.StartsWith(NorwegianPersonIdentifier.PrefixWithSeparator, x.Activities.Single().PerformedBy.ActorId));
 
     [Fact]
     public Task Search_Dialog_LatestActivity_Should_Return_User_Ids_Unhashed() =>
@@ -38,12 +33,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
                 ServiceResource = [ctx.GetServiceResource()]
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
-                x.Items.Single()
-                    .LatestActivity!
-                    .PerformedBy
-                    .ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
+                Assert.StartsWith(NorwegianPersonIdentifier.PrefixWithSeparator, x.Items.Single().LatestActivity!.PerformedBy.ActorId));
 
     [Fact]
     public Task Get_ActivityLog_Should_Return_User_Ids_Unhashed() =>
@@ -57,10 +47,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
                 ActivityId = x.Activities.First().Id
             })
             .ExecuteAndAssert<ActivityDto>(x =>
-                x.PerformedBy
-                    .ActorId
-                    .Should()
-                    .StartWith(NorwegianPersonIdentifier.PrefixWithSeparator));
+                Assert.StartsWith(NorwegianPersonIdentifier.PrefixWithSeparator, x.PerformedBy.ActorId));
 
     private static CreateDialogCommand DialogWithActivity()
     {

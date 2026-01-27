@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OneOf.Types;
@@ -42,7 +41,7 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
             .CreateSimpleDialog(x => x.Dto.ServiceResource = "urn:altinn:resource:SuperKulTest")
             .AssertResult<CreateDialogSuccess>(x =>
             {
-                x.Revision.Should().NotBeEmpty();
+                Assert.NotEqual(Guid.Empty, x.Revision);
                 originalRevision = x.Revision;
             })
             .SendCommand((_, ctx) => new FreezeDialogCommand
@@ -51,8 +50,9 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
             })
             .ExecuteAndAssert<FreezeDialogSuccess>(x =>
             {
-                x.Revision.Should().NotBeEmpty();
-                x.Revision.Should().NotBe(originalRevision!.Value);
+                Assert.NotEqual(Guid.Empty, x.Revision);
+                Assert.NotNull(originalRevision);
+                Assert.True(originalRevision.Value != x.Revision);
             });
     }
 }

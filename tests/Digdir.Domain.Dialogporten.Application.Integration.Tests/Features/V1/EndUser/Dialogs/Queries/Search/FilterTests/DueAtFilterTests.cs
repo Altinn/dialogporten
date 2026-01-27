@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search.FilterTests;
@@ -44,10 +43,8 @@ public class DueAtFilterTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
             {
-                result.Items
-                    .Select(x => x.Id)
-                    .Should()
-                    .BeEquivalentTo(expectedDialogIds);
+                var actualDialogIds = result.Items.Select(x => x.Id).ToList();
+                Assert.Equivalent(expectedDialogIds, actualDialogIds);
             });
     }
 

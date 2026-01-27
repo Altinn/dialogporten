@@ -7,7 +7,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 
 using UpdateActivityDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
@@ -46,19 +45,19 @@ public class ActivityValidatorTests
         // Assert
         if (activityType == DialogActivityType.Values.TransmissionOpened)
         {
-            createValidation.IsValid.Should().BeTrue();
-            updateValidation.IsValid.Should().BeTrue();
+            Assert.True(createValidation.IsValid);
+            Assert.True(updateValidation.IsValid);
         }
         else
         {
-            createValidation.IsValid.Should().BeFalse();
-            updateValidation.IsValid.Should().BeFalse();
+            Assert.False(createValidation.IsValid);
+            Assert.False(updateValidation.IsValid);
 
-            createValidation.Errors.Should().ContainSingle();
-            updateValidation.Errors.Should().ContainSingle();
+            Assert.Single(createValidation.Errors);
+            Assert.Single(updateValidation.Errors);
 
-            createValidation.Errors.First().ErrorMessage.Should().Contain("TransmissionOpened");
-            updateValidation.Errors.First().ErrorMessage.Should().Contain("TransmissionOpened");
+            Assert.Contains("TransmissionOpened", createValidation.Errors.First().ErrorMessage);
+            Assert.Contains("TransmissionOpened", updateValidation.Errors.First().ErrorMessage);
         }
     }
 }

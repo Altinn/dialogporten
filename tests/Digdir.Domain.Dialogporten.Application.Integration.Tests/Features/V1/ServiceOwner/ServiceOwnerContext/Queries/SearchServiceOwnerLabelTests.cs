@@ -4,7 +4,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Common;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.ServiceOwnerContext.Queries;
@@ -30,8 +29,8 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
             .SearchServiceOwnerDialogs(x => x.ServiceOwnerLabels = [label])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
             {
-                x.Items.Should().HaveCount(1);
-                x.Items[0].Id.Should().Be(labeledDialogId);
+                var item = Assert.Single(x.Items);
+                Assert.Equal(labeledDialogId, item.Id);
             });
     }
 
@@ -64,8 +63,8 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
             .SearchServiceOwnerDialogs(x => x.ServiceOwnerLabels = [label1, label2])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
             {
-                x.Items.Should().HaveCount(1);
-                x.Items[0].Id.Should().Be(dialogIdMatchingBothLabels);
+                var item = Assert.Single(x.Items);
+                Assert.Equal(dialogIdMatchingBothLabels, item.Id);
             });
     }
 
@@ -104,8 +103,8 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
                 ["Scadrial*", "Roshar", "Adon*"])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
             {
-                x.Items.Should().HaveCount(1);
-                x.Items[0].Id.Should().Be(dialogIdMatchingAllSearchCriteria);
+                var item = Assert.Single(x.Items);
+                Assert.Equal(dialogIdMatchingAllSearchCriteria, item.Id);
             });
     }
 
@@ -123,7 +122,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
                 ];
             })
             .SearchServiceOwnerDialogs(x => x.ServiceOwnerLabels = ["Scadrial"])
-            .ExecuteAndAssert<PaginatedList<DialogDto>>(x => { x.Items.Should().BeEmpty(); });
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x => { Assert.Empty(x.Items); });
     }
 
     [Fact]

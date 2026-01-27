@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
-using FluentAssertions;
 using FluentValidation;
 using NetArchTest.Rules;
 
@@ -30,8 +29,10 @@ public class InfrastructureArchitectureTests
             .Should().NotBePublic()
             .GetResult();
 
-        publicClasses.FailingTypes.Should().BeNullOrEmpty();
-        publicClasses.IsSuccessful.Should().BeTrue();
+        Assert.True(
+            publicClasses.FailingTypes is null || !publicClasses.FailingTypes.Any(),
+            $"Public infrastructure types found: {string.Join(", ", publicClasses.FailingTypes?.Select(t => t.FullName) ?? [])}");
+        Assert.True(publicClasses.IsSuccessful);
     }
 
 
@@ -49,8 +50,8 @@ public class InfrastructureArchitectureTests
             .Where(t => t.IsPublic)
             .ToList();
 
-        publicValidators.Should().BeEmpty(
-            $"These validators are public but should be internal: " +
-            $"{string.Join(", ", publicValidators.Select(t => t.FullName))}");
+        Assert.True(
+            publicValidators.Count == 0,
+            $"These validators are public but should be internal: {string.Join(", ", publicValidators.Select(t => t.FullName))}");
     }
 }

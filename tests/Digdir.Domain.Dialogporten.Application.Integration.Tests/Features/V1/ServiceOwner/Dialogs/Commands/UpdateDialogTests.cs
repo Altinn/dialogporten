@@ -17,7 +17,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
@@ -59,8 +58,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .SendCommand(_ => new GetDialogQuery { DialogId = id!.Value })
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Id.Should().Be(id!.Value);
-                x.ExternalReference.Should().Be(expectedExternalReference);
+                Assert.Equal(id!.Value, x.Id);
+                Assert.Equal(expectedExternalReference, x.ExternalReference);
             });
     }
 
@@ -79,8 +78,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             })
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
-        updateSuccess.Revision.Should().NotBeEmpty();
-        updateSuccess.Revision.Should().NotBe(revision!.Value);
+        Assert.NotEqual(Guid.Empty, updateSuccess.Revision);
+        Assert.NotNull(revision);
+        Assert.True(revision.Value != updateSuccess.Revision);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>();
 
-        updatedDialog.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(expectedSystemLabel);
+        Assert.Equal(expectedSystemLabel, updatedDialog.EndUserContext.SystemLabels.FirstOrDefault());
     }
 
     [Fact]
@@ -114,7 +114,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .AssertResult<DialogDto>(x => initialUpdatedAt = x.UpdatedAt)
             .SendCommand(IFlowStepExtensions.CreateUpdateDialogCommand)
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.UpdatedAt.Should().Be(initialUpdatedAt));
+            .ExecuteAndAssert<DialogDto>(x => Assert.Equal(initialUpdatedAt, x.UpdatedAt));
     }
 
     [Fact]
@@ -128,8 +128,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .AssertSuccessAndUpdateDialog(_ => { })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.UpdatedAt.Should()
-                    .BeCloseTo(initialDate, TimeSpan.FromSeconds(1)));
+            {
+                var precision = TimeSpan.FromSeconds(1);
+                Assert.InRange(x.UpdatedAt, initialDate - precision, initialDate + precision);
+            });
     }
 
     [Fact]
@@ -146,8 +148,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             })
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
-        updateSuccess.Revision.Should().NotBeEmpty();
-        updateSuccess.Revision.Should().NotBe(initialRevision!.Value);
+        Assert.NotEqual(Guid.Empty, updateSuccess.Revision);
+        Assert.NotNull(initialRevision);
+        Assert.True(initialRevision.Value != updateSuccess.Revision);
     }
 
     [Fact]
@@ -177,9 +180,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             })
             .ExecuteAndAssert<DomainError>();
 
-        domainError.Errors
-            .Should()
-            .Contain(e => e.ErrorMessage.Contains("already exists"));
+        Assert.Contains(domainError.Errors, e => e.ErrorMessage.Contains("already exists"));
     }
 
     [Fact]
@@ -224,7 +225,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.Dto.Content!.Summary = null)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
-                dialog.Content!.Summary.Should().BeNull());
+                Assert.Null(dialog.Content!.Summary));
 
     [Fact]
     public Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog() =>
@@ -261,7 +262,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
             .AssertSuccessAndUpdateDialog(x => x.Dto.IsApiOnly = true)
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.IsApiOnly.Should().BeTrue());
+            .ExecuteAndAssert<DialogDto>(x => Assert.True(x.IsApiOnly));
 
     [Fact]
     public Task Can_Update_IsApiOnly_From_True_To_False() =>
@@ -269,7 +270,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
             .AssertSuccessAndUpdateDialog(x => x.Dto.IsApiOnly = false)
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.IsApiOnly.Should().BeFalse());
+            .ExecuteAndAssert<DialogDto>(x => Assert.False(x.IsApiOnly));
 
     [Fact]
     public Task Cannot_Update_IsApiOnly_To_False_If_Dialog_Content_Is_Null() =>
@@ -330,9 +331,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<DialogDto>();
 
         // Assert
-        updatedDialog.Attachments
-            .Should()
-            .ContainSingle(x => x.Id == userDefinedAttachmentId);
+        Assert.Single(updatedDialog.Attachments, x => x.Id == userDefinedAttachmentId);
     }
 
     [Fact]
@@ -356,9 +355,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<DialogDto>();
 
         // Assert
-        updatedDialog.ApiActions
-            .Should()
-            .ContainSingle(x => x.Id == userDefinedApiActionId);
+        Assert.Single(updatedDialog.ApiActions, x => x.Id == userDefinedApiActionId);
     }
 
     [Fact]
@@ -384,9 +381,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<DialogDto>();
 
         // Assert
-        updatedDialog.GuiActions
-            .Should()
-            .ContainSingle(x => x.Id == userDefinedGuiActionId);
+        Assert.Single(updatedDialog.GuiActions, x => x.Id == userDefinedGuiActionId);
     }
 
     private sealed class ContentUpdatedAtTestData : TheoryData<string, Action<UpdateDialogCommand>>
@@ -414,8 +409,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.ContentUpdatedAt.Should().NotBe(x.CreatedAt);
-                x.ContentUpdatedAt.Should().Be(x.UpdatedAt);
+                Assert.NotEqual(x.CreatedAt, x.ContentUpdatedAt);
+                Assert.Equal(x.UpdatedAt, x.ContentUpdatedAt);
             });
 
     private sealed class ContentNotUpdatedAtTestData : TheoryData<string, Action<UpdateDialogCommand>>
@@ -444,8 +439,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.ContentUpdatedAt.Should().Be(x.CreatedAt);
-                x.ContentUpdatedAt.Should().NotBe(x.UpdatedAt);
+                Assert.Equal(x.CreatedAt, x.ContentUpdatedAt);
+                Assert.NotEqual(x.UpdatedAt, x.ContentUpdatedAt);
             });
 
     [Fact]
@@ -463,10 +458,13 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
             {
-                dialog.VisibleFrom.Should().BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1));
-                dialog.CreatedAt.Should().Be(dialog.VisibleFrom);
-                dialog.UpdatedAt.Should().Be(dialog.VisibleFrom);
-                dialog.ContentUpdatedAt.Should().Be(dialog.VisibleFrom);
+                var precision = TimeSpan.FromSeconds(1);
+                var visibleFromValue = dialog.VisibleFrom;
+                Assert.NotNull(visibleFromValue);
+                Assert.InRange(visibleFromValue.Value, visibleFrom - precision, visibleFrom + precision);
+                Assert.Equal(dialog.VisibleFrom, dialog.CreatedAt);
+                Assert.Equal(dialog.VisibleFrom, dialog.UpdatedAt);
+                Assert.Equal(dialog.VisibleFrom, dialog.ContentUpdatedAt);
             });
     }
 
@@ -530,9 +528,9 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.UpdatedAt.Should().Be(x.CreatedAt);
-                x.ContentUpdatedAt.Should().Be(x.CreatedAt);
-                x.ContentUpdatedAt.Should().Be(x.UpdatedAt);
+                Assert.Equal(x.CreatedAt, x.UpdatedAt);
+                Assert.Equal(x.CreatedAt, x.ContentUpdatedAt);
+                Assert.Equal(x.UpdatedAt, x.ContentUpdatedAt);
             });
 
     [Fact]
@@ -560,8 +558,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.HasUnopenedContent.Should().BeFalse();
-                x.Transmissions.First().IsOpened.Should().BeTrue();
+                Assert.False(x.HasUnopenedContent);
+                Assert.True(x.Transmissions.First().IsOpened);
             });
     }
 
@@ -573,16 +571,16 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>(x =>
             {
-                x.FromServiceOwnerTransmissionsCount.Should().Be(0);
-                x.FromPartyTransmissionsCount.Should().Be(0);
+                Assert.Equal(0, x.FromServiceOwnerTransmissionsCount);
+                Assert.Equal(0, x.FromPartyTransmissionsCount);
             })
             .UpdateDialog(x => x
                 .AddTransmission(x => x.Type = DialogTransmissionType.Values.Correction))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.FromServiceOwnerTransmissionsCount.Should().Be(0);
-                x.FromPartyTransmissionsCount.Should().Be(1);
+                Assert.Equal(0, x.FromServiceOwnerTransmissionsCount);
+                Assert.Equal(1, x.FromPartyTransmissionsCount);
             });
     }
 
@@ -594,16 +592,16 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .GetEndUserDialog()
             .AssertResult<DialogDtoEU>(x =>
             {
-                x.FromServiceOwnerTransmissionsCount.Should().Be(0);
-                x.FromPartyTransmissionsCount.Should().Be(0);
+                Assert.Equal(0, x.FromServiceOwnerTransmissionsCount);
+                Assert.Equal(0, x.FromPartyTransmissionsCount);
             })
             .UpdateDialog(x => x
                 .AddTransmission(x => x.Type = DialogTransmissionType.Values.Information))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.FromServiceOwnerTransmissionsCount.Should().Be(1);
-                x.FromPartyTransmissionsCount.Should().Be(0);
+                Assert.Equal(1, x.FromServiceOwnerTransmissionsCount);
+                Assert.Equal(0, x.FromPartyTransmissionsCount);
             });
     }
 
@@ -618,13 +616,11 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             {
                 if (shouldAddSentLabel)
                 {
-                    x.EndUserContext.SystemLabels.Should().ContainSingle(
-                        label => label == SystemLabel.Values.Sent);
+                    Assert.Single(x.EndUserContext.SystemLabels, label => label == SystemLabel.Values.Sent);
                 }
                 else
                 {
-                    x.EndUserContext.SystemLabels.Should().NotContain(
-                        label => label == SystemLabel.Values.Sent);
+                    Assert.DoesNotContain(x.EndUserContext.SystemLabels, label => label == SystemLabel.Values.Sent);
                 }
             });
 

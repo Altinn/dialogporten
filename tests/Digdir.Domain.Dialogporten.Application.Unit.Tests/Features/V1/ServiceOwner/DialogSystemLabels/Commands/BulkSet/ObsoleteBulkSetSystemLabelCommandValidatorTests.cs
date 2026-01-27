@@ -1,7 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using FluentAssertions;
 #pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
@@ -72,8 +71,8 @@ public class ObsoleteBulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeTrue();
-        result.Errors.Should().BeEmpty();
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Errors);
     }
 
     [Fact]
@@ -91,6 +90,6 @@ public class ObsoleteBulkSetSystemLabelCommandValidatorTests
 
         var result = _validator.Validate(command);
 
-        result.IsValid.Should().BeTrue();
+        Assert.True(result.IsValid);
     }
 }

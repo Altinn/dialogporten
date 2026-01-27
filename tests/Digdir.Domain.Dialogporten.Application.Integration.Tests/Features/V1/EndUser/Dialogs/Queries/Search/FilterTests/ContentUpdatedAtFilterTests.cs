@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using FluentAssertions;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -30,7 +29,7 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
                 x.ContentUpdatedBefore = contentUpdatedAt;
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
-                x.Items.Should().HaveCount(1));
+                Assert.Single(x.Items));
     }
 
     [Fact]
@@ -50,6 +49,6 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
                 x.ContentUpdatedAfter = contentUpdatedAt;
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
-                x.Items.Should().HaveCount(1));
+                Assert.Single(x.Items));
     }
 }

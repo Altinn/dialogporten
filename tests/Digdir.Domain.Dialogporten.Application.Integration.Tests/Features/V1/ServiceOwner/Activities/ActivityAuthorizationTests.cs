@@ -9,7 +9,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -35,8 +34,8 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<Forbidden>(x =>
             {
-                x.Reasons.Should().ContainSingle(x => x.Contains(AuthorizationScope.CorrespondenceScope));
-                x.Reasons.Should().ContainSingle(x => x.Contains(nameof(DialogActivityType.Values.CorrespondenceOpened)));
+                Assert.Single(x.Reasons, r => r.Contains(AuthorizationScope.CorrespondenceScope));
+                Assert.Single(x.Reasons, r => r.Contains(nameof(DialogActivityType.Values.CorrespondenceOpened)));
             });
 
     [Fact]
@@ -77,8 +76,8 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<Forbidden>(x =>
             {
-                x.Reasons.Should().ContainSingle(x => x.Contains(AuthorizationScope.CorrespondenceScope));
-                x.Reasons.Should().ContainSingle(x => x.Contains(nameof(DialogActivityType.Values.CorrespondenceOpened)));
+                Assert.Single(x.Reasons, r => r.Contains(AuthorizationScope.CorrespondenceScope));
+                Assert.Single(x.Reasons, r => r.Contains(nameof(DialogActivityType.Values.CorrespondenceOpened)));
             });
 
     [Fact]

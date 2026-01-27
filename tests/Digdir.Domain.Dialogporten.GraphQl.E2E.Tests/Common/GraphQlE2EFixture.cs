@@ -2,7 +2,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -140,9 +139,9 @@ public class GraphQlE2EFixture : IAsyncLifetime
             preFlightIssues.Add($"WebAPI not reachable at {PreflightState.WebApiUri}. Error: {PreflightState.WebApiError}");
         }
 
-        preFlightIssues.Should()
-            .BeEmpty($"GraphQL E2E preflight failed:{Environment.NewLine}" +
-                     $"{string.Join($"{Environment.NewLine}", preFlightIssues)}");
+        Assert.True(
+            preFlightIssues.Count == 0,
+            $"GraphQL E2E preflight failed:{Environment.NewLine}{string.Join(Environment.NewLine, preFlightIssues)}");
     }
 
     public void CleanupAfterTest()

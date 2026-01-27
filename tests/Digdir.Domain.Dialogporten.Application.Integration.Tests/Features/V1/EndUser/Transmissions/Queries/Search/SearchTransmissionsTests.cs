@@ -7,7 +7,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Transmissions.Queries.Search;
@@ -25,8 +24,10 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
                 DialogId = ctx.GetDialogId()
             })
             .ExecuteAndAssert<List<TransmissionDto>>(x =>
-                x.Should().ContainSingle().Which
-                    .ExternalReference.Should().Be("ext"));
+            {
+                var transmission = Assert.Single(x);
+                Assert.Equal("ext", transmission.ExternalReference);
+            });
 
     [Fact]
     public Task Search_Transmission_Should_Mask_Expired_Attachment_Urls() =>
@@ -43,11 +44,24 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
                 DialogId = ctx.GetDialogId(),
             })
             .ExecuteAndAssert<List<TransmissionDto>>(x =>
-                x.Should().NotBeEmpty()
-                    .And.AllSatisfy(x => x.Attachments.Should().NotBeEmpty()
-                        .And.AllSatisfy(x => x.ExpiresAt.Should().NotBeNull())
-                        .And.AllSatisfy(x => x.Urls.Should().NotBeEmpty()
-                            .And.AllSatisfy(x => x.Url.Should().Be(Constants.ExpiredUri)))));
+            {
+                Assert.NotEmpty(x);
+                Assert.All(x, transmission =>
+                {
+                    Assert.NotEmpty(transmission.Attachments);
+                    Assert.All(transmission.Attachments, attachment =>
+                    {
+                        Assert.NotNull(attachment.ExpiresAt);
+                        Assert.NotEmpty(attachment.Urls);
+                        Assert.All(attachment.Urls, url =>
+                        {
+                            var urlValue = url.Url;
+                            Assert.NotNull(urlValue);
+                            Assert.Equal(Constants.ExpiredUri, urlValue);
+                        });
+                    });
+                });
+            });
 
     [Fact]
     public Task Search_Transmission_Should_Mask_Unauthorized_ContentReference() =>
@@ -73,11 +87,12 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
             .ExecuteAndAssert<List<TransmissionDto>>(x =>
             {
                 var transmission = x.Single();
-                transmission.IsAuthorized.Should().BeFalse();
-                transmission.Content.ContentReference.Should().NotBeNull();
-                transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
-                    .And.AllSatisfy(localization =>
-                        localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+                Assert.False(transmission.IsAuthorized);
+                Assert.NotNull(transmission.Content.ContentReference);
+                var localizations = transmission.Content.ContentReference!.Value;
+                Assert.NotEmpty(localizations);
+                Assert.All(localizations, localization =>
+                    Assert.Equal(Constants.UnauthorizedUri.ToString(), localization.Value));
             });
 
     private static void ConfigureReadOnlyAuthorization(IServiceCollection services)

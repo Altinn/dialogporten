@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search.FilterTests;
 
@@ -29,10 +28,11 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
             .CreateDialogs(createDialogCommands)
             .OverrideUtc(searchTime)
             .SearchEndUserDialogs(x => x.Party = [Tests.Common.Common.Party])
-            .ExecuteAndAssert<PaginatedList<DialogDto>>(result => result.Items
-                .Select(x => x.ExternalReference)
-                .Should()
-                .BeEquivalentTo(expectedReferences));
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
+            {
+                var actualReferences = result.Items.Select(x => x.ExternalReference).ToList();
+                Assert.Equivalent(expectedReferences, actualReferences);
+            });
     }
 
     private static CreateDialogCommand CreateDialogCommand(DialogData data)

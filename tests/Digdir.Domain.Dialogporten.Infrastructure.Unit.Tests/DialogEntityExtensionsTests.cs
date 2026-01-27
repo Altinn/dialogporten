@@ -43,7 +43,7 @@ public class DialogEntityExtensionsTests
 
         // Assert
         Assert.NotNull(actions);
-        Assert.Equal(9, actions.Count);
+        Assert.True(actions.Count == 9);
         Assert.Contains(actions, a => a is { Name: Constants.ReadAction, AuthorizationAttribute: Constants.MainResource });
         Assert.Contains(actions, a => a is { Name: Constants.ReadAction, AuthorizationAttribute: "foo" });
         Assert.Contains(actions, a => a is { Name: Constants.TransmissionReadAction, AuthorizationAttribute: "bar" });

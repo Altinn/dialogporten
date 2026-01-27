@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Activities;
 
@@ -34,11 +33,14 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Activities
-                    .Single(activity => activity.Id == formSavedActivityId)
-                    .CreatedAt.Should().BeCloseTo(newFormCreatedAt, TimeSpan.FromMicroseconds(1));
+                var precision = TimeSpan.FromMicroseconds(1);
+                var activity = x.Activities.Single(activity => activity.Id == formSavedActivityId);
+                Assert.True(activity.CreatedAt.HasValue);
+                var createdAt = activity.CreatedAt.Value;
+                Assert.InRange(createdAt, newFormCreatedAt - precision, newFormCreatedAt + precision);
 
-                x.UpdatedAt.Should().BeCloseTo(dialogCreatedAt, TimeSpan.FromMicroseconds(1));
+                var updatedAt = x.UpdatedAt;
+                Assert.InRange(updatedAt, dialogCreatedAt - precision, dialogCreatedAt + precision);
             });
     }
 
@@ -65,11 +67,14 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Activities
-                    .Single(x => x.Id == formSavedActivityId)
-                    .CreatedAt.Should().BeCloseTo(newFormCreatedAt, TimeSpan.FromMicroseconds(1));
+                var precision = TimeSpan.FromMicroseconds(1);
+                var activity = x.Activities.Single(activity => activity.Id == formSavedActivityId);
+                Assert.True(activity.CreatedAt.HasValue);
+                var createdAt = activity.CreatedAt.Value;
+                Assert.InRange(createdAt, newFormCreatedAt - precision, newFormCreatedAt + precision);
 
-                x.UpdatedAt.Should().BeCloseTo(newFormCreatedAt, TimeSpan.FromMicroseconds(1));
+                var updatedAt = x.UpdatedAt;
+                Assert.InRange(updatedAt, newFormCreatedAt - precision, newFormCreatedAt + precision);
             });
     }
 
@@ -92,8 +97,9 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Revision.Should().NotBeEmpty();
-                x.Revision.Should().NotBe(initialRevision!.Value);
+                Assert.NotEqual(Guid.Empty, x.Revision);
+                Assert.NotNull(initialRevision);
+                Assert.True(initialRevision.Value != x.Revision);
             });
     }
 

@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetActivity.ActivityDto;
 using ActivityDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ActivityDto;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
@@ -28,8 +27,13 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
             .ExecuteAndAssert<DialogDto>(result =>
             {
                 var actorId = result.Activities.Single().PerformedBy.ActorId;
-                actorId.Should().StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
-                actorId.Should().NotContain(unhashedActorId);
+                if (unhashedActorId is null)
+                {
+                    Assert.Fail("Expected an unhashed actor id.");
+                }
+                var expectedUnhashedActorId = unhashedActorId;
+                Assert.StartsWith(NorwegianPersonIdentifier.HashPrefixWithSeparator, actorId);
+                Assert.DoesNotContain(expectedUnhashedActorId, actorId);
             });
     }
 
@@ -49,8 +53,13 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
             {
                 var actorId = result.Items.Single().LatestActivity!.PerformedBy.ActorId;
-                actorId.Should().StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
-                actorId.Should().NotContain(unhashedActorId);
+                if (unhashedActorId is null)
+                {
+                    Assert.Fail("Expected an unhashed actor id.");
+                }
+                var expectedUnhashedActorId = unhashedActorId;
+                Assert.StartsWith(NorwegianPersonIdentifier.HashPrefixWithSeparator, actorId);
+                Assert.DoesNotContain(expectedUnhashedActorId, actorId);
             });
     }
 
@@ -71,8 +80,13 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
             .ExecuteAndAssert<ActivityDto>(result =>
             {
                 var actorId = result.PerformedBy.ActorId;
-                actorId.Should().StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator);
-                actorId.Should().NotContain(unhashedActorId);
+                if (unhashedActorId is null)
+                {
+                    Assert.Fail("Expected an unhashed actor id.");
+                }
+                var expectedUnhashedActorId = unhashedActorId;
+                Assert.StartsWith(NorwegianPersonIdentifier.HashPrefixWithSeparator, actorId);
+                Assert.DoesNotContain(expectedUnhashedActorId, actorId);
             });
     }
 

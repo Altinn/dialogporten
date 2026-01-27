@@ -3,7 +3,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
-using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Queries.Search;
 
@@ -20,8 +19,10 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
                 DialogId = ctx.GetDialogId(),
             })
             .ExecuteAndAssert<List<TransmissionDto>>(x =>
-                x.Should().ContainSingle().Which
-                    .ExternalReference.Should().Be("ext"));
+            {
+                var transmission = Assert.Single(x);
+                Assert.Equal("ext", transmission.ExternalReference);
+            });
 
     [Fact]
     public Task Search_Transmission_Should_Not_Mask_Expired_Attachment_Urls() =>
@@ -38,9 +39,22 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
                 DialogId = ctx.GetDialogId(),
             })
             .ExecuteAndAssert<List<TransmissionDto>>(x =>
-                x.Should().NotBeEmpty()
-                    .And.AllSatisfy(x => x.Attachments.Should().NotBeEmpty()
-                        .And.AllSatisfy(x => x.ExpiresAt.Should().NotBeNull())
-                        .And.AllSatisfy(x => x.Urls.Should().NotBeEmpty()
-                            .And.AllSatisfy(x => x.Url.Should().NotBe(Constants.ExpiredUri)))));
+            {
+                Assert.NotEmpty(x);
+                Assert.All(x, transmission =>
+                {
+                    Assert.NotEmpty(transmission.Attachments);
+                    Assert.All(transmission.Attachments, attachment =>
+                    {
+                        Assert.NotNull(attachment.ExpiresAt);
+                        Assert.NotEmpty(attachment.Urls);
+                        Assert.All(attachment.Urls, url =>
+                        {
+                            var urlValue = url.Url;
+                            Assert.NotNull(urlValue);
+                            Assert.NotEqual(Constants.ExpiredUri, urlValue);
+                        });
+                    });
+                });
+            });
 }

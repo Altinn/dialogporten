@@ -53,8 +53,12 @@ public class AltinnAuthorizationClientTests
         var result = (AuthorizedPartiesResult?)method!.Invoke(null, [input]);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal(4, result.AuthorizedParties.Count);
+        if (result is null)
+        {
+            Assert.Fail("Expected authorized parties result.");
+        }
+
+        Assert.True(result.AuthorizedParties.Count == 4);
 
         var parent = result.AuthorizedParties[0];
         Assert.Equal("parent", parent.Party);

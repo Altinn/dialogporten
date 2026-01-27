@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
 
@@ -22,7 +21,13 @@ public class DeleteDialogTests(DialogApplication application) : ApplicationColle
                 DialogId = ctx.GetDialogId()
             })
             .ExecuteAndAssert<DialogDto>(x =>
-                x.DeletedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(1)));
+            {
+                var now = DateTimeOffset.UtcNow;
+                var precision = TimeSpan.FromSeconds(1);
+                var deletedAt = x.DeletedAt;
+                Assert.NotNull(deletedAt);
+                Assert.InRange(deletedAt.Value, now - precision, now + precision);
+            });
 
     [Fact]
     public Task Updating_Deleted_Dialog_Should_Return_EntityDeleted() =>
@@ -42,14 +47,15 @@ public class DeleteDialogTests(DialogApplication application) : ApplicationColle
             .CreateSimpleDialog()
             .AssertResult<CreateDialogSuccess>(x =>
             {
-                x.Revision.Should().NotBeEmpty();
+                Assert.NotEqual(Guid.Empty, x.Revision);
                 originalRevision = x.Revision;
             })
             .SendCommand(x => new DeleteDialogCommand { Id = x.DialogId })
             .ExecuteAndAssert<DeleteDialogSuccess>(x =>
             {
-                x.Revision.Should().NotBeEmpty();
-                x.Revision.Should().NotBe(originalRevision!.Value);
+                Assert.NotEqual(Guid.Empty, x.Revision);
+                Assert.NotNull(originalRevision);
+                Assert.True(originalRevision.Value != x.Revision);
             });
     }
 }

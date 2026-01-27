@@ -22,61 +22,60 @@ internal static class DeleteDelegate
 
 internal static class MergeExtensions
 {
-    public static void Merge<TDestination, TSource, TKey>(
-        this ICollection<TDestination> destinations,
-        IEnumerable<TSource> sources,
-        Func<TDestination, TKey> destinationKeySelector,
-        Func<TSource, TKey> sourceKeySelector,
-        CreateDelegate<TDestination, TSource>? create = null,
-        UpdateDelegate<TDestination, TSource>? update = null,
-        DeleteDelegate<TDestination>? delete = null,
-        IEqualityComparer<TKey>? comparer = null)
+    extension<TDestination>(ICollection<TDestination> destinations)
     {
-        ArgumentNullException.ThrowIfNull(sources);
-        ArgumentNullException.ThrowIfNull(destinations);
-        ArgumentNullException.ThrowIfNull(sourceKeySelector);
-        ArgumentNullException.ThrowIfNull(destinationKeySelector);
-        comparer ??= EqualityComparer<TKey>.Default;
-        var concreteSources = sources as List<TSource> ?? sources.ToList();
-        var updateSets = UpdateSet<TDestination, TSource>.Create(
-            destinations,
-            concreteSources,
-            destinationKeySelector,
-            sourceKeySelector,
-            comparer);
+        public void Merge<TSource, TKey>(IEnumerable<TSource> sources,
+            Func<TDestination, TKey> destinationKeySelector,
+            Func<TSource, TKey> sourceKeySelector,
+            CreateDelegate<TDestination, TSource>? create = null,
+            UpdateDelegate<TDestination, TSource>? update = null,
+            DeleteDelegate<TDestination>? delete = null,
+            IEqualityComparer<TKey>? comparer = null)
+        {
+            ArgumentNullException.ThrowIfNull(sources);
+            ArgumentNullException.ThrowIfNull(destinations);
+            ArgumentNullException.ThrowIfNull(sourceKeySelector);
+            ArgumentNullException.ThrowIfNull(destinationKeySelector);
+            comparer ??= EqualityComparer<TKey>.Default;
+            var concreteSources = sources as List<TSource> ?? sources.ToList();
+            var updateSets = UpdateSet<TDestination, TSource>.Create(
+                destinations,
+                concreteSources,
+                destinationKeySelector,
+                sourceKeySelector,
+                comparer);
 
-        Delete(destinations, delete, updateSets);
-        Update(update, updateSets);
-        Create(destinations, concreteSources, create, updateSets);
-    }
+            Delete(destinations, delete, updateSets);
+            Update(update, updateSets);
+            Create(destinations, concreteSources, create, updateSets);
+        }
 
-    public static async Task MergeAsync<TDestination, TSource, TKey>(
-        this ICollection<TDestination> destinations,
-        IEnumerable<TSource> sources,
-        Func<TDestination, TKey> destinationKeySelector,
-        Func<TSource, TKey> sourceKeySelector,
-        CreateAsyncDelegate<TDestination, TSource>? create = null,
-        UpdateAsyncDelegate<TDestination, TSource>? update = null,
-        DeleteAsyncDelegate<TDestination>? delete = null,
-        IEqualityComparer<TKey>? comparer = null,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(sources);
-        ArgumentNullException.ThrowIfNull(destinations);
-        ArgumentNullException.ThrowIfNull(sourceKeySelector);
-        ArgumentNullException.ThrowIfNull(destinationKeySelector);
-        comparer ??= EqualityComparer<TKey>.Default;
-        var concreteSources = sources as List<TSource> ?? sources.ToList();
-        var updateSets = UpdateSet<TDestination, TSource>.Create(
-            destinations,
-            concreteSources,
-            destinationKeySelector,
-            sourceKeySelector,
-            comparer);
+        public async Task MergeAsync<TSource, TKey>(IEnumerable<TSource> sources,
+            Func<TDestination, TKey> destinationKeySelector,
+            Func<TSource, TKey> sourceKeySelector,
+            CreateAsyncDelegate<TDestination, TSource>? create = null,
+            UpdateAsyncDelegate<TDestination, TSource>? update = null,
+            DeleteAsyncDelegate<TDestination>? delete = null,
+            IEqualityComparer<TKey>? comparer = null,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(sources);
+            ArgumentNullException.ThrowIfNull(destinations);
+            ArgumentNullException.ThrowIfNull(sourceKeySelector);
+            ArgumentNullException.ThrowIfNull(destinationKeySelector);
+            comparer ??= EqualityComparer<TKey>.Default;
+            var concreteSources = sources as List<TSource> ?? sources.ToList();
+            var updateSets = UpdateSet<TDestination, TSource>.Create(
+                destinations,
+                concreteSources,
+                destinationKeySelector,
+                sourceKeySelector,
+                comparer);
 
-        await DeleteAsync(destinations, delete, updateSets, cancellationToken);
-        await UpdateAsync(update, updateSets, cancellationToken);
-        await CreateAsync(destinations, concreteSources, create, updateSets, cancellationToken);
+            await DeleteAsync(destinations, delete, updateSets, cancellationToken);
+            await UpdateAsync(update, updateSets, cancellationToken);
+            await CreateAsync(destinations, concreteSources, create, updateSets, cancellationToken);
+        }
     }
 
     internal static void Update<TDestination, TSource>(this IMapperBase mapper, IEnumerable<UpdateSet<TDestination, TSource>> updateSets)

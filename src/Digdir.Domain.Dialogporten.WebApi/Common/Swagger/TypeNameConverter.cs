@@ -107,54 +107,57 @@ internal static class TypeNameConverter
         className.CopyTo(finalName, ref index);
     }
 
-    private static ReadOnlySpan<char> ExcludePrefix(this ReadOnlySpan<char> name, IEnumerable<string> prefixes)
+    extension(ReadOnlySpan<char> name)
     {
-        foreach (var prefix in prefixes)
+        private ReadOnlySpan<char> ExcludePrefix(IEnumerable<string> prefixes)
         {
-            // Remove "Delete" from "DeleteMe",
-            // but not from "DeletedFilter"
-            if (!name.StartsWith(prefix) || name.MatchWord(prefix))
+            foreach (var prefix in prefixes)
             {
-                continue;
+                // Remove "Delete" from "DeleteMe",
+                // but not from "DeletedFilter"
+                if (!name.StartsWith(prefix) || name.MatchWord(prefix))
+                {
+                    continue;
+                }
+
+                name = name[prefix.Length..];
+                break;
             }
 
-            name = name[prefix.Length..];
-            break;
+            return name;
         }
 
-        return name;
-    }
+        private bool MatchWord(string prefix)
+            => name.Length != prefix.Length && name[prefix.Length] is >= 'a' and <= 'z';
 
-    private static bool MatchWord(this ReadOnlySpan<char> name, string prefix)
-        => name.Length != prefix.Length && name[prefix.Length] is >= 'a' and <= 'z';
-
-    private static ReadOnlySpan<char> ExcludePostfix(this ReadOnlySpan<char> name, IEnumerable<string> postfixes)
-    {
-        foreach (var postfix in postfixes)
+        private ReadOnlySpan<char> ExcludePostfix(IEnumerable<string> postfixes)
         {
-            if (!name.EndsWith(postfix)) continue;
-            name = name[..^postfix.Length];
-            break;
+            foreach (var postfix in postfixes)
+            {
+                if (!name.EndsWith(postfix)) continue;
+                name = name[..^postfix.Length];
+                break;
+            }
+
+            return name;
         }
 
-        return name;
-    }
+        private void SplitNamespaceAndClassName(out ReadOnlySpan<char> namespaceName, out ReadOnlySpan<char> className)
+        {
+            const int notFound = -1;
+            var classNamespaceSeparatorIndex = name.LastIndexOf('.');
+            className = classNamespaceSeparatorIndex == notFound
+                ? name
+                : name[(classNamespaceSeparatorIndex + 1)..];
+            namespaceName = classNamespaceSeparatorIndex == notFound
+                ? ReadOnlySpan<char>.Empty
+                : name[..classNamespaceSeparatorIndex];
+        }
 
-    private static void SplitNamespaceAndClassName(this ReadOnlySpan<char> fullName, out ReadOnlySpan<char> namespaceName, out ReadOnlySpan<char> className)
-    {
-        const int notFound = -1;
-        var classNamespaceSeparatorIndex = fullName.LastIndexOf('.');
-        className = classNamespaceSeparatorIndex == notFound
-            ? fullName
-            : fullName[(classNamespaceSeparatorIndex + 1)..];
-        namespaceName = classNamespaceSeparatorIndex == notFound
-            ? ReadOnlySpan<char>.Empty
-            : fullName[..classNamespaceSeparatorIndex];
-    }
-
-    private static void CopyTo(this ReadOnlySpan<char> source, Span<char> destination, ref int index)
-    {
-        source.CopyTo(destination[index..]);
-        index += source.Length;
+        private void CopyTo(Span<char> destination, ref int index)
+        {
+            name.CopyTo(destination[index..]);
+            index += name.Length;
+        }
     }
 }

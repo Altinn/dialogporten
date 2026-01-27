@@ -6,19 +6,22 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 
 internal static class ErrorResponseBuilderExtensions
 {
-    public static ProblemDetails DefaultResponse(this HttpContext ctx, int? statusCode = null) => new()
+    extension(HttpContext ctx)
     {
-        Title = "An error occurred while processing the request.",
-        Detail = "Something went wrong during the request.",
-        Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1",
-        Status = statusCode ?? ctx.Response.StatusCode,
-        Instance = ctx.Request.Path,
-        Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-    };
+        public ProblemDetails DefaultResponse(int? statusCode = null) => new()
+        {
+            Title = "An error occurred while processing the request.",
+            Detail = "Something went wrong during the request.",
+            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1",
+            Status = statusCode ?? ctx.Response.StatusCode,
+            Instance = ctx.Request.Path,
+            Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
+        };
 
-    public static ProblemDetails GetResponseOrDefault(this HttpContext ctx, int statusCode,
-        List<ValidationFailure>? failures = null) =>
-        ctx.ResponseBuilder(failures, statusCode) ?? ctx.DefaultResponse(statusCode);
+        public ProblemDetails GetResponseOrDefault(int statusCode,
+            List<ValidationFailure>? failures = null) =>
+            ctx.ResponseBuilder(failures, statusCode) ?? ctx.DefaultResponse(statusCode);
+    }
 
     public static object ResponseBuilder(List<ValidationFailure> failures, HttpContext ctx, int statusCode)
         => ctx.ResponseBuilder(failures, statusCode) ?? ctx.DefaultResponse(statusCode);

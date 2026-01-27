@@ -60,53 +60,56 @@ public static class PartyIdentifier
             .ToDictionary(x => x.Prefix, x => x.TryParse);
     }
 
-    private static List<PartyIdentifierMetadata> AssertNoIdenticalPrefixes(this List<PartyIdentifierMetadata> partyIdentifiers)
+    extension(List<PartyIdentifierMetadata> partyIdentifiers)
     {
-        var identicalPrefix = partyIdentifiers
-                    .GroupBy(x => x.Prefix)
-                    .Where(x => x.Count() > 1)
-                    .ToList();
-
-        if (identicalPrefix.Count != 0)
+        private List<PartyIdentifierMetadata> AssertNoIdenticalPrefixes()
         {
-            var typeNameGroups = string.Join(", ", identicalPrefix.Select(x => $"{{{string.Join(", ", x.Select(x => x.Type.Name))}}}"));
-            throw new InvalidOperationException(
-                $"{nameof(IPartyIdentifier.Prefix)} cannot be identical to another {nameof(IPartyIdentifier)} for the following type groups: [{typeNameGroups}].");
+            var identicalPrefix = partyIdentifiers
+                .GroupBy(x => x.Prefix)
+                .Where(x => x.Count() > 1)
+                .ToList();
+
+            if (identicalPrefix.Count != 0)
+            {
+                var typeNameGroups = string.Join(", ", identicalPrefix.Select(x => $"{{{string.Join(", ", x.Select(x => x.Type.Name))}}}"));
+                throw new InvalidOperationException(
+                    $"{nameof(IPartyIdentifier.Prefix)} cannot be identical to another {nameof(IPartyIdentifier)} for the following type groups: [{typeNameGroups}].");
+            }
+
+            return partyIdentifiers;
         }
 
-        return partyIdentifiers;
-    }
-
-    private static List<PartyIdentifierMetadata> AssertPrefixEndsWithSeparator(this List<PartyIdentifierMetadata> partyIdentifiers)
-    {
-        var separatorlessPrefix = partyIdentifiers
-                    .Where(x => !x.Prefix.EndsWith(Separator, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-        if (separatorlessPrefix.Count != 0)
+        private List<PartyIdentifierMetadata> AssertPrefixEndsWithSeparator()
         {
-            var typeNames = string.Join(", ", separatorlessPrefix.Select(x => x.Type.Name));
-            throw new InvalidOperationException(
-                $"{nameof(IPartyIdentifier.Prefix)} must end with prefix-id separator '{Separator}' for the following types: [{typeNames}].");
+            var separatorlessPrefix = partyIdentifiers
+                .Where(x => !x.Prefix.EndsWith(Separator, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (separatorlessPrefix.Count != 0)
+            {
+                var typeNames = string.Join(", ", separatorlessPrefix.Select(x => x.Type.Name));
+                throw new InvalidOperationException(
+                    $"{nameof(IPartyIdentifier.Prefix)} must end with prefix-id separator '{Separator}' for the following types: [{typeNames}].");
+            }
+
+            return partyIdentifiers;
         }
 
-        return partyIdentifiers;
-    }
-
-    private static List<PartyIdentifierMetadata> AssertPrefixNotNullOrWhitespace(this List<PartyIdentifierMetadata> partyIdentifiers)
-    {
-        var nullOrWhitespacePrefix = partyIdentifiers
-            .Where(x => string.IsNullOrWhiteSpace(x.Prefix))
-            .ToList();
-
-        if (nullOrWhitespacePrefix.Count != 0)
+        private List<PartyIdentifierMetadata> AssertPrefixNotNullOrWhitespace()
         {
-            var typeNames = string.Join(", ", nullOrWhitespacePrefix.Select(x => x.Type.Name));
-            throw new InvalidOperationException(
-                $"{nameof(IPartyIdentifier.Prefix)} cannot be null or whitespace for the following types: [{typeNames}]");
-        }
+            var nullOrWhitespacePrefix = partyIdentifiers
+                .Where(x => string.IsNullOrWhiteSpace(x.Prefix))
+                .ToList();
 
-        return partyIdentifiers;
+            if (nullOrWhitespacePrefix.Count != 0)
+            {
+                var typeNames = string.Join(", ", nullOrWhitespacePrefix.Select(x => x.Type.Name));
+                throw new InvalidOperationException(
+                    $"{nameof(IPartyIdentifier.Prefix)} cannot be null or whitespace for the following types: [{typeNames}]");
+            }
+
+            return partyIdentifiers;
+        }
     }
 
     private record struct PartyIdentifierMetadata(

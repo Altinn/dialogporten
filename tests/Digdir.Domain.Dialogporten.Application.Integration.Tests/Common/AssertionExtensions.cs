@@ -14,14 +14,17 @@ public static class ValidationErrorAssertionsExtensions
 
 public static class DomainErrorAssertionsExtensions
 {
-    public static void ShouldHaveErrorWithText(this DomainError domainError, string expectedText) =>
-        domainError.Errors.Should().Contain(
-            e => e.ErrorMessage.Contains(expectedText, StringComparison.OrdinalIgnoreCase),
-            $"Expected an error containing the text '{expectedText}'");
+    extension(DomainError domainError)
+    {
+        public void ShouldHaveErrorWithText(string expectedText) =>
+            domainError.Errors.Should().Contain(
+                e => e.ErrorMessage.Contains(expectedText, StringComparison.OrdinalIgnoreCase),
+                $"Expected an error containing the text '{expectedText}'");
 
-    public static void ShouldHaveErrorWithPropertyNameText(this DomainError domainError, string expectedText) =>
-        domainError.Errors.Should().Contain(
-            e => e.PropertyName.Contains(expectedText, StringComparison.OrdinalIgnoreCase),
-            $"Expected an error with {nameof(DomainFailure.PropertyName)} " +
-            $"containing the text '{expectedText}'");
+        public void ShouldHaveErrorWithPropertyNameText(string expectedText) =>
+            domainError.Errors.Should().Contain(
+                e => e.PropertyName.Contains(expectedText, StringComparison.OrdinalIgnoreCase),
+                $"Expected an error with {nameof(DomainFailure.PropertyName)} " +
+                $"containing the text '{expectedText}'");
+    }
 }

@@ -5,24 +5,26 @@
 /// </summary>
 public static class SoftDeletableExtensions
 {
-    /// <summary>
-    /// Marks a <see cref="ISoftDeletableEntity"/> as soft deleted.
-    /// </summary>
     /// <param name="deletable">The <see cref="ISoftDeletableEntity"/> to soft delete.</param>
-    /// <param name="now">The deletion time in UTC.</param>
-    public static void SoftDelete(this ISoftDeletableEntity deletable, DateTimeOffset now)
+    extension(ISoftDeletableEntity deletable)
     {
-        deletable.DeletedAt = now;
-        deletable.Deleted = true;
-    }
+        /// <summary>
+        /// Marks a <see cref="ISoftDeletableEntity"/> as soft deleted.
+        /// </summary>
+        /// <param name="now">The deletion time in UTC.</param>
+        public void SoftDelete(DateTimeOffset now)
+        {
+            deletable.DeletedAt = now;
+            deletable.Deleted = true;
+        }
 
-    /// <summary>
-    /// Restores a <see cref="ISoftDeletableEntity"/>.
-    /// </summary>
-    /// <param name="deletable">The <see cref="ISoftDeletableEntity"/> to restore.</param>
-    public static void Restore(this ISoftDeletableEntity deletable)
-    {
-        deletable.DeletedAt = null;
-        deletable.Deleted = false;
+        /// <summary>
+        /// Restores a <see cref="ISoftDeletableEntity"/>.
+        /// </summary>
+        public void Restore()
+        {
+            deletable.DeletedAt = null;
+            deletable.Deleted = false;
+        }
     }
 }

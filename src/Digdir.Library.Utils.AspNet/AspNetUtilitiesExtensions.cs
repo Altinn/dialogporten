@@ -28,16 +28,19 @@ public static class AspNetUtilitiesExtensions
             .Services;
     }
 
-    public static WebApplication MapAspNetHealthChecks(this WebApplication app) =>
-        app.MapHealthCheckEndpoint("/health/startup", check => check.Tags.Contains("dependencies"))
-            .MapHealthCheckEndpoint("/health/liveness", check => check.Tags.Contains("self"))
-            .MapHealthCheckEndpoint("/health/readiness", check => check.Tags.Contains("critical"))
-            .MapHealthCheckEndpoint("/health", check => check.Tags.Contains("dependencies"))
-            .MapHealthCheckEndpoint("/health/deep", check => check.Tags.Contains("dependencies") || check.Tags.Contains("external"));
-
-    private static WebApplication MapHealthCheckEndpoint(this WebApplication app, string path, Func<HealthCheckRegistration, bool> predicate)
+    extension(WebApplication app)
     {
-        app.MapHealthChecks(path, new HealthCheckOptions { Predicate = predicate, ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
-        return app;
+        public WebApplication MapAspNetHealthChecks() =>
+            app.MapHealthCheckEndpoint("/health/startup", check => check.Tags.Contains("dependencies"))
+                .MapHealthCheckEndpoint("/health/liveness", check => check.Tags.Contains("self"))
+                .MapHealthCheckEndpoint("/health/readiness", check => check.Tags.Contains("critical"))
+                .MapHealthCheckEndpoint("/health", check => check.Tags.Contains("dependencies"))
+                .MapHealthCheckEndpoint("/health/deep", check => check.Tags.Contains("dependencies") || check.Tags.Contains("external"));
+
+        private WebApplication MapHealthCheckEndpoint(string path, Func<HealthCheckRegistration, bool> predicate)
+        {
+            app.MapHealthChecks(path, new HealthCheckOptions { Predicate = predicate, ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
+            return app;
+        }
     }
 }

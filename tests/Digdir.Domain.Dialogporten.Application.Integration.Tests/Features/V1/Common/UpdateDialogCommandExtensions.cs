@@ -13,97 +13,100 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.C
 
 internal static class UpdateDialogCommandExtensions
 {
-    public static UpdateDialogCommand AddTransmission(this UpdateDialogCommand command, Action<TransmissionDto>? modify = null)
+    extension(UpdateDialogCommand command)
     {
-        var transmission = new TransmissionDto
+        public UpdateDialogCommand AddTransmission(Action<TransmissionDto>? modify = null)
         {
-            Type = DialogTransmissionType.Values.Information,
-            Content = new()
+            var transmission = new TransmissionDto
             {
-                Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) },
-                Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) }
-            },
-            Sender = new() { ActorType = ActorType.Values.ServiceOwner }
-        };
-
-        modify?.Invoke(transmission);
-        command.Dto.Transmissions.Add(transmission);
-        return command;
-    }
-
-    public static UpdateDialogCommand AddGuiAction(this UpdateDialogCommand command, Action<GuiActionDto>? modify = null)
-    {
-        var guiAction = new GuiActionDto
-        {
-            Action = "Test action",
-            Title = [new() { LanguageCode = "nb", Value = "Test action" }],
-            Priority = DialogGuiActionPriority.Values.Tertiary,
-            Url = new Uri("https://example.com"),
-        };
-
-        modify?.Invoke(guiAction);
-        command.Dto.GuiActions.Add(guiAction);
-        return command;
-    }
-
-    public static UpdateDialogCommand AddApiAction(this UpdateDialogCommand command, Action<ApiActionDto>? modify = null)
-    {
-        var apiAction = new ApiActionDto
-        {
-            Action = "Test action",
-            Name = "Test action",
-            Endpoints = [new() { Url = new Uri("https://example.com"), HttpMethod = HttpVerb.Values.GET }]
-        };
-
-        modify?.Invoke(apiAction);
-        command.Dto.ApiActions.Add(apiAction);
-        return command;
-    }
-
-    public static UpdateDialogCommand AddAttachment(this UpdateDialogCommand command, Action<AttachmentDto>? modify = null)
-    {
-        var attachment = new AttachmentDto
-        {
-            DisplayName = DialogGenerator.GenerateFakeLocalizations(3),
-            Urls =
-            [
-                new()
+                Type = DialogTransmissionType.Values.Information,
+                Content = new()
                 {
-                    Url = new Uri("https://example.com"),
-                    ConsumerType = AttachmentUrlConsumerType.Values.Gui
-                }
-            ]
-        };
+                    Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) },
+                    Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(3) }
+                },
+                Sender = new() { ActorType = ActorType.Values.ServiceOwner }
+            };
 
-        modify?.Invoke(attachment);
-        command.Dto.Attachments.Add(attachment);
-        return command;
-    }
+            modify?.Invoke(transmission);
+            command.Dto.Transmissions.Add(transmission);
+            return command;
+        }
 
-    public static UpdateDialogCommand ChangeTitle(this UpdateDialogCommand command, Action<ContentValueDto>? modify = null)
-    {
-        var contentDto = new ContentValueDto
+        public UpdateDialogCommand AddGuiAction(Action<GuiActionDto>? modify = null)
         {
-            Value = DialogGenerator.GenerateFakeLocalizations(3)
-        };
+            var guiAction = new GuiActionDto
+            {
+                Action = "Test action",
+                Title = [new() { LanguageCode = "nb", Value = "Test action" }],
+                Priority = DialogGuiActionPriority.Values.Tertiary,
+                Url = new Uri("https://example.com"),
+            };
 
-        modify?.Invoke(contentDto);
-        command.Dto.Content!.Title = contentDto;
-        return command;
-    }
+            modify?.Invoke(guiAction);
+            command.Dto.GuiActions.Add(guiAction);
+            return command;
+        }
 
-    public static UpdateDialogCommand AddActivity(this UpdateDialogCommand command, Action<ActivityDto>? modify = null)
-    {
-        var activity = new ActivityDto
+        public UpdateDialogCommand AddApiAction(Action<ApiActionDto>? modify = null)
         {
-            Type = DialogActivityType.Values.Information,
-            Description = DialogGenerator.GenerateFakeLocalizations(3),
-            PerformedBy = new() { ActorType = ActorType.Values.ServiceOwner }
-        };
+            var apiAction = new ApiActionDto
+            {
+                Action = "Test action",
+                Name = "Test action",
+                Endpoints = [new() { Url = new Uri("https://example.com"), HttpMethod = HttpVerb.Values.GET }]
+            };
 
-        modify?.Invoke(activity);
-        command.Dto.Activities.Add(activity);
-        return command;
+            modify?.Invoke(apiAction);
+            command.Dto.ApiActions.Add(apiAction);
+            return command;
+        }
+
+        public UpdateDialogCommand AddAttachment(Action<AttachmentDto>? modify = null)
+        {
+            var attachment = new AttachmentDto
+            {
+                DisplayName = DialogGenerator.GenerateFakeLocalizations(3),
+                Urls =
+                [
+                    new()
+                    {
+                        Url = new Uri("https://example.com"),
+                        ConsumerType = AttachmentUrlConsumerType.Values.Gui
+                    }
+                ]
+            };
+
+            modify?.Invoke(attachment);
+            command.Dto.Attachments.Add(attachment);
+            return command;
+        }
+
+        public UpdateDialogCommand ChangeTitle(Action<ContentValueDto>? modify = null)
+        {
+            var contentDto = new ContentValueDto
+            {
+                Value = DialogGenerator.GenerateFakeLocalizations(3)
+            };
+
+            modify?.Invoke(contentDto);
+            command.Dto.Content!.Title = contentDto;
+            return command;
+        }
+
+        public UpdateDialogCommand AddActivity(Action<ActivityDto>? modify = null)
+        {
+            var activity = new ActivityDto
+            {
+                Type = DialogActivityType.Values.Information,
+                Description = DialogGenerator.GenerateFakeLocalizations(3),
+                PerformedBy = new() { ActorType = ActorType.Values.ServiceOwner }
+            };
+
+            modify?.Invoke(activity);
+            command.Dto.Activities.Add(activity);
+            return command;
+        }
     }
 
     public static TransmissionDto AddAttachment(this TransmissionDto transmission, Action<TransmissionAttachmentDto>? modify = null)

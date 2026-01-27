@@ -21,7 +21,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public Task Can_Create_Dialog_With_ServiceOwner_Labels() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
-                .AddServiceOwnerLabels("Scadrial", "Roshar", "Sel"))
+                .AddServiceOwnerLabels(["Scadrial", "Roshar", "Sel"]))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.ServiceOwnerContext
@@ -35,7 +35,7 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
                 // Case-insensitive, duplicate labels
-                .AddServiceOwnerLabels("sel", "SEL"))
+                .AddServiceOwnerLabels(["sel", "SEL"]))
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("duplicate"));
 
@@ -43,10 +43,11 @@ public class CreateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public Task Cannot_Create_Labels_With_Invalid_Length() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
-                x.AddServiceOwnerLabels(
+                x.AddServiceOwnerLabels([
                     null!,
                     new string('a', Constants.MinSearchStringLength - 1),
-                    new string('a', Constants.DefaultMaxStringLength + 1)))
+                    new string('a', Constants.DefaultMaxStringLength + 1)
+                ]))
             .ExecuteAndAssert<ValidationError>(x =>
             {
                 x.ShouldHaveErrorWithText("not be empty");

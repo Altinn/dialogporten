@@ -10,51 +10,52 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 internal static class ServiceCollectionExtensions
 {
-    internal static void ChangeUserPid(this IServiceCollection x, string pid)
-    {
-        x.RemoveAll<IUser>();
-
-        var claims = IntegrationTestUser
-            .GetDefaultClaims()
-            .Where(y => y.Type != "pid")
-            .Concat([new Claim("pid", pid)])
-            .ToList();
-
-        var newUser = new IntegrationTestUser(claims, addDefaultClaims: false);
-
-        x.AddSingleton<IUser>(newUser);
-    }
-
-    /// <summary>
-    /// Removes any existing <see cref="IAltinnAuthorization"/> and adds a substitute that can be configured.
-    /// </summary>
     /// <param name="x"></param>
-    /// <param name="configure"></param>
-    internal static void ConfigureAltinnAuthorization(this IServiceCollection x, Action<IAltinnAuthorization> configure)
+    extension(IServiceCollection x)
     {
-        x.RemoveAll<IAltinnAuthorization>();
-
-        var altinnAuthorizationSubstitute = Substitute.For<IAltinnAuthorization>();
-        configure(altinnAuthorizationSubstitute);
-
-        x.AddSingleton(altinnAuthorizationSubstitute);
-    }
-
-    internal static void ConfigureDialogDetailsAuthorizationResult(
-        this IServiceCollection services,
-        DialogDetailsAuthorizationResult result)
-    {
-        services.ConfigureAltinnAuthorization(altinnAuthorization =>
+        internal void ChangeUserPid(string pid)
         {
-            altinnAuthorization.GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult(result));
-            altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(true);
-            altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
-                .Returns(true);
-            altinnAuthorization.HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
-                .Returns(true);
-        });
+            x.RemoveAll<IUser>();
+
+            var claims = IntegrationTestUser
+                .GetDefaultClaims()
+                .Where(y => y.Type != "pid")
+                .Concat([new Claim("pid", pid)])
+                .ToList();
+
+            var newUser = new IntegrationTestUser(claims, addDefaultClaims: false);
+
+            x.AddSingleton<IUser>(newUser);
+        }
+
+        /// <summary>
+        /// Removes any existing <see cref="IAltinnAuthorization"/> and adds a substitute that can be configured.
+        /// </summary>
+        /// <param name="configure"></param>
+        internal void ConfigureAltinnAuthorization(Action<IAltinnAuthorization> configure)
+        {
+            x.RemoveAll<IAltinnAuthorization>();
+
+            var altinnAuthorizationSubstitute = Substitute.For<IAltinnAuthorization>();
+            configure(altinnAuthorizationSubstitute);
+
+            x.AddSingleton(altinnAuthorizationSubstitute);
+        }
+
+        internal void ConfigureDialogDetailsAuthorizationResult(DialogDetailsAuthorizationResult result)
+        {
+            x.ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                altinnAuthorization.GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(Task.FromResult(result));
+                altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns(true);
+                altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
+                    .Returns(true);
+                altinnAuthorization.HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(true);
+            });
+        }
     }
 
     /// <summary>

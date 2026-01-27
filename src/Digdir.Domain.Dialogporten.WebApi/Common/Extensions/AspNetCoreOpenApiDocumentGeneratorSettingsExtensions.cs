@@ -9,29 +9,30 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 
 internal static class AspNetCoreOpenApiDocumentGeneratorSettingsExtensions
 {
-    public static AspNetCoreOpenApiDocumentGeneratorSettings CleanupPaginatedLists(
-        this AspNetCoreOpenApiDocumentGeneratorSettings settings)
+    extension(AspNetCoreOpenApiDocumentGeneratorSettings settings)
     {
-        settings.OperationProcessors.Add(new PaginatedListParametersProcessor());
+        public AspNetCoreOpenApiDocumentGeneratorSettings CleanupPaginatedLists()
+        {
+            settings.OperationProcessors.Add(new PaginatedListParametersProcessor());
 
-        // Attempt to remove the definitions that NSwag generates for this
-        foreach (var ignoreType in new[]
-        {
-            typeof(ContinuationTokenSet<,>),
-            typeof(Order<>),
-            typeof(OrderSet<,>)
-        })
-        {
-            settings.SchemaSettings.TypeMappers.Add(new ObjectTypeMapper(ignoreType, new JsonSchema { Type = JsonObjectType.None }));
+            // Attempt to remove the definitions that NSwag generates for this
+            foreach (var ignoreType in new[]
+                     {
+                         typeof(ContinuationTokenSet<,>),
+                         typeof(Order<>),
+                         typeof(OrderSet<,>)
+                     })
+            {
+                settings.SchemaSettings.TypeMappers.Add(new ObjectTypeMapper(ignoreType, new JsonSchema { Type = JsonObjectType.None }));
+            }
+
+            return settings;
         }
 
-        return settings;
-    }
-
-    public static AspNetCoreOpenApiDocumentGeneratorSettings EnsureJsonPatchConsumes(
-        this AspNetCoreOpenApiDocumentGeneratorSettings settings)
-    {
-        settings.OperationProcessors.Add(new JsonPatchConsumesOperationProcessor());
-        return settings;
+        public AspNetCoreOpenApiDocumentGeneratorSettings EnsureJsonPatchConsumes()
+        {
+            settings.OperationProcessors.Add(new JsonPatchConsumesOperationProcessor());
+            return settings;
+        }
     }
 }

@@ -19,15 +19,18 @@ internal static partial class FluentValidationStringExtensions
         "are not supported except for on '<a>' which must contain a 'href' starting " +
         "with 'https://'.";
 
-    public static IRuleBuilderOptions<T, string?> IsValidUri<T>(this IRuleBuilder<T, string?> ruleBuilder) =>
-        ruleBuilder
-            .Must(uri => uri is null || Uri.IsWellFormedUriString(uri, UriKind.RelativeOrAbsolute))
-            .WithMessage("'{PropertyName}' is not a well-formatted URI.");
+    extension<T>(IRuleBuilder<T, string?> ruleBuilder)
+    {
+        public IRuleBuilderOptions<T, string?> IsValidUri() =>
+            ruleBuilder
+                .Must(uri => uri is null || Uri.IsWellFormedUriString(uri, UriKind.RelativeOrAbsolute))
+                .WithMessage("'{PropertyName}' is not a well-formatted URI.");
 
-    public static IRuleBuilderOptions<T, string?> IsValidHttpsUrl<T>(this IRuleBuilder<T, string?> ruleBuilder) =>
-        ruleBuilder
-            .Must(x => x is null || (Uri.TryCreate(x, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps))
-            .WithMessage("'{PropertyName}' is not a well-formatted HTTPS URL.");
+        public IRuleBuilderOptions<T, string?> IsValidHttpsUrl() =>
+            ruleBuilder
+                .Must(x => x is null || (Uri.TryCreate(x, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps))
+                .WithMessage("'{PropertyName}' is not a well-formatted HTTPS URL.");
+    }
 
     public static IRuleBuilderOptions<T, Uri?> IsValidHttpsUrl<T>(this IRuleBuilder<T, Uri?> ruleBuilder) =>
         ruleBuilder
@@ -90,18 +93,21 @@ internal static partial class FluentValidationStringExtensions
         return true;
     }
 
-    private static bool IsAnchorTag(this HtmlNode node)
+    extension(HtmlNode node)
     {
-        const string anchorTag = "a";
-        return node.Name == anchorTag;
-    }
+        private bool IsAnchorTag()
+        {
+            const string anchorTag = "a";
+            return node.Name == anchorTag;
+        }
 
-    private static bool IsValidAnchorTag(this HtmlNode node)
-    {
-        const string https = "https://";
-        const string href = "href";
-        return node.Attributes.Count == 1 &&
-               node.Attributes[href] is not null &&
-               node.Attributes[href].Value.StartsWith(https, StringComparison.InvariantCultureIgnoreCase);
+        private bool IsValidAnchorTag()
+        {
+            const string https = "https://";
+            const string href = "href";
+            return node.Attributes.Count == 1 &&
+                   node.Attributes[href] is not null &&
+                   node.Attributes[href].Value.StartsWith(https, StringComparison.InvariantCultureIgnoreCase);
+        }
     }
 }

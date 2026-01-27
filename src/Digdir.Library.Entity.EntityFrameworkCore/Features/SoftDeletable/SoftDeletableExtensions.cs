@@ -13,73 +13,69 @@ public static class SoftDeletableExtensions
     private static readonly MethodInfo OpenGenericInternalMethodInfo = typeof(SoftDeletableExtensions)
             .GetMethod(nameof(EnableSoftDeletableQueryFilter_Internal), BindingFlags.NonPublic | BindingFlags.Static)!;
 
-    /// <summary>
-    /// Marks a <typeparamref name="TSoftDeletableEntity"/> as hard deleted.
-    /// </summary>
-    /// <remarks>
-    /// This will permanently delete the entity from the database.
-    /// </remarks>
     /// <param name="set">The <see cref="DbSet{TEntity}"/> where <paramref name="entity"/> resides.</param>
-    /// <param name="entity">The entity to permanently delete.</param>
-    /// <returns>
-    /// The <see cref="EntityEntry{TEntity}" /> for the entity. The entry provides
-    /// access to change tracking information and operations for the entity.
-    /// </returns>
-    public static EntityEntry<TSoftDeletableEntity> HardRemove<TSoftDeletableEntity>(this DbSet<TSoftDeletableEntity> set, TSoftDeletableEntity entity)
-        where TSoftDeletableEntity : class, ISoftDeletableEntity => set.Remove(entity);
-
-    /// <summary>
-    /// Marks a <typeparamref name="TSoftDeletableEntity"/> as hard deleted.
-    /// </summary>
-    /// <remarks>
-    /// This will permanently delete the entity from the database.
-    /// </remarks>
-    /// <param name="set">The <see cref="DbSet{TEntity}"/> where <paramref name="entities"/> resides.</param>
-    /// <param name="entities">The entities to permanently delete.</param>
-    public static void HardRemoveRange<TSoftDeletableEntity>(this DbSet<TSoftDeletableEntity> set, IEnumerable<TSoftDeletableEntity> entities)
-        where TSoftDeletableEntity : class, ISoftDeletableEntity
+    extension<TSoftDeletableEntity>(DbSet<TSoftDeletableEntity> set) where TSoftDeletableEntity : class, ISoftDeletableEntity
     {
-        foreach (var entity in entities)
+        /// <summary>
+        /// Marks a <typeparamref name="TSoftDeletableEntity"/> as hard deleted.
+        /// </summary>
+        /// <remarks>
+        /// This will permanently delete the entity from the database.
+        /// </remarks>
+        /// <param name="entity">The entity to permanently delete.</param>
+        /// <returns>
+        /// The <see cref="EntityEntry{TEntity}" /> for the entity. The entry provides
+        /// access to change tracking information and operations for the entity.
+        /// </returns>
+        public EntityEntry<TSoftDeletableEntity> HardRemove(TSoftDeletableEntity entity) => set.Remove(entity);
+
+        /// <summary>
+        /// Marks a <typeparamref name="TSoftDeletableEntity"/> as hard deleted.
+        /// </summary>
+        /// <remarks>
+        /// This will permanently delete the entity from the database.
+        /// </remarks>
+        /// <param name="entities">The entities to permanently delete.</param>
+        public void HardRemoveRange(IEnumerable<TSoftDeletableEntity> entities)
         {
-            set.HardRemove(entity);
+            foreach (var entity in entities)
+            {
+                set.HardRemove(entity);
+            }
         }
-    }
 
-    /// <summary>
-    /// Marks a <typeparamref name="TSoftDeletableEntity"/> as soft deleted.
-    /// </summary>
-    /// <remarks>
-    /// This will mark the entity as deleted in the database.
-    /// </remarks>
-    /// <param name="set">The <see cref="DbSet{TEntity}"/> where <paramref name="entity"/> resides.</param>
-    /// <param name="entity">The entity to soft-delete.</param>
-    /// <returns>
-    /// The <see cref="EntityEntry{TEntity}" /> for the entity. The entry provides
-    /// access to change tracking information and operations for the entity.
-    /// </returns>
-    public static EntityEntry<TSoftDeletableEntity> SoftRemove<TSoftDeletableEntity>(this DbSet<TSoftDeletableEntity> set, TSoftDeletableEntity entity)
-        where TSoftDeletableEntity : class, ISoftDeletableEntity
-    {
-        entity.SoftDelete();
-        // In case the entity implements SoftDelete, but forgets to set Deleted to true.
-        entity.Deleted = true;
-        return set.Entry(entity);
-    }
-
-    /// <summary>
-    /// Marks a <typeparamref name="TSoftDeletableEntity"/> as soft deleted.
-    /// </summary>
-    /// <remarks>
-    /// This will mark the entity as deleted in the database.
-    /// </remarks>
-    /// <param name="set">The <see cref="DbSet{TEntity}"/> where <paramref name="entities"/> resides.</param>
-    /// <param name="entities">The entities to soft-delete.</param>
-    public static void SoftRemoveRange<TSoftDeletableEntity>(this DbSet<TSoftDeletableEntity> set, IEnumerable<TSoftDeletableEntity> entities)
-        where TSoftDeletableEntity : class, ISoftDeletableEntity
-    {
-        foreach (var entity in entities)
+        /// <summary>
+        /// Marks a <typeparamref name="TSoftDeletableEntity"/> as soft deleted.
+        /// </summary>
+        /// <remarks>
+        /// This will mark the entity as deleted in the database.
+        /// </remarks>
+        /// <param name="entity">The entity to soft-delete.</param>
+        /// <returns>
+        /// The <see cref="EntityEntry{TEntity}" /> for the entity. The entry provides
+        /// access to change tracking information and operations for the entity.
+        /// </returns>
+        public EntityEntry<TSoftDeletableEntity> SoftRemove(TSoftDeletableEntity entity)
         {
-            set.SoftRemove(entity);
+            entity.SoftDelete();
+            // In case the entity implements SoftDelete, but forgets to set Deleted to true.
+            entity.Deleted = true;
+            return set.Entry(entity);
+        }
+
+        /// <summary>
+        /// Marks a <typeparamref name="TSoftDeletableEntity"/> as soft deleted.
+        /// </summary>
+        /// <remarks>
+        /// This will mark the entity as deleted in the database.
+        /// </remarks>
+        /// <param name="entities">The entities to soft-delete.</param>
+        public void SoftRemoveRange(IEnumerable<TSoftDeletableEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                set.SoftRemove(entity);
+            }
         }
     }
 
@@ -94,24 +90,27 @@ public static class SoftDeletableExtensions
         });
     }
 
-    internal static bool IsMarkedForSoftDeletion(this EntityEntry entry)
+    extension(EntityEntry entry)
     {
-        return entry.Entity is ISoftDeletableEntity
-            && !(bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).OriginalValue! // Not already soft-deleted in the database
-            && (bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).CurrentValue!; // Deleted in memory
-    }
+        internal bool IsMarkedForSoftDeletion()
+        {
+            return entry.Entity is ISoftDeletableEntity
+                   && !(bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).OriginalValue! // Not already soft-deleted in the database
+                   && (bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).CurrentValue!; // Deleted in memory
+        }
 
-    internal static bool IsMarkedForRestoration(this EntityEntry entry)
-    {
-        return entry.Entity is ISoftDeletableEntity
-            && (bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).OriginalValue! // Already soft-deleted in the database
-            && !(bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).CurrentValue!; // Restored in memory
-    }
+        internal bool IsMarkedForRestoration()
+        {
+            return entry.Entity is ISoftDeletableEntity
+                   && (bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).OriginalValue! // Already soft-deleted in the database
+                   && !(bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).CurrentValue!; // Restored in memory
+        }
 
-    internal static bool IsSoftDeleted(this EntityEntry entry)
-    {
-        return entry.Entity is ISoftDeletableEntity
-            && (bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).OriginalValue!; // Already soft-deleted in the database
+        internal bool IsSoftDeleted()
+        {
+            return entry.Entity is ISoftDeletableEntity
+                   && (bool)entry.Property(nameof(ISoftDeletableEntity.Deleted)).OriginalValue!; // Already soft-deleted in the database
+        }
     }
 
     internal static ChangeTracker HandleSoftDeletableEntities(this ChangeTracker changeTracker, DateTimeOffset utcNow)

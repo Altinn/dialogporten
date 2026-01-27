@@ -43,15 +43,18 @@ internal static class ActivityTagsExtensions
     private const string ForeignKeyViolationErrorCode = "23503";
 
     // This mutes Slack notifications and error logging in AppInsights
-    public static bool ContainsUniqueConstraintError(this IEnumerable<KeyValuePair<string, string?>> tags) =>
-        tags.Any(t => t is { Key: Constants.OtelStatusCode, Value: Constants.Error }) &&
-        tags.Any(t => t is
-        {
-            Key: Constants.OtelStatusDescription,
-            Value: UniqueViolationErrorCode or ForeignKeyViolationErrorCode
-        });
+    extension(IEnumerable<KeyValuePair<string, string?>> tags)
+    {
+        public bool ContainsUniqueConstraintError() =>
+            tags.Any(t => t is { Key: Constants.OtelStatusCode, Value: Constants.Error }) &&
+            tags.Any(t => t is
+            {
+                Key: Constants.OtelStatusDescription,
+                Value: UniqueViolationErrorCode or ForeignKeyViolationErrorCode
+            });
 
-    public static bool IsSuccessfulSqlStatementActivity(this IEnumerable<KeyValuePair<string, string?>> tags) =>
-        tags.Any(t => t is { Key: Constants.DbStatement }) &&
-        tags.Any(t => t is { Key: Constants.OtelStatusCode, Value: Constants.Ok });
+        public bool IsSuccessfulSqlStatementActivity() =>
+            tags.Any(t => t is { Key: Constants.DbStatement }) &&
+            tags.Any(t => t is { Key: Constants.OtelStatusCode, Value: Constants.Ok });
+    }
 }

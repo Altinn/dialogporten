@@ -18,7 +18,7 @@ public class GetServiceOwnerLabelsTest : ApplicationCollectionFixture
     public Task Can_Get_ServiceOwnerLabels() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
-                .AddServiceOwnerLabels("Scadrial", "Roshar", "Sel"))
+                .AddServiceOwnerLabels(["Scadrial", "Roshar", "Sel"]))
             .SendCommand((_, ctx) => new GetServiceOwnerLabelsQuery { DialogId = ctx.GetDialogId() })
             .ExecuteAndAssert<ServiceOwnerLabelResultDto>(x => x.Labels.Should().HaveCount(3));
 

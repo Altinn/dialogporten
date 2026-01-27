@@ -6,11 +6,14 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidat
 
 public static class FluentValidationUuiDv7Extensions
 {
-    internal static IRuleBuilderOptions<T, Guid?> IsValidUuidV7<T>(this IRuleBuilder<T, Guid?> ruleBuilder)
-        => ruleBuilder.SetValidator(new UuidV7TimestampIsInPastValidator<T>());
+    extension<T>(IRuleBuilder<T, Guid?> ruleBuilder)
+    {
+        internal IRuleBuilderOptions<T, Guid?> IsValidUuidV7()
+            => ruleBuilder.SetValidator(new UuidV7TimestampIsInPastValidator<T>());
 
-    internal static IRuleBuilderOptions<T, Guid?> UuidV7TimestampIsInPast<T>(this IRuleBuilder<T, Guid?> ruleBuilder, IClock clock)
-        => ruleBuilder.SetValidator(new IsValidUuidV7TimestampValidator<T>(clock));
+        internal IRuleBuilderOptions<T, Guid?> UuidV7TimestampIsInPast(IClock clock)
+            => ruleBuilder.SetValidator(new IsValidUuidV7TimestampValidator<T>(clock));
+    }
 }
 
 internal sealed class UuidV7TimestampIsInPastValidator<T> : PropertyValidator<T, Guid?>

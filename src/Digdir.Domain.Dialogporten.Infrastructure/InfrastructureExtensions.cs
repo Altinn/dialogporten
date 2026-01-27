@@ -302,120 +302,120 @@ public static class InfrastructureExtensions
                 });
     }
 
-    private static IServiceCollection AddHttpClients(this IServiceCollection services,
-        InfrastructureSettings infrastructureSettings)
+    extension(IServiceCollection services)
     {
-        services.
-            AddMaskinportenHttpClient<ICloudEventBus, AltinnEventsClient, SettingsJwkClientDefinition>(
-                infrastructureSettings,
-                x => x.ClientSettings.ExhangeToAltinnToken = true)
-            .ConfigureHttpClient((services, client) =>
-            {
-                client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.EventsBaseUri;
-            });
-        services.AddHttpClient<IResourceRegistry, ResourceRegistryClient>((services, client) =>
-                client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri)
-            .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
+        private IServiceCollection AddHttpClients(InfrastructureSettings infrastructureSettings)
+        {
+            services.
+                AddMaskinportenHttpClient<ICloudEventBus, AltinnEventsClient, SettingsJwkClientDefinition>(
+                    infrastructureSettings,
+                    x => x.ClientSettings.ExhangeToAltinnToken = true)
+                .ConfigureHttpClient((services, client) =>
+                {
+                    client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.EventsBaseUri;
+                });
+            services.AddHttpClient<IResourceRegistry, ResourceRegistryClient>((services, client) =>
+                    client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri)
+                .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
 
-        services.AddHttpClient<IServiceOwnerNameRegistry, ServiceOwnerNameRegistryClient>((services, client) =>
-                client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.AltinnCdn.BaseUri)
-            .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
+            services.AddHttpClient<IServiceOwnerNameRegistry, ServiceOwnerNameRegistryClient>((services, client) =>
+                    client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.AltinnCdn.BaseUri)
+                .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
 
-        services.AddMaskinportenHttpClient<IPartyNameRegistry, PartyNameRegistryClient, SettingsJwkClientDefinition>(
-                infrastructureSettings,
-                x => x.ClientSettings.ExhangeToAltinnToken = true)
-            .ConfigureHttpClient((services, client) =>
-            {
-                var altinnSettings = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn;
-                client.BaseAddress = altinnSettings.BaseUri;
-                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", altinnSettings.SubscriptionKey);
-            })
-            .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
+            services.AddMaskinportenHttpClient<IPartyNameRegistry, PartyNameRegistryClient, SettingsJwkClientDefinition>(
+                    infrastructureSettings,
+                    x => x.ClientSettings.ExhangeToAltinnToken = true)
+                .ConfigureHttpClient((services, client) =>
+                {
+                    var altinnSettings = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn;
+                    client.BaseAddress = altinnSettings.BaseUri;
+                    client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", altinnSettings.SubscriptionKey);
+                })
+                .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
 
-        services.AddMaskinportenHttpClient<IAltinnAuthorization, AltinnAuthorizationClient, SettingsJwkClientDefinition>(
-                infrastructureSettings,
-                x => x.ClientSettings.ExhangeToAltinnToken = true)
-            .ConfigureHttpClient((services, client) =>
-            {
-                var altinnSettings = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn;
-                client.BaseAddress = altinnSettings.BaseUri;
-                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", altinnSettings.SubscriptionKey);
-            })
-            .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
+            services.AddMaskinportenHttpClient<IAltinnAuthorization, AltinnAuthorizationClient, SettingsJwkClientDefinition>(
+                    infrastructureSettings,
+                    x => x.ClientSettings.ExhangeToAltinnToken = true)
+                .ConfigureHttpClient((services, client) =>
+                {
+                    var altinnSettings = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn;
+                    client.BaseAddress = altinnSettings.BaseUri;
+                    client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", altinnSettings.SubscriptionKey);
+                })
+                .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
 
-        return services;
-    }
+            return services;
+        }
 
-    private static IServiceCollection AddCustomHealthChecks(this IServiceCollection services)
-    {
-        services.AddHealthChecks()
-            .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies", "redis"])
-            .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"]);
+        private IServiceCollection AddCustomHealthChecks()
+        {
+            services.AddHealthChecks()
+                .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies", "redis"])
+                .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"]);
 
-        services.AddSingleton<RedisHealthCheck>();
+            services.AddSingleton<RedisHealthCheck>();
 
-        return services;
-    }
+            return services;
+        }
 
-    private static IServiceCollection ConfigureFusionCache(this IServiceCollection services, string cacheName, FusionCacheSettings? settings = null)
-    {
-        settings ??= new FusionCacheSettings();
+        private IServiceCollection ConfigureFusionCache(string cacheName, FusionCacheSettings? settings = null)
+        {
+            settings ??= new FusionCacheSettings();
 
-        services.AddFusionCache(cacheName)
-            .WithOptions(options =>
-            {
-                options.DistributedCacheCircuitBreakerDuration = TimeSpan.FromSeconds(2);
-            })
-            .WithDefaultEntryOptions(new FusionCacheEntryOptions
-            {
-                Duration = settings.Duration,
+            services.AddFusionCache(cacheName)
+                .WithOptions(options =>
+                {
+                    options.DistributedCacheCircuitBreakerDuration = TimeSpan.FromSeconds(2);
+                })
+                .WithDefaultEntryOptions(new FusionCacheEntryOptions
+                {
+                    Duration = settings.Duration,
 
-                IsFailSafeEnabled = settings.IsFailSafeEnabled,
-                FailSafeMaxDuration = settings.FailSafeMaxDuration,
-                FailSafeThrottleDuration = settings.FailSafeThrottleDuration,
+                    IsFailSafeEnabled = settings.IsFailSafeEnabled,
+                    FailSafeMaxDuration = settings.FailSafeMaxDuration,
+                    FailSafeThrottleDuration = settings.FailSafeThrottleDuration,
 
-                FactorySoftTimeout = settings.FactorySoftTimeout,
-                FactoryHardTimeout = settings.FactoryHardTimeout,
+                    FactorySoftTimeout = settings.FactorySoftTimeout,
+                    FactoryHardTimeout = settings.FactoryHardTimeout,
 
-                DistributedCacheSoftTimeout = settings.DistributedCacheSoftTimeout,
-                DistributedCacheHardTimeout = settings.DistributedCacheHardTimeout,
+                    DistributedCacheSoftTimeout = settings.DistributedCacheSoftTimeout,
+                    DistributedCacheHardTimeout = settings.DistributedCacheHardTimeout,
 
-                AllowBackgroundDistributedCacheOperations = settings.AllowBackgroundDistributedCacheOperations,
+                    AllowBackgroundDistributedCacheOperations = settings.AllowBackgroundDistributedCacheOperations,
 
-                JitterMaxDuration = settings.JitterMaxDuration,
-                EagerRefreshThreshold = settings.EagerRefreshThreshold,
+                    JitterMaxDuration = settings.JitterMaxDuration,
+                    EagerRefreshThreshold = settings.EagerRefreshThreshold,
 
-                SkipMemoryCacheWrite = settings.SkipMemoryCache,
-                SkipMemoryCacheRead = settings.SkipMemoryCache,
+                    SkipMemoryCacheWrite = settings.SkipMemoryCache,
+                    SkipMemoryCacheRead = settings.SkipMemoryCache,
 
-                // This will stop deserialization exceptions to be re-thrown, which will cause the factory to run as if
-                // the cache entry was not found. This avoids crashes which otherwise would happen if entities that
-                // are cached are changed in a way that makes them incompatible with the cached version.
-                ReThrowSerializationExceptions = false,
-            })
-            .WithRegisteredSerializer()
-            // If Redis is disabled (eg. in local development or non-web runtimes), we must instruct FusionCache to
-            // allow the use of InMemoryDistributedCache (it is by default ignored as a IDistributedCache implementation)
-            // TryWithRegisteredBackplane is used to ensure that we can continue without Redis as backplane
-            .WithRegisteredDistributedCache(ignoreMemoryDistributedCache: false)
-            .WithMemoryLocker(new AsyncKeyedMemoryLocker())
-            .TryWithRegisteredBackplane();
+                    // This will stop deserialization exceptions to be re-thrown, which will cause the factory to run as if
+                    // the cache entry was not found. This avoids crashes which otherwise would happen if entities that
+                    // are cached are changed in a way that makes them incompatible with the cached version.
+                    ReThrowSerializationExceptions = false,
+                })
+                .WithRegisteredSerializer()
+                // If Redis is disabled (eg. in local development or non-web runtimes), we must instruct FusionCache to
+                // allow the use of InMemoryDistributedCache (it is by default ignored as a IDistributedCache implementation)
+                // TryWithRegisteredBackplane is used to ensure that we can continue without Redis as backplane
+                .WithRegisteredDistributedCache(ignoreMemoryDistributedCache: false)
+                .WithMemoryLocker(new AsyncKeyedMemoryLocker())
+                .TryWithRegisteredBackplane();
 
-        return services;
-    }
+            return services;
+        }
 
-    private static IHttpClientBuilder AddMaskinportenHttpClient<TClient, TImplementation, TClientDefinition>(
-        this IServiceCollection services,
-        InfrastructureSettings infrastructureSettings,
-        Action<TClientDefinition>? configureClientDefinition = null)
-        where TClient : class
-        where TImplementation : class, TClient
-        where TClientDefinition : class, IClientDefinition
-    {
-        services.RegisterMaskinportenClientDefinition<TClientDefinition>(typeof(TClient).FullName, infrastructureSettings.Maskinporten);
-        return services
-            .AddHttpClient<TClient, TImplementation>()
-            .AddMaskinportenHttpMessageHandler<TClientDefinition, TClient>(configureClientDefinition);
+        private IHttpClientBuilder AddMaskinportenHttpClient<TClient, TImplementation, TClientDefinition>(InfrastructureSettings infrastructureSettings,
+            Action<TClientDefinition>? configureClientDefinition = null)
+            where TClient : class
+            where TImplementation : class, TClient
+            where TClientDefinition : class, IClientDefinition
+        {
+            services.RegisterMaskinportenClientDefinition<TClientDefinition>(typeof(TClient).FullName, infrastructureSettings.Maskinporten);
+            return services
+                .AddHttpClient<TClient, TImplementation>()
+                .AddMaskinportenHttpMessageHandler<TClientDefinition, TClient>(configureClientDefinition);
+        }
     }
 
     private sealed class FusionCacheSettings

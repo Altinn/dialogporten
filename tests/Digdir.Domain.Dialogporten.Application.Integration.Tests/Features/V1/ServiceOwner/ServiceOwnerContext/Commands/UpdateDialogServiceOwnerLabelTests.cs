@@ -47,7 +47,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     public Task Can_Remove_ServiceOwnerLabels() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
-                .AddServiceOwnerLabels("Scadrial"))
+                .AddServiceOwnerLabels(["Scadrial"]))
             .UpdateServiceOwnerContext(x => x.Dto = new()
             {
                 ServiceOwnerLabels = []
@@ -65,7 +65,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .UpdateServiceOwnerContext(x => x
-                .AddServiceOwnerLabels("Scadrial", "Roshar"))
+                .AddServiceOwnerLabels(["Scadrial", "Roshar"]))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.ServiceOwnerContext
@@ -80,7 +80,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
             .CreateSimpleDialog()
             .UpdateServiceOwnerContext(x => x
                 // Case-insensitive, duplicate labels
-                .AddServiceOwnerLabels("sel", "SEL"))
+                .AddServiceOwnerLabels(["sel", "SEL"]))
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText("duplicate"));
 
@@ -89,10 +89,11 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .UpdateServiceOwnerContext(x => x
-                .AddServiceOwnerLabels(
+                .AddServiceOwnerLabels([
                     null!,
                     new string('a', Constants.MinSearchStringLength - 1),
-                    new string('a', Constants.DefaultMaxStringLength + 1)))
+                    new string('a', Constants.DefaultMaxStringLength + 1)
+                ]))
             .ExecuteAndAssert<ValidationError>(x =>
             {
                 x.ShouldHaveErrorWithText("not be empty");

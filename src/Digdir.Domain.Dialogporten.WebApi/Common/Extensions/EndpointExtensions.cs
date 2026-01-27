@@ -6,56 +6,59 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 
 public static class EndpointExtensions
 {
-    public static Task BadRequestAsync(this IEndpoint ep, ValidationError failure, CancellationToken cancellationToken = default)
-        => ep.BadRequestAsync(failure.Errors, cancellationToken);
-
-    public static Task BadRequestAsync(this IEndpoint ep, IEnumerable<ValidationFailure> failures, CancellationToken cancellationToken = default)
-        => ep.HttpContext.Response.SendErrorsAsync(failures.ToList(), cancellation: cancellationToken);
-
-    public static Task BadRequestAsync(this IEndpoint ep, BadRequest badRequest, CancellationToken cancellationToken = default)
-        => ep.HttpContext.Response.SendErrorsAsync(
-            badRequest.ToValidationResults(),
-            cancellation: cancellationToken);
-
-    public static Task PreconditionFailed(this IEndpoint ep, CancellationToken cancellationToken = default)
-        => ep.HttpContext.Response.SendErrorsAsync([], StatusCodes.Status412PreconditionFailed, cancellation: cancellationToken);
-
-    public static Task NotFoundAsync(this IEndpoint ep, EntityNotFound notFound, CancellationToken cancellationToken = default)
-        => ep.HttpContext.Response.SendErrorsAsync(
-            notFound.ToValidationResults(),
-            StatusCodes.Status404NotFound,
-            cancellation: cancellationToken);
-
-    public static Task NotVisibleAsync(this IEndpoint ep, EntityNotVisible notVisible, CancellationToken cancellationToken = default)
+    extension(IEndpoint ep)
     {
-        ep.HttpContext.Response.Headers.Expires = notVisible.VisibleFrom.ToString("r");
-        return ep.HttpContext.Response.SendErrorsAsync(
-            notVisible.ToValidationResults(),
-            StatusCodes.Status404NotFound,
-            cancellation: cancellationToken);
+        public Task BadRequestAsync(ValidationError failure, CancellationToken cancellationToken = default)
+            => ep.BadRequestAsync(failure.Errors, cancellationToken);
+
+        public Task BadRequestAsync(IEnumerable<ValidationFailure> failures, CancellationToken cancellationToken = default)
+            => ep.HttpContext.Response.SendErrorsAsync(failures.ToList(), cancellation: cancellationToken);
+
+        public Task BadRequestAsync(BadRequest badRequest, CancellationToken cancellationToken = default)
+            => ep.HttpContext.Response.SendErrorsAsync(
+                badRequest.ToValidationResults(),
+                cancellation: cancellationToken);
+
+        public Task PreconditionFailed(CancellationToken cancellationToken = default)
+            => ep.HttpContext.Response.SendErrorsAsync([], StatusCodes.Status412PreconditionFailed, cancellation: cancellationToken);
+
+        public Task NotFoundAsync(EntityNotFound notFound, CancellationToken cancellationToken = default)
+            => ep.HttpContext.Response.SendErrorsAsync(
+                notFound.ToValidationResults(),
+                StatusCodes.Status404NotFound,
+                cancellation: cancellationToken);
+
+        public Task NotVisibleAsync(EntityNotVisible notVisible, CancellationToken cancellationToken = default)
+        {
+            ep.HttpContext.Response.Headers.Expires = notVisible.VisibleFrom.ToString("r");
+            return ep.HttpContext.Response.SendErrorsAsync(
+                notVisible.ToValidationResults(),
+                StatusCodes.Status404NotFound,
+                cancellation: cancellationToken);
+        }
+
+        public Task GoneAsync(EntityDeleted deleted, CancellationToken cancellationToken = default)
+            => ep.HttpContext.Response.SendErrorsAsync(
+                deleted.ToValidationResults(),
+                StatusCodes.Status410Gone,
+                cancellation: cancellationToken);
+
+        public Task ForbiddenAsync(Forbidden forbidden, CancellationToken cancellationToken = default)
+            => ep.HttpContext.Response.SendErrorsAsync(
+                forbidden.ToValidationResults(),
+                StatusCodes.Status403Forbidden,
+                cancellation: cancellationToken);
+
+        public Task UnprocessableEntityAsync(DomainError domainError, CancellationToken cancellationToken = default)
+            => ep.HttpContext.Response.SendErrorsAsync(
+                domainError.ToValidationResults(),
+                StatusCodes.Status422UnprocessableEntity,
+                cancellation: cancellationToken);
+
+        public Task ConflictAsync(Conflict conflict, CancellationToken cancellationToken = default) =>
+            ep.HttpContext.Response.SendErrorsAsync(
+                conflict.ToValidationResults(),
+                StatusCodes.Status409Conflict,
+                cancellation: cancellationToken);
     }
-
-    public static Task GoneAsync(this IEndpoint ep, EntityDeleted deleted, CancellationToken cancellationToken = default)
-        => ep.HttpContext.Response.SendErrorsAsync(
-            deleted.ToValidationResults(),
-            StatusCodes.Status410Gone,
-            cancellation: cancellationToken);
-
-    public static Task ForbiddenAsync(this IEndpoint ep, Forbidden forbidden, CancellationToken cancellationToken = default)
-        => ep.HttpContext.Response.SendErrorsAsync(
-            forbidden.ToValidationResults(),
-            StatusCodes.Status403Forbidden,
-            cancellation: cancellationToken);
-
-    public static Task UnprocessableEntityAsync(this IEndpoint ep, DomainError domainError, CancellationToken cancellationToken = default)
-        => ep.HttpContext.Response.SendErrorsAsync(
-            domainError.ToValidationResults(),
-            StatusCodes.Status422UnprocessableEntity,
-            cancellation: cancellationToken);
-
-    public static Task ConflictAsync(this IEndpoint ep, Conflict conflict, CancellationToken cancellationToken = default) =>
-        ep.HttpContext.Response.SendErrorsAsync(
-            conflict.ToValidationResults(),
-            StatusCodes.Status409Conflict,
-            cancellation: cancellationToken);
 }

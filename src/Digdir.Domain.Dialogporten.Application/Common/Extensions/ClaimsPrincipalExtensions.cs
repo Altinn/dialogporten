@@ -33,30 +33,33 @@ public static class ClaimsPrincipalExtensions
     public const string ScopeClaim = "scope";
     public const string AltinnOrgClaim = "urn:altinn:org";
 
-    public static bool TryGetClaimValue(this ClaimsPrincipal claimsPrincipal, string claimType,
-        [NotNullWhen(true)] out string? value)
+    extension(ClaimsPrincipal claimsPrincipal)
     {
-        value = claimsPrincipal.FindFirst(claimType)?.Value;
-        return value is not null;
-    }
+        public bool TryGetClaimValue(string claimType,
+            [NotNullWhen(true)] out string? value)
+        {
+            value = claimsPrincipal.FindFirst(claimType)?.Value;
+            return value is not null;
+        }
 
-    public static bool TryGetConsumerOrgNumber(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgNumber)
-        => claimsPrincipal.FindFirst(ConsumerClaim).TryGetConsumerOrgNumber(out orgNumber);
+        public bool TryGetConsumerOrgNumber([NotNullWhen(true)] out string? orgNumber)
+            => claimsPrincipal.FindFirst(ConsumerClaim).TryGetConsumerOrgNumber(out orgNumber);
 
-    public static bool HasScope(this ClaimsPrincipal claimsPrincipal, string scope) =>
-        claimsPrincipal.TryGetClaimValue(ScopeClaim, out var scopes) &&
-        scopes.Split(ScopeClaimSeparator).Contains(scope);
+        public bool HasScope(string scope) =>
+            claimsPrincipal.TryGetClaimValue(ScopeClaim, out var scopes) &&
+            scopes.Split(ScopeClaimSeparator).Contains(scope);
 
-    public static bool TryGetSupplierOrgNumber(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgNumber)
-        => claimsPrincipal.FindFirst(SupplierClaim).TryGetConsumerOrgNumber(out orgNumber);
+        public bool TryGetSupplierOrgNumber([NotNullWhen(true)] out string? orgNumber)
+            => claimsPrincipal.FindFirst(SupplierClaim).TryGetConsumerOrgNumber(out orgNumber);
 
-    public static bool TryGetPid(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? pid)
-        => claimsPrincipal.FindFirst(PidClaim).TryGetPid(out pid);
+        public bool TryGetPid([NotNullWhen(true)] out string? pid)
+            => claimsPrincipal.FindFirst(PidClaim).TryGetPid(out pid);
 
-    public static bool TryGetOrganizationShortName(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgShortName)
-    {
-        orgShortName = claimsPrincipal.FindFirst(AltinnOrgClaim)?.Value;
-        return !string.IsNullOrWhiteSpace(orgShortName);
+        public bool TryGetOrganizationShortName([NotNullWhen(true)] out string? orgShortName)
+        {
+            orgShortName = claimsPrincipal.FindFirst(AltinnOrgClaim)?.Value;
+            return !string.IsNullOrWhiteSpace(orgShortName);
+        }
     }
 
     public static bool TryGetPid(this Claim? pidClaim, [NotNullWhen(true)] out string? pid)
@@ -83,52 +86,53 @@ public static class ClaimsPrincipalExtensions
         [NotNullWhen(true)] out string? systemUserId) =>
         new ClaimsPrincipal(new ClaimsIdentity(claimsList.ToArray())).TryGetSystemUserId(out systemUserId);
 
-    public static bool TryGetSystemUserId(this ClaimsPrincipal claimsPrincipal,
-        [NotNullWhen(true)] out string? systemUserId)
+    extension(ClaimsPrincipal claimsPrincipal)
     {
-        systemUserId = null;
-
-        if (!claimsPrincipal.TryGetAuthorizationDetailsClaimValue(out var authorizationDetails))
+        public bool TryGetSystemUserId([NotNullWhen(true)] out string? systemUserId)
         {
-            return false;
+            systemUserId = null;
+
+            if (!claimsPrincipal.TryGetAuthorizationDetailsClaimValue(out var authorizationDetails))
+            {
+                return false;
+            }
+
+            if (authorizationDetails.Length == 0)
+            {
+                return false;
+            }
+
+            var systemUserDetails = authorizationDetails.FirstOrDefault(x => x.Type == AuthorizationDetailsType);
+
+            if (systemUserDetails?.SystemUserIds is null)
+            {
+                return false;
+            }
+
+            systemUserId = systemUserDetails.SystemUserIds.FirstOrDefault();
+
+            return systemUserId is not null;
         }
 
-        if (authorizationDetails.Length == 0)
+        public bool TryGetSystemUserOrgNumber([NotNullWhen(true)] out string? orgNumber)
         {
-            return false;
+            orgNumber = null;
+
+            if (!claimsPrincipal.TryGetAuthorizationDetailsClaimValue(out var authorizationDetails))
+            {
+                return false;
+            }
+
+            if (authorizationDetails.Length == 0)
+            {
+                return false;
+            }
+
+            var systemUserDetails = authorizationDetails.FirstOrDefault(x => x.Type == AuthorizationDetailsType);
+
+            return systemUserDetails?.SystemUserOrg is not null
+                   && TryGetOrganizationNumberFromConsumerOrganization(systemUserDetails.SystemUserOrg, out orgNumber);
         }
-
-        var systemUserDetails = authorizationDetails.FirstOrDefault(x => x.Type == AuthorizationDetailsType);
-
-        if (systemUserDetails?.SystemUserIds is null)
-        {
-            return false;
-        }
-
-        systemUserId = systemUserDetails.SystemUserIds.FirstOrDefault();
-
-        return systemUserId is not null;
-    }
-
-    public static bool TryGetSystemUserOrgNumber(this ClaimsPrincipal claimsPrincipal,
-        [NotNullWhen(true)] out string? orgNumber)
-    {
-        orgNumber = null;
-
-        if (!claimsPrincipal.TryGetAuthorizationDetailsClaimValue(out var authorizationDetails))
-        {
-            return false;
-        }
-
-        if (authorizationDetails.Length == 0)
-        {
-            return false;
-        }
-
-        var systemUserDetails = authorizationDetails.FirstOrDefault(x => x.Type == AuthorizationDetailsType);
-
-        return systemUserDetails?.SystemUserOrg is not null
-               && TryGetOrganizationNumberFromConsumerOrganization(systemUserDetails.SystemUserOrg, out orgNumber);
     }
 
     private static bool TryGetConsumerOrgNumber(this Claim? consumerClaim, [NotNullWhen(true)] out string? orgNumber)
@@ -150,66 +154,69 @@ public static class ClaimsPrincipalExtensions
         }
     }
 
-    public static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
-        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email);
-
-    public static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? username)
-        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username);
-
-    public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
-        => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);
-
-    public static bool TryGetPartyUuid(this ClaimsPrincipal claimsPrincipal, out Guid partyUuid)
+    extension(ClaimsPrincipal claimsPrincipal)
     {
-        if (claimsPrincipal.TryGetClaimValue(PartyUuidClaim, out var s) && Guid.TryParse(s, out var id))
+        public bool TryGetSelfIdentifiedUserEmail([NotNullWhen(true)] out string? email)
+            => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email);
+
+        public bool TryGetSelfIdentifiedUsername([NotNullWhen(true)] out string? username)
+            => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username);
+
+        public bool TryGetFeideSubject([NotNullWhen(true)] out string? subject)
+            => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);
+
+        public bool TryGetPartyUuid(out Guid partyUuid)
         {
-            partyUuid = id;
-            return true;
-        }
-
-        partyUuid = Guid.Empty;
-        return false;
-    }
-
-    public static bool TryGetPartyId(this ClaimsPrincipal claimsPrincipal, out int partyId)
-    {
-        if (claimsPrincipal.TryGetClaimValue(PartyIdClaim, out var s) && int.TryParse(s, out var id))
-        {
-            partyId = id;
-            return true;
-        }
-
-        partyId = 0;
-        return false;
-    }
-
-    public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
-    {
-        if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level) && level >= 0)
-        {
-            return level;
-        }
-
-        if (claimsPrincipal.TryGetClaimValue(IdportenAuthLevelClaim, out claimValue))
-        {
-            // The acr claim value is either "idporten-loa-substantial" (previously "Level3") or "idporten-loa-high" (previously "Level4")
-            // https://docs.digdir.no/docs/idporten/oidc/oidc_protocol_new_idporten#new-acr-values
-            return claimValue switch
+            if (claimsPrincipal.TryGetClaimValue(PartyUuidClaim, out var s) && Guid.TryParse(s, out var id))
             {
-                Constants.IdportenLoaSubstantial => 3,
-                Constants.IdportenLoaHigh => 4,
-                _ => throw new ArgumentException("Unknown acr value")
-            };
+                partyUuid = id;
+                return true;
+            }
+
+            partyUuid = Guid.Empty;
+            return false;
         }
 
-        if (claimsPrincipal.TryGetSystemUserId(out _))
+        public bool TryGetPartyId(out int partyId)
         {
-            // System users are always considered to have authentication level 3
-            // See https://github.com/Altinn/altinn-authentication/blob/242ef98de4094f15a1a444aeebb2caa1e808b482/src/Authentication/Controllers/AuthenticationController.cs#L495
-            return 3;
+            if (claimsPrincipal.TryGetClaimValue(PartyIdClaim, out var s) && int.TryParse(s, out var id))
+            {
+                partyId = id;
+                return true;
+            }
+
+            partyId = 0;
+            return false;
         }
 
-        throw new UnreachableException("No authentication level claim found");
+        public int GetAuthenticationLevel()
+        {
+            if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level) && level >= 0)
+            {
+                return level;
+            }
+
+            if (claimsPrincipal.TryGetClaimValue(IdportenAuthLevelClaim, out claimValue))
+            {
+                // The acr claim value is either "idporten-loa-substantial" (previously "Level3") or "idporten-loa-high" (previously "Level4")
+                // https://docs.digdir.no/docs/idporten/oidc/oidc_protocol_new_idporten#new-acr-values
+                return claimValue switch
+                {
+                    Constants.IdportenLoaSubstantial => 3,
+                    Constants.IdportenLoaHigh => 4,
+                    _ => throw new ArgumentException("Unknown acr value")
+                };
+            }
+
+            if (claimsPrincipal.TryGetSystemUserId(out _))
+            {
+                // System users are always considered to have authentication level 3
+                // See https://github.com/Altinn/altinn-authentication/blob/242ef98de4094f15a1a444aeebb2caa1e808b482/src/Authentication/Controllers/AuthenticationController.cs#L495
+                return 3;
+            }
+
+            throw new UnreachableException("No authentication level claim found");
+        }
     }
 
     public static IEnumerable<Claim> GetIdentifyingClaims(this IEnumerable<Claim> claims)
@@ -295,69 +302,71 @@ public static class ClaimsPrincipalExtensions
     public static IPartyIdentifier? GetEndUserPartyIdentifier(this List<Claim> claims)
         => new ClaimsPrincipal(new ClaimsIdentity(claims)).GetEndUserPartyIdentifier();
 
-    public static IPartyIdentifier? GetEndUserPartyIdentifier(this ClaimsPrincipal claimsPrincipal)
+    extension(ClaimsPrincipal claimsPrincipal)
     {
-        var (userType, externalId) = claimsPrincipal.GetUserType();
-        return userType switch
+        public IPartyIdentifier? GetEndUserPartyIdentifier()
         {
-            UserIdType.ServiceOwnerOnBehalfOfPerson or UserIdType.Person
-                => NorwegianPersonIdentifier.TryParse(externalId, out var personId)
-                    ? personId : null,
-            UserIdType.SystemUser
-                => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
-                    ? systemUserId : null,
-            UserIdType.IdportenEmailIdentifiedUser
-                => IdportenEmailUserIdentifier.TryParse(externalId, out var email)
-                    ? email : null,
-            UserIdType.AltinnSelfIdentifiedUser
-                => AltinnSelfIdentifiedUserIdentifier.TryParse(externalId, out var username)
-                    ? username : null,
-            UserIdType.FeideUser
-                => FeideUserIdentifier.TryParse(externalId, out var feideSubject)
-                    ? feideSubject : null,
-            UserIdType.Unknown => null,
-            UserIdType.ServiceOwner => null,
-            _ => null
-        };
-    }
-
-    private static bool TryGetAuthorizationDetailsClaimValue(this ClaimsPrincipal claimsPrincipal,
-        [NotNullWhen(true)] out SystemUserAuthorizationDetails[]? authorizationDetails)
-    {
-        authorizationDetails = null;
-
-        if (!claimsPrincipal.TryGetClaimValue(AuthorizationDetailsClaim, out var authDetailsJson))
-        {
-            return false;
+            var (userType, externalId) = claimsPrincipal.GetUserType();
+            return userType switch
+            {
+                UserIdType.ServiceOwnerOnBehalfOfPerson or UserIdType.Person
+                    => NorwegianPersonIdentifier.TryParse(externalId, out var personId)
+                        ? personId : null,
+                UserIdType.SystemUser
+                    => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
+                        ? systemUserId : null,
+                UserIdType.IdportenEmailIdentifiedUser
+                    => IdportenEmailUserIdentifier.TryParse(externalId, out var email)
+                        ? email : null,
+                UserIdType.AltinnSelfIdentifiedUser
+                    => AltinnSelfIdentifiedUserIdentifier.TryParse(externalId, out var username)
+                        ? username : null,
+                UserIdType.FeideUser
+                    => FeideUserIdentifier.TryParse(externalId, out var feideSubject)
+                        ? feideSubject : null,
+                UserIdType.Unknown => null,
+                UserIdType.ServiceOwner => null,
+                _ => null
+            };
         }
 
-        JsonNode? authDetailsJsonNode;
-        try
+        private bool TryGetAuthorizationDetailsClaimValue([NotNullWhen(true)] out SystemUserAuthorizationDetails[]? authorizationDetails)
         {
-            authDetailsJsonNode = JsonNode.Parse(authDetailsJson);
-            if (authDetailsJsonNode is null)
+            authorizationDetails = null;
+
+            if (!claimsPrincipal.TryGetClaimValue(AuthorizationDetailsClaim, out var authDetailsJson))
             {
                 return false;
             }
-        }
-        catch (JsonException)
-        {
-            // If the JSON is malformed, we cannot parse it, so we return false
-            return false;
-        }
 
-        // If a claim is an array, but contains only one element, it will be deserialized as a single object by dotnet
-        if (authDetailsJsonNode.GetValueKind() is JsonValueKind.Array)
-        {
-            authorizationDetails = JsonSerializer.Deserialize<SystemUserAuthorizationDetails[]>(authDetailsJson);
-        }
-        else
-        {
-            var systemUserAuthorizationDetails = JsonSerializer.Deserialize<SystemUserAuthorizationDetails>(authDetailsJson);
-            authorizationDetails = [systemUserAuthorizationDetails!];
-        }
+            JsonNode? authDetailsJsonNode;
+            try
+            {
+                authDetailsJsonNode = JsonNode.Parse(authDetailsJson);
+                if (authDetailsJsonNode is null)
+                {
+                    return false;
+                }
+            }
+            catch (JsonException)
+            {
+                // If the JSON is malformed, we cannot parse it, so we return false
+                return false;
+            }
 
-        return authorizationDetails is not null;
+            // If a claim is an array, but contains only one element, it will be deserialized as a single object by dotnet
+            if (authDetailsJsonNode.GetValueKind() is JsonValueKind.Array)
+            {
+                authorizationDetails = JsonSerializer.Deserialize<SystemUserAuthorizationDetails[]>(authDetailsJson);
+            }
+            else
+            {
+                var systemUserAuthorizationDetails = JsonSerializer.Deserialize<SystemUserAuthorizationDetails>(authDetailsJson);
+                authorizationDetails = [systemUserAuthorizationDetails!];
+            }
+
+            return authorizationDetails is not null;
+        }
     }
 
     private static bool TryGetOrganizationNumberFromConsumerOrganization(ConsumerOrganization? consumerOrganization, [NotNullWhen(true)] out string? orgNumber)

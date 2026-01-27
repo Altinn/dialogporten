@@ -150,103 +150,100 @@ internal static class AggregateExtensions
         return node.State is not AggregateNodeState.Unchanged;
     }
 
-    private static async Task<AggregateNode> AddAggregateChain(
-        this Dictionary<EntityEntry, AggregateNode> nodeByEntry,
-        EntityEntry entry,
-        CancellationToken cancellationToken)
+    extension(Dictionary<EntityEntry, AggregateNode> nodeByEntry)
     {
-        if (nodeByEntry.TryGetValue(entry, out var node))
+        private async Task<AggregateNode> AddAggregateChain(EntityEntry entry,
+            CancellationToken cancellationToken)
         {
-            // We have already added this entry, so just return the node without expanding its parents or children.
+            if (nodeByEntry.TryGetValue(entry, out var node))
+            {
+                // We have already added this entry, so just return the node without expanding its parents or children.
+                return node;
+            }
+
+            nodeByEntry[entry] = node = entry.ToAggregateNode();
+            await nodeByEntry.AddAggregateParentChain(entry, cancellationToken);
+
+            // This is not needed for now, as we don't need to send Deleted events for
+            // any aggregate children (as we did for the old DialogElement concept
+            // await nodeByEntry.AddAggregateChildChain(entry, cancellationToken);
             return node;
         }
 
-        nodeByEntry[entry] = node = entry.ToAggregateNode();
-        await nodeByEntry.AddAggregateParentChain(entry, cancellationToken);
-
-        // This is not needed for now, as we don't need to send Deleted events for
-        // any aggregate children (as we did for the old DialogElement concept
-        // await nodeByEntry.AddAggregateChildChain(entry, cancellationToken);
-        return node;
-    }
-
-    private static async Task AddAggregateParentChain(
-        this Dictionary<EntityEntry, AggregateNode> nodeByEntry,
-        EntityEntry childEntry,
-        CancellationToken cancellationToken)
-    {
-        if (!nodeByEntry.TryGetValue(childEntry, out var childNode))
+        private async Task AddAggregateParentChain(EntityEntry childEntry,
+            CancellationToken cancellationToken)
         {
-            throw new InvalidOperationException("Node must be added before calling this method.");
-        }
-
-        foreach (var parentForeignKey in childEntry.Metadata.FindAggregateParents())
-        {
-            // Supports only dependent to principal. That is - one-to-one and one-to-many
-            // relationships. Many-to-many relationships are not supported.
-            var parentType = parentForeignKey.PrincipalEntityType.ClrType;
-
-            var parentPrimaryKey = parentForeignKey
-                .Properties
-                .Select(key => childEntry.OriginalValues[key.Name])
-                .ToArray();
-
-            if (parentPrimaryKey.Length == 0 || parentPrimaryKey.Any(x => x is null))
+            if (!nodeByEntry.TryGetValue(childEntry, out var childNode))
             {
-                throw new UnreachableException(
-                    $"Foreign key to {parentType.Name} from {childEntry.Metadata.ClrType.Name} " +
-                    $"is empty or contains null values.");
+                throw new InvalidOperationException("Node must be added before calling this method.");
             }
 
-            // Adding a new entity with a custom primary key and hitting this error? Here's the deal:
-            // EF checks the key to determine if it's new or existing. If the key is set, EF thinks
-            // it's existing and marks it as Modified. To add it properly, manually set
-            // childEntry.State = EntityState.Added. This can be done through DbContext.Add(entity).
-            var parentEntity = await childEntry.Context
-                .FindAsync(parentType, parentPrimaryKey, cancellationToken: cancellationToken)
-                ?? throw new InvalidOperationException(
-                    $"Could not find parent {parentType.Name} on {childEntry.Metadata.ClrType.Name} " +
-                    $"with key [{string.Join(",", parentPrimaryKey)}].");
-
-            var parentEntry = childEntry.Context.Entry(parentEntity);
-            var parentNode = await nodeByEntry.AddAggregateChain(parentEntry, cancellationToken);
-            parentNode.AddChild(childNode);
-            childNode.AddParent(parentNode);
-        }
-    }
-
-    private static async Task AddAggregateChildChain(
-        this Dictionary<EntityEntry, AggregateNode> nodeByEntry,
-        EntityEntry parentEntry,
-        CancellationToken cancellationToken)
-    {
-        if (!nodeByEntry.TryGetValue(parentEntry, out var parentNode))
-        {
-            throw new InvalidOperationException("Node must be added before calling this method.");
-        }
-
-        foreach (var childForeignKey in parentEntry.Metadata.FindAggregateChildren())
-        {
-            var childNav = parentEntry.Navigation(childForeignKey.PrincipalToDependent!.Name);
-            if (!childNav.IsLoaded)
+            foreach (var parentForeignKey in childEntry.Metadata.FindAggregateParents())
             {
-                throw new InvalidOperationException(
-                    $"Aggregate child navigation property {childNav.Metadata.Name} on {parentEntry.Metadata.Name} is not loaded. " +
-                    $"The whole aggregate tree must be loaded before saving.");
-            }
+                // Supports only dependent to principal. That is - one-to-one and one-to-many
+                // relationships. Many-to-many relationships are not supported.
+                var parentType = parentForeignKey.PrincipalEntityType.ClrType;
 
-            var currentValues = childNav.Metadata.IsCollection
-                ? childNav.CurrentValue as IEnumerable<object> ?? []
-                : Enumerable.Empty<object>()
-                    .Append(childNav.CurrentValue)
-                    .Where(x => x is not null)
-                    .Cast<object>();
+                var parentPrimaryKey = parentForeignKey
+                    .Properties
+                    .Select(key => childEntry.OriginalValues[key.Name])
+                    .ToArray();
 
-            foreach (var childEntry in currentValues.Select(parentEntry.Context.Entry))
-            {
-                var childNode = await nodeByEntry.AddAggregateChain(childEntry, cancellationToken);
+                if (parentPrimaryKey.Length == 0 || parentPrimaryKey.Any(x => x is null))
+                {
+                    throw new UnreachableException(
+                        $"Foreign key to {parentType.Name} from {childEntry.Metadata.ClrType.Name} " +
+                        $"is empty or contains null values.");
+                }
+
+                // Adding a new entity with a custom primary key and hitting this error? Here's the deal:
+                // EF checks the key to determine if it's new or existing. If the key is set, EF thinks
+                // it's existing and marks it as Modified. To add it properly, manually set
+                // childEntry.State = EntityState.Added. This can be done through DbContext.Add(entity).
+                var parentEntity = await childEntry.Context
+                                       .FindAsync(parentType, parentPrimaryKey, cancellationToken: cancellationToken)
+                                   ?? throw new InvalidOperationException(
+                                       $"Could not find parent {parentType.Name} on {childEntry.Metadata.ClrType.Name} " +
+                                       $"with key [{string.Join(",", parentPrimaryKey)}].");
+
+                var parentEntry = childEntry.Context.Entry(parentEntity);
+                var parentNode = await nodeByEntry.AddAggregateChain(parentEntry, cancellationToken);
                 parentNode.AddChild(childNode);
                 childNode.AddParent(parentNode);
+            }
+        }
+
+        private async Task AddAggregateChildChain(EntityEntry parentEntry,
+            CancellationToken cancellationToken)
+        {
+            if (!nodeByEntry.TryGetValue(parentEntry, out var parentNode))
+            {
+                throw new InvalidOperationException("Node must be added before calling this method.");
+            }
+
+            foreach (var childForeignKey in parentEntry.Metadata.FindAggregateChildren())
+            {
+                var childNav = parentEntry.Navigation(childForeignKey.PrincipalToDependent!.Name);
+                if (!childNav.IsLoaded)
+                {
+                    throw new InvalidOperationException(
+                        $"Aggregate child navigation property {childNav.Metadata.Name} on {parentEntry.Metadata.Name} is not loaded. " +
+                        $"The whole aggregate tree must be loaded before saving.");
+                }
+
+                var currentValues = childNav.Metadata.IsCollection
+                    ? childNav.CurrentValue as IEnumerable<object> ?? []
+                    : Enumerable.Empty<object>()
+                        .Append(childNav.CurrentValue)
+                        .Where(x => x is not null)
+                        .Cast<object>();
+
+                foreach (var childEntry in currentValues.Select(parentEntry.Context.Entry))
+                {
+                    var childNode = await nodeByEntry.AddAggregateChain(childEntry, cancellationToken);
+                    parentNode.AddChild(childNode);
+                    childNode.AddParent(parentNode);
+                }
             }
         }
     }
@@ -284,26 +281,29 @@ internal static class AggregateExtensions
             modifiedProperties);
     }
 
-    private static IEnumerable<IReadOnlyForeignKey> FindAggregateParents(this IReadOnlyEntityType entityType)
+    extension(IReadOnlyEntityType entityType)
     {
-        return entityType
-            .GetForeignKeys()
-            .Where(x => x
-                .PrincipalToDependent?
-                .PropertyInfo?
-                .GetCustomAttribute<AggregateChildAttribute>()
-                is not null);
-    }
+        private IEnumerable<IReadOnlyForeignKey> FindAggregateParents()
+        {
+            return entityType
+                .GetForeignKeys()
+                .Where(x => x
+                        .PrincipalToDependent?
+                        .PropertyInfo?
+                        .GetCustomAttribute<AggregateChildAttribute>()
+                    is not null);
+        }
 
-    private static IEnumerable<IReadOnlyForeignKey> FindAggregateChildren(this IReadOnlyEntityType entry)
-    {
-        return entry
-            .GetReferencingForeignKeys()
-            .Where(x => x
-                .PrincipalToDependent?
-                .PropertyInfo?
-                .GetCustomAttribute<AggregateChildAttribute>()
-                is not null);
+        private IEnumerable<IReadOnlyForeignKey> FindAggregateChildren()
+        {
+            return entityType
+                .GetReferencingForeignKeys()
+                .Where(x => x
+                        .PrincipalToDependent?
+                        .PropertyInfo?
+                        .GetCustomAttribute<AggregateChildAttribute>()
+                    is not null);
+        }
     }
 
     private sealed class EntityEntryComparer : IEqualityComparer<EntityEntry>

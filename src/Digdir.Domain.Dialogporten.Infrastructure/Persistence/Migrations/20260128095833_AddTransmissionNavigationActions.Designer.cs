@@ -13,8 +13,8 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20260128085342_AddTransmissionNavigationalActions")]
-    partial class AddTransmissionNavigationalActions
+    [Migration("20260128095833_AddTransmissionNavigationActions")]
+    partial class AddTransmissionNavigationActions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1375,11 +1375,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("TransmissionId")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
 
                     b.Property<string>("Url")
                         .IsRequired()

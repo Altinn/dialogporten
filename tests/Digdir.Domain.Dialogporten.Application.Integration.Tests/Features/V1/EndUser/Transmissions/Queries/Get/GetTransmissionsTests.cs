@@ -10,7 +10,6 @@ using Digdir.Domain.Dialogporten.Domain;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-using CreateTransmissionNavigationalActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionNavigationalActionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Transmissions.Queries.Get;
 
@@ -72,16 +71,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                 x.AddTransmission(x =>
                 {
                     x.Id = transmissionId;
-                    x.NavigationalActions =
-                    [
-                        // CODEX TODO: create an extension in CreateDialogCommandExtensions
-                        new CreateTransmissionNavigationalActionDto
-                        {
-                            Title = [new LocalizationDto { LanguageCode = "nb", Value = "Go" }],
-                            Url = new Uri("https://example.com/action"),
-                            ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)
-                        }
-                    ];
+                    x.AddNavigationalAction(a => a.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1));
                 }))
             .OverrideUtc(TimeSpan.FromDays(2))
             .SendCommand((_, ctx) => new GetTransmissionQuery
@@ -141,15 +131,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                 {
                     transmission.Id = transmissionId;
                     transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";
-                    transmission.NavigationalActions =
-                    [
-                        // CODEX TODO: use the extension you created in CreateDialogCommandExtensions
-                        new CreateTransmissionNavigationalActionDto
-                        {
-                            Title = [new LocalizationDto { LanguageCode = "nb", Value = "Go" }],
-                            Url = new Uri("https://example.com/action")
-                        }
-                    ];
+                    transmission.AddNavigationalAction();
                 }))
             .SendCommand((_, ctx) => new GetTransmissionQuery
             {

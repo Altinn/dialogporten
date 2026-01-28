@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.101.0](https://github.com/Altinn/dialogporten/compare/v1.100.2...v1.101.0) (2026-01-27)
+
+
+### Features
+
+* Added support for Timefields to be in the past ([#3227](https://github.com/Altinn/dialogporten/issues/3227)) ([0231973](https://github.com/Altinn/dialogporten/commit/0231973ca37ed0a46c89de35119e47122ab3136d))
+* **janitor:** Introduce custom metrics collection for Janitor, including MassTransit outbox queue size ([#3267](https://github.com/Altinn/dialogporten/issues/3267)) ([0ec1bf4](https://github.com/Altinn/dialogporten/commit/0ec1bf43790db9452e5fd2a929df95c1359c8b6a))
+
+
+### Bug Fixes
+
+* Send in response.type into WriteAsJsonAsync to get error messages into http response ([#3323](https://github.com/Altinn/dialogporten/issues/3323)) ([d55293d](https://github.com/Altinn/dialogporten/commit/d55293d670cae917b054a4a45ace0f4f73824736))
+
+
+### Miscellaneous Chores
+
+* **deps:** update Altinn.ApiClients.Maskinporten ([#3332](https://github.com/Altinn/dialogporten/issues/3332)) ([3dc101c](https://github.com/Altinn/dialogporten/commit/3dc101cf2dd7950fd8d82022daf9c48898b22f5d))
+* **performance:** adjust threshold values ([#3320](https://github.com/Altinn/dialogporten/issues/3320)) ([e9db3f2](https://github.com/Altinn/dialogporten/commit/e9db3f294a3a6dd417bcc721cb61ac72e725fd51))
+
 ## [1.100.2](https://github.com/Altinn/dialogporten/compare/v1.100.1...v1.100.2) (2026-01-26)
 
 

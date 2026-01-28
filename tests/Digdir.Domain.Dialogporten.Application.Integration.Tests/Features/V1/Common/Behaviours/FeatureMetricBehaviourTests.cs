@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using FluentAssertions;
+using AwesomeAssertions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 

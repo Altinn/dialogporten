@@ -163,7 +163,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
         var searchExpression = Expressions.LocalizedSearchExpression(request.Search, request.SearchLanguageCode);
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(

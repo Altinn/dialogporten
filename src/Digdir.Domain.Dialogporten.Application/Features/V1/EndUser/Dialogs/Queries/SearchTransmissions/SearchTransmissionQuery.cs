@@ -39,7 +39,7 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
 
-    public async Task<SearchTransmissionResult> Handle(SearchTransmissionQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchTransmissionResult> Handle(SearchTransmissionQuery request, CancellationToken cancellationToken)
     {
         var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
             dbCtx.Dialogs

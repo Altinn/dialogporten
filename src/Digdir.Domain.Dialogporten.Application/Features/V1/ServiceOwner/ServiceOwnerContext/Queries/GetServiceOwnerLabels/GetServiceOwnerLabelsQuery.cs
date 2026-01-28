@@ -34,7 +34,7 @@ internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetSer
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<GetServiceOwnerLabelsResult> Handle(GetServiceOwnerLabelsQuery request, CancellationToken cancellationToken)
+    public async ValueTask<GetServiceOwnerLabelsResult> Handle(GetServiceOwnerLabelsQuery request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

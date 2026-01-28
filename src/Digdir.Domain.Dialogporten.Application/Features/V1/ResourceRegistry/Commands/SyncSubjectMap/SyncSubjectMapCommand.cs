@@ -37,7 +37,7 @@ internal sealed partial class SyncSubjectMapCommandHandler : IRequestHandler<Syn
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<SyncSubjectMapResult> Handle(SyncSubjectMapCommand request, CancellationToken cancellationToken)
+    public async ValueTask<SyncSubjectMapResult> Handle(SyncSubjectMapCommand request, CancellationToken cancellationToken)
     {
         // Get the last updated timestamp from parameter, or the database (with a time skew), or use a default
         var lastUpdated = request.Since

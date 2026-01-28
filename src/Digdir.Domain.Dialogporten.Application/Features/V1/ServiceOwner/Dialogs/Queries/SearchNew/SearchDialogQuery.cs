@@ -163,7 +163,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
     }
 
-    public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
         // If the service owner impersonates an end user, we need to additionally filter the dialogs
         // based on the end user's authorization

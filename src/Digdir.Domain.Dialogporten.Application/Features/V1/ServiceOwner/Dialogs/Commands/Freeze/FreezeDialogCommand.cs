@@ -32,7 +32,7 @@ internal sealed class FreezeDialogCommandHandler(
     private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     private readonly IUserResourceRegistry _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
 
-    public async Task<FreezeDialogResult> Handle(FreezeDialogCommand request, CancellationToken cancellationToken)
+    public async ValueTask<FreezeDialogResult> Handle(FreezeDialogCommand request, CancellationToken cancellationToken)
     {
         if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {

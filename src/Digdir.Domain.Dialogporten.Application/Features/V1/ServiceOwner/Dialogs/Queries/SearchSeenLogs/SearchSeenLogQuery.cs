@@ -35,7 +35,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         _userResourceRegistry = userResourceRegistry;
     }
 
-    public async Task<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

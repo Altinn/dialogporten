@@ -154,7 +154,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         _user = user ?? throw new ArgumentNullException(nameof(user));
     }
 
-    public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
             request.Party ?? [],

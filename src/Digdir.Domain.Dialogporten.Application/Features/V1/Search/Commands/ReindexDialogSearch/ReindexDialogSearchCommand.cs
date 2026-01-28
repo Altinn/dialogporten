@@ -38,7 +38,7 @@ internal sealed partial class ReindexDialogSearchCommandHandler : IRequestHandle
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<ReindexDialogSearchResult> Handle(ReindexDialogSearchCommand request, CancellationToken ct)
+    public async ValueTask<ReindexDialogSearchResult> Handle(ReindexDialogSearchCommand request, CancellationToken ct)
     {
         LogReindexDialogSearchCommandStarted(
             request.Full,

@@ -18,7 +18,7 @@ internal sealed class GetOauthAuthorizationServerQueryHandler : IRequestHandler<
         _applicationSettings = applicationSettings.Value;
     }
 
-    public async Task<GetOauthAuthorizationServerDto> Handle(GetOauthAuthorizationServerQuery request, CancellationToken cancellationToken)
+    public async ValueTask<GetOauthAuthorizationServerDto> Handle(GetOauthAuthorizationServerQuery request, CancellationToken cancellationToken)
     {
         var issuerUrl = _applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + Constants.DialogTokenIssuerVersion;
         return await Task.FromResult(new GetOauthAuthorizationServerDto

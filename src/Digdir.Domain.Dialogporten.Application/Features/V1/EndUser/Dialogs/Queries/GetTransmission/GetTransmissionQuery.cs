@@ -41,7 +41,7 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
 
-    public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
+    public async ValueTask<GetTransmissionResult> Handle(GetTransmissionQuery request,
         CancellationToken cancellationToken)
     {
         var dialog = await _dbContext.WrapWithRepeatableRead((dbCtx, ct) =>

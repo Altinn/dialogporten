@@ -18,7 +18,7 @@ internal sealed class GetPartiesQueryHandler : IRequestHandler<GetPartiesQuery, 
         _mapper = mapper;
     }
 
-    public async Task<PartiesDto> Handle(GetPartiesQuery request, CancellationToken cancellationToken)
+    public async ValueTask<PartiesDto> Handle(GetPartiesQuery request, CancellationToken cancellationToken)
     {
         var authorizedPartiesResult = await _userParties.GetUserParties(cancellationToken);
         return _mapper.Map<PartiesDto>(authorizedPartiesResult);

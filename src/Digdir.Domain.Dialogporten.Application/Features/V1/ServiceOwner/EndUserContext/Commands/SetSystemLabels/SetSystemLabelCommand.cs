@@ -52,7 +52,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<SetSystemLabelResult> Handle(
+    public async ValueTask<SetSystemLabelResult> Handle(
         SetSystemLabelCommand request,
         CancellationToken cancellationToken)
     {

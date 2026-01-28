@@ -44,7 +44,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<BulkSetSystemLabelResult> Handle(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
+    public async ValueTask<BulkSetSystemLabelResult> Handle(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
     {
         var dialogIds = request.Dto.Dialogs
             .Select(d => d.DialogId)

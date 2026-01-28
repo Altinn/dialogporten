@@ -32,7 +32,7 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)
     {
         var dialog = await _dialogDbContext.WrapWithRepeatableRead((dbCtx, ct) =>
                 dbCtx.Dialogs

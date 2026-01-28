@@ -32,7 +32,7 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

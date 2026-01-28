@@ -34,7 +34,7 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<GetActivityResult> Handle(GetActivityQuery request,
+    public async ValueTask<GetActivityResult> Handle(GetActivityQuery request,
         CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);

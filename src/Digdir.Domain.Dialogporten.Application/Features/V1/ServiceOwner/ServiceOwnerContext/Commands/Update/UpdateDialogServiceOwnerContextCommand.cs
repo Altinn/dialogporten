@@ -40,7 +40,7 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
-    public async Task<UpdateDialogServiceOwnerContextResult> Handle(UpdateDialogServiceOwnerContextCommand request,
+    public async ValueTask<UpdateDialogServiceOwnerContextResult> Handle(UpdateDialogServiceOwnerContextCommand request,
         CancellationToken cancellationToken)
     {
         var serviceOwnerContext = UpdateServiceOwnerContextDataLoader.GetPreloadedData(_dataLoaderContext);

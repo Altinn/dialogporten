@@ -38,7 +38,7 @@ internal sealed class RestoreDialogCommandHandler : IRequestHandler<RestoreDialo
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<RestoreDialogResult> Handle(RestoreDialogCommand request, CancellationToken cancellationToken)
+    public async ValueTask<RestoreDialogResult> Handle(RestoreDialogCommand request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

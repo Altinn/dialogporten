@@ -34,7 +34,7 @@ internal sealed partial class SyncPolicyCommandHandler : IRequestHandler<SyncPol
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<SyncPolicyResult> Handle(SyncPolicyCommand request,
+    public async ValueTask<SyncPolicyResult> Handle(SyncPolicyCommand request,
         CancellationToken cancellationToken)
     {
         // Get the last updated timestamp from parameter, or the database (with a time skew), or use a default

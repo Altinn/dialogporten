@@ -76,7 +76,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
     }
 
-    public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
+    public async ValueTask<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
     {
         var dialog = _mapper.Map<DialogEntity>(request.Dto);
 

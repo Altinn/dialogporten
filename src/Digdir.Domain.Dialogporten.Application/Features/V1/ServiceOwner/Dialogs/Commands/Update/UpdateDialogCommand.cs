@@ -86,7 +86,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
     }
 
-    public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
+    public async ValueTask<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
     {
         var dialog = UpdateDialogDataLoader.GetPreloadedData(_dataLoaderContext);
 

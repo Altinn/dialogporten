@@ -35,7 +35,7 @@ internal sealed class NotificationConditionQueryHandler : IRequestHandler<Notifi
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
-    public async Task<NotificationConditionResult> Handle(NotificationConditionQuery request, CancellationToken cancellationToken)
+    public async ValueTask<NotificationConditionResult> Handle(NotificationConditionQuery request, CancellationToken cancellationToken)
     {
         var hasMatchingActivity = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
             dbCtx.Dialogs

@@ -34,7 +34,7 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
+    public async ValueTask<GetTransmissionResult> Handle(GetTransmissionQuery request,
         CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);

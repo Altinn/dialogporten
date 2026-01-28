@@ -38,7 +38,7 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)
     {
         var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
             dbCtx.Dialogs

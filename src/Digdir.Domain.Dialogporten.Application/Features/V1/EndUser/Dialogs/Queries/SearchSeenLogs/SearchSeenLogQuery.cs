@@ -39,7 +39,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
     }
 
-    public async Task<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
     {
         var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 

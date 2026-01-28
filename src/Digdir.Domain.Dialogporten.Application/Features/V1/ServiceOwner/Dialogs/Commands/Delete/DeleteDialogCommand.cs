@@ -43,7 +43,7 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<DeleteDialogResult> Handle(DeleteDialogCommand request, CancellationToken cancellationToken)
+    public async ValueTask<DeleteDialogResult> Handle(DeleteDialogCommand request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

@@ -41,7 +41,7 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
-    public async Task<GetActivityResult> Handle(GetActivityQuery request,
+    public async ValueTask<GetActivityResult> Handle(GetActivityQuery request,
         CancellationToken cancellationToken)
     {
         var dialog = await _dbContext.WrapWithRepeatableRead((dbCtx, ct) =>

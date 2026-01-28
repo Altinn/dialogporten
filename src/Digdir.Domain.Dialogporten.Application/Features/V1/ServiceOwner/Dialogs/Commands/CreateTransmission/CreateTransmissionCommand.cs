@@ -71,7 +71,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
     }
 
-    public async Task<CreateTransmissionResult> Handle(CreateTransmissionCommand request, CancellationToken cancellationToken)
+    public async ValueTask<CreateTransmissionResult> Handle(CreateTransmissionCommand request, CancellationToken cancellationToken)
     {
         var dialog = await LoadDialogAsync(request.DialogId, cancellationToken);
         if (dialog is null)

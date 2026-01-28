@@ -32,7 +32,7 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
-    public async Task<SearchTransmissionResult> Handle(SearchTransmissionQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchTransmissionResult> Handle(SearchTransmissionQuery request, CancellationToken cancellationToken)
     {
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 

@@ -66,7 +66,7 @@ internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<S
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
     }
 
-    public async Task<SearchDialogEndUserContextResult> Handle(SearchDialogEndUserContextQuery request, CancellationToken cancellationToken)
+    public async ValueTask<SearchDialogEndUserContextResult> Handle(SearchDialogEndUserContextQuery request, CancellationToken cancellationToken)
     {
         var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
         DialogSearchAuthorizationResult? authorizedResources = null;

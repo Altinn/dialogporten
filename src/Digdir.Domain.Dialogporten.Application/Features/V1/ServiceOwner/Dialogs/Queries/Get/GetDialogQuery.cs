@@ -47,7 +47,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
     }
 
-    public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
+    public async ValueTask<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
     {
         var dialog = GetDialogDataLoader.GetPreloadedData(_dataLoaderContext);
 

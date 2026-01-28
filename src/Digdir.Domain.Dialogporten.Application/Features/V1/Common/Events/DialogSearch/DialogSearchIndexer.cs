@@ -10,11 +10,11 @@ internal sealed class DialogSearchIndexer(IDialogSearchRepository db) : INotific
     private static readonly AsyncKeyedLocker<Guid> Semaphore = new();
     private readonly IDialogSearchRepository _db = db ?? throw new ArgumentNullException(nameof(db));
 
-    public Task Handle(DialogCreatedDomainEvent notification, CancellationToken cancellationToken) =>
-        UpdateIndex(notification.DialogId, cancellationToken);
+    public ValueTask Handle(DialogCreatedDomainEvent notification, CancellationToken cancellationToken) =>
+        new(UpdateIndex(notification.DialogId, cancellationToken));
 
-    public Task Handle(DialogUpdatedDomainEvent notification, CancellationToken cancellationToken) =>
-        UpdateIndex(notification.DialogId, cancellationToken);
+    public ValueTask Handle(DialogUpdatedDomainEvent notification, CancellationToken cancellationToken) =>
+        new(UpdateIndex(notification.DialogId, cancellationToken));
 
     private async Task UpdateIndex(Guid dialogId, CancellationToken cancellationToken)
     {

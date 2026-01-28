@@ -14,7 +14,7 @@ internal sealed class DialogActivityEventToAltinnForwarder : DomainEventToAltinn
         : base(cloudEventBus, settings) { }
 
     [EndpointName("DialogEventToAltinnForwarder_DialogActivityCreatedDomainEvent")]
-    public async Task Handle(DialogActivityCreatedDomainEvent domainEvent, CancellationToken cancellationToken)
+    public async ValueTask Handle(DialogActivityCreatedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         if (domainEvent.ShouldNotBeSentToAltinnEvents())
         {

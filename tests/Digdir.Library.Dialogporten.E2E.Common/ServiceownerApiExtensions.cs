@@ -1,5 +1,5 @@
 using Altinn.ApiClients.Dialogporten.Features.V1;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;

@@ -3,13 +3,13 @@
 End-to-end tests that call Dialogporten GraphQL and WebAPI endpoints using test tokens from the token generator.
 
 ## Prerequisites
-- Dialogporten WebAPI + GraphQL running locally (see repo `README.md`)
+- Dialogporten WebAPI running locally (see repo `README.md`)
 - Access to Altinn testtools token generator credentials
 
 ## Setup
 1. Start Dialogporten locally (GraphQL + WebAPI).
    - Make sure DB/Redis are running: `podman compose -f docker-compose-db-redis.yml up -d`.
-   - Ensure `appsettings.Development.json` or `appsettings.local.json` for both projects are set to:
+   - Ensure `appsettings.Development.json` or `appsettings.local.json` for the WebAPI is set to:
 ```json
 {
   "LocalDevelopment": {
@@ -53,7 +53,7 @@ Use the shared E2E base class and custom attributes so hooks and explicit behavi
 ## Run tests
 These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile this project, so you get compile-time checks even when the E2E tests do not run.
 
-To enable these tests locally for debugging, set `E2EExplicitOptions.ExplicitTests` to `true`.
+To enable these tests locally for debugging, set `E2EExplicitOptions.ExplicitTests` to `false`.
 
 Use the xUnit explicit switch:
 - `dotnet test -- xUnit.Explicit=off` (default; do not run explicit tests)

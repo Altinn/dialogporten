@@ -229,12 +229,9 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         E2ESettings settings,
         Uri webApiUri,
         Uri graphQlUri)
-    {
-    }
+    { }
 
-    protected virtual void AfterServiceProviderBuilt(ServiceProvider serviceProvider)
-    {
-    }
+    protected virtual void AfterServiceProviderBuilt(ServiceProvider serviceProvider) { }
 
     protected virtual bool IncludeGraphQlPreflight => true;
 

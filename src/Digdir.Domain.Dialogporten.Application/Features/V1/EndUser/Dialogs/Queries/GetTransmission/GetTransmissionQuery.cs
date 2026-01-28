@@ -56,6 +56,9 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
                 .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
                     .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                     .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Transmissions.Where(x => x.Id == request.TransmissionId))
+                    .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(x => x.Transmissions)
                     .ThenInclude(x => x.Sender)
                     .ThenInclude(x => x.ActorNameEntity)
@@ -103,6 +106,7 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         if (dto.IsAuthorized)
         {
             ReplaceExpiredAttachmentUrls(dto);
+            ReplaceExpiredNavigationalActionUrls(dto);
             return dto;
         }
 
@@ -110,6 +114,11 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         foreach (var url in urls)
         {
             url.Url = Constants.UnauthorizedUri;
+        }
+
+        foreach (var action in dto.NavigationalActions)
+        {
+            action.Url = Constants.UnauthorizedUri;
         }
 
         dto.Content.ContentReference.ReplaceUnauthorizedContentReference();
@@ -127,6 +136,17 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         foreach (var url in expiredTransmissionAttachmentUrls)
         {
             url.Url = Constants.ExpiredUri;
+        }
+    }
+
+    private void ReplaceExpiredNavigationalActionUrls(TransmissionDto dto)
+    {
+        var expiredNavigationalActions = dto.NavigationalActions
+            .Where(x => x.ExpiresAt < _clock.UtcNowOffset);
+
+        foreach (var action in expiredNavigationalActions)
+        {
+            action.Url = Constants.ExpiredUri;
         }
     }
 }

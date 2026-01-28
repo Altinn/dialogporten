@@ -12,6 +12,7 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
         IValidator<ActorDto> actorValidator,
         IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator,
+        IValidator<TransmissionNavigationalActionDto> navigationalActionValidator,
         IClock clock)
     {
         RuleFor(x => x.Id)
@@ -49,6 +50,9 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
 
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
+
+        RuleForEach(x => x.NavigationalActions)
+            .SetValidator(navigationalActionValidator);
 
         When(CreateDialogCommandValidator.IsApiOnly, () =>
                 RuleFor(x => x.Content)

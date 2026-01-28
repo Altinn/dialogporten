@@ -120,4 +120,17 @@ internal static class UpdateDialogCommandExtensions
         transmission.Attachments.Add(attachment);
         return transmission;
     }
+
+    public static TransmissionDto AddNavigationalAction(this TransmissionDto transmission, Action<TransmissionNavigationalActionDto>? modify = null)
+    {
+        var action = new TransmissionNavigationalActionDto
+        {
+            Title = DialogGenerator.GenerateFakeLocalizations(1),
+            Url = new Uri("https://example.com/action")
+        };
+
+        modify?.Invoke(action);
+        transmission.NavigationalActions.Add(action);
+        return transmission;
+    }
 }

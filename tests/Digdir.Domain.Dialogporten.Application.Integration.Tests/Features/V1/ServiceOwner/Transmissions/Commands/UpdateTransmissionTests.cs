@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -143,6 +144,46 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<ValidationError>(error =>
                 error.ShouldHaveErrorWithText(nameof(ContentDto.Title)));
+
+    [Fact]
+    public Task Cannot_Update_Transmission_NavigationalAction_With_Long_Title() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(x =>
+                x.AddTransmission(transmission =>
+                    transmission.AddNavigationalAction(action =>
+                        action.Title =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = new string('a', 256)
+                            }
+                        ])))
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText("256 characters"));
+
+    [Fact]
+    public Task Cannot_Update_Transmission_NavigationalAction_With_Http_Url() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(x =>
+                x.AddTransmission(transmission =>
+                    transmission.AddNavigationalAction(action =>
+                        action.Url = new Uri("http://example.com/action"))))
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText("https"));
+
+    [Fact]
+    public Task Cannot_Update_Transmission_NavigationalAction_With_ExpiresAt_In_Past() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(x =>
+                x.AddTransmission(transmission =>
+                    transmission.AddNavigationalAction(action =>
+                        action.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1))))
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText("future"));
 
     private static TransmissionDto UpdateDialogDialogTransmissionDto() => new()
     {

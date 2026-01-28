@@ -77,6 +77,8 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.ConsumerType, opt => opt.Ignore())
             .ForMember(dest => dest.ConsumerTypeId, opt => opt.MapFrom(src => src.ConsumerType));
 
+        CreateMap<TransmissionNavigationalActionDto, DialogTransmissionNavigationalAction>();
+
         // ===========================================
         // ================== Patch ==================
         // ===========================================

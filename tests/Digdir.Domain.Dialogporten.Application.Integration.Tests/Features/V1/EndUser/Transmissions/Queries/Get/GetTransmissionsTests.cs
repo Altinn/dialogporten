@@ -54,6 +54,29 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
     }
 
     [Fact]
+    public async Task Get_Transmission_Should_Mask_Expired_NavigationalAction_Urls()
+    {
+        var transmissionId = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(x =>
+                {
+                    x.Id = transmissionId;
+                    x.AddNavigationalAction(a => a.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1));
+                }))
+            .OverrideUtc(TimeSpan.FromDays(2))
+            .SendCommand((_, ctx) => new GetTransmissionQuery
+            {
+                DialogId = ctx.GetDialogId(),
+                TransmissionId = transmissionId
+            })
+            .ExecuteAndAssert<TransmissionDto>(x =>
+                x.NavigationalActions.Should().ContainSingle()
+                    .Which.Url.Should().Be(Constants.ExpiredUri));
+    }
+
+    [Fact]
     public async Task Get_Transmission_Should_Mask_Unauthorized_ContentReference()
     {
         var transmissionId = NewUuidV7();
@@ -82,6 +105,32 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                 x.Content.ContentReference!.Value.Should().NotBeEmpty()
                     .And.AllSatisfy(localization =>
                         localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+            });
+    }
+
+    [Fact]
+    public async Task Get_Transmission_Should_Mask_Unauthorized_NavigationalAction_Urls()
+    {
+        var transmissionId = NewUuidV7();
+
+        await FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(transmission =>
+                {
+                    transmission.Id = transmissionId;
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";
+                    transmission.AddNavigationalAction();
+                }))
+            .SendCommand((_, ctx) => new GetTransmissionQuery
+            {
+                DialogId = ctx.GetDialogId(),
+                TransmissionId = transmissionId
+            })
+            .ExecuteAndAssert<TransmissionDto>(x =>
+            {
+                x.IsAuthorized.Should().BeFalse();
+                x.NavigationalActions.Should().ContainSingle()
+                    .Which.Url.Should().Be(Constants.UnauthorizedUri);
             });
     }
 

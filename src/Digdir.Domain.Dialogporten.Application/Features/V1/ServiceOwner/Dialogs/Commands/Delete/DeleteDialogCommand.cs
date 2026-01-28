@@ -23,7 +23,7 @@ public sealed class DeleteDialogCommand : IRequest<DeleteDialogResult>, ISilentU
 }
 
 [GenerateOneOf]
-public sealed partial class DeleteDialogResult : OneOfBase<DeleteDialogSuccess, EntityNotFound, EntityDeleted, Forbidden, ConcurrencyError>;
+public sealed partial class DeleteDialogResult : OneOfBase<DeleteDialogSuccess, EntityNotFound, EntityDeleted, Forbidden, ConcurrencyError, Conflict>;
 
 public sealed record DeleteDialogSuccess(Guid Revision);
 
@@ -83,6 +83,7 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
         return saveResult.Match<DeleteDialogResult>(
             success => new DeleteDialogSuccess(dialog.Revision),
             domainError => throw new UnreachableException("Should never get a domain error when deleting a dialog"),
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 }

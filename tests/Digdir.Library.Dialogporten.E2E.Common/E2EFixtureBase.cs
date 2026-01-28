@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -218,10 +218,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         }
         finally
         {
-            if (originalAccessor is not null)
-            {
-                originalAccessor.Current = originalCurrent;
-            }
+            originalAccessor?.Current = originalCurrent;
 
             _tokenOverridesAccessor = originalAccessor;
         }

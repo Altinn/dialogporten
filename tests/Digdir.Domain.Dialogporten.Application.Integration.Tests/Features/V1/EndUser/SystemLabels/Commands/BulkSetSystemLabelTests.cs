@@ -13,7 +13,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
 

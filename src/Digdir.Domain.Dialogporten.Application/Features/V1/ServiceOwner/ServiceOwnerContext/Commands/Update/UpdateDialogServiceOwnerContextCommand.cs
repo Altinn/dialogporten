@@ -20,7 +20,7 @@ public sealed class UpdateDialogServiceOwnerContextCommand : IRequest<UpdateDial
 
 [GenerateOneOf]
 public sealed partial class UpdateDialogServiceOwnerContextResult :
-    OneOfBase<UpdateServiceOwnerContextSuccess, ValidationError, EntityNotFound, DomainError, ConcurrencyError>;
+    OneOfBase<UpdateServiceOwnerContextSuccess, ValidationError, EntityNotFound, DomainError, ConcurrencyError, Conflict>;
 
 public sealed record UpdateServiceOwnerContextSuccess(Guid Revision);
 
@@ -65,6 +65,7 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
         return saveResult.Match<UpdateDialogServiceOwnerContextResult>(
             success => new UpdateServiceOwnerContextSuccess(serviceOwnerContext.Revision),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 }

@@ -18,6 +18,7 @@ public sealed class BulkSetDialogSystemLabelsEndpointSummary : Summary<BulkSetDi
         Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope.ServiceProvider);
         Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("update");
+        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
         Responses[StatusCodes.Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
     }

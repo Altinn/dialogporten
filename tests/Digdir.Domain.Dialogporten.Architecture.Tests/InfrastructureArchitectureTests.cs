@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
-using FluentAssertions;
+using AwesomeAssertions;
 using FluentValidation;
 using NetArchTest.Rules;
 

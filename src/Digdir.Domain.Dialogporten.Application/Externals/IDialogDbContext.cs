@@ -27,6 +27,7 @@ public interface IDialogDbContext
     DbSet<DialogTransmissionType> DialogTransmissionTypes { get; }
     DbSet<DialogTransmissionContent> DialogTransmissionContents { get; }
     DbSet<DialogTransmissionContentType> DialogTransmissionContentTypes { get; }
+    DbSet<DialogTransmissionNavigationalAction> DialogTransmissionNavigationalActions { get; }
 
     DbSet<DialogApiAction> DialogApiActions { get; }
     DbSet<DialogApiActionEndpoint> DialogApiActionEndpoints { get; }

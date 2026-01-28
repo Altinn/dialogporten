@@ -25,7 +25,7 @@ public sealed class ReindexDialogSearchCommand : IRequest<ReindexDialogSearchRes
 [GenerateOneOf]
 public sealed partial class ReindexDialogSearchResult : OneOfBase<Success, ValidationError>;
 
-internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<ReindexDialogSearchCommand, ReindexDialogSearchResult>
+internal sealed partial class ReindexDialogSearchCommandHandler : IRequestHandler<ReindexDialogSearchCommand, ReindexDialogSearchResult>
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<ReindexDialogSearchCommandHandler> _logger;
@@ -40,15 +40,19 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
     public async Task<ReindexDialogSearchResult> Handle(ReindexDialogSearchCommand request, CancellationToken ct)
     {
-        _logger.LogInformation(
-            "ReindexDialogSearchCommand handler started. Mode: Full={Full}, Since={Since}, Resume={Resume}, StaleOnly={StaleOnly}, StaleFirst={StaleFirst}, BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}",
-            request.Full, request.Since, request.Resume, request.StaleOnly, request.StaleFirst,
-            request.BatchSize, request.Workers, request.ThrottleMs, request.WorkMemBytes);
+        LogReindexDialogSearchCommandStarted(
+            request.Full,
+            request.Since,
+            request.Resume,
+            request.StaleOnly,
+            request.StaleFirst,
+            request.BatchSize,
+            request.Workers,
+            request.ThrottleMs,
+            request.WorkMemBytes);
 
         var options = BuildOptions(request);
-        _logger.LogInformation(
-            "Reindex options configured: BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}",
-            options.BatchSize, options.Workers, options.ThrottleMs, options.WorkMemBytes);
+        LogReindexOptionsConfigured(options.BatchSize, options.Workers, options.ThrottleMs, options.WorkMemBytes);
 
         if (!request.Resume)
         {
@@ -61,14 +65,12 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
         var baselineProgress = await WithRepositoryAsync((repo, token) => repo.GetProgressAsync(token), ct);
         var baselineDone = baselineProgress.Done;
-        _logger.LogInformation(
-            "Baseline progress retrieved: Total={Total}, Pending={Pending}, Done={Done}",
-            baselineProgress.Total, baselineProgress.Pending, baselineDone);
+        LogBaselineProgressRetrieved(baselineProgress.Total, baselineProgress.Pending, baselineDone);
 
         var startedAtUtc = DateTimeOffset.UtcNow;
 
         var workerTasks = CreateWorkerTasks(options, request.StaleFirst, ct);
-        _logger.LogInformation("Created {WorkerCount} worker tasks", workerTasks.Count);
+        LogWorkerTasksCreated(workerTasks.Count);
 
         using var progressCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         var progressTask = StartProgressLoggerAsync(startedAtUtc, baselineDone, progressCts.Token);
@@ -85,9 +87,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         if (ct.IsCancellationRequested)
         {
             var averageSpeedDuringRun = elapsed.TotalSeconds > 0 ? total / elapsed.TotalSeconds : 0d;
-            _logger.LogInformation(
-                "Reindex cancelled by user, rolling back blocks currently being processed. Processed {Total} dialogs (~{AverageSpeed:F1} dialogs/s across {Elapsed}).",
-                total, averageSpeedDuringRun, elapsed);
+            LogReindexCancelled(total, averageSpeedDuringRun, elapsed);
             return new Success();
         }
 
@@ -95,9 +95,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         var processedSinceStart = Math.Max(0, finalProgress.Done - baselineDone);
         var averageSpeed = elapsed.TotalSeconds > 0 ? processedSinceStart / elapsed.TotalSeconds : 0d;
 
-        _logger.LogInformation(
-            "Reindex finished. Total processed by all workers: {Total}. Average speed ~{AverageSpeed:F1} dialogs/s across {Elapsed}.",
-            total, averageSpeed, elapsed);
+        LogReindexFinished(total, averageSpeed, elapsed);
 
         _logger.LogInformation("Starting search index optimization...");
         await OptimizeSearchIndex(ct);
@@ -120,7 +118,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         {
             var count = await WithRepositoryAsync(
                 (repo, token) => repo.SeedFullAsync(resetExisting: true, token), ct);
-            _logger.LogInformation("Seeded full rebuild queue with {Count} dialogs.", count);
+            LogSeededFullRebuildQueue(count);
             return;
         }
 
@@ -128,7 +126,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         {
             var count = await WithRepositoryAsync(
                 (repo, token) => repo.SeedSinceAsync(request.Since.Value, resetMatching: true, token), ct);
-            _logger.LogInformation("Seeded since={Since:o} queue with {Count} dialogs.", request.Since, count);
+            LogSeededSinceQueue(request.Since, count);
             return;
         }
 
@@ -136,7 +134,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         {
             var count = await WithRepositoryAsync(
                 (repo, token) => repo.SeedStaleAsync(resetMatching: true, token), ct);
-            _logger.LogInformation("Seeded stale-only queue with {Count} dialogs.", count);
+            LogSeededStaleOnlyQueue(count);
         }
     }
 
@@ -155,8 +153,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
     private async Task<long> RunWorkerAsync(int workerId, Options options, bool staleFirst, CancellationToken ct)
     {
-        _logger.LogInformation("Worker #{WorkerId} starting (BatchSize={BatchSize}, StaleFirst={StaleFirst})",
-            workerId, options.BatchSize, staleFirst);
+        LogWorkerStarting(workerId, options.BatchSize, staleFirst);
 
         long total = 0;
 
@@ -172,15 +169,13 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
 
                 if (processed <= 0)
                 {
-                    _logger.LogInformation("Worker #{WorkerId}: no more items, exiting.", workerId);
+                    LogWorkerNoMoreItems(workerId);
                     break;
                 }
 
                 total += processed;
 
-                _logger.LogDebug(
-                    "Worker #{WorkerId}: processed {Processed} (total {TotalProcessed})",
-                    workerId, processed, total);
+                LogWorkerProcessed(workerId, processed, total);
 
                 if (options.ThrottleMs > 0)
                     await Task.Delay(options.ThrottleMs, ct);
@@ -213,9 +208,7 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
                     var elapsed = DateTimeOffset.UtcNow - startedAtUtc;
                     var doneSinceStart = Math.Max(0, p.Done - baselineDone);
                     var avgDps = elapsed.TotalSeconds > 0 ? doneSinceStart / elapsed.TotalSeconds : 0d;
-                    _logger.LogInformation(
-                        "Progress: total={Total} pending={Pending} done={Done} pct={Pct:P2} avg_dps={AvgDps:F1}",
-                        p.Total, p.Pending, p.Done, pct, avgDps);
+                    LogProgress(p.Total, p.Pending, p.Done, pct, avgDps);
                 }
             }
             catch (OperationCanceledException)
@@ -251,4 +244,64 @@ internal sealed class ReindexDialogSearchCommandHandler : IRequestHandler<Reinde
         public required int ThrottleMs { get; init; }
         public required long WorkMemBytes { get; init; }
     }
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "ReindexDialogSearchCommand handler started. Mode: Full={Full}, Since={Since}, Resume={Resume}, StaleOnly={StaleOnly}, StaleFirst={StaleFirst}, BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}")]
+    private partial void LogReindexDialogSearchCommandStarted(
+        bool full,
+        DateTimeOffset? since,
+        bool resume,
+        bool staleOnly,
+        bool staleFirst,
+        int? batchSize,
+        int? workers,
+        int? throttleMs,
+        long? workMemBytes);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Reindex options configured: BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}")]
+    private partial void LogReindexOptionsConfigured(int batchSize, int workers, int throttleMs, long workMemBytes);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Baseline progress retrieved: Total={Total}, Pending={Pending}, Done={Done}")]
+    private partial void LogBaselineProgressRetrieved(long total, long pending, long done);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Created {WorkerCount} worker tasks")]
+    private partial void LogWorkerTasksCreated(int workerCount);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Reindex cancelled by user, rolling back blocks currently being processed. Processed {Total} dialogs (~{AverageSpeed:F1} dialogs/s across {Elapsed}).")]
+    private partial void LogReindexCancelled(long total, double averageSpeed, TimeSpan elapsed);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Reindex finished. Total processed by all workers: {Total}. Average speed ~{AverageSpeed:F1} dialogs/s across {Elapsed}.")]
+    private partial void LogReindexFinished(long total, double averageSpeed, TimeSpan elapsed);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Seeded full rebuild queue with {Count} dialogs.")]
+    private partial void LogSeededFullRebuildQueue(long count);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Seeded since={Since:o} queue with {Count} dialogs.")]
+    private partial void LogSeededSinceQueue(DateTimeOffset? since, long count);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Seeded stale-only queue with {Count} dialogs.")]
+    private partial void LogSeededStaleOnlyQueue(long count);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Worker #{WorkerId} starting (BatchSize={BatchSize}, StaleFirst={StaleFirst})")]
+    private partial void LogWorkerStarting(int workerId, int batchSize, bool staleFirst);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Worker #{WorkerId}: no more items, exiting.")]
+    private partial void LogWorkerNoMoreItems(int workerId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Worker #{WorkerId}: processed {Processed} (total {TotalProcessed})")]
+    private partial void LogWorkerProcessed(int workerId, long processed, long totalProcessed);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Progress: total={Total} pending={Pending} done={Done} pct={Pct:P2} avg_dps={AvgDps:F1}")]
+    private partial void LogProgress(long total, long pending, long done, double pct, double avgDps);
 }

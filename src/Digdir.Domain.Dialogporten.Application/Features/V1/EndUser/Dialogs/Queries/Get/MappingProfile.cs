@@ -68,6 +68,8 @@ internal sealed class MappingProfile : Profile
         CreateMap<DialogTransmissionAttachment, DialogTransmissionAttachmentDto>();
         CreateMap<AttachmentUrl, DialogTransmissionAttachmentUrlDto>()
             .ForMember(dest => dest.ConsumerType, opt => opt.MapFrom(src => src.ConsumerTypeId));
+
+        CreateMap<DialogTransmissionNavigationalAction, DialogTransmissionNavigationalActionDto>();
     }
 
 }

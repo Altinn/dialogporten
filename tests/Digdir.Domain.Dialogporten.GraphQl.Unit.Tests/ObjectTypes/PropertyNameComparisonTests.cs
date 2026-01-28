@@ -69,6 +69,7 @@ public class PropertyNameComparisonTests
             Add(typeof(DialogTransmissionContentDto), typeof(TransmissionContent), null);
             Add(typeof(DialogTransmissionAttachmentDto), typeof(Attachment), null);
             Add(typeof(DialogTransmissionAttachmentUrlDto), typeof(AttachmentUrl), null);
+            Add(typeof(DialogTransmissionNavigationalActionDto), typeof(TransmissionNavigationalAction), null);
 
             // ====== Enums =======
             Add(typeof(DialogStatus.Values), typeof(GraphQL.EndUser.Common.DialogStatus), null);

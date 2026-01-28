@@ -32,6 +32,9 @@ public sealed class DialogTransmission :
     public List<DialogTransmissionAttachment> Attachments { get; set; } = [];
 
     [AggregateChild]
+    public List<DialogTransmissionNavigationalAction> NavigationalActions { get; set; } = [];
+
+    [AggregateChild]
     public DialogTransmissionSenderActor Sender { get; set; } = null!;
 
     public List<DialogTransmission> RelatedTransmissions { get; set; } = [];

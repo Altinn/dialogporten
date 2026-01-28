@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
-public sealed class AzureStorageService
+public sealed partial class AzureStorageService
 {
     private readonly BlobServiceClient _blobServiceClient;
     private readonly ILogger<AzureStorageService> _logger;
@@ -22,8 +22,7 @@ public sealed class AzureStorageService
 
     public async Task UploadParquetFileAsync(byte[] parquetData, string fileName, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Uploading Parquet file {FileName} ({FileSize} bytes) to Azure Storage",
-            fileName, parquetData.Length);
+        LogUploadingParquetFile(fileName, parquetData.Length);
 
         try
         {
@@ -35,8 +34,7 @@ public sealed class AzureStorageService
             using var stream = new MemoryStream(parquetData);
             await blobClient.UploadAsync(stream, overwrite: true, cancellationToken: cancellationToken);
 
-            _logger.LogInformation("Successfully uploaded {FileName} to Azure Storage container {ContainerName}",
-                fileName, _options.StorageContainerName);
+            LogUploadedParquetFile(fileName, _options.StorageContainerName);
         }
         catch (Exception ex)
         {
@@ -44,4 +42,10 @@ public sealed class AzureStorageService
             throw;
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Uploading Parquet file {FileName} ({FileSize} bytes) to Azure Storage")]
+    private partial void LogUploadingParquetFile(string fileName, int fileSize);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Successfully uploaded {FileName} to Azure Storage container {ContainerName}")]
+    private partial void LogUploadedParquetFile(string fileName, string containerName);
 }

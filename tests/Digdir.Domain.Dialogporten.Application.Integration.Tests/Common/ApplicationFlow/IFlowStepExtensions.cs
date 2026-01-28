@@ -8,7 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
@@ -23,6 +23,10 @@ using SearchDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.
 using SearchDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
 using SearchDialogEndUserContextResult = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextResult;
 using SearchDialogEndUserContextQuery = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextQuery;
+using GetTransmissionQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
+using GetTransmissionQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
+using GetTransmissionResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionResult;
+using GetTransmissionResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionResult;
 using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
 using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
@@ -58,7 +62,8 @@ public static class IFlowStepExtensions
         step.SendCommand(ctx =>
         {
             var command = commandSelector(ctx);
-            ctx.Bag[DialogIdKey] = command.Dto.Id = command.Dto.Id.CreateVersion7IfDefault();
+            command.Dto.Id ??= IdentifiableExtensions.CreateVersion7(DialogApplication.Clock.UtcNowOffset);
+            ctx.Bag[DialogIdKey] = command.Dto.Id;
             ctx.Bag[ServiceResource] = command.Dto.ServiceResource;
             ctx.Bag[PartyKey] = command.Dto.Party;
             return command;
@@ -260,6 +265,22 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<UpdateDialogResult> step) =>
         step.AssertResult<UpdateDialogSuccess>()
             .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
+
+    public static IFlowExecutor<GetTransmissionResultSO> GetServiceOwnerTransmission(this IFlowStep step,
+        Guid transmissionId) =>
+        step.SendCommand(ctx => new GetTransmissionQuerySO
+        {
+            DialogId = ctx.GetDialogId(),
+            TransmissionId = transmissionId
+        });
+
+    public static IFlowExecutor<GetTransmissionResultEU> GetEndUserTransmission(this IFlowStep step,
+        Guid transmissionId) =>
+        step.SendCommand(ctx => new GetTransmissionQueryEU
+        {
+            DialogId = ctx.GetDialogId(),
+            TransmissionId = transmissionId
+        });
 
     public static IFlowExecutor<SearchDialogResultSO> SearchServiceOwnerDialogs(this IFlowStep step,
         Action<SearchDialogQuerySO> modify) => step.SearchServiceOwnerDialogs((query, _) => modify(query));

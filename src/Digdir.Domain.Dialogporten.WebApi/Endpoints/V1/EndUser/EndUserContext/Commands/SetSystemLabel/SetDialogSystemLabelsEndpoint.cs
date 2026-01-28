@@ -24,6 +24,7 @@ public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<Set
             StatusCodes.Status400BadRequest,
             StatusCodes.Status403Forbidden,
             StatusCodes.Status404NotFound,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status410Gone,
             StatusCodes.Status412PreconditionFailed,
             StatusCodes.Status422UnprocessableEntity));
@@ -50,7 +51,8 @@ public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<Set
             deleted => this.GoneAsync(deleted, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using AwesomeAssertions;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.ActivityDto;

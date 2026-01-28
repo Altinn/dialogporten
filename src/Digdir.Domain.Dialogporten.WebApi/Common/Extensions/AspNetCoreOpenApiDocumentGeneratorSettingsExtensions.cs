@@ -27,4 +27,11 @@ internal static class AspNetCoreOpenApiDocumentGeneratorSettingsExtensions
 
         return settings;
     }
+
+    public static AspNetCoreOpenApiDocumentGeneratorSettings EnsureJsonPatchConsumes(
+        this AspNetCoreOpenApiDocumentGeneratorSettings settings)
+    {
+        settings.OperationProcessors.Add(new JsonPatchConsumesOperationProcessor());
+        return settings;
+    }
 }

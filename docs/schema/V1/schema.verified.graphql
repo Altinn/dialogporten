@@ -128,6 +128,10 @@ type BulkSetSystemLabelConcurrencyError implements BulkSetSystemLabelError {
   message: String!
 }
 
+type BulkSetSystemLabelConflictError implements BulkSetSystemLabelError {
+  message: String!
+}
+
 type BulkSetSystemLabelDomainError implements BulkSetSystemLabelError {
   message: String!
 }
@@ -414,6 +418,10 @@ type SetSystemLabelConcurrencyError implements SetSystemLabelError {
   message: String!
 }
 
+type SetSystemLabelConflictError implements SetSystemLabelError {
+  message: String!
+}
+
 type SetSystemLabelDomainError implements SetSystemLabelError {
   message: String!
 }
@@ -469,6 +477,8 @@ type Transmission {
   content: TransmissionContent!
   "The transmission-level attachments."
   attachments: [Attachment!]!
+  "The transmission-level navigational actions."
+  navigationalActions: [TransmissionNavigationalAction!]!
 }
 
 type TransmissionContent {
@@ -478,6 +488,15 @@ type TransmissionContent {
   summary: ContentValue
   "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL."
   contentReference: ContentValue
+}
+
+type TransmissionNavigationalAction {
+  "The title of the navigational action."
+  title: [Localization!]!
+  "The fully qualified URL of the navigational action. Will be set to 'urn:dialogporten:unauthorized' if the user is not authorized to access the transmission, or 'urn:dialogporten:expired' if the action has expired."
+  url: URL!
+  "The UTC timestamp when the navigational action expires and is no longer available."
+  expiresAt: DateTime
 }
 
 input BulkSetSystemLabelInput {

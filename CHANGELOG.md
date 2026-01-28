@@ -1,5 +1,77 @@
 # Changelog
 
+## [1.101.0](https://github.com/Altinn/dialogporten/compare/v1.100.2...v1.101.0) (2026-01-27)
+
+
+### Features
+
+* Added support for Timefields to be in the past ([#3227](https://github.com/Altinn/dialogporten/issues/3227)) ([0231973](https://github.com/Altinn/dialogporten/commit/0231973ca37ed0a46c89de35119e47122ab3136d))
+* **janitor:** Introduce custom metrics collection for Janitor, including MassTransit outbox queue size ([#3267](https://github.com/Altinn/dialogporten/issues/3267)) ([0ec1bf4](https://github.com/Altinn/dialogporten/commit/0ec1bf43790db9452e5fd2a929df95c1359c8b6a))
+
+
+### Bug Fixes
+
+* Send in response.type into WriteAsJsonAsync to get error messages into http response ([#3323](https://github.com/Altinn/dialogporten/issues/3323)) ([d55293d](https://github.com/Altinn/dialogporten/commit/d55293d670cae917b054a4a45ace0f4f73824736))
+
+
+### Miscellaneous Chores
+
+* **deps:** update Altinn.ApiClients.Maskinporten ([#3332](https://github.com/Altinn/dialogporten/issues/3332)) ([3dc101c](https://github.com/Altinn/dialogporten/commit/3dc101cf2dd7950fd8d82022daf9c48898b22f5d))
+* **performance:** adjust threshold values ([#3320](https://github.com/Altinn/dialogporten/issues/3320)) ([e9db3f2](https://github.com/Altinn/dialogporten/commit/e9db3f294a3a6dd417bcc721cb61ac72e725fd51))
+
+## [1.100.2](https://github.com/Altinn/dialogporten/compare/v1.100.1...v1.100.2) (2026-01-26)
+
+
+### Miscellaneous Chores
+
+* upgrade to .NET10 ([#3311](https://github.com/Altinn/dialogporten/issues/3311)) ([038ac38](https://github.com/Altinn/dialogporten/commit/038ac389a3b6f24dfbb9291a1bf4dc5b0ae258fe))
+
+## [1.100.1](https://github.com/Altinn/dialogporten/compare/v1.100.0...v1.100.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* improved exception handlig in UnitOfWork ([#3264](https://github.com/Altinn/dialogporten/issues/3264)) ([2b8d039](https://github.com/Altinn/dialogporten/commit/2b8d039da5e04ce3e9fe4c41dae58a6895de8e59))
+* **infra:** retry generic DbUpdateConcurrencyException conflicts ([#3244](https://github.com/Altinn/dialogporten/issues/3244)) ([c096042](https://github.com/Altinn/dialogporten/commit/c0960425949acea37df36f1a2fbbfef9994ff847))
+* **search:** Cap overly large dialog content to avoid errors when indexing dialogs. ([#3133](https://github.com/Altinn/dialogporten/issues/3133)) ([84b09cf](https://github.com/Altinn/dialogporten/commit/84b09cf266b331535f19d9ac9bb12b35b7493abd))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v6.0.2 ([#3313](https://github.com/Altinn/dialogporten/issues/3313)) ([5e62d8b](https://github.com/Altinn/dialogporten/commit/5e62d8bc40fb401b5ee641db1df6a3e470aca530))
+* **infra:** Specify permissions on Github actions where missing ([#3307](https://github.com/Altinn/dialogporten/issues/3307)) ([86bedc8](https://github.com/Altinn/dialogporten/commit/86bedc8ca90768268f01e0420e7e04851fd6f985))
+
+## [1.100.0](https://github.com/Altinn/dialogporten/compare/v1.99.2...v1.100.0) (2026-01-22)
+
+
+### Features
+
+* Lax max length of ExtendedStatus to 25 ([#3294](https://github.com/Altinn/dialogporten/issues/3294)) ([327b9cb](https://github.com/Altinn/dialogporten/commit/327b9cbab7bc1ca7f49cbd578fbc193bcb216301))
+
+
+### Bug Fixes
+
+* **app:** add future tolerance of 15s in validators ([#3303](https://github.com/Altinn/dialogporten/issues/3303)) ([3b0f0e2](https://github.com/Altinn/dialogporten/commit/3b0f0e2ab2bf7647765bec64a51f98a56307c413))
+
+
+### Miscellaneous Chores
+
+* **ci:** move permissions to job level ([#3224](https://github.com/Altinn/dialogporten/issues/3224)) ([f2240f0](https://github.com/Altinn/dialogporten/commit/f2240f086c9023ad6cf031936222436d7141f1d5))
+* Disable Npsql serilog override ([#3302](https://github.com/Altinn/dialogporten/issues/3302)) ([8fdfe9d](https://github.com/Altinn/dialogporten/commit/8fdfe9d392d7e7cbabc8bea5b98cf047ca9fda99))
+* **infra:** fix typings for postgresql ([#3298](https://github.com/Altinn/dialogporten/issues/3298)) ([0954a51](https://github.com/Altinn/dialogporten/commit/0954a51371830d0260002638b976c5aaa3aae38d))
+
+## [1.99.2](https://github.com/Altinn/dialogporten/compare/v1.99.1...v1.99.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* **infra:** issue with ha typings in bicep for postgresql ([0cff821](https://github.com/Altinn/dialogporten/commit/0cff82129cedef5bd91ee7a421977771813364c2))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dotnet monorepo ([#3287](https://github.com/Altinn/dialogporten/issues/3287)) ([d707fc1](https://github.com/Altinn/dialogporten/commit/d707fc13a3a459d8c7f3194954a94b87b2cf9519))
+
 ## [1.99.1](https://github.com/Altinn/dialogporten/compare/v1.99.0...v1.99.1) (2026-01-21)
 
 

@@ -20,6 +20,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using FluentValidation.Results;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -48,14 +49,18 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
     private readonly IUser _user;
+    private readonly IClock _clock;
+    private readonly IUserResourceRegistry _userResourceRegistry;
 
     public CreateDialogCommandHandler(
         IUser user,
+        IClock clock,
         IDialogDbContext db,
         IMapper mapper,
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IResourceRegistry resourceRegistry,
+        IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
         ITransmissionHierarchyValidator transmissionHierarchyValidator)
     {
@@ -65,7 +70,9 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
     }
 
@@ -104,6 +111,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return new Conflict(nameof(dialog.IdempotentKey), $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
         }
 
+        if (!request.IsSilentUpdate || !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            ValidateTimeFields(request.Dto);
+        }
+
         CreateDialogEndUserContext(request, dialog);
         CreateDialogServiceOwnerContext(request, dialog);
 
@@ -134,7 +146,29 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         return saveResult.Match<CreateDialogResult>(
             success => new CreateDialogSuccess(dialog.Id, dialog.Revision),
             domainError => domainError,
-            concurrencyError => throw new UnreachableException("Should never get a concurrency error when creating a new dialog"));
+            concurrencyError => throw new UnreachableException("Should never get a concurrency error when creating a new dialog"),
+            conflict => conflict);
+    }
+    private void ValidateTimeFields(CreateDialogDto dto)
+    {
+        const string errorMessage = "Must be in the future";
+
+        var clockUtcNow = _clock.UtcNowOffset;
+
+        if (dto.DueAt.HasValue && dto.DueAt <= clockUtcNow)
+        {
+            _domainContext.AddError(nameof(CreateDialogCommand.Dto.DueAt), errorMessage);
+        }
+
+        if (dto.ExpiresAt.HasValue && dto.ExpiresAt <= clockUtcNow)
+        {
+            _domainContext.AddError(nameof(CreateDialogCommand.Dto.ExpiresAt), errorMessage);
+        }
+
+        if (dto.VisibleFrom.HasValue && dto.VisibleFrom <= clockUtcNow)
+        {
+            _domainContext.AddError(nameof(CreateDialogCommand.Dto.VisibleFrom), errorMessage);
+        }
     }
 
     private async Task<Guid?> GetExistingDialogIdByIdempotentKey(DialogEntity dialog, CancellationToken cancellationToken)

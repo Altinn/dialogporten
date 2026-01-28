@@ -43,8 +43,6 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
 
 public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
 {
-    private readonly string? _searchLanguageCode;
-
     /// <summary>
     /// Filter by one or more service owner codes
     /// </summary>
@@ -140,8 +138,8 @@ public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDial
     /// </summary>
     public string? SearchLanguageCode
     {
-        get => _searchLanguageCode;
-        init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
+        get;
+        init => field = Localization.NormalizeCultureCode(value);
     }
 
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]

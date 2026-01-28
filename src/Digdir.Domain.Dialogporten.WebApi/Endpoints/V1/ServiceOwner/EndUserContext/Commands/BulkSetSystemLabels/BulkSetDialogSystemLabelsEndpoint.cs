@@ -21,6 +21,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
             StatusCodes.Status403Forbidden,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status412PreconditionFailed,
             StatusCodes.Status422UnprocessableEntity));
     }
@@ -39,7 +40,8 @@ public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

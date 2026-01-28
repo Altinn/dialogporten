@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Janitor;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
+using Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 using Digdir.Library.Utils.AspNet;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
@@ -64,7 +65,8 @@ static void BuildAndRun(string[] args)
 
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
-            additionalTracing: x => x.AddFusionCacheInstrumentation())
+            additionalTracing: x => x.AddFusionCacheInstrumentation(),
+            additionalMetrics: x => x.AddMeter(CustomMetrics.MeterName))
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)
             .WithoutPubSubCapabilities()
@@ -133,6 +135,10 @@ static void BuildAndRun(string[] args)
     builder.Services.AddSingleton<ParquetFileService>();
     builder.Services.AddSingleton<AzureStorageService>();
     builder.Services.AddSingleton<CostMetricsAggregationOrchestrator>();
+
+    // Add custom metrics collection services
+    builder.Services.AddSingleton<IMetricCollector, OutboxQueueSizeMetricCollector>();
+    builder.Services.AddSingleton<CustomMetricsService>();
 
     var app = builder.Build();
 

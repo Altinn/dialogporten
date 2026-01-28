@@ -23,6 +23,7 @@ public sealed class CreateServiceOwnerLabelEndpointSummary : Summary<CreateServi
             Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope
                 .ServiceProvider);
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
         Responses[StatusCodes.Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
     }

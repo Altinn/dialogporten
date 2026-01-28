@@ -17,7 +17,7 @@ public sealed class SyncPolicyCommand : IRequest<SyncPolicyResult>, IFeatureMetr
 [GenerateOneOf]
 public sealed partial class SyncPolicyResult : OneOfBase<Success, ValidationError>;
 
-internal sealed class SyncPolicyCommandHandler : IRequestHandler<SyncPolicyCommand, SyncPolicyResult>
+internal sealed partial class SyncPolicyCommandHandler : IRequestHandler<SyncPolicyCommand, SyncPolicyResult>
 {
     private const int DefaultNumberOfConcurrentRequests = 15;
     private readonly IResourceRegistry _resourceRegistry;
@@ -43,7 +43,7 @@ internal sealed class SyncPolicyCommandHandler : IRequestHandler<SyncPolicyComma
                               timeSkew: TimeSpan.FromMicroseconds(1),
                               cancellationToken: cancellationToken);
 
-        _logger.LogInformation("Fetching updated resource policy information since {LastUpdated:O}.", lastUpdated);
+        LogFetchingUpdatedResourcePolicyInformationSince(lastUpdated);
 
         try
         {
@@ -55,11 +55,11 @@ internal sealed class SyncPolicyCommandHandler : IRequestHandler<SyncPolicyComma
                 .Select(x => x.ToResourcePolicyInformation(syncTime))
                 .ToList();
             var mergeCount = await _resourcePolicyMetadataRepository.Merge(mergeableResourcePolicyInformation, cancellationToken);
-            _logger.LogInformation("{MergeCount} copies of resource policy information updated.", mergeCount);
+            LogResourcePolicyInformationUpdated(mergeCount);
 
             if (mergeCount > 0)
             {
-                _logger.LogInformation("Successfully synced information from {MergeCount} policies", mergeCount);
+                LogSuccessfullySyncedResourcePolicyInformation(mergeCount);
             }
             else
             {
@@ -74,4 +74,13 @@ internal sealed class SyncPolicyCommandHandler : IRequestHandler<SyncPolicyComma
             throw;
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Fetching updated resource policy information since {LastUpdated:O}.")]
+    private partial void LogFetchingUpdatedResourcePolicyInformationSince(DateTimeOffset lastUpdated);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{MergeCount} copies of resource policy information updated.")]
+    private partial void LogResourcePolicyInformationUpdated(int mergeCount);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Successfully synced information from {MergeCount} policies")]
+    private partial void LogSuccessfullySyncedResourcePolicyInformation(int mergeCount);
 }

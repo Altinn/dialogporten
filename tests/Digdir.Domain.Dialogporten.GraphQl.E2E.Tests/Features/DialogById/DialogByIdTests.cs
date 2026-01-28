@@ -1,6 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests;
 using Digdir.Library.Dialogporten.E2E.Common;
-using FluentAssertions;
+using AwesomeAssertions;
 using StrawberryShake;
 using Xunit;
 

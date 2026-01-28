@@ -3,17 +3,17 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using FluentAssertions;
+using Digdir.Tool.Dialogporten.GenerateFakeData;
+using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
@@ -85,6 +85,43 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 x.Dto.Transmissions = [transmission];
             })
             .ExecuteAndAssert<ValidationError>(result => result.ShouldHaveErrorWithText("https"));
+
+    [Fact]
+    public Task Cannot_Create_Transmission_NavigationalAction_With_Long_Title() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(transmission =>
+                    transmission.AddNavigationalAction(action =>
+                        action.Title =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = new string('a', 256)
+                            }
+                        ])))
+            .ExecuteAndAssert<ValidationError>(result =>
+                result.ShouldHaveErrorWithText("256 characters"));
+
+    [Fact]
+    public Task Cannot_Create_Transmission_NavigationalAction_With_Http_Url() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(transmission =>
+                    transmission.AddNavigationalAction(action =>
+                        action.Url = new Uri("http://example.com/action"))))
+            .ExecuteAndAssert<ValidationError>(result =>
+                result.ShouldHaveErrorWithText("https"));
+
+    [Fact]
+    public Task Cannot_Create_Transmission_NavigationalAction_With_ExpiresAt_In_Past() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddTransmission(transmission =>
+                    transmission.AddNavigationalAction(action =>
+                        action.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1))))
+            .ExecuteAndAssert<ValidationError>(result =>
+                result.ShouldHaveErrorWithText("future"));
 
     [Fact]
     public Task Can_Create_Related_Transmission_With_Null_Id() =>

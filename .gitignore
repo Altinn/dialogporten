@@ -401,3 +401,12 @@ CLAUDE.md
 
 # Bicep build output (compiled ARM template)
 .azure/infrastructure/main.json
+
+# Codex related files (skills, workflows, etc. for codex agents)
+.codex
+
+# Agents related files (used for skills, workflows, etc. for generic agents)
+.agents
+
+# Claude Code related files (used for skills, workflows, etc. for claude agents)
+.claude

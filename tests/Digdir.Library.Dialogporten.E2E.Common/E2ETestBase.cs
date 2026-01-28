@@ -1,11 +1,9 @@
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
-public abstract class E2ETestBase<TFixture> : IE2ETestHooks
+public abstract class E2ETestBase<TFixture>(TFixture fixture) : IE2ETestHooks
     where TFixture : E2EFixtureBase
 {
-    protected TFixture Fixture { get; }
-
-    protected E2ETestBase(TFixture fixture) => Fixture = fixture;
+    protected TFixture Fixture { get; } = fixture;
 
     void IE2ETestHooks.BeforeTest() => Fixture.PreflightCheck();
 

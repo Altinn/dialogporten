@@ -36,7 +36,7 @@ public class GraphQlE2EFactAttributeUsageTest
         nonBaseClasses
             .Should()
             .BeEmpty(
-                $"All GraphQl E2E test classes must inherit {nameof(E2ETestBase)}.");
+                $"All GraphQl E2E test classes must inherit {nameof(E2ETestBase<>)}.");
     }
 
     [Fact]

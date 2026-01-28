@@ -1,7 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Domain.Common.Exceptions;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 

@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using FluentValidation;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,7 +16,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchNew;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
-using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SearchDialogQueryEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
 using SearchDialogResultEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
@@ -49,10 +48,12 @@ public static class ApplicationExtensions
         services
             // Framework
             .AddAutoMapper(thisAssembly)
-            .AddMediatR(x =>
+            .AddMediator((MediatorOptions x)=>
             {
-                x.RegisterServicesFromAssembly(thisAssembly);
-                x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
+                x.Assemblies = [thisAssembly];
+                x.GenerateTypesAsInternal = true;
+                // x.RegisterServicesFromAssembly(thisAssembly);
+                // x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
                 x.NotificationPublisherType = typeof(TaskWhenAllPublisher);
             })
             .AddValidatorsFromAssembly(thisAssembly, ServiceLifetime.Transient, includeInternalTypes: true,

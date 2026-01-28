@@ -1,7 +1,7 @@
 using AsyncKeyedLock;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.DialogSearch;
 

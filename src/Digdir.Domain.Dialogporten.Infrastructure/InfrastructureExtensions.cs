@@ -39,7 +39,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using MassTransit;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 

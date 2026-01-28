@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 

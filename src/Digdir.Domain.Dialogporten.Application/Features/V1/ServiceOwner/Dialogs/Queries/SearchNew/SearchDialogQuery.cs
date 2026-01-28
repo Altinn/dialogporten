@@ -12,7 +12,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Act
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
-using MediatR;
+using Mediator;
 using OneOf;
 #pragma warning disable CS0618 // Type or member is obsolete
 

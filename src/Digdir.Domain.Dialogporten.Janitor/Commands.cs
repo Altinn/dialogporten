@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Comman
 using Digdir.Domain.Dialogporten.Application.Features.V1.Search.Commands.ReindexDialogSearch;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

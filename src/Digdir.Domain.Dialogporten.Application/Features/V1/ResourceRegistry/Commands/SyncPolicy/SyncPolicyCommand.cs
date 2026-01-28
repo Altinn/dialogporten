@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;

@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Domain.Common;
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 

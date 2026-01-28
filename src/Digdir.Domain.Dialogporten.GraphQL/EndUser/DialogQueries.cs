@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
-using MediatR;
+using Mediator;
 using static Digdir.Domain.Dialogporten.GraphQL.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser;

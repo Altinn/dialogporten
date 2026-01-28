@@ -1,5 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Options;
 using Constants = Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.Constants;
 

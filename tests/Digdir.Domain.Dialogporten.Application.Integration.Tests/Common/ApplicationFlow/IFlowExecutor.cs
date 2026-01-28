@@ -1,4 +1,4 @@
-using MediatR;
+using Mediator;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 

@@ -19,6 +19,7 @@ public sealed class DialogTransmission :
     IEventPublisher
 {
     public Guid Id { get; set; }
+    public string? IdempotentKey { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public string? AuthorizationAttribute { get; set; }
     public Uri? ExtendedType { get; set; }

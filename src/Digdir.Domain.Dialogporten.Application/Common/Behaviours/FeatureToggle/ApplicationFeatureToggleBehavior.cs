@@ -8,12 +8,12 @@ internal sealed class ApplicationFeatureToggleBehavior<TRequest, TResponse>(
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
-    public Task<TResponse> Handle(TRequest request,
-        RequestHandlerDelegate<TResponse> next,
+    public ValueTask<TResponse> Handle(TRequest request,
+        MessageHandlerDelegate<TRequest, TResponse> next,
         CancellationToken cancellationToken) =>
         featureToggle is not null && featureToggle.IsEnabled
             ? FeatureToggle(request, cancellationToken)
-            : next(cancellationToken);
+            : next(request, cancellationToken);
 
     private async Task<TResponse> FeatureToggle(TRequest request, CancellationToken cancellationToken)
     {

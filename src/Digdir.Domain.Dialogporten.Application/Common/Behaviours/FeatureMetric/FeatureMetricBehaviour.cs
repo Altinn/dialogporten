@@ -18,9 +18,9 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
     private readonly IUser _user = user ?? throw new ArgumentNullException(nameof(user));
     private readonly IFeatureMetricServiceResourceResolver<TRequest> _featureMetricServiceResourceResolver = featureMetricServiceResourceResolver ?? throw new ArgumentNullException(nameof(featureMetricServiceResourceResolver));
 
-    public async Task<TResponse> Handle(
+    public async ValueTask<TResponse> Handle(
         TRequest request,
-        RequestHandlerDelegate<TResponse> next,
+        MessageHandlerDelegate<TRequest, TResponse> next,
         CancellationToken cancellationToken)
     {
         var principal = _user.GetPrincipal();
@@ -37,6 +37,6 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse>(
             OwnerOrg: resource?.OwnerOrgNumber,
             ServiceResource: resource?.ResourceId));
 
-        return await next(cancellationToken);
+        return await next(request, cancellationToken);
     }
 }

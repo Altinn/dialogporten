@@ -14,14 +14,14 @@ internal sealed class SilentUpdateBehaviour<TRequest, TResponse> : IPipelineBeha
         _applicationContext = applicationContext;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         if (request.IsSilentUpdate)
         {
             _applicationContext.AddMetadata(Constants.IsSilentUpdate, bool.TrueString);
         }
 
-        return await next(cancellationToken);
+        return await next(request, cancellationToken);
     }
 }
 

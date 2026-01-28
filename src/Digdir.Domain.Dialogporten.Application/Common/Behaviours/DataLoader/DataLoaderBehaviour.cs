@@ -28,7 +28,7 @@ internal sealed class DataLoaderBehaviour<TRequest, TResponse>
             _context.Set(loader.GetKey(), await loader.Load(request, cancellationToken));
         }
 
-        return await next(cancellationToken);
+        return await next(request, cancellationToken);
     }
 }
 

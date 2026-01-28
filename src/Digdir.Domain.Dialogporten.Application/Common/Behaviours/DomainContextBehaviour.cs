@@ -29,13 +29,13 @@ internal sealed class DomainContextBehaviour<TRequest, TResponse> : IPipelineBeh
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         TResponse? response;
 
         try
         {
-            response = await next(cancellationToken);
+            response = await next(request, cancellationToken);
         }
         catch (DomainException ex)
         {

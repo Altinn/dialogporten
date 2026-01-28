@@ -18,11 +18,11 @@ internal sealed class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavi
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         if (!_validators.Any())
         {
-            return await next(cancellationToken);
+            return await next(request, cancellationToken);
         }
 
         var context = new ValidationContext<TRequest>(request);
@@ -39,7 +39,7 @@ internal sealed class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavi
 
         if (failures.Count == 0)
         {
-            return await next(cancellationToken);
+            return await next(request, cancellationToken);
         }
 
         if (OneOfExtensions.TryConvertToOneOf<TResponse>(new ValidationError(failures), out var result))

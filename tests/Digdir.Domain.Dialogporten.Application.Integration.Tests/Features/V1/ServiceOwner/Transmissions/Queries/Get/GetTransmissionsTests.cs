@@ -23,11 +23,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                     x.Id = transmissionId;
                     x.ExternalReference = "ext";
                 }))
-            .SendCommand((_, ctx) => new GetTransmissionQuery
-            {
-                DialogId = ctx.GetDialogId(),
-                TransmissionId = transmissionId
-            })
+            .GetServiceOwnerTransmission(transmissionId)
             .ExecuteAndAssert<TransmissionDto>(x =>
                 x.ExternalReference.Should().Be("ext"));
     }
@@ -45,11 +41,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
                     x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1));
                 }))
             .OverrideUtc(TimeSpan.FromDays(2))
-            .SendCommand((_, ctx) => new GetTransmissionQuery
-            {
-                DialogId = ctx.GetDialogId(),
-                TransmissionId = transmissionId
-            })
+            .GetServiceOwnerTransmission(transmissionId)
             .ExecuteAndAssert<TransmissionDto>(x =>
                 x.Attachments.Should().ContainSingle(t => t.ExpiresAt != null)
                     .Which.Urls.Should().ContainSingle()

@@ -48,10 +48,10 @@ public static class ApplicationExtensions
         services
             // Framework
             .AddAutoMapper(thisAssembly)
-            .AddMediator((MediatorOptions x)=>
+            .AddMediator(x =>
             {
                 x.Assemblies = [thisAssembly];
-                x.GenerateTypesAsInternal = true;
+                // x.GenerateTypesAsInternal = true;
                 // x.RegisterServicesFromAssembly(thisAssembly);
                 // x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
                 x.NotificationPublisherType = typeof(TaskWhenAllPublisher);

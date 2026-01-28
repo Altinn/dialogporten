@@ -15,7 +15,7 @@ internal sealed class DataLoaderBehaviour<TRequest, TResponse>
         _context = context;
     }
 
-    public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest,TResponse> next,
+    public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next,
         CancellationToken cancellationToken)
     {
         // Should we support parallel data loaders? If so we need a mechanism to

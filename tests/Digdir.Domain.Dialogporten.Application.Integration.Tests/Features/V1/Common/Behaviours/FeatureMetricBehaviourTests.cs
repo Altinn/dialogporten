@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Mediator;
 using AwesomeAssertions;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Behaviours;

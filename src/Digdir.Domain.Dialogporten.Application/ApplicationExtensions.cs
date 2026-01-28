@@ -47,14 +47,30 @@ public static class ApplicationExtensions
         services
             // Framework
             .AddAutoMapper(ApplicationAssemblyMarker.Assembly)
-            .AddMediator(x =>
-            {
-                x.Assemblies = [ApplicationAssemblyMarker.Assembly];
-                // x.GenerateTypesAsInternal = true;
-                // x.RegisterServicesFromAssembly(thisAssembly);
-                // x.NotificationPublisherType = typeof(TaskWhenAllPublisher);
-                // x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
-            })
+            // .AddMediator(x =>
+            // {
+            //     x.Assemblies = [ApplicationAssemblyMarker.Assembly];
+            //     // x.GenerateTypesAsInternal = true;
+            //     // x.RegisterServicesFromAssembly(thisAssembly);
+            //     // x.NotificationPublisherType = typeof(TaskWhenAllPublisher);
+            //     // x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
+            // .AddMediator(options =>
+            // {
+            //     options.Assemblies = [ApplicationAssemblyMarker.Assembly];
+            //     options.GenerateTypesAsInternal = true;
+            //     options.ServiceLifetime = ServiceLifetime.Scoped;
+            //     // x.RegisterServicesFromAssembly(thisAssembly);
+            //     // x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
+            //     options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
+            //     options.PipelineBehaviors = [
+            //         typeof(ApplicationFeatureToggleBehavior<,>),
+            //         typeof(FeatureMetricBehaviour<,>),
+            //         typeof(DataLoaderBehaviour<,>),
+            //         typeof(ValidationBehaviour<,>),
+            //         typeof(DomainContextBehaviour<,>),
+            //         typeof(SilentUpdateBehaviour<,>)
+            //     ];
+            // })
             .AddValidatorsFromAssembly(ApplicationAssemblyMarker.Assembly,
                 ServiceLifetime.Transient, includeInternalTypes: true,
                 filter: type => !type.ValidatorType.IsAssignableTo(typeof(IIgnoreOnAssemblyScan)))
@@ -79,12 +95,12 @@ public static class ApplicationExtensions
             .AddTransient<IApplicationFeatureToggle<SearchDialogQueryEu, SearchDialogResultEu>, OptimizedEndUserDialogSearchFeatureToggle>()
             .AddTransient<IApplicationFeatureToggle<SearchDialogQuerySo, SearchDialogResultSo>, OptimizedServiceOwnerDialogSearchFeatureToggle>()
             .AddDataLoaders()
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationFeatureToggleBehavior<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DataLoaderBehaviour<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>))
+            // .AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationFeatureToggleBehavior<,>))
+            // .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))
+            // .AddTransient(typeof(IPipelineBehavior<,>), typeof(DataLoaderBehaviour<,>))
+            // .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>))
+            // .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainContextBehaviour<,>))
+            // .AddTransient(typeof(IPipelineBehavior<,>), typeof(SilentUpdateBehaviour<,>))
             .AddTransient<IFeatureMetricDeliveryContext, LoggingFeatureMetricDeliveryContext>()
             .AddScoped<FeatureMetricRecorder>()
             .AddServiceResourceResolvers();

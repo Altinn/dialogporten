@@ -123,9 +123,6 @@ public static class InfrastructureExtensions
             // HttpClient
             .AddHttpClients(infrastructureSettings)
 
-            // Decorators
-            .Decorate(typeof(INotificationHandler<>), typeof(IdempotentNotificationHandler<>))
-
             // Feature Metrics
             .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
 

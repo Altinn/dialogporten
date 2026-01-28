@@ -12,10 +12,10 @@ internal sealed class ApplicationFeatureToggleBehavior<TRequest, TResponse>(
         MessageHandlerDelegate<TRequest, TResponse> next,
         CancellationToken cancellationToken) =>
         featureToggle is not null && featureToggle.IsEnabled
-            ? new ValueTask<TResponse>(FeatureToggle(request, cancellationToken))
+            ? FeatureToggle(request, cancellationToken)
             : next(request, cancellationToken);
 
-    private async Task<TResponse> FeatureToggle(TRequest request, CancellationToken cancellationToken)
+    private async ValueTask<TResponse> FeatureToggle(TRequest request, CancellationToken cancellationToken)
     {
         if (featureToggle is null || !featureToggle.IsEnabled)
         {

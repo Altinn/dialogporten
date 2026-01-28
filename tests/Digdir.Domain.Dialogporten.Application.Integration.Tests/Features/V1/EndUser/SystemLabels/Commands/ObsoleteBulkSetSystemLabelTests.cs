@@ -10,7 +10,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 
-using FluentAssertions;
+using AwesomeAssertions;
 #pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;

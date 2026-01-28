@@ -17,7 +17,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using AwesomeAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;

@@ -1,7 +1,7 @@
 using System.Reflection;
 using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests;
 using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace Digdir.Domain.Dialogporten.Architecture.Tests;
 

@@ -73,6 +73,11 @@ public class CreateTransmissionDto
     /// The transmission-level attachments.
     /// </summary>
     public List<TransmissionAttachmentDto> Attachments { get; set; } = [];
+
+    /// <summary>
+    /// The transmission-level navigational actions.
+    /// </summary>
+    public List<TransmissionNavigationalActionDto> NavigationalActions { get; set; } = [];
 }
 
 public sealed class TransmissionContentDto
@@ -137,4 +142,22 @@ public sealed class TransmissionAttachmentUrlDto
     /// The type of consumer the URL is intended for.
     /// </summary>
     public AttachmentUrlConsumerType.Values ConsumerType { get; set; }
+}
+
+public sealed class TransmissionNavigationalActionDto
+{
+    /// <summary>
+    /// The title of the navigational action.
+    /// </summary>
+    public List<LocalizationDto> Title { get; set; } = [];
+
+    /// <summary>
+    /// The fully qualified URL of the navigational action.
+    /// </summary>
+    public Uri Url { get; set; } = null!;
+
+    /// <summary>
+    /// The UTC timestamp when the navigational action expires and is no longer available.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
 }

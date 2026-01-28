@@ -36,6 +36,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<DialogTransmissionType> DialogTransmissionTypes => Set<DialogTransmissionType>();
     public DbSet<DialogTransmissionContent> DialogTransmissionContents => Set<DialogTransmissionContent>();
     public DbSet<DialogTransmissionContentType> DialogTransmissionContentTypes => Set<DialogTransmissionContentType>();
+    public DbSet<DialogTransmissionNavigationalAction> DialogTransmissionNavigationalActions => Set<DialogTransmissionNavigationalAction>();
     public DbSet<DialogApiAction> DialogApiActions => Set<DialogApiAction>();
     public DbSet<DialogApiActionEndpoint> DialogApiActionEndpoints => Set<DialogApiActionEndpoint>();
     public DbSet<DialogGuiAction> DialogGuiActions => Set<DialogGuiAction>();

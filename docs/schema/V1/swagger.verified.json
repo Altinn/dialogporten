@@ -1216,6 +1216,14 @@
             "description": "Indicates whether the dialog transmission has been opened.",
             "type": "boolean"
           },
+          "navigationalActions": {
+            "description": "The transmission-level navigational actions.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogTransmissionNavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "relatedTransmissionId": {
             "description": "Reference to any other transmission that this transmission is related to.",
             "format": "guid",
@@ -1333,6 +1341,32 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogTransmissionNavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action. Will be set to \\\u0022urn:dialogporten:unauthorized\\\u0022 if the user is\nnot authorized to access the transmission, or \\\u0022urn:dialogporten:expired\\\u0022 if the action has expired.",
+            "example": "https://example.com/path\nurn:dialogporten:unauthorized\nurn:dialogporten:expired",
+            "format": "uri",
+            "type": "string"
           }
         },
         "type": "object"
@@ -1508,6 +1542,32 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogsQueriesGetTransmission_NavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action. Will be set to \\\u0022urn:dialogporten:unauthorized\\\u0022 if the user is\nnot authorized to access the transmission, or \\\u0022urn:dialogporten:expired\\\u0022 if the action has expired.",
+            "example": "https://example.com/path\nurn:dialogporten:unauthorized\nurn:dialogporten:expired",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogsQueriesGetTransmission_Transmission": {
         "additionalProperties": false,
         "properties": {
@@ -1562,6 +1622,14 @@
           "isAuthorized": {
             "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
             "type": "boolean"
+          },
+          "navigationalActions": {
+            "description": "The navigational actions associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetTransmission_NavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "relatedTransmissionId": {
             "description": "The unique identifier for the related transmission, if any.",
@@ -2092,6 +2160,32 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogsQueriesSearchTransmissions_NavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action. Will be set to \\\u0022urn:dialogporten:unauthorized\\\u0022 if the user is\nnot authorized to access the transmission, or \\\u0022urn:dialogporten:expired\\\u0022 if the action has expired.",
+            "example": "https://example.com/path\nurn:dialogporten:unauthorized\nurn:dialogporten:expired",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogsQueriesSearchTransmissions_Transmission": {
         "additionalProperties": false,
         "properties": {
@@ -2146,6 +2240,14 @@
           "isAuthorized": {
             "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
             "type": "boolean"
+          },
+          "navigationalActions": {
+            "description": "The navigational actions associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchTransmissions_NavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "relatedTransmissionId": {
             "description": "The unique identifier for the related transmission, if any.",
@@ -2969,6 +3071,14 @@
             "nullable": true,
             "type": "string"
           },
+          "navigationalActions": {
+            "description": "The transmission-level navigational actions.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "relatedTransmissionId": {
             "description": "Reference to any other transmission that this transmission is related to.",
             "format": "guid",
@@ -3082,6 +3192,31 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action.",
+            "format": "uri",
+            "type": "string"
           }
         },
         "type": "object"
@@ -3233,6 +3368,31 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3281,6 +3441,14 @@
             "format": "guid",
             "nullable": true,
             "type": "string"
+          },
+          "navigationalActions": {
+            "description": "The transmission-level navigational actions.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "relatedTransmissionId": {
             "description": "Reference to any other transmission that this transmission is related to.",
@@ -3852,6 +4020,14 @@
             "nullable": true,
             "type": "string"
           },
+          "navigationalActions": {
+            "description": "The transmission-level navigational actions.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_TransmissionNavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "relatedTransmissionId": {
             "description": "Reference to any other transmission that this transmission is related to.",
             "format": "guid",
@@ -3965,6 +4141,31 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsCommandsUpdate_TransmissionNavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action.",
+            "format": "uri",
+            "type": "string"
           }
         },
         "type": "object"
@@ -4704,6 +4905,14 @@
             "description": "Indicates whether the dialog transmission has been opened.",
             "type": "boolean"
           },
+          "navigationalActions": {
+            "description": "The transmission-level navigational actions.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_DialogTransmissionNavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "relatedTransmissionId": {
             "description": "Reference to any other transmission that this transmission is related to.",
             "format": "guid",
@@ -4821,6 +5030,32 @@
                 "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "V1ServiceOwnerDialogsQueriesGet_DialogTransmissionNavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action.",
+            "example": "https://example.com/path",
+            "format": "uri",
+            "type": "string"
           }
         },
         "type": "object"
@@ -4995,6 +5230,32 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsQueriesGetTransmission_NavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action.",
+            "example": "https://example.com/path",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsQueriesGetTransmission_Transmission": {
         "additionalProperties": false,
         "properties": {
@@ -5045,6 +5306,14 @@
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "navigationalActions": {
+            "description": "The navigational actions associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGetTransmission_NavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "relatedTransmissionId": {
             "description": "The unique identifier for the related transmission, if any.",
@@ -5649,6 +5918,32 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerDialogsQueriesSearchTransmissions_NavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action.",
+            "example": "https://example.com/path",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission": {
         "additionalProperties": false,
         "properties": {
@@ -5699,6 +5994,14 @@
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "navigationalActions": {
+            "description": "The navigational actions associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearchTransmissions_NavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "relatedTransmissionId": {
             "description": "The unique identifier for the related transmission, if any.",

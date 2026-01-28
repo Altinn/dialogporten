@@ -174,6 +174,9 @@ public sealed class Transmission
 
     [GraphQLDescription("The transmission-level attachments.")]
     public List<Attachment> Attachments { get; set; } = [];
+
+    [GraphQLDescription("The transmission-level navigational actions.")]
+    public List<TransmissionNavigationalAction> NavigationalActions { get; set; } = [];
 }
 
 public enum TransmissionType
@@ -369,6 +372,18 @@ public sealed class AttachmentUrl
 
     [GraphQLDescription("What type of consumer the URL is intended for.")]
     public AttachmentUrlConsumer ConsumerType { get; set; }
+}
+
+public sealed class TransmissionNavigationalAction
+{
+    [GraphQLDescription("The title of the navigational action.")]
+    public List<Localization> Title { get; set; } = [];
+
+    [GraphQLDescription("The fully qualified URL of the navigational action. Will be set to 'urn:dialogporten:unauthorized' if the user is not authorized to access the transmission, or 'urn:dialogporten:expired' if the action has expired.")]
+    public Uri Url { get; set; } = null!;
+
+    [GraphQLDescription("The UTC timestamp when the navigational action expires and is no longer available.")]
+    public DateTimeOffset? ExpiresAt { get; set; }
 }
 
 public enum AttachmentUrlConsumer

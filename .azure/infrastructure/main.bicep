@@ -103,8 +103,11 @@ var secrets = {
 var namePrefix = 'dp-be-${environment}'
 
 var tags = {
-  Environment: environment
-  Product: 'Dialogporten'
+  finops_environment: environment
+  finops_product: 'Dialogporten'
+  repository: 'https://github.com/altinn/dialogporten'
+  finops_serviceownercode: 'digdir'
+  finops_serviceownerorgnr: '991825827'
 }
 
 // Create resource groups

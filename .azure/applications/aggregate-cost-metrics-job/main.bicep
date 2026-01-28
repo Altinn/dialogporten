@@ -51,13 +51,19 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 // Pattern: dp-be-{environment}-applicationInsights
 var appInsightsName = 'dp-be-${environment}-applicationInsights'
 
-var tags = {
+var baseTags = {
   FullName: '${namePrefix}-aggregate-cost-metrics'
-  Environment: environment
-  Product: 'Dialogporten'
   Description: 'Aggregates cost metrics from Application Insights across environments'
   JobType: 'Scheduled'
 }
+
+var tags = union(baseTags, {
+  finops_environment: environment
+  finops_product: 'Dialogporten'
+  repository: 'https://github.com/altinn/dialogporten'
+  finops_serviceownercode: 'digdir'
+  finops_serviceownerorgnr: '991825827'
+})
 
 var name = '${namePrefix}-cost-metrics'
 

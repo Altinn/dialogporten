@@ -1,7 +1,8 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 
-namespace Digdir.Domain.Dialogporten.WebApi.Unit.Tests.Features.V1;
+namespace Digdir.Domain.Dialogporten.WebApi.Unit.Tests.Features.V1.ServiceOwner.Dialogs;
 
 public class TransmissionDtoPropertyEquivalenceTests
 {
@@ -19,11 +20,13 @@ public class TransmissionDtoPropertyEquivalenceTests
             .Except(createTransmissionProperties, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        Assert.True(missingFromCreateDialogTransmission.Count == 0,
-            $"Properties missing in {nameof(TransmissionDto)}: {string.Join(", ", missingFromCreateDialogTransmission)}");
+        missingFromCreateDialogTransmission.Should().BeEmpty(
+            $"Properties missing in {nameof(TransmissionDto)}: " +
+            $"{string.Join(", ", missingFromCreateDialogTransmission)}");
 
-        Assert.True(missingFromCreateTransmission.Count == 0,
-            $"Properties missing in {nameof(CreateTransmissionDto)}: {string.Join(", ", missingFromCreateTransmission)}");
+        missingFromCreateTransmission.Should().BeEmpty(
+            $"Properties missing in {nameof(CreateTransmissionDto)}: " +
+            $"{string.Join(", ", missingFromCreateTransmission)}");
     }
 
     private static IEnumerable<string> GetNames(Type type) =>

@@ -7,11 +7,11 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.4" />
+        <PackageReference Include="AwesomeAssertions" Version="9.3.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.2" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-        <PackageReference Include="StrawberryShake.Server" Version="15.1.12" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
         <PackageReference Include="xunit.v3" Version="3.2.2" />
     </ItemGroup>
@@ -26,15 +26,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Digdir.Library.Dialogporten.E2E.Common\Digdir.Library.Dialogporten.E2E.Common.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <GraphQL Update="GetDialogById.graphql">
-        <Generator>MSBuild:GenerateGraphQLCode</Generator>
-      </GraphQL>
-      <GraphQL Update="schema.extensions.graphql">
-        <Generator>MSBuild:GenerateGraphQLCode</Generator>
-      </GraphQL>
     </ItemGroup>
 
 </Project>

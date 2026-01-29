@@ -7,8 +7,8 @@ namespace Digdir.Library.Dialogporten.E2E.Common;
 
 public static class E2EExplicitOptions
 {
-    // Flip to false when you want to
-    // run/debug E2E tests in your IDE
+    // When true, tests are marked Explicit and are skipped unless xUnit.Explicit=on/only.
+    // Set to false to run E2E tests by default in your IDE.
     public const bool ExplicitTests = true;
 }
 

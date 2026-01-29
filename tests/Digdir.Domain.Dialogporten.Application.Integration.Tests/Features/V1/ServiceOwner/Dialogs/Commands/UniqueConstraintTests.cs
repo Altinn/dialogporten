@@ -102,6 +102,30 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     }
 
     [Fact]
+    public Task Cannot_Exceed_Dialog_IdempotentKey_Max_Length_When_Creating_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .Dto.IdempotentKey = "Random string which is longer than maximum allowed idempotentKey length")
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                var err = x.Errors.Single();
+                err.ErrorCode.Should().Be("MaximumLengthValidator");
+                err.ErrorMessage.Should().Contain(nameof(CreateDialogDto.IdempotentKey));
+            });
+
+    [Fact]
+    public Task Cannot_Go_Below_The_Dialog_IdempotentKey_Min_Length_When_Creating_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                    .Dto.IdempotentKey = "be")
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                var err = x.Errors.Single();
+                err.ErrorCode.Should().Be("MinimumLengthValidator");
+                err.ErrorMessage.Should().Contain(nameof(CreateDialogDto.IdempotentKey));
+            });
+
+    [Fact]
     public async Task Cannot_Use_Duplicate_Transmission_IdempotentKey_When_Creating_Dialog()
     {
         var idempotentKey1 = NewUuidV7().ToString();

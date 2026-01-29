@@ -41,6 +41,11 @@ public static class AuthorizationScope
     public const string ServiceProviderSearch = "digdir:dialogporten.serviceprovider.search";
 
     /// <summary>
+    /// Allows technical corrections of existing transmissions.
+    /// </summary>
+    public const string ServiceProviderChangeTransmissions = "digdir:dialogporten.serviceprovider.changetransmissions";
+
+    /// <summary>
     /// Allows the modification (create/update/delete) of dialogs on behalf of all service owners regardless of the authenticated user.
     /// </summary>
     public const string ServiceOwnerAdminScope = "digdir:dialogporten.serviceprovider.admin";

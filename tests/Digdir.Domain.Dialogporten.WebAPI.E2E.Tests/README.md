@@ -1,15 +1,15 @@
-# GraphQL E2E Tests
+# WebAPI E2E Tests
 
-End-to-end tests that call Dialogporten GraphQL and WebAPI endpoints using test tokens from the token generator.
+End-to-end tests that call Dialogporten WebAPI endpoints using test tokens from the token generator.
 
 ## Prerequisites
-- Dialogporten WebAPI + GraphQL running locally (see repo `README.md`)
+- Dialogporten WebAPI running locally (see repo `README.md`)
 - Access to Altinn testtools token generator credentials
 
 ## Setup
-1. Start Dialogporten locally (GraphQL + WebAPI).
+1. Start Dialogporten locally (WebAPI only).
    - Make sure DB/Redis are running: `podman compose -f docker-compose-db-redis.yml up -d`.
-   - Ensure `appsettings.Development.json` or `appsettings.local.json` for both projects are set to:
+   - Ensure `appsettings.Development.json` or `appsettings.local.json` for the WebAPI is set to:
 ```json
 {
   "LocalDevelopment": {
@@ -40,13 +40,13 @@ Ask the team on Slack if you do not have them.
 This can be done in the Solution Explorer in JetBrains Rider, right-click on the project, select `Tools => .NET User Secrets`  
 Or use the command line:
 ```bash
-dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests TokenGeneratorUser "<user>"
-dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests TokenGeneratorPassword "<password>"
+dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests TokenGeneratorUser "<user>"
+dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests TokenGeneratorPassword "<password>"
 ```
 
 ## Writing tests
 Use the shared E2E base class and custom attributes so hooks and explicit behavior are consistent:
-- Inherit `E2ETestBase<GraphQlE2EFixture>` and keep tests under `Features/*`.
+- Inherit `E2ETestBase<WebApiE2EFixture>` and keep tests under `Features/*`.
 - Use `[E2EFact]` or `[E2ETheory]` on every test (do not use `[Fact]`/`[Theory]`).
 - Explicit behavior is centralized in `E2EExplicitOptions` in `Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs`.
 

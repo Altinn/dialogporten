@@ -7,6 +7,7 @@ public static class Constants
     public const int DefaultMaxStringLength = 255;
     public const int DefaultMaxUriLength = 1023;
     public const int CorrespondenceMaxStringLength = 512;
+    public const int MaxIdempotentKeyLength = 36;
 
     public const string ServiceResourcePrefix = "urn:altinn:resource:";
     public const string AppResourceIdPrefix = "app_";

@@ -55,7 +55,7 @@ internal sealed class UpdateDialogDialogTransmissionDtoValidator : AbstractValid
             .SetValidator(navigationalActionValidator);
 
         RuleFor(x => x.IdempotentKey)
-            .MaximumLength(36);
+            .MaximumLength(Constants.MaxIdempotentKeyLength);
 
         When(UpdateDialogCommandValidator.IsApiOnly, () =>
                 RuleFor(x => x.Content)

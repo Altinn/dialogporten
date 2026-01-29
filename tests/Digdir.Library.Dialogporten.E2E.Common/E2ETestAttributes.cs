@@ -3,28 +3,28 @@ using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.v3;
 
-namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
+namespace Digdir.Library.Dialogporten.E2E.Common;
 
-public static class GraphQlE2EExplicitOptions
+public static class E2EExplicitOptions
 {
     // Flip to false when you want to
     // run/debug E2E tests in your IDE
     public const bool ExplicitTests = true;
 }
 
-public sealed class GraphQlE2EFactAttribute : FactAttribute, IBeforeAfterTestAttribute
+public sealed class E2EFactAttribute : FactAttribute, IBeforeAfterTestAttribute
 {
-    public GraphQlE2EFactAttribute(
+    public E2EFactAttribute(
         [CallerFilePath] string? sourceFilePath = null,
         [CallerLineNumber] int sourceLineNumber = 0)
         : base(sourceFilePath, sourceLineNumber)
     {
-        Explicit = GraphQlE2EExplicitOptions.ExplicitTests;
+        Explicit = E2EExplicitOptions.ExplicitTests;
     }
 
     public void Before(MethodInfo methodUnderTest, IXunitTest test)
     {
-        if (TestContext.Current.TestClassInstance is IGraphQlE2ETestHooks hooks)
+        if (TestContext.Current.TestClassInstance is IE2ETestHooks hooks)
         {
             hooks.BeforeTest();
         }
@@ -32,26 +32,26 @@ public sealed class GraphQlE2EFactAttribute : FactAttribute, IBeforeAfterTestAtt
 
     public void After(MethodInfo methodUnderTest, IXunitTest test)
     {
-        if (TestContext.Current.TestClassInstance is IGraphQlE2ETestHooks hooks)
+        if (TestContext.Current.TestClassInstance is IE2ETestHooks hooks)
         {
             hooks.AfterTest();
         }
     }
 }
 
-public sealed class GraphQlE2ETheoryAttribute : TheoryAttribute, IBeforeAfterTestAttribute
+public sealed class E2ETheoryAttribute : TheoryAttribute, IBeforeAfterTestAttribute
 {
-    public GraphQlE2ETheoryAttribute(
+    public E2ETheoryAttribute(
         [CallerFilePath] string? sourceFilePath = null,
         [CallerLineNumber] int sourceLineNumber = 0)
         : base(sourceFilePath, sourceLineNumber)
     {
-        Explicit = GraphQlE2EExplicitOptions.ExplicitTests;
+        Explicit = E2EExplicitOptions.ExplicitTests;
     }
 
     public void Before(MethodInfo methodUnderTest, IXunitTest test)
     {
-        if (TestContext.Current.TestClassInstance is IGraphQlE2ETestHooks hooks)
+        if (TestContext.Current.TestClassInstance is IE2ETestHooks hooks)
         {
             hooks.BeforeTest();
         }
@@ -59,7 +59,7 @@ public sealed class GraphQlE2ETheoryAttribute : TheoryAttribute, IBeforeAfterTes
 
     public void After(MethodInfo methodUnderTest, IXunitTest test)
     {
-        if (TestContext.Current.TestClassInstance is IGraphQlE2ETestHooks hooks)
+        if (TestContext.Current.TestClassInstance is IE2ETestHooks hooks)
         {
             hooks.AfterTest();
         }

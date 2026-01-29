@@ -2,9 +2,9 @@ using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.Options;
-using static Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common.TestTokenConstants;
+using static Digdir.Library.Dialogporten.E2E.Common.TestTokenConstants;
 
-namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Common;
+namespace Digdir.Library.Dialogporten.E2E.Common;
 
 public enum TokenKind
 {
@@ -60,7 +60,7 @@ public sealed class TestTokenHandler : DelegatingHandler
             return overrideToken;
         }
 
-        var tokenEnvironment = Utils.GetTokenGeneratorEnvironment();
+        var tokenEnvironment = Environment.GetTokenGeneratorEnvironment();
         var requestPath = _kind switch
         {
             TokenKind.EndUser => BuildEndUserRequestPath(overrides?.EndUser, tokenEnvironment),

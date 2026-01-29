@@ -26,8 +26,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Digdir.Library.Dialogporten.E2E.Common\Digdir.Library.Dialogporten.E2E.Common.csproj" />
-      <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj" />
-      <ProjectReference Include="..\..\src\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
     </ItemGroup>
 
     <ItemGroup>

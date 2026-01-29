@@ -147,30 +147,6 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             conflict => conflict);
     }
 
-    /*
-    var duplicatedKeys = newTransmissions
-            .Select(x => x.IdempotentKey)
-            .OfType<string>()
-            .GroupBy(t => t)
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .ToList();
-
-        if (duplicatedKeys.Count != 0)
-    {
-        var conflictingKeys = string.Join(", ", duplicatedKeys.Select(x => $"'{x}'"));
-        return new Conflict(nameof(DialogTransmission.IdempotentKey),
-            $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
-    }
-
-    var conflictingTransmission =
-            await GetFirstTransmissionWithReusedIdempotentKey(dialog.Id, newTransmissions, cancellationToken);
-        if (conflictingTransmission is not null)
-    {
-        return new Conflict(nameof(DialogTransmission.IdempotentKey),
-            $"'{conflictingTransmission.IdempotentKey}' already exists with DialogId '{dialog.Id}'");
-    }
-    */
     private async Task<Conflict?> ValidateIdempotentKeys(Guid dialogId, List<DialogTransmission> newTransmissions,
         CancellationToken cancellationToken)
     {
@@ -243,20 +219,5 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             addLabels: [labelToAdd],
             removeLabels: [],
             performedBy);
-    }
-
-    private async Task<DialogTransmission?> GetFirstTransmissionWithReusedIdempotentKey(Guid dialogId,
-        List<DialogTransmission> transmissions,
-        CancellationToken cancellationToken)
-    {
-        var idempotentKeys = transmissions.Select(i => i.IdempotentKey).OfType<string>().ToList();
-        if (idempotentKeys.IsNullOrEmpty()) return null;
-
-        var transmission = await _db.DialogTransmissions
-            .Where(x => !string.IsNullOrEmpty(x.IdempotentKey) && x.DialogId == dialogId &&
-                        idempotentKeys.Contains(x.IdempotentKey))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        return transmission;
     }
 }

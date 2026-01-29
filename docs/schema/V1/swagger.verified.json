@@ -3071,6 +3071,11 @@
             "nullable": true,
             "type": "string"
           },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.",
+            "nullable": true,
+            "type": "string"
+          },
           "navigationalActions": {
             "description": "The transmission-level navigational actions.",
             "items": {
@@ -3439,6 +3444,11 @@
             "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.",
             "nullable": true,
             "type": "string"
           },
@@ -4017,6 +4027,11 @@
             "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.",
             "nullable": true,
             "type": "string"
           },
@@ -4896,6 +4911,11 @@
             "format": "guid",
             "type": "string"
           },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.",
+            "nullable": true,
+            "type": "string"
+          },
           "isAuthorized": {
             "description": "Flag indicating if the authenticated user supplied in the query is authorized for this transmission.",
             "nullable": true,
@@ -5305,6 +5325,11 @@
           "id": {
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
+            "type": "string"
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.",
+            "nullable": true,
             "type": "string"
           },
           "navigationalActions": {
@@ -5993,6 +6018,11 @@
           "id": {
             "description": "The unique identifier for the transmission in UUIDv7 format.",
             "format": "guid",
+            "type": "string"
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.",
+            "nullable": true,
             "type": "string"
           },
           "navigationalActions": {

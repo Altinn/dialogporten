@@ -104,20 +104,25 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public async Task Cannot_Use_Duplicate_Transmission_IdempotentKey_When_Creating_Dialog()
     {
-        var idempotentKey = NewUuidV7().ToString();
+        var idempotentKey1 = NewUuidV7().ToString();
+        var idempotentKey2 = NewUuidV7().ToString();
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
                 .AddTransmission(x =>
-                    x.IdempotentKey = idempotentKey)
+                    x.IdempotentKey = idempotentKey1)
                 .AddTransmission(x =>
-                    x.IdempotentKey = idempotentKey))
+                    x.IdempotentKey = idempotentKey1)
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey2)
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey2))
             .ExecuteAndAssert<Conflict>(x => x
-                .ErrorMessage.Should().Contain(idempotentKey));
+                .ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2));
     }
 
     [Fact]
-    public Task Cannot_Exceed_Transmission_IdempotentKey_Length_When_Creating_Dialog() =>
+    public Task Cannot_Exceed_Transmission_IdempotentKey_Max_Length_When_Creating_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
                 .AddTransmission(x =>
@@ -129,6 +134,18 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
                 err.ErrorMessage.Should().Contain(nameof(TransmissionDto.IdempotentKey));
             });
 
+    [Fact]
+    public Task Cannot_Go_Below_The_Transmission_IdempotentKey_Min_Length_When_Creating_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .AddTransmission(x =>
+                    x.IdempotentKey = "be"))
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                var err = x.Errors.Single();
+                err.ErrorCode.Should().Be("MinimumLengthValidator");
+                err.ErrorMessage.Should().Contain(nameof(TransmissionDto.IdempotentKey));
+            });
 
     #endregion
 
@@ -162,33 +179,41 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public async Task Cannot_Use_Existing_Transmission_IdempotentKey_When_Updating_Dialog()
     {
-        var idempotentKey = NewUuidV7().ToString();
+        var idempotentKey1 = NewUuidV7().ToString();
+        var idempotentKey2 = NewUuidV7().ToString();
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
                 .AddTransmission(x =>
-                    x.IdempotentKey = idempotentKey))
-            .UpdateDialog(x => x.AddTransmission(x => x.IdempotentKey = idempotentKey))
+                    x.IdempotentKey = idempotentKey1)
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey2))
+            .UpdateDialog(x =>
+                x.AddTransmission(x => x.IdempotentKey = idempotentKey1)
+                    .AddTransmission(x => x.IdempotentKey = idempotentKey2))
             .ExecuteAndAssert<Conflict>(x => x
-                .ErrorMessage.Should().Contain(idempotentKey));
+                .ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2));
     }
 
     [Fact]
     public async Task Cannot_Use_Duplicate_Transmission_IdempotentKey_When_Updating_Dialog()
     {
-        var idempotentKey = NewUuidV7().ToString();
+        var idempotentKey1 = NewUuidV7().ToString();
+        var idempotentKey2 = NewUuidV7().ToString();
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .UpdateDialog(x => x
-                .AddTransmission(t => t.IdempotentKey = idempotentKey)
-                .AddTransmission(t => t.IdempotentKey = idempotentKey))
+                .AddTransmission(t => t.IdempotentKey = idempotentKey1)
+                .AddTransmission(t => t.IdempotentKey = idempotentKey1)
+                .AddTransmission(t => t.IdempotentKey = idempotentKey2)
+                .AddTransmission(t => t.IdempotentKey = idempotentKey2))
             .ExecuteAndAssert<Conflict>(x => x
-                .ErrorMessage.Should().Contain(idempotentKey));
+                .ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2));
     }
 
     [Fact]
-    public async Task Cannot_Exceed_Transmission_IdempotentKey_Length_When_Updating_Dialog()
+    public async Task Cannot_Exceed_Transmission_IdempotentKey_Max_Length_When_Updating_Dialog()
     {
         var idempotentKey = NewUuidV7().ToString();
 
@@ -201,6 +226,24 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             {
                 var err = x.Errors.Single();
                 err.ErrorCode.Should().Be("MaximumLengthValidator");
+                err.ErrorMessage.Should().Contain(nameof(TransmissionDto.IdempotentKey));
+            });
+    }
+
+    [Fact]
+    public async Task Cannot_Go_Below_The_Transmission_IdempotentKey_Min_Length_When_Updating_Dialog()
+    {
+        var idempotentKey = NewUuidV7().ToString();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .AddTransmission())
+            .UpdateDialog(x => x.AddTransmission(x =>
+                x.IdempotentKey = "be"))
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                var err = x.Errors.Single();
+                err.ErrorCode.Should().Be("MinimumLengthValidator");
                 err.ErrorMessage.Should().Contain(nameof(TransmissionDto.IdempotentKey));
             });
     }

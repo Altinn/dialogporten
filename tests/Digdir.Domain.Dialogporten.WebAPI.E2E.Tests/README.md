@@ -1,13 +1,13 @@
 # WebAPI E2E Tests
 
-End-to-end tests that call Dialogporten GraphQL and WebAPI endpoints using test tokens from the token generator.
+End-to-end tests that call Dialogporten WebAPI endpoints using test tokens from the token generator.
 
 ## Prerequisites
 - Dialogporten WebAPI running locally (see repo `README.md`)
 - Access to Altinn testtools token generator credentials
 
 ## Setup
-1. Start Dialogporten locally (GraphQL + WebAPI).
+1. Start Dialogporten locally (WebAPI only).
    - Make sure DB/Redis are running: `podman compose -f docker-compose-db-redis.yml up -d`.
    - Ensure `appsettings.Development.json` or `appsettings.local.json` for the WebAPI is set to:
 ```json

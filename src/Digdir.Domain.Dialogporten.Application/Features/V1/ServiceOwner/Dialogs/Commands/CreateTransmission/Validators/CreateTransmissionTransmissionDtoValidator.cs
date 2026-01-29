@@ -20,6 +20,7 @@ internal sealed class CreateTransmissionTransmissionDtoValidator : AbstractValid
             .UuidV7TimestampIsInPast(clock);
 
         RuleFor(x => x.IdempotentKey)
+            .MinimumLength(Constants.MinIdempotentKeyLength)
             .MaximumLength(Constants.MaxIdempotentKeyLength);
 
         RuleFor(x => x.CreatedAt)

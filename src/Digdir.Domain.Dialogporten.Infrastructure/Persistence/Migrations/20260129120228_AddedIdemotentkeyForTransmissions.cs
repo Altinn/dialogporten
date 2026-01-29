@@ -5,15 +5,11 @@
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class addedIdemotentkeyForTransmissions : Migration
+    public partial class AddedIdemotentkeyForTransmissions : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_DialogTransmission_DialogId",
-                table: "DialogTransmission");
-
             migrationBuilder.AddColumn<string>(
                 name: "IdempotentKey",
                 table: "DialogTransmission",
@@ -39,11 +35,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.DropColumn(
                 name: "IdempotentKey",
                 table: "DialogTransmission");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DialogTransmission_DialogId",
-                table: "DialogTransmission",
-                column: "DialogId");
         }
     }
 }

@@ -13,15 +13,15 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20260122115727_addedIdemotentkeyForTransmissions")]
-    partial class addedIdemotentkeyForTransmissions
+    [Migration("20260129120228_AddedIdemotentkeyForTransmissions")]
+    partial class AddedIdemotentkeyForTransmissions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.12")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gin");
@@ -64,7 +64,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.ToTable("Actor");
 
-                    b.HasDiscriminator().HasValue("Actor");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Actor");
 
                     b.UseTphMappingStrategy();
                 });
@@ -155,7 +155,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.ToTable("Attachment");
 
-                    b.HasDiscriminator().HasValue("Attachment");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Attachment");
 
                     b.UseTphMappingStrategy();
                 });
@@ -835,7 +835,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 5,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            MaxLength = 20,
+                            MaxLength = 25,
                             Name = "ExtendedStatus",
                             OutputInList = true,
                             Required = false
@@ -1353,6 +1353,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DialogId");
+
                     b.HasIndex("RelatedTransmissionId");
 
                     b.HasIndex("TypeId");
@@ -1523,7 +1525,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.ToTable("LocalizationSet");
 
-                    b.HasDiscriminator().HasValue("LocalizationSet");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("LocalizationSet");
 
                     b.UseTphMappingStrategy();
                 });

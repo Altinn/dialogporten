@@ -1350,6 +1350,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DialogId");
+
                     b.HasIndex("RelatedTransmissionId");
 
                     b.HasIndex("TypeId");

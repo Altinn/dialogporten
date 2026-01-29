@@ -54,6 +54,10 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
         RuleForEach(x => x.NavigationalActions)
             .SetValidator(navigationalActionValidator);
 
+        RuleFor(x => x.IdempotentKey)
+            .MinimumLength(Constants.MinIdempotentKeyLength)
+            .MaximumLength(Constants.MaxIdempotentKeyLength);
+
         When(CreateDialogCommandValidator.IsApiOnly, () =>
                 RuleFor(x => x.Content)
                     .SetValidator(contentValidator)

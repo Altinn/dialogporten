@@ -94,7 +94,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         var newTransmissions = _mapper.Map<List<DialogTransmission>>(request.Transmissions);
 
         var conflict = await ValidateIdempotentKeys(dialog.Id, newTransmissions, cancellationToken);
-        if (conflict != null)
+        if (conflict is not null)
         {
             return conflict;
         }

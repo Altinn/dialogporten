@@ -215,8 +215,6 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public async Task Cannot_Exceed_Transmission_IdempotentKey_Max_Length_When_Updating_Dialog()
     {
-        var idempotentKey = NewUuidV7().ToString();
-
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
                 .AddTransmission())
@@ -233,8 +231,6 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public async Task Cannot_Go_Below_The_Transmission_IdempotentKey_Min_Length_When_Updating_Dialog()
     {
-        var idempotentKey = NewUuidV7().ToString();
-
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x
                 .AddTransmission())

@@ -178,6 +178,11 @@ public sealed class TransmissionDto
     public Guid? Id { get; set; }
 
     /// <summary>
+    /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
+
+    /// <summary>
     /// If supplied, overrides the creating date and time for the transmission.
     /// If not supplied, the current date /time will be used.
     /// </summary>

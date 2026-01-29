@@ -129,6 +129,21 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         await AppendTransmission(dialog, request.Dto, cancellationToken);
 
+        var duplicatedKeys = dialog.Transmissions
+            .Select(x => x.IdempotentKey)
+            .OfType<string>()
+            .GroupBy(t => t)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicatedKeys.Count != 0)
+        {
+            var conflictingKeys = string.Join(", ", duplicatedKeys.Select(x => $"'{x}'"));
+            return new Conflict(nameof(DialogTransmission.IdempotentKey),
+                $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
+        }
+
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,

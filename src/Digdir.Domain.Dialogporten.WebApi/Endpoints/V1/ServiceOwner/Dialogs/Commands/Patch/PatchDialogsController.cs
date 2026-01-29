@@ -112,7 +112,7 @@ public sealed class PatchDialogsController : ControllerBase
             forbidden => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status403Forbidden, forbidden.ToValidationResults())),
             domainError => UnprocessableEntity(HttpContext.GetResponseOrDefault(StatusCodes.Status422UnprocessableEntity, domainError.ToValidationResults())),
             concurrencyError => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status412PreconditionFailed)) { StatusCode = StatusCodes.Status412PreconditionFailed },
-            conflict => Conflict(conflict.ToValidationResults())
+            conflict => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status409Conflict, conflict.ToValidationResults())) { StatusCode = StatusCodes.Status409Conflict }
         );
     }
 

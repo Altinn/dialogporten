@@ -134,17 +134,19 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
         _transmissionHierarchyValidator.ValidateWholeAggregate(dialog);
 
-        var duplicatedKey = dialog.Transmissions
-            .Where(x => !string.IsNullOrWhiteSpace(x.IdempotentKey))
-            .GroupBy(x => x.IdempotentKey)
+        var duplicatedKeys = dialog.Transmissions
+            .Select(x => x.IdempotentKey)
+            .OfType<string>()
+            .GroupBy(x => x)
             .Where(x => x.Count() > 1)
             .Select(g => g.Key)
-            .FirstOrDefault();
+            .ToList();
 
-        if (duplicatedKey != null)
+        if (duplicatedKeys.Count != 0)
         {
+            var conflictingKeys = string.Join(", ", duplicatedKeys.Select(x => $"'{x}'"));
             return new Conflict(nameof(DialogTransmission.IdempotentKey),
-                $"Duplicate of transmission idempotentKey '{duplicatedKey}'");
+                $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
         }
 
         var (fromParty, fromServiceOwner) = dialog.Transmissions.GetTransmissionCounts();

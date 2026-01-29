@@ -90,36 +90,20 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             return new Forbidden("User cannot modify frozen dialog");
         }
 
-        foreach (var transmission in request.Transmissions)
-        {
-            transmission.Id = transmission.Id.CreateVersion7IfDefault();
-        }
-
         // Map incoming DTOs to domain entities without loading existing transmissions.
         var newTransmissions = _mapper.Map<List<DialogTransmission>>(request.Transmissions);
+
+        var conflict = await ValidateIdempotentKeys(dialog.Id, newTransmissions, cancellationToken);
+        if (conflict != null)
+        {
+            return conflict;
+        }
+
         foreach (var transmission in newTransmissions)
         {
+            transmission.Id = transmission.Id.CreateVersion7IfDefault();
             transmission.DialogId = dialog.Id;
             transmission.Dialog = dialog;
-        }
-
-        var duplicatedKey = newTransmissions.Where(t => !string.IsNullOrWhiteSpace(t.IdempotentKey))
-            .GroupBy(t => t.IdempotentKey)
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .FirstOrDefault();
-        if (duplicatedKey != null)
-        {
-            return new Conflict(nameof(DialogTransmission.IdempotentKey),
-                $"Duplicate of transmission idempotentKey '{duplicatedKey}'");
-        }
-
-        var conflictingTransmission =
-            await GetFirstTransmissionWithReusedIdempotentKey(dialog.Id, newTransmissions, cancellationToken);
-        if (conflictingTransmission is not null)
-        {
-            return new Conflict(nameof(DialogTransmission.IdempotentKey),
-                $"'{conflictingTransmission.IdempotentKey}' already exists with DialogId '{dialog.Id}'");
         }
 
         await _transmissionHierarchyValidator.ValidateNewTransmissionsAsync(
@@ -163,6 +147,67 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             conflict => conflict);
     }
 
+    /*
+    var duplicatedKeys = newTransmissions
+            .Select(x => x.IdempotentKey)
+            .OfType<string>()
+            .GroupBy(t => t)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicatedKeys.Count != 0)
+    {
+        var conflictingKeys = string.Join(", ", duplicatedKeys.Select(x => $"'{x}'"));
+        return new Conflict(nameof(DialogTransmission.IdempotentKey),
+            $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
+    }
+
+    var conflictingTransmission =
+            await GetFirstTransmissionWithReusedIdempotentKey(dialog.Id, newTransmissions, cancellationToken);
+        if (conflictingTransmission is not null)
+    {
+        return new Conflict(nameof(DialogTransmission.IdempotentKey),
+            $"'{conflictingTransmission.IdempotentKey}' already exists with DialogId '{dialog.Id}'");
+    }
+    */
+    private async Task<Conflict?> ValidateIdempotentKeys(Guid dialogId, List<DialogTransmission> newTransmissions,
+        CancellationToken cancellationToken)
+    {
+        var newIdempotentKeys = newTransmissions
+            .Select(x => x.IdempotentKey)
+            .OfType<string>()
+            .ToList();
+
+        if (newIdempotentKeys.Count == 0)
+        {
+            return null;
+        }
+
+        var existingIdempotentKeys = await _db.DialogTransmissions
+            .Where(x => x.DialogId == dialogId)
+            .Select(x => x.IdempotentKey)
+            .OfType<string>()
+            .Where(x => newIdempotentKeys.Contains(x))
+            .ToListAsync(cancellationToken);
+
+        var duplicatedIdempotentKeys = newIdempotentKeys
+            .Concat(existingIdempotentKeys)
+            .GroupBy(x => x)
+            .Where(x => x.Count() > 1)
+            .Select(x => x.Key)
+            .ToList();
+
+        if (duplicatedIdempotentKeys.Count == 0)
+        {
+            return null;
+        }
+
+        var conflictingKeys = string.Join(", ", duplicatedIdempotentKeys.Select(x => $"'{x}'"));
+        return new Conflict(nameof(DialogTransmission.IdempotentKey),
+            $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
+    }
+
     private async Task<DialogEntity?> LoadDialogAsync(Guid dialogId, CancellationToken cancellationToken)
     {
         var isAdmin = _userResourceRegistry.IsCurrentUserServiceOwnerAdmin();
@@ -174,7 +219,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
 
         return await _db.Dialogs
             .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .IgnoreQueryFilters()
             .WhereIf(!isAdmin, x => x.Org == org)
             .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);
@@ -184,7 +229,8 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
     {
         if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
         {
-            _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
+            _domainContext.AddError(new DomainFailure(nameof(organizationNumber),
+                "Cannot find organization number for current user."));
             return;
         }
 
@@ -199,14 +245,16 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             performedBy);
     }
 
-    private async Task<DialogTransmission?> GetFirstTransmissionWithReusedIdempotentKey(Guid dialogId, List<DialogTransmission> transmissions,
+    private async Task<DialogTransmission?> GetFirstTransmissionWithReusedIdempotentKey(Guid dialogId,
+        List<DialogTransmission> transmissions,
         CancellationToken cancellationToken)
     {
         var idempotentKeys = transmissions.Select(i => i.IdempotentKey).OfType<string>().ToList();
         if (idempotentKeys.IsNullOrEmpty()) return null;
 
         var transmission = await _db.DialogTransmissions
-            .Where(x => !string.IsNullOrEmpty(x.IdempotentKey) && x.DialogId == dialogId && idempotentKeys.Contains(x.IdempotentKey))
+            .Where(x => !string.IsNullOrEmpty(x.IdempotentKey) && x.DialogId == dialogId &&
+                        idempotentKeys.Contains(x.IdempotentKey))
             .FirstOrDefaultAsync(cancellationToken);
 
         return transmission;

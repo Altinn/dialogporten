@@ -88,7 +88,7 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             concurrencyError => this.PreconditionFailed(cancellationToken: ct),
-            conflict => throw new UnreachableException("Should not create conflict when creating activities"));
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

@@ -129,6 +129,17 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         await AppendTransmission(dialog, request.Dto, cancellationToken);
 
+        var duplicatedKey = dialog.Transmissions.Where(t => !string.IsNullOrWhiteSpace(t.IdempotentKey))
+            .GroupBy(t => t.IdempotentKey)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .FirstOrDefault();
+        if (duplicatedKey != null)
+        {
+            return new Conflict(nameof(DialogTransmission.IdempotentKey),
+                $"Duplicate of transmission idempotentKey '{duplicatedKey}'");
+        }
+
         _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
             keySelector: x => x.Id,
             parentKeySelector: x => x.RelatedTransmissionId,

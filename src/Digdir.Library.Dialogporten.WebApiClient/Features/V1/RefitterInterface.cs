@@ -1604,6 +1604,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -1663,12 +1669,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment> Attachments { get; set; }
-
-        /// <summary>
-        /// The navigational actions associated with the transmission.
-        /// </summary>
-        [JsonPropertyName("navigationalActions")]
-        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_NavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -1833,30 +1833,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Api")]
         Api = 1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_NavigationalAction
-    {
-
-        /// <summary>
-        /// The title of the navigational action.
-        /// </summary>
-        [JsonPropertyName("title")]
-        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the navigational action.
-        /// </summary>
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The UTC timestamp when the navigational action expires and is no longer available.
-        /// </summary>
-        [JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -2506,6 +2482,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -2565,12 +2547,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_Attachment> Attachments { get; set; }
-
-        /// <summary>
-        /// The navigational actions associated with the transmission.
-        /// </summary>
-        [JsonPropertyName("navigationalActions")]
-        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_NavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -2669,30 +2645,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_NavigationalAction
-    {
-
-        /// <summary>
-        /// The title of the navigational action.
-        /// </summary>
-        [JsonPropertyName("title")]
-        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the navigational action.
-        /// </summary>
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The UTC timestamp when the navigational action expires and is no longer available.
-        /// </summary>
-        [JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -3125,6 +3077,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -3195,12 +3153,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogTransmissionAttachment> Attachments { get; set; }
-
-        /// <summary>
-        /// The transmission-level navigational actions.
-        /// </summary>
-        [JsonPropertyName("navigationalActions")]
-        public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogTransmissionNavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -3287,30 +3239,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmissionNavigationalAction
-    {
-
-        /// <summary>
-        /// The title of the navigational action.
-        /// </summary>
-        [JsonPropertyName("title")]
-        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the navigational action.
-        /// </summary>
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The UTC timestamp when the navigational action expires and is no longer available.
-        /// </summary>
-        [JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -3970,6 +3898,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
@@ -4029,12 +3963,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
-
-        /// <summary>
-        /// The transmission-level navigational actions.
-        /// </summary>
-        [JsonPropertyName("navigationalActions")]
-        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionNavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -4114,30 +4042,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionNavigationalAction
-    {
-
-        /// <summary>
-        /// The title of the navigational action.
-        /// </summary>
-        [JsonPropertyName("title")]
-        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the navigational action.
-        /// </summary>
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The UTC timestamp when the navigational action expires and is no longer available.
-        /// </summary>
-        [JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -4379,6 +4283,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
@@ -4438,12 +4348,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment> Attachments { get; set; }
-
-        /// <summary>
-        /// The transmission-level navigational actions.
-        /// </summary>
-        [JsonPropertyName("navigationalActions")]
-        public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -4523,30 +4427,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction
-    {
-
-        /// <summary>
-        /// The title of the navigational action.
-        /// </summary>
-        [JsonPropertyName("title")]
-        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the navigational action.
-        /// </summary>
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The UTC timestamp when the navigational action expires and is no longer available.
-        /// </summary>
-        [JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -4934,6 +4814,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
@@ -4993,12 +4879,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment> Attachments { get; set; }
-
-        /// <summary>
-        /// The transmission-level navigational actions.
-        /// </summary>
-        [JsonPropertyName("navigationalActions")]
-        public ICollection<V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -5078,30 +4958,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction
-    {
-
-        /// <summary>
-        /// The title of the navigational action.
-        /// </summary>
-        [JsonPropertyName("title")]
-        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
-
-        /// <summary>
-        /// The fully qualified URL of the navigational action.
-        /// </summary>
-        [JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
-
-        /// <summary>
-        /// The UTC timestamp when the navigational action expires and is no longer available.
-        /// </summary>
-        [JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 

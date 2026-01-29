@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -100,6 +101,35 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
                 x.ErrorMessage.Should().Contain(idempotentKey));
     }
 
+    [Fact]
+    public async Task Cannot_Use_Duplicate_Transmission_IdempotentKey_When_Creating_Dialog()
+    {
+        var idempotentKey = NewUuidV7().ToString();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey)
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey))
+            .ExecuteAndAssert<Conflict>(x => x
+                .ErrorMessage.Should().Contain(idempotentKey));
+    }
+
+    [Fact]
+    public Task Cannot_Exceed_Transmission_IdempotentKey_Length_When_Creating_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .AddTransmission(x =>
+                    x.IdempotentKey = "Random string which is longer than maximum allowed idempotentKey length"))
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                var err = x.Errors.Single();
+                err.ErrorCode.Should().Be("MaximumLengthValidator");
+                err.ErrorMessage.Should().Contain(nameof(TransmissionDto.IdempotentKey));
+            });
+
+
     #endregion
 
     # region Update
@@ -127,6 +157,52 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithText(originalTransmission.Id.ToString()!));
+    }
+
+    [Fact]
+    public async Task Cannot_Use_Existing_Transmission_IdempotentKey_When_Updating_Dialog()
+    {
+        var idempotentKey = NewUuidV7().ToString();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey))
+            .UpdateDialog(x => x.AddTransmission(x => x.IdempotentKey = idempotentKey))
+            .ExecuteAndAssert<Conflict>(x => x
+                .ErrorMessage.Should().Contain(idempotentKey));
+    }
+
+    [Fact]
+    public async Task Cannot_Use_Duplicate_Transmission_IdempotentKey_When_Updating_Dialog()
+    {
+        var idempotentKey = NewUuidV7().ToString();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x => x
+                .AddTransmission(t => t.IdempotentKey = idempotentKey)
+                .AddTransmission(t => t.IdempotentKey = idempotentKey))
+            .ExecuteAndAssert<Conflict>(x => x
+                .ErrorMessage.Should().Contain(idempotentKey));
+    }
+
+    [Fact]
+    public async Task Cannot_Exceed_Transmission_IdempotentKey_Length_When_Updating_Dialog()
+    {
+        var idempotentKey = NewUuidV7().ToString();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x
+                .AddTransmission())
+            .UpdateDialog(x => x.AddTransmission(x =>
+                x.IdempotentKey = "Random string which is longer than maximum allowed idempotentKey length"))
+            .ExecuteAndAssert<ValidationError>(x =>
+            {
+                var err = x.Errors.Single();
+                err.ErrorCode.Should().Be("MaximumLengthValidator");
+                err.ErrorMessage.Should().Contain(nameof(TransmissionDto.IdempotentKey));
+            });
     }
 
     [Fact]

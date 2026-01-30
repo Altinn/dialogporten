@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.102.0](https://github.com/Altinn/dialogporten/compare/v1.101.0...v1.102.0) (2026-01-30)
+
+
+### Features
+
+* Added idempotentKey for dialog transmission ([#3284](https://github.com/Altinn/dialogporten/issues/3284)) ([8996bbd](https://github.com/Altinn/dialogporten/commit/8996bbd9c1e15354fc01b6005c35e30beeeef66c))
+* Added minimum length of 3 character for dialog idempotentKey ([#3352](https://github.com/Altinn/dialogporten/issues/3352)) ([0257d17](https://github.com/Altinn/dialogporten/commit/0257d173bc7c3dd8cdf269bef6abd9d96b3c31b5))
+* **app:** navigation actions on transmissions ([#3333](https://github.com/Altinn/dialogporten/issues/3333)) ([3004ab8](https://github.com/Altinn/dialogporten/commit/3004ab8489f29ab3528fc68f22c6950bedff29cb))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-node action to v6.2.0 ([#3338](https://github.com/Altinn/dialogporten/issues/3338)) ([71a9b36](https://github.com/Altinn/dialogporten/commit/71a9b363e8f94042e85cedc6e8491e0da9a5069a))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.144.0 ([#3339](https://github.com/Altinn/dialogporten/issues/3339)) ([a884816](https://github.com/Altinn/dialogporten/commit/a884816770f90297b1cf6d7e6126517b97217c64))
+
 ## [1.101.0](https://github.com/Altinn/dialogporten/compare/v1.100.2...v1.101.0) (2026-01-27)
 
 

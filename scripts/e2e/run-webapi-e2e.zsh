@@ -35,6 +35,7 @@ else
     exit 1
   fi
 fi
+
 # Read .env file
 env_file=""
 if [[ -n "${ENV_FILE:-}" ]]; then
@@ -79,6 +80,7 @@ while true; do
   if curl -k -s -o /dev/null -I "$WebApiUrl"; then
     break
   fi
+  
   now=$(date +%s)
   time_ran=$((now - start_time))
   echo "$((timeout_seconds - time_ran )) Seconds Remaining"
@@ -88,7 +90,6 @@ while true; do
     tail -n 200 "$webapi_log" || true
     exit 1
   fi
-
   sleep 1
 done
 

@@ -84,7 +84,6 @@ indent_size = 2
 # Enforce indentation to be 2 spaces
 indent_size = 2
 
-
 [*.zsh]
 
 # Enforce indentation to be 2 spaces

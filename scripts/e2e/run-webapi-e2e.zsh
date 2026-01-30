@@ -13,10 +13,28 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
-repo_root="$DIALOGPORTEN"
-echo "$script_dir"
-echo "$repo_root"
 
+if [[ -n "${DIALOGPORTEN:-}" ]]; then
+  repo_root="$DIALOGPORTEN"
+else
+  echo "DIALOGPORTEN not set, searching for repo root...."
+  repo_root="$script_dir"   # start from script location
+  depth=0
+  found=0
+  while [[ $repo_root != "/" && $depth -lt 5 ]]; do
+    if [[ -e "$repo_root/Digdir.Domain.Dialogporten.sln" ]]; then
+      echo "Repo root found: $repo_root/Digdir.Domain.Dialogporten.sln"
+      found=1
+      break
+    fi
+    repo_root=${repo_root:h}
+    ((++depth))
+  done
+  if [[ $found -ne 1 ]]; then
+    echo "ERROR: Repo root not found within 5 levels from $script_dir" >&2
+    exit 1
+  fi
+fi
 # Read .env file
 env_file=""
 if [[ -n "${ENV_FILE:-}" ]]; then

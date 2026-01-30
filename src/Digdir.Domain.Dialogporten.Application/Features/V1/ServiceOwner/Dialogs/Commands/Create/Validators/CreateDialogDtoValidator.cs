@@ -40,6 +40,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
                 x.UpdatedAt.HasValue && x.UpdatedAt != default(DateTimeOffset));
 
         RuleFor(x => x.IdempotentKey)
+            .MinimumLength(Constants.MinIdempotentKeyLength)
             .MaximumLength(Constants.MaxIdempotentKeyLength);
 
         RuleFor(x => x.ServiceResource)

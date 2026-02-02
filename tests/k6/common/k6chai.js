@@ -11,10 +11,10 @@ function expectStatusFor(response) {
                 try {
                     let message = "response status";
 
-                    const is4xx = response.status >= 400 && response.status < 500;
+                    const is400OrMore = response.status >= 400;
                     const statusMismatch = response.status !== expectedStatus;
 
-                    if (statusMismatch && is4xx) {
+                    if (statusMismatch && is400OrMore) {
                         let prettyBody;
 
                         if (!response.body || response.body.trim() === "") {

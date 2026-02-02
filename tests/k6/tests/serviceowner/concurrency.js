@@ -29,7 +29,7 @@ export default function () {
         purgeSO('dialogs/' + dialogId);
 
         results.forEach((r) => {
-            expect(r.status, 'status code for concurrently added child entity').to.equal(201);
+            expect([201, 409], 'status code for concurrently added child entity').to.contain(r.status);
         });
 
     });

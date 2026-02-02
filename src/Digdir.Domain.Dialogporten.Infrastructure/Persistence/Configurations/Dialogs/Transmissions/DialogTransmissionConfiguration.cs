@@ -11,5 +11,11 @@ internal sealed class DialogTransmissionConfiguration : IEntityTypeConfiguration
         builder.HasOne(x => x.RelatedTransmission)
             .WithMany(x => x.RelatedTransmissions)
             .OnDelete(DeleteBehavior.SetNull);
+        builder.HasIndex(x => new { x.DialogId, x.IdempotentKey }).IsUnique()
+            .HasFilter($"\"{nameof(DialogTransmission.IdempotentKey)}\" is not null");
+
+        builder.HasIndex(x => x.DialogId);
+
+        builder.Property(x => x.IdempotentKey).HasMaxLength(36);
     }
 }

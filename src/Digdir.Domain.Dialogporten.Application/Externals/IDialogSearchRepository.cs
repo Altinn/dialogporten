@@ -90,8 +90,6 @@ public sealed class GetDialogsQuery
     public IContinuationTokenSet? ContinuationToken { get; set; }
     public int Limit { get; set; } = 100;
 
-    private readonly string? _searchLanguageCode;
-
     /// <summary>
     /// Filter by one or more service owner codes
     /// </summary>
@@ -202,8 +200,8 @@ public sealed class GetDialogsQuery
     /// </summary>
     public string? SearchLanguageCode
     {
-        get => _searchLanguageCode;
-        init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
+        get;
+        init => field = Localization.NormalizeCultureCode(value);
     }
 
     public DateTimeOffset? ExpiresAfter { get; set; }

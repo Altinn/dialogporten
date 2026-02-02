@@ -20,5 +20,7 @@ public sealed class MappingProfile : Profile
         CreateMap<DialogTransmissionAttachment, AttachmentDto>();
         CreateMap<AttachmentUrl, AttachmentUrlDto>()
             .ForMember(dest => dest.ConsumerType, opt => opt.MapFrom(src => src.ConsumerTypeId));
+
+        CreateMap<DialogTransmissionNavigationalAction, NavigationalActionDto>();
     }
 }

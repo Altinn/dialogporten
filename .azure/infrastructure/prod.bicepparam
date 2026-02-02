@@ -57,10 +57,6 @@ param postgresConfiguration = {
   parameterLogging: {
     enabled: false
   }
-  highAvailability: {
-    mode: 'Disabled'
-    standbyAvailabilityZone: '2'
-  }
   backupRetentionDays: 32
   availabilityZone: '3'
   enableBackupVault: true

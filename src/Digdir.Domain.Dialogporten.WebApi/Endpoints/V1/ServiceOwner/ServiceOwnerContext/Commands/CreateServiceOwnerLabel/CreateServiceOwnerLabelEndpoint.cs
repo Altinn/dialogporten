@@ -31,6 +31,7 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
         Description(b => b.ProducesOneOf(
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status412PreconditionFailed));
     }
 
@@ -80,7 +81,8 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
             validationError => this.BadRequestAsync(validationError, ct),
             notFound => this.NotFoundAsync(notFound, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

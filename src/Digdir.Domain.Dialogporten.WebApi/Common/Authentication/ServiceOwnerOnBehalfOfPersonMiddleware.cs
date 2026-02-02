@@ -37,7 +37,7 @@ public sealed class ServiceOwnerOnBehalfOfPersonMiddleware
         if (!NorwegianPersonIdentifier.TryParse(endUserIdQuery.First(), out var endUserId))
         {
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            context.Response.WriteAsJsonAsync(context.GetResponseOrDefault(
+            var response = context.GetResponseOrDefault(
                 context.Response.StatusCode,
                 [
                     new("EndUserId",
@@ -45,8 +45,8 @@ public sealed class ServiceOwnerOnBehalfOfPersonMiddleware
                         $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}'."
                     )
                 ]
-            ));
-            return Task.CompletedTask;
+            );
+            return context.Response.WriteAsJsonAsync(response, response.GetType());
         }
 
         OverrideClaim(context.User, PidClaim, endUserId.Id);

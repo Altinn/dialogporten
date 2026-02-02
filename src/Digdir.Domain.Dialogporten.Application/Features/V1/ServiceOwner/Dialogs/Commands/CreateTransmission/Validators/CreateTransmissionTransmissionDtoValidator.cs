@@ -12,11 +12,16 @@ internal sealed class CreateTransmissionTransmissionDtoValidator : AbstractValid
         IValidator<ActorDto> actorValidator,
         IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator,
+        IValidator<TransmissionNavigationalActionDto> navigationalActionValidator,
         IClock clock)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
             .UuidV7TimestampIsInPast(clock);
+
+        RuleFor(x => x.IdempotentKey)
+            .MinimumLength(Constants.MinIdempotentKeyLength)
+            .MaximumLength(Constants.MaxIdempotentKeyLength);
 
         RuleFor(x => x.CreatedAt)
             .IsInPast(clock);
@@ -49,6 +54,9 @@ internal sealed class CreateTransmissionTransmissionDtoValidator : AbstractValid
 
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
+
+        RuleForEach(x => x.NavigationalActions)
+            .SetValidator(navigationalActionValidator);
 
         RuleFor(x => x.Content)
             .NotEmpty()

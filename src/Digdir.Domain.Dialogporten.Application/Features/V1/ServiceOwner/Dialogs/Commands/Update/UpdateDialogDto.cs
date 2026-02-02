@@ -116,6 +116,11 @@ public sealed class TransmissionDto
     public Guid? Id { get; set; }
 
     /// <summary>
+    /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
+
+    /// <summary>
     /// If supplied, overrides the creating date and time for the transmission.
     /// If not supplied, the current date /time will be used.
     /// </summary>
@@ -173,6 +178,11 @@ public sealed class TransmissionDto
     /// The transmission-level attachments.
     /// </summary>
     public List<TransmissionAttachmentDto> Attachments { get; set; } = [];
+
+    /// <summary>
+    /// The transmission-level navigational actions.
+    /// </summary>
+    public List<TransmissionNavigationalActionDto> NavigationalActions { get; set; } = [];
 }
 
 public sealed class TransmissionContentDto
@@ -548,4 +558,22 @@ public sealed class TransmissionAttachmentUrlDto
     /// The type of consumer the URL is intended for.
     /// </summary>
     public AttachmentUrlConsumerType.Values ConsumerType { get; set; }
+}
+
+public sealed class TransmissionNavigationalActionDto
+{
+    /// <summary>
+    /// The title of the navigational action.
+    /// </summary>
+    public List<LocalizationDto> Title { get; set; } = [];
+
+    /// <summary>
+    /// The fully qualified URL of the navigational action.
+    /// </summary>
+    public Uri Url { get; set; } = null!;
+
+    /// <summary>
+    /// The UTC timestamp when the navigational action expires and is no longer available.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
 }

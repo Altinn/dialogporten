@@ -232,11 +232,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Retrieve service owner labels for a dialog.</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.1.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.2.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Retrieve service owner labels for a dialog.</summary>
         /// <remarks>Fetches all labels associated with the service owner context of a specific dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -276,6 +277,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Add a label to the service owner context.
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="dto">dto parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -301,6 +305,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Forbidden</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
@@ -316,6 +324,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Delete a service owner label for a dialog</summary>
         /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="label">label parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -341,6 +352,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog or service owner label was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>A server side error occurred.</description>
         /// </item>
@@ -360,6 +375,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="enduserId">enduserId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="setDialogSystemLabelRequest">setDialogSystemLabelRequest parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -389,6 +408,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -412,6 +435,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
+        /// <param name="enduserId">enduserId parameter</param>
+        /// <param name="dto">dto parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -437,6 +462,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy).</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
@@ -456,6 +485,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -500,6 +530,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="createTransmissionRequest">createTransmissionRequest parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -533,6 +566,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -556,6 +593,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -632,6 +670,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -672,6 +711,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="createActivityRequest">createActivityRequest parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -703,6 +745,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
         /// </item>
         /// <item>
         /// <term>410</term>
@@ -767,6 +813,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// For detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)
         /// </remarks>
+        /// <param name="dto">dto parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -815,6 +862,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Returns a boolean value based on conditions used to determine if a notification is to be sent</summary>
         /// <remarks>Used by Altinn Notification only. Takes a dialogId and returns a boolean value based on conditions used to determine if a notification is to be sent.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
@@ -848,6 +896,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a single dialog transmission</summary>
         /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="transmissionId">transmissionId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -888,6 +938,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="seenLogId">seenLogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -928,6 +980,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="activityId">activityId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -972,6 +1026,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Note that this operation may return deleted dialogs (see the field `DeletedAt`).
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="endUserId">Filter by end user id</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
@@ -1013,6 +1068,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="dto">dto parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1040,6 +1098,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
         /// </item>
         /// <item>
         /// <term>410</term>
@@ -1072,6 +1134,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1101,6 +1165,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>Entity with the given key(s) is removed.</description>
         /// </item>
@@ -1125,6 +1193,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="etag">etag parameter</param>
+        /// <param name="patchDocument">patchDocument parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1154,6 +1225,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found or is deleted</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>A server side error occurred.</description>
+        /// </item>
+        /// <item>
         /// <term>410</term>
         /// <description>The dialog with the given key is removed</description>
         /// </item>
@@ -1177,6 +1252,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Restore a dialog</summary>
         /// <remarks>Restore a dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1202,6 +1279,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
@@ -1221,6 +1302,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1246,6 +1329,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <description>The given dialog ID was not found.</description>
         /// </item>
         /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
+        /// </item>
+        /// <item>
         /// <term>412</term>
         /// <description>The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied.</description>
         /// </item>
@@ -1264,6 +1351,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Freezes a given dialog.
         /// The dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1291,6 +1380,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <item>
         /// <term>404</term>
         /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>409</term>
+        /// <description>Conflict occurred while processing the request.</description>
         /// </item>
         /// <item>
         /// <term>410</term>
@@ -1556,6 +1649,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -1615,6 +1714,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment> Attachments { get; set; }
+
+        /// <summary>
+        /// The navigational actions associated with the transmission.
+        /// </summary>
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_NavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -1779,6 +1884,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Api")]
         Api = 1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_NavigationalAction
+    {
+
+        /// <summary>
+        /// The title of the navigational action.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the navigational action.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the navigational action expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -2428,6 +2557,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -2487,6 +2622,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_Attachment> Attachments { get; set; }
+
+        /// <summary>
+        /// The navigational actions associated with the transmission.
+        /// </summary>
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_NavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -2585,6 +2726,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_NavigationalAction
+    {
+
+        /// <summary>
+        /// The title of the navigational action.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the navigational action.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the navigational action expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -3017,6 +3182,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
@@ -3087,6 +3258,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogTransmissionAttachment> Attachments { get; set; }
+
+        /// <summary>
+        /// The transmission-level navigational actions.
+        /// </summary>
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogTransmissionNavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -3173,6 +3350,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGet_DialogTransmissionNavigationalAction
+    {
+
+        /// <summary>
+        /// The title of the navigational action.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the navigational action.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the navigational action expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -3832,6 +4033,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
@@ -3891,6 +4098,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment> Attachments { get; set; }
+
+        /// <summary>
+        /// The transmission-level navigational actions.
+        /// </summary>
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<V1ServiceOwnerDialogsCommandsUpdate_TransmissionNavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -3970,6 +4183,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsUpdate_TransmissionNavigationalAction
+    {
+
+        /// <summary>
+        /// The title of the navigational action.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the navigational action.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the navigational action expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -4211,6 +4448,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
@@ -4270,6 +4513,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment> Attachments { get; set; }
+
+        /// <summary>
+        /// The transmission-level navigational actions.
+        /// </summary>
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -4349,6 +4598,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction
+    {
+
+        /// <summary>
+        /// The title of the navigational action.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the navigational action.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the navigational action expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 
@@ -4736,6 +5009,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
+        /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+        /// </summary>
+        [JsonPropertyName("idempotentKey")]
+        public string IdempotentKey { get; set; }
+
+        /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
@@ -4795,6 +5074,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("attachments")]
         public ICollection<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment> Attachments { get; set; }
+
+        /// <summary>
+        /// The transmission-level navigational actions.
+        /// </summary>
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction> NavigationalActions { get; set; }
 
     }
 
@@ -4874,6 +5159,30 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("consumerType")]
         [JsonConverter(typeof(JsonStringEnumConverter<Attachments_AttachmentUrlConsumerType>))]
         public Attachments_AttachmentUrlConsumerType ConsumerType { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction
+    {
+
+        /// <summary>
+        /// The title of the navigational action.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the navigational action.
+        /// </summary>
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; }
+
+        /// <summary>
+        /// The UTC timestamp when the navigational action expires and is no longer available.
+        /// </summary>
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; }
 
     }
 

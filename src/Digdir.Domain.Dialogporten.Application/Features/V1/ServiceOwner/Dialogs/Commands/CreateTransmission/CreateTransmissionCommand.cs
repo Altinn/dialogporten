@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -33,7 +34,7 @@ public sealed class CreateTransmissionCommand : IRequest<CreateTransmissionResul
 }
 
 [GenerateOneOf]
-public sealed partial class CreateTransmissionResult : OneOfBase<CreateTransmissionSuccess, EntityNotFound, EntityDeleted, ValidationError, Forbidden, DomainError, ConcurrencyError>;
+public sealed partial class CreateTransmissionResult : OneOfBase<CreateTransmissionSuccess, EntityNotFound, EntityDeleted, ValidationError, Forbidden, DomainError, ConcurrencyError, Conflict>;
 
 public sealed record CreateTransmissionSuccess(Guid Revision, IReadOnlyCollection<Guid> TransmissionIds);
 
@@ -89,15 +90,18 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             return new Forbidden("User cannot modify frozen dialog");
         }
 
-        foreach (var transmission in request.Transmissions)
-        {
-            transmission.Id = transmission.Id.CreateVersion7IfDefault();
-        }
-
         // Map incoming DTOs to domain entities without loading existing transmissions.
         var newTransmissions = _mapper.Map<List<DialogTransmission>>(request.Transmissions);
+
+        var conflict = await ValidateIdempotentKeys(dialog.Id, newTransmissions, cancellationToken);
+        if (conflict is not null)
+        {
+            return conflict;
+        }
+
         foreach (var transmission in newTransmissions)
         {
+            transmission.Id = transmission.Id.CreateVersion7IfDefault();
             transmission.DialogId = dialog.Id;
             transmission.Dialog = dialog;
         }
@@ -139,7 +143,45 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         return saveResult.Match<CreateTransmissionResult>(
             success => new CreateTransmissionSuccess(dialog.Revision, newTransmissions.Select(x => x.Id).ToArray()),
             domainError => domainError,
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
+    }
+
+    private async Task<Conflict?> ValidateIdempotentKeys(Guid dialogId, List<DialogTransmission> newTransmissions,
+        CancellationToken cancellationToken)
+    {
+        var newIdempotentKeys = newTransmissions
+            .Select(x => x.IdempotentKey)
+            .OfType<string>()
+            .ToList();
+
+        if (newIdempotentKeys.Count == 0)
+        {
+            return null;
+        }
+
+        var existingIdempotentKeys = await _db.DialogTransmissions
+            .Where(x => x.DialogId == dialogId)
+            .Select(x => x.IdempotentKey)
+            .OfType<string>()
+            .Where(x => newIdempotentKeys.Contains(x))
+            .ToListAsync(cancellationToken);
+
+        var duplicatedIdempotentKeys = newIdempotentKeys
+            .Concat(existingIdempotentKeys)
+            .GroupBy(x => x)
+            .Where(x => x.Count() > 1)
+            .Select(x => x.Key)
+            .ToList();
+
+        if (duplicatedIdempotentKeys.Count == 0)
+        {
+            return null;
+        }
+
+        var conflictingKeys = string.Join(", ", duplicatedIdempotentKeys.Select(x => $"'{x}'"));
+        return new Conflict(nameof(DialogTransmission.IdempotentKey),
+            $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
     }
 
     private async Task<DialogEntity?> LoadDialogAsync(Guid dialogId, CancellationToken cancellationToken)
@@ -153,7 +195,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
 
         return await _db.Dialogs
             .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .IgnoreQueryFilters()
             .WhereIf(!isAdmin, x => x.Org == org)
             .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);
@@ -163,7 +205,8 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
     {
         if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
         {
-            _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
+            _domainContext.AddError(new DomainFailure(nameof(organizationNumber),
+                "Cannot find organization number for current user."));
             return;
         }
 
@@ -177,5 +220,4 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             removeLabels: [],
             performedBy);
     }
-
 }

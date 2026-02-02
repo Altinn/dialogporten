@@ -22,10 +22,11 @@ public static class DialogGenerator
         Randomizer.Seed = new Random(123456);
     }
 
-    [ThreadStatic] private static Randomizer? _rnd;
-    [ThreadStatic] private static Faker? _faker;
-    private static Randomizer MyRandomizer => _rnd ??= new Randomizer();
-    private static Faker MyFaker => _faker ??= new Faker();
+    [field: ThreadStatic]
+    private static Randomizer MyRandomizer => field ??= new Randomizer();
+
+    [field: ThreadStatic]
+    private static Faker MyFaker => field ??= new Faker();
 
     private static readonly Faker<SearchTagDto> SearchTagFaker = new Faker<SearchTagDto>()
         .RuleFor(o => o.Value, f => f.Random.AlphaNumeric(10));
@@ -81,7 +82,6 @@ public static class DialogGenerator
         // We need to handle id, serviceResource, party, and others passed as arguments
         // RuleFor cannot directly use external parameters easily. We handle these post-generation.
         // Placeholder rules are set, real values might be overridden later.
-        .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.ServiceResource, _ => GenerateFakeResource())
         .RuleFor(o => o.Party, _ => GenerateRandomParty())
         .RuleFor(o => o.Progress, f => f.Random.Number(0, 100))

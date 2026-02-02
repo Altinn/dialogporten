@@ -18,12 +18,11 @@ on:
         description: "SHA of the latest deployed applications version"
         value: ${{ jobs.get-versions.outputs.apps_version_sha }}
 
-permissions:
-  contents: read
-
 jobs:
   get-versions:
     name: Get Latest Deployed Versions from GitHub Variables
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     env:
@@ -33,7 +32,7 @@ jobs:
       apps_version_sha: ${{ steps.get-apps-sha.outputs.sha }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 

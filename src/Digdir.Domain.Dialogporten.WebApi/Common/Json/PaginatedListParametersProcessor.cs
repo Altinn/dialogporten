@@ -19,7 +19,7 @@ public sealed class PaginatedListParametersProcessor : IOperationProcessor
         foreach (var parameter in context.OperationDescription.Operation.Parameters)
         {
             if (parameter.Kind != OpenApiParameterKind.Query) continue;
-            if (parameter.Name is nameof(PaginatedList<string>.ContinuationToken) or nameof(PaginatedList<string>.OrderBy))
+            if (parameter.Name is nameof(PaginatedList<>.ContinuationToken) or nameof(PaginatedList<>.OrderBy))
             {
                 parameter.Schema = new JsonSchema { Type = JsonObjectType.String, IsNullableRaw = true };
             }

@@ -5,9 +5,12 @@ using Parquet.Schema;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 
-public sealed class ParquetFileService
+public sealed partial class ParquetFileService
 {
+    // Used by source-generated logging partials; analyzers don't see the generated usage.
+#pragma warning disable IDE0052
     private readonly ILogger<ParquetFileService> _logger;
+#pragma warning restore IDE0052
 
     public ParquetFileService(ILogger<ParquetFileService> logger)
     {
@@ -16,7 +19,7 @@ public sealed class ParquetFileService
 
     public async Task<byte[]> GenerateParquetFileAsync(List<AggregatedCostMetricsRecord> records, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Generating Parquet file for {RecordCount} aggregated records", records.Count);
+        LogGeneratingParquetFile(records.Count);
 
         using var memoryStream = new MemoryStream();
 
@@ -83,7 +86,13 @@ public sealed class ParquetFileService
             }
         }
 
-        _logger.LogInformation("Generated Parquet file with {FileSize} bytes", memoryStream.Length);
+        LogGeneratedParquetFile(memoryStream.Length);
         return memoryStream.ToArray();
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Generating Parquet file for {RecordCount} aggregated records")]
+    private partial void LogGeneratingParquetFile(int recordCount);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Generated Parquet file with {FileSize} bytes")]
+    private partial void LogGeneratedParquetFile(long fileSize);
 }

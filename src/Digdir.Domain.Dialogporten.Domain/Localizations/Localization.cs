@@ -36,15 +36,13 @@ public sealed class Localization
     public static bool IsValidCultureCode(string? languageCode) =>
         languageCode is not null && Codes.Contains(languageCode);
 
-    private string _languageCode = null!;
-
     public string Value { get; set; } = null!;
 
     public string LanguageCode
     {
-        get => _languageCode;
-        set => _languageCode = NormalizeCultureCode(value)!;
-    }
+        get;
+        set => field = NormalizeCultureCode(value)!;
+    } = null!;
 
     // === Dependent relationships ===
     public Guid LocalizationSetId { get; set; }

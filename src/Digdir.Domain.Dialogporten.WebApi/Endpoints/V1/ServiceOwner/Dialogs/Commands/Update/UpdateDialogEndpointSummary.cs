@@ -25,6 +25,7 @@ public sealed class UpdateDialogEndpointSummary : Summary<UpdateDialogEndpoint>
         Responses[StatusCodes.Status403Forbidden] =
             Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("update");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[StatusCodes.Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
         Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
         Responses[StatusCodes.Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;

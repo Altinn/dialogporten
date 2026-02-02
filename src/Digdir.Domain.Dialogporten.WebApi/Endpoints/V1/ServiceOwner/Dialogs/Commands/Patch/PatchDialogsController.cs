@@ -52,12 +52,14 @@ public sealed class PatchDialogsController : ControllerBase
     /// <response code="412">The supplied Revision does not match the current Revision of the dialog</response>
     /// <response code="422">Domain error occurred. See problem details for a list of errors.</response>
     [HttpPatch("{dialogId}")]
+    [Consumes("application/json", "application/json-patch+json")]
     [OpenApiOperation("V1ServiceOwnerDialogsPatchDialog")]
     [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status410Gone)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status412PreconditionFailed)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
@@ -109,7 +111,8 @@ public sealed class PatchDialogsController : ControllerBase
             validationFailed => BadRequest(HttpContext.GetResponseOrDefault(StatusCodes.Status400BadRequest, validationFailed.Errors.ToList())),
             forbidden => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status403Forbidden, forbidden.ToValidationResults())),
             domainError => UnprocessableEntity(HttpContext.GetResponseOrDefault(StatusCodes.Status422UnprocessableEntity, domainError.ToValidationResults())),
-            concurrencyError => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status412PreconditionFailed)) { StatusCode = StatusCodes.Status412PreconditionFailed }
+            concurrencyError => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status412PreconditionFailed)) { StatusCode = StatusCodes.Status412PreconditionFailed },
+            conflict => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status409Conflict, conflict.ToValidationResults())) { StatusCode = StatusCodes.Status409Conflict }
         );
     }
 

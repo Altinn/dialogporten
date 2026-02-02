@@ -24,9 +24,12 @@ internal sealed class AltinnEventsClient : ICloudEventBus
             cancellationToken: cancellationToken);
 }
 
-internal sealed class ConsoleLogEventBus : ICloudEventBus
+internal sealed partial class ConsoleLogEventBus : ICloudEventBus
 {
+    // Used by source-generated logging partials; analyzers don't see the generated usage.
+#pragma warning disable IDE0052
     private readonly ILogger<ConsoleLogEventBus> _logger;
+#pragma warning restore IDE0052
 
     public ConsoleLogEventBus(ILogger<ConsoleLogEventBus> logger)
     {
@@ -35,7 +38,10 @@ internal sealed class ConsoleLogEventBus : ICloudEventBus
 
     public Task Publish(CloudEvent cloudEvent, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Event published! Time: {CloudEventTime:O}, Type: {CloudEventType}", cloudEvent.Time, cloudEvent.Type);
+        LogEventPublished(cloudEvent.Time, cloudEvent.Type);
         return Task.CompletedTask;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Event published! Time: {CloudEventTime:O}, Type: {CloudEventType}")]
+    private partial void LogEventPublished(DateTimeOffset? cloudEventTime, string? cloudEventType);
 }

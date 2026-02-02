@@ -28,6 +28,7 @@ public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
             .ProducesOneOf(
             StatusCodes.Status204NoContent,
             StatusCodes.Status404NotFound,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status412PreconditionFailed));
     }
 
@@ -46,7 +47,8 @@ public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
             notFound => this.NotFoundAsync(notFound, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             concurrencyError => this.PreconditionFailed(ct),
-            validationError => this.BadRequestAsync(validationError, ct));
+            validationError => this.BadRequestAsync(validationError, ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 }
 

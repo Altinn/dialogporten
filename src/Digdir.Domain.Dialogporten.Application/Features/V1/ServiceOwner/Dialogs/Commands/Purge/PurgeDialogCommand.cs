@@ -24,7 +24,7 @@ public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>,
 }
 
 [GenerateOneOf]
-public sealed partial class PurgeDialogResult : OneOfBase<Success, EntityNotFound, Forbidden, ConcurrencyError, ValidationError>;
+public sealed partial class PurgeDialogResult : OneOfBase<Success, EntityNotFound, Forbidden, ConcurrencyError, ValidationError, Conflict>;
 
 internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCommand, PurgeDialogResult>
 {
@@ -68,6 +68,7 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
         return saveResult.Match<PurgeDialogResult>(
             success => success,
             domainError => throw new UnreachableException("Should never get a domain error when deleting a dialog"),
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 }

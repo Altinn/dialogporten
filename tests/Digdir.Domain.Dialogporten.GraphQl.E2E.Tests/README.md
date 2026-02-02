@@ -46,14 +46,15 @@ dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests To
 
 ## Writing tests
 Use the shared E2E base class and custom attributes so hooks and explicit behavior are consistent:
-- Inherit `GraphQlE2ETestBase` and keep tests under `Features/*`.
-- Use `[GraphQlE2EFact]` or `[GraphQlE2ETheory]` on every test (do not use `[Fact]`/`[Theory]`).
-- Explicit behavior is centralized in `GraphQlE2EExplicitOptions` in `Common/GraphQlE2ETestAttributes.cs`.
+- Inherit `E2ETestBase<GraphQlE2EFixture>` and keep tests under `Features/*`.
+- Use `[E2EFact]` or `[E2ETheory]` on every test (do not use `[Fact]`/`[Theory]`).
+- Explicit behavior is centralized in `E2EExplicitOptions` in `Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs`.
 
 ## Run tests
 These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile this project, so you get compile-time checks even when the E2E tests do not run.
 
-To enable these tests locally for debugging, set `GraphQlE2EExplicitOptions.ExplicitTests` to `true`.
+To enable these tests locally for debugging, set `E2EExplicitOptions.ExplicitTests` to `false`  
+(when `true`, tests are marked explicit and skipped unless you pass `xUnit.Explicit=on/only`).
 
 Use the xUnit explicit switch:
 - `dotnet test -- xUnit.Explicit=off` (default; do not run explicit tests)

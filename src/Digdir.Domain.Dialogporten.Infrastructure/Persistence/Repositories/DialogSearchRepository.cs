@@ -19,7 +19,7 @@ using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed class DialogSearchRepository(
+internal sealed partial class DialogSearchRepository(
     DialogDbContext dbContext,
     ILogger<DialogSearchRepository> logger,
     NpgsqlDataSource dataSource) : IDialogSearchRepository
@@ -706,6 +706,8 @@ internal sealed class DialogSearchRepository(
     private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, List<PartiesAndServices>? partiesAndServices)
     {
         if (partiesAndServices is null) return;
+        if (!logger.IsEnabled(LogLevel.Information)) return;
+
         var totalPartiesCount = partiesAndServices.Sum(g => g.Parties.Length);
         var totalServicesCount = partiesAndServices.Sum(g => g.Services.Length);
         var groupsCount = partiesAndServices.Count;
@@ -713,9 +715,7 @@ internal sealed class DialogSearchRepository(
             .Select(g => (g.Parties.Length, g.Services.Length))
             .ToList();
 
-        logger.LogInformation(
-            "PartiesAndServices: tp={TotalPartiesCount}, ts={TotalServicesCount}, g={GroupsCount}, gs={GroupSizes}",
-            totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
+        LogPartiesAndServicesCount(logger, totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
     }
 
     private sealed record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
@@ -733,4 +733,14 @@ internal sealed class DialogSearchRepository(
     private sealed record RawActivityRow(Guid DialogId, Guid ActivityId, DateTime CreatedAt,
         DialogActivityType.Values TypeId, string? ExtendedType, Guid? TransmissionId, ActorType.Values ActorType,
         string? ActorId, string? ActorName, string? LanguageCode, string? Description);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "PartiesAndServices: tp={TotalPartiesCount}, ts={TotalServicesCount}, g={GroupsCount}, gs={GroupSizes}")]
+    private static partial void LogPartiesAndServicesCount(
+        ILogger<DialogSearchRepository> logger,
+        int totalPartiesCount,
+        int totalServicesCount,
+        int groupsCount,
+        List<(int PartiesCount, int ServicesCount)> groupSizes);
 }

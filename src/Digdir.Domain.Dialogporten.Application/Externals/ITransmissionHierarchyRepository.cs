@@ -1,5 +1,3 @@
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-
 namespace Digdir.Domain.Dialogporten.Application.Externals;
 
 public interface ITransmissionHierarchyRepository

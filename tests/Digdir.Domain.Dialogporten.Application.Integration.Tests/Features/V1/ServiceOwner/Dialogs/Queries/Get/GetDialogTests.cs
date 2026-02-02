@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -6,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
+using AwesomeAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -119,4 +120,21 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .ExecuteAndAssert<DialogDto>(x =>
                 x.SystemLabel.Should()
                     .Be(SystemLabel.Values.Default));
+
+    [Fact]
+    public Task Get_Dialog_with_malformed_EndUserId() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SearchServiceOwnerDialogs(x =>
+            {
+                x.ServiceResource = ["urn:altinn:resource:super-simple-service"];
+                x.EndUserId =
+                    "urn:altinn:person:identifier-no:05848297888";
+            })
+            .ExecuteAndAssert<ValidationError>(result =>
+            {
+                result.Errors.Should().ContainSingle()
+                    .Which.ErrorMessage.Should()
+                    .Contain("EndUserId must be a valid end user identifier.");
+            });
 }

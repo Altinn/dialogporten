@@ -12,7 +12,7 @@ internal sealed class ContextDesignTimeFactory : IDesignTimeDbContextFactory<Dia
     public DialogDbContext CreateDbContext(string[] args)
     {
         var localPostgresConnectionString = new ConfigurationBuilder()
-            .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
+            .AddUserSecrets(InfrastructureAssemblyMarker.Assembly, true)
             .Build()[ConnectionStringConfigName];
 
         return new(new DbContextOptionsBuilder<DialogDbContext>()

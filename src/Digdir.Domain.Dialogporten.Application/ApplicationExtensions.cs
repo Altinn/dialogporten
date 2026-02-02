@@ -31,7 +31,6 @@ public static class ApplicationExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
-        var thisAssembly = Assembly.GetExecutingAssembly();
 
         services.AddOptions<ApplicationSettings>()
             .Bind(configuration.GetSection(ApplicationSettings.ConfigurationSectionName))
@@ -48,14 +47,15 @@ public static class ApplicationExtensions
 
         services
             // Framework
-            .AddAutoMapper(thisAssembly)
+            .AddAutoMapper(ApplicationAssemblyMarker.Assembly)
             .AddMediatR(x =>
             {
-                x.RegisterServicesFromAssembly(thisAssembly);
+                x.RegisterServicesFromAssembly(ApplicationAssemblyMarker.Assembly);
                 x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
                 x.NotificationPublisherType = typeof(TaskWhenAllPublisher);
             })
-            .AddValidatorsFromAssembly(thisAssembly, ServiceLifetime.Transient, includeInternalTypes: true,
+            .AddValidatorsFromAssembly(ApplicationAssemblyMarker.Assembly,
+                ServiceLifetime.Transient, includeInternalTypes: true,
                 filter: type => !type.ValidatorType.IsAssignableTo(typeof(IIgnoreOnAssemblyScan)))
 
             // Singleton

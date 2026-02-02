@@ -87,8 +87,6 @@ static void BuildAndRun(string[] args)
         ));
     }
 
-    var thisAssembly = Assembly.GetExecutingAssembly();
-
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
@@ -109,10 +107,11 @@ static void BuildAndRun(string[] args)
 
         // Asp infrastructure
         .AddExceptionHandler<GlobalExceptionHandler>()
-        .AddAutoMapper(Assembly.GetExecutingAssembly())
+        .AddAutoMapper(WebApiAssemblyMarker.Assembly)
         .AddScoped<IUser, ApplicationUser>()
         .AddHttpContextAccessor()
-        .AddValidatorsFromAssembly(thisAssembly, ServiceLifetime.Transient, includeInternalTypes: true)
+        .AddValidatorsFromAssembly(WebApiAssemblyMarker.Assembly,
+            ServiceLifetime.Transient, includeInternalTypes: true)
         .AddAzureAppConfiguration()
         .AddEndpointsApiExplorer()
         .AddFastEndpoints()

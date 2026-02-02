@@ -1,6 +1,7 @@
 #!/usr/bin/env zsh
 set -euo pipefail
 
+script_dir="$(cd "$(dirname "$0")" && pwd)"
 # Clean up function
 cleanup() {
   if [[ -n "${webapi_pid:-}" ]] && kill -0 "$webapi_pid" >/dev/null 2>&1; then
@@ -9,11 +10,25 @@ cleanup() {
   fi
 }
 
-# Run cleanup when script exit or terminates
-trap cleanup EXIT INT TERM
+# Read .env file
+loadEnv() {
+  env_file=""
+  if [[ -n "${ENV_FILE:-}" ]]; then
+    env_file="$ENV_FILE"
+  elif [[ -f "$script_dir/.env" ]]; then
+    env_file="$script_dir/.env"
+  fi
+  
+  # Load env file
+  if [[ -n "$env_file" ]]; then
+    echo "Loading environment from $env_file"
+    set -a
+    source "$env_file"
+    set +a
+  fi
+}
 
-script_dir="$(cd "$(dirname "$0")" && pwd)"
-
+setRepoPath() {
 if [[ -n "${DIALOGPORTEN:-}" ]]; then
   repo_root="$DIALOGPORTEN"
 else
@@ -35,25 +50,31 @@ else
     exit 1
   fi
 fi
+}
 
-# Read .env file
-env_file=""
-if [[ -n "${ENV_FILE:-}" ]]; then
-  env_file="$ENV_FILE"
-elif [[ -f "$script_dir/.env" ]]; then
-  env_file="$script_dir/.env"
-fi
+podman_check() {
+  postgre_run=$(podman ps -f "status=running" -f name=postgres -q)
+  redis_run=$(podman ps -f "status=running" -f name=redis -q)
+  podman_log="${script_dir}/dialogporten-podman.log"
+  if [[ -n "${postgre_run:-}" && -n "${redis_run:-}" ]]; then
+    echo "postgre is running"
+    echo "redis is running"
+    return 1
+  fi
+  
+  podman compose -f $repo_root/docker-compose-db-redis.yml up > "$podman_log" 2>&1 &
+}
+# Run cleanup when script exit or terminates
+trap cleanup EXIT INT TERM
 
-# Load env file
-if [[ -n "$env_file" ]]; then
-  echo "Loading environment from $env_file"
-  set -a
-  source "$env_file"
-  set +a
-fi
+setRepoPath
+loadEnv
 
 # fix Path
 webapi_log="${script_dir}/dialogporten-webapi-e2e.log"
+
+# Podman check
+podman_check
 
 export DOTNET_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
 export ASPNETCORE_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
@@ -75,7 +96,7 @@ echo "Waiting for WebAPI to respond..."
 
 start_time=$(date +%s)
 timeout_seconds=60
-echo "Timeout $timeout_seconds secounds"
+echo "Timeout $timeout_seconds seconds"
 while true; do
   if curl -k -s -o /dev/null -I "$WebApiUrl"; then
     break

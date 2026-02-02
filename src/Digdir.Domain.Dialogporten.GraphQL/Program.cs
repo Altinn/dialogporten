@@ -71,8 +71,6 @@ static void BuildAndRun(string[] args)
         ));
     }
 
-    var thisAssembly = Assembly.GetExecutingAssembly();
-
     // CORS allowed origins by environment in order for GraphQL streams to work from Arbeidsflate directly through APIM
     var allowedOrigins = builder.Configuration
         .GetSection(GraphQlSettings.SectionName)
@@ -90,10 +88,11 @@ static void BuildAndRun(string[] args)
         .AddInfrastructure(builder.Configuration, builder.Environment)
             .WithPubCapabilities()
             .Build()
-        .AddAutoMapper(Assembly.GetExecutingAssembly())
+        .AddAutoMapper(GraphQLAssemblyMarker.Assembly)
         .AddHttpContextAccessor()
         .AddScoped<IUser, ApplicationUser>()
-        .AddValidatorsFromAssembly(thisAssembly, ServiceLifetime.Transient, includeInternalTypes: true)
+        .AddValidatorsFromAssembly(GraphQLAssemblyMarker.Assembly,
+            ServiceLifetime.Transient, includeInternalTypes: true)
         .AddAzureAppConfiguration()
 
         // CORS

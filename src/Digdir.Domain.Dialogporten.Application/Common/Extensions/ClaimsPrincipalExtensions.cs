@@ -20,6 +20,9 @@ public static class ClaimsPrincipalExtensions
     private const string IdPrefix = "0192";
     private const string AltinnClaimPrefix = "urn:altinn:";
     private const string IdportenAuthLevelClaim = "acr";
+    private const string IdportenAmrClaim = "amr";
+    private const string AmrSelfRegisteredEmail = "Selfregistered-email";
+    private const string AmrSelfIdentified = "SelfIdentified";
     private const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
@@ -38,6 +41,18 @@ public static class ClaimsPrincipalExtensions
     {
         value = claimsPrincipal.FindFirst(claimType)?.Value;
         return value is not null;
+    }
+
+    public static bool TryGetClaimValues(this ClaimsPrincipal claimsPrincipal, string claimType,
+        [NotNullWhen(true)] out string[]? values)
+    {
+        values = claimsPrincipal.FindAll(claimType)
+            .Select(c => c.Value)
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        return values.Length > 0;
     }
 
     public static bool TryGetConsumerOrgNumber(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgNumber)
@@ -151,10 +166,12 @@ public static class ClaimsPrincipalExtensions
     }
 
     public static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
-        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email);
+        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
+           && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr[0] == AmrSelfRegisteredEmail;
 
     public static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? username)
-        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username);
+        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
+        && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr[0] == AmrSelfIdentified;
 
     public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
         => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);
@@ -192,10 +209,17 @@ public static class ClaimsPrincipalExtensions
 
         if (claimsPrincipal.TryGetClaimValue(IdportenAuthLevelClaim, out claimValue))
         {
-            // The acr claim value is either "idporten-loa-substantial" (previously "Level3") or "idporten-loa-high" (previously "Level4")
-            // https://docs.digdir.no/docs/idporten/oidc/oidc_protocol_new_idporten#new-acr-values
+            // The acr claim value is either
+            // - "idporten-loa-low" (only set by Altinn, used for legacy SI users)
+            // - "idporten-loa-substantial" (previously "Level3")
+            // - "idporten-loa-high" (previously "Level4")
+            // - "selfregistered-email" (for email users),
+            // See https://docs.digdir.no/docs/idporten/oidc/oidc_protocol_new_idporten#new-acr-values
+            //     https://docs.digdir.no/docs/idporten/oidc/oidc_func_emaillogin.html
             return claimValue switch
             {
+                Constants.IdportenLoaEmail => 0,
+                Constants.IdportenLoaLow => 0,
                 Constants.IdportenLoaSubstantial => 3,
                 Constants.IdportenLoaHigh => 4,
                 _ => throw new ArgumentException("Unknown acr value")
@@ -247,8 +271,8 @@ public static class ClaimsPrincipalExtensions
     /// 2. System user (has authorization_details claim with type urn:altinn:systemuser)
     /// 3. Service owner (has consumer claim and service_owner scope)
     /// 4. Feide user (has orgsub claim)
-    /// 5. Altinn self-identified user (has urn:altinn:username claim with SelfIdentified auth method)
-    /// 6. Idporten self-identified user (has email claim)
+    /// 5. Altinn self-identified user (has urn:altinn:username claim with SelfIdentified amr claim)
+    /// 6. Idporten self-registered user (has email claim with SelfIdentified-email amr claim)
     /// 7. Unknown (none of the above)
     /// </summary>
     /// <param name="claimsPrincipal"></param>
@@ -386,6 +410,22 @@ public static class ClaimsPrincipalExtensions
         };
 
         return orgNumber is not null;
+    }
+
+    private static bool TryGetAmrClaimValues(this ClaimsPrincipal claimsPrincipal,
+        [NotNullWhen(true)] out string[]? amrValuesSorted)
+    {
+        amrValuesSorted = null;
+
+        if (!claimsPrincipal.TryGetClaimValues(IdportenAmrClaim, out var amrClaimValues))
+        {
+            return false;
+        }
+
+        amrClaimValues.Sort(StringComparer.Ordinal);
+        amrValuesSorted = amrClaimValues;
+
+        return amrValuesSorted.Length > 0;
     }
 
     // https://docs.altinn.studio/authentication/systemauthentication/

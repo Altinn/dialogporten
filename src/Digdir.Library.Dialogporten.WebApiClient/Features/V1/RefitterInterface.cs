@@ -232,11 +232,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Retrieve service owner labels for a dialog.</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.1.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.2.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Retrieve service owner labels for a dialog.</summary>
         /// <remarks>Fetches all labels associated with the service owner context of a specific dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -276,6 +277,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Add a label to the service owner context.
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="dto">dto parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -320,6 +324,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Delete a service owner label for a dialog</summary>
         /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="label">label parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -368,6 +375,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="enduserId">enduserId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="setDialogSystemLabelRequest">setDialogSystemLabelRequest parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -424,6 +435,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
+        /// <param name="enduserId">enduserId parameter</param>
+        /// <param name="dto">dto parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -472,6 +485,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -516,6 +530,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="createTransmissionRequest">createTransmissionRequest parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -576,6 +593,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -652,6 +670,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -692,6 +711,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="createActivityRequest">createActivityRequest parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -791,6 +813,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// For detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)
         /// </remarks>
+        /// <param name="dto">dto parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -839,6 +862,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Returns a boolean value based on conditions used to determine if a notification is to be sent</summary>
         /// <remarks>Used by Altinn Notification only. Takes a dialogId and returns a boolean value based on conditions used to determine if a notification is to be sent.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="queryParams">The dynamic querystring parameter wrapping all others.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
@@ -872,6 +896,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a single dialog transmission</summary>
         /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="transmissionId">transmissionId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -912,6 +938,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="seenLogId">seenLogId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -952,6 +980,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="activityId">activityId parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -996,6 +1026,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Note that this operation may return deleted dialogs (see the field `DeletedAt`).
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
         /// <param name="endUserId">Filter by end user id</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
@@ -1037,6 +1068,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
+        /// <param name="dto">dto parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1100,6 +1134,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1157,6 +1193,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="etag">etag parameter</param>
+        /// <param name="patchDocument">patchDocument parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1213,6 +1252,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Restore a dialog</summary>
         /// <remarks>Restore a dialog.</remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1261,6 +1302,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
@@ -1308,6 +1351,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Freezes a given dialog.
         /// The dialog cannot be updated/deleted by the service owner (but can still be altered via admin-scope) when frozen
         /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="if_Match">if_Match parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
         /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:

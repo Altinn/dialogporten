@@ -272,7 +272,7 @@ public static class ClaimsPrincipalExtensions
     /// 3. Service owner (has consumer claim and service_owner scope)
     /// 4. Feide user (has orgsub claim)
     /// 5. Altinn self-identified user (has urn:altinn:username claim with SelfIdentified amr claim)
-    /// 6. Idporten self-registered user (has email claim with SelfIdentified-email amr claim)
+    /// 6. Idporten self-registered user (has email claim with Selfregistered-email amr claim)
     /// 7. Unknown (none of the above)
     /// </summary>
     /// <param name="claimsPrincipal"></param>

@@ -21,6 +21,11 @@ loadEnv() {
   elif [[ -f "$script_dir/.env" ]]; then
     env_file="$script_dir/.env"
   fi
+  
+  if [[ -z "${WEBAPI_ENVIRONMENT:-}" ]]; then
+      echo "WEBAPI_ENVIRONMENT not found, using Development as default"
+      WEBAPI_ENVIRONMENT=Development 
+  fi
 
   if [[ -n "$env_file" ]]; then
     echo "Loading environment from $env_file"
@@ -69,8 +74,8 @@ podman_check() {
 
 trap cleanup EXIT INT TERM
 
-setRepoPath
 loadEnv
+setRepoPath
 
 webapi_log="${script_dir}/dialogporten-webapi-e2e.log"
 graphql_log="${script_dir}/dialogporten-graphql-e2e.log"

@@ -19,7 +19,7 @@ internal sealed class UtcDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
         // Validate that the last 6 bytes includes a valid offset
         if (!HasValidOffset(reader.ValueSpan))
         {
-            throw new JsonException(OffsetRequiredErrorMessage);
+            throw new JsonException($"{OffsetRequiredErrorMessage} Got '{reader.GetString()}'.");
         }
 
         return dateTimeOffset;
@@ -71,7 +71,7 @@ internal sealed class UtcDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
     }
 
     private static bool IsNumber(byte value) => value is >= 48 and <= 57;
-    private static bool IsZ(byte value) => value == 90;
+    private static bool IsZ(byte value) => value is 90;
     private static bool IsPlusOrMinus(byte value) => value is 43 or 45;
-    private static bool IsSemicolon(byte value) => value == 58;
+    private static bool IsSemicolon(byte value) => value is 58;
 }

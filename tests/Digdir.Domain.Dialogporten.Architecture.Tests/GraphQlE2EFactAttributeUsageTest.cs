@@ -1,5 +1,6 @@
 using System.Reflection;
 using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests;
 using Digdir.Library.Dialogporten.E2E.Common;
 using AwesomeAssertions;
 
@@ -8,19 +9,23 @@ namespace Digdir.Domain.Dialogporten.Architecture.Tests;
 public class GraphQlE2EFactAttributeUsageTest
 {
     [Fact]
-    public void GraphQl_E2E_ExplicitOption_Must_Be_Enabled() =>
+    public void E2E_ExplicitOption_Must_Be_Enabled() =>
         E2EExplicitOptions.ExplicitTests
             .Should()
-            .BeTrue("GraphQl E2E tests must remain explicit in CI/CD.");
+            .BeTrue("E2E tests must remain explicit in CI/CD.");
 
     [Fact]
-    public void All_GraphQL_E2E_Tests_Must_Inherit_E2E_Base()
+    public void All_E2E_Tests_Must_Inherit_E2E_Base()
     {
-        var testMethods = GraphQlE2EAssemblyMarker
-            .Assembly
-            .GetTypes()
-            .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
-            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        var testMethods = new[]
+            {
+                GraphQlE2EAssemblyMarker.Assembly,
+                WebAPIE2EAssemblyMarker.Assembly,
+            }
+            .SelectMany(assembly => assembly
+                .GetTypes()
+                .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
+                .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)))
             .Where(m => m.GetCustomAttributes(inherit: true)
                 .Any(a => a is E2EFactAttribute or E2ETheoryAttribute))
             .ToArray();
@@ -36,17 +41,21 @@ public class GraphQlE2EFactAttributeUsageTest
         nonBaseClasses
             .Should()
             .BeEmpty(
-                $"All GraphQl E2E test classes must inherit {nameof(E2ETestBase<>)}.");
+                $"All GraphQl and WebAPI E2E test classes must inherit {nameof(E2ETestBase<>)}.");
     }
 
     [Fact]
-    public void All_GraphQL_E2E_Tests_Must_Use_Custom_Attributes()
+    public void All_E2E_Tests_Must_Use_Custom_Attributes()
     {
-        var nonCustomAttributeTests = GraphQlE2EAssemblyMarker
-            .Assembly
-            .GetTypes()
-            .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
-            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        var nonCustomAttributeTests = new[]
+            {
+                GraphQlE2EAssemblyMarker.Assembly,
+                WebAPIE2EAssemblyMarker.Assembly,
+            }
+            .SelectMany(assembly => assembly
+                .GetTypes()
+                .Where(t => t is { IsClass: true, IsAbstract: false, IsPublic: true })
+                .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)))
             .Where(m => m.GetCustomAttributes(inherit: true)
                 .Any(a => a is FactAttribute or TheoryAttribute))
             .Where(m => m.GetCustomAttributes(inherit: true)
@@ -58,7 +67,7 @@ public class GraphQlE2EFactAttributeUsageTest
         nonCustomAttributeTests
             .Should()
             .BeEmpty(
-                $"All tests in the GraphQl E2E project must use {nameof(E2EFactAttribute)} " +
+                $"All tests in the GraphQl and WebAPI E2E projects must use {nameof(E2EFactAttribute)} " +
                 $"or {nameof(E2ETheoryAttribute)}.");
     }
 

@@ -11,6 +11,7 @@ public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
 
     public DialogByIdTests(GraphQlE2EFixture fixture) : base(fixture) { }
 
+
     [E2EFact]
     public async Task Should_Return_Typed_NotFound_Error_For_Invalid_DialogId()
     {

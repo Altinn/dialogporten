@@ -2,7 +2,7 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
-# Clean up function
+
 cleanup() {
   if [[ -n "${webapi_pid:-}" ]] && kill -0 "$webapi_pid" >/dev/null 2>&1; then
     kill "$webapi_pid" >/dev/null 2>&1 || true
@@ -14,7 +14,6 @@ cleanup() {
   fi
 }
 
-# Read .env file
 loadEnv() {
   env_file=""
   if [[ -n "${ENV_FILE:-}" ]]; then
@@ -22,8 +21,7 @@ loadEnv() {
   elif [[ -f "$script_dir/.env" ]]; then
     env_file="$script_dir/.env"
   fi
-  
-  # Load env file
+
   if [[ -n "$env_file" ]]; then
     echo "Loading environment from $env_file"
     set -a
@@ -33,27 +31,27 @@ loadEnv() {
 }
 
 setRepoPath() {
-if [[ -n "${DIALOGPORTEN:-}" ]]; then
-  repo_root="$DIALOGPORTEN"
-else
-  echo "DIALOGPORTEN not set, searching for repo root...."
-  repo_root="$script_dir"   # start from script location
-  depth=0
-  found=0
-  while [[ $repo_root != "/" && $depth -lt 5 ]]; do
-    if [[ -e "$repo_root/Digdir.Domain.Dialogporten.sln" ]]; then
-      echo "Repo root found: $repo_root/Digdir.Domain.Dialogporten.sln"
-      found=1
-      break
+  if [[ -n "${DIALOGPORTEN:-}" ]]; then
+    repo_root="$DIALOGPORTEN"
+  else
+    echo "DIALOGPORTEN not set, searching for repo root...."
+    repo_root="$script_dir"   # start from script location
+    depth=0
+    found=0
+    while [[ $repo_root != "/" && $depth -lt 5 ]]; do
+      if [[ -e "$repo_root/Digdir.Domain.Dialogporten.sln" ]]; then
+        echo "Repo root found: $repo_root/Digdir.Domain.Dialogporten.sln"
+        found=1
+        break
+      fi
+      repo_root=${repo_root:h}
+      ((++depth))
+    done
+    if [[ $found -ne 1 ]]; then
+      echo "ERROR: Repo root not found within 5 levels from $script_dir" >&2
+      exit 1
     fi
-    repo_root=${repo_root:h}
-    ((++depth))
-  done
-  if [[ $found -ne 1 ]]; then
-    echo "ERROR: Repo root not found within 5 levels from $script_dir" >&2
-    exit 1
   fi
-fi
 }
 
 podman_check() {
@@ -65,16 +63,15 @@ podman_check() {
     echo "redis is running"
     return
   fi
-  
+
   podman compose -f $repo_root/docker-compose-db-redis.yml up > "$podman_log" 2>&1 &
 }
-# Run cleanup when script exit or terminates
+
 trap cleanup EXIT INT TERM
 
 setRepoPath
 loadEnv
 
-# fix Path
 webapi_log="${script_dir}/dialogporten-webapi-e2e.log"
 graphql_log="${script_dir}/dialogporten-graphql-e2e.log"
 

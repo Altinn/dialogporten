@@ -17,9 +17,8 @@ internal static class MigrationSqlLoader
         }
 
         var resourceName = $"{BaseNamespace}.{Normalize(relativePath)}";
-        var assembly = Assembly.GetExecutingAssembly();
 
-        using var stream = assembly.GetManifestResourceStream(resourceName)
+        using var stream = InfrastructureAssemblyMarker.Assembly.GetManifestResourceStream(resourceName)
                            ?? throw new InvalidOperationException($"Embedded SQL resource '{resourceName}' not found.");
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();

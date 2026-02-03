@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.102.1](https://github.com/Altinn/dialogporten/compare/v1.102.0...v1.102.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* **WebApi:** Respect Utf8JsonReader.HasValueSequence ([#3366](https://github.com/Altinn/dialogporten/issues/3366)) ([0b048d3](https://github.com/Altinn/dialogporten/commit/0b048d3ce8a977080f4a8f7ca009c1efeadbbdc9))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency asynckeyedlock to 8.0.1 ([#3356](https://github.com/Altinn/dialogporten/issues/3356)) ([4c5a862](https://github.com/Altinn/dialogporten/commit/4c5a8620e2bbff9da66eaf916b09ea9e68cf48e8))
+* **deps:** update dependency refitter.sourcegenerator to 1.7.2 ([#3357](https://github.com/Altinn/dialogporten/issues/3357)) ([7b39a64](https://github.com/Altinn/dialogporten/commit/7b39a64c35e2b1ac7e9c852135355c94bede2bd0))
+
 ## [1.102.0](https://github.com/Altinn/dialogporten/compare/v1.101.0...v1.102.0) (2026-01-30)
 
 

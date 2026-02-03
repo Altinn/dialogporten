@@ -167,11 +167,11 @@ public static class ClaimsPrincipalExtensions
 
     public static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
         => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
-           && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr[0] == AmrSelfRegisteredEmail;
+           && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfRegisteredEmail];
 
     public static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? username)
         => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
-        && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr[0] == AmrSelfIdentified;
+        && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfIdentified];
 
     public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
         => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);

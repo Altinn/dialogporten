@@ -159,7 +159,8 @@ public class DecisionRequestHelperTests
             GetAsClaims(
                 ("urn:altinn:partyid", "1"),
                 ("urn:altinn:userid", "2"),
-                ("urn:altinn:username", "someusername")
+                ("urn:altinn:username", "someusername"),
+                ("amr", "SelfIdentified")
             ),
             $"{AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator}someusername"
         );
@@ -189,7 +190,8 @@ public class DecisionRequestHelperTests
             GetAsClaims(
                 ("urn:altinn:partyid", "1"),
                 ("urn:altinn:userid", "2"),
-                ("email", "foo@bar.com")
+                ("email", "foo@bar.com"),
+                ("amr", "Selfregistered-email")
             ),
             $"{IdportenEmailUserIdentifier.PrefixWithSeparator}foo@bar.com"
         );

@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Altinn.ApiClients.Maskinporten.Extensions;
+using Dapper;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -55,6 +56,8 @@ public static class InfrastructureExtensions
     {
         ArgumentNullException.ThrowIfNull(builderContext);
         var (services, configuration, environment, infrastructureSettings, _) = builderContext;
+
+        SqlMapper.AddTypeHandler(new GuidArrayTypeHandler());
 
         services
             .AddSingleton(sp =>

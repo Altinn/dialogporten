@@ -77,8 +77,10 @@ param serviceBusSku = {
 }
 
 // Altinn Product Dialogporten: Developers Prod
-param sshJumperAdminLoginGroupObjectId = 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
+param sshJumperConfig = {
+  adminLoginGroupObjectId: 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
+  vmSize: 'Standard_D2as_v5'
+}
 
 param apimUrl = 'https://platform.altinn.no/dialogporten'
 
-param sshJumperVmSize = 'Standard_D2as_v5'

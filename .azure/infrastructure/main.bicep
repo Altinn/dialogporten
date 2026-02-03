@@ -36,8 +36,11 @@ param sourceKeyVaultName string
 @minLength(3)
 param sourceKeyVaultSshJumperSshPublicKey string
 
-@description('The object ID of the group to assign the Admin Login role for SSH Jumper')
-param sshJumperAdminLoginGroupObjectId string
+@description('Configuration for the SSH jumper')
+param sshJumperConfig {
+  adminLoginGroupObjectId: string
+  vmSize: string?
+}
 
 @description('The URL of the APIM instance')
 param apimUrl string
@@ -91,9 +94,6 @@ import { Sku as RedisSku } from '../modules/redis/main.bicep'
 param redisSku RedisSku
 @minLength(1)
 param redisVersion string
-
-@description('The SKU of the SSH jumper')
-param sshJumperVmSize string = 'Standard_B1s'
 
 var secrets = {
   dialogportenPgAdminPassword: dialogportenPgAdminPassword
@@ -215,8 +215,8 @@ module sshJumper '../modules/ssh-jumper/main.bicep' = {
     subnetId: vnet.outputs.sshJumperSubnetId
     tags: tags
     sshPublicKey: secrets.sourceKeyVaultSshJumperSshPublicKey
-    adminLoginGroupObjectId: sshJumperAdminLoginGroupObjectId
-    vmSize: sshJumperVmSize
+    adminLoginGroupObjectId: sshJumperConfig.adminLoginGroupObjectId
+    vmSize: sshJumperConfig.?vmSize ?? 'Standard_B1s'
   }
 }
 

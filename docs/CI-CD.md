@@ -26,7 +26,6 @@ When code is merged to `main`, two parallel workflows are triggered:
      - Infrastructure if changed
      - Applications if changed
      - Runs tests
-     - Updates dependencies
 
    b. **Release Please** (`ci-cd-release-please.yml`)
    - Checks if changes warrant a new release
@@ -56,7 +55,7 @@ Three parallel workflows are triggered:
 3. **YT01 Deployment** (`ci-cd-yt01.yml`)
    - Deploys to YT01 environment
    - Performance testing environment
-   - Full deployment similar to staging
+   - Deployment similar to staging, but does not publish SDK or schema packages
 
 #### Production Deployment
 - **Manual Trigger Required** (`ci-cd-prod.yml`)
@@ -67,6 +66,10 @@ Three parallel workflows are triggered:
   - Application deployment
   - SDK publishing
   - Version tracking updates
+
+##### Production Deployment Checklist
+- Notify the team for possible objections/comments (ping `@dialogporten-backend` in Slack and/or mention it at daily standup).
+- Verify the release has been deployed to tt02 and yt01 without issues.
 
 ### 3. Environment Flow
 ```

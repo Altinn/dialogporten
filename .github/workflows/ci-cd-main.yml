@@ -27,6 +27,12 @@ jobs:
     name: Check for changes
     uses: ./.github/workflows/workflow-check-for-changes.yml
 
+  build-and-test:
+    name: Build and test backend
+    uses: ./.github/workflows/workflow-build-and-test.yml
+    needs: [ check-for-changes ]
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
+
   publish:
     name: Build and publish docker images
     uses: ./.github/workflows/workflow-publish.yml
@@ -35,6 +41,7 @@ jobs:
         get-current-version,
         check-for-changes,
         generate-git-short-sha,
+        build-and-test,
       ]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     secrets:
@@ -157,6 +164,7 @@ jobs:
       run-e2e-tests,
       run-graphql-e2e-tests,
       publish-schema-npm,
+      build-and-test,
       publish,
     ]
     if: ${{ always() && failure() && !cancelled() }}
@@ -169,6 +177,7 @@ jobs:
       graphql_e2e_tests_status: ${{ needs.run-graphql-e2e-tests.result }}
       schema_npm_status: ${{ needs.publish-schema-npm.result }}
       publish_status: ${{ needs.publish.result }}
+      build_and_test_status: ${{ needs.build-and-test.result }}
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}

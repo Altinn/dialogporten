@@ -27,15 +27,14 @@ jobs:
       contents: read
     strategy:
       matrix:
-        environment: ${{
-          fromJSON(
-          github.event_name == 'workflow_dispatch' &&
-          inputs.environment != 'all' &&
-          format('[\"{0}\"]', inputs.environment)
-          ||
-          '[\"test\",\"staging\",\"yt01\"]'
-          )
-    } }
+        environment: >-
+          ${{ fromJSON(
+            github.event_name == 'workflow_dispatch' &&
+            inputs.environment != 'all' &&
+            format('["{0}"]', inputs.environment)
+            ||
+            '["test","staging","yt01"]'
+          ) }}
 
     steps:
       - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0

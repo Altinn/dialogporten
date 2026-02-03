@@ -1,4 +1,3 @@
-@description('The name prefix to be used for the resource')
 param namePrefix string
 
 @description('The location to deploy the resource to')
@@ -16,6 +15,9 @@ param sshPublicKey string
 
 @description('The object ID of the group to assign the Admin Login role for SSH Jumper')
 param adminLoginGroupObjectId string
+
+@description('The size of the virtual machine')
+param vmSize string = 'Standard_B1s'
 
 var name = '${namePrefix}-ssh-jumper'
 
@@ -85,7 +87,7 @@ module virtualMachine '../../modules/virtualMachine/main.bicep' = {
     adminLoginGroupObjectId: adminLoginGroupObjectId
     enableJit: true
     hardwareProfile: {
-      vmSize: 'Standard_B1s'
+      vmSize: vmSize
     }
     additionalCapabilities: {
       hibernationEnabled: false

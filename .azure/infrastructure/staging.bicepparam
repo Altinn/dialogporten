@@ -65,3 +65,5 @@ param serviceBusSku = {
 param sshJumperAdminLoginGroupObjectId = 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
 
 param apimUrl = 'https://platform.tt02.altinn.no/dialogporten'
+
+param sshJumperVmSize = 'Standard_B2als_v2'

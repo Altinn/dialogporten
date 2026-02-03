@@ -92,6 +92,9 @@ param redisSku RedisSku
 @minLength(1)
 param redisVersion string
 
+@description('The SKU of the SSH jumper')
+param sshJumperVmSize string = 'Standard_B1s'
+
 var secrets = {
   dialogportenPgAdminPassword: dialogportenPgAdminPassword
   sourceKeyVaultSubscriptionId: sourceKeyVaultSubscriptionId
@@ -213,6 +216,7 @@ module sshJumper '../modules/ssh-jumper/main.bicep' = {
     tags: tags
     sshPublicKey: secrets.sourceKeyVaultSshJumperSshPublicKey
     adminLoginGroupObjectId: sshJumperAdminLoginGroupObjectId
+    vmSize: sshJumperVmSize
   }
 }
 

@@ -82,3 +82,5 @@ param workloadProfiles = [
     maximumCount: 10
   }
 ]
+
+param sshJumperVmSize = 'Standard_B2als_v2'

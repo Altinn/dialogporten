@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.102.3](https://github.com/Altinn/dialogporten/compare/v1.102.2...v1.102.3) (2026-02-03)
+
+
+### Miscellaneous Chores
+
+* **ci:** always build docker images in pull requests ([#3376](https://github.com/Altinn/dialogporten/issues/3376)) ([33393cc](https://github.com/Altinn/dialogporten/commit/33393ccfe6f764b69226b1aa810c2c1695738b16))
+* **postgresql:** remove parameter logging ([#3372](https://github.com/Altinn/dialogporten/issues/3372)) ([d13be85](https://github.com/Altinn/dialogporten/commit/d13be855e0d14664a595c662730a25de638e591e))
+* update migration ef tools version ([#3374](https://github.com/Altinn/dialogporten/issues/3374)) ([d38084a](https://github.com/Altinn/dialogporten/commit/d38084a057462a96d8f40166b6df67f191bfc88c))
+
 ## [1.102.2](https://github.com/Altinn/dialogporten/compare/v1.102.1...v1.102.2) (2026-02-03)
 
 

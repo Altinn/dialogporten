@@ -13,7 +13,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="..\Digdir.Domain.Dialogporten.GraphQl.E2E.Tests\appsettings*.json" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.test.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.staging.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="appsettings.yt01.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

@@ -63,6 +63,9 @@ param serviceBusSku = {
 }
 
 // Altinn Product Dialogporten: Developers Dev
-param sshJumperAdminLoginGroupObjectId = 'c12e51e3-5cbd-4229-8a31-5394c423fb5f'
+param sshJumperConfig = {
+  adminLoginGroupObjectId: 'c12e51e3-5cbd-4229-8a31-5394c423fb5f'
+  vmSize: 'Standard_B2als_v2'
+}
 
 param apimUrl = 'https://platform.at23.altinn.cloud/dialogporten'

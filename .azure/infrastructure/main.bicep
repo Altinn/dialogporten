@@ -36,8 +36,11 @@ param sourceKeyVaultName string
 @minLength(3)
 param sourceKeyVaultSshJumperSshPublicKey string
 
-@description('The object ID of the group to assign the Admin Login role for SSH Jumper')
-param sshJumperAdminLoginGroupObjectId string
+@description('Configuration for the SSH jumper')
+param sshJumperConfig {
+  adminLoginGroupObjectId: string
+  vmSize: string
+}
 
 @description('The URL of the APIM instance')
 param apimUrl string
@@ -212,7 +215,8 @@ module sshJumper '../modules/ssh-jumper/main.bicep' = {
     subnetId: vnet.outputs.sshJumperSubnetId
     tags: tags
     sshPublicKey: secrets.sourceKeyVaultSshJumperSshPublicKey
-    adminLoginGroupObjectId: sshJumperAdminLoginGroupObjectId
+    adminLoginGroupObjectId: sshJumperConfig.adminLoginGroupObjectId
+    vmSize: sshJumperConfig.vmSize
   }
 }
 

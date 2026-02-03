@@ -103,8 +103,17 @@ var secrets = {
 
 var namePrefix = 'dp-be-${environment}'
 
+var finopsEnvironmentMap = {
+  test: 'dev'
+  staging: 'test'
+  yt01: 'test'
+  prod: 'prod'
+}
+
+var finopsEnvironment = contains(finopsEnvironmentMap, environment) ? finopsEnvironmentMap[environment] : environment
+
 var tags = {
-  finops_environment: environment
+  finops_environment: finopsEnvironment
   finops_product: 'Dialogporten'
   repository: 'https://github.com/altinn/dialogporten'
   finops_serviceownercode: 'digdir'

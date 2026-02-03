@@ -39,6 +39,16 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+
+var finopsEnvironmentMap = {
+  test: 'dev'
+  staging: 'test'
+  yt01: 'test'
+  prod: 'prod'
+}
+
+var finopsEnvironment = contains(finopsEnvironmentMap, environment) ? finopsEnvironmentMap[environment] : environment
+
 var name = '${namePrefix}-custom-metrics'
 
 var baseTags = {
@@ -48,7 +58,7 @@ var baseTags = {
 }
 
 var tags = union(baseTags, {
-  finops_environment: environment
+  finops_environment: finopsEnvironment
   finops_product: 'Dialogporten'
   repository: 'https://github.com/altinn/dialogporten'
   finops_serviceownercode: 'digdir'

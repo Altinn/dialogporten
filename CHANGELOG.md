@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.102.2](https://github.com/Altinn/dialogporten/compare/v1.102.1...v1.102.2) (2026-02-03)
+
+
+### Miscellaneous Chores
+
+* **infra:** Allow configuration of the SSH jumper virtual machine size. Upgrade SKU. ([#3369](https://github.com/Altinn/dialogporten/issues/3369)) ([0b69fcb](https://github.com/Altinn/dialogporten/commit/0b69fcb3875c3dfc1e7a6562ad9d3e179f23de0b))
+
 ## [1.102.1](https://github.com/Altinn/dialogporten/compare/v1.102.0...v1.102.1) (2026-02-02)
 
 

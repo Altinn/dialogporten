@@ -1,4 +1,4 @@
-﻿name: CI/CD Pull Request
+name: CI/CD Pull Request
 
 on:
   pull_request:
@@ -25,12 +25,26 @@ jobs:
       contents: read
     uses: ./.github/workflows/workflow-check-for-changes.yml
 
-  build:
+  build-and-test:
     uses: ./.github/workflows/workflow-build-and-test.yml
     needs: [ check-for-changes ]
     if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
     permissions:
       contents: read
+
+  build-docker-images:
+    uses: ./.github/workflows/workflow-publish-docker-images.yml
+    needs: [ build-and-test, check-for-changes ]
+    if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    secrets:
+      GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      dockerImageBaseName: ghcr.io/altinn/dialogporten-
+      version: test
+      push: false
 
   validate-schema:
     name: Validate Schema

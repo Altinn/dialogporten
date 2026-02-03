@@ -141,7 +141,9 @@ public abstract class E2EFixtureBase : IAsyncLifetime
                      $"{string.Join($"{Environment.NewLine}", preFlightIssues)}");
     }
 
-    public void CleanupAfterTest()
+    // Scheduled by GitHub Actions at 04:00 UTC (dispatch-purge-e2e-test-data.yml)
+    // and can be run manually in GitHub Actions → “Purge E2E test data” with a selected environment/ref.
+    public void PurgeE2ETestDialogs()
     {
         var originalAccessor = _tokenOverridesAccessor;
         var originalCurrent = originalAccessor?.Current;

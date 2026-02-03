@@ -7,5 +7,5 @@ public abstract class E2ETestBase<TFixture>(TFixture fixture) : IE2ETestHooks
 
     void IE2ETestHooks.BeforeTest() => Fixture.PreflightCheck();
 
-    void IE2ETestHooks.AfterTest() => Fixture.CleanupAfterTest();
+    void IE2ETestHooks.AfterTest() { }
 }

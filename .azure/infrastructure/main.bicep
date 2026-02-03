@@ -39,7 +39,7 @@ param sourceKeyVaultSshJumperSshPublicKey string
 @description('Configuration for the SSH jumper')
 param sshJumperConfig {
   adminLoginGroupObjectId: string
-  vmSize: string?
+  vmSize: string
 }
 
 @description('The URL of the APIM instance')
@@ -216,7 +216,7 @@ module sshJumper '../modules/ssh-jumper/main.bicep' = {
     tags: tags
     sshPublicKey: secrets.sourceKeyVaultSshJumperSshPublicKey
     adminLoginGroupObjectId: sshJumperConfig.adminLoginGroupObjectId
-    vmSize: sshJumperConfig.?vmSize ?? 'Standard_B1s'
+    vmSize: sshJumperConfig.vmSize
   }
 }
 

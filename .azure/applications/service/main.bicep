@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { finopsTags } from '../../functions/finopsTags.bicep'
+
 import { Scale } from '../../modules/containerApp/main.bicep'
 
 @description('The tag of the image to be used')
@@ -84,23 +86,10 @@ param scale Scale = {
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-var finopsEnvironmentMap = {
-  test: 'dev'
-  staging: 'test'
-  yt01: 'test'
-  prod: 'prod'
-}
-
-var finopsEnvironment = contains(finopsEnvironmentMap, environment) ? finopsEnvironmentMap[environment] : environment
-
 
 var baseTags = {}
 
-var tags = union(baseTags, {
-  finops_environment: finopsEnvironment
-  finops_product: 'Dialogporten'
-  repository: 'https://github.com/altinn/dialogporten'
-})
+var tags = finopsTags(baseTags, environment)
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationName

@@ -1,5 +1,7 @@
 targetScope = 'subscription'
 
+import { finopsTags } from '../functions/finopsTags.bicep'
+
 @description('The environment for the deployment')
 @minLength(3)
 param environment string
@@ -103,20 +105,7 @@ var secrets = {
 
 var namePrefix = 'dp-be-${environment}'
 
-var finopsEnvironmentMap = {
-  test: 'dev'
-  staging: 'test'
-  yt01: 'test'
-  prod: 'prod'
-}
-
-var finopsEnvironment = contains(finopsEnvironmentMap, environment) ? finopsEnvironmentMap[environment] : environment
-
-var tags = {
-  finops_environment: finopsEnvironment
-  finops_product: 'Dialogporten'
-  repository: 'https://github.com/altinn/dialogporten'
-}
+var tags = finopsTags({}, environment)
 
 // Create resource groups
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {

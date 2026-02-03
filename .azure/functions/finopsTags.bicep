@@ -8,9 +8,12 @@ func finopsTags(existingTags object, environment string) object => union(existin
 
 @description('Maps deployment environment to FinOps environment')
 @export()
-func finopsEnvironment(environment string) string =>
-  environment == 'test' ? 'dev' :
-  environment == 'staging' ? 'test' :
-  environment == 'yt01' ? 'test' :
-  environment == 'prod' ? 'prod' :
-  environment
+func finopsEnvironment(environment string) string => environment == 'test'
+  ? 'dev'
+  : (environment == 'staging'
+    ? 'test'
+    : (environment == 'yt01'
+      ? 'test'
+      : (environment == 'prod'
+        ? 'prod'
+        : environment)))

@@ -3,7 +3,7 @@
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -27,22 +27,10 @@ jobs:
     name: Check for changes
     uses: ./.github/workflows/workflow-check-for-changes.yml
 
-  build-and-test:
-    name: Build and test backend
-    uses: ./.github/workflows/workflow-build-and-test.yml
-    needs: [ check-for-changes ]
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
-
   publish:
     name: Build and publish docker images
     uses: ./.github/workflows/workflow-publish.yml
-    needs:
-      [
-        get-current-version,
-        check-for-changes,
-        generate-git-short-sha,
-        build-and-test,
-      ]
+    needs: [get-current-version, check-for-changes, generate-git-short-sha]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     secrets:
       GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -52,7 +40,7 @@ jobs:
 
   deploy-infra:
     name: Deploy infra to test
-    needs: [ get-current-version, check-for-changes, generate-git-short-sha ]
+    needs: [get-current-version, check-for-changes, generate-git-short-sha]
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
     uses: ./.github/workflows/workflow-deploy-infra.yml
     secrets:
@@ -109,18 +97,31 @@ jobs:
 
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
-    needs: [ deploy-apps, get-current-version, generate-git-short-sha, check-for-changes, generate-timestamp ]
+    needs:
+      [
+        deploy-apps,
+        get-current-version,
+        generate-git-short-sha,
+        check-for-changes,
+        generate-timestamp,
+      ]
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges == 'true' ) }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
-      source: 'https://api.nuget.org/v3/index.json'
+      path: "src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj"
+      source: "https://api.nuget.org/v3/index.json"
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
   publish-schema-npm:
     name: Deploy schema npm package
-    needs: [ check-for-changes, get-current-version, generate-git-short-sha, deploy-apps ]
+    needs:
+      [
+        check-for-changes,
+        get-current-version,
+        generate-git-short-sha,
+        deploy-apps,
+      ]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasGqlSchemaChanges == 'true') }}
     uses: ./.github/workflows/workflow-publish-schema.yml
     with:
@@ -132,7 +133,7 @@ jobs:
     name: "Run K6 functional end-to-end tests"
     # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
-    needs: [ deploy-apps, check-for-changes ]
+    needs: [deploy-apps, check-for-changes]
     uses: ./.github/workflows/workflow-run-k6-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
@@ -148,7 +149,7 @@ jobs:
   run-graphql-e2e-tests:
     name: "Run GraphQL E2E tests"
     if: ${{ always() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
-    needs: [ run-e2e-tests, check-for-changes ]
+    needs: [run-e2e-tests, check-for-changes]
     uses: ./.github/workflows/workflow-run-graphql-e2e-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
@@ -159,7 +160,7 @@ jobs:
   run-webapi-e2e-tests:
     name: "Run WebAPI E2E tests"
     if: ${{ always() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
-    needs: [ run-graphql-e2e-tests, check-for-changes ]
+    needs: [run-graphql-e2e-tests, check-for-changes]
     uses: ./.github/workflows/workflow-run-webapi-e2e-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
@@ -169,16 +170,16 @@ jobs:
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [
-      deploy-infra,
-      deploy-apps,
-      run-e2e-tests,
-      run-graphql-e2e-tests,
-      run-webapi-e2e-tests,
-      publish-schema-npm,
-      publish,
-      build-and-test,
-    ]
+    needs:
+      [
+        deploy-infra,
+        deploy-apps,
+        run-e2e-tests,
+        run-graphql-e2e-tests,
+        run-webapi-e2e-tests,
+        publish-schema-npm,
+        publish,
+      ]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:
@@ -190,7 +191,6 @@ jobs:
       webapi_e2e_tests_status: ${{ needs.run-webapi-e2e-tests.result }}
       schema_npm_status: ${{ needs.publish-schema-npm.result }}
       publish_status: ${{ needs.publish.result }}
-      build_and_test_status: ${{ needs.build-and-test.result }}
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
@@ -199,10 +199,11 @@ jobs:
     name: Send deployment to Swarmia
     if: ${{ always() && !failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-swarmia-deployment.yml
-    needs: [ deploy-infra, deploy-apps, get-current-version, generate-git-short-sha ]
+    needs:
+      [deploy-infra, deploy-apps, get-current-version, generate-git-short-sha]
     with:
       app-name: dialogporten
-      environment: 'test'
+      environment: "test"
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}

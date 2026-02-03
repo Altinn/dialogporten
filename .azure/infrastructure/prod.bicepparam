@@ -54,9 +54,6 @@ param postgresConfiguration = {
   // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true
   enableQueryPerformanceInsight: false
-  parameterLogging: {
-    enabled: false
-  }
   backupRetentionDays: 32
   availabilityZone: '3'
   enableBackupVault: true

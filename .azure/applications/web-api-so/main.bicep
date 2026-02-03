@@ -89,7 +89,6 @@ param scale Scale = {
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-
 var baseTags = {}
 
 var tags = finopsTags(baseTags, environment)
@@ -158,7 +157,6 @@ var containerAppEnvVars = [
     value: otelTraceSamplerRatio
   }
 ]
-
 
 var containerAppName = '${namePrefix}-webapi-so-ca'
 

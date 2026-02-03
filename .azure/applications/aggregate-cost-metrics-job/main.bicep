@@ -49,7 +49,6 @@ param storageContainerName string = 'costmetrics'
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-
 // Use naming convention for Application Insights resource
 // Pattern: dp-be-{environment}-applicationInsights
 var appInsightsName = 'dp-be-${environment}-applicationInsights'
@@ -85,7 +84,7 @@ module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' 
 var storageAccountName = take('${toLower(replace(namePrefix, '-', ''))}storage${uniqueString(resourceGroup().id)}', 24)
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
-  name: storageAccountName 
+  name: storageAccountName
   location: location
   sku: {
     name: 'Standard_LRS'

@@ -86,7 +86,6 @@ param scale Scale = {
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-
 var baseTags = {}
 
 var tags = finopsTags(baseTags, environment)

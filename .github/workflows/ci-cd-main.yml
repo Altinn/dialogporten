@@ -166,7 +166,7 @@ jobs:
       TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
     with:
       environment: test
-    
+
   send-slack-message-on-failure:
     name: Send Slack message on failure
     needs: [
@@ -176,8 +176,8 @@ jobs:
       run-graphql-e2e-tests,
       run-webapi-e2e-tests,
       publish-schema-npm,
-      build-and-test,
       publish,
+      build-and-test,
     ]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml

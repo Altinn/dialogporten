@@ -13,7 +13,7 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20260203111449_ConsolidateIndices")]
+    [Migration("20260203121811_ConsolidateIndices")]
     partial class ConsolidateIndices
     {
         /// <inheritdoc />

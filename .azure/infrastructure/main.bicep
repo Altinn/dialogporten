@@ -36,8 +36,11 @@ param sourceKeyVaultName string
 @minLength(3)
 param sourceKeyVaultSshJumperSshPublicKey string
 
-@description('The object ID of the group to assign the Admin Login role for SSH Jumper')
-param sshJumperAdminLoginGroupObjectId string
+@description('Configuration for the SSH jumper')
+param sshJumperConfig {
+  adminLoginGroupObjectId: string
+  vmSize: string
+}
 
 @description('The URL of the APIM instance')
 param apimUrl string
@@ -68,14 +71,12 @@ param appInsightsSku AppInsightsSku
 import { Sku as PostgresSku } from '../modules/postgreSql/create.bicep'
 import { StorageConfiguration as PostgresStorageConfig } from '../modules/postgreSql/create.bicep'
 import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from '../modules/postgreSql/create.bicep'
-import { ParameterLoggingConfiguration as PostgresParameterLoggingConfig } from '../modules/postgreSql/create.bicep'
 
 param postgresConfiguration {
   sku: PostgresSku
   storage: PostgresStorageConfig
   enableIndexTuning: bool
   enableQueryPerformanceInsight: bool
-  parameterLogging: PostgresParameterLoggingConfig
   highAvailability: PostgresHighAvailabilityConfig?
   backupRetentionDays: int
   availabilityZone: string
@@ -212,7 +213,8 @@ module sshJumper '../modules/ssh-jumper/main.bicep' = {
     subnetId: vnet.outputs.sshJumperSubnetId
     tags: tags
     sshPublicKey: secrets.sourceKeyVaultSshJumperSshPublicKey
-    adminLoginGroupObjectId: sshJumperAdminLoginGroupObjectId
+    adminLoginGroupObjectId: sshJumperConfig.adminLoginGroupObjectId
+    vmSize: sshJumperConfig.vmSize
   }
 }
 
@@ -233,7 +235,6 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     appInsightWorkspaceName: appInsights.outputs.appInsightsWorkspaceName
     enableIndexTuning: postgresConfiguration.enableIndexTuning
     enableQueryPerformanceInsight: postgresConfiguration.enableQueryPerformanceInsight
-    parameterLogging: postgresConfiguration.parameterLogging
     subnetId: vnet.outputs.postgresqlSubnetId
     vnetId: vnet.outputs.virtualNetworkId
     highAvailability: postgresConfiguration.?highAvailability

@@ -22,10 +22,6 @@ on:
         type: string
         description: "Status of the GraphQL end-to-end tests job"
         default: "skipped"
-      webapi_e2e_tests_status:
-        type: string
-        description: "Status of the WebAPI end-to-end tests job"
-        default: "skipped"
       performance_tests_status:
         type: string
         description: "Status of the performance tests job"
@@ -37,6 +33,10 @@ on:
       publish_status:
         type: string
         description: "Status of the docker image publishing job"
+        default: "skipped"
+      build_and_test_status:
+        type: string
+        description: "Status of the build and test job"
         default: "skipped"
       release_please_status:
         type: string
@@ -84,9 +84,9 @@ jobs:
             echo "APPS_EMOJI=$(determine_emoji "$APPS_STATUS")"
             echo "E2E_TESTS_EMOJI=$(determine_emoji "$E2E_TESTS_STATUS")"
             echo "GRAPHQL_E2E_TESTS_EMOJI=$(determine_emoji "$GRAPHQL_E2E_TESTS_STATUS")"
-            echo "WEBAPI_E2E_TESTS_EMOJI=$(determine_emoji "$WEBAPI_E2E_TESTS_STATUS")"
             echo "SCHEMA_NPM_EMOJI=$(determine_emoji "$SCHEMA_NPM_STATUS")"
             echo "PUBLISH_EMOJI=$(determine_emoji "$PUBLISH_STATUS")"
+            echo "BUILD_AND_TEST_EMOJI=$(determine_emoji "$BUILD_AND_TEST_STATUS")"
             echo "PERFORMANCE_TESTS_EMOJI=$(determine_emoji "$PERFORMANCE_TESTS_STATUS")"
             echo "RELEASE_PLEASE_EMOJI=$(determine_emoji "$RELEASE_PLEASE_STATUS")"
             echo "NOTIFY_RELEASE_CREATED_EMOJI=$(determine_emoji "$NOTIFY_RELEASE_CREATED_STATUS")"
@@ -96,9 +96,9 @@ jobs:
           APPS_STATUS: ${{ inputs.apps_status }}
           E2E_TESTS_STATUS: ${{ inputs.e2e_tests_status }}
           GRAPHQL_E2E_TESTS_STATUS: ${{ inputs.graphql_e2e_tests_status }}
-          WEBAPI_E2E_TESTS_STATUS: ${{ inputs.webapi_e2e_tests_status }}
           SCHEMA_NPM_STATUS: ${{ inputs.schema_npm_status }}
           PUBLISH_STATUS: ${{ inputs.publish_status }}
+          BUILD_AND_TEST_STATUS: ${{ inputs.build_and_test_status }}
           PERFORMANCE_TESTS_STATUS: ${{ inputs.performance_tests_status }}
           RELEASE_PLEASE_STATUS: ${{ inputs.release_please_status }}
           NOTIFY_RELEASE_CREATED_STATUS: ${{ inputs.notify_release_created_status }}
@@ -114,9 +114,9 @@ jobs:
           APPS_STATUS: "${{ steps.status-emojis.outputs.APPS_EMOJI }}"
           E2E_TESTS_STATUS: "${{ steps.status-emojis.outputs.E2E_TESTS_EMOJI }}"
           GRAPHQL_E2E_TESTS_STATUS: "${{ steps.status-emojis.outputs.GRAPHQL_E2E_TESTS_EMOJI }}"
-          WEBAPI_E2E_TESTS_STATUS: "${{ steps.status-emojis.outputs.WEBAPI_E2E_TESTS_EMOJI }}"
           SCHEMA_NPM_STATUS: "${{ steps.status-emojis.outputs.SCHEMA_NPM_EMOJI }}"
           PUBLISH_STATUS: "${{ steps.status-emojis.outputs.PUBLISH_EMOJI }}"
+          BUILD_AND_TEST_STATUS: "${{ steps.status-emojis.outputs.BUILD_AND_TEST_EMOJI }}"
           PERFORMANCE_TESTS_STATUS: "${{ steps.status-emojis.outputs.PERFORMANCE_TESTS_EMOJI }}"
           RELEASE_PLEASE_STATUS: "${{ steps.status-emojis.outputs.RELEASE_PLEASE_EMOJI }}"
           NOTIFY_RELEASE_CREATED_STATUS: "${{ steps.status-emojis.outputs.NOTIFY_RELEASE_CREATED_EMOJI }}"

@@ -15,6 +15,11 @@ on:
         description: "Version to tag"
         required: true
         type: string
+      push:
+        description: "Whether to push images to the registry"
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   publish-docker-images:
@@ -65,7 +70,7 @@ jobs:
         with:
           context: .
           file: ${{ matrix.dockerfile }}
-          push: true
+          push: ${{ inputs.push }}
           tags: |
             ${{ env.DOCKER_IMAGE_BASE_NAME }}${{ matrix.imageName }}:${{ inputs.version }}
           labels: ${{ steps.meta.outputs.labels }}

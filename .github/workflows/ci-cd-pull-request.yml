@@ -33,7 +33,7 @@ jobs:
       contents: read
 
   build-docker-images:
-    uses: ./.github/workflows/workflow-publish.yml
+    uses: ./.github/workflows/workflow-publish-docker-images.yml
     needs: [ build-and-test, check-for-changes ]
     if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     permissions:

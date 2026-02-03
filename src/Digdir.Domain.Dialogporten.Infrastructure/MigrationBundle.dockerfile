@@ -22,6 +22,7 @@ RUN dotnet restore "src/Digdir.Domain.Dialogporten.Infrastructure/Digdir.Domain.
 COPY ["src/", "."]
 
 WORKDIR "/src/Digdir.Domain.Dialogporten.Infrastructure"
+RUN dotnet build -c Release
 RUN mkdir -p /app/publish
 RUN dotnet ef migrations -v bundle -o /app/publish/efbundle
 

@@ -100,8 +100,6 @@ var tags = union(baseTags, {
   finops_environment: finopsEnvironment
   finops_product: 'Dialogporten'
   repository: 'https://github.com/altinn/dialogporten'
-  finops_serviceownercode: 'digdir'
-  finops_serviceownerorgnr: '991825827'
 })
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {

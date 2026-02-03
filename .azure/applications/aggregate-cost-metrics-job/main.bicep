@@ -71,8 +71,6 @@ var tags = union(baseTags, {
   finops_environment: finopsEnvironment
   finops_product: 'Dialogporten'
   repository: 'https://github.com/altinn/dialogporten'
-  finops_serviceownercode: 'digdir'
-  finops_serviceownerorgnr: '991825827'
 })
 
 var name = '${namePrefix}-cost-metrics'

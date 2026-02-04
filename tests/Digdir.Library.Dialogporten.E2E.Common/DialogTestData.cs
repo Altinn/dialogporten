@@ -98,4 +98,74 @@ public static class DialogTestData
             Value = value,
             LanguageCode = languageCode,
         };
+
+    public static V1ServiceOwnerDialogsCommandsCreate_Attachment CreateDialogAttachment(
+        string? name = null,
+        string url = "https://example.com/dialog-attachment.pdf",
+        string displayName = "Dialogvedlegg",
+        Attachments_AttachmentUrlConsumerType consumerType = Attachments_AttachmentUrlConsumerType.Gui) =>
+        new()
+        {
+            DisplayName = [CreateLocalization(displayName)],
+            Name = name!,
+            Urls =
+            [
+                new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
+                {
+                    Url = new Uri(url),
+                    ConsumerType = consumerType
+                }
+            ]
+        };
+
+    public static V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment CreateTransmissionAttachment(
+        string? name = null,
+        string url = "https://example.com/transmission-attachment.pdf",
+        string displayName = "Overforing",
+        Attachments_AttachmentUrlConsumerType consumerType = Attachments_AttachmentUrlConsumerType.Gui) =>
+        new()
+        {
+            DisplayName = [CreateLocalization(displayName)],
+            Name = name!,
+            Urls =
+            [
+                new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
+                {
+                    Url = new Uri(url),
+                    ConsumerType = consumerType
+                }
+            ]
+        };
+
+    public static V1ServiceOwnerDialogsCommandsCreate_Transmission CreateTransmission(
+        string title,
+        List<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment>? attachments = null,
+        DateTimeOffset? createdAt = null,
+        DialogsEntitiesTransmissions_DialogTransmissionType type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+        Actors_ActorType actorType = Actors_ActorType.ServiceOwner)
+    {
+        var transmission = new V1ServiceOwnerDialogsCommandsCreate_Transmission
+        {
+            Id = Guid.CreateVersion7(),
+            CreatedAt = createdAt ?? DateTimeOffset.UtcNow,
+            Type = type,
+            Sender = new V1ServiceOwnerCommonActors_Actor
+            {
+                ActorType = actorType
+            },
+            Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
+            {
+                Title = CreateContentValue(
+                    value: title,
+                    languageCode: "nb")
+            }
+        };
+
+        if (attachments is not null)
+        {
+            transmission.Attachments = attachments;
+        }
+
+        return transmission;
+    }
 }

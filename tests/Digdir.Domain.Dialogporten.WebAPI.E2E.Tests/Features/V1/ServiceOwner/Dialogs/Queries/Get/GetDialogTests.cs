@@ -1,4 +1,3 @@
-using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Xunit;
@@ -36,61 +35,19 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
 
         dialog.Attachments =
         [
-            new V1ServiceOwnerDialogsCommandsCreate_Attachment
-            {
-                DisplayName =
-                [
-                    DialogTestData.CreateLocalization("Dialogvedlegg", "nb")
-                ],
-                Name = "dialog-attachment",
-                Urls =
-                [
-                    new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
-                    {
-                        Url = new Uri("https://example.com/dialog-attachment.pdf"),
-                        ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
-                    }
-                ]
-            }
+            DialogTestData.CreateDialogAttachment(name: "dialog-attachment")
         ];
 
         dialog.Transmissions =
         [
-            new V1ServiceOwnerDialogsCommandsCreate_Transmission
-            {
-                Id = Guid.CreateVersion7(),
-                CreatedAt = DateTimeOffset.UtcNow,
-                Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
-                Sender = new V1ServiceOwnerCommonActors_Actor
-                {
-                    ActorType = Actors_ActorType.ServiceOwner
-                },
-                Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
-                {
-                    Title = DialogTestData.CreateContentValue(
-                        value: "Melding med vedlegg",
-                        languageCode: "nb")
-                },
-                Attachments =
+            DialogTestData.CreateTransmission(
+                title: "Melding med vedlegg",
+                attachments:
                 [
-                    new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
-                    {
-                        DisplayName =
-                        [
-                            DialogTestData.CreateLocalization("Overforing", "nb")
-                        ],
-                        Name = "transmission-attachment",
-                        Urls =
-                        [
-                            new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
-                            {
-                                Url = new Uri("https://example.com/transmission-attachment.pdf"),
-                                ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
-                            }
-                        ]
-                    }
-                ]
-            }
+                    DialogTestData.CreateTransmissionAttachment(
+                        name: "transmission-attachment",
+                        url: "https://example.com/transmission-attachment.pdf")
+                ])
         ];
 
         var createResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(

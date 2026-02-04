@@ -13,7 +13,7 @@ This file describes how AI coding agents should interact with the repository.
 
 Always run `dotnet build` and `dotnet test` after making changes to *.cs files in `./src/**` or `./tests/**`.  
 
-If running integration tests fails due to sandboxing issues due to the use for test containers, use `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'` to skip them. 
+If integration tests fail because test containers are blocked by sandboxing, use `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'` to skip them.
 
 All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyzers.
 

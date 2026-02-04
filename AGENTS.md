@@ -59,7 +59,7 @@ The SwaggerSnapshot test will fail if these files are not identical. It will als
 
 ### Database migrations and entity configuration
 - Database migration files must be created using Entity Framework Core tools and not edited manually unless absolutely necessary.
-- No use of .HasAnnotation("Npgsql:CreatedConcurrently", true) allowed, as this break automation of migrations.
+- No use of .HasAnnotation("Npgsql:CreatedConcurrently", true) allowed, as this breaks automation of migrations.
 - Database changes must be backwards compatible to avoid downtime during deployment.
 - Database changes must be applied to production manually, this should be addressed in the PR description. Code reviewers should add a comment to remind the author of this.
 - Only simple field additions with default values can be applied automatically in production.

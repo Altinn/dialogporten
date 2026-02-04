@@ -205,29 +205,29 @@ public static class DialogTestData
         return transmission;
     }
 
-    extension(V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest transmission)
+    public static V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest AddAttachment(
+        this V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest transmission,
+        Action<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment>? modify = null)
     {
-        public void AddAttachment(Action<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment>? modify = null)
+        ArgumentNullException.ThrowIfNull(transmission);
+        transmission.Attachments ??= [];
+
+        var attachment = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment
         {
-            ArgumentNullException.ThrowIfNull(transmission);
-            transmission.Attachments ??= [];
+            DisplayName = [CreateLocalization("Forsendelsevedlegg")],
+            Name = null!,
+            Urls =
+            [
+                new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl
+                {
+                    Url = new Uri("https://example.com/transmission-attachment.pdf"),
+                    ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                }
+            ]
+        };
 
-            var attachment = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment
-            {
-                DisplayName = [CreateLocalization("Forsendelsevedlegg")],
-                Name = null!,
-                Urls =
-                [
-                    new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl
-                    {
-                        Url = new Uri("https://example.com/transmission-attachment.pdf"),
-                        ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
-                    }
-                ]
-            };
-
-            modify?.Invoke(attachment);
-            transmission.Attachments.Add(attachment);
-        }
+        modify?.Invoke(attachment);
+        transmission.Attachments.Add(attachment);
+        return transmission;
     }
 }

@@ -38,8 +38,8 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         {
             dialog.AddAttachment(x =>
                 x.Name = dialogAttachmentName);
-            dialog.AddTransmission(x =>
-                x.AddAttachment(modify: x =>
+            dialog.AddTransmission(modify: x =>
+                x.AddAttachment(x =>
                     x.Name = transmissionAttachmentName));
         });
 

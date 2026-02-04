@@ -105,6 +105,28 @@ public static class DialogTestData
             LanguageCode = languageCode,
         };
 
+    public static V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest CreateSimpleTransmission(
+        Action<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest>? modify = null)
+    {
+        var transmission = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest
+        {
+            Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+            Sender = new V1ServiceOwnerCommonActors_Actor
+            {
+                ActorType = Actors_ActorType.ServiceOwner
+            },
+            Content = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent
+            {
+                Title = CreateContentValue(
+                    value: "Melding med vedlegg",
+                    languageCode: "nb")
+            }
+        };
+
+        modify?.Invoke(transmission);
+        return transmission;
+    }
+
     extension(V1ServiceOwnerDialogsCommandsCreate_Dialog dialog)
     {
         public void AddAttachment(Action<V1ServiceOwnerDialogsCommandsCreate_Attachment>? modify = null)
@@ -181,5 +203,31 @@ public static class DialogTestData
         transmission.Attachments.Add(attachment);
 
         return transmission;
+    }
+
+    extension(V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest transmission)
+    {
+        public void AddAttachment(Action<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment>? modify = null)
+        {
+            ArgumentNullException.ThrowIfNull(transmission);
+            transmission.Attachments ??= [];
+
+            var attachment = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment
+            {
+                DisplayName = [CreateLocalization("Forsendelsevedlegg")],
+                Name = null!,
+                Urls =
+                [
+                    new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl
+                    {
+                        Url = new Uri("https://example.com/transmission-attachment.pdf"),
+                        ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                    }
+                ]
+            };
+
+            modify?.Invoke(attachment);
+            transmission.Attachments.Add(attachment);
+        }
     }
 }

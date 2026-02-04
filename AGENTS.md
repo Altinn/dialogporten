@@ -43,6 +43,7 @@ The SwaggerSnapshot test will fail if these files are not identical. It will als
 
 ### Modern C# Syntax (Required)
 - Target latest language features available in the solution (.NET 10 / C# 14).
+- Use extension block syntax
 - Use the field keyword for auto properties
 - Prefer pattern matching (`switch` expressions, property patterns) over `if/else` chains.
 - Prefer switch expressions over statement-based `switch`.

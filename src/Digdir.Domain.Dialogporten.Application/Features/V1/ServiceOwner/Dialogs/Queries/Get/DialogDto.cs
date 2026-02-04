@@ -667,6 +667,12 @@ public sealed class DialogAttachmentDto
     public List<LocalizationDto> DisplayName { get; set; } = [];
 
     /// <summary>
+    /// The logical name of the attachment.
+    /// </summary>
+    /// <example>receipt</example>
+    public string? Name { get; set; }
+
+    /// <summary>
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.
     /// </summary>
     public List<DialogAttachmentUrlDto> Urls { get; set; } = [];
@@ -718,6 +724,12 @@ public sealed class DialogTransmissionAttachmentDto
     /// The display name of the attachment that should be used in GUIs.
     /// </summary>
     public List<LocalizationDto> DisplayName { get; set; } = [];
+
+    /// <summary>
+    /// The logical name of the attachment.
+    /// </summary>
+    /// <example>receipt</example>
+    public string? Name { get; set; }
 
     /// <summary>
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.

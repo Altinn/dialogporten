@@ -35,18 +35,13 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
 
         dialog.Attachments =
         [
-            DialogTestData.CreateDialogAttachment(name: "dialog-attachment")
+            DialogTestData.CreateDialogAttachment(x => x.Name = "dialog-attachment")
         ];
 
         dialog.Transmissions =
         [
-            DialogTestData.CreateTransmission(
-                title: "Melding med vedlegg",
-                attachments:
-                [
-                    DialogTestData.CreateTransmissionAttachment(
-                        name: "transmission-attachment")
-                ])
+            DialogTestData.CreateTransmission(x => x.Attachments = [DialogTestData.CreateTransmissionAttachment(y => y.Name = "transmission-attachment")
+            ])
         ];
 
         var createResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(

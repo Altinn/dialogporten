@@ -100,72 +100,67 @@ public static class DialogTestData
         };
 
     public static V1ServiceOwnerDialogsCommandsCreate_Attachment CreateDialogAttachment(
-        string? name = null,
-        string url = "https://example.com/dialog-attachment.pdf",
-        string displayName = "Dialogvedlegg",
-        Attachments_AttachmentUrlConsumerType consumerType = Attachments_AttachmentUrlConsumerType.Gui) =>
-        new()
+        Action<V1ServiceOwnerDialogsCommandsCreate_Attachment>? modify = null)
+    {
+        var attachment = new V1ServiceOwnerDialogsCommandsCreate_Attachment
         {
-            DisplayName = [CreateLocalization(displayName)],
-            Name = name!,
+            DisplayName = [CreateLocalization("Dialogvedlegg")],
             Urls =
             [
                 new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
                 {
-                    Url = new Uri(url),
-                    ConsumerType = consumerType
+                    Url = new Uri("https://example.com/dialog-attachment.pdf"),
+                    ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                 }
             ]
         };
 
+        modify?.Invoke(attachment);
+        return attachment;
+    }
+
     public static V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment CreateTransmissionAttachment(
-        string? name = null,
-        string url = "https://example.com/transmission-attachment.pdf",
-        string displayName = "Overforing",
-        Attachments_AttachmentUrlConsumerType consumerType = Attachments_AttachmentUrlConsumerType.Gui) =>
-        new()
+        Action<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment>? modify = null)
+    {
+        var attachment = new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
         {
-            DisplayName = [CreateLocalization(displayName)],
-            Name = name!,
+            DisplayName = [CreateLocalization("Overforing")],
             Urls =
             [
                 new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
                 {
-                    Url = new Uri(url),
-                    ConsumerType = consumerType
+                    Url = new Uri("https://example.com/transmission-attachment.pdf"),
+                    ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                 }
             ]
         };
 
+        modify?.Invoke(attachment);
+        return attachment;
+    }
+
     public static V1ServiceOwnerDialogsCommandsCreate_Transmission CreateTransmission(
-        string title,
-        List<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment>? attachments = null,
-        DateTimeOffset? createdAt = null,
-        DialogsEntitiesTransmissions_DialogTransmissionType type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
-        Actors_ActorType actorType = Actors_ActorType.ServiceOwner)
+        Action<V1ServiceOwnerDialogsCommandsCreate_Transmission>? modify = null)
     {
         var transmission = new V1ServiceOwnerDialogsCommandsCreate_Transmission
         {
             Id = Guid.CreateVersion7(),
-            CreatedAt = createdAt ?? DateTimeOffset.UtcNow,
-            Type = type,
+            CreatedAt = DateTimeOffset.UtcNow,
+            Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
             Sender = new V1ServiceOwnerCommonActors_Actor
             {
-                ActorType = actorType
+                ActorType = Actors_ActorType.ServiceOwner
             },
             Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
             {
                 Title = CreateContentValue(
-                    value: title,
+                    value: "Melding med vedlegg",
                     languageCode: "nb")
-            }
+            },
+            Attachments = [CreateTransmissionAttachment()]
         };
 
-        if (attachments is not null)
-        {
-            transmission.Attachments = attachments;
-        }
-
+        modify?.Invoke(transmission);
         return transmission;
     }
 }

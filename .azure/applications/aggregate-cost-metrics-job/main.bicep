@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { finopsTags } from '../../functions/finopsTags.bicep'
+
 @description('The tag of the image to be used')
 @minLength(3)
 param imageTag string
@@ -51,13 +53,13 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 // Pattern: dp-be-{environment}-applicationInsights
 var appInsightsName = 'dp-be-${environment}-applicationInsights'
 
-var tags = {
+var baseTags = {
   FullName: '${namePrefix}-aggregate-cost-metrics'
-  Environment: environment
-  Product: 'Dialogporten'
   Description: 'Aggregates cost metrics from Application Insights across environments'
   JobType: 'Scheduled'
 }
+
+var tags = finopsTags(baseTags, environment)
 
 var name = '${namePrefix}-cost-metrics'
 
@@ -82,7 +84,7 @@ module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' 
 var storageAccountName = take('${toLower(replace(namePrefix, '-', ''))}storage${uniqueString(resourceGroup().id)}', 24)
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
-  name: storageAccountName 
+  name: storageAccountName
   location: location
   sku: {
     name: 'Standard_LRS'

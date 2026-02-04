@@ -21,10 +21,10 @@ loadEnv() {
   elif [[ -f "$script_dir/.env" ]]; then
     env_file="$script_dir/.env"
   fi
-  
+
   if [[ -z "${WEBAPI_ENVIRONMENT:-}" ]]; then
       echo "WEBAPI_ENVIRONMENT not found, using Development as default"
-      WEBAPI_ENVIRONMENT=Development 
+      WEBAPI_ENVIRONMENT=Development
   fi
 
   if [[ -n "$env_file" ]]; then
@@ -82,14 +82,29 @@ graphql_log="${script_dir}/dialogporten-graphql-e2e.log"
 
 podman_check
 
-mode="${1:-both}"
-case "$mode" in
-  webapi|graphql|both) ;;
-  *)
-    echo "Usage: $0 [webapi|graphql|both]" >&2
-    exit 1
-    ;;
-esac
+usage() {
+  echo "Usage: $0 [webapi|graphql|both] [--doNotRunTests]" >&2
+  exit 1
+}
+
+mode="both"
+doNotRunTests=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    webapi|graphql|both)
+      mode="$1"
+      shift
+      ;;
+    --doNotRunTests)
+      doNotRunTests=1
+      shift
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
 
 export DOTNET_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
 export ASPNETCORE_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
@@ -158,12 +173,18 @@ if [[ "$mode" == "graphql" || "$mode" == "both" ]]; then
   start_graphql
 fi
 
-if [[ "$mode" == "webapi" || "$mode" == "both" ]]; then
-  echo "Running WebAPI E2E tests..."
-  dotnet test "$repo_root/tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.csproj" -- xUnit.Explicit=on
-fi
+if [[ $doNotRunTests -eq 0 ]]; then
+  if [[ "$mode" == "webapi" || "$mode" == "both" ]]; then
+    echo "Running WebAPI E2E tests..."
+    dotnet test "$repo_root/tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.csproj" -- xUnit.Explicit=on
+  fi
 
-if [[ "$mode" == "graphql" || "$mode" == "both" ]]; then
-  echo "Running GraphQL E2E tests..."
-  dotnet test "$repo_root/tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.csproj" -- xUnit.Explicit=on
+  if [[ "$mode" == "graphql" || "$mode" == "both" ]]; then
+    echo "Running GraphQL E2E tests..."
+    dotnet test "$repo_root/tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.csproj" -- xUnit.Explicit=on
+  fi
+else
+  echo "Skipping tests as requested. Services are running."
+  echo "Press any key to terminate the services and exit..."
+  read -k 1 -s
 fi

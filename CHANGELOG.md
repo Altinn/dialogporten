@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.102.4](https://github.com/Altinn/dialogporten/compare/v1.102.3...v1.102.4) (2026-02-03)
+
+
+### Bug Fixes
+
+* **auth:** Align SI vs SR user determination ([#3365](https://github.com/Altinn/dialogporten/issues/3365)) ([43dc0fc](https://github.com/Altinn/dialogporten/commit/43dc0fc85c5adf27d3574e5b585a05c4d037bd9f))
+
+
+### Miscellaneous Chores
+
+* **ci:** upgrade az cli to 2.83.0 ([#3380](https://github.com/Altinn/dialogporten/issues/3380)) ([3f14b86](https://github.com/Altinn/dialogporten/commit/3f14b86b2099a652e07cbba7ae61f16b05a279b4))
+
 ## [1.102.3](https://github.com/Altinn/dialogporten/compare/v1.102.2...v1.102.3) (2026-02-03)
 
 

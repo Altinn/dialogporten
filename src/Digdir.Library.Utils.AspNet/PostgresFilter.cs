@@ -48,13 +48,13 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
         // when EnableParameterLogging() is called on the data source.
         // Parameters are added with keys like "db.query.parameter.<name>" following OpenTelemetry semantic conventions
         var parameters = activity.Tags
-            .Where(t => t.Key.StartsWith("db.query.parameter.", StringComparison.Ordinal) ||
-                       t.Key.StartsWith("db.statement.parameter.", StringComparison.Ordinal))
+            .Where(t => t.Key.StartsWith(Constants.DbQueryParameterPrefix, StringComparison.Ordinal) ||
+                       t.Key.StartsWith(Constants.DbStatementParameterPrefix, StringComparison.Ordinal))
             .OrderBy(t => t.Key)
             .Select(t =>
             {
-                var paramName = t.Key.Replace("db.query.parameter.", "")
-                                    .Replace("db.statement.parameter.", "@p");
+                var paramName = t.Key.Replace(Constants.DbQueryParameterPrefix, "")
+                                    .Replace(Constants.DbStatementParameterPrefix, "@p");
                 return $"{paramName}={t.Value}";
             })
             .ToList();
@@ -62,7 +62,7 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
         if (parameters.Count > 0)
         {
             // Add a consolidated parameter tag for easier viewing in logs
-            activity.SetTag("db.query.parameters", string.Join("; ", parameters));
+            activity.SetTag(Constants.DbQueryParameters, string.Join("; ", parameters));
         }
     }
 }

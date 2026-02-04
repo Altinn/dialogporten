@@ -175,8 +175,6 @@ public class DialogApplication : IAsyncLifetime
             {
                 FeatureToggle = new FeatureToggle
                 {
-                    UseOptimizedEndUserDialogSearch = true,
-                    UseOptimizedServiceOwnerDialogSearch = true,
                     UseAltinnAutoAuthorizedPartiesQueryParameters = true,
                     UseCorrectPersonNameOrdering = true
                 },

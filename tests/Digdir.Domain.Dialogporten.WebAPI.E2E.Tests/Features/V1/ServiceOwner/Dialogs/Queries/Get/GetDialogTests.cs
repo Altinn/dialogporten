@@ -33,8 +33,8 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
-            dialog.AddAttachment();
-            dialog.AddTransmission();
+            dialog.AddAttachment(x => x.Name = "dialog-attachment");
+            dialog.AddTransmission(x => x.AddAttachment(x => x.Name = "transmission-attachment"));
         });
 
         // Act

@@ -45,8 +45,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
                 attachments:
                 [
                     DialogTestData.CreateTransmissionAttachment(
-                        name: "transmission-attachment",
-                        url: "https://example.com/transmission-attachment.pdf")
+                        name: "transmission-attachment")
                 ])
         ];
 

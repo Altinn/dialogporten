@@ -1830,6 +1830,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -2684,6 +2690,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -3127,6 +3139,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -3306,6 +3324,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("displayName")]
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
@@ -3977,6 +4001,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -4146,6 +4176,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("displayName")]
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
@@ -4563,6 +4599,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -4960,6 +5002,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -5122,6 +5170,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("displayName")]
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.

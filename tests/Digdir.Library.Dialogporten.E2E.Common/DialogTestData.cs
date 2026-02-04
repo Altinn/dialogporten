@@ -4,6 +4,29 @@ namespace Digdir.Library.Dialogporten.E2E.Common;
 
 public static class DialogTestData
 {
+    public static V1ServiceOwnerDialogsCommandsCreate_Dialog GetSimpleCreateDialogCommand() =>
+        CreateDialog(
+            serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
+            party: $"urn:altinn:person:identifier-no:{TestTokenConstants.DefaultEndUserSsn}",
+            content: CreateContent(
+                title: CreateContentValue(
+                    value: "Skjema for rapportering av et eller annet",
+                    languageCode: "nb"),
+                summary: CreateContentValue(
+                    value: "Et sammendrag her. Maks 200 tegn, ingen HTML-støtte. Påkrevd. Vises i liste.",
+                    languageCode: "nb"),
+                senderName: CreateContentValue(
+                    value: "Avsendernavn",
+                    languageCode: "nb"),
+                additionalInfo: CreateContentValue(
+                    value: "Utvidet forklaring (enkel HTML-støtte, inntil 1023 tegn). Ikke påkrevd. Vises kun i detaljvisning.",
+                    languageCode: "nb",
+                    mediaType: "text/plain"),
+                extendedStatus: CreateContentValue(
+                    value: "Utvidet status",
+                    languageCode: "nb",
+                    mediaType: "text/plain")));
+
     public static V1ServiceOwnerDialogsCommandsCreate_Dialog CreateDialog(
         string serviceResource,
         string party,

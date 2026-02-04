@@ -32,13 +32,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
     public async Task Should_Return_Attachment_Names()
     {
         // Arrange
-        var dialog = DialogTestData.CreateDialog(
-            serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
-            party: $"urn:altinn:person:identifier-no:{TestTokenConstants.DefaultEndUserSsn}",
-            content: DialogTestData.CreateContent(
-                title: DialogTestData.CreateContentValue(
-                    value: "Dialog med vedlegg",
-                    languageCode: "nb")));
+        var dialog = DialogTestData.GetSimpleCreateDialogCommand();
 
         dialog.Attachments =
         [

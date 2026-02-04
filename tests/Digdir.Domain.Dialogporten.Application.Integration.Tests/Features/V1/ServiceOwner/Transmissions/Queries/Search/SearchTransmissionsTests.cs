@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Queries.Search;
 
@@ -32,7 +32,7 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
                 x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
                 x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
             })
-            .SetApplicationClockSkew(TimeSpan.FromDays(2))
+            .OverrideUtc(TimeSpan.FromDays(2))
             .SendCommand((_, ctx) => new SearchTransmissionQuery
             {
                 DialogId = ctx.GetDialogId(),

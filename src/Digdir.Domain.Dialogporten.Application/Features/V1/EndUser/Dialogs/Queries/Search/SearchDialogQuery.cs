@@ -22,8 +22,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 
 public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>, IRequest<SearchDialogResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
-    private readonly string? _searchLanguageCode;
-
     /// <summary>
     /// Filter by one or more service owner codes
     /// </summary>
@@ -119,8 +117,8 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public string? SearchLanguageCode
     {
-        get => _searchLanguageCode;
-        init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
+        get;
+        init => field = Localization.NormalizeCultureCode(value);
     }
 
     /// <summary>
@@ -133,9 +131,9 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<Intermed
 {
     public static IOrderOptions<IntermediateDialogDto> Configure(IOrderOptionsBuilder<IntermediateDialogDto> options) =>
         options.AddId(x => x.Id)
-            .AddDefault("createdAt", x => x.CreatedAt)
+            .AddDefault("contentUpdatedAt", x => x.ContentUpdatedAt)
             .AddOption("updatedAt", x => x.UpdatedAt)
-            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
+            .AddOption("createdAt", x => x.CreatedAt)
             .AddOption("dueAt", x => x.DueAt)
             .Build();
 }

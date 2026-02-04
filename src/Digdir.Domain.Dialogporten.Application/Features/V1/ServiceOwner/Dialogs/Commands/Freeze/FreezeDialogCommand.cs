@@ -18,7 +18,7 @@ public sealed class FreezeDialogCommand : IRequest<FreezeDialogResult>, IFeature
 }
 
 [GenerateOneOf]
-public sealed partial class FreezeDialogResult : OneOfBase<FreezeDialogSuccess, EntityNotFound, EntityDeleted, Forbidden, ConcurrencyError>;
+public sealed partial class FreezeDialogResult : OneOfBase<FreezeDialogSuccess, EntityNotFound, EntityDeleted, Forbidden, ConcurrencyError, Conflict>;
 
 public sealed record FreezeDialogSuccess(Guid Revision);
 
@@ -66,6 +66,7 @@ internal sealed class FreezeDialogCommandHandler(
         return saveResult.Match<FreezeDialogResult>(
             success => new FreezeDialogSuccess(dialog.Revision),
             domainError => throw new UnreachableException("Should never get a domain error when freezing a dialog"),
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 }

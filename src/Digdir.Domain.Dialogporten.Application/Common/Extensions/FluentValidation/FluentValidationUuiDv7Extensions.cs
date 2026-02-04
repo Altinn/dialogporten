@@ -6,11 +6,11 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidat
 
 public static class FluentValidationUuiDv7Extensions
 {
-    public static IRuleBuilderOptions<T, Guid?> IsValidUuidV7<T>(this IRuleBuilder<T, Guid?> ruleBuilder)
+    internal static IRuleBuilderOptions<T, Guid?> IsValidUuidV7<T>(this IRuleBuilder<T, Guid?> ruleBuilder)
         => ruleBuilder.SetValidator(new UuidV7TimestampIsInPastValidator<T>());
 
-    public static IRuleBuilderOptions<T, Guid?> UuidV7TimestampIsInPast<T>(this IRuleBuilder<T, Guid?> ruleBuilder)
-        => ruleBuilder.SetValidator(new IsValidUuidV7TimestampValidator<T>());
+    internal static IRuleBuilderOptions<T, Guid?> UuidV7TimestampIsInPast<T>(this IRuleBuilder<T, Guid?> ruleBuilder, IClock clock)
+        => ruleBuilder.SetValidator(new IsValidUuidV7TimestampValidator<T>(clock));
 }
 
 internal sealed class UuidV7TimestampIsInPastValidator<T> : PropertyValidator<T, Guid?>
@@ -26,6 +26,13 @@ internal sealed class UuidV7TimestampIsInPastValidator<T> : PropertyValidator<T,
 
 internal sealed class IsValidUuidV7TimestampValidator<T> : PropertyValidator<T, Guid?>
 {
+    private readonly IClock _clock;
+
+    public IsValidUuidV7TimestampValidator(IClock clock)
+    {
+        _clock = clock;
+    }
+
     public override bool IsValid(ValidationContext<T> context, Guid? value)
     {
         if (value is null)
@@ -42,7 +49,7 @@ internal sealed class IsValidUuidV7TimestampValidator<T> : PropertyValidator<T, 
         context.MessageFormatter.AppendArgument("date", date.ToString("o"));
 
         // Allow up to 15s in the future
-        return date < DateTimeOffset.UtcNow.AddSeconds(15);
+        return date < _clock.UtcNow.AddSeconds(15);
     }
 
     public override string Name { get; } = "Uuid7TimestampValidator";

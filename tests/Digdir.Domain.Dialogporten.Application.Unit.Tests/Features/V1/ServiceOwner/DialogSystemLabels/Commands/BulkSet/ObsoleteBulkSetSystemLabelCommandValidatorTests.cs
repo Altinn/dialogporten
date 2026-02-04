@@ -1,13 +1,14 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using FluentAssertions;
+using AwesomeAssertions;
 #pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceOwner.DialogSystemLabels.Commands.BulkSet;
 
 public class ObsoleteBulkSetSystemLabelCommandValidatorTests
 {
-    private readonly BulkSetSystemLabelCommandValidator _validator = new(new BulkSetSystemLabelDtoValidator());
+    private readonly BulkSetSystemLabelCommandValidator _validator = new(new BulkSetSystemLabelDtoValidator(new ActorValidator()));
 
     [Fact]
     public void Unique_DialogIds_Should_Be_Valid()

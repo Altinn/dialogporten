@@ -42,8 +42,8 @@ param appInsightsSku = {
 }
 param postgresConfiguration = {
   sku: {
-    name: 'Standard_D16ads_v5'
-    tier: 'GeneralPurpose'
+    name: 'Standard_E16ads_v5'
+    tier: 'MemoryOptimized'
   }
   storage: {
     storageSizeGB: 4096
@@ -54,15 +54,9 @@ param postgresConfiguration = {
   // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true
   enableQueryPerformanceInsight: false
-  parameterLogging: {
-    enabled: false
-  }
-  highAvailability: {
-    mode: 'ZoneRedundant'
-    standbyAvailabilityZone: '2'
-  }
   backupRetentionDays: 32
   availabilityZone: '3'
+  enableBackupVault: true
 }
 
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
@@ -80,6 +74,10 @@ param serviceBusSku = {
 }
 
 // Altinn Product Dialogporten: Developers Prod
-param sshJumperAdminLoginGroupObjectId = 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
+param sshJumperConfig = {
+  adminLoginGroupObjectId: 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
+  vmSize: 'Standard_D2as_v5'
+}
 
 param apimUrl = 'https://platform.altinn.no/dialogporten'
+

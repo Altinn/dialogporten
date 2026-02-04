@@ -12,4 +12,11 @@ public static class Constants
     public const string FusionCache = "ZiggyCreatures";
     public const string AspNetCore = "Microsoft.AspNetCore";
     public const string Npgsql = "Npgsql";
+    public const string HotChocolateDiagnostics = "HotChocolate.Diagnostics";
+
+    // GraphQL Activity OperationNames to filter out (internal processing steps)
+    public const string GraphQLOperationParseHttpRequest = "ParseHttpRequest";
+    public const string GraphQLOperationValidateDocument = "ValidateDocument";
+    public const string GraphQLOperationCompileOperation = "CompileOperation";
+    public const string GraphQLOperationFormatHttpResponse = "FormatHttpResponse";
 }

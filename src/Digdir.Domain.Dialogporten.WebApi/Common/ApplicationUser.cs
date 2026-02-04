@@ -14,5 +14,5 @@ internal sealed class ApplicationUser : IUser
 
     public ClaimsPrincipal GetPrincipal()
         => _httpContextAccessor.HttpContext?.User ??
-           throw new InvalidOperationException("No user principal found");
+            throw new InvalidOperationException("No user principal found");
 }

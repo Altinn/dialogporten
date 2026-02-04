@@ -33,6 +33,7 @@ using Npgsql;
 using StackExchange.Redis;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.NullObjects;
+using ZiggyCreatures.Caching.Fusion.Locking.AsyncKeyed;
 using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
@@ -123,12 +124,11 @@ public static class InfrastructureExtensions
 
             // Transient
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
-            .AddTransient<Lazy<IPublishEndpoint>>(x =>
-                new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
-            .AddTransient<Lazy<ITopicEventSender>>(x =>
-                new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
+            .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
+            .AddTransient(x => new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 
             // Singleton
             .AddSingleton<INotificationProcessingContextFactory, NotificationProcessingContextFactory>()
@@ -411,6 +411,7 @@ public static class InfrastructureExtensions
             // allow the use of InMemoryDistributedCache (it is by default ignored as a IDistributedCache implementation)
             // TryWithRegisteredBackplane is used to ensure that we can continue without Redis as backplane
             .WithRegisteredDistributedCache(ignoreMemoryDistributedCache: false)
+            .WithMemoryLocker(new AsyncKeyedMemoryLocker())
             .TryWithRegisteredBackplane();
 
         return services;

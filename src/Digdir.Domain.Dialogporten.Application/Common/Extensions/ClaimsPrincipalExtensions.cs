@@ -20,19 +20,39 @@ public static class ClaimsPrincipalExtensions
     private const string IdPrefix = "0192";
     private const string AltinnClaimPrefix = "urn:altinn:";
     private const string IdportenAuthLevelClaim = "acr";
+    private const string IdportenAmrClaim = "amr";
+    private const string AmrSelfRegisteredEmail = "Selfregistered-email";
+    private const string AmrSelfIdentified = "SelfIdentified";
     private const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
-    public const string AltinnOrgClaim = "urn:altinn:org";
-    public const string ScopeClaim = "scope";
+    private const string IdportenEmailClaim = "email";
+    private const string AltinnUsernameClaim = "urn:altinn:username";
+    private const string FeideSubjectClaim = "orgsub";
+    private const string PartyUuidClaim = "urn:altinn:party:uuid";
+    private const string PartyIdClaim = "urn:altinn:partyid";
     private const char ScopeClaimSeparator = ' ';
     private const string PidClaim = "pid";
+    public const string ScopeClaim = "scope";
+    public const string AltinnOrgClaim = "urn:altinn:org";
 
     public static bool TryGetClaimValue(this ClaimsPrincipal claimsPrincipal, string claimType,
         [NotNullWhen(true)] out string? value)
     {
         value = claimsPrincipal.FindFirst(claimType)?.Value;
         return value is not null;
+    }
+
+    public static bool TryGetClaimValues(this ClaimsPrincipal claimsPrincipal, string claimType,
+        [NotNullWhen(true)] out string[]? values)
+    {
+        values = claimsPrincipal.FindAll(claimType)
+            .Select(c => c.Value)
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        return values.Length > 0;
     }
 
     public static bool TryGetConsumerOrgNumber(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgNumber)
@@ -51,7 +71,7 @@ public static class ClaimsPrincipalExtensions
     public static bool TryGetOrganizationShortName(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgShortName)
     {
         orgShortName = claimsPrincipal.FindFirst(AltinnOrgClaim)?.Value;
-        return orgShortName is not null;
+        return !string.IsNullOrWhiteSpace(orgShortName);
     }
 
     public static bool TryGetPid(this Claim? pidClaim, [NotNullWhen(true)] out string? pid)
@@ -145,6 +165,41 @@ public static class ClaimsPrincipalExtensions
         }
     }
 
+    public static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
+        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
+           && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfRegisteredEmail];
+
+    public static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? username)
+        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
+        && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfIdentified];
+
+    public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
+        => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);
+
+    public static bool TryGetPartyUuid(this ClaimsPrincipal claimsPrincipal, out Guid partyUuid)
+    {
+        if (claimsPrincipal.TryGetClaimValue(PartyUuidClaim, out var s) && Guid.TryParse(s, out var id))
+        {
+            partyUuid = id;
+            return true;
+        }
+
+        partyUuid = Guid.Empty;
+        return false;
+    }
+
+    public static bool TryGetPartyId(this ClaimsPrincipal claimsPrincipal, out int partyId)
+    {
+        if (claimsPrincipal.TryGetClaimValue(PartyIdClaim, out var s) && int.TryParse(s, out var id))
+        {
+            partyId = id;
+            return true;
+        }
+
+        partyId = 0;
+        return false;
+    }
+
     public static int GetAuthenticationLevel(this ClaimsPrincipal claimsPrincipal)
     {
         if (claimsPrincipal.TryGetClaimValue(AltinnAuthLevelClaim, out var claimValue) && int.TryParse(claimValue, out var level) && level >= 0)
@@ -154,10 +209,17 @@ public static class ClaimsPrincipalExtensions
 
         if (claimsPrincipal.TryGetClaimValue(IdportenAuthLevelClaim, out claimValue))
         {
-            // The acr claim value is either "idporten-loa-substantial" (previously "Level3") or "idporten-loa-high" (previously "Level4")
-            // https://docs.digdir.no/docs/idporten/oidc/oidc_protocol_new_idporten#new-acr-values
+            // The acr claim value is either
+            // - "idporten-loa-low" (only set by Altinn, used for legacy SI users)
+            // - "idporten-loa-substantial" (previously "Level3")
+            // - "idporten-loa-high" (previously "Level4")
+            // - "selfregistered-email" (for email users),
+            // See https://docs.digdir.no/docs/idporten/oidc/oidc_protocol_new_idporten#new-acr-values
+            //     https://docs.digdir.no/docs/idporten/oidc/oidc_func_emaillogin.html
             return claimValue switch
             {
+                Constants.IdportenLoaEmail => 0,
+                Constants.IdportenLoaLow => 0,
                 Constants.IdportenLoaSubstantial => 3,
                 Constants.IdportenLoaHigh => 4,
                 _ => throw new ArgumentException("Unknown acr value")
@@ -180,6 +242,10 @@ public static class ClaimsPrincipalExtensions
 
         var identifyingClaims = claimsList.Where(c =>
             c.Type == PidClaim ||
+            c.Type == AltinnUsernameClaim ||
+            c.Type == IdportenEmailClaim ||
+            c.Type == IdportenAuthLevelClaim ||
+            c.Type == FeideSubjectClaim ||
             c.Type == ConsumerClaim ||
             c.Type == SupplierClaim ||
             c.Type == IdportenAuthLevelClaim ||
@@ -197,6 +263,20 @@ public static class ClaimsPrincipalExtensions
         return identifyingClaims;
     }
 
+    /// <summary>
+    /// This is the main method for determining the user type of the current user.
+    /// The order of checks is important, as some claims may be present in multiple user types.
+    /// The order is:
+    /// 1. Person (has pid claim)
+    /// 2. System user (has authorization_details claim with type urn:altinn:systemuser)
+    /// 3. Service owner (has consumer claim and service_owner scope)
+    /// 4. Feide user (has orgsub claim)
+    /// 5. Altinn self-identified user (has urn:altinn:username claim with SelfIdentified amr claim)
+    /// 6. Idporten self-registered user (has email claim with Selfregistered-email amr claim)
+    /// 7. Unknown (none of the above)
+    /// </summary>
+    /// <param name="claimsPrincipal"></param>
+    /// <returns></returns>
     public static (UserIdType, string externalId) GetUserType(this ClaimsPrincipal claimsPrincipal)
     {
         if (claimsPrincipal.TryGetPid(out var externalId))
@@ -218,6 +298,21 @@ public static class ClaimsPrincipalExtensions
             return (UserIdType.ServiceOwner, externalId);
         }
 
+        if (claimsPrincipal.TryGetFeideSubject(out externalId))
+        {
+            return (UserIdType.FeideUser, externalId);
+        }
+
+        if (claimsPrincipal.TryGetSelfIdentifiedUsername(out externalId))
+        {
+            return (UserIdType.AltinnSelfIdentifiedUser, externalId);
+        }
+
+        if (claimsPrincipal.TryGetSelfIdentifiedUserEmail(out externalId))
+        {
+            return (UserIdType.IdportenEmailIdentifiedUser, externalId);
+        }
+
         return (UserIdType.Unknown, string.Empty);
     }
 
@@ -235,6 +330,15 @@ public static class ClaimsPrincipalExtensions
             UserIdType.SystemUser
                 => SystemUserIdentifier.TryParse(externalId, out var systemUserId)
                     ? systemUserId : null,
+            UserIdType.IdportenEmailIdentifiedUser
+                => IdportenEmailUserIdentifier.TryParse(externalId, out var email)
+                    ? email : null,
+            UserIdType.AltinnSelfIdentifiedUser
+                => AltinnSelfIdentifiedUserIdentifier.TryParse(externalId, out var username)
+                    ? username : null,
+            UserIdType.FeideUser
+                => FeideUserIdentifier.TryParse(externalId, out var feideSubject)
+                    ? feideSubject : null,
             UserIdType.Unknown => null,
             UserIdType.ServiceOwner => null,
             _ => null
@@ -306,6 +410,22 @@ public static class ClaimsPrincipalExtensions
         };
 
         return orgNumber is not null;
+    }
+
+    private static bool TryGetAmrClaimValues(this ClaimsPrincipal claimsPrincipal,
+        [NotNullWhen(true)] out string[]? amrValuesSorted)
+    {
+        amrValuesSorted = null;
+
+        if (!claimsPrincipal.TryGetClaimValues(IdportenAmrClaim, out var amrClaimValues))
+        {
+            return false;
+        }
+
+        amrClaimValues.Sort(StringComparer.Ordinal);
+        amrValuesSorted = amrClaimValues;
+
+        return amrValuesSorted.Length > 0;
     }
 
     // https://docs.altinn.studio/authentication/systemauthentication/

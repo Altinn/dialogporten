@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Xml;
 using Altinn.Authorization.ABAC.Utils;
 using Altinn.Authorization.ABAC.Xacml;
+using AsyncKeyedLock;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.Extensions.Logging;
@@ -64,7 +65,8 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
             yield return response.Data;
 
-            nextUrl = response.Links.Next?.ToString();
+            // Use PathAndQuery to work around internal (non-APIM) URLs being returned
+            nextUrl = response.Links.Next?.PathAndQuery;
         } while (nextUrl is not null);
     }
 
@@ -76,7 +78,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         // concurrently using semaphores.
         var updatedResources = await GetUniqueUpdatedResources(since, cancellationToken);
 
-        using var semaphore = new SemaphoreSlim(numberOfConcurrentRequests);
+        using var semaphore = new AsyncNonKeyedLocker(numberOfConcurrentRequests);
         var metadataTasks = new List<Task<UpdatedResourcePolicyInformation?>>();
 
         foreach (var updatedResource in updatedResources)
@@ -91,17 +93,10 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
             .ToList();
     }
 
-    private async Task<UpdatedResourcePolicyInformation?> ProcessResourcePolicy(UpdatedResource item, SemaphoreSlim semaphore, CancellationToken cancellationToken)
+    private async Task<UpdatedResourcePolicyInformation?> ProcessResourcePolicy(UpdatedResource item, AsyncNonKeyedLocker semaphore, CancellationToken cancellationToken)
     {
-        await semaphore.WaitAsync(cancellationToken);
-        try
-        {
-            return await GetUpdatedResourcePolicyInformation(item, cancellationToken);
-        }
-        finally
-        {
-            semaphore.Release();
-        }
+        using var _ = await semaphore.LockAsync(cancellationToken);
+        return await GetUpdatedResourcePolicyInformation(item, cancellationToken);
     }
 
     private async Task<List<UpdatedResource>> GetUniqueUpdatedResources(DateTimeOffset _, CancellationToken cancellationToken)

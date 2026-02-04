@@ -1,4 +1,4 @@
-using UUIDNext;
+using DeterministicGuids;
 
 namespace Digdir.Tool.Dialogporten.LargeDataSetGenerator;
 
@@ -7,7 +7,7 @@ public static class DeterministicUuidV7
     public static Guid Generate(DateTimeOffset timestamp, string tableName, int tiebreaker = 0)
     {
         var timeBasedEmpty = Guid.Empty.ToVersion7(timestamp);
-        var nameBasedUuid = Uuid.NewNameBased(timeBasedEmpty, $"{tableName}{tiebreaker}");
+        var nameBasedUuid = DeterministicGuid.Create(timeBasedEmpty, $"{tableName}{tiebreaker}");
         return nameBasedUuid.ToVersion7(timestamp);
     }
 

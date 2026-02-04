@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OneOf.Types;
@@ -63,6 +63,7 @@ internal sealed class TestUserResourceRegistry(IUserResourceRegistry userResourc
     public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyCollection<string>>(["urn:altinn:resource:SuperKulTest"]);
     public bool UserCanModifyResourceType(string serviceResourceType) => userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
     public bool IsCurrentUserServiceOwnerAdmin() => false;
+    public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) => throw new NotImplementedException();
 }
 
 internal sealed class TestServiceResourceAuthorizer : IServiceResourceAuthorizer

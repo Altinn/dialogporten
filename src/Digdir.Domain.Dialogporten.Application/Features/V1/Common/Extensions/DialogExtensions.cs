@@ -73,6 +73,11 @@ internal static class DialogExtensions
         {
             attachment.DisplayName?.Localizations.PruneLocalizations(acceptedLanguages);
         }
+
+        foreach (var navigationalAction in transmission.NavigationalActions)
+        {
+            navigationalAction.Title.Localizations.PruneLocalizations(acceptedLanguages);
+        }
     }
 
     public static void FilterLocalizations(this DialogActivity activity, List<AcceptedLanguage>? acceptedLanguages) =>

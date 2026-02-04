@@ -14,10 +14,14 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureToggle;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchNew;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using SearchDialogQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
-using SearchDialogResult = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
+using SearchDialogQueryEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
+using SearchDialogResultEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
+using SearchDialogQuerySo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+using SearchDialogResultSo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
 
 namespace Digdir.Domain.Dialogporten.Application;
 
@@ -27,7 +31,6 @@ public static class ApplicationExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
-        var thisAssembly = Assembly.GetExecutingAssembly();
 
         services.AddOptions<ApplicationSettings>()
             .Bind(configuration.GetSection(ApplicationSettings.ConfigurationSectionName))
@@ -44,14 +47,15 @@ public static class ApplicationExtensions
 
         services
             // Framework
-            .AddAutoMapper(thisAssembly)
+            .AddAutoMapper(ApplicationAssemblyMarker.Assembly)
             .AddMediatR(x =>
             {
-                x.RegisterServicesFromAssembly(thisAssembly);
+                x.RegisterServicesFromAssembly(ApplicationAssemblyMarker.Assembly);
                 x.TypeEvaluator = type => !type.IsAssignableTo(typeof(IIgnoreOnAssemblyScan));
                 x.NotificationPublisherType = typeof(TaskWhenAllPublisher);
             })
-            .AddValidatorsFromAssembly(thisAssembly, ServiceLifetime.Transient, includeInternalTypes: true,
+            .AddValidatorsFromAssembly(ApplicationAssemblyMarker.Assembly,
+                ServiceLifetime.Transient, includeInternalTypes: true,
                 filter: type => !type.ValidatorType.IsAssignableTo(typeof(IIgnoreOnAssemblyScan)))
 
             // Singleton
@@ -69,7 +73,10 @@ public static class ApplicationExtensions
             .AddTransient<IUserRegistry, UserRegistry>()
             .AddTransient<IUserParties, UserParties>()
             .AddTransient<IClock, Clock>()
-            .AddTransient<IApplicationFeatureToggle<SearchDialogQuery, SearchDialogResult>, OptimizedEndUserDialogSearchFeatureToggle>()
+            .AddTransient<IDialogTransmissionAppender, DialogTransmissionAppender>()
+            .AddTransient<ITransmissionHierarchyValidator, TransmissionHierarchyValidator>()
+            .AddTransient<IApplicationFeatureToggle<SearchDialogQueryEu, SearchDialogResultEu>, OptimizedEndUserDialogSearchFeatureToggle>()
+            .AddTransient<IApplicationFeatureToggle<SearchDialogQuerySo, SearchDialogResultSo>, OptimizedServiceOwnerDialogSearchFeatureToggle>()
             .AddDataLoaders()
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationFeatureToggleBehavior<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))

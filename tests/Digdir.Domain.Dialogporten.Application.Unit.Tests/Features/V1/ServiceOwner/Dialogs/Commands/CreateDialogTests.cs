@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using NSubstitute;
@@ -28,8 +29,11 @@ public class CreateDialogTests
         var domainContextSub = Substitute.For<IDomainContext>();
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
+        var userResourceSub = Substitute.For<IUserResourceRegistry>();
         var userSub = Substitute.For<IUser>();
+        var clock = new Clock();
 
+        var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
 
         serviceAuthorizationSub
@@ -40,9 +44,9 @@ public class CreateDialogTests
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
-        var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
+        var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub);
+            resourceRegistrySub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);
@@ -67,7 +71,10 @@ public class CreateDialogTests
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
+        var userResourceSub = Substitute.For<IUserResourceRegistry>();
+        var hierarchyValidatorSub = Substitute.For<ITransmissionHierarchyValidator>();
         var createCommand = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
+        var clock = new Clock();
 
         serviceAuthorizationSub
             .AuthorizeServiceResources(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
@@ -77,9 +84,9 @@ public class CreateDialogTests
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
-        var commandHandler = new CreateDialogCommandHandler(userSub, dialogDbContextSub,
+        var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, serviceAuthorizationSub);
+            resourceRegistrySub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);

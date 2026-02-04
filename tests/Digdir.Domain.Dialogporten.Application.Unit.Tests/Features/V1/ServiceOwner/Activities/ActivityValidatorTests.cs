@@ -7,7 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using AwesomeAssertions;
 
 using UpdateActivityDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
@@ -19,7 +19,7 @@ namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceO
 public class ActivityValidatorTests
 {
     public static IEnumerable<object[]> ActivityTypes() =>
-        from DialogActivityType.Values activityType in Enum.GetValues(typeof(DialogActivityType.Values))
+        from DialogActivityType.Values activityType in Enum.GetValues<DialogActivityType.Values>()
         select new object[] { activityType, };
 
     [Theory, MemberData(nameof(ActivityTypes))]

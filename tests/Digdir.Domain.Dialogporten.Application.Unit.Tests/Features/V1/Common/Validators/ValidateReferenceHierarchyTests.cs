@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Unit.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
-using FluentAssertions;
+using AwesomeAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.Validators;
 

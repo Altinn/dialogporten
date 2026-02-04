@@ -10,6 +10,8 @@ internal static class FluentValidationDateTimeOffsetExtensions
     public const string InPastOfMessage = "'{PropertyName}' must be before '{ComparisonProperty}'.";
     public const string InFutureOfMessage = "'{PropertyName}' must be after '{ComparisonProperty}'.";
 
+    private static readonly TimeSpan FutureTolerance = TimeSpan.FromSeconds(15);
+
     public static IRuleBuilderOptions<T, DateTimeOffset?> IsInFuture<T>(this IRuleBuilder<T, DateTimeOffset?> ruleBuilder, IClock clock)
     {
         return ruleBuilder
@@ -27,14 +29,14 @@ internal static class FluentValidationDateTimeOffsetExtensions
     public static IRuleBuilderOptions<T, DateTimeOffset?> IsInPast<T>(this IRuleBuilder<T, DateTimeOffset?> ruleBuilder, IClock clock)
     {
         return ruleBuilder
-            .LessThanOrEqualTo(clock.UtcNowOffset)
+            .LessThanOrEqualTo(clock.UtcNowOffset.Add(FutureTolerance))
             .WithMessage(InPastMessage);
     }
 
     public static IRuleBuilderOptions<T, DateTimeOffset> IsInPast<T>(this IRuleBuilder<T, DateTimeOffset> ruleBuilder, IClock clock)
     {
         return ruleBuilder
-            .LessThanOrEqualTo(clock.UtcNowOffset)
+            .LessThanOrEqualTo(clock.UtcNowOffset.Add(FutureTolerance))
             .WithMessage(InPastMessage);
     }
 }

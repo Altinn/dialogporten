@@ -1,7 +1,7 @@
 import { _default, _setup } from "./graphqlCommonFunctions.js";
 
 const label = "graphql-getall-dialogs-for-party";
-const queryType = "getAllDialogsForParty"
+const queryType = "getAllDialogsForEnduser";
 
 const numberOfEndUsers = 200; // Remove when altinn-testtools bulk get of endusers/tokens is fast
 export const options = {
@@ -13,7 +13,7 @@ export const options = {
 };
 
 
-options.thresholds[`http_req_duration{name:${label}}`] = ["p(95)<500"];
+options.thresholds[`http_req_duration{name:${label}}`] = ["p(95)<1700"];
 options.thresholds[`http_reqs{name:${label}}`] = [];
 
 

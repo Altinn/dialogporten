@@ -20,9 +20,11 @@ public partial class Queries
         var result = await mediator.Send(request, cancellationToken);
 
         user.GetPrincipal().TryGetPid(out var pid);
-        logger.LogInformation("GraphQL handler, app result for party {Party}: {@Result}",
-            pid, result);
+        LogGraphqlPartyResult(logger, pid, result);
 
         return mapper.Map<List<AuthorizedParty>>(result.AuthorizedParties);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "GraphQL handler, app result for party {Party}: {@Result}")]
+    private static partial void LogGraphqlPartyResult(ILogger logger, string? party, PartiesDto result);
 }

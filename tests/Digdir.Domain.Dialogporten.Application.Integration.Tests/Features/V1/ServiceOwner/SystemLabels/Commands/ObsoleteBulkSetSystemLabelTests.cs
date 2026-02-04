@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using FluentAssertions;
+using AwesomeAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 #pragma warning disable CS0618 // Type or member is obsolete

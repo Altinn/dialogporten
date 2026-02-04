@@ -12,11 +12,12 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
         IValidator<ActorDto> actorValidator,
         IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator,
+        IValidator<TransmissionNavigationalActionDto> navigationalActionValidator,
         IClock clock)
     {
         RuleFor(x => x.Id)
             .IsValidUuidV7()
-            .UuidV7TimestampIsInPast();
+            .UuidV7TimestampIsInPast(clock);
 
         RuleFor(x => x.CreatedAt)
             .IsInPast(clock);
@@ -49,6 +50,13 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
 
         RuleForEach(x => x.Attachments)
             .SetValidator(attachmentValidator);
+
+        RuleForEach(x => x.NavigationalActions)
+            .SetValidator(navigationalActionValidator);
+
+        RuleFor(x => x.IdempotentKey)
+            .MinimumLength(Constants.MinIdempotentKeyLength)
+            .MaximumLength(Constants.MaxIdempotentKeyLength);
 
         When(CreateDialogCommandValidator.IsApiOnly, () =>
                 RuleFor(x => x.Content)

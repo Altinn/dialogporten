@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using AsyncKeyedLock;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,7 @@ public interface INotificationProcessingContext : IAsyncDisposable
 
 internal sealed class NotificationProcessingContext : INotificationProcessingContext
 {
-    private readonly SemaphoreSlim _initializeLock = new(1, 1);
+    private readonly AsyncNonKeyedLocker _initializeLock = new(1);
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly Action<Guid> _onDispose;
     private readonly Guid _eventId;
@@ -110,28 +111,20 @@ internal sealed class NotificationProcessingContext : INotificationProcessingCon
 
     internal async Task Initialize(bool isFirstAttempt = false, CancellationToken cancellationToken = default)
     {
-        await _initializeLock.WaitAsync(cancellationToken);
-
-        try
+        using var _ = await _initializeLock.LockAsync(cancellationToken);
+        if (_serviceScope is not null)
         {
-            if (_serviceScope is not null)
-            {
-                throw new InvalidOperationException("Transaction already started.");
-            }
-
-            _serviceScope = _serviceScopeFactory.CreateScope();
-            _db = _serviceScope.ServiceProvider.GetRequiredService<DialogDbContext>();
-            _logger = _serviceScope.ServiceProvider.GetRequiredService<ILogger<NotificationProcessingContext>>();
-            if (!isFirstAttempt)
-            {
-                await _db.NotificationAcknowledgements
-                    .Where(x => x.EventId == _eventId)
-                    .LoadAsync(cancellationToken);
-            }
+            throw new InvalidOperationException("Transaction already started.");
         }
-        finally
+
+        _serviceScope = _serviceScopeFactory.CreateScope();
+        _db = _serviceScope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        _logger = _serviceScope.ServiceProvider.GetRequiredService<ILogger<NotificationProcessingContext>>();
+        if (!isFirstAttempt)
         {
-            _initializeLock.Release();
+            await _db.NotificationAcknowledgements
+                .Where(x => x.EventId == _eventId)
+                .LoadAsync(cancellationToken);
         }
     }
 

@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
-using FluentAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
@@ -33,7 +32,7 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
         var settings = new VerifySettings();
 
         // Timestamps and tiebreaker UUIDs on continuation token will differ on each run
-        settings.IgnoreMember(nameof(PaginatedList<DialogDto>.ContinuationToken));
+        settings.IgnoreMember(nameof(PaginatedList<>.ContinuationToken));
         settings.UseFileName($"OrderBySnapshotTests.{orderBy}");
 
         await Verify(pages, settings)

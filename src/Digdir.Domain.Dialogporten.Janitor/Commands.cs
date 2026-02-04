@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Comman
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Search.Commands.ReindexDialogSearch;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
+using Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -11,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Janitor;
 
-internal static class Commands
+internal static partial class Commands
 {
     internal static CoconaApp AddJanitorCommands(this CoconaApp app)
     {
@@ -60,9 +61,7 @@ internal static class Commands
                 [Option("work-mem-bytes", Description = "work_mem per worker (default 268435456 bytes = 256MB)")] long? workMemBytes)
             =>
             {
-                logger.LogInformation(
-                    "Starting reindex-dialogsearch command with parameters: Full={Full}, Since={Since}, Resume={Resume}, StaleOnly={StaleOnly}, StaleFirst={StaleFirst}, BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}",
-                    full, since, resume, staleOnly, staleFirst, batchSize, workers, throttleMs, workMemBytes);
+                LogStartingReindexDialogSearch(logger, full, since, resume, staleOnly, staleFirst, batchSize, workers, throttleMs, workMemBytes);
 
                 try
                 {
@@ -110,7 +109,7 @@ internal static class Commands
             {
                 var targetDate = targetDateInput ?? NorwegianTimeConverter.GetYesterday();
 
-                logger.LogInformation("Host Environment: {Environment}", env.EnvironmentName);
+                LogHostEnvironment(logger, env.EnvironmentName);
 
                 var localDevSettings = config.GetLocalDevelopmentSettings();
                 if (env.IsDevelopment() && localDevSettings.UseLocalMetricsAggregationStorage)
@@ -125,6 +124,47 @@ internal static class Commands
                     failure => -1);
             });
 
+        app.AddCommand("collect-custom-metrics", async (
+                [FromService] CustomMetricsService metricsService,
+                [FromService] CoconaAppContext ctx,
+                [FromService] ILogger<CoconaApp> logger)
+            =>
+            {
+                logger.LogInformation("Starting collect-custom-metrics command");
+
+                try
+                {
+                    await metricsService.CollectAllMetricsAsync(ctx.CancellationToken);
+                    logger.LogInformation("collect-custom-metrics command completed successfully");
+                    return 0;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "collect-custom-metrics command failed with exception: {Message}", ex.Message);
+                    return -1;
+                }
+            });
+
         return app;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Starting reindex-dialogsearch command with parameters: Full={Full}, Since={Since}, Resume={Resume}, StaleOnly={StaleOnly}, StaleFirst={StaleFirst}, BatchSize={BatchSize}, Workers={Workers}, ThrottleMs={ThrottleMs}, WorkMemBytes={WorkMemBytes}")]
+    private static partial void LogStartingReindexDialogSearch(
+        ILogger logger,
+        bool full,
+        DateTimeOffset? since,
+        bool resume,
+        bool staleOnly,
+        bool staleFirst,
+        int? batchSize,
+        int? workers,
+        int? throttleMs,
+        long? workMemBytes);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Host Environment: {Environment}")]
+    private static partial void LogHostEnvironment(ILogger logger, string environment);
 }

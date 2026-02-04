@@ -106,14 +106,19 @@ public sealed class UpdateDialogDto
     public List<ActivityDto> Activities { get; set; } = [];
 }
 
-public class TransmissionDto
+public sealed class TransmissionDto
 {
     /// <summary>
-    /// The UUDIv7 of the action may be provided to support idempotent additions to the list of transmissions.
+    /// A UUIDv7 may be provided to support idempotent additions to the list of transmissions.
     /// If not supplied, a new UUIDv7 will be generated.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
     public Guid? Id { get; set; }
+
+    /// <summary>
+    /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
+    /// </summary>
+    public string? IdempotentKey { get; set; }
 
     /// <summary>
     /// If supplied, overrides the creating date and time for the transmission.
@@ -173,6 +178,11 @@ public class TransmissionDto
     /// The transmission-level attachments.
     /// </summary>
     public List<TransmissionAttachmentDto> Attachments { get; set; } = [];
+
+    /// <summary>
+    /// The transmission-level navigational actions.
+    /// </summary>
+    public List<TransmissionNavigationalActionDto> NavigationalActions { get; set; } = [];
 }
 
 public sealed class TransmissionContentDto
@@ -249,7 +259,7 @@ public sealed class SearchTagDto
 public class ActivityDto
 {
     /// <summary>
-    /// The UUDIv7 of the action may be provided to support idempotent additions to the list of activities.
+    /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
     /// If not supplied, a new UUIDv7 will be generated.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
@@ -548,4 +558,22 @@ public sealed class TransmissionAttachmentUrlDto
     /// The type of consumer the URL is intended for.
     /// </summary>
     public AttachmentUrlConsumerType.Values ConsumerType { get; set; }
+}
+
+public sealed class TransmissionNavigationalActionDto
+{
+    /// <summary>
+    /// The title of the navigational action.
+    /// </summary>
+    public List<LocalizationDto> Title { get; set; } = [];
+
+    /// <summary>
+    /// The fully qualified URL of the navigational action.
+    /// </summary>
+    public Uri Url { get; set; } = null!;
+
+    /// <summary>
+    /// The UTC timestamp when the navigational action expires and is no longer available.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
 }

@@ -5,9 +5,11 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
@@ -86,6 +88,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .Include(x => x.Transmissions)
                         .ThenInclude(x => x.Attachments)
                         .ThenInclude(x => x.DisplayName!.Localizations)
+                    .Include(x => x.Transmissions)
+                        .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                        .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.Activities)
                         .ThenInclude(x => x.Description!.Localizations)
                     .Include(x => x.Activities)
@@ -151,11 +156,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             currentUserInformation.UserId.Type,
             currentUserInformation.Name);
 
+        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
+
         dialog.EndUserContext.UpdateSystemLabels(
             addLabels: [],
             removeLabels: [SystemLabel.Values.MarkedAsUnopened],
-            userId: currentUserInformation.UserId.ExternalIdWithPrefix
-        );
+            performedBy);
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
@@ -166,7 +172,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             success => { },
             domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
             concurrencyError =>
-                throw new UnreachableException("Should not get concurrencyError when updating SeenAt."));
+                throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
+            conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
@@ -266,10 +273,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         foreach (var dialogTransmission in dto.Transmissions.Where(e => !e.IsAuthorized))
         {
+            dialogTransmission.Content.ContentReference.ReplaceUnauthorizedContentReference();
             var urls = dialogTransmission.Attachments.SelectMany(a => a.Urls).ToList();
             foreach (var url in urls)
             {
                 url.Url = Constants.UnauthorizedUri;
+            }
+
+            foreach (var action in dialogTransmission.NavigationalActions)
+            {
+                action.Url = Constants.UnauthorizedUri;
             }
         }
     }
@@ -294,6 +307,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         foreach (var url in expiredTransmissionAttachmentUrls)
         {
             url.Url = Constants.ExpiredUri;
+        }
+
+        var expiredTransmissionNavigationalActions = dto.Transmissions
+            .Where(x => x.IsAuthorized)
+            .SelectMany(x => x.NavigationalActions)
+            .Where(x => x.ExpiresAt < _clock.UtcNowOffset);
+
+        foreach (var action in expiredTransmissionNavigationalActions)
+        {
+            action.Url = Constants.ExpiredUri;
         }
     }
 }

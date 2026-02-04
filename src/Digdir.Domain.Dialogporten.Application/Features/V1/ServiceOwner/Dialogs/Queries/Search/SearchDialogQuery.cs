@@ -22,8 +22,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>, IRequest<SearchDialogResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
-    private string? _searchLanguageCode;
-
     /// <summary>
     /// Filter by one or more service resources
     /// </summary>
@@ -42,28 +40,26 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by one or more extended statuses
     /// </summary>
-    public List<string>? ExtendedStatus { get; init; }
+    public List<string>? ExtendedStatus { get; set; }
 
     /// <summary>
     /// Filter by external reference
     /// </summary>
-    public string? ExternalReference { get; init; }
+    public string? ExternalReference { get; set; }
 
     /// <summary>
     /// Filter by status
     /// </summary>
-    public List<DialogStatus.Values>? Status { get; init; }
-
-    private DeletedFilter? _deleted = DeletedFilter.Exclude;
+    public List<DialogStatus.Values>? Status { get; set; }
 
     /// <summary>
     /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
     /// </summary>
     public DeletedFilter? Deleted
     {
-        get => _deleted;
-        set => _deleted = value ?? DeletedFilter.Exclude;
-    }
+        get;
+        set => field = value ?? DeletedFilter.Exclude;
+    } = DeletedFilter.Exclude;
 
     /// <summary>
     /// Only return dialogs created after this date
@@ -118,7 +114,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Filter by process
     /// </summary>
-    public string? Process { get; init; }
+    public string? Process { get; set; }
 
     /// <summary>
     /// Filter by Display state
@@ -128,7 +124,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// <summary>
     /// Whether to exclude API-only dialogs from the results. Defaults to false.
     /// </summary>
-    public bool? ExcludeApiOnly { get; init; }
+    public bool? ExcludeApiOnly { get; set; }
 
     /// <summary>
     /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
@@ -145,8 +141,8 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// </summary>
     public string? SearchLanguageCode
     {
-        get => _searchLanguageCode;
-        init => _searchLanguageCode = Localization.NormalizeCultureCode(value);
+        get;
+        init => field = Localization.NormalizeCultureCode(value);
     }
 }
 
@@ -154,9 +150,9 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<Intermed
 {
     public static IOrderOptions<IntermediateDialogDto> Configure(IOrderOptionsBuilder<IntermediateDialogDto> options) =>
         options.AddId(x => x.Id)
-            .AddDefault("createdAt", x => x.CreatedAt)
+            .AddDefault("contentUpdatedAt", x => x.ContentUpdatedAt)
             .AddOption("updatedAt", x => x.UpdatedAt)
-            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
+            .AddOption("createdAt", x => x.CreatedAt)
             .AddOption("dueAt", x => x.DueAt)
             .Build();
 }

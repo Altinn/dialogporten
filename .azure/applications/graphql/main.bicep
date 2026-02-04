@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { finopsTags } from '../../functions/finopsTags.bicep'
+
 import { Scale } from '../../modules/containerApp/main.bicep'
 
 @description('The tag of the image to be used')
@@ -14,9 +16,9 @@ param environment string
 @minLength(3)
 param location string
 
-@description('The IP address of the API Management instance')
-@minLength(3)
-param apimIp string
+@description('List of IP address ranges allowed to access the container app ingress (e.g. APIM public IPs)')
+@minLength(1)
+param whitelistedIPs string[]
 
 @description('The suffix for the revision of the container app')
 @minLength(3)
@@ -55,10 +57,9 @@ param workloadProfileName string = 'Consumption'
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-var tags = {
-  Environment: environment
-  Product: 'Dialogporten'
-}
+var baseTags = {}
+
+var tags = finopsTags(baseTags, environment)
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationName
@@ -147,7 +148,7 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     location: location
     envVariables: containerAppEnvVars
     containerAppEnvId: containerAppEnvironment.id
-    apimIp: apimIp
+    whitelistedIPs: whitelistedIPs
     tags: tags
     resources: resources
     revisionSuffix: revisionSuffix

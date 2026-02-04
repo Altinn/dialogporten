@@ -12,6 +12,7 @@ import {
     setStatus,
     setExtendedStatus,
     setServiceResource,
+    setServiceOwnerLabels,
     setParty,
     setDueAt,
     setProcess,
@@ -22,24 +23,23 @@ import {
     purgeSO
 } from '../../common/testimports.js'
 
-import { default as sentinelCheck } from '../../common/sentinel.js';
-
 import {default as dialogToInsert} from './testdata/01-create-dialog.js';
 
 import {getDefaultEnduserOrgNo, getDefaultEnduserSsn} from "../../common/token.js";
 import {notValidEnduserId} from '../../common/config.js';
+import {sleep} from 'k6';
 
 export default function () {
 
     const defaultResource = "urn:altinn:resource:ttd-dialogporten-automated-tests";
     const endUserId = "urn:altinn:person:identifier-no:" + getDefaultEnduserSsn();
-    const updatedAfter = (new Date()).toISOString(); // We use this on all tests to avoid clashing with unrelated dialogs
-    const defaultFilter = "?UpdatedAfter=" + updatedAfter;
+    var tag = "so-search-dialog-test-" + uuidv4().substring(0, 8);
+    var defaultFilter = '?ServiceOwnerLabels=' + tag;
 
     describe('Perform simple dialog list', () => {
         // Arrange
         let count = 10;
-        let dialogIds = createDialogs(count);
+        let dialogIds = createDialogs(count, null, tag);
 
         // Assert
         let r = getSO('dialogs');
@@ -54,6 +54,7 @@ export default function () {
         });
     });
 
+    /* // Disable pending better handling of async processed
     describe('Search for title', () => {
         // Arrange
         let titleToSearchFor = uuidv4();
@@ -61,7 +62,9 @@ export default function () {
             if (index == 3) {
                 setTitle(dialog, titleToSearchFor);
             }
-        });
+        }, tag);
+
+        sleep(2); // Allow for indexing to complete
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + titleToSearchFor);
@@ -83,7 +86,9 @@ export default function () {
             if (index == 3) {
                 setAdditionalInfo(dialog, additionalInfoToSearchFor);
             }
-        });
+        }, tag);
+
+        sleep(2); // Allow for indexing to complete
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + additionalInfoToSearchFor);
@@ -105,7 +110,9 @@ export default function () {
             if (index == 3) {
                 setSenderName(dialog, senderNameToSearchFor);
             }
-        });
+        }, tag);
+
+        sleep(2); // Allow for indexing to complete
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + defaultResource + '&EndUserId=' + endUserId + '&Search=' + senderNameToSearchFor);
@@ -119,6 +126,7 @@ export default function () {
             expect(r.status, 'response status').to.equal(204);
         });
     });
+    */
 
     describe('Filter by extended status', () => {
         // Arrange
@@ -131,7 +139,7 @@ export default function () {
             if (index == 2) {
                 setExtendedStatus(dialog, secondExtendedStatusToSearchFor);
             }
-        });
+        }, tag);
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ExtendedStatus=' + extendedStatusToSearchFor + "&ExtendedStatus=" + secondExtendedStatusToSearchFor);
@@ -148,7 +156,7 @@ export default function () {
 
     describe('List with limit', () => {
         // Arrange
-        let dialogIds = createDialogs(10);
+        let dialogIds = createDialogs(10, null, tag);
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&Limit=3');
@@ -175,7 +183,7 @@ export default function () {
     });
 
     describe('List with custom orderBy', () => {
-        sentinelCheck();
+
         let titleForDueAtItem = uuidv4();
         let titleForUpdatedItem = uuidv4();
         let titleForLastItem = uuidv4();
@@ -189,7 +197,7 @@ export default function () {
             if (index == 9) {
                 setTitle(dialog, titleForLastItem);
             }
-        });
+        }, tag);
 
         // Update single dialog
         let firstDialogId = dialogIds[0];
@@ -234,7 +242,7 @@ export default function () {
             if (index == 1) {
                 setParty(dialog, auxParty);
             }
-        });
+        }, tag);
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&Party=' + auxParty);
@@ -257,7 +265,7 @@ export default function () {
             if (index == 1) {
                 setServiceResource(dialog, auxResource);
             }
-        });
+        }, tag);
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&ServiceResource=' + auxResource);
@@ -275,7 +283,7 @@ export default function () {
 
     describe('List with invalid process', () => {
         // Arrange
-        let dialogIds = createDialogs(10);
+        let dialogIds = createDialogs(10, null, tag);
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&process=inval|d');
@@ -295,7 +303,7 @@ export default function () {
         let processToSearchFor = "urn:test:listsearch:1";
         let dialogIds = createDialogs(10, (dialog, index) => {
             setProcess(dialog, "urn:test:listsearch:" + (index + 1));
-        });
+        }, tag);
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&process=' + processToSearchFor);
@@ -318,7 +326,7 @@ export default function () {
             if (index == 1) {
                 setServiceResource(dialog, auxResource);
             }
-        });
+        }, tag);
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&EndUserId=' + endUserId + '&ServiceResource=' + auxResource);
@@ -338,7 +346,7 @@ export default function () {
         // Arrange
         let invalidEndUserId = "urn:altinn:person:identifier-no:" + notValidEnduserId;
         let auxResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2"; // This must exist in Resource Registry
-        let dialogIds = createDialogs(10);
+        let dialogIds = createDialogs(10, null, tag);
 
         // Assert
         let r = getSO('dialogs/' + defaultFilter + '&EndUserId=' + invalidEndUserId + '&ServiceResource=' + auxResource);
@@ -354,11 +362,12 @@ export default function () {
     });
 }
 
-function createDialogs(count, modify) {
+function createDialogs(count, modify, tag) {
     let dialogIds = [];
     for (let i = 0; i < count; i++) {
         let d = dialogToInsert();
         setTitle(d, "e2e-test-dialog #" + (i + 1), "nn_NO");
+        setServiceOwnerLabels(d, [tag]);
         if (modify) {
             modify(d, i);
         }

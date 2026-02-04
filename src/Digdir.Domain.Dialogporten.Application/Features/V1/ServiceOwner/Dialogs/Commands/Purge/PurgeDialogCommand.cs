@@ -13,7 +13,10 @@ using OneOf;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
-public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>, ISilentUpdater, IFeatureMetricServiceResourceThroughDialogIdRequest
+
+public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>,
+    ISilentUpdater,
+    IFeatureMetricServiceResourceThroughDialogIdRequest
 {
     public Guid DialogId { get; set; }
     public Guid? IfMatchDialogRevision { get; set; }
@@ -21,7 +24,7 @@ public sealed class PurgeDialogCommand : IRequest<PurgeDialogResult>, ISilentUpd
 }
 
 [GenerateOneOf]
-public sealed partial class PurgeDialogResult : OneOfBase<Success, EntityNotFound, Forbidden, ConcurrencyError, ValidationError>;
+public sealed partial class PurgeDialogResult : OneOfBase<Success, EntityNotFound, Forbidden, ConcurrencyError, ValidationError, Conflict>;
 
 internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCommand, PurgeDialogResult>
 {
@@ -65,6 +68,7 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
         return saveResult.Match<PurgeDialogResult>(
             success => success,
             domainError => throw new UnreachableException("Should never get a domain error when deleting a dialog"),
-            concurrencyError => concurrencyError);
+            concurrencyError => concurrencyError,
+            conflict => conflict);
     }
 }

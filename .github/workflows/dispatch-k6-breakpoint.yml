@@ -54,7 +54,7 @@ on:
         options:
           - 'tests/k6/tests/serviceowner/performance/createDialogBreakpoint.js'
           - 'tests/k6/tests/serviceowner/performance/createTransmissionsBreakpoint.js'
-          - 'tests/k6/tests/serviceowner/performance/serviceownerSearchBreakpoint.js'
+          - 'tests/k6/tests/serviceowner/performance/serviceOwnerSearchBreakpoint.js'
           - 'tests/k6/tests/serviceowner/performance/serviceOwnerShouldSendNotification.js'
           - 'tests/k6/tests/serviceowner/performance/createDialogTransmissionActivity.js'
           - 'tests/k6/tests/enduser/performance/enduserSearchBreakpoint.js'

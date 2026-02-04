@@ -1,5 +1,4 @@
-using Digdir.Domain.Dialogporten.WebApi;
-using FluentAssertions;
+using AwesomeAssertions;
 using NetArchTest.Rules;
 
 namespace Digdir.Domain.Dialogporten.Architecture.Tests;
@@ -13,7 +12,7 @@ public class SealedClassesTest
             .InAssemblies(DialogportenAssemblies.All)
             .That().AreClasses()
             .And().AreNotAbstract()
-            .And().DoNotHaveName(nameof(Program))
+            .And().DoNotHaveName(nameof(WebApi.Program))
             .And().DoNotHaveNameStartingWith("LocalDevelopment")
             .And().DoNotResideInNamespaceMatching("Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations")
             .GetTypes()

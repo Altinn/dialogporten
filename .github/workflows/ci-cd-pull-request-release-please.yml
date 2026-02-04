@@ -6,36 +6,42 @@ on:
     paths-ignore:
       - "tests/k6/**"
 
-permissions:
-  contents: read
-  pull-requests: read
-  id-token: write
-
 jobs:
   verify-release-please-branch:
     if: startsWith(github.head_ref, 'release-please-')
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - run: echo "Confirmed to be a release please branch"
 
   get-current-version:
     name: Get current version
     needs: [verify-release-please-branch]
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-get-current-version.yml
 
   check-for-changes:
     name: Check for changes
     needs: [verify-release-please-branch]
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-check-for-changes.yml
 
   generate-git-short-sha:
     name: Generate git short sha
     needs: [verify-release-please-branch]
+    permissions:
+      contents: read
     uses: ./.github/workflows/workflow-generate-git-short-sha.yml
 
   dry-run-deploy-infra-staging:
     name: Deploy infra to staging (dry run)
     needs: [generate-git-short-sha, get-current-version, check-for-changes]
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
     uses: ./.github/workflows/workflow-deploy-infra.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -54,6 +60,10 @@ jobs:
   dry-run-deploy-apps-staging:
     name: Deploy apps to staging (dry run)
     needs: [generate-git-short-sha, get-current-version, check-for-changes]
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -75,8 +85,9 @@ jobs:
     name: Send Slack message
     needs: [dry-run-deploy-infra-staging, dry-run-deploy-apps-staging]
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
-      - uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+      - uses: step-security/harden-runner@e3f713f2d8f53843e71c69a996d56f51aa9adfb9 # v2.14.1
         with:
           egress-policy: audit
 
@@ -137,14 +148,16 @@ jobs:
         id: slackify
         uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1
         with:
-          text: ${{ github.event.pull_request.body }}
+          text: ${{ env.PR_BODY }}
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
 
       - name: Trim slackified content if necessary
         id: trim-slackified
+        env:
+          SLACKIFIED_CONTENT: ${{ steps.slackify.outputs.text }}
+          MAX_LENGTH: ${{ env.MAX_BODY_LENGTH }}
         run: |
-          SLACKIFIED_CONTENT="${{ steps.slackify.outputs.text }}"
-          MAX_LENGTH=${{ env.MAX_BODY_LENGTH }}
-          
           if [ ${#SLACKIFIED_CONTENT} -gt $MAX_LENGTH ]; then
             # Account for the trimming message length to ensure we stay under limit
             TRIM_MESSAGE="... (content trimmed due to length)"

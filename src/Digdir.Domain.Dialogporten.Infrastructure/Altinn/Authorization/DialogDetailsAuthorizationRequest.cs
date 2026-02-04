@@ -8,7 +8,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 internal sealed class DialogDetailsAuthorizationRequest
 {
-    public required List<Claim> Claims { get; init; }
+    public required ClaimsPrincipal ClaimsPrincipal { get; init; }
     public required string ServiceResource { get; init; }
     public required Guid DialogId { get; init; }
     public required string Party { get; init; }
@@ -22,7 +22,7 @@ internal static class DialogDetailsAuthorizationRequestExtensions
 {
     public static string GenerateCacheKey(this DialogDetailsAuthorizationRequest request)
     {
-        var claimsKey = string.Join(";", request.Claims.GetIdentifyingClaims()
+        var claimsKey = string.Join(";", request.ClaimsPrincipal.Claims.GetIdentifyingClaims()
             .Select(c => $"{c.Type}:{c.Value}"));
 
         var actionsKey = string.Join(";", request.AltinnActions.OrderBy(a => a.Name)
@@ -31,7 +31,7 @@ internal static class DialogDetailsAuthorizationRequestExtensions
         var rawKey = $"{request.DialogId}||{claimsKey}|{actionsKey}";
 
         var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
-        var hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+        var hashString = Convert.ToHexStringLower(hashBytes);
 
         return $"auth:details:{hashString}";
     }

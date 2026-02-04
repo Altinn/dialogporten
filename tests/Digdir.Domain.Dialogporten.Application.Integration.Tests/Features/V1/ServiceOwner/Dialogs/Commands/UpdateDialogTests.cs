@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -12,10 +13,11 @@ using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using FluentAssertions;
+using AwesomeAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
 using ApiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ApiActionDto;
@@ -625,4 +627,53 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                         label => label == SystemLabel.Values.Sent);
                 }
             });
+
+    [Theory, ClassData(typeof(DialogContentLengthTestData))]
+    public Task Content_Length_Validation_Test(Action<UpdateDialogCommand> action, Type expectedResult) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(action)
+            .ExecuteAndAssert(expectedResult);
+
+    private sealed class DialogContentLengthTestData : TheoryData<Action<UpdateDialogCommand>, Type>
+    {
+        private static string Repeat(char c, int x) => new(c, x);
+        private static int GetMaxLength(DialogContentType.Values value) =>
+            DialogContentType.GetValue(value).MaxLength;
+
+        public DialogContentLengthTestData()
+        {
+            AddLengthTests((x, value) => x.Dto.Content!.Title = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.Title));
+
+            AddLengthTests((x, value) => x.Dto.Content!.SenderName = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.SenderName));
+
+            AddLengthTests((x, value) => x.Dto.Content!.Summary = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.Summary));
+
+            AddLengthTests((x, value) => x.Dto.Content!.AdditionalInfo = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.AdditionalInfo));
+
+            AddLengthTests((x, value) => x.Dto.Content!.ExtendedStatus = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.ExtendedStatus));
+
+            AddLengthTests((x, value) => x.Dto.Content!.NonSensitiveTitle = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.NonSensitiveTitle));
+
+            AddLengthTests((x, value) => x.Dto.Content!.NonSensitiveSummary = CreateContentDto(value),
+                GetMaxLength(DialogContentType.Values.NonSensitiveSummary));
+        }
+
+        private void AddLengthTests(Action<UpdateDialogCommand, string> applyValue, int maxLength)
+        {
+            Add(x => applyValue(x, Repeat('x', maxLength)), typeof(UpdateDialogSuccess));
+            Add(x => applyValue(x, Repeat('x', maxLength + 1)), typeof(ValidationError));
+        }
+
+        private static ContentValueDto CreateContentDto(string content) => new()
+        {
+            Value = [new() { Value = content, LanguageCode = "nb" }]
+        };
+    }
 }

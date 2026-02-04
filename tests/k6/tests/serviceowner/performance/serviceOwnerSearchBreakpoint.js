@@ -1,5 +1,5 @@
 import { default as run, options as _options } from './serviceowner-search.js'
-import { endUsersPart } from '../../performancetest_common/readTestdata.js';
+export { setup } from './serviceowner-search.js'
 
 const stages_duration = (__ENV.stages_duration ?? '1m');
 const stages_target = (__ENV.stages_target ?? '5');
@@ -15,15 +15,6 @@ export let options = {
     stages: [
         { duration: stages_duration, target: stages_target }, // simulate ramp-up of traffic from 1 to stages_target users over stages_duration
     ],
-}
-
-export function setup() {
-    const totalVus = stages_target;
-    let parts = [];
-    for (let i = 1; i <= totalVus; i++) {
-        parts.push(endUsersPart(totalVus, i));
-    }
-    return parts;
 }
 
 export default function(data) { run(data);}

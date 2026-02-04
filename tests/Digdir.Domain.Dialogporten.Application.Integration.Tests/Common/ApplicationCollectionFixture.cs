@@ -4,6 +4,11 @@ public abstract class ApplicationCollectionFixture(DialogApplication application
 {
     protected DialogApplication Application { get; } = application;
 
-    public Task DisposeAsync() => Task.CompletedTask;
-    public Task InitializeAsync() => Application.ResetState();
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask InitializeAsync() => Application.ResetState();
 }

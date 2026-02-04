@@ -8,10 +8,22 @@ namespace Digdir.Library.Entity.Abstractions.Features.Identifiable;
 public static class IdentifiableExtensions
 {
     /// <summary>
+    /// Populates <see cref="IIdentifiableEntity.Id"/> with a new guid for each entity if the id is <see cref="Guid.Empty"/>.
+    /// </summary>
+    /// <param name="entities">The collection of <see cref="IIdentifiableEntity"/> to update.</param>
+    public static void EnsureIds(this IEnumerable<IIdentifiableEntity> entities)
+    {
+        foreach (var entity in entities)
+        {
+            entity.EnsureId();
+        }
+    }
+
+    /// <summary>
     /// Populates <see cref="IIdentifiableEntity.Id"/> with a new guid if the id is <see cref="Guid.Empty"/>.
     /// </summary>
     /// <param name="identifiable">The <see cref="IIdentifiableEntity"/> to update.</param>
-    public static Guid CreateId(this IIdentifiableEntity identifiable)
+    public static Guid EnsureId(this IIdentifiableEntity identifiable)
         => identifiable.Id = CreateVersion7IfDefault(identifiable.Id);
 
     /// <summary>

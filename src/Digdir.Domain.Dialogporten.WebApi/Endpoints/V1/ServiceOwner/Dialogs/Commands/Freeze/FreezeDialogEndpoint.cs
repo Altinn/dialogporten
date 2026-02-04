@@ -25,6 +25,7 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
             StatusCodes.Status400BadRequest,
             StatusCodes.Status403Forbidden,
             StatusCodes.Status404NotFound,
+            StatusCodes.Status409Conflict,
             StatusCodes.Status410Gone,
             StatusCodes.Status412PreconditionFailed));
     }
@@ -46,7 +47,8 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
             entityNotFound => this.NotFoundAsync(entityNotFound, ct),
             deleted => this.GoneAsync(deleted, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
-            concurrencyError => this.PreconditionFailed(ct));
+            concurrencyError => this.PreconditionFailed(ct),
+            conflict => this.ConflictAsync(conflict, ct));
     }
 
 }

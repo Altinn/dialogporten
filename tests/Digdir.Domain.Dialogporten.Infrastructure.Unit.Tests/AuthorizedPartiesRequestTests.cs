@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;

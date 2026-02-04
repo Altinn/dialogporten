@@ -12,6 +12,9 @@ reviews:
   poem: false
   collapse_walkthrough: true
   sequence_diagrams: false
+  finishing_touches:
+    docstrings:
+      enabled: false
   labeling_instructions: []
   path_filters: ["!**/Migrations/**/*Designer.cs", "!**/Migrations/DialogDbContextModelSnapshot.cs"]
   path_instructions: []

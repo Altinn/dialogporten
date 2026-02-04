@@ -17,14 +17,10 @@ internal static class IdentifiableExtensions
 
     public static ChangeTracker HandleIdentifiableEntities(this ChangeTracker changeTracker)
     {
-        var identifiableEntities = changeTracker
-            .Entries<IIdentifiableEntity>()
-            .Where(x => x.State == EntityState.Added);
-
-        foreach (var entity in identifiableEntities)
-        {
-            entity.Entity.CreateId();
-        }
+        changeTracker.Entries<IIdentifiableEntity>()
+            .Where(x => x.State == EntityState.Added)
+            .Select(x => x.Entity)
+            .EnsureIds();
 
         return changeTracker;
     }

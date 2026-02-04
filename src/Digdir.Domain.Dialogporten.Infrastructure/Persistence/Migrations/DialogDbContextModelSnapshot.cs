@@ -18,7 +18,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gin");
@@ -61,7 +61,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.ToTable("Actor");
 
-                    b.HasDiscriminator().HasValue("Actor");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Actor");
 
                     b.UseTphMappingStrategy();
                 });
@@ -152,7 +152,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.ToTable("Attachment");
 
-                    b.HasDiscriminator().HasValue("Attachment");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Attachment");
 
                     b.UseTphMappingStrategy();
                 });
@@ -832,7 +832,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 5,
                             AllowedMediaTypes = new[] { "text/plain" },
-                            MaxLength = 20,
+                            MaxLength = 25,
                             Name = "ExtendedStatus",
                             OutputInList = true,
                             Required = false
@@ -989,6 +989,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ExternalReference");
 
+                    b.HasIndex("Id")
+                        .HasDatabaseName("IX_Dialog_Id_Covering");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Id"), new[] { "ServiceResource", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt", "ContentUpdatedAt" });
+
                     b.HasIndex("IsApiOnly");
 
                     b.HasIndex("Org");
@@ -1009,15 +1014,20 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasFilter("\"IdempotentKey\" is not null");
 
-                    b.HasIndex("ServiceResource", "Party");
+                    b.HasIndex("Org", "ContentUpdatedAt", "Id")
+                        .IsDescending(false, true, true);
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ServiceResource", "Party"), new[] { "Id" });
+                    b.HasIndex("Org", "CreatedAt", "Id")
+                        .IsDescending(false, true, true);
+
+                    b.HasIndex("Org", "UpdatedAt", "Id")
+                        .IsDescending(false, true, true);
 
                     b.HasIndex("Party", "ContentUpdatedAt", "Id")
                         .IsDescending(false, true, true)
-                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+                        .HasDatabaseName("IX_Dialog_Party_ContentUpdatedAt_Id_Covering");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ContentUpdatedAt", "Id"), new[] { "ServiceResource" });
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ContentUpdatedAt", "Id"), new[] { "ServiceResource", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt" });
 
                     b.HasIndex("Party", "CreatedAt", "Id")
                         .IsDescending(false, true, true)
@@ -1036,6 +1046,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasAnnotation("Npgsql:CreatedConcurrently", true);
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "UpdatedAt", "Id"), new[] { "ServiceResource" });
+
+                    b.HasIndex("Org", "Party", "ContentUpdatedAt", "Id")
+                        .IsDescending(false, false, true, true);
+
+                    b.HasIndex("Org", "ServiceResource", "ContentUpdatedAt", "Id")
+                        .IsDescending(false, false, true, true);
 
                     b.ToTable("Dialog", (string)null);
                 });
@@ -1188,6 +1204,21 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 4,
                             Name = "ServiceOwnerOnBehalfOfPerson"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "IdportenEmailIdentifiedUser"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "AltinnSelfIdentifiedUser"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "FeideUser"
                         });
                 });
 
@@ -1307,6 +1338,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<string>("IdempotentKey")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)");
+
                     b.Property<Guid?>("RelatedTransmissionId")
                         .HasColumnType("uuid");
 
@@ -1321,7 +1356,41 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TypeId");
 
+                    b.HasIndex("DialogId", "IdempotentKey")
+                        .IsUnique()
+                        .HasFilter("\"IdempotentKey\" is not null");
+
                     b.ToTable("DialogTransmission");
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionNavigationalAction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TransmissionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1023)
+                        .HasColumnType("character varying(1023)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TransmissionId");
+
+                    b.ToTable("DialogTransmissionNavigationalAction");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionType", b =>
@@ -1483,7 +1552,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.ToTable("LocalizationSet");
 
-                    b.HasDiscriminator().HasValue("LocalizationSet");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("LocalizationSet");
 
                     b.UseTphMappingStrategy();
                 });
@@ -2103,6 +2172,19 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasDiscriminator().HasValue("DialogTransmissionContentValue");
                 });
 
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionNavigationalActionTitle", b =>
+                {
+                    b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet");
+
+                    b.Property<Guid>("NavigationalActionId")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("NavigationalActionId")
+                        .IsUnique();
+
+                    b.HasDiscriminator().HasValue("DialogTransmissionNavigationalActionTitle");
+                });
+
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.Actor", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", "ActorNameEntity")
@@ -2389,6 +2471,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Navigation("Type");
                 });
 
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionNavigationalAction", b =>
+                {
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmission", "Transmission")
+                        .WithMany("NavigationalActions")
+                        .HasForeignKey("TransmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Transmission");
+                });
+
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Localizations.Localization", b =>
                 {
                     b.HasOne("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet", "LocalizationSet")
@@ -2555,6 +2648,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Navigation("TransmissionContent");
                 });
 
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionNavigationalActionTitle", b =>
+                {
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionNavigationalAction", "NavigationalAction")
+                        .WithOne("Title")
+                        .HasForeignKey("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionNavigationalActionTitle", "NavigationalActionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NavigationalAction");
+                });
+
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", b =>
                 {
                     b.Navigation("ActorEntities");
@@ -2656,9 +2760,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Content");
 
+                    b.Navigation("NavigationalActions");
+
                     b.Navigation("RelatedTransmissions");
 
                     b.Navigation("Sender")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionNavigationalAction", b =>
+                {
+                    b.Navigation("Title")
                         .IsRequired();
                 });
 

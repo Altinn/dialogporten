@@ -45,6 +45,7 @@ param postgresConfiguration = {
   }
   backupRetentionDays: 7
   availabilityZone: '2'
+  enableBackupVault: false
 }
 
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
@@ -61,6 +62,9 @@ param serviceBusSku = {
   capacity: 1
 }
 // Altinn Product Dialogporten: Developers Prod
-param sshJumperAdminLoginGroupObjectId = 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
+param sshJumperConfig = {
+  adminLoginGroupObjectId: 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
+  vmSize: 'Standard_B2als_v2'
+}
 
 param apimUrl = 'https://platform.tt02.altinn.no/dialogporten'

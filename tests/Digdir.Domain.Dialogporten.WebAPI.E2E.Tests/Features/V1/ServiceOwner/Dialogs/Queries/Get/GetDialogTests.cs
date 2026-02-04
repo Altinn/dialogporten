@@ -31,10 +31,16 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
     public async Task Should_Return_Attachment_Names()
     {
         // Arrange
+        const string dialogAttachmentName = "dialog-attachment";
+        const string transmissionAttachmentName = "transmission-attachment";
+
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
-            dialog.AddAttachment(x => x.Name = "dialog-attachment");
-            dialog.AddTransmission(x => x.AddAttachment(x => x.Name = "transmission-attachment"));
+            dialog.AddAttachment(x =>
+                x.Name = dialogAttachmentName);
+            dialog.AddTransmission(x =>
+                x.AddAttachment(modify: x =>
+                    x.Name = transmissionAttachmentName));
         });
 
         // Act
@@ -46,8 +52,11 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         // Assert
         response.IsSuccessful.Should().BeTrue();
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
-        content.Attachments.Should().ContainSingle(attachment => attachment.Name == "dialog-attachment");
+        content.Attachments.Should()
+            .ContainSingle(attachment =>
+                attachment.Name == dialogAttachmentName);
         content.Transmissions.Should().ContainSingle()
-            .Which.Attachments.Should().ContainSingle(attachment => attachment.Name == "transmission-attachment");
+            .Which.Attachments.Should().ContainSingle(attachment =>
+                attachment.Name == transmissionAttachmentName);
     }
 }

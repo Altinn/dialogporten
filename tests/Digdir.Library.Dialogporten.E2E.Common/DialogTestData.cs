@@ -126,13 +126,15 @@ public static class DialogTestData
                 ]
             };
 
-            attachment.Name = "dialog-attachment";
             modify?.Invoke(attachment);
             dialog.Attachments.Add(attachment);
         }
 
         public void AddTransmission(Action<V1ServiceOwnerDialogsCommandsCreate_Transmission>? modify = null)
         {
+            ArgumentNullException.ThrowIfNull(dialog);
+            dialog.Transmissions ??= [];
+
             var transmission = new V1ServiceOwnerDialogsCommandsCreate_Transmission
             {
                 Id = Guid.CreateVersion7(),
@@ -147,8 +149,7 @@ public static class DialogTestData
                     Title = CreateContentValue(
                         value: "Melding med vedlegg",
                         languageCode: "nb")
-                },
-                Attachments = [CreateDefaultTransmissionAttachment()]
+                }
             };
 
             modify?.Invoke(transmission);
@@ -156,38 +157,16 @@ public static class DialogTestData
         }
     }
 
-    public static V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest AddAttachment(
-        this V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest transmission,
-        Action<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment>? modify = null)
+    public static V1ServiceOwnerDialogsCommandsCreate_Transmission AddAttachment(this V1ServiceOwnerDialogsCommandsCreate_Transmission transmission,
+        Action<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment>? modify = null)
     {
         ArgumentNullException.ThrowIfNull(transmission);
         transmission.Attachments ??= [];
 
-        var attachment = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment
+        var attachment = new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
         {
-            DisplayName = [CreateLocalization("Overforing")],
+            DisplayName = [CreateLocalization("Forsendelsevedlegg")],
             Name = null!,
-            Urls =
-            [
-                new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl
-                {
-                    Url = new Uri("https://example.com/transmission-attachment.pdf"),
-                    ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
-                }
-            ]
-        };
-
-        attachment.Name = "transmission-attachment";
-        modify?.Invoke(attachment);
-        transmission.Attachments.Add(attachment);
-        return transmission;
-    }
-
-    private static V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment CreateDefaultTransmissionAttachment() =>
-        new()
-        {
-            DisplayName = [CreateLocalization("Overforing")],
-            Name = "transmission-attachment",
             Urls =
             [
                 new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
@@ -197,4 +176,10 @@ public static class DialogTestData
                 }
             ]
         };
+
+        modify?.Invoke(attachment);
+        transmission.Attachments.Add(attachment);
+
+        return transmission;
+    }
 }

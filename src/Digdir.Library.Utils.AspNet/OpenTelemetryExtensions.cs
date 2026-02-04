@@ -40,8 +40,8 @@ public static class OpenTelemetryExtensions
 
         var endpoint = new Uri(configuration[OtelExporterOtlpEndpoint]!);
         var infrastructureSection = configuration.GetSection("Infrastructure");
-        var enabledSqlStatementLogging = infrastructureSection.GetValue("EnableSqlStatementLogging", true);
-        var enabledSqlParametersLogging = infrastructureSection.GetValue("EnableSqlParametersLogging", true);
+        var enabledSqlStatementLogging = infrastructureSection.GetValue("EnableSqlStatementLogging", false);
+        var enabledSqlParametersLogging = infrastructureSection.GetValue("EnableSqlParametersLogging", false);
 
         return services.AddOpenTelemetry()
             .ConfigureResource(resource =>

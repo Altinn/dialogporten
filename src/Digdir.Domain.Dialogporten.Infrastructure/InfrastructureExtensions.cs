@@ -70,8 +70,6 @@ public static class InfrastructureExtensions
                     dataSourceBuilder.EnableParameterLogging();
 
                     // Configure OpenTelemetry to include parameter values in traces.
-                    // This intentionally formats array values (e.g. text[]) since `.ToString()` on arrays
-                    // yields "System.String[]" which is misleading in Jaeger.
                     dataSourceBuilder.ConfigureTracing(options =>
                     {
                         options.ConfigureCommandEnrichmentCallback((activity, command) =>

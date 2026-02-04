@@ -1,4 +1,5 @@
-﻿using System.Data;
+using System.Data;
+using System.Globalization;
 using Altinn.ApiClients.Maskinporten.Extensions;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
@@ -67,16 +68,19 @@ public static class InfrastructureExtensions
                 if (infrastructure.EnableSqlParametersLogging)
                 {
                     dataSourceBuilder.EnableParameterLogging();
-                    
-                    // Configure OpenTelemetry to include parameter values in traces
+
+                    // Configure OpenTelemetry to include parameter values in traces.
+                    // This intentionally formats array values (e.g. text[]) since `.ToString()` on arrays
+                    // yields "System.String[]" which is misleading in Jaeger.
                     dataSourceBuilder.ConfigureTracing(options =>
                     {
                         options.ConfigureCommandEnrichmentCallback((activity, command) =>
                         {
-                            // Add each parameter as a separate tag following OpenTelemetry semantic conventions
                             foreach (NpgsqlParameter parameter in command.Parameters)
                             {
-                                activity.SetTag($"db.query.parameter.{parameter.ParameterName}", parameter.Value?.ToString() ?? "null");
+                                activity.SetTag(
+                                    $"db.query.parameter.{parameter.ParameterName}",
+                                    FormatOtelDbParameterValue(parameter.Value));
                             }
                         });
                     });
@@ -231,6 +235,44 @@ public static class InfrastructureExtensions
             .ReplaceSingleton<IFusionCache, NullFusionCache>(predicate: localDeveloperSettings.DisableCache)
             .ReplaceSingleton<IPartyNameRegistry, LocalPartNameRegistryClient>(predicate: localDeveloperSettings.UseLocalDevelopmentPartyNameRegistry);
     }
+
+    private static string FormatOtelDbParameterValue(object? value)
+    {
+        if (value is null || value == DBNull.Value)
+            return "null";
+
+        // Treat strings as scalars (they are IEnumerable<char>).
+        if (value is string s)
+            return Truncate(s, 512);
+
+        // Make arrays readable in traces (e.g. string[]).
+        if (value is Array array)
+        {
+            const int maxItems = 32;
+            var count = array.Length;
+            var shown = Math.Min(count, maxItems);
+
+            var items = Enumerable.Range(0, shown)
+                .Select(i => FormatOtelDbParameterValue(array.GetValue(i)))
+                .Select(v => Truncate(v, 128));
+
+            var rendered = $"[{string.Join(", ", items)}]";
+            return count > maxItems ? $"{rendered} (count={count})" : rendered;
+        }
+
+        // Default to invariant culture rendering.
+        return value switch
+        {
+            Guid g => g.ToString("D", CultureInfo.InvariantCulture),
+            DateTime dt => dt.ToString("O", CultureInfo.InvariantCulture),
+            DateTimeOffset dto => dto.ToString("O", CultureInfo.InvariantCulture),
+            IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+            _ => Truncate(value.ToString() ?? "null", 512)
+        };
+    }
+
+    private static string Truncate(string value, int maxLength) =>
+        value.Length <= maxLength ? value : value[..maxLength] + "...";
 
     internal static void AddPubSubCapabilities(InfrastructureBuilderContext builderContext, List<Action<IBusRegistrationConfigurator>> customConfigurations)
     {

@@ -14,7 +14,7 @@ public static class ServiceownerApiExtensions
 
         var createDialogResponse =
             await serviceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
-                createDialogCommand ?? DialogTestData.GetSimpleCreateDialogCommand(),
+                createDialogCommand ?? DialogTestData.CreateSimpleDialog(),
                 TestContext.Current.CancellationToken);
 
         createDialogResponse.Content.Should().NotBeNull();
@@ -32,4 +32,10 @@ public static class ServiceownerApiExtensions
 
         return dialogId;
     }
+
+    public static Task<Guid> CreateSimpleDialogAsync(
+        this IServiceownerApi serviceownerApi,
+        Action<V1ServiceOwnerDialogsCommandsCreate_Dialog> modify) =>
+        serviceownerApi.CreateSimpleDialogAsync(
+            DialogTestData.CreateSimpleDialog(modify));
 }

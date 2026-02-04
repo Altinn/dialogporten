@@ -31,31 +31,11 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
     public async Task Should_Return_Attachment_Names()
     {
         // Arrange
-        var dialog = DialogTestData.GetSimpleCreateDialogCommand();
-
-        dialog.Attachments =
-        [
-            DialogTestData.CreateDialogAttachment(x => x.Name = "dialog-attachment")
-        ];
-
-        dialog.Transmissions =
-        [
-            DialogTestData.CreateTransmission(x => x.Attachments = [DialogTestData.CreateTransmissionAttachment(y => y.Name = "transmission-attachment")
-            ])
-        ];
-
-        var createResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
-            dialog,
-            TestContext.Current.CancellationToken);
-
-        createResponse.IsSuccessful.Should().BeTrue();
-        var dialogIdRaw = createResponse.Content?.Trim('"')
-            ?? throw new InvalidOperationException("Dialog id was null.");
-
-        if (!Guid.TryParse(dialogIdRaw, out var dialogId))
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
-            throw new InvalidOperationException($"Could not parse create dialog response, {dialogIdRaw}");
-        }
+            dialog.AddAttachment();
+            dialog.AddTransmission();
+        });
 
         // Act
         var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(

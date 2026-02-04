@@ -4,8 +4,10 @@ namespace Digdir.Library.Dialogporten.E2E.Common;
 
 public static class DialogTestData
 {
-    public static V1ServiceOwnerDialogsCommandsCreate_Dialog GetSimpleCreateDialogCommand() =>
-        CreateDialog(
+    public static V1ServiceOwnerDialogsCommandsCreate_Dialog CreateSimpleDialog(
+        Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
+    {
+        var dialog = CreateDialog(
             serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
             party: $"urn:altinn:person:identifier-no:{TestTokenConstants.DefaultEndUserSsn}",
             content: CreateContent(
@@ -26,6 +28,10 @@ public static class DialogTestData
                     value: "Utvidet status",
                     languageCode: "nb",
                     mediaType: "text/plain")));
+
+        modify?.Invoke(dialog);
+        return dialog;
+    }
 
     public static V1ServiceOwnerDialogsCommandsCreate_Dialog CreateDialog(
         string serviceResource,
@@ -99,32 +105,89 @@ public static class DialogTestData
             LanguageCode = languageCode,
         };
 
-    public static V1ServiceOwnerDialogsCommandsCreate_Attachment CreateDialogAttachment(
-        Action<V1ServiceOwnerDialogsCommandsCreate_Attachment>? modify = null)
+    extension(V1ServiceOwnerDialogsCommandsCreate_Dialog dialog)
     {
-        var attachment = new V1ServiceOwnerDialogsCommandsCreate_Attachment
+        public void AddAttachment(Action<V1ServiceOwnerDialogsCommandsCreate_Attachment>? modify = null)
         {
-            DisplayName = [CreateLocalization("Dialogvedlegg")],
+            ArgumentNullException.ThrowIfNull(dialog);
+            dialog.Attachments ??= [];
+
+            var attachment = new V1ServiceOwnerDialogsCommandsCreate_Attachment
+            {
+                DisplayName = [CreateLocalization("Dialogvedlegg")],
+                Name = null!,
+                Urls =
+                [
+                    new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
+                    {
+                        Url = new Uri("https://example.com/dialog-attachment.pdf"),
+                        ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                    }
+                ]
+            };
+
+            attachment.Name = "dialog-attachment";
+            modify?.Invoke(attachment);
+            dialog.Attachments.Add(attachment);
+        }
+
+        public void AddTransmission(Action<V1ServiceOwnerDialogsCommandsCreate_Transmission>? modify = null)
+        {
+            var transmission = new V1ServiceOwnerDialogsCommandsCreate_Transmission
+            {
+                Id = Guid.CreateVersion7(),
+                CreatedAt = DateTimeOffset.UtcNow,
+                Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+                Sender = new V1ServiceOwnerCommonActors_Actor
+                {
+                    ActorType = Actors_ActorType.ServiceOwner
+                },
+                Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
+                {
+                    Title = CreateContentValue(
+                        value: "Melding med vedlegg",
+                        languageCode: "nb")
+                },
+                Attachments = [CreateDefaultTransmissionAttachment()]
+            };
+
+            modify?.Invoke(transmission);
+            dialog.Transmissions.Add(transmission);
+        }
+    }
+
+    public static V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest AddAttachment(
+        this V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest transmission,
+        Action<V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment>? modify = null)
+    {
+        ArgumentNullException.ThrowIfNull(transmission);
+        transmission.Attachments ??= [];
+
+        var attachment = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment
+        {
+            DisplayName = [CreateLocalization("Overforing")],
+            Name = null!,
             Urls =
             [
-                new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
+                new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachmentUrl
                 {
-                    Url = new Uri("https://example.com/dialog-attachment.pdf"),
+                    Url = new Uri("https://example.com/transmission-attachment.pdf"),
                     ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                 }
             ]
         };
 
+        attachment.Name = "transmission-attachment";
         modify?.Invoke(attachment);
-        return attachment;
+        transmission.Attachments.Add(attachment);
+        return transmission;
     }
 
-    public static V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment CreateTransmissionAttachment(
-        Action<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment>? modify = null)
-    {
-        var attachment = new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
+    private static V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment CreateDefaultTransmissionAttachment() =>
+        new()
         {
             DisplayName = [CreateLocalization("Overforing")],
+            Name = "transmission-attachment",
             Urls =
             [
                 new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
@@ -134,33 +197,4 @@ public static class DialogTestData
                 }
             ]
         };
-
-        modify?.Invoke(attachment);
-        return attachment;
-    }
-
-    public static V1ServiceOwnerDialogsCommandsCreate_Transmission CreateTransmission(
-        Action<V1ServiceOwnerDialogsCommandsCreate_Transmission>? modify = null)
-    {
-        var transmission = new V1ServiceOwnerDialogsCommandsCreate_Transmission
-        {
-            Id = Guid.CreateVersion7(),
-            CreatedAt = DateTimeOffset.UtcNow,
-            Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
-            Sender = new V1ServiceOwnerCommonActors_Actor
-            {
-                ActorType = Actors_ActorType.ServiceOwner
-            },
-            Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
-            {
-                Title = CreateContentValue(
-                    value: "Melding med vedlegg",
-                    languageCode: "nb")
-            },
-            Attachments = [CreateTransmissionAttachment()]
-        };
-
-        modify?.Invoke(transmission);
-        return transmission;
-    }
 }

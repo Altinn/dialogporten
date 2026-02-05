@@ -291,30 +291,57 @@ internal sealed partial class DialogSearchRepository(
 
         LogPartiesAndServicesCount(logger, partiesAndServices);
 
-        // TODO: Respect instance delegated dialogs
-        var accessibleFilteredDialogs = new PostgresFormattableStringBuilder()
-            .AppendIf(query.Search is null,
-                """
-                SELECT d."Id"
-                FROM "Dialog" d
-                WHERE d."Party" = ppm.party
+        // If the amount of services to search for is above the threshold, it's more efficient to first filter dialogs
+        // by party and then apply service filtering on the resulting set (Party-driven). If it's below the threshold, it's more efficient
+        // to directly filter dialogs by services and parties in a single step (Service-driven)
+        const int serviceDrivenThreshold = 20;
 
-                """)
-            .AppendIf(query.Search is not null,
+        var totalServiceCount = partiesAndServices
+            .SelectMany(x => x.Services)
+            .Distinct(StringComparer.InvariantCultureIgnoreCase)
+            .Count();
+        var useServiceDrivenQuery = totalServiceCount <= serviceDrivenThreshold;
+
+        var searchJoin = new PostgresFormattableStringBuilder();
+        if (query.Search is not null)
+        {
+            searchJoin.Append(
                 """
-                SELECT d."Id"
-                FROM search."DialogSearch" ds 
-                JOIN "Dialog" d ON d."Id" = ds."DialogId"
+                JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
                 CROSS JOIN searchString ss
-                WHERE ds."Party" = ppm.party AND ds."SearchVector" @@ ss.searchVector
+                """);
+        }
+        var permissionCandidateDialogs = new PostgresFormattableStringBuilder();
 
-                """)
-            .Append(
-                """
-                AND d."ServiceResource" = ANY(ppm.allowed_services)
+        if (!useServiceDrivenQuery)
+        {
+            permissionCandidateDialogs
+                .Append(
+                    """
+                    SELECT d."Id"
+                    FROM "Dialog" d
+                    WHERE d."Party" = pp.party
+                    AND d."ServiceResource" = ANY(pp.allowed_services)
 
-                """)
+                    """);
+        }
+        else
+        {
+            permissionCandidateDialogs
+                .Append(
+                    """
+                    SELECT d."Id"
+                    FROM service_permissions sp
+                    JOIN "Dialog" d ON d."ServiceResource" = sp.service
+                                   AND d."Party" = ANY(sp.allowed_parties)
+                    WHERE 1=1
 
+                    """);
+        }
+
+        var postPermissionFilters = new PostgresFormattableStringBuilder()
+            .Append("WHERE 1=1")
+            .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
@@ -337,6 +364,8 @@ internal sealed partial class DialogSearchRepository(
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
 
+        var delegatedDialogIds = authorizedResources.DialogIds.ToArray();
+
         var queryBuilder = new PostgresFormattableStringBuilder()
             .Append("WITH ")
             .AppendIf(query.Search is not null,
@@ -349,29 +378,70 @@ internal sealed partial class DialogSearchRepository(
                     LIMIT 1
                 ),
                 """)
-            .Append(
+            .AppendIf(!useServiceDrivenQuery,
                 $"""
-                 raw_permissions AS (
-                    SELECT p.party, s.service
-                    FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
-                    CROSS JOIN LATERAL unnest(x."Services") AS s(service)
-                    CROSS JOIN LATERAL unnest(x."Parties") AS p(party)
+                 permission_groups AS (
+                     SELECT x."Parties" AS parties
+                          , x."Services" AS services
+                     FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
                  )
-                 ,party_permission_map AS (
-                     SELECT party
-                          , ARRAY_AGG(service) AS allowed_services
-                     FROM raw_permissions
-                     GROUP BY party
+                 ,party_permissions AS (
+                     SELECT p.party
+                          , pg.services AS allowed_services
+                     FROM permission_groups pg
+                     CROSS JOIN LATERAL unnest(pg.parties) AS p(party)
+                 )
+                 ,permission_candidate_ids AS (
+                     SELECT d_inner."Id"
+                     FROM party_permissions pp
+                     CROSS JOIN LATERAL (
+                         {permissionCandidateDialogs}
+                     ) d_inner
+                 )
+                 ,delegated_dialogs AS (
+                     SELECT unnest({delegatedDialogIds}::uuid[]) AS "Id"
+                 )
+                 ,candidate_dialogs AS (
+                     SELECT "Id" FROM permission_candidate_ids
+                     UNION
+                     SELECT "Id" FROM delegated_dialogs
                  )
                  SELECT d.*
-                 FROM (
-                     SELECT d_inner."Id"
-                     FROM party_permission_map ppm
-                     CROSS JOIN LATERAL (
-                         {accessibleFilteredDialogs}
-                     ) d_inner
-                 ) AS filtered_dialogs
-                 JOIN "Dialog" d ON d."Id" = filtered_dialogs."Id"
+                 FROM candidate_dialogs cd
+                 JOIN "Dialog" d ON d."Id" = cd."Id"
+                 {searchJoin}
+                 {postPermissionFilters}
+
+                 """)
+            .AppendIf(useServiceDrivenQuery,
+                $"""
+                 permission_groups AS (
+                     SELECT x."Parties" AS parties
+                          , x."Services" AS services
+                     FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
+                 )
+                 ,service_permissions AS (
+                     SELECT s.service
+                          , pg.parties AS allowed_parties
+                     FROM permission_groups pg
+                     CROSS JOIN LATERAL unnest(pg.services) AS s(service)
+                 )
+                 ,permission_candidate_ids AS (
+                     {permissionCandidateDialogs}
+                 )
+                 ,delegated_dialogs AS (
+                     SELECT unnest({delegatedDialogIds}::uuid[]) AS "Id"
+                 )
+                 ,candidate_dialogs AS (
+                     SELECT "Id" FROM permission_candidate_ids
+                     UNION
+                     SELECT "Id" FROM delegated_dialogs
+                 )
+                 SELECT d.*
+                 FROM candidate_dialogs cd
+                 JOIN "Dialog" d ON d."Id" = cd."Id"
+                 {searchJoin}
+                 {postPermissionFilters}
 
                  """);
 

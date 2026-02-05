@@ -1,16 +1,20 @@
 using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Infrastructure;
+using Microsoft.Extensions.Options;
 
 namespace Digdir.Library.Utils.AspNet;
 
 public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 {
-    private readonly bool _enabledSqlStatementLogging;
-    private readonly bool _enabledSqlParametersLogging;
+    private readonly IDisposable? _settingsChangeToken;
+    private volatile bool _enabledSqlStatementLogging;
+    private volatile bool _enabledSqlParametersLogging;
 
-    public PostgresFilter(bool enabledSqlStatementLogging, bool enabledSqlParametersLogging = false)
+    public PostgresFilter(IOptionsMonitor<InfrastructureSettings> optionsMonitor)
     {
-        _enabledSqlStatementLogging = enabledSqlStatementLogging;
-        _enabledSqlParametersLogging = enabledSqlParametersLogging;
+        ArgumentNullException.ThrowIfNull(optionsMonitor);
+        ApplySettings(optionsMonitor.CurrentValue);
+        _settingsChangeToken = optionsMonitor.OnChange(ApplySettings);
     }
 
     public override void OnEnd(Activity activity)
@@ -27,7 +31,7 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
             AddParameterInformation(activity);
         }
 
-        if (activity.Tags.IsSuccessfulSqlStatementActivity() && !_enabledSqlStatementLogging)
+        if (!_enabledSqlStatementLogging && activity.Tags.IsSuccessfulSqlStatementActivity())
         {
             activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
             return;
@@ -40,6 +44,22 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
         }
 
         base.OnEnd(activity);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _settingsChangeToken?.Dispose();
+        }
+
+        base.Dispose(disposing);
+    }
+
+    private void ApplySettings(InfrastructureSettings settings)
+    {
+        _enabledSqlStatementLogging = settings.EnableSqlStatementLogging;
+        _enabledSqlParametersLogging = settings.EnableSqlParametersLogging;
     }
 
     private static void AddParameterInformation(Activity activity)

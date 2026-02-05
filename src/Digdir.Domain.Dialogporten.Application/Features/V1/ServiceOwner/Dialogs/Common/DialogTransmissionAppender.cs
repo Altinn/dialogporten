@@ -44,11 +44,39 @@ internal sealed class DialogTransmissionAppender : IDialogTransmissionAppender
 
         var (fromParty, fromServiceOwner) = newTransmissions.GetTransmissionCounts();
 
-        dialog.FromPartyTransmissionsCount = checked((short)(dialog.FromPartyTransmissionsCount + fromParty));
-        dialog.FromServiceOwnerTransmissionsCount = checked((short)(dialog.FromServiceOwnerTransmissionsCount + fromServiceOwner));
+        var sumFromParty = fromParty + dialog.FromPartyTransmissionsCount;
+        if (sumFromParty > short.MaxValue)
+        {
+            _domainContext.AddError(
+                nameof(DialogEntity.FromPartyTransmissionsCount),
+                $"'{nameof(DialogEntity.FromPartyTransmissionsCount)}' cannot exceed {short.MaxValue}."
+            );
+            fromParty = 0;
+        }
+        else
+        {
+            dialog.FromPartyTransmissionsCount = (short)sumFromParty;
+        }
 
-        dialog.Transmissions.AddRange(newTransmissions);
-        _db.DialogTransmissions.AddRange(newTransmissions);
+        var sumFromServiceOwner = fromServiceOwner + dialog.FromServiceOwnerTransmissionsCount;
+        if (sumFromServiceOwner > short.MaxValue)
+        {
+            _domainContext.AddError(
+                nameof(DialogEntity.FromServiceOwnerTransmissionsCount),
+                $"'{nameof(DialogEntity.FromServiceOwnerTransmissionsCount)}' cannot exceed {short.MaxValue}."
+            );
+            fromServiceOwner = 0;
+        }
+        else
+        {
+            dialog.FromServiceOwnerTransmissionsCount = (short)sumFromServiceOwner;
+        }
+
+        if (fromParty > 0 || fromServiceOwner > 0)
+        {
+            dialog.Transmissions.AddRange(newTransmissions);
+            _db.DialogTransmissions.AddRange(newTransmissions);
+        }
 
         foreach (var attachment in newTransmissions.SelectMany(x => x.Attachments))
         {

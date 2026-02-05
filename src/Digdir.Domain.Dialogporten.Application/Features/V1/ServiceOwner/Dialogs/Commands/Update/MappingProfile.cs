@@ -34,7 +34,6 @@ internal sealed class MappingProfile : Profile
 
         CreateMap<ApiActionEndpointDto, DialogApiActionEndpoint>()
             .IgnoreComplexDestinationProperties()
-            .ForMember(x => x.Id, opt => opt.Ignore())
             .ForMember(dest => dest.HttpMethod, opt => opt.Ignore())
             .ForMember(dest => dest.HttpMethodId, opt => opt.MapFrom(src => src.HttpMethod));
 

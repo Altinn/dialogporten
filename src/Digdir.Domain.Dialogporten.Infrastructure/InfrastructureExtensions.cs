@@ -77,7 +77,7 @@ public static class InfrastructureExtensions
                             foreach (NpgsqlParameter parameter in command.Parameters)
                             {
                                 activity.SetTag(
-                                    $"db.query.parameter.{parameter.ParameterName}",
+                                    $"{Constants.DbQueryParameterPrefix}{parameter.ParameterName}",
                                     FormatOtelDbParameterValue(parameter.Value));
                             }
                         });

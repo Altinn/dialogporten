@@ -292,42 +292,29 @@ internal sealed partial class DialogSearchRepository(
         LogPartiesAndServicesCount(logger, partiesAndServices);
 
         // TODO: Respect instance delegated dialogs
-        var queryBuilder = new PostgresFormattableStringBuilder()
-            .Append("WITH ")
-            .AppendIf(query.Search is not null,
-                $"""
-                searchString AS (
-                   SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
-                    ,string_to_array({query.Search}::text, ' ') AS searchTerms
-                    FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
-                    LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
-                    LIMIT 1
-                ),
-                """)
-            .Append(
-                $"""
-                 permissions AS (
-                    SELECT x."Parties" AS parties
-                         , x."Services" AS services
-                    FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
-                 )
-                 SELECT d.*
-                 FROM permissions p
-                 JOIN "Dialog" d ON d."Party" = ANY(p.parties) AND d."ServiceResource" = ANY(p.services)
-
-                 """)
-            .AppendIf(query.Search is not null,
-                """
-                JOIN search."DialogSearch" ds ON ds."DialogId" = d."Id"
-                CROSS JOIN searchString ss
-                WHERE ds."Party" = d."Party" AND ds."SearchVector" @@ ss.searchVector
-
-                """)
+        var accessibleFilteredDialogs = new PostgresFormattableStringBuilder()
             .AppendIf(query.Search is null,
                 """
-                WHERE TRUE
+                SELECT d."Id"
+                FROM "Dialog" d
+                WHERE d."Party" = ppm.party
 
                 """)
+            .AppendIf(query.Search is not null,
+                """
+                SELECT d."Id"
+                FROM search."DialogSearch" ds 
+                JOIN "Dialog" d ON d."Id" = ds."DialogId"
+                CROSS JOIN searchString ss
+                WHERE ds."Party" = ppm.party AND ds."SearchVector" @@ ss.searchVector
+
+                """)
+            .Append(
+                """
+                AND d."ServiceResource" = ANY(ppm.allowed_services)
+
+                """)
+
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
@@ -349,6 +336,44 @@ internal sealed partial class DialogSearchRepository(
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
+
+        var queryBuilder = new PostgresFormattableStringBuilder()
+            .Append("WITH ")
+            .AppendIf(query.Search is not null,
+                $"""
+                searchString AS (
+                   SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
+                    ,string_to_array({query.Search}::text, ' ') AS searchTerms
+                    FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
+                    LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
+                    LIMIT 1
+                ),
+                """)
+            .Append(
+                $"""
+                 raw_permissions AS (
+                    SELECT p.party, s.service
+                    FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
+                    CROSS JOIN LATERAL unnest(x."Services") AS s(service)
+                    CROSS JOIN LATERAL unnest(x."Parties") AS p(party)
+                 )
+                 ,party_permission_map AS (
+                     SELECT party
+                          , ARRAY_AGG(service) AS allowed_services
+                     FROM raw_permissions
+                     GROUP BY party
+                 )
+                 SELECT d.*
+                 FROM (
+                     SELECT d_inner."Id"
+                     FROM party_permission_map ppm
+                     CROSS JOIN LATERAL (
+                         {accessibleFilteredDialogs}
+                     ) d_inner
+                 ) AS filtered_dialogs
+                 JOIN "Dialog" d ON d."Id" = filtered_dialogs."Id"
+
+                 """);
 
         // DO NOT use Include here, as it will use the custom SQL above which is
         // much less efficient than querying further by the resulting dialogIds.

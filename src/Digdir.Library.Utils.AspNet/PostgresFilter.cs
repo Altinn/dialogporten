@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Digdir.Domain.Dialogporten.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Digdir.Library.Utils.AspNet;
@@ -10,7 +9,7 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
     private volatile bool _enabledSqlStatementLogging;
     private volatile bool _enabledSqlParametersLogging;
 
-    public PostgresFilter(IOptionsMonitor<InfrastructureSettings> optionsMonitor)
+    public PostgresFilter(IOptionsMonitor<SqlLoggingOptions> optionsMonitor)
     {
         ArgumentNullException.ThrowIfNull(optionsMonitor);
         ApplySettings(optionsMonitor.CurrentValue);
@@ -56,7 +55,7 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
         base.Dispose(disposing);
     }
 
-    private void ApplySettings(InfrastructureSettings settings)
+    private void ApplySettings(SqlLoggingOptions settings)
     {
         _enabledSqlStatementLogging = settings.EnableSqlStatementLogging;
         _enabledSqlParametersLogging = settings.EnableSqlParametersLogging;

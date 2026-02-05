@@ -13,12 +13,12 @@ using AwesomeAssertions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ContentDto;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
-public class UpdateTransmissionTests : ApplicationCollectionFixture
+public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
 {
-    public UpdateTransmissionTests(DialogApplication application) : base(application) { }
+    public UpdateDialogTransmissionTests(DialogApplication application) : base(application) { }
 
     [Fact]
     public async Task Cannot_Use_Existing_Attachment_Id_In_Update()
@@ -197,3 +197,4 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
         }
     };
 }
+

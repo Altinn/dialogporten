@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { finopsTags } from '../../functions/finopsTags.bicep'
+
 @description('The tag of the image to be used')
 @minLength(3)
 param imageTag string
@@ -39,14 +41,16 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-var tags = {
+
+var name = '${namePrefix}-sync-sr-mappings'
+
+var baseTags = {
   FullName: '${namePrefix}-sync-subject-resource-mappings'
-  Environment: environment
-  Product: 'Dialogporten'
   Description: 'Synchronizes subject resource mappings'
   JobType: 'Scheduled'
 }
-var name = '${namePrefix}-sync-sr-mappings'
+
+var tags = finopsTags(baseTags, environment)
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

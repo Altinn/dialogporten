@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.102.4](https://github.com/Altinn/dialogporten/compare/v1.102.3...v1.102.4) (2026-02-03)
+
+
+### Bug Fixes
+
+* **auth:** Align SI vs SR user determination ([#3365](https://github.com/Altinn/dialogporten/issues/3365)) ([43dc0fc](https://github.com/Altinn/dialogporten/commit/43dc0fc85c5adf27d3574e5b585a05c4d037bd9f))
+
+
+### Miscellaneous Chores
+
+* **ci:** upgrade az cli to 2.83.0 ([#3380](https://github.com/Altinn/dialogporten/issues/3380)) ([3f14b86](https://github.com/Altinn/dialogporten/commit/3f14b86b2099a652e07cbba7ae61f16b05a279b4))
+
+## [1.102.3](https://github.com/Altinn/dialogporten/compare/v1.102.2...v1.102.3) (2026-02-03)
+
+
+### Miscellaneous Chores
+
+* **ci:** always build docker images in pull requests ([#3376](https://github.com/Altinn/dialogporten/issues/3376)) ([33393cc](https://github.com/Altinn/dialogporten/commit/33393ccfe6f764b69226b1aa810c2c1695738b16))
+* **postgresql:** remove parameter logging ([#3372](https://github.com/Altinn/dialogporten/issues/3372)) ([d13be85](https://github.com/Altinn/dialogporten/commit/d13be855e0d14664a595c662730a25de638e591e))
+* update migration ef tools version ([#3374](https://github.com/Altinn/dialogporten/issues/3374)) ([d38084a](https://github.com/Altinn/dialogporten/commit/d38084a057462a96d8f40166b6df67f191bfc88c))
+
+## [1.102.2](https://github.com/Altinn/dialogporten/compare/v1.102.1...v1.102.2) (2026-02-03)
+
+
+### Miscellaneous Chores
+
+* **infra:** Allow configuration of the SSH jumper virtual machine size. Upgrade SKU. ([#3369](https://github.com/Altinn/dialogporten/issues/3369)) ([0b69fcb](https://github.com/Altinn/dialogporten/commit/0b69fcb3875c3dfc1e7a6562ad9d3e179f23de0b))
+
+## [1.102.1](https://github.com/Altinn/dialogporten/compare/v1.102.0...v1.102.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* **WebApi:** Respect Utf8JsonReader.HasValueSequence ([#3366](https://github.com/Altinn/dialogporten/issues/3366)) ([0b048d3](https://github.com/Altinn/dialogporten/commit/0b048d3ce8a977080f4a8f7ca009c1efeadbbdc9))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency asynckeyedlock to 8.0.1 ([#3356](https://github.com/Altinn/dialogporten/issues/3356)) ([4c5a862](https://github.com/Altinn/dialogporten/commit/4c5a8620e2bbff9da66eaf916b09ea9e68cf48e8))
+* **deps:** update dependency refitter.sourcegenerator to 1.7.2 ([#3357](https://github.com/Altinn/dialogporten/issues/3357)) ([7b39a64](https://github.com/Altinn/dialogporten/commit/7b39a64c35e2b1ac7e9c852135355c94bede2bd0))
+
 ## [1.102.0](https://github.com/Altinn/dialogporten/compare/v1.101.0...v1.102.0) (2026-01-30)
 
 

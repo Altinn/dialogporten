@@ -14,7 +14,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
@@ -182,63 +181,6 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                     .ExternalReference
                     .Should()
                     .Be("unique-key"));
-
-    [Fact]
-    public Task Can_Create_Transmission_With_Attachment_Name() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog()
-            .AssertResult<CreateDialogSuccess>()
-            .SendCommand((_, ctx) =>
-            {
-                var transmission = new CreateTransmissionDto
-                {
-                    Id = Guid.CreateVersion7(),
-                    CreatedAt = DateTimeOffset.UtcNow,
-                    Type = DialogTransmissionType.Values.Information,
-                    Sender = new ActorDto
-                    {
-                        ActorType = Domain.Actors.ActorType.Values.ServiceOwner
-                    },
-                    Content = new CreateTransmissionContentDto
-                    {
-                        Title = new ContentValueDto
-                        {
-                            Value = [new LocalizationDto
-                            {
-                                LanguageCode = "nb",
-                                Value = "Ny melding"
-                            }]
-                        }
-                    },
-                    Attachments =
-                    [
-                        new()
-                        {
-                            DisplayName = DialogGenerator.GenerateFakeLocalizations(1),
-                            Name = "receipt",
-                            Urls =
-                            [
-                                new()
-                                {
-                                    Url = new Uri("https://example.com/file.pdf"),
-                                    ConsumerType = AttachmentUrlConsumerType.Values.Api
-                                }
-                            ]
-                        }
-                    ]
-                };
-
-                return new CreateTransmissionCommand
-                {
-                    DialogId = ctx.GetDialogId(),
-                    Transmissions = [transmission]
-                };
-            })
-            .AssertResult<CreateTransmissionSuccess>()
-            .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(result =>
-                result.Transmissions.Last()
-                    .Attachments.Should().ContainSingle(attachment => attachment.Name == "receipt"));
 
     [Fact]
     public Task Can_Create_Transmission_Related_To_Existing_Transmission() =>

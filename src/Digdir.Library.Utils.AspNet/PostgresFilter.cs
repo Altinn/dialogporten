@@ -5,15 +5,12 @@ namespace Digdir.Library.Utils.AspNet;
 
 public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 {
-    private readonly IDisposable? _settingsChangeToken;
-    private volatile bool _enabledSqlStatementLogging;
-    private volatile bool _enabledSqlParametersLogging;
+    private readonly IOptionsMonitor<SqlLoggingOptions> _optionsMonitor;
 
     public PostgresFilter(IOptionsMonitor<SqlLoggingOptions> optionsMonitor)
     {
+        _optionsMonitor = optionsMonitor;
         ArgumentNullException.ThrowIfNull(optionsMonitor);
-        ApplySettings(optionsMonitor.CurrentValue);
-        _settingsChangeToken = optionsMonitor.OnChange(ApplySettings);
     }
 
     public override void OnEnd(Activity activity)
@@ -24,13 +21,15 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
             return;
         }
 
+        var currentOptions = _optionsMonitor.CurrentValue;
+
         // Add parameter information to the activity if enabled
-        if (_enabledSqlParametersLogging)
+        if (currentOptions.EnableSqlParametersLogging)
         {
             AddParameterInformation(activity);
         }
 
-        if (!_enabledSqlStatementLogging && activity.Tags.IsSuccessfulSqlStatementActivity())
+        if (!currentOptions.EnableSqlStatementLogging && activity.Tags.IsSuccessfulSqlStatementActivity())
         {
             activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
             return;
@@ -43,22 +42,6 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
         }
 
         base.OnEnd(activity);
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _settingsChangeToken?.Dispose();
-        }
-
-        base.Dispose(disposing);
-    }
-
-    private void ApplySettings(SqlLoggingOptions settings)
-    {
-        _enabledSqlStatementLogging = settings.EnableSqlStatementLogging;
-        _enabledSqlParametersLogging = settings.EnableSqlParametersLogging;
     }
 
     private static void AddParameterInformation(Activity activity)

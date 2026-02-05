@@ -269,8 +269,20 @@ public static class InfrastructureExtensions
         };
     }
 
-    private static string Truncate(string value, int maxLength) =>
-        value.Length <= maxLength ? value : value[..maxLength] + "...";
+    private static string Truncate(string value, int maxLength)
+    {
+        const string ellipsis = "...";
+
+        if (value.Length <= maxLength)
+            return value;
+
+        maxLength = Math.Max(0, maxLength);
+        if (maxLength < ellipsis.Length)
+            return ellipsis[..maxLength];
+
+        var effectiveMax = Math.Max(0, maxLength - ellipsis.Length);
+        return value[..effectiveMax] + ellipsis;
+    }
 
     internal static void AddPubSubCapabilities(InfrastructureBuilderContext builderContext, List<Action<IBusRegistrationConfigurator>> customConfigurations)
     {

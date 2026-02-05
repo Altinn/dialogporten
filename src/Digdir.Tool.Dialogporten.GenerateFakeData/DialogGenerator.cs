@@ -41,6 +41,7 @@ public static class DialogGenerator
         .RuleFor(o => o.Urls, _ => AttachmentUrlFaker.Generate(MyRandomizer.Number(1, 3)));
 
     private static readonly Faker<ApiActionEndpointDto> ApiActionEndpointFaker = new Faker<ApiActionEndpointDto>()
+        .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
         .RuleFor(o => o.HttpMethod, f => f.PickRandom<HttpVerb.Values>())
         .RuleFor(o => o.Version, f => "v" + f.Random.Number(100, 999))

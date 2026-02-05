@@ -10,8 +10,8 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 
     public PostgresFilter(IOptionsMonitor<InfrastructureSettings> optionsMonitor)
     {
-        _optionsMonitor = optionsMonitor;
         ArgumentNullException.ThrowIfNull(optionsMonitor);
+        _optionsMonitor = optionsMonitor;
     }
 
     public override void OnEnd(Activity activity)

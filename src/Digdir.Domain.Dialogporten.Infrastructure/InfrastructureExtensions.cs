@@ -250,8 +250,10 @@ public static class InfrastructureExtensions
             var count = array.Length;
             var shown = Math.Min(count, maxItems);
 
-            var items = Enumerable.Range(0, shown)
-                .Select(i => FormatOtelDbParameterValue(array.GetValue(i)))
+            var items = array
+                .Cast<object?>()
+                .Take(shown)
+                .Select(FormatOtelDbParameterValue)
                 .Select(v => Truncate(v, 128));
 
             var rendered = $"[{string.Join(", ", items)}]";

@@ -1,13 +1,14 @@
 using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Digdir.Library.Utils.AspNet;
 
 public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 {
-    private readonly IOptionsMonitor<SqlLoggingOptions> _optionsMonitor;
+    private readonly IOptionsMonitor<InfrastructureSettings> _optionsMonitor;
 
-    public PostgresFilter(IOptionsMonitor<SqlLoggingOptions> optionsMonitor)
+    public PostgresFilter(IOptionsMonitor<InfrastructureSettings> optionsMonitor)
     {
         _optionsMonitor = optionsMonitor;
         ArgumentNullException.ThrowIfNull(optionsMonitor);

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using Azure.Monitor.OpenTelemetry.Exporter;
+using Digdir.Domain.Dialogporten.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -40,9 +41,6 @@ public static class OpenTelemetryExtensions
         };
 
         var endpoint = new Uri(configuration[OtelExporterOtlpEndpoint]!);
-        services.AddOptions<SqlLoggingOptions>()
-            .Bind(configuration.GetSection("Infrastructure"))
-            .ValidateOnStart();
 
         return services.AddOpenTelemetry()
             .ConfigureResource(resource =>
@@ -58,7 +56,7 @@ public static class OpenTelemetryExtensions
                 }
 
                 tracing.AddProcessor(sp =>
-                    new PostgresFilter(sp.GetRequiredService<IOptionsMonitor<SqlLoggingOptions>>()));
+                    new PostgresFilter(sp.GetRequiredService<IOptionsMonitor<InfrastructureSettings>>()));
                 tracing.AddProcessor(new GraphQLFilter());
                 tracing.AddProcessor(new HealthCheckFilter());
                 tracing.AddProcessor(new FusionCacheFilter());

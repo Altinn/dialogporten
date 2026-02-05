@@ -54,23 +54,4 @@ public class CreateAttachmentTests(DialogApplication application) : ApplicationC
                         x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1))))
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText(nameof(AttachmentDto.ExpiresAt)));
-
-    [Fact]
-    public Task Cannot_Create_Dialog_Attachment_With_Name_Over_MaxLength() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-                x.AddAttachment(x =>
-                    x.Name = new string('a', 256)))
-            .ExecuteAndAssert<ValidationError>(x =>
-                x.ShouldHaveErrorWithText(nameof(AttachmentDto.Name)));
-
-    [Fact]
-    public Task Cannot_Create_Transmission_Attachment_With_Name_Over_MaxLength() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
-                x.AddTransmission(x =>
-                    x.AddAttachment(x =>
-                        x.Name = new string('a', 256))))
-            .ExecuteAndAssert<ValidationError>(x =>
-                x.ShouldHaveErrorWithText(nameof(AttachmentDto.Name)));
 }

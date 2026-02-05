@@ -1,16 +1,17 @@
 using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Infrastructure;
+using Microsoft.Extensions.Options;
 
 namespace Digdir.Library.Utils.AspNet;
 
 public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 {
-    private readonly bool _enabledSqlStatementLogging;
-    private readonly bool _enabledSqlParametersLogging;
+    private readonly IOptionsMonitor<InfrastructureSettings> _optionsMonitor;
 
-    public PostgresFilter(bool enabledSqlStatementLogging, bool enabledSqlParametersLogging = false)
+    public PostgresFilter(IOptionsMonitor<InfrastructureSettings> optionsMonitor)
     {
-        _enabledSqlStatementLogging = enabledSqlStatementLogging;
-        _enabledSqlParametersLogging = enabledSqlParametersLogging;
+        ArgumentNullException.ThrowIfNull(optionsMonitor);
+        _optionsMonitor = optionsMonitor;
     }
 
     public override void OnEnd(Activity activity)
@@ -21,13 +22,15 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
             return;
         }
 
+        var currentOptions = _optionsMonitor.CurrentValue;
+
         // Add parameter information to the activity if enabled
-        if (_enabledSqlParametersLogging)
+        if (currentOptions.EnableSqlParametersLogging)
         {
             AddParameterInformation(activity);
         }
 
-        if (activity.Tags.IsSuccessfulSqlStatementActivity() && !_enabledSqlStatementLogging)
+        if (!currentOptions.EnableSqlStatementLogging && activity.Tags.IsSuccessfulSqlStatementActivity())
         {
             activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
             return;

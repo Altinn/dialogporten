@@ -17,6 +17,7 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var transmission = DialogTestData.CreateSimpleTransmission(x =>
             x.AddAttachment(x => x.Name = transmissionAttachmentName));
 
+        // Act
         var createResponse = await Fixture.ServiceownerApi
             .V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(
                 dialogId,
@@ -26,7 +27,6 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         createResponse.IsSuccessful.Should().BeTrue();
 
-        // Act
         var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
             dialogId,
             endUserId: null!,

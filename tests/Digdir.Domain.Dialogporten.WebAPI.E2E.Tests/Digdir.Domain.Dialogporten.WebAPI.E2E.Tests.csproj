@@ -28,8 +28,4 @@
       <ProjectReference Include="..\Digdir.Library.Dialogporten.E2E.Common\Digdir.Library.Dialogporten.E2E.Common.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Features\V1\ServiceOwner\Transmissions\" />
-    </ItemGroup>
-
 </Project>

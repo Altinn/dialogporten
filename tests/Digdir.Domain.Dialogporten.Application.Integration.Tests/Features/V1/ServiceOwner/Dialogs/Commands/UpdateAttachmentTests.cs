@@ -86,4 +86,25 @@ public class UpdateAttachmentTests(DialogApplication application) : ApplicationC
                         x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1))))
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithPropertyNameText(nameof(AttachmentDto.ExpiresAt)));
+
+    [Fact]
+    public Task Cannot_Update_Dialog_Attachment_With_Name_Over_MaxLength() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.AddAttachment())
+            .UpdateDialog(x =>
+                x.Dto.Attachments.First().Name = new string('a', 256))
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithPropertyNameText(nameof(AttachmentDto.Name)));
+
+    [Fact]
+    public Task Cannot_Add_Transmission_Attachment_With_Name_Over_MaxLength() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+                x.AddTransmission(x =>
+                    x.AddAttachment(x =>
+                        x.Name = new string('a', 256))))
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithPropertyNameText(nameof(AttachmentDto.Name)));
 }

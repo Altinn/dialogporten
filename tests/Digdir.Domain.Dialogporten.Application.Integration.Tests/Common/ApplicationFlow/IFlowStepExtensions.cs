@@ -1,6 +1,9 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Freeze;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
@@ -8,41 +11,66 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
-using GetDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
-using SearchDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
-using SearchDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
-using GetDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogQuery;
-using GetDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
-using SearchDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
-using SearchDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
-using SearchDialogEndUserContextResult = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextResult;
-using SearchDialogEndUserContextQuery = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextQuery;
-using GetTransmissionQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
-using GetTransmissionQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
-using GetTransmissionResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionResult;
-using GetTransmissionResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionResult;
-using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
-using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
-using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
-using BulkSetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
-using SetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelResult;
-using SetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
-using SetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelResult;
-using SetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelCommand;
+using GetDialogResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
+using SearchDialogResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
+using SearchDialogQueryEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
+using GetDialogQuerySO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogQuery;
+using GetDialogResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
+using SearchDialogResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
+using SearchDialogQuerySO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+using SearchDialogEndUserContextResult =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextResult;
+using SearchDialogEndUserContextQuery =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextQuery;
+using GetTransmissionQueryEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
+using GetTransmissionQuerySO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
+using GetTransmissionResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionResult;
+using GetTransmissionResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionResult;
+using BulkSetSystemLabelResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
+using BulkSetSystemLabelCommandEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+using BulkSetSystemLabelResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
+using BulkSetSystemLabelCommandSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+using GetActivityQuery =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.GetActivityQuery;
+using GetActivityResult =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.GetActivityResult;
+using SetSystemLabelResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelResult;
+using SetSystemLabelCommandEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
+using SetSystemLabelResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelResult;
+using SetSystemLabelCommandSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelCommand;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
 public static class IFlowStepExtensions
 {
-    private const string DialogIdKey = "DialogId";
-    private const string PartyKey = "Party";
-    private const string ServiceResource = "ServiceResource";
+    public const string DialogIdKey = "DialogId";
+    public const string PartyKey = "Party";
+    public const string ActivityIdKey = "ActivityId";
+    public const string ServiceResource = "ServiceResource";
 
     public static IFlowExecutor<CreateDialogSuccess> CreateDialogs(this IFlowStep step,
         params CreateDialogCommand[] commands)
@@ -352,6 +380,27 @@ public static class IFlowStepExtensions
                 NewCreatedAt = newCreatedAt ?? DateTimeOffset.UtcNow
             });
 
+    public static IFlowExecutor<CreateActivityResult> CreateActivity<TIn>(
+        this IFlowExecutor<TIn> step,
+        CreateActivityDto activity) =>
+        step
+            .SendCommand(ctx => new CreateActivityCommand
+            {
+                DialogId = ctx.GetDialogId(),
+                IfMatchDialogRevision = null,
+                Activities = [activity],
+                IsSilentUpdate = false
+            });
+
+    public static IFlowExecutor<GetActivityResult> GetActivity(
+        this IFlowStep<CreateActivityResult> step) =>
+        step.AssertResult<CreateActivitySuccess>((x, a) => a.Bag[ActivityIdKey] = x.ActivityIds.First())
+            .SendCommand(ctx => new GetActivityQuery
+            {
+                DialogId = ctx.GetDialogId(),
+                ActivityId = ctx.GetActivityId()
+            });
+
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,
         Action<TIn> selector) => step.Modify((x, _)
@@ -420,6 +469,12 @@ public static class IFlowStepExtensions
     public static Guid GetDialogId(this FlowContext ctx)
     {
         ctx.Bag.TryGetValue(DialogIdKey, out var value).Should().BeTrue();
+        return value.Should().BeOfType<Guid>().Subject;
+    }
+
+    public static Guid GetActivityId(this FlowContext ctx)
+    {
+        ctx.Bag.TryGetValue(ActivityIdKey, out var value).Should().BeTrue();
         return value.Should().BeOfType<Guid>().Subject;
     }
 

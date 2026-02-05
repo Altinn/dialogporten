@@ -1,0 +1,51 @@
+-- Collects every plain-text fragment per dialog so all rebuild workers share identical inputs.
+CREATE OR REPLACE VIEW search."VDialogContent" AS
+WITH RankedContent AS (
+    SELECT dc."DialogId" AS "DialogId",
+        CASE dc."TypeId" WHEN 1 THEN 'B' ELSE 'D' END AS "Weight",
+        l."LanguageCode" AS "LanguageCode",
+        l."Value"        AS "Value",
+        1 AS "OuterPriority",
+        dc."TypeId" as "InnerPriority"
+    FROM "DialogContent" dc
+    JOIN "LocalizationSet" dcls ON dc."Id" = dcls."DialogContentId"
+    JOIN "Localization"   l     ON dcls."Id" = l."LocalizationSetId"
+    WHERE dc."MediaType" = 'text/plain'
+
+    UNION ALL
+-- Search tags are language-agnostic keywords; force the simple configuration.
+    SELECT dst."DialogId", 'D', 'simple'::varchar(15), dst."Value"::varchar(4095), 2, 0
+    FROM "DialogSearchTag" dst
+
+    UNION ALL
+-- Dialog-linked attachments are discoverable alongside the root dialog text.
+    SELECT a."DialogId", 'D', l."LanguageCode", l."Value", 3, EXTRACT(EPOCH FROM a."CreatedAt")::bigint
+    FROM "Attachment" a
+    JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
+    JOIN "Localization"   l     ON l."LocalizationSetId" = dcls."Id"
+
+    UNION ALL
+    SELECT dt."DialogId", 'D', l."LanguageCode", l."Value", 4, EXTRACT(EPOCH FROM dt."CreatedAt")::bigint
+    FROM "DialogTransmission" dt
+    JOIN "DialogTransmissionContent" dtc ON dt."Id" = dtc."TransmissionId"
+    JOIN "LocalizationSet" dcls          ON dtc."Id" = dcls."TransmissionContentId"
+    JOIN "Localization"   l              ON dcls."Id" = l."LocalizationSetId"
+    WHERE dtc."MediaType" = 'text/plain'
+
+    UNION ALL
+    SELECT da."DialogId", 'D', l."LanguageCode", l."Value", 5, EXTRACT(EPOCH FROM da."CreatedAt")::bigint
+    FROM "DialogActivity" da
+    JOIN "LocalizationSet" dcls ON da."Id" = dcls."ActivityId"
+    JOIN "Localization"   l     ON l."LocalizationSetId" = dcls."Id"
+
+    UNION ALL
+-- Transmission attachments inherit the enclosing dialog as their search scope.
+    SELECT dt."DialogId", 'D', l."LanguageCode", l."Value", 6, EXTRACT(EPOCH FROM a."CreatedAt")::bigint
+    FROM "DialogTransmission" dt
+    JOIN "Attachment" a         ON a."TransmissionId" = dt."Id"
+    JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
+    JOIN "Localization"   l     ON l."LocalizationSetId" = dcls."Id"
+)
+SELECT "DialogId", "Weight", "LanguageCode", "Value"
+FROM RankedContent
+ORDER BY "DialogId", "OuterPriority", "InnerPriority";

@@ -1,15 +1,21 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Security.Claims;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ContentDto;
 
@@ -18,6 +24,9 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class UpdateTransmissionTests : ApplicationCollectionFixture
 {
+    private const string TransmissionIdKey = nameof(TransmissionIdKey);
+    private const string ContentUpdatedAtKey = nameof(ContentUpdatedAtKey);
+
     public UpdateTransmissionTests(DialogApplication application) : base(application) { }
 
     [Fact]
@@ -184,6 +193,62 @@ public class UpdateTransmissionTests : ApplicationCollectionFixture
                         action.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1))))
             .ExecuteAndAssert<ValidationError>(error =>
                 error.ShouldHaveErrorWithText("future"));
+
+    [Fact]
+    public Task Can_Update_Transmission_Without_Bumping_ContentUpdatedAt() =>
+        FlowBuilder.For(Application)
+            .ConfigureServices(ConfigureUserWithScope(AuthorizationScope.ServiceProviderChangeTransmissions))
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>((dialog, ctx) =>
+            {
+                var transmission = dialog.Transmissions.Single();
+                ctx.Bag[TransmissionIdKey] = transmission.Id;
+                ctx.Bag[ContentUpdatedAtKey] = dialog.ContentUpdatedAt;
+            })
+            .UpdateTransmission(ctx => (Guid)ctx.Bag[TransmissionIdKey]!, command =>
+            {
+                command.IsSilentUpdate = true;
+                var localization = command.Dto.Content!.Title.Value.First();
+                localization.Value = $"{localization.Value} updated";
+            })
+            .AssertResult<UpdateTransmissionSuccess>()
+            .SendCommand(ctx => new GetDialogQuerySO { DialogId = ctx.GetDialogId() })
+            .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
+            {
+                var transmissionId = (Guid)ctx.Bag[TransmissionIdKey]!;
+                var contentUpdatedAt = (DateTimeOffset)ctx.Bag[ContentUpdatedAtKey]!;
+                var transmission = dialog.Transmissions.Single(x => x.Id == transmissionId);
+
+                transmission.Content.Title.Value.First().Value.Should().Contain("updated");
+                dialog.ContentUpdatedAt.Should().Be(contentUpdatedAt);
+            });
+
+    [Fact]
+    public Task Update_Transmission_Without_Scope_Is_Forbidden() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>((dialog, ctx) =>
+            {
+                var transmission = dialog.Transmissions.Single();
+                ctx.Bag[TransmissionIdKey] = transmission.Id;
+            })
+            .UpdateTransmission(ctx => (Guid)ctx.Bag[TransmissionIdKey]!, command =>
+            {
+                command.IsSilentUpdate = true;
+            })
+            .ExecuteAndAssert<Forbidden>();
+
+    private static Action<IServiceCollection> ConfigureUserWithScope(string scope) => services =>
+    {
+        var claims = IntegrationTestUser.GetDefaultClaims();
+        claims.Add(new Claim("scope", scope));
+        var user = new IntegrationTestUser(claims, addDefaultClaims: false);
+
+        services.RemoveAll<IUser>();
+        services.AddSingleton<IUser>(user);
+    };
 
     private static TransmissionDto UpdateDialogDialogTransmissionDto() => new()
     {

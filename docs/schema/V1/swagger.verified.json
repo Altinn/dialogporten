@@ -2459,7 +2459,7 @@
         "additionalProperties": false,
         "properties": {
           "createdAt": {
-            "description": "If supplied, overrides the creating date and time for the transmission.\nIf not supplied, the current date /time will be used.",
+            "description": "If supplied, overrides the creating date and time for the activity.\nIf not supplied, the current date /time will be used.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
@@ -2473,7 +2473,7 @@
             "type": "array"
           },
           "extendedType": {
-            "description": "Arbitrary URI/URN describing a service-specific transmission type.",
+            "description": "Arbitrary URI/URN describing a service-specific activity type.",
             "format": "uri",
             "nullable": true,
             "type": "string"
@@ -2500,7 +2500,7 @@
             "type": "string"
           },
           "type": {
-            "description": "The type of transmission.",
+            "description": "The type of activity.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
@@ -3237,7 +3237,7 @@
         "additionalProperties": false,
         "properties": {
           "createdAt": {
-            "description": "If supplied, overrides the creating date and time for the transmission.\nIf not supplied, the current date /time will be used.",
+            "description": "If supplied, overrides the creating date and time for the activity.\nIf not supplied, the current date /time will be used.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
@@ -3251,7 +3251,7 @@
             "type": "array"
           },
           "extendedType": {
-            "description": "Arbitrary URI/URN describing a service-specific transmission type.",
+            "description": "Arbitrary URI/URN describing a service-specific activity type.",
             "format": "uri",
             "nullable": true,
             "type": "string"
@@ -3278,7 +3278,7 @@
             "type": "string"
           },
           "type": {
-            "description": "The type of transmission.",
+            "description": "The type of activity",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
@@ -3496,7 +3496,7 @@
         "additionalProperties": false,
         "properties": {
           "createdAt": {
-            "description": "If supplied, overrides the creating date and time for the transmission.\nIf not supplied, the current date /time will be used.",
+            "description": "If supplied, overrides the creating date and time for the activity.\nIf not supplied, the current date /time will be used.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
@@ -3510,7 +3510,7 @@
             "type": "array"
           },
           "extendedType": {
-            "description": "Arbitrary URI/URN describing a service-specific transmission type.",
+            "description": "Arbitrary URI/URN describing a service-specific activity type.",
             "format": "uri",
             "nullable": true,
             "type": "string"
@@ -3537,7 +3537,7 @@
             "type": "string"
           },
           "type": {
-            "description": "The type of transmission.",
+            "description": "The type of activity.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"

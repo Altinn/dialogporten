@@ -6,6 +6,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
@@ -66,6 +70,47 @@ public static class IFlowStepExtensions
             ctx.Bag[DialogIdKey] = command.Dto.Id;
             ctx.Bag[ServiceResource] = command.Dto.ServiceResource;
             ctx.Bag[PartyKey] = command.Dto.Party;
+            return command;
+        });
+
+    public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
+        this IFlowStep step,
+        Action<CreateTransmissionDto> modify) =>
+        step.CreateTransmission((transmission, _) => modify(transmission));
+
+    public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
+        this IFlowStep step,
+        Action<CreateTransmissionDto, FlowContext>? modify) =>
+        step.SendCommand(ctx =>
+        {
+            var transmission = new CreateTransmissionDto
+            {
+                Type = DialogTransmissionType.Values.Information,
+                Sender = new()
+                {
+                    ActorType = ActorType.Values.ServiceOwner
+                },
+                Content = new()
+                {
+                    Title = new ContentValueDto
+                    {
+                        Value = [new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = "Ny melding"
+                        }]
+                    }
+                }
+            };
+
+            modify?.Invoke(transmission, ctx);
+
+            var command = new CreateTransmissionCommand
+            {
+                DialogId = ctx.GetDialogId(),
+                Transmissions = [transmission]
+            };
+
             return command;
         });
 

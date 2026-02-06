@@ -172,16 +172,14 @@ internal sealed class DialogSearchRepository(
         }
         else
         {
-            var partiesAndServices = authorizedResources.ResourcesByParties
-                .Select(x => (party: x.Key, services: x.Value))
-                .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
-                .Select(x => new PartiesAndServices(
-                    x.Select(k => k.party)
-                        .Where(p => parties.Contains(p))
-                        .ToArray(),
-                    x.Key.ToArray()))
-                .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
-                .ToList();
+            var partyFilterQuery = new GetDialogsQuery
+            {
+                Deleted = null,
+                Party = parties
+            };
+            var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
+                partyFilterQuery,
+                authorizedResources);
 
             if (partiesAndServices.Count == 0)
             {

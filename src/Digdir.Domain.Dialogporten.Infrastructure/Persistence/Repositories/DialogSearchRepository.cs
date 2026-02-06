@@ -13,19 +13,23 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed partial class DialogSearchRepository(
+internal sealed class DialogSearchRepository(
     DialogDbContext dbContext,
     ILogger<DialogSearchRepository> logger,
-    NpgsqlDataSource dataSource) : IDialogSearchRepository
+    NpgsqlDataSource dataSource,
+    IDialogEndUserSearchStrategySelector endUserSearchStrategySelector) : IDialogSearchRepository
 {
     private readonly DialogDbContext _db = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+    private readonly IDialogEndUserSearchStrategySelector _endUserSearchStrategySelector =
+        endUserSearchStrategySelector ?? throw new ArgumentNullException(nameof(endUserSearchStrategySelector));
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {
@@ -184,7 +188,7 @@ internal sealed partial class DialogSearchRepository(
                 return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
             }
 
-            LogPartiesAndServicesCount(logger, partiesAndServices);
+            DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(logger, partiesAndServices);
 
             queryBuilder
                 .Append(
@@ -274,232 +278,18 @@ internal sealed partial class DialogSearchRepository(
             return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());
         }
 
-        var partiesAndServices = authorizedResources.ResourcesByParties
-            .Select(x => (party: x.Key, services: x.Value))
-            .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
-            .Select(x => new PartiesAndServices(
-                x.Select(k => k.party)
-                    .Where(p => query.Party.IsNullOrEmpty() || query.Party.Contains(p))
-                    .ToArray(),
-                x.Key
-                    .Where(s => query.ServiceResource.IsNullOrEmpty() || query.ServiceResource.Contains(s))
-                    .ToArray()
-               )
-            )
-            .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
-            .ToList();
+        var context = new EndUserSearchContext(query, authorizedResources);
+        var strategy = _endUserSearchStrategySelector.Select(context);
+        return await GetDialogsAsEndUserInternal(strategy, cancellationToken);
+    }
 
-        LogPartiesAndServicesCount(logger, partiesAndServices);
+    private async Task<PaginatedList<DialogEntity>> GetDialogsAsEndUserInternal(
+        IDialogEndUserSearchStrategy strategy,
+        CancellationToken cancellationToken)
+    {
+        var queryBuilder = strategy.BuildSql();
+        var query = strategy.Context.Query;
 
-        // I/O-driven branching (NAS): party-driven is most efficient for very small service sets,
-        // while service-driven avoids heavy per-party probing when services are moderate/high.
-        const int partyOrigServiceThreshold = 5;
-
-        var totalServiceCount = partiesAndServices
-            .SelectMany(x => x.Services)
-            .Distinct(StringComparer.InvariantCultureIgnoreCase)
-            .Count();
-        var usePartyDrivenQuery = totalServiceCount <= partyOrigServiceThreshold;
-        var useServiceDrivenQuery = !usePartyDrivenQuery;
-
-        var searchJoin = new PostgresFormattableStringBuilder();
-        if (query.Search is not null)
-        {
-            searchJoin.Append(
-                """
-                JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
-                CROSS JOIN searchString ss
-                """);
-        }
-        PostgresFormattableStringBuilder permissionCandidateDialogs;
-        PostgresFormattableStringBuilder postPermissionFilters;
-
-        if (usePartyDrivenQuery)
-        {
-            permissionCandidateDialogs = new PostgresFormattableStringBuilder()
-                .AppendIf(query.Search is null,
-                    """
-                    SELECT d."Id"
-                    FROM "Dialog" d
-                    WHERE d."Party" = pp.party
-
-                    """)
-                .AppendIf(query.Search is not null,
-                    """
-                    SELECT d."Id"
-                    FROM search."DialogSearch" ds
-                    JOIN "Dialog" d ON d."Id" = ds."DialogId"
-                    CROSS JOIN searchString ss
-                    WHERE ds."Party" = pp.party AND ds."SearchVector" @@ ss.searchVector
-
-                    """)
-                .Append(
-                    """
-                    AND d."ServiceResource" = ANY(pp.allowed_services)
-
-                    """);
-
-            postPermissionFilters = new PostgresFormattableStringBuilder()
-                .AppendManyFilter(query.Org, nameof(query.Org))
-                .AppendManyFilter(query.Status, "StatusId", "int")
-                .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
-                .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
-                .AppendIf(query.ExpiresAfter is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresAfter}::timestamptz) """)
-                .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
-                .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
-                .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)
-                .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore}::timestamptz """)
-                .AppendIf(query.UpdatedAfter is not null, $""" AND {query.UpdatedAfter}::timestamptz <= d."UpdatedAt" """)
-                .AppendIf(query.UpdatedBefore is not null, $""" AND d."UpdatedAt" <= {query.UpdatedBefore}::timestamptz """)
-                .AppendIf(query.ContentUpdatedAfter is not null, $""" AND {query.ContentUpdatedAfter}::timestamptz <= d."ContentUpdatedAt" """)
-                .AppendIf(query.ContentUpdatedBefore is not null, $""" AND d."ContentUpdatedAt" <= {query.ContentUpdatedBefore}::timestamptz """)
-                .AppendIf(query.DueAfter is not null, $""" AND {query.DueAfter}::timestamptz <= d."DueAt" """)
-                .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
-                .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
-                .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
-                .AppendSystemLabelFilterCondition(query.SystemLabel)
-                .ApplyPaginationOrder(query.OrderBy!, alias: "d")
-                .ApplyPaginationLimit(query.Limit);
-        }
-        else
-        {
-            permissionCandidateDialogs = new PostgresFormattableStringBuilder()
-                .AppendIf(!useServiceDrivenQuery,
-                    """
-                    SELECT d."Id"
-                    FROM "Dialog" d
-                    WHERE d."Party" = pp.party
-                    AND d."ServiceResource" = ANY(pp.allowed_services)
-
-                    """)
-                .AppendIf(useServiceDrivenQuery,
-                    """
-                    SELECT d."Id"
-                    FROM service_permissions sp
-                    JOIN "Dialog" d ON d."ServiceResource" = sp.service
-                                   AND d."Party" = ANY(sp.allowed_parties)
-                    WHERE 1=1
-
-                    """);
-
-            postPermissionFilters = new PostgresFormattableStringBuilder()
-                .Append("WHERE 1=1")
-                .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
-                .AppendManyFilter(query.Org, nameof(query.Org))
-                .AppendManyFilter(query.Status, "StatusId", "int")
-                .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
-                .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
-                .AppendIf(query.ExpiresAfter is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresAfter}::timestamptz) """)
-                .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
-                .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
-                .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)
-                .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore}::timestamptz """)
-                .AppendIf(query.UpdatedAfter is not null, $""" AND {query.UpdatedAfter}::timestamptz <= d."UpdatedAt" """)
-                .AppendIf(query.UpdatedBefore is not null, $""" AND d."UpdatedAt" <= {query.UpdatedBefore}::timestamptz """)
-                .AppendIf(query.ContentUpdatedAfter is not null, $""" AND {query.ContentUpdatedAfter}::timestamptz <= d."ContentUpdatedAt" """)
-                .AppendIf(query.ContentUpdatedBefore is not null, $""" AND d."ContentUpdatedAt" <= {query.ContentUpdatedBefore}::timestamptz """)
-                .AppendIf(query.DueAfter is not null, $""" AND {query.DueAfter}::timestamptz <= d."DueAt" """)
-                .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
-                .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
-                .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
-                .AppendSystemLabelFilterCondition(query.SystemLabel)
-                .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
-                .ApplyPaginationOrder(query.OrderBy!, alias: "d")
-                .ApplyPaginationLimit(query.Limit);
-        }
-
-        var delegatedDialogIds = authorizedResources.DialogIds.ToArray();
-
-        var queryBuilder = new PostgresFormattableStringBuilder()
-            .Append("WITH ")
-            .AppendIf(query.Search is not null,
-                $"""
-                searchString AS (
-                   SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
-                    ,string_to_array({query.Search}::text, ' ') AS searchTerms
-                    FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
-                    LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
-                    LIMIT 1
-                ),
-                """)
-            .AppendIf(usePartyDrivenQuery,
-                $"""
-                 permission_groups AS (
-                     SELECT x."Parties" AS parties
-                          , x."Services" AS services
-                     FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
-                 )
-                 ,party_permission_map AS (
-                     SELECT p.party
-                          , ARRAY_AGG(s.service) AS allowed_services
-                     FROM permission_groups pg
-                     CROSS JOIN LATERAL unnest(pg.services) AS s(service)
-                     CROSS JOIN LATERAL unnest(pg.parties) AS p(party)
-                     GROUP BY p.party
-                 )
-                 ,party_permissions AS (
-                     SELECT p.party
-                          , pg.services AS allowed_services
-                     FROM permission_groups pg
-                     CROSS JOIN LATERAL unnest(pg.parties) AS p(party)
-                 )
-                 ,permission_candidate_ids AS (
-                     SELECT d_inner."Id"
-                     FROM party_permission_map pp
-                     CROSS JOIN LATERAL (
-                         {permissionCandidateDialogs}
-                     ) d_inner
-                 )
-                 ,delegated_dialogs AS (
-                     SELECT unnest({delegatedDialogIds}::uuid[]) AS "Id"
-                 )
-                 ,candidate_dialogs AS (
-                     SELECT "Id" FROM permission_candidate_ids
-                     UNION
-                     SELECT "Id" FROM delegated_dialogs
-                 )
-                 SELECT d.*
-                 FROM candidate_dialogs cd
-                 JOIN "Dialog" d ON d."Id" = cd."Id"
-                 {postPermissionFilters}
-
-                 """)
-            .AppendIf(useServiceDrivenQuery,
-                $"""
-                 permission_groups AS (
-                     SELECT x."Parties" AS parties
-                          , x."Services" AS services
-                     FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
-                 )
-                 ,service_permissions AS (
-                     SELECT s.service
-                          , pg.parties AS allowed_parties
-                     FROM permission_groups pg
-                     CROSS JOIN LATERAL unnest(pg.services) AS s(service)
-                 )
-                 ,permission_candidate_ids AS (
-                     {permissionCandidateDialogs}
-                 )
-                 ,delegated_dialogs AS (
-                     SELECT unnest({delegatedDialogIds}::uuid[]) AS "Id"
-                 )
-                 ,candidate_dialogs AS (
-                     SELECT "Id" FROM permission_candidate_ids
-                     UNION
-                     SELECT "Id" FROM delegated_dialogs
-                 )
-                 SELECT d.*
-                 FROM candidate_dialogs cd
-                 JOIN "Dialog" d ON d."Id" = cd."Id"
-                 {searchJoin}
-                 {postPermissionFilters}
-
-                 """);
-
-        // DO NOT use Include here, as it will use the custom SQL above which is
-        // much less efficient than querying further by the resulting dialogIds.
-        // We only get dialogs here, and will later query related data as
-        // needed based on the IDs.
         var efQuery = _db.Dialogs
             .FromSql(queryBuilder.ToFormattableString())
             .IgnoreQueryFilters()
@@ -515,6 +305,7 @@ internal sealed partial class DialogSearchRepository(
 
         return dialogs;
     }
+
 
     public async Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(
         Guid[] dialogIds,
@@ -824,22 +615,6 @@ internal sealed partial class DialogSearchRepository(
         })
         .FirstOrDefault();
 
-    private sealed record PartiesAndServices(string[] Parties, string[] Services);
-    private static void LogPartiesAndServicesCount(ILogger<DialogSearchRepository> logger, List<PartiesAndServices>? partiesAndServices)
-    {
-        if (partiesAndServices is null) return;
-        if (!logger.IsEnabled(LogLevel.Information)) return;
-
-        var totalPartiesCount = partiesAndServices.Sum(g => g.Parties.Length);
-        var totalServicesCount = partiesAndServices.Sum(g => g.Services.Length);
-        var groupsCount = partiesAndServices.Count;
-        var groupSizes = partiesAndServices
-            .Select(g => (g.Parties.Length, g.Services.Length))
-            .ToList();
-
-        LogPartiesAndServicesCount(logger, totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
-    }
-
     private sealed record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
         string LanguageCode, string Value);
     private sealed record RawEndUserContextRow(Guid DialogId, Guid Revision, SystemLabel.Values SystemLabelId);
@@ -856,13 +631,4 @@ internal sealed partial class DialogSearchRepository(
         DialogActivityType.Values TypeId, string? ExtendedType, Guid? TransmissionId, ActorType.Values ActorType,
         string? ActorId, string? ActorName, string? LanguageCode, string? Description);
 
-    [LoggerMessage(
-        Level = LogLevel.Information,
-        Message = "PartiesAndServices: tp={TotalPartiesCount}, ts={TotalServicesCount}, g={GroupsCount}, gs={GroupSizes}")]
-    private static partial void LogPartiesAndServicesCount(
-        ILogger<DialogSearchRepository> logger,
-        int totalPartiesCount,
-        int totalServicesCount,
-        int groupsCount,
-        List<(int PartiesCount, int ServicesCount)> groupSizes);
 }

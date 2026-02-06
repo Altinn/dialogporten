@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.103.0](https://github.com/Altinn/dialogporten/compare/v1.102.4...v1.103.0) (2026-02-06)
+
+
+### Features
+
+* enable parameter logging for npsql ([#3058](https://github.com/Altinn/dialogporten/issues/3058)) ([385562e](https://github.com/Altinn/dialogporten/commit/385562ec57d2cb6aa60c33b6eaa580d77e988ce5))
+* support user supplied IDs for ApiActionEndpoint ([#3408](https://github.com/Altinn/dialogporten/issues/3408)) ([7aa4100](https://github.com/Altinn/dialogporten/commit/7aa41001f19912012b19267e9dafd8f3f7e1c408))
+
+
+### Miscellaneous Chores
+
+* **app:** remove old search queries ([#3391](https://github.com/Altinn/dialogporten/issues/3391)) ([4467f61](https://github.com/Altinn/dialogporten/commit/4467f61133f8003ef2f19c72bb6f0e9d949f18e2))
+* **ci:** implement finops tags ([#3330](https://github.com/Altinn/dialogporten/issues/3330)) ([df627f5](https://github.com/Altinn/dialogporten/commit/df627f58f06206d98490c8cdf30fa943c750dc11))
+* create e2e scripts ([#3355](https://github.com/Altinn/dialogporten/issues/3355)) ([123b1a6](https://github.com/Altinn/dialogporten/commit/123b1a62669a09aeb761b2b96dfccc7eac90caf2))
+* **deps:** update dependency refitter.sourcegenerator to 1.7.3 ([#3382](https://github.com/Altinn/dialogporten/issues/3382)) ([325f53d](https://github.com/Altinn/dialogporten/commit/325f53deb25c24194e898eb4f68c1907882b9833))
+* **deps:** update grafana/grafana docker tag to v11.6.9 ([#3393](https://github.com/Altinn/dialogporten/issues/3393)) ([83f87bf](https://github.com/Altinn/dialogporten/commit/83f87bf5cc23bd534276cbecd667582807d943a2))
+* **deps:** update grafana/loki docker tag to v3.6.4 ([#3384](https://github.com/Altinn/dialogporten/issues/3384)) ([1ad4840](https://github.com/Altinn/dialogporten/commit/1ad48408a08db0df263f5f0e2c24faddab894135))
+* **deps:** update step-security/harden-runner action to v2.14.1 ([#3385](https://github.com/Altinn/dialogporten/issues/3385)) ([3bd5cf3](https://github.com/Altinn/dialogporten/commit/3bd5cf306246172d310391f082b91dd21c90a5fc))
+* **deps:** upgrade local postgres version to 16.11 ([#3400](https://github.com/Altinn/dialogporten/issues/3400)) ([a1b0a66](https://github.com/Altinn/dialogporten/commit/a1b0a660b3c5412568d88b5fcd3d38e6759756d4))
+* feat toggle for statement logging ([#3402](https://github.com/Altinn/dialogporten/issues/3402)) ([ca92026](https://github.com/Altinn/dialogporten/commit/ca920269eb39b55e11cd4034100f269a9e2c169b))
+* remove postgresql info logs from yt01 and prod ([#3401](https://github.com/Altinn/dialogporten/issues/3401)) ([db727a3](https://github.com/Altinn/dialogporten/commit/db727a36273f65647594ef758aa1ff17845407b1))
+
 ## [1.102.4](https://github.com/Altinn/dialogporten/compare/v1.102.3...v1.102.4) (2026-02-03)
 
 

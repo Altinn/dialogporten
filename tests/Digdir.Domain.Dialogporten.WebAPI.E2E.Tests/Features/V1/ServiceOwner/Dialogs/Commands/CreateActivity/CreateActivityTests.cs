@@ -180,5 +180,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         response2.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         response2.Content.Should().BeNull();
+        var errorBody = await response2.Error!.GetContentAsAsync<ProblemDetails>();
+        errorBody.Should().NotBeNull();
     }
 }

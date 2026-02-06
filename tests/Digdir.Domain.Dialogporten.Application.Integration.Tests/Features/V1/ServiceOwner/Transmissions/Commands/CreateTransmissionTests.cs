@@ -54,14 +54,12 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .CreateSimpleDialog()
             .ExecuteAndAssert<CreateDialogSuccess>();
 
-        const int batchSize = 500;
-        for (var created = 0; created < short.MaxValue; created += batchSize)
+        foreach (var batch in Enumerable.Range(0, short.MaxValue).Chunk(100))
         {
-            var count = Math.Min(batchSize, short.MaxValue - created);
             await FlowBuilder.For(Application)
             .SendCommand(_ =>
                 {
-                    var transmissions = Enumerable.Range(0, count)
+                    var transmissions = batch
                         .Select(_ => CreateTransmissionDto())
                         .ToArray();
 

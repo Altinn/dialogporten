@@ -50,6 +50,11 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
+        if (request.IfMatchServiceOwnerContextRevision is { } revision && revision != serviceOwnerContext.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         serviceOwnerContext.ServiceOwnerLabels
             .Merge(request.Dto.ServiceOwnerLabels,
                 destinationKeySelector: x => x.Value,

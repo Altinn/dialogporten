@@ -90,6 +90,11 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             return new Forbidden("User cannot modify frozen dialog");
         }
 
+        if (request.IfMatchDialogRevision is { } revision && revision != dialog.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         // Map incoming DTOs to domain entities without loading existing transmissions.
         var newTransmissions = _mapper.Map<List<DialogTransmission>>(request.Transmissions);
 

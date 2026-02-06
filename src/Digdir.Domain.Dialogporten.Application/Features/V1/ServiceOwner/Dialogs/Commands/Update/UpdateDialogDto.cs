@@ -256,7 +256,7 @@ public sealed class SearchTagDto
     public string Value { get; set; } = null!;
 }
 
-public class ActivityDto
+public sealed class ActivityDto
 {
     /// <summary>
     /// A UUIDv7 may be provided to support idempotent additions to the list of activities.

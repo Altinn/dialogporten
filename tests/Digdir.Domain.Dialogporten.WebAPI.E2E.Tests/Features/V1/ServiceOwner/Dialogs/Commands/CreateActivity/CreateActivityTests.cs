@@ -4,7 +4,7 @@ using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Xunit;
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Create;
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)

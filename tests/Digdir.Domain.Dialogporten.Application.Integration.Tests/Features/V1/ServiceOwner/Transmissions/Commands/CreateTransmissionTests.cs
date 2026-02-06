@@ -4,7 +4,12 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
+using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
@@ -41,4 +46,75 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 result.Transmissions.Last().RelatedTransmissionId.Should()
                     .Be(result.Transmissions.First().Id);
             });
+
+    [Fact]
+    public async Task Cannot_Create_More_Than_ShortMaxValue_Transmissions()
+    {
+        var dialog = await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ExecuteAndAssert<CreateDialogSuccess>();
+
+        const int batchSize = 500;
+        for (var created = 0; created < short.MaxValue; created += batchSize)
+        {
+            var count = Math.Min(batchSize, short.MaxValue - created);
+            await FlowBuilder.For(Application)
+            .SendCommand(_ =>
+                {
+                    var transmissions = Enumerable.Range(0, count)
+                        .Select(_ => CreateTransmissionDto())
+                        .ToArray();
+
+                    var command = new CreateTransmissionCommand
+                    {
+                        IsSilentUpdate = true,
+                        DialogId = dialog.DialogId,
+                        Transmissions = [.. transmissions]
+                    };
+                    return command;
+                })
+                .ExecuteAndAssert<CreateTransmissionSuccess>();
+        }
+
+
+        await FlowBuilder.For(Application)
+            // .SendCommand(_ => new GetDialogQuery { DialogId = dialog.DialogId })
+            // .AssertResult<DialogDto>(result => result.Transmissions.Count.Should().Be(short.MaxValue))
+            .SendCommand(_ =>
+            {
+                var command = new CreateTransmissionCommand
+                {
+                    IsSilentUpdate = true,
+                    DialogId = dialog.DialogId,
+                    Transmissions = [CreateTransmissionDto()]
+                };
+                return command;
+            }).ExecuteAndAssert<DomainError>(x => x.ShouldHaveErrorWithText($"cannot exceed {short.MaxValue}"));
+    }
+
+    private static CreateTransmissionDto CreateTransmissionDto()
+    {
+        return new CreateTransmissionDto
+        {
+            Type = DialogTransmissionType.Values.Information,
+            Sender = new()
+            {
+                ActorType = ActorType.Values.ServiceOwner
+            },
+            Content = new()
+            {
+                Title = new ContentValueDto
+                {
+                    Value =
+                    [
+                        new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = "Ny melding"
+                        }
+                    ]
+                }
+            }
+        };
+    }
 }

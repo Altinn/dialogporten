@@ -75,6 +75,11 @@ internal sealed class DeleteDialogCommandHandler : IRequestHandler<DeleteDialogC
             return new Forbidden($"User cannot modify resource type {dialog.ServiceResourceType}.");
         }
 
+        if (request.IfMatchDialogRevision is { } revision && revision != dialog.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         _db.Dialogs.SoftRemove(dialog);
         var saveResult = await _unitOfWork
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)

@@ -3,11 +3,11 @@ using Refit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
-internal abstract class ServicerOwnerApiDecoratorBase : IServiceownerApi
+internal abstract class ServiceOwnerApiDecoratorBase : IServiceownerApi
 {
     private readonly IServiceownerApi _serviceownerApi;
 
-    internal ServicerOwnerApiDecoratorBase(IServiceownerApi serviceownerApi)
+    internal ServiceOwnerApiDecoratorBase(IServiceownerApi serviceownerApi)
     {
         _serviceownerApi = serviceownerApi;
     }

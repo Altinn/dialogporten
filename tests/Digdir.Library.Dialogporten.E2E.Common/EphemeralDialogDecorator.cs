@@ -4,7 +4,7 @@ using Refit;
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
 internal sealed class EphemeralDialogDecorator(IServiceownerApi serviceownerApi)
-    : ServicerOwnerApiDecoratorBase(serviceownerApi)
+    : ServiceOwnerApiDecoratorBase(serviceownerApi)
 {
     public override Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateDialog(V1ServiceOwnerDialogsCommandsCreate_Dialog dto,
         CancellationToken cancellationToken = default)

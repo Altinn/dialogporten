@@ -45,7 +45,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .ExecuteAndAssert<CreateActivitySuccess>(x =>
             {
                 x.ActivityIds.Count.Should().Be(1);
-                x.ActivityIds.First().Should().NotBe(guid);
+                x.ActivityIds.First().Should().Be(guid);
             });
     }
 
@@ -102,7 +102,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .GetActivity()
             .ExecuteAndAssert<ActivityDto>(x =>
                 {
-                    x.Id.Should().NotBe(guid);
+                    x.Id.Should().Be(guid);
                     x.CreatedAt.Should().BeBefore(DateTimeOffset.UtcNow);
                     x.ExtendedType.Should().Be(new Uri("https://altinn.no"));
                     x.Type.Should().Be(DialogActivityType.Values.DialogCreated);

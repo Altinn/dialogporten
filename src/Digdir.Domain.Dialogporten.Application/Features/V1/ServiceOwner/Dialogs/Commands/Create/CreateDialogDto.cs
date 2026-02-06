@@ -418,6 +418,12 @@ public sealed class ApiActionDto
 public sealed class ApiActionEndpointDto
 {
     /// <summary>
+    /// A self-defined UUIDv7 may be provided to support idempotent creation of Api Action Endpoints. If not provided, a new UUIDv7 will be generated.
+    /// </summary>
+    /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
+    public Guid? Id { get; set; }
+
+    /// <summary>
     /// Arbitrary string indicating the version of the endpoint.
     /// </summary>
     public string? Version { get; set; }

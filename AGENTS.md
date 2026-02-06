@@ -5,7 +5,6 @@ This file describes how AI coding agents should interact with the repository.
 ## Build & Test Commands
 - **Build**: `dotnet build Digdir.Domain.Dialogporten.sln`
 - **Test all**: `dotnet test Digdir.Domain.Dialogporten.sln`
-- **Test w/o integration**: `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'`
 - **Test single**: `dotnet test --filter "FullyQualifiedName=Namespace.TestClass.TestMethod"`
 - **Run project**: `cd src/ProjectDir && dotnet run`
 - **Add DB migration**: `dotnet ef migrations add <Name> -p .\src\Digdir.Domain.Dialogporten.Infrastructure\`
@@ -13,9 +12,8 @@ This file describes how AI coding agents should interact with the repository.
 - Do **not** run performance test suites. All K6 tests requires internet connectivity.
 
 Always run `dotnet build` and `dotnet test` after making changes to *.cs files in `./src/**` or `./tests/**`.  
-Running integration tests requires Docker, so run tests outside any sandbox. 
 
-If a sandbox is absolutely needed, use `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'` to skip them. 
+If integration tests fail because test containers are blocked by sandboxing, use `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'` to skip them.
 
 All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyzers.
 
@@ -43,6 +41,7 @@ The SwaggerSnapshot test will fail if these files are not identical. It will als
 
 ### Modern C# Syntax (Required)
 - Target latest language features available in the solution (.NET 10 / C# 14).
+- Use extension block syntax
 - Use the field keyword for auto properties
 - Prefer pattern matching (`switch` expressions, property patterns) over `if/else` chains.
 - Prefer switch expressions over statement-based `switch`.
@@ -58,6 +57,13 @@ The SwaggerSnapshot test will fail if these files are not identical. It will als
 - Prefer pattern matching (`is not null`) over `!= null`.
 - Prefer early returns over nested null checks.
 - Use `ArgumentNullException.ThrowIfNull()` for public API guards.
+
+### Database migrations and entity configuration
+- Database migration files must be created using Entity Framework Core tools and not edited manually unless absolutely necessary.
+- No use of .HasAnnotation("Npgsql:CreatedConcurrently", true) allowed, as this breaks automation of migrations.
+- Database changes must be backwards compatible to avoid downtime during deployment.
+- Database changes must be applied to production manually, this should be addressed in the PR description. Code reviewers should add a comment to remind the author of this.
+- Only simple field additions with default values can be applied automatically in production.
 
 ## Pull Requests
 - PR titles must follow the [Conventional Commits](https://www.conventionalcommits.org/) format, and must be prefixed such that the title is <type>[optional scope]: <description>. The title will be used as the squash commit message.

@@ -22,6 +22,7 @@ If there are guidelines on architecture or other implementation choices, they ar
 - [ ] Implementation tasks are added here
 - [ ] Prepare documentation (if relevant - either update working document, or add a new file in `docs`)
 - [ ] Add e2e-test (if relevant)
+- [ ] Manually apply database changes to prod/YT01 (if relevant)
 
 ### Threat Modelling
 - [ ] I have considered potential security risks (if risks were found, please list them below)

@@ -1,4 +1,5 @@
-﻿using System.Data;
+using System.Data;
+using System.Globalization;
 using Altinn.ApiClients.Maskinporten.Extensions;
 using Dapper;
 using Altinn.ApiClients.Maskinporten.Interfaces;
@@ -71,6 +72,20 @@ public static class InfrastructureExtensions
                 if (infrastructure.EnableSqlParametersLogging)
                 {
                     dataSourceBuilder.EnableParameterLogging();
+
+                    // Configure OpenTelemetry to include parameter values in traces.
+                    dataSourceBuilder.ConfigureTracing(options =>
+                    {
+                        options.ConfigureCommandEnrichmentCallback((activity, command) =>
+                        {
+                            foreach (NpgsqlParameter parameter in command.Parameters)
+                            {
+                                activity.SetTag(
+                                    $"{Constants.DbQueryParameterPrefix}{parameter.ParameterName}",
+                                    FormatOtelDbParameterValue(parameter.Value));
+                            }
+                        });
+                    });
                 }
 
                 return dataSourceBuilder.Build();
@@ -224,6 +239,58 @@ public static class InfrastructureExtensions
             .ReplaceTransient<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>(predicate: localDeveloperSettings.UseLocalDevelopmentAltinnAuthorization)
             .ReplaceSingleton<IFusionCache, NullFusionCache>(predicate: localDeveloperSettings.DisableCache)
             .ReplaceSingleton<IPartyNameRegistry, LocalPartNameRegistryClient>(predicate: localDeveloperSettings.UseLocalDevelopmentPartyNameRegistry);
+    }
+
+    private static string FormatOtelDbParameterValue(object? value)
+    {
+        if (value is null || value == DBNull.Value)
+            return "null";
+
+        // Treat strings as scalars (they are IEnumerable<char>).
+        if (value is string s)
+            return Truncate(s, 512);
+
+        // Make arrays readable in traces (e.g. string[]).
+        if (value is Array array)
+        {
+            const int maxItems = 32;
+            var count = array.Length;
+            var shown = Math.Min(count, maxItems);
+
+            var items = array
+                .Cast<object?>()
+                .Take(shown)
+                .Select(FormatOtelDbParameterValue)
+                .Select(v => Truncate(v, 128));
+
+            var rendered = $"[{string.Join(", ", items)}]";
+            return count > maxItems ? $"{rendered} (count={count})" : rendered;
+        }
+
+        // Default to invariant culture rendering.
+        return value switch
+        {
+            Guid g => g.ToString("D", CultureInfo.InvariantCulture),
+            DateTime dt => dt.ToString("O", CultureInfo.InvariantCulture),
+            DateTimeOffset dto => dto.ToString("O", CultureInfo.InvariantCulture),
+            IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+            _ => Truncate(value.ToString() ?? "null", 512)
+        };
+    }
+
+    private static string Truncate(string value, int maxLength)
+    {
+        const string ellipsis = "...";
+
+        if (value.Length <= maxLength)
+            return value;
+
+        maxLength = Math.Max(0, maxLength);
+        if (maxLength < ellipsis.Length)
+            return ellipsis[..maxLength];
+
+        var effectiveMax = Math.Max(0, maxLength - ellipsis.Length);
+        return value[..effectiveMax] + ellipsis;
     }
 
     internal static void AddPubSubCapabilities(InfrastructureBuilderContext builderContext, List<Action<IBusRegistrationConfigurator>> customConfigurations)

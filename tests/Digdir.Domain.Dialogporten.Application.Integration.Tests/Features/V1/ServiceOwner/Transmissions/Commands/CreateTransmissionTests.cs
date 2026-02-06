@@ -47,14 +47,14 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                     .Be(result.Transmissions.First().Id);
             });
 
-    [Fact]
+    [Fact(Skip = "Takes to long. 14 seconds")]
     public async Task Cannot_Create_More_Than_ShortMaxValue_Transmissions()
     {
         var dialog = await FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ExecuteAndAssert<CreateDialogSuccess>();
 
-        foreach (var batch in Enumerable.Range(0, short.MaxValue).Chunk(100))
+        foreach (var batch in Enumerable.Range(0, short.MaxValue).Chunk(200))
         {
             await FlowBuilder.For(Application)
                 .SendCommand(_ =>

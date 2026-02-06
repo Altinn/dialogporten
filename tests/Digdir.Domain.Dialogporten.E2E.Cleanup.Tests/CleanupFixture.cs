@@ -14,13 +14,13 @@ public sealed class CleanupFixture : E2EFixtureBase
     public void PurgeE2ETestDialogs()
     {
         using var _ = UseServiceOwnerTokenOverrides(
-            scopes: TestTokenConstants.ServiceOwnerScopes + " "
+            scopes: E2EConstants.ServiceOwnerScopes + " "
                     + AuthorizationScope.ServiceOwnerAdminScope);
 
         var cancellationToken = TestContext.Current.CancellationToken;
         var queryParams = new V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
         {
-            ServiceResource = ["urn:altinn:resource:ttd-dialogporten-automated-tests"],
+            ServiceOwnerLabels = [E2EConstants.EphemeralDialogUrn],
             Limit = 1000
         };
 

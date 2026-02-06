@@ -63,6 +63,8 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.ServiceOwner));
 
+        services.Decorate<IServiceownerApi, EphemeralDialogDecorator>();
+
         var graphQlPath = environment == Environments.Development ? "/graphql" : "/dialogporten/graphql";
         var graphQlUriBuilder = new UriBuilder(settings.DialogportenBaseUri)
         {

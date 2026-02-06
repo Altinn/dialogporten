@@ -92,11 +92,11 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         }
 
         var newActivities = _mapper.Map<List<DialogActivity>>(request.Activities)
-            .Select(d =>
+            .Select(activity =>
             {
-                d.Id = d.Id.CreateVersion7IfDefault();
-                d.DialogId = dialog.Id;
-                return d;
+                activity.Id = activity.Id.CreateVersion7IfDefault();
+                activity.DialogId = dialog.Id;
+                return activity;
             })
             .ToList();
 

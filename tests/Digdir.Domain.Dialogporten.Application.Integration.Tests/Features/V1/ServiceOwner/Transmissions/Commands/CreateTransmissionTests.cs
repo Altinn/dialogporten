@@ -57,7 +57,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         foreach (var batch in Enumerable.Range(0, short.MaxValue).Chunk(100))
         {
             await FlowBuilder.For(Application)
-            .SendCommand(_ =>
+                .SendCommand(_ =>
                 {
                     var transmissions = batch
                         .Select(_ => CreateTransmissionDto())
@@ -76,8 +76,6 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
 
         await FlowBuilder.For(Application)
-            // .SendCommand(_ => new GetDialogQuery { DialogId = dialog.DialogId })
-            // .AssertResult<DialogDto>(result => result.Transmissions.Count.Should().Be(short.MaxValue))
             .SendCommand(_ =>
             {
                 var command = new CreateTransmissionCommand
@@ -87,7 +85,8 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                     Transmissions = [CreateTransmissionDto()]
                 };
                 return command;
-            }).ExecuteAndAssert<DomainError>(x => x.ShouldHaveErrorWithText($"cannot exceed {short.MaxValue}"));
+            }).ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText($"cannot exceed {short.MaxValue}"));
     }
 
     private static CreateTransmissionDto CreateTransmissionDto()

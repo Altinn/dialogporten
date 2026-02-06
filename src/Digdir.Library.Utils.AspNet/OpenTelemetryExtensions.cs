@@ -39,9 +39,6 @@ public static class OpenTelemetryExtensions
         };
 
         var endpoint = new Uri(configuration[OtelExporterOtlpEndpoint]!);
-        var infrastructureSection = configuration.GetSection("Infrastructure");
-        var enabledSqlStatementLogging = infrastructureSection.GetValue("EnableSqlStatementLogging", false);
-        var enabledSqlParametersLogging = infrastructureSection.GetValue("EnableSqlParametersLogging", false);
 
         return services.AddOpenTelemetry()
             .ConfigureResource(resource =>
@@ -56,10 +53,10 @@ public static class OpenTelemetryExtensions
                     tracing.SetSampler(new AlwaysOnSampler());
                 }
 
-                tracing.AddProcessor(new PostgresFilter(enabledSqlStatementLogging, enabledSqlParametersLogging));
-                tracing.AddProcessor(new GraphQLFilter());
-                tracing.AddProcessor(new HealthCheckFilter());
-                tracing.AddProcessor(new FusionCacheFilter());
+                tracing.AddProcessor<PostgresFilter>();
+                tracing.AddProcessor<GraphQLFilter>();
+                tracing.AddProcessor<HealthCheckFilter>();
+                tracing.AddProcessor<FusionCacheFilter>();
 
                 tracing
                     .AddHttpClientInstrumentation(o =>

@@ -23,4 +23,8 @@
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.Infrastructure\Digdir.Domain.Dialogporten.Infrastructure.csproj"/>
+    </ItemGroup>
+
 </Project>

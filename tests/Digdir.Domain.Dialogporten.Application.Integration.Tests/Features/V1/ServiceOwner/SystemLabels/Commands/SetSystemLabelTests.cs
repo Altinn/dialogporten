@@ -189,6 +189,9 @@ internal sealed class AdminUserResourceRegistryDecorator(IUserResourceRegistry u
 
     public bool IsCurrentUserServiceOwnerAdmin() => true;
 
+    public bool CurrentUserCanChangeTransmissions() =>
+        userResourceRegistry.CurrentUserCanChangeTransmissions();
+
     public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
         userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
 }
@@ -205,6 +208,9 @@ internal sealed class NonAdminUserResourceRegistryDecorator(IUserResourceRegistr
         userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
 
     public bool IsCurrentUserServiceOwnerAdmin() => false;
+
+    public bool CurrentUserCanChangeTransmissions() =>
+        userResourceRegistry.CurrentUserCanChangeTransmissions();
 
     public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
         userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);

@@ -10,9 +10,12 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -68,12 +71,16 @@ using SetSystemLabelResultSO =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelResult;
 using SetSystemLabelCommandSO =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelCommand;
+using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionAttachmentDto;
+using TransmissionAttachmentUrlDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionAttachmentUrlDto;
+using TransmissionNavigationalActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionNavigationalActionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
 public static class IFlowStepExtensions
 {
     private const string DialogIdKey = "DialogId";
+    public const string TransmissionIdKey = "TransmissionId";
     private const string PartyKey = "Party";
     private const string ActivityIdKey = "ActivityId";
     private const string ServiceResource = "ServiceResource";
@@ -107,9 +114,9 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
         this IFlowStep step,
-        Action<CreateTransmissionDto> modify,
         Guid? ifMatchDialogRevision = null) =>
-        step.CreateTransmission((transmission, _) => modify(transmission), ifMatchDialogRevision);
+        step.CreateTransmission((_, _) =>
+            { }, ifMatchDialogRevision);
 
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
         this IFlowStep step,
@@ -141,6 +148,9 @@ public static class IFlowStepExtensions
             };
 
             modify?.Invoke(transmission, ctx);
+
+            transmission.Id ??= IdentifiableExtensions.CreateVersion7(DialogApplication.Clock.UtcNowOffset);
+            ctx.Bag[TransmissionIdKey] = transmission.Id;
 
             var command = new CreateTransmissionCommand
             {
@@ -294,6 +304,60 @@ public static class IFlowStepExtensions
             modify(command);
             return command;
         });
+
+    public static IFlowExecutor<UpdateTransmissionResult> UpdateTransmission(this IFlowStep step,
+        Action<UpdateTransmissionCommand, FlowContext> modify) =>
+        step.SendCommand(ctx => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
+            .AssertResult<DialogDtoSO>()
+            .SendCommand((dialog, ctx) =>
+            {
+                var transmissionId = ctx.GetTransmissionId();
+                var transmission = dialog.Transmissions.Single(x => x.Id == transmissionId);
+                var updateTransmissionDto = new UpdateTransmissionDto
+                {
+                    Id = transmission.Id,
+                    IdempotentKey = null,
+                    AuthorizationAttribute = transmission.AuthorizationAttribute,
+                    ExtendedType = transmission.ExtendedType,
+                    ExternalReference = transmission.ExternalReference,
+                    RelatedTransmissionId = transmission.RelatedTransmissionId,
+                    Type = transmission.Type,
+                    Sender = transmission.Sender,
+                    Content = new()
+                    {
+                        Title = transmission.Content.Title,
+                        ContentReference = transmission.Content.ContentReference
+                    },
+                    Attachments = transmission.Attachments.Select(x => new TransmissionAttachmentDto
+                    {
+                        Id = x.Id,
+                        DisplayName = x.DisplayName,
+                        Urls = x.Urls.Select(x => new TransmissionAttachmentUrlDto
+                        {
+                            Url = x.Url,
+                            MediaType = x.MediaType,
+                            ConsumerType = x.ConsumerType
+                        }).ToList(),
+                        ExpiresAt = x.ExpiresAt
+                    }).ToList(),
+                    NavigationalActions = transmission.NavigationalActions.Select(x => new TransmissionNavigationalActionDto
+                    {
+                        Title = x.Title,
+                        Url = x.Url,
+                        ExpiresAt = x.ExpiresAt,
+                    }).ToList(),
+                };
+
+                var updateTransmissionCommand = new UpdateTransmissionCommand
+                {
+                    Dto = updateTransmissionDto,
+                    DialogId = ctx.GetDialogId(),
+                    IsSilentUpdate = true,
+                    TransmissionId = ctx.GetTransmissionId()
+                };
+                modify(updateTransmissionCommand, ctx);
+                return updateTransmissionCommand;
+            });
 
     public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(
         this IFlowStep<CreateDialogResult> step,
@@ -548,6 +612,18 @@ public static class IFlowStepExtensions
     public static Guid GetDialogId(this FlowContext ctx)
     {
         ctx.Bag.TryGetValue(DialogIdKey, out var value).Should().BeTrue();
+        return value.Should().BeOfType<Guid>().Subject;
+    }
+
+    public static Guid GetGuidByKey(this FlowContext ctx, string key)
+    {
+        ctx.Bag.TryGetValue(key, out var value).Should().BeTrue();
+        return value.Should().BeOfType<Guid>().Subject;
+    }
+
+    public static Guid GetTransmissionId(this FlowContext ctx)
+    {
+        ctx.Bag.TryGetValue(TransmissionIdKey, out var value).Should().BeTrue();
         return value.Should().BeOfType<Guid>().Subject;
     }
 

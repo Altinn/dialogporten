@@ -14,7 +14,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     public async Task Should_Create_Activity_As_Service_Owner()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
         var activityId = await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId);
@@ -30,7 +30,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         using var _ = Fixture.UseServiceOwnerTokenOverrides(
             scopes: E2EConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
         );
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
         var activityId = await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId);
@@ -61,7 +61,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     public async Task Should_Not_Be_Able_To_Create_Activity_When_IfMatch_DialogRevision_Is_Changed()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
         var dialogReq = DialogTestData.CreateSimpleActivity();
 
         // Act
@@ -78,7 +78,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     public async Task Should_Not_Be_Able_To_Create_Activity_On_Another_Users_Dialog()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
         var request = DialogTestData.CreateSimpleActivity();
         using var _ = Fixture.UseServiceOwnerTokenOverrides("964951284", "hko");
 
@@ -96,7 +96,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     public async Task Should_Not_Be_Able_To_Create_Activity_On_Deleted_Dialog()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
         await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);
         var request = DialogTestData.CreateSimpleActivity();
 
@@ -117,7 +117,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         using var _ = Fixture.UseServiceOwnerTokenOverrides(
             scopes: E2EConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
         );
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
         await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);
         var request = DialogTestData.CreateSimpleActivity();
 
@@ -135,7 +135,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     public async Task Should_Not_Be_Able_To_Create_The_Same_Activity_Twice()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
         var activityId = Guid.CreateVersion7();
         var request = DialogTestData.CreateSimpleActivity(activity => activity.Id = activityId);
 

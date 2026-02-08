@@ -13,7 +13,7 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     {
         // Arrange
         const string transmissionAttachmentName = "transmission-attachment";
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         var transmission = DialogTestData.CreateSimpleTransmission(x =>
             x.AddAttachment(x => x.Name = transmissionAttachmentName));

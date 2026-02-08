@@ -8,7 +8,21 @@ internal static class CreateTransmissionDtoExtensions
 {
     extension(CreateTransmissionDto transmission)
     {
-        public void AddAttachment(Action<TransmissionAttachmentDto>? modify = null)
+        public CreateTransmissionDto AddNavigationalAction(Action<TransmissionNavigationalActionDto>? modify = null)
+        {
+            var action = new TransmissionNavigationalActionDto
+            {
+                Title = DialogGenerator.GenerateFakeLocalizations(1),
+                Url = new Uri("https://digdir.no/action")
+            };
+
+            modify?.Invoke(action);
+            transmission.NavigationalActions.Add(action);
+
+            return transmission;
+        }
+
+        public CreateTransmissionDto AddAttachment(Action<TransmissionAttachmentDto>? modify = null)
         {
             var attachment = new TransmissionAttachmentDto
             {
@@ -25,6 +39,8 @@ internal static class CreateTransmissionDtoExtensions
 
             modify?.Invoke(attachment);
             transmission.Attachments.Add(attachment);
+
+            return transmission;
         }
     }
 }

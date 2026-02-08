@@ -7,14 +7,15 @@ public static class ServiceOwnerApiExtensions
 {
     extension(IServiceownerApi serviceownerApi)
     {
-        public async Task<Guid> CreateSimpleDialogAsync(Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
+        public async Task<(Guid DialogId, Guid ETag)> CreateSimpleDialogAsync(
+            Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
         {
             var createDialogResponse =
                 await serviceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
                     DialogTestData.CreateSimpleDialog(modify),
                     TestContext.Current.CancellationToken);
 
-            return createDialogResponse.Content.ToGuid();
+            return (createDialogResponse.Content.ToGuid(), createDialogResponse.Headers.ETagToGuid());
         }
 
         public async Task<Guid> CreateSimpleActivityAsync(

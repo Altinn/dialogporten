@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -17,7 +18,8 @@ internal static class CreateDialogCommandExtensions
         return command;
     }
 
-    public static CreateDialogCommand AddTransmission(this CreateDialogCommand command, Action<TransmissionDto>? modify = null)
+    public static CreateDialogCommand AddTransmission(this CreateDialogCommand command,
+        Action<TransmissionDto>? modify = null)
     {
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
         modify?.Invoke(transmission);

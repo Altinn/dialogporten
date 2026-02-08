@@ -11,9 +11,5 @@ internal sealed class DialogSearchTagConfiguration : IEntityTypeConfiguration<Di
     {
         builder.Property(x => x.Value)
             .HasMaxLength(MaxSearchTagLength);
-
-        builder.HasIndex(x => x.Value)
-            .HasMethod(Constants.Gin)
-            .HasOperators(Constants.GinTrgmOps);
     }
 }

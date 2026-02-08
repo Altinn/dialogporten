@@ -19,6 +19,10 @@ internal sealed class CreateDialogTransmissionAttachmentDtoValidator : AbstractV
         RuleFor(x => x.DisplayName)
             .SetValidator(localizationsValidator);
 
+        RuleFor(x => x.Name)
+            .MaximumLength(255)
+            .When(x => x.Name is not null);
+
         RuleFor(x => x.Urls)
             .NotEmpty()
             .ForEach(x => x.SetValidator(urlValidator));

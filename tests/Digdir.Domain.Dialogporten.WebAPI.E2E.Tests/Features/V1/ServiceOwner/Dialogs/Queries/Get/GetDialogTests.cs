@@ -26,4 +26,37 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.Id.Should().Be(dialogId);
     }
+
+    [E2EFact]
+    public async Task Should_Return_Attachment_Names()
+    {
+        // Arrange
+        const string dialogAttachmentName = "dialog-attachment";
+        const string transmissionAttachmentName = "transmission-attachment";
+
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+        {
+            dialog.AddAttachment(x =>
+                x.Name = dialogAttachmentName);
+            dialog.AddTransmission(modify: x =>
+                x.AddAttachment(x =>
+                    x.Name = transmissionAttachmentName));
+        });
+
+        // Act
+        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
+            dialogId,
+            endUserId: null!,
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        content.Attachments.Should()
+            .ContainSingle(attachment =>
+                attachment.Name == dialogAttachmentName);
+        content.Transmissions.Should().ContainSingle()
+            .Which.Attachments.Should().ContainSingle(attachment =>
+                attachment.Name == transmissionAttachmentName);
+    }
 }

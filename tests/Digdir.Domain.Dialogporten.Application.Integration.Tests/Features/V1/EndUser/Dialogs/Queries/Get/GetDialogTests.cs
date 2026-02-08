@@ -123,6 +123,29 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             });
 
     [Fact]
+    public Task Get_Dialog_Should_Return_Attachment_Names() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddAttachment(attachment =>
+                    attachment.Name = "dialog-attachment");
+                x.AddTransmission(transmission =>
+                    transmission.AddAttachment(attachment =>
+                        attachment.Name = "transmission-attachment"));
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == "dialog-attachment");
+                x.Transmissions.Should().ContainSingle()
+                    .Which.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == "transmission-attachment");
+            });
+
+    [Fact]
     public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

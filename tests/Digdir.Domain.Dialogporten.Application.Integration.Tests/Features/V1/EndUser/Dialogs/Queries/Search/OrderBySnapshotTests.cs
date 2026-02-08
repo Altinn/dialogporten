@@ -1,11 +1,13 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
@@ -53,10 +55,10 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
                 {
                     x.Limit = 2;
                     x.Party = [IntegrationTestUser.DefaultParty];
-                    x.ContinuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
+                    x.ContinuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>
                         .TryParse(previousToken, out var token) ? token : null;
                     x.OrderBy =
-                        OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(orderBy,
+                        OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(orderBy,
                             out var orderSet)
                             ? orderSet
                             : null;

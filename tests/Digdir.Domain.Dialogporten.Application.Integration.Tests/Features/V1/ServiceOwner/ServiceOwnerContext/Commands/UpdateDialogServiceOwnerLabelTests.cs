@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ServiceOwnerLabelDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update.ServiceOwnerLabelDto;
 

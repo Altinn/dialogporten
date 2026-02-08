@@ -8,13 +8,13 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;

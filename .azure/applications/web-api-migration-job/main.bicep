@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { finopsTags } from '../../functions/finopsTags.bicep'
+
 @description('The tag of the image to be used')
 @minLength(3)
 param imageTag string
@@ -30,11 +32,12 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-var tags = {
-  Environment: environment
-  Product: 'Dialogporten'
-}
+
 var name = '${namePrefix}-db-migration-job'
+
+var baseTags = {}
+
+var tags = finopsTags(baseTags, environment)
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

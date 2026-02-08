@@ -54,9 +54,6 @@ param postgresConfiguration = {
   // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true
   enableQueryPerformanceInsight: false
-  parameterLogging: {
-    enabled: false
-  }
   backupRetentionDays: 32
   availabilityZone: '3'
   enableBackupVault: true
@@ -77,6 +74,10 @@ param serviceBusSku = {
 }
 
 // Altinn Product Dialogporten: Developers Prod
-param sshJumperAdminLoginGroupObjectId = 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
+param sshJumperConfig = {
+  adminLoginGroupObjectId: 'a94de4bf-0a83-4d30-baba-0c6a7365571c'
+  vmSize: 'Standard_D2as_v5'
+}
 
 param apimUrl = 'https://platform.altinn.no/dialogporten'
+

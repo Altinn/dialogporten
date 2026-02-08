@@ -1,5 +1,68 @@
 # Changelog
 
+## [1.103.0](https://github.com/Altinn/dialogporten/compare/v1.102.4...v1.103.0) (2026-02-06)
+
+
+### Features
+
+* enable parameter logging for npsql ([#3058](https://github.com/Altinn/dialogporten/issues/3058)) ([385562e](https://github.com/Altinn/dialogporten/commit/385562ec57d2cb6aa60c33b6eaa580d77e988ce5))
+* support user supplied IDs for ApiActionEndpoint ([#3408](https://github.com/Altinn/dialogporten/issues/3408)) ([7aa4100](https://github.com/Altinn/dialogporten/commit/7aa41001f19912012b19267e9dafd8f3f7e1c408))
+
+
+### Miscellaneous Chores
+
+* **app:** remove old search queries ([#3391](https://github.com/Altinn/dialogporten/issues/3391)) ([4467f61](https://github.com/Altinn/dialogporten/commit/4467f61133f8003ef2f19c72bb6f0e9d949f18e2))
+* **ci:** implement finops tags ([#3330](https://github.com/Altinn/dialogporten/issues/3330)) ([df627f5](https://github.com/Altinn/dialogporten/commit/df627f58f06206d98490c8cdf30fa943c750dc11))
+* create e2e scripts ([#3355](https://github.com/Altinn/dialogporten/issues/3355)) ([123b1a6](https://github.com/Altinn/dialogporten/commit/123b1a62669a09aeb761b2b96dfccc7eac90caf2))
+* **deps:** update dependency refitter.sourcegenerator to 1.7.3 ([#3382](https://github.com/Altinn/dialogporten/issues/3382)) ([325f53d](https://github.com/Altinn/dialogporten/commit/325f53deb25c24194e898eb4f68c1907882b9833))
+* **deps:** update grafana/grafana docker tag to v11.6.9 ([#3393](https://github.com/Altinn/dialogporten/issues/3393)) ([83f87bf](https://github.com/Altinn/dialogporten/commit/83f87bf5cc23bd534276cbecd667582807d943a2))
+* **deps:** update grafana/loki docker tag to v3.6.4 ([#3384](https://github.com/Altinn/dialogporten/issues/3384)) ([1ad4840](https://github.com/Altinn/dialogporten/commit/1ad48408a08db0df263f5f0e2c24faddab894135))
+* **deps:** update step-security/harden-runner action to v2.14.1 ([#3385](https://github.com/Altinn/dialogporten/issues/3385)) ([3bd5cf3](https://github.com/Altinn/dialogporten/commit/3bd5cf306246172d310391f082b91dd21c90a5fc))
+* **deps:** upgrade local postgres version to 16.11 ([#3400](https://github.com/Altinn/dialogporten/issues/3400)) ([a1b0a66](https://github.com/Altinn/dialogporten/commit/a1b0a660b3c5412568d88b5fcd3d38e6759756d4))
+* feat toggle for statement logging ([#3402](https://github.com/Altinn/dialogporten/issues/3402)) ([ca92026](https://github.com/Altinn/dialogporten/commit/ca920269eb39b55e11cd4034100f269a9e2c169b))
+* remove postgresql info logs from yt01 and prod ([#3401](https://github.com/Altinn/dialogporten/issues/3401)) ([db727a3](https://github.com/Altinn/dialogporten/commit/db727a36273f65647594ef758aa1ff17845407b1))
+
+## [1.102.4](https://github.com/Altinn/dialogporten/compare/v1.102.3...v1.102.4) (2026-02-03)
+
+
+### Bug Fixes
+
+* **auth:** Align SI vs SR user determination ([#3365](https://github.com/Altinn/dialogporten/issues/3365)) ([43dc0fc](https://github.com/Altinn/dialogporten/commit/43dc0fc85c5adf27d3574e5b585a05c4d037bd9f))
+
+
+### Miscellaneous Chores
+
+* **ci:** upgrade az cli to 2.83.0 ([#3380](https://github.com/Altinn/dialogporten/issues/3380)) ([3f14b86](https://github.com/Altinn/dialogporten/commit/3f14b86b2099a652e07cbba7ae61f16b05a279b4))
+
+## [1.102.3](https://github.com/Altinn/dialogporten/compare/v1.102.2...v1.102.3) (2026-02-03)
+
+
+### Miscellaneous Chores
+
+* **ci:** always build docker images in pull requests ([#3376](https://github.com/Altinn/dialogporten/issues/3376)) ([33393cc](https://github.com/Altinn/dialogporten/commit/33393ccfe6f764b69226b1aa810c2c1695738b16))
+* **postgresql:** remove parameter logging ([#3372](https://github.com/Altinn/dialogporten/issues/3372)) ([d13be85](https://github.com/Altinn/dialogporten/commit/d13be855e0d14664a595c662730a25de638e591e))
+* update migration ef tools version ([#3374](https://github.com/Altinn/dialogporten/issues/3374)) ([d38084a](https://github.com/Altinn/dialogporten/commit/d38084a057462a96d8f40166b6df67f191bfc88c))
+
+## [1.102.2](https://github.com/Altinn/dialogporten/compare/v1.102.1...v1.102.2) (2026-02-03)
+
+
+### Miscellaneous Chores
+
+* **infra:** Allow configuration of the SSH jumper virtual machine size. Upgrade SKU. ([#3369](https://github.com/Altinn/dialogporten/issues/3369)) ([0b69fcb](https://github.com/Altinn/dialogporten/commit/0b69fcb3875c3dfc1e7a6562ad9d3e179f23de0b))
+
+## [1.102.1](https://github.com/Altinn/dialogporten/compare/v1.102.0...v1.102.1) (2026-02-02)
+
+
+### Bug Fixes
+
+* **WebApi:** Respect Utf8JsonReader.HasValueSequence ([#3366](https://github.com/Altinn/dialogporten/issues/3366)) ([0b048d3](https://github.com/Altinn/dialogporten/commit/0b048d3ce8a977080f4a8f7ca009c1efeadbbdc9))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency asynckeyedlock to 8.0.1 ([#3356](https://github.com/Altinn/dialogporten/issues/3356)) ([4c5a862](https://github.com/Altinn/dialogporten/commit/4c5a8620e2bbff9da66eaf916b09ea9e68cf48e8))
+* **deps:** update dependency refitter.sourcegenerator to 1.7.2 ([#3357](https://github.com/Altinn/dialogporten/issues/3357)) ([7b39a64](https://github.com/Altinn/dialogporten/commit/7b39a64c35e2b1ac7e9c852135355c94bede2bd0))
+
 ## [1.102.0](https://github.com/Altinn/dialogporten/compare/v1.101.0...v1.102.0) (2026-01-30)
 
 

@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
@@ -31,6 +32,7 @@ using GetTransmissionQueryEU = Digdir.Domain.Dialogporten.Application.Features.V
 using GetTransmissionQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
 using GetTransmissionResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionResult;
 using GetTransmissionResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionResult;
+using DialogTransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogTransmissionDto;
 using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
 using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
 using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
@@ -39,6 +41,9 @@ using SetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V
 using SetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
 using SetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelResult;
 using SetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelCommand;
+using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionAttachmentDto;
+using TransmissionAttachmentUrlDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionAttachmentUrlDto;
+using TransmissionNavigationalActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionNavigationalActionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -258,6 +263,18 @@ public static class IFlowStepExtensions
             modify(command);
             return command;
         });
+
+    public static IFlowExecutor<UpdateTransmissionResult> UpdateTransmission(this IFlowStep step,
+        Action<UpdateTransmissionCommand> modify) =>
+        step.SendCommand(ctx => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()))
+            .AssertResult<DialogDtoSO>()
+            .SendCommand((dialog, _) =>
+            {
+                var transmission = dialog.Transmissions.Single();
+                var command = CreateUpdateTransmissionCommand(dialog, transmission);
+                modify(command);
+                return command;
+            });
     public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(this IFlowStep<CreateDialogResult> step,
         Action<UpdateDialogServiceOwnerContextCommand> modify) =>
         step.AssertResult<CreateDialogSuccess>()
@@ -275,6 +292,13 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateDialogResult> step) =>
         step.AssertResult<UpdateDialogSuccess>()
             .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
+
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateTransmissionResult> step) =>
+        step.AssertResult<UpdateTransmissionSuccess>()
+            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
+
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateTransmissionSuccess> step) =>
+        step.SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateDialogServiceOwnerContextResult> step) =>
         step.AssertResult<UpdateServiceOwnerContextSuccess>()
@@ -490,6 +514,62 @@ public static class IFlowStepExtensions
         {
             IfMatchDialogRevision = dto.Revision,
             Id = ctx.GetDialogId(),
+            Dto = updateDto
+        };
+    }
+
+    private static UpdateTransmissionCommand CreateUpdateTransmissionCommand(DialogDtoSO dialog, DialogTransmissionDto transmission)
+    {
+        var updateDto = new UpdateTransmissionDto
+        {
+            Id = transmission.Id,
+            IdempotentKey = transmission.IdempotentKey,
+            CreatedAt = transmission.CreatedAt,
+            AuthorizationAttribute = transmission.AuthorizationAttribute,
+            ExtendedType = transmission.ExtendedType,
+            ExternalReference = transmission.ExternalReference,
+            RelatedTransmissionId = transmission.RelatedTransmissionId,
+            Type = transmission.Type,
+            Sender = transmission.Sender,
+            Content = new()
+            {
+                Title = transmission.Content.Title,
+                ContentReference = transmission.Content.ContentReference
+            },
+            Attachments =
+            [
+                ..transmission.Attachments.Select(attachment => new TransmissionAttachmentDto
+                {
+                    Id = attachment.Id,
+                    DisplayName = [..attachment.DisplayName],
+                    Urls =
+                    [
+                        ..attachment.Urls.Select(url => new TransmissionAttachmentUrlDto
+                        {
+                            Url = url.Url,
+                            MediaType = url.MediaType,
+                            ConsumerType = url.ConsumerType
+                        })
+                    ],
+                    ExpiresAt = attachment.ExpiresAt
+                })
+            ],
+            NavigationalActions =
+            [
+                ..transmission.NavigationalActions.Select(action => new TransmissionNavigationalActionDto
+                {
+                    Title = [..action.Title],
+                    Url = action.Url,
+                    ExpiresAt = action.ExpiresAt
+                })
+            ]
+        };
+
+        return new UpdateTransmissionCommand
+        {
+            DialogId = dialog.Id,
+            TransmissionId = transmission.Id,
+            IfMatchDialogRevision = dialog.Revision,
             Dto = updateDto
         };
     }

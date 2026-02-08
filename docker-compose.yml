@@ -41,6 +41,7 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES=service.instance.id=dialogporten-webapi,service.namespace=${OTEL_NAMESPACE} 
     volumes:
       - ./.aspnet/https:/https
+      - ${USER_SECRETS_DIR}:/home/app/.microsoft/usersecrets:ro
 
   dialogporten-graphql-ingress:
     image: nginx:1.29.4
@@ -81,3 +82,4 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES=service.instance.id=dialogporten-graphql,service.namespace=${OTEL_NAMESPACE}
     volumes:
       - ./.aspnet/https:/https
+      - ${USER_SECRETS_DIR}:/home/app/.microsoft/usersecrets:ro

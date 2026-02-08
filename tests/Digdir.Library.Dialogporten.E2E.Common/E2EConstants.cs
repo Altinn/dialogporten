@@ -2,7 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
-public static class TestTokenConstants
+public static class E2EConstants
 {
     public const string TestTokenBaseUrl = "https://altinn-testtools-token-generator.azurewebsites.net/api";
     public const string DefaultServiceOwnerOrgNr = "991825827";
@@ -18,4 +18,6 @@ public static class TestTokenConstants
         AuthorizationScope.ServiceProviderSearch;
 
     public const string EndUserScopes = AuthorizationScope.EndUser;
+
+    public const string EphemeralDialogUrn = "digdir:dialogporten:ephemeral-dialog";
 }

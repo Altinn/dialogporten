@@ -14,7 +14,7 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.2" />
         <PackageReference Include="Npgsql" Version="10.0.1" />
-        <PackageReference Include="MediatR" Version="12.5.0"/>
+        <PackageReference Include="MediatR" Version="14.0.0"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
         <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="OneOf" Version="3.0.271"/>

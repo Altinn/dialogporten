@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.103.1](https://github.com/Altinn/dialogporten/compare/v1.103.0...v1.103.1) (2026-02-08)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunitv3 to 31.10.0 ([#3419](https://github.com/Altinn/dialogporten/issues/3419)) ([e8e2411](https://github.com/Altinn/dialogporten/commit/e8e2411149be5a2170fc5994d1e5a035987fec0c))
+* **deps:** update docker/login-action action to v3.7.0 ([#3420](https://github.com/Altinn/dialogporten/issues/3420)) ([b8306c4](https://github.com/Altinn/dialogporten/commit/b8306c41e4c5adc987f3184839d8d7c6def087fa))
+* **deps:** update dotnet monorepo ([#3418](https://github.com/Altinn/dialogporten/issues/3418)) ([8fe7f2c](https://github.com/Altinn/dialogporten/commit/8fe7f2c0e3518eaf32663f6dac7b81dcb22c5db1))
+
 ## [1.103.0](https://github.com/Altinn/dialogporten/compare/v1.102.4...v1.103.0) (2026-02-06)
 
 

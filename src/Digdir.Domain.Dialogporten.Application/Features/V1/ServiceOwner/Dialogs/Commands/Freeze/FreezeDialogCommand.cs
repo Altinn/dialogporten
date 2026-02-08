@@ -52,6 +52,11 @@ internal sealed class FreezeDialogCommandHandler(
             return new EntityDeleted<DialogEntity>(request.Id);
         }
 
+        if (request.IfMatchDialogRevision is { } revision && revision != dialog.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         if (dialog.Frozen)
         {
             return new FreezeDialogSuccess(dialog.Revision);

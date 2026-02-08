@@ -86,6 +86,15 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new Forbidden().WithInvalidDialogIds(missing);
         }
 
+        foreach (var dialog in dialogs)
+        {
+            var revision = request.Dto.Dialogs.Single(x => x.DialogId == dialog.Id).EndUserContextRevision;
+            if (revision is { } expected && expected != dialog.EndUserContext.Revision)
+            {
+                return new ConcurrencyError();
+            }
+        }
+
 
         foreach (var dialog in dialogs)
         {

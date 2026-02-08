@@ -87,6 +87,11 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             }
         }
 
+        if (request.IfMatchEndUserContextRevision is { } revision && revision != dialog.EndUserContext.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, performedBy!);
 
         var saveResult = await _unitOfWork

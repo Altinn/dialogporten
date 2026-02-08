@@ -74,6 +74,16 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new EntityNotFound<DialogEntity>(notFound);
         }
 
+        var dialogsById = dialogs.ToDictionary(x => x.Id);
+        foreach (var dto in request.Dto.Dialogs)
+        {
+            if (dto.EndUserContextRevision is { } expected &&
+                dialogsById[dto.DialogId].EndUserContext.Revision != expected)
+            {
+                return new ConcurrencyError();
+            }
+        }
+
         await dialogs.MergeAsync(
             sources: request.Dto.Dialogs,
             destinationKeySelector: x => x.Id,

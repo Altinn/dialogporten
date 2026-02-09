@@ -118,6 +118,8 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         UseTokenOverrides(new TokenOverrides(
             ServiceOwner: new ServiceOwnerTokenOverrides(orgNumber, orgName, scopes, tokenOverride)));
 
+    public void Cleanup() => ClearTokenOverrides();
+
     public void PreflightCheck()
     {
         var preFlightIssues = new List<string>();
@@ -181,6 +183,8 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             return exception.GetBaseException().Message;
         }
     }
+
+    private void ClearTokenOverrides() => _tokenOverridesAccessor?.Current = null;
 }
 
 public sealed record PreflightState(

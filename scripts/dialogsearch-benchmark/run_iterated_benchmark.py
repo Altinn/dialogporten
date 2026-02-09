@@ -5,6 +5,8 @@ import datetime as dt
 import math
 import os
 import re
+import shutil
+import glob
 import subprocess
 import sys
 from pathlib import Path
@@ -42,6 +44,14 @@ def log_command(cmd: List[str]) -> None:
 
 def log_info(message: str) -> None:
     print(f"[info] {message}", file=sys.stderr)
+
+
+def resolve_globs(patterns: str) -> List[Path]:
+    globs = [p.strip() for p in re.split(r"[,\s]+", patterns) if p.strip()]
+    paths: List[Path] = []
+    for pattern in globs:
+        paths.extend(Path(p) for p in glob.glob(pattern))
+    return [p for p in paths if p.is_file()]
 
 
 def write_text(path: Path, content: str) -> None:
@@ -168,22 +178,31 @@ def main() -> int:
     if args.party_pool < 1 or args.service_pool < 1:
         die("party-pool and service-pool must be >= 1")
 
+    timestamp = dt.datetime.now().strftime("%Y%m%d%H%M")
     if args.out_dir:
         root_dir = Path(args.out_dir)
     else:
-        timestamp = dt.datetime.now().strftime("%Y%m%d-%H%M")
-        root_dir = Path.cwd() / f"benchmark-{timestamp}"
+        root_dir = Path.cwd() / f"benchmark-{dt.datetime.now().strftime('%Y%m%d-%H%M')}"
     casesets_dir = root_dir / "casesets"
     output_dir = root_dir / "output"
+    sqls_dir = root_dir / "sqls"
     csvs_dir = output_dir / "csvs"
     explains_dir = output_dir / "explains"
 
     ensure_dir(casesets_dir)
     ensure_dir(csvs_dir)
     ensure_dir(explains_dir)
+    ensure_dir(sqls_dir)
 
     parties_path = output_dir / "parties.txt"
     services_path = output_dir / "services.txt"
+
+    sql_paths = resolve_globs(args.sqls)
+    if not sql_paths:
+        die(f"No SQL files found for: {args.sqls}")
+    log_info(f"Copying {len(sql_paths)} SQL files into {sqls_dir}")
+    for path in sorted(sql_paths):
+        shutil.copy2(path, sqls_dir / path.name)
 
     log_info("Generating party samples")
     log_command([sys.executable, "generate_samples.py", "party", str(args.party_pool)])
@@ -306,7 +325,7 @@ def main() -> int:
             aggregate_rows.extend(iteration_rows)
 
     log_info("Writing summary and concatenated explains")
-    summary_path = root_dir / "summary.csv"
+    summary_path = root_dir / f"summary-{timestamp}.csv"
     summary_rows: List[Dict[str, str]] = []
 
     grouped: Dict[Tuple[str, str], Dict[str, List[float]]] = {}
@@ -404,7 +423,7 @@ def main() -> int:
             handle.write("\n\n")
 
     log_info("Generating Excel summary")
-    excel_path = root_dir / "summary.xlsx"
+    excel_path = root_dir / f"summary-{timestamp}.xlsx"
     log_command(
         [
             sys.executable,

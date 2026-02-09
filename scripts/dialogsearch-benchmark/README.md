@@ -6,7 +6,7 @@ This folder contains a small toolkit for generating test samples, producing case
 
 - Python 3.9+
 - `psql` in `PATH`
-- Environment variable `PG_CONNECTION_STRING` pointing to your Postgres instance
+- Environment variable `PG_CONNECTION_STRING` pointing to your Postgres instance, having the form `postgresql://postgres@localhost:5432/dialogporten`. This will utilize `.pgpass`.
 - Python package: `openpyxl` (for Excel output)
 
 Install:

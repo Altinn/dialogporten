@@ -1,5 +1,5 @@
 EXPLAIN (ANALYZE, BUFFERS, TIMING)
-SELECT d."Id", d."ContentUpdatedAt", d."CreatedAt", d."Deleted", d."DeletedAt", d."DueAt", d."ExpiresAt", d."ExtendedStatus", d."ExternalReference", d."FromPartyTransmissionsCount", d."FromServiceOwnerTransmissionsCount", d."Frozen", d."HasUnopenedContent", d."IdempotentKey", d."IsApiOnly",
+SELECT d."Id", d."CreatedAt", d."CreatedAt", d."Deleted", d."DeletedAt", d."DueAt", d."ExpiresAt", d."ExtendedStatus", d."ExternalReference", d."FromPartyTransmissionsCount", d."FromServiceOwnerTransmissionsCount", d."Frozen", d."HasUnopenedContent", d."IdempotentKey", d."IsApiOnly",
   d."Org", d."Party", d."PrecedingProcess", d."Process", d."Progress", d."Revision", d."ServiceResource", d."ServiceResourceType", d."StatusId", d."UpdatedAt", d."VisibleFrom"
 FROM (
     WITH permission_groups AS (
@@ -7,17 +7,17 @@ FROM (
              , x."Services" AS services
         FROM jsonb_to_recordset('--PARTIESANDSERVICESPLACEHOLDER--'::jsonb) AS x("Parties" text[], "Services" text[])
     )
-    ,party_permissions AS (
-        SELECT p.party
-             , pg.services AS allowed_services
+    ,service_permissions AS (
+        SELECT s.service
+             , pg.parties AS allowed_parties
         FROM permission_groups pg
-        CROSS JOIN LATERAL unnest(pg.parties) AS p(party)
+        CROSS JOIN LATERAL unnest(pg.services) AS s(service)
     )
     ,permission_candidate_ids AS (
         SELECT d."Id"
-        FROM party_permissions pp
-        JOIN "Dialog" d ON d."Party" = pp.party
-                       AND d."ServiceResource" = ANY(pp.allowed_services)
+        FROM service_permissions sp
+        JOIN "Dialog" d ON d."ServiceResource" = sp.service
+                       AND d."Party" = ANY(sp.allowed_parties)
     )
     ,delegated_dialogs AS (
         -- Replace ARRAY[] with delegated dialog IDs if you want to test this path
@@ -33,10 +33,9 @@ FROM (
     JOIN "Dialog" d ON d."Id" = cd."Id"
     WHERE 1=1
       AND d."StatusId" = ANY(ARRAY[7, 2, 8]::int[])
-      AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= NOW())
-      AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > NOW())
+      AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= '2026-02-05T13:56:28.8523270+00:00'::timestamptz)
+      AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > '2026-02-05T13:56:28.8523270+00:00'::timestamptz)
       AND d."Deleted" = false::boolean
-      AND d."ContentUpdatedAt" >= NOW() - INTERVAL '12 months'
       AND EXISTS (
         SELECT 1
         FROM "DialogEndUserContext" dec
@@ -44,8 +43,8 @@ FROM (
         WHERE dec."DialogId" = d."Id"
            AND sl."SystemLabelId" = 1
       )
-    ORDER BY d."ContentUpdatedAt" DESC, d."Id" DESC
+    ORDER BY d."CreatedAt" DESC, d."Id" DESC
     LIMIT 101
 ) AS d
-ORDER BY d."ContentUpdatedAt" DESC, d."Id" DESC
+ORDER BY d."CreatedAt" DESC, d."Id" DESC
 LIMIT 101

@@ -57,8 +57,7 @@ param workloadProfileName string = 'Consumption'
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-var aditionalTags = {
-}
+var aditionalTags = {}
 
 var tags = baseTags(aditionalTags, environment)
 

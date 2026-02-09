@@ -10,6 +10,9 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 public sealed class TestUser : IUser
 {
+    private static string DefaultPid => "22834498646";
+    public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
+
     private static readonly ClaimsPrincipal DefaultPrincipal = new(UserStore.IntegrationTestUser);
 
     private ClaimsPrincipal? _override;
@@ -117,7 +120,9 @@ internal sealed class ClaimsPrincipalBuilder
 
     public ClaimsPrincipalBuilder WithScope(string value)
     {
-        _claims[ClaimsPrincipalExtensions.ScopeClaim] += " " + value;
+        _claims[ClaimsPrincipalExtensions.ScopeClaim] = _claims.TryGetValue(ClaimsPrincipalExtensions.ScopeClaim, out var existing)
+            ? $"{existing} {value}"
+            : value;
         return this;
     }
 
@@ -132,4 +137,3 @@ internal sealed class ClaimsPrincipalBuilder
         new(new ClaimsIdentity(_claims
             .Select(x => new Claim(x.Key, x.Value))));
 }
-

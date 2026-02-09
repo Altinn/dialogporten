@@ -1,6 +1,6 @@
 targetScope = 'resourceGroup'
 
-import { finopsTags } from '../../functions/finopsTags.bicep'
+import { baseTags } from '../../functions/baseTags.bicep'
 
 @description('The tag of the image to be used')
 @minLength(3)
@@ -39,15 +39,13 @@ var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var name = '${namePrefix}-reindex-search'
-var baseTags = {
-  Environment: environment
-  Product: 'Dialogporten'
+var aditionalTags = {
   FullName: name
   Description: 'Manual janitor job to reindex dialog search'
   JobType: 'Manual'
 }
 
-var tags = finopsTags(baseTags, environment)
+var tags = baseTags(aditionalTags, environment)
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

@@ -2,6 +2,11 @@
 
 This folder contains a small toolkit for generating test samples, producing case sets, running SQL variants, and aggregating results across multiple iterations. The main entrypoint is `run_iterated_benchmark.py`, which orchestrates the others.
 
+`run_iterated_benchmark.py` now defaults to a fairness-oriented execution model:
+- Each SQL file is run separately on the same caseset.
+- SQL execution order is rotated per round/iteration and alternates forward/reverse.
+- This reduces systematic "later SQL gets warmer cache" bias.
+
 ## Prerequisites
 
 - Python 3.9+
@@ -24,7 +29,8 @@ pip install openpyxl
   --generate-set "1,1,1; 1,3000,1; 5,3000,2; 100,3000,20; 200,3000,40; 1000,1,1; 2000,1,1; 10000,1,1" \
   --sqls "sql/*.sql" \
   --iterations 10 \
-  --seed 1337
+  --seed 1337 \
+  --rounds-per-iteration 2
 ```
 
 This creates a new output directory named `benchmark-YYYYMMDD-HHMM` in the current working directory (unless you override it with `--out-dir`).
@@ -53,9 +59,9 @@ benchmark-YYYYMMDD-HHMM/
       2001.csv
     explains/
       2000/
-        <case>__<sql>.txt
+        <case>__<sql>__rXX_pYY.txt
       2001/
-        <case>__<sql>.txt
+        <case>__<sql>__rXX_pYY.txt
   summary-YYYYMMDDHHMM.csv
   summary-YYYYMMDDHHMM.xlsx
   explains_all.txt
@@ -65,7 +71,8 @@ benchmark-YYYYMMDD-HHMM/
 Notes:
 - Each iteration is seeded from `--seed` + iteration index, and the directory name is the seed (zero‑padded).
 - Case filenames omit the seed (stable names across iterations) so aggregation groups cleanly.
-- `summary-YYYYMMDDHHMM.csv` is aggregated per `(sql, case)` across all iterations, with exec/read/hit stats.
+- Each `output/csvs/<seed>.csv` file contains combined rows from all rounds and SQL positions for that seed.
+- `summary-YYYYMMDDHHMM.csv` is aggregated per `(sql, case)` across all iterations/rounds, with completion rate and exec/read/hit stats.
 - `summary-YYYYMMDDHHMM.xlsx` contains a Summary sheet (aggregated by sql) and a Details sheet (per case).
 - `explains_all.txt.condensed.txt` is a compressed version of `explains_all.txt`.
 
@@ -83,6 +90,7 @@ Key options:
 - `--sqls`: comma-separated quoted glob(s) for SQL files.
 - `--iterations`: number of iterations.
 - `--seed`: base seed.
+- `--rounds-per-iteration`: fairness rounds per iteration (default `2`).
 - `--out-dir`: override output directory (optional).
 - `--padding`: zero‑padding width for iteration dirs (default 3).
 
@@ -90,8 +98,9 @@ Behavior:
 1. Generates `parties.txt` and `services.txt` once (via `generate_samples.py`).
 2. For each iteration:
    - Generates JSON cases (via `generate_cases.py`).
-   - Runs `run_benchmark.py` with `--csv` and `--print-explain`.
-   - Stores CSVs and per‑case explain outputs.
+   - Runs each SQL file separately via `run_benchmark.py` with `--csv` and `--print-explain`.
+   - Rotates SQL order per round/iteration, alternating forward/reverse order.
+   - Stores one combined CSV per seed and per-run explain outputs.
 3. Aggregates all runs into `summary.csv` and builds `summary.xlsx`.
 4. Concatenates all explains into `explains_all.txt`.
 

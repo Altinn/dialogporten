@@ -3,13 +3,14 @@ import argparse
 import csv
 import datetime as dt
 import glob
+import io
 import math
 import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 try:
     from stats_utils import summarize
@@ -140,9 +141,23 @@ def parse_explains(output: str) -> Dict[Tuple[str, str], List[str]]:
     return blocks
 
 
-def parse_csv_rows(path: Path) -> List[Dict[str, str]]:
-    with path.open("r", encoding="utf-8", newline="") as handle:
-        return list(csv.DictReader(handle))
+def parse_csv_text(content: str) -> List[Dict[str, str]]:
+    handle = io.StringIO(content)
+    return list(csv.DictReader(handle))
+
+
+def write_csv_rows(path: Path, rows: List[Dict[str, str]], fieldnames: List[str]) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def rotated_paths(paths: List[Path], offset: int) -> List[Path]:
+    if not paths:
+        return []
+    normalized = offset % len(paths)
+    return paths[normalized:] + paths[:normalized]
 
 
 def safe_float(value: Optional[str]) -> Optional[float]:
@@ -195,6 +210,15 @@ def main() -> int:
     parser.add_argument("--iterations", type=int, required=True, help="Number of iterations")
     parser.add_argument("--seed", type=int, required=True, help="Base seed")
     parser.add_argument(
+        "--rounds-per-iteration",
+        type=int,
+        default=2,
+        help=(
+            "Number of fairness rounds per iteration (default: 2). "
+            "Each round runs each SQL separately with rotated order."
+        ),
+    )
+    parser.add_argument(
         "--padding",
         type=int,
         default=3,
@@ -219,6 +243,8 @@ def main() -> int:
         die("generate-party-pool-with-count must be >= 1")
     if args.generate_service_pool_with_count is not None and args.generate_service_pool_with_count < 1:
         die("generate-service-pool-with-count must be >= 1")
+    if args.rounds_per_iteration < 1:
+        die("rounds-per-iteration must be >= 1")
     if args.script_timeout < 1:
         die("script-timeout must be >= 1")
 
@@ -252,7 +278,6 @@ def main() -> int:
         copied = sqls_dir / path.name
         shutil.copy2(path, copied)
         copied_sql_paths.append(copied)
-    copied_sql_patterns = ",".join(str(path) for path in copied_sql_paths)
 
     if args.with_party_pool_file:
         src = Path(args.with_party_pool_file)
@@ -327,40 +352,96 @@ def main() -> int:
             die(f"generate_cases.py failed for iteration {iter_name}")
 
         csv_path = csvs_dir / f"{iter_name}.csv"
-        cmd = [
-            sys.executable,
-            "run_benchmark.py",
-            "--cases",
-            str(iter_cases_dir / "*.json"),
-            "--sqls",
-            copied_sql_patterns,
-            "--csv",
-            "--print-explain",
-        ]
-        log_command(cmd)
-        code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
+        iteration_rows: List[Dict[str, str]] = []
+        sql_count = len(copied_sql_paths)
+        for round_index in range(args.rounds_per_iteration):
+            rotation_offset = iteration + (round_index // 2)
+            if round_index % 2 == 0:
+                ordered_sql_paths = rotated_paths(copied_sql_paths, rotation_offset)
+            else:
+                ordered_sql_paths = rotated_paths(
+                    list(reversed(copied_sql_paths)), rotation_offset
+                )
+            for position, sql_path in enumerate(ordered_sql_paths, start=1):
+                cmd = [
+                    sys.executable,
+                    "run_benchmark.py",
+                    "--cases",
+                    str(iter_cases_dir / "*.json"),
+                    "--sqls",
+                    str(sql_path),
+                    "--csv",
+                    "--print-explain",
+                ]
+                log_info(
+                    (
+                        f"Iteration {iteration + 1}/{args.iterations} seed {iter_seed} "
+                        f"round {round_index + 1}/{args.rounds_per_iteration} "
+                        f"position {position}/{sql_count} ({sql_path.name})"
+                    )
+                )
+                log_command(cmd)
+                code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
 
-        if stderr.strip():
-            explain_blocks = parse_explains(stderr)
-            for (case_name, sql_name), lines in explain_blocks.items():
-                filename = f"{case_name}__{sql_name}.txt"
-                explain_path = iter_explains_dir / filename
-                write_text(explain_path, "\n".join(lines).rstrip() + "\n")
-                explain_catalog.append((filename, "\n".join(lines).rstrip()))
+                if stderr.strip():
+                    explain_blocks = parse_explains(stderr)
+                    for (case_name, sql_name), lines in explain_blocks.items():
+                        filename = (
+                            f"{case_name}__{sql_name}"
+                            f"__r{round_index + 1:02d}_p{position:02d}.txt"
+                        )
+                        explain_path = iter_explains_dir / filename
+                        content = "\n".join(lines).rstrip()
+                        write_text(explain_path, content + "\n")
+                        explain_catalog.append((filename, content))
 
-        if code != 0:
-            warn(f"run_benchmark.py returned {code} for iteration {iter_name}")
+                if code != 0:
+                    warn(
+                        (
+                            "run_benchmark.py returned "
+                            f"{code} for iteration {iter_name}, round {round_index + 1}, "
+                            f"position {position}, sql {sql_path.name}"
+                        )
+                    )
+                    continue
+
+                for row in parse_csv_text(stdout):
+                    row["iteration_seed"] = str(iter_seed)
+                    row["round"] = str(round_index + 1)
+                    row["sql_position"] = str(position)
+                    row["sql_count"] = str(sql_count)
+                    row["sql_order"] = "reverse" if round_index % 2 == 1 else "forward"
+                    iteration_rows.append(row)
+
+        if not iteration_rows:
+            warn(f"No benchmark rows produced for iteration {iter_name}")
             continue
 
-        write_text(csv_path, stdout)
-        iteration_rows = parse_csv_rows(csv_path)
+        iteration_fields = [
+            "category",
+            "case",
+            "party_count",
+            "service_count",
+            "variant",
+            "exec_ms",
+            "shared_read",
+            "shared_hit",
+            "shared_dirtied",
+            "cache_status",
+            "iteration_seed",
+            "round",
+            "sql_position",
+            "sql_count",
+            "sql_order",
+        ]
+        write_csv_rows(csv_path, iteration_rows, iteration_fields)
         aggregate_rows.extend(iteration_rows)
 
     log_info("Writing summary and concatenated explains")
     summary_path = root_dir / f"summary-{timestamp}.csv"
     summary_rows: List[Dict[str, str]] = []
 
-    grouped: Dict[Tuple[str, str], Dict[str, List[float]]] = {}
+    grouped: Dict[Tuple[str, str], Dict[str, List[float] | int]] = {}
     meta: Dict[Tuple[str, str], Dict[str, str]] = {}
 
     for row in aggregate_rows:
@@ -376,25 +457,39 @@ def main() -> int:
             "party_count": row.get("party_count") or "",
             "service_count": row.get("service_count") or "",
         }
-        bucket = grouped.setdefault(key, {"exec_ms": [], "shared_read": [], "shared_hit": []})
+        bucket = grouped.setdefault(
+            key, {"exec_ms": [], "shared_read": [], "shared_hit": [], "attempted": 0}
+        )
+        bucket["attempted"] = int(bucket["attempted"]) + 1
         exec_ms = safe_float(row.get("exec_ms"))
         if exec_ms is not None:
-            bucket["exec_ms"].append(exec_ms)
+            cast(List[float], bucket["exec_ms"]).append(exec_ms)
         shared_read = safe_int(row.get("shared_read"))
         if shared_read is not None:
-            bucket["shared_read"].append(float(shared_read))
+            cast(List[float], bucket["shared_read"]).append(float(shared_read))
         shared_hit = safe_int(row.get("shared_hit"))
         if shared_hit is not None:
-            bucket["shared_hit"].append(float(shared_hit))
+            cast(List[float], bucket["shared_hit"]).append(float(shared_hit))
 
     for key, values in grouped.items():
         meta_row = meta.get(key, {})
-        exec_stats = summarize(values["exec_ms"])
-        read_stats = summarize(values["shared_read"])
-        hit_stats = summarize(values["shared_hit"])
+        exec_values = cast(List[float], values["exec_ms"])
+        read_values = cast(List[float], values["shared_read"])
+        hit_values = cast(List[float], values["shared_hit"])
+        attempted = int(values["attempted"])
+        samples = len(exec_values)
+        completion_rate = (samples / attempted * 100.0) if attempted > 0 else math.nan
+        exec_stats = summarize(exec_values)
+        read_stats = summarize(read_values)
+        hit_stats = summarize(hit_values)
         summary_rows.append(
             {
                 **meta_row,
+                "samples": str(samples),
+                "attempted": str(attempted),
+                "completion_rate_pct": (
+                    f"{completion_rate:.2f}" if not math.isnan(completion_rate) else ""
+                ),
                 "exec_avg": f"{exec_stats['avg']:.4f}" if not math.isnan(exec_stats["avg"]) else "",
                 "exec_min": f"{exec_stats['min']:.4f}" if not math.isnan(exec_stats["min"]) else "",
                 "exec_max": f"{exec_stats['max']:.4f}" if not math.isnan(exec_stats["max"]) else "",
@@ -422,6 +517,9 @@ def main() -> int:
         "category",
         "party_count",
         "service_count",
+        "samples",
+        "attempted",
+        "completion_rate_pct",
         "exec_avg",
         "exec_min",
         "exec_max",

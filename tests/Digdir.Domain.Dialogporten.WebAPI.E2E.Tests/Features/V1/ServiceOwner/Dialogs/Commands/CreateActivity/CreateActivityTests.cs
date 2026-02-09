@@ -3,7 +3,6 @@ using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Xunit;
-using ProblemDetails = Refit.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 
@@ -181,7 +180,8 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         response2.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         response2.Content.Should().BeNull();
-        var errorBody = await response2.Error!.GetContentAsAsync<ProblemDetails>(); // Todo: Swap to class from SDK when we can generate the correct class
-        errorBody.Should().NotBeNull();
+        var errorBody = await response2.Error!.GetContentAsAsync<Mvc_ValidationProblemDetails>();
+        errorBody!.Errors["DialogActivity"].First()
+            .Should().Be("Key ('Id')=(019c322e-855f-7837-8255-9c922a84eff5) already exists.");
     }
 }

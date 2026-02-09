@@ -15,7 +15,7 @@ public static class ServiceownerApiExtensions
             await serviceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
                 DialogTestData.CreateDialog(
                     serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
-                    party: $"urn:altinn:person:identifier-no:{TestTokenConstants.DefaultEndUserSsn}",
+                    party: $"urn:altinn:person:identifier-no:{E2EConstants.DefaultEndUserSsn}",
                     content: DialogTestData.CreateContent(
                         title: DialogTestData.CreateContentValue(
                             value: "Skjema for rapportering av et eller annet",

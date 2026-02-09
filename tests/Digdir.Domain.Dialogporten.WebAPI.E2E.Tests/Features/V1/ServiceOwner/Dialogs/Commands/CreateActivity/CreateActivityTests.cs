@@ -78,7 +78,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     }
 
     [E2EFact]
-    public async Task Should_NotBe_Able_To_Create_Activity_When_IfMatch_DialogRevision_Is_Changed()
+    public async Task Should_Not_Be_Able_To_Create_Activity_When_IfMatch_DialogRevision_Is_Changed()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();

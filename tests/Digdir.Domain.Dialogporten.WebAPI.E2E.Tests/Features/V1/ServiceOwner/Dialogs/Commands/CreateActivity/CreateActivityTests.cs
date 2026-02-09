@@ -148,9 +148,10 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var activityId = Guid.CreateVersion7();
         var request = new V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
         {
-            Id = Guid.Parse("019c322e-855f-7837-8255-9c922a84eff5"),
+            Id = activityId,
             CreatedAt = null,
             ExtendedType = new Uri("http://localhost"),
             Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
@@ -181,7 +182,6 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         response2.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         response2.Content.Should().BeNull();
         var errorBody = await response2.Error!.GetContentAsAsync<Mvc_ValidationProblemDetails>();
-        errorBody!.Errors["DialogActivity"].First()
-            .Should().Be("Key ('Id')=(019c322e-855f-7837-8255-9c922a84eff5) already exists.");
+        errorBody!.Errors["DialogActivity"].First().Should().Be($"Key ('Id')=({activityId}) already exists.");
     }
 }

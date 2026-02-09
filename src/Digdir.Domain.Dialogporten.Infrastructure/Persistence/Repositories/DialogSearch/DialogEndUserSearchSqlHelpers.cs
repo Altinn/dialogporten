@@ -142,4 +142,38 @@ internal static partial class DialogEndUserSearchSqlHelpers
 
         return uniqueServices.Count;
     }
+
+    internal static int GetTotalPartyCount(EndUserSearchContext context)
+    {
+        var uniqueParties = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+        var constrainedParties = context.Query.Party;
+        var constrainedServices = context.Query.ServiceResource;
+
+        foreach (var (party, services) in context.AuthorizedResources.ResourcesByParties)
+        {
+            if (constrainedParties is not null && constrainedParties.Count != 0 && !constrainedParties.Contains(party))
+            {
+                continue;
+            }
+
+            if (constrainedServices is null || constrainedServices.Count == 0)
+            {
+                uniqueParties.Add(party);
+                continue;
+            }
+
+            foreach (var service in services)
+            {
+                if (!constrainedServices.Contains(service))
+                {
+                    continue;
+                }
+
+                uniqueParties.Add(party);
+                break;
+            }
+        }
+
+        return uniqueParties.Count;
+    }
 }

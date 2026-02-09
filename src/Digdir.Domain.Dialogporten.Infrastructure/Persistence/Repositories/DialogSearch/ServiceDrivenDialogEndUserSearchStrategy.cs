@@ -8,6 +8,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDrivenDialogEndUserSearchStrategy> logger)
     : IDialogEndUserSearchStrategy
 {
+    private const int ServiceCountThreshold = 5;
+    private const int HighPartyCountThreshold = 5000;
     private readonly ILogger<ServiceDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public string Name => "ServiceDriven";
@@ -16,11 +18,12 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
     public void SetContext(EndUserSearchContext context) =>
         Context = context ?? throw new ArgumentNullException(nameof(context));
 
-    // Service-driven is optimized for small service sets with large party lists.
+    // Service-driven is preferred when services are many or party cardinality is very high.
     public int Score(EndUserSearchContext context)
     {
         var totalServiceCount = DialogEndUserSearchSqlHelpers.GetTotalServiceCount(context);
-        return totalServiceCount > 5 ? 100 : 1;
+        var totalPartyCount = DialogEndUserSearchSqlHelpers.GetTotalPartyCount(context);
+        return totalServiceCount > ServiceCountThreshold || totalPartyCount >= HighPartyCountThreshold ? 100 : 1;
     }
 
     public PostgresFormattableStringBuilder BuildSql()

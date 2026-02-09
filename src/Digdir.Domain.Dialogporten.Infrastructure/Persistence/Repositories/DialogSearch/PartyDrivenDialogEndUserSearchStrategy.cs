@@ -7,6 +7,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDrivenDialogEndUserSearchStrategy> logger)
     : IDialogEndUserSearchStrategy
 {
+    private const int ServiceCountThreshold = 5;
+    private const int HighPartyCountThreshold = 5000;
     private readonly ILogger<PartyDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public string Name => "PartyDriven";
@@ -15,11 +17,12 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
     public void SetContext(EndUserSearchContext context) =>
         Context = context ?? throw new ArgumentNullException(nameof(context));
 
-    // Party-driven is optimized for very small service sets and leverages per-party clustering.
+    // Party-driven is preferred only when service and party cardinality are both limited.
     public int Score(EndUserSearchContext context)
     {
         var totalServiceCount = DialogEndUserSearchSqlHelpers.GetTotalServiceCount(context);
-        return totalServiceCount <= 5 ? 100 : 1;
+        var totalPartyCount = DialogEndUserSearchSqlHelpers.GetTotalPartyCount(context);
+        return totalServiceCount <= ServiceCountThreshold && totalPartyCount < HighPartyCountThreshold ? 100 : 1;
     }
 
     public PostgresFormattableStringBuilder BuildSql()

@@ -9,7 +9,7 @@ public static class DialogTestData
     {
         var dialog = CreateDialog(
             serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
-            party: $"urn:altinn:person:identifier-no:{TestTokenConstants.DefaultEndUserSsn}",
+            party: $"urn:altinn:person:identifier-no:{E2EConstants.DefaultEndUserSsn}",
             content: CreateContent(
                 title: CreateContentValue(
                     value: "Skjema for rapportering av et eller annet",

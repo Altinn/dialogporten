@@ -35,8 +35,7 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var name = '${namePrefix}-db-migration-job'
 
-var aditionalTags = {
-}
+var aditionalTags = {}
 
 var tags = baseTags(aditionalTags, environment)
 

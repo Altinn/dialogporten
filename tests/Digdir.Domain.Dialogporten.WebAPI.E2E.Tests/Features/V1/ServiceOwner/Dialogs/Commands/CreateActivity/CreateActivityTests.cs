@@ -47,7 +47,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     {
         // Arrange
         using var _ = Fixture.UseServiceOwnerTokenOverrides(
-            scopes: TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
+            scopes: E2EConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
         );
         await Should_Create_Activity_As_Service_Owner();
     }
@@ -191,7 +191,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     {
         // Arrange
         using var _ = Fixture.UseServiceOwnerTokenOverrides(
-            scopes: TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
+            scopes: E2EConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
         );
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
         await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);

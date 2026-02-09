@@ -92,17 +92,24 @@ def parse_explain(output: str):
     buf_hit = buf_read = buf_dirtied = None
     for line in output.splitlines():
         if "Buffers:" in line:
-            buf_hit = buf_read = buf_dirtied = 0
-            m = re.search(r"shared hit=(\d+)", line)
-            if m:
-                buf_hit = int(m.group(1))
-            m = re.search(r"shared read=(\d+)", line)
-            if m:
-                buf_read = int(m.group(1))
-            m = re.search(r"dirtied=(\d+)", line)
-            if m:
-                buf_dirtied = int(m.group(1))
-            break
+            if buf_hit is None:
+                buf_hit = 0
+            if buf_read is None:
+                buf_read = 0
+            if buf_dirtied is None:
+                buf_dirtied = 0
+            shared_match = re.search(r"shared ([^,]+)", line)
+            if shared_match:
+                shared_part = shared_match.group(1)
+                m = re.search(r"hit=(\d+)", shared_part)
+                if m:
+                    buf_hit += int(m.group(1))
+                m = re.search(r"read=(\d+)", shared_part)
+                if m:
+                    buf_read += int(m.group(1))
+                m = re.search(r"dirtied=(\d+)", shared_part)
+                if m:
+                    buf_dirtied += int(m.group(1))
     return exec_time, buf_read, buf_hit, buf_dirtied
 
 

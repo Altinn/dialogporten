@@ -68,8 +68,9 @@ def build_details_sheet(wb: Workbook, rows: List[Dict[str, str]], headers: List[
         if h.startswith("exec_")
         or h.startswith("read_")
         or h.startswith("hit_")
-        or h in {"exec_ms", "shared_read", "shared_hit", "shared_dirtied"}
+        or h in {"exec_ms", "shared_read", "shared_hit", "shared_dirtied", "party_count", "service_count"}
     ]
+    integer_cols = {"party_count", "service_count"}
     for col_index, header in enumerate(headers, start=1):
         if header in numeric_cols:
             for row_index in range(2, ws.max_row + 1):
@@ -81,10 +82,13 @@ def build_details_sheet(wb: Workbook, rows: List[Dict[str, str]], headers: List[
                 except ValueError:
                     continue
             for row_index in range(2, ws.max_row + 1):
-                ws.cell(row=row_index, column=col_index).number_format = "0.00"
+                fmt = "0" if header in integer_cols else "0.00"
+                ws.cell(row=row_index, column=col_index).number_format = fmt
 
     if ws.max_row > 1:
         for header in numeric_cols:
+            if header in integer_cols:
+                continue
             col_idx = headers.index(header) + 1
             col_letter = ws.cell(row=1, column=col_idx).column_letter
             ws.conditional_formatting.add(

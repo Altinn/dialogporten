@@ -14,7 +14,6 @@ public static class ServiceOwnerCreateDialogExtensions
             var attachment = new V1ServiceOwnerDialogsCommandsCreate_Attachment
             {
                 DisplayName = [DialogTestData.CreateLocalization("Dialogvedlegg")],
-                Name = null!,
                 Urls =
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl

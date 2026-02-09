@@ -74,7 +74,7 @@ Example:
 ```
 
 Notes:
-- If you need parameter values for successful statements, enable both settings. When statement logging is disabled, successful SQL statement activities are filtered out and parameter values will only appear on failed statements.
+- If you need parameter values for successful statements, enable both settings. When statement logging is disabled, successful SQL statement activities are filtered out and parameter values will only appear on failed statements. Note that certain failures (unique/foreign key violations) are still suppressed, so parameter values will not surface for those errors.
 - These settings can expose sensitive data. Enable them only for troubleshooting and disable them when done.
 
 Propagation (Azure App Configuration):

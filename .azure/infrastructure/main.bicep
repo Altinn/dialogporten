@@ -105,9 +105,9 @@ var secrets = {
 
 var namePrefix = 'dp-be-${environment}'
 
-var aditionalTags = {}
+var additionalTags = {}
 
-var tags = baseTags(aditionalTags, environment)
+var tags = baseTags(additionalTags, environment)
 
 // Create resource groups
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {

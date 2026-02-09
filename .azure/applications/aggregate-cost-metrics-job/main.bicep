@@ -53,13 +53,13 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 // Pattern: dp-be-{environment}-applicationInsights
 var appInsightsName = 'dp-be-${environment}-applicationInsights'
 
-var aditionalTags = {
+var additionalTags = {
   FullName: '${namePrefix}-aggregate-cost-metrics'
   Description: 'Aggregates cost metrics from Application Insights across environments'
   JobType: 'Scheduled'
 }
 
-var tags = baseTags(aditionalTags, environment)
+var tags = baseTags(additionalTags, environment)
 
 var name = '${namePrefix}-cost-metrics'
 

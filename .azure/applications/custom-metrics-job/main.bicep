@@ -44,13 +44,13 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var name = '${namePrefix}-custom-metrics'
 
-var aditionalTags = {
+var additionalTags = {
   FullName: '${namePrefix}-custom-metrics'
   Description: 'Collects custom metrics and emits to Azure Monitor'
   JobType: 'Scheduled'
 }
 
-var tags = baseTags(aditionalTags, environment)
+var tags = baseTags(additionalTags, environment)
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

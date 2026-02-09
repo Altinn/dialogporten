@@ -89,9 +89,9 @@ param scale Scale = {
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-var aditionalTags = {}
+var additionalTags = {}
 
-var tags = baseTags(aditionalTags, environment)
+var tags = baseTags(additionalTags, environment)
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationName

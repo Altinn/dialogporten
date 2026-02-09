@@ -44,13 +44,13 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var name = '${namePrefix}-sync-rp-info'
 
-var aditionalTags = {
+var additionalTags = {
   FullName: '${namePrefix}-sync-resource-policy-information'
   Description: 'Synchronizes resource policy information'
   JobType: 'Scheduled'
 }
 
-var tags = baseTags(aditionalTags, environment)
+var tags = baseTags(additionalTags, environment)
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

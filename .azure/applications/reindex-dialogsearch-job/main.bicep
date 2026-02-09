@@ -39,13 +39,13 @@ var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var name = '${namePrefix}-reindex-search'
-var aditionalTags = {
+var additionalTags = {
   FullName: name
   Description: 'Manual janitor job to reindex dialog search'
   JobType: 'Manual'
 }
 
-var tags = baseTags(aditionalTags, environment)
+var tags = baseTags(additionalTags, environment)
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

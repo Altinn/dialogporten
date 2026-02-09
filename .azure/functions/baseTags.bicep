@@ -4,6 +4,7 @@ func baseTags(existingTags object, environment string) object => union(existingT
   finops_environment: finopsEnvironment(environment)
   finops_product: 'Dialogporten'
   Environment: environment
+  Product: 'Dialogporten'
   repository: 'https://github.com/altinn/dialogporten'
 })
 

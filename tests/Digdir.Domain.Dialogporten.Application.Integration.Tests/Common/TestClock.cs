@@ -26,5 +26,3 @@ internal static class TestClockExtensions
         public TFlowStep OverrideUtc(TimeSpan skew) => flowStep.Do(_ => DialogApplication.Clock.OverrideUtc(skew));
     }
 }
-
-

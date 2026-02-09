@@ -130,7 +130,6 @@ public class DialogApplication : IAsyncLifetime
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
-
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();

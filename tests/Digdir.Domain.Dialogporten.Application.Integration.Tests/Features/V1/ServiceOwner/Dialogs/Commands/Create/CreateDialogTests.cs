@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -310,76 +311,82 @@ public class CreateDialogTests : ApplicationCollectionFixture
         }]
     };
 
-    private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>
+    private sealed class HtmlContentTestData : TheoryData<string, ClaimsPrincipal, Action<CreateDialogCommand>, Type>
     {
         public HtmlContentTestData()
         {
+            var legacyHtmlScopeUser = ClaimsPrincipalBuilder
+                .Create(UserStore.IntegrationTestUser)
+                .WithScope(AuthorizationScope.LegacyHtmlScope)
+                .Build();
+
             Add("Cannot create dialog with HTML content without valid html scope",
-                _ => { }, // No change in user scopes
+                UserStore.IntegrationTestUser, // No change in user scopes
                 x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Can create dialog with HTML content with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(CreateDialogSuccess));
 
             Add("Can create HTML content with table tag with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateTableHtml(),
                 typeof(CreateDialogSuccess));
 
             Add("Cannot create dialog with forbidden HTML tags: iframe",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<iframe src='malicious site'></iframe>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: script",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<script>alert('hack');</script>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: img",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<img src='evil.png' />"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: div",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<div>Not allowed</div>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: span",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<span>Not allowed</span>"),
                 typeof(ValidationError));
 
             Add("Cannot create title content with HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create summary content with HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create title content with embeddable HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(ValidationError));
 
             Add("Can create mainContentRef content with embeddable HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.MainContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(CreateDialogSuccess));
         }
     }
 
     [Theory, ClassData(typeof(HtmlContentTestData))]
-    public Task Html_Content_Tests(string _, Action<IServiceCollection> appConfig,
+    public Task Html_Content_Tests(string _, ClaimsPrincipal user,
         Action<CreateDialogCommand> createDialog, Type expectedType) =>
-        FlowBuilder.For(Application, appConfig)
+        FlowBuilder.For(Application)
+            .AsUser(user)
             .CreateSimpleDialog(createDialog)
             .ExecuteAndAssert(expectedType);
 

@@ -73,11 +73,8 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     {
         var activityCount = 0;
 
-        await FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-            })
+        await FlowBuilder.For(Application)
+            .AsCorrespondenceUser()
             .CreateSimpleDialog(x =>
             {
                 var allActivityTypes = Enum.GetValues<DialogActivityType.Values>().ToList();

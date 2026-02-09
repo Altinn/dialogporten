@@ -42,6 +42,7 @@ public class DialogApplication : IAsyncLifetime
     private readonly List<object> _publishedEvents = [];
 
     internal static TestClock Clock { get; } = new();
+    internal static TestUser User { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer =
         new PostgreSqlBuilder("postgres:16.11")
@@ -98,6 +99,7 @@ public class DialogApplication : IAsyncLifetime
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
             .RemoveAll<IClock>()
             .AddSingleton<IClock>(Clock)
+            .AddSingleton<IUser>(User)
             .AddDistributedMemoryCache()
             .AddLogging()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
@@ -127,12 +129,10 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
-            .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
 
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
-            .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
             .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();
     }
 
@@ -237,6 +237,7 @@ public class DialogApplication : IAsyncLifetime
     public async ValueTask ResetState()
     {
         Clock.Reset();
+        User.Reset();
         _publishedEvents.Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();

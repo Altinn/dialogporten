@@ -41,11 +41,8 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
 
     [Fact]
     public Task Can_Create_Correspondence_Activities_With_Required_Scope() =>
-        FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-            })
+        FlowBuilder.For(Application)
+            .AsCorrespondenceUser()
             .CreateSimpleDialog(x =>
             {
                 x.Dto.Activities
@@ -83,11 +80,8 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
 
     [Fact]
     public Task Can_Update_Correspondence_Activities_With_Required_Scope() =>
-        FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-            })
+        FlowBuilder.For(Application)
+            .AsCorrespondenceUser()
             .CreateSimpleDialog()
             .AssertSuccessAndUpdateDialog(x =>
             {

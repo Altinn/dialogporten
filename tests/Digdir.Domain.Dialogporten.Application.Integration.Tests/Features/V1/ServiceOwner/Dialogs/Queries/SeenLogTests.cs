@@ -101,12 +101,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .AssertResult<DialogDtoEU>()
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-            .ExecuteAndAssert<UpdateDialogSuccess>();
-
-        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
-
-        await FlowBuilder.For(Application)
-            // Fetch as new EndUser
+            .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQueryEU { DialogId = dialogId })
             .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
             .ExecuteAndAssert<DialogDtoSO>(x =>
@@ -154,12 +149,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .AssertResult<DialogDtoEU>()
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-            .ExecuteAndAssert<UpdateDialogSuccess>();
-
-        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
-
-        await FlowBuilder.For(Application)
-            // Fetch as new EndUser
+            .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQueryEU { DialogId = dialogId })
             .SearchServiceOwnerDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>

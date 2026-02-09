@@ -66,23 +66,15 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator));
 
     [Fact]
-    public async Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_Different_Users()
-    {
-        var dialogId = NewUuidV7();
-
-        await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId)
+    public Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_Different_Users() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
             .GetEndUserDialog() // Default integration test user
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-            .ExecuteAndAssert<UpdateDialogSuccess>();
-
-        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
-
-        await FlowBuilder.For(Application)
-            // Fetch as new EndUser
-            .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
+            .AsIntegrationTestUser(x => x.WithPid("13213312833"))
+            .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 // Both users should be in SeenSinceLastContentUpdate
@@ -91,7 +83,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 // Only the new user should be in SeenSinceLastUpdate
                 x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
             });
-    }
 
     [Fact]
     public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastContentUpdate() =>
@@ -121,12 +112,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-            .ExecuteAndAssert<UpdateDialogSuccess>();
-
-        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
-
-        await FlowBuilder.For(Application)
-            // Fetch as new EndUser
+            .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>

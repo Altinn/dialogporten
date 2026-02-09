@@ -32,15 +32,6 @@ internal static class Common
 
     internal static Guid NewUuidV7(DateTimeOffset? timeStamp = null) => IdentifiableExtensions.CreateVersion7(timeStamp);
 
-    internal static IntegrationTestUser CreateUserWithScope(string scope) => new([new("scope", scope)]);
-
-    internal static Action<IServiceCollection> ConfigureUserWithScope(string scope) => services =>
-    {
-        var user = CreateUserWithScope(scope);
-        services.RemoveAll<IUser>();
-        services.AddSingleton<IUser>(user);
-    };
-
     internal static ContentValueDto CreateHtmlContentValueDto(string mediaType) => new()
     {
         MediaType = mediaType,

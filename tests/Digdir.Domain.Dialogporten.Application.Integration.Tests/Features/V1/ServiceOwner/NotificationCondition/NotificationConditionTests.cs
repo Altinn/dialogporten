@@ -33,11 +33,8 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         bool expectedSendNotificationValue)
     {
         Guid? transmissionId = null;
-        await FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(new IntegrationTestUser([new("scope", AuthorizationScope.CorrespondenceScope)]));
-            })
+        await FlowBuilder.For(Application)
+            .AsCorrespondenceUser()
             .CreateSimpleDialog(x =>
             {
                 switch (conditionType)

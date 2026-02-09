@@ -163,12 +163,10 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         DialogActivityType.Values activityType, bool expectedHasUnOpenedContent) =>
         FlowBuilder.For(Application, x =>
             {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-
                 x.RemoveAll<IResourceRegistry>();
                 x.AddScoped<IResourceRegistry, TestResourceRegistry>();
             })
+            .AsIntegrationTestUser(x => x.WithScope(AuthorizationScope.CorrespondenceScope))
             .CreateSimpleDialog(x => x.AddActivity(activityType))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>

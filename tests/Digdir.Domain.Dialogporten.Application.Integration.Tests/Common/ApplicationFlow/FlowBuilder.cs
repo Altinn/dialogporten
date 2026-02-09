@@ -17,12 +17,6 @@ public static class FlowBuilder
 
 public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
 {
-    public IFlowStep Do(Action<FlowContext> action)
-    {
-        action.Invoke(Context);
-        return this;
-    }
-
     public FlowContext Context { get; }
 
     public FlowStep(FlowContext context)
@@ -36,18 +30,16 @@ public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
     public IFlowExecutor<TOut> SendCommand<TOut>(Func<TIn, FlowContext, IRequest<TOut>> commandSelector)
     {
         var context = Context;
-        context.Commands.Add((input, cancellationToken) =>
+        context.Commands.Add(async (input, cancellationToken) =>
         {
             var command = commandSelector((TIn)input!, context);
-            return context.Application
-                .Send(command, cancellationToken)
-                .ContinueWith(t => (object?)t.Result, cancellationToken);
+            return await context.Application.Send(command, cancellationToken);
         });
         return new FlowStep<TOut>(context);
     }
 
-    public IFlowExecutor<TOut> Select<TOut>(Func<TIn, TOut> selector)
-        => Select((@in, _) => selector(@in));
+    public IFlowExecutor<TOut> Select<TOut>(Func<TIn, TOut> selector) =>
+        Select((@in, _) => selector(@in));
 
     public IFlowExecutor<TOut> Select<TOut>(Func<TIn, FlowContext, TOut> selector)
     {

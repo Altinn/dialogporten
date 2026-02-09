@@ -7,7 +7,44 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-from stats_utils import summarize
+try:
+    from stats_utils import summarize
+except ModuleNotFoundError:
+    def percentile(values: List[float], pct: float) -> float:
+        if not values:
+            return math.nan
+        ordered = sorted(values)
+        if pct <= 0:
+            return ordered[0]
+        if pct >= 100:
+            return ordered[-1]
+        rank = (pct / 100) * (len(ordered) - 1)
+        low = int(math.floor(rank))
+        high = int(math.ceil(rank))
+        if low == high:
+            return ordered[low]
+        weight = rank - low
+        return ordered[low] * (1 - weight) + ordered[high] * weight
+
+
+    def summarize(values: List[float]) -> Dict[str, float]:
+        if not values:
+            return {
+                "avg": math.nan,
+                "min": math.nan,
+                "max": math.nan,
+                "p50": math.nan,
+                "p95": math.nan,
+                "p99": math.nan,
+            }
+        return {
+            "avg": sum(values) / len(values),
+            "min": min(values),
+            "max": max(values),
+            "p50": percentile(values, 50),
+            "p95": percentile(values, 95),
+            "p99": percentile(values, 99),
+        }
 
 try:
     from openpyxl import Workbook

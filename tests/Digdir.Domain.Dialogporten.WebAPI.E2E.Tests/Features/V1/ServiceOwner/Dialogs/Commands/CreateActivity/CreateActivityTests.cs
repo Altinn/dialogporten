@@ -1,5 +1,6 @@
 using System.Net;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
@@ -10,7 +11,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.D
 public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     [E2EFact]
-    public async Task Should_Create_Activity()
+    public async Task Should_Create_Activity_As_Service_Owner()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
@@ -20,6 +21,16 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         activityId.Should().NotBe(Guid.Empty);
+    }
+
+    [E2EFact]
+    public async Task Should_Create_Activity_As_Admin()
+    {
+        // Arrange
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(
+            scopes: TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
+        );
+        await Should_Create_Activity_As_Service_Owner();
     }
 
     [E2EFact]
@@ -73,6 +84,74 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.Content.Should().BeNull();
+    }
+
+    [E2EFact]
+    public async Task Should_Not_Be_Able_To_Create_Activity_On_Deleted_Dialog()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);
+        var request = new V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
+        {
+            Id = null,
+            CreatedAt = null,
+            ExtendedType = new Uri("http://localhost"),
+            Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
+            TransmissionId = null,
+            PerformedBy = new V1ServiceOwnerCommonActors_Actor
+            {
+                ActorType = Actors_ActorType.PartyRepresentative,
+                ActorName = null!,
+                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+            },
+            Description = []
+        };
+
+        // Act
+        var response = await Fixture
+            .ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Gone);
+        response.Content.Should().BeNull();
+    }
+
+    [E2EFact]
+    public async Task Should_Be_Able_To_Create_Activity_On_Deleted_Dialog_If_Admin()
+    {
+        // Arrange
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(
+            scopes: TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
+        );
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);
+        var request = new V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
+        {
+            Id = null,
+            CreatedAt = null,
+            ExtendedType = new Uri("http://localhost"),
+            Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
+            TransmissionId = null,
+            PerformedBy = new V1ServiceOwnerCommonActors_Actor
+            {
+                ActorType = Actors_ActorType.PartyRepresentative,
+                ActorName = null!,
+                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+            },
+            Description = []
+        };
+
+        // Act
+        var response = await Fixture
+            .ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = response.Content ?? throw new InvalidOperationException("Expected a body");
+        Guid.Parse(content.Replace("\"", ""));
     }
 
     [E2EFact]

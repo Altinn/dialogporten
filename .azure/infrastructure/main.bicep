@@ -105,8 +105,7 @@ var secrets = {
 
 var namePrefix = 'dp-be-${environment}'
 
-var aditionalTags = {
-}
+var aditionalTags = {}
 
 var tags = baseTags(aditionalTags, environment)
 

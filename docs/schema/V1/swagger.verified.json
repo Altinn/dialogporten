@@ -216,6 +216,73 @@
           "Invalid"
         ]
       },
+      "Mvc_ProblemDetails": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "instance": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Mvc_ValidationProblemDetails": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "errors": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "instance": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "OrderSetOfTOrderDefinitionAndTTarget": {},
       "PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog": {
         "additionalProperties": false,
@@ -8345,7 +8412,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
                 }
               }
             },
@@ -8355,13 +8422,20 @@
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \\\u0022digdir:dialogporten.serviceprovider\\\u0022"
           },
           "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
+                }
+              }
+            },
             "description": "Unauthorized to update a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)"
           },
           "404": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
                 }
               }
             },
@@ -8371,7 +8445,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
                 }
               }
             },
@@ -8381,7 +8455,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
                 }
               }
             },
@@ -8401,7 +8475,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
                 }
               }
             },
@@ -9100,9 +9174,9 @@
           },
           "400": {
             "content": {
-              "application/problem\u002Bjson": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
                 }
               }
             },
@@ -9112,29 +9186,50 @@
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
+                }
+              }
+            },
             "description": "Unauthorized to create child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
           },
           "404": {
             "content": {
-              "application/problem\u002Bjson": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
                 }
               }
             },
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
             "content": {
-              "application/problem\u002Bjson": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ProblemDetails"
                 }
               }
             },
@@ -9142,9 +9237,9 @@
           },
           "422": {
             "content": {
-              "application/problem\u002Bjson": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/Mvc_ValidationProblemDetails"
                 }
               }
             },

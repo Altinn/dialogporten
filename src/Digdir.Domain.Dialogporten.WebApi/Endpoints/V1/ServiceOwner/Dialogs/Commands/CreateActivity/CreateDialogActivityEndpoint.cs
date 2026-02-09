@@ -2,11 +2,12 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetActivity;
 using FastEndpoints;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
+using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 
@@ -24,15 +25,16 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
         Post("dialogs/{dialogId}/activities");
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
-
-        Description(b => b.ProducesOneOf(
-            StatusCodes.Status201Created,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status410Gone,
-            StatusCodes.Status412PreconditionFailed,
-            StatusCodes.Status422UnprocessableEntity));
+        Description(b => b
+            .Produces<string>(StatusCodes.Status201Created)
+            .Produces<ValidationProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ValidationProblemDetails>(StatusCodes.Status403Forbidden)
+            .Produces<ValidationProblemDetails>(StatusCodes.Status404NotFound)
+            .Produces<ValidationProblemDetails>(StatusCodes.Status409Conflict)
+            .Produces<ValidationProblemDetails>(StatusCodes.Status410Gone)
+            .Produces<ProblemDetails>(StatusCodes.Status412PreconditionFailed)
+            .Produces<ValidationProblemDetails>(StatusCodes.Status422UnprocessableEntity)
+        );
     }
 
     public override async Task HandleAsync(CreateActivityRequest req, CancellationToken ct)
@@ -71,7 +73,7 @@ public sealed class CreateActivityRequest : CreateActivityDto
 {
     public Guid DialogId { get; set; }
 
-    [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
+    [FastEndpoints.FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchDialogRevision { get; set; }
 
     [HideFromDocs]

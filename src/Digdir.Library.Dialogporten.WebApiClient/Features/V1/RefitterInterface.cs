@@ -768,7 +768,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
+        [Headers("Accept: application/json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(System.Guid dialogId, [Body, AliasAs("CreateActivityRequest")] V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest createActivityRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
@@ -4396,20 +4396,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
+        /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
 
         /// <summary>
-        /// The type of transmission.
+        /// The type of activity.
         /// </summary>
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
@@ -4626,6 +4626,69 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Mvc_ValidationProblemDetails
+    {
+
+        [JsonPropertyName("errors")]
+        public IDictionary<string, ICollection<string>> Errors { get; set; }
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+
+        [JsonPropertyName("instance")]
+        public string Instance { get; set; }
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Mvc_ProblemDetails
+    {
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+
+        [JsonPropertyName("instance")]
+        public string Instance { get; set; }
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
     {
 
@@ -4637,20 +4700,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
+        /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
 
         /// <summary>
-        /// The type of transmission.
+        /// The type of activity
         /// </summary>
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
@@ -5371,20 +5434,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
+        /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
 
         /// <summary>
-        /// The type of transmission.
+        /// The type of activity.
         /// </summary>
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]

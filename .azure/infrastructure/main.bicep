@@ -1,6 +1,6 @@
 targetScope = 'subscription'
 
-import { finopsTags } from '../functions/finopsTags.bicep'
+import { baseTags } from '../functions/baseTags.bicep'
 
 @description('The environment for the deployment')
 @minLength(3)
@@ -105,7 +105,9 @@ var secrets = {
 
 var namePrefix = 'dp-be-${environment}'
 
-var tags = finopsTags({}, environment)
+var additionalTags = {}
+
+var tags = baseTags(additionalTags, environment)
 
 // Create resource groups
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {

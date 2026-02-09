@@ -43,7 +43,7 @@ public class DialogEndUserSearchStrategyScoringTests
     }
 
     [Fact]
-    public void Score_ShouldPreferServiceDriven_WhenPartyCardinalityIsVeryHigh_AndServiceCardinalityIsLow()
+    public void Score_ShouldPreferPartyDriven_WhenPartyCardinalityIsVeryHigh_AndServiceCardinalityIsLow()
     {
         // Arrange
         var context = CreateContext(BuildResourcesByParties(partyCount: 5000, serviceCount: 1));
@@ -55,17 +55,16 @@ public class DialogEndUserSearchStrategyScoringTests
         var serviceScore = serviceDriven.Score(context);
 
         // Assert
-        Assert.Equal(1, partyScore);
-        Assert.Equal(100, serviceScore);
+        Assert.Equal(100, partyScore);
+        Assert.Equal(1, serviceScore);
     }
 
     [Fact]
-    public void Score_ShouldRespectQueryConstraints_WhenComputingPartyCardinality()
+    public void Score_ShouldPreferServiceDriven_WhenServiceCardinalityIsHigh_EvenWhenPartyCardinalityIsVeryHigh()
     {
         // Arrange
         var context = CreateContext(
-            BuildResourcesByParties(partyCount: 5000, serviceCount: 1),
-            constrainedParties: ["party-1"]);
+            BuildResourcesByParties(partyCount: 5000, serviceCount: 6));
         var partyDriven = new PartyDrivenDialogEndUserSearchStrategy(NullLogger<PartyDrivenDialogEndUserSearchStrategy>.Instance);
         var serviceDriven = new ServiceDrivenDialogEndUserSearchStrategy(NullLogger<ServiceDrivenDialogEndUserSearchStrategy>.Instance);
 
@@ -74,8 +73,8 @@ public class DialogEndUserSearchStrategyScoringTests
         var serviceScore = serviceDriven.Score(context);
 
         // Assert
-        Assert.Equal(100, partyScore);
-        Assert.Equal(1, serviceScore);
+        Assert.Equal(1, partyScore);
+        Assert.Equal(100, serviceScore);
     }
 
     private static EndUserSearchContext CreateContext(

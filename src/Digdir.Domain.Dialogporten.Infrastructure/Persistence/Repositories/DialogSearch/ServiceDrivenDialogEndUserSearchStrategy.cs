@@ -9,7 +9,6 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
     : IDialogEndUserSearchStrategy
 {
     private const int ServiceCountThreshold = 5;
-    private const int HighPartyCountThreshold = 5000;
     private readonly ILogger<ServiceDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public string Name => "ServiceDriven";
@@ -18,12 +17,11 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
     public void SetContext(EndUserSearchContext context) =>
         Context = context ?? throw new ArgumentNullException(nameof(context));
 
-    // Service-driven is preferred when services are many or party cardinality is very high.
+    // Service-driven is preferred when service cardinality is high.
     public int Score(EndUserSearchContext context)
     {
         var totalServiceCount = DialogEndUserSearchSqlHelpers.GetTotalServiceCount(context);
-        var totalPartyCount = DialogEndUserSearchSqlHelpers.GetTotalPartyCount(context);
-        return totalServiceCount > ServiceCountThreshold || totalPartyCount >= HighPartyCountThreshold ? 100 : 1;
+        return totalServiceCount > ServiceCountThreshold ? 100 : 1;
     }
 
     public PostgresFormattableStringBuilder BuildSql()

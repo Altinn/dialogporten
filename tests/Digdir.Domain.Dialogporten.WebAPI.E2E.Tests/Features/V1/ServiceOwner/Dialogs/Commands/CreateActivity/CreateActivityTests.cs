@@ -3,6 +3,7 @@ using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Xunit;
+using ProblemDetails = Refit.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 
@@ -180,7 +181,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         response2.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         response2.Content.Should().BeNull();
-        var errorBody = await response2.Error!.GetContentAsAsync<ProblemDetails>();
+        var errorBody = await response2.Error!.GetContentAsAsync<ProblemDetails>(); // Todo: Swap to class from SDK when we can generate the correct class
         errorBody.Should().NotBeNull();
     }
 }

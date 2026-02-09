@@ -184,7 +184,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .ExecuteAndAssert<EntityDeleted<DialogEntity>>((x, ctx) =>
                 {
                     x.Name.Should().Be("DialogEntity");
-                    var id = ctx.Bag[IFlowStepExtensions.DialogIdKey];
+                    var id = ctx.GetDialogId();
                     x.Message.Should().Be($"Entity 'DialogEntity' with the following key(s) is removed: ({id}).");
                 }
             );

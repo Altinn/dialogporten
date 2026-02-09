@@ -111,7 +111,7 @@ podman compose up
 
 The following GUI services should now be available:
 * WebAPI/SwaggerUI: [localhost:7124/swagger](https://localhost:7214/swagger/index.html)
-* GraphQL/BananaCakePop: [localhost:7215/graphql](https://localhost:7214/swagger/index.html)
+* GraphQl/BananaCakePop: [localhost:7215/graphql](https://localhost:7214/swagger/index.html)
 * Redis/Insight: [localhost:7216](https://localhost:7214/swagger/index.html)
 
 The WebAPI and GraphQl services are behind a nginx proxy, and you can change the number of replicas by setting the `scale` property in the `docker-compose.yml` file.

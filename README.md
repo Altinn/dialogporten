@@ -75,7 +75,7 @@ We mount your host secrets folder into that location via `USER_SECRETS_DIR`.
 If you are on Windows, set `USER_SECRETS_DIR` to `%APPDATA%/Microsoft/UserSecrets` before running `podman compose`.
 
 The following GUI services should now be available:
-* WebAPI/SwaggerUI: [localhost:7124/swagger](https://localhost:7214/swagger/index.html)
+* WebAPI/SwaggerUI: [localhost:7214/swagger](https://localhost:7214/swagger/index.html)
 * GraphQl/Nitro: [localhost:7215/graphql](https://localhost:7215/graphql)
 * Redis/Insight: [localhost:7216](https://localhost:7216)
 

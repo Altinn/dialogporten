@@ -150,8 +150,27 @@ def safe_int(value: Optional[str]) -> Optional[int]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run iterated benchmarks with generated samples.")
-    parser.add_argument("--party-pool", type=int, required=True, help="Total party pool size")
-    parser.add_argument("--service-pool", type=int, required=True, help="Total service pool size")
+    party_group = parser.add_mutually_exclusive_group(required=True)
+    party_group.add_argument(
+        "--generate-party-pool-with-count",
+        type=int,
+        help="Generate party pool with the given size",
+    )
+    party_group.add_argument(
+        "--with-party-pool-file",
+        help="Use an existing party pool file (one value per line)",
+    )
+
+    service_group = parser.add_mutually_exclusive_group(required=True)
+    service_group.add_argument(
+        "--generate-service-pool-with-count",
+        type=int,
+        help="Generate service pool with the given size",
+    )
+    service_group.add_argument(
+        "--with-service-pool-file",
+        help="Use an existing service pool file (one value per line)",
+    )
     parser.add_argument(
         "--generate-set",
         required=True,
@@ -175,8 +194,10 @@ def main() -> int:
 
     if args.iterations < 1:
         die("iterations must be >= 1")
-    if args.party_pool < 1 or args.service_pool < 1:
-        die("party-pool and service-pool must be >= 1")
+    if args.generate_party_pool_with_count is not None and args.generate_party_pool_with_count < 1:
+        die("generate-party-pool-with-count must be >= 1")
+    if args.generate_service_pool_with_count is not None and args.generate_service_pool_with_count < 1:
+        die("generate-service-pool-with-count must be >= 1")
 
     timestamp = dt.datetime.now().strftime("%Y%m%d%H%M")
     if args.out_dir:
@@ -204,33 +225,51 @@ def main() -> int:
     for path in sorted(sql_paths):
         shutil.copy2(path, sqls_dir / path.name)
 
-    log_info("Generating party samples")
-    log_command([sys.executable, "generate_samples.py", "party", str(args.party_pool)])
-    code, stdout, stderr = run_command(
-        [sys.executable, "generate_samples.py", "party", str(args.party_pool)]
-    )
-    if code != 0:
-        print(stderr, file=sys.stderr)
-        die("generate_samples.py party failed")
-    if not stdout.strip():
-        if stderr.strip():
+    if args.with_party_pool_file:
+        src = Path(args.with_party_pool_file)
+        if not src.is_file():
+            die(f"Party pool file not found: {src}")
+        log_info(f"Using existing party pool file: {src}")
+        shutil.copy2(src, parties_path)
+    else:
+        log_info("Generating party samples")
+        log_command(
+            [sys.executable, "generate_samples.py", "party", str(args.generate_party_pool_with_count)]
+        )
+        code, stdout, stderr = run_command(
+            [sys.executable, "generate_samples.py", "party", str(args.generate_party_pool_with_count)]
+        )
+        if code != 0:
             print(stderr, file=sys.stderr)
-        die("generate_samples.py party returned no data")
-    write_text(parties_path, stdout.strip() + ("\n" if stdout.strip() else ""))
+            die("generate_samples.py party failed")
+        if not stdout.strip():
+            if stderr.strip():
+                print(stderr, file=sys.stderr)
+            die("generate_samples.py party returned no data")
+        write_text(parties_path, stdout.strip() + ("\n" if stdout.strip() else ""))
 
-    log_info("Generating service samples")
-    log_command([sys.executable, "generate_samples.py", "service", str(args.service_pool)])
-    code, stdout, stderr = run_command(
-        [sys.executable, "generate_samples.py", "service", str(args.service_pool)]
-    )
-    if code != 0:
-        print(stderr, file=sys.stderr)
-        die("generate_samples.py service failed")
-    if not stdout.strip():
-        if stderr.strip():
+    if args.with_service_pool_file:
+        src = Path(args.with_service_pool_file)
+        if not src.is_file():
+            die(f"Service pool file not found: {src}")
+        log_info(f"Using existing service pool file: {src}")
+        shutil.copy2(src, services_path)
+    else:
+        log_info("Generating service samples")
+        log_command(
+            [sys.executable, "generate_samples.py", "service", str(args.generate_service_pool_with_count)]
+        )
+        code, stdout, stderr = run_command(
+            [sys.executable, "generate_samples.py", "service", str(args.generate_service_pool_with_count)]
+        )
+        if code != 0:
             print(stderr, file=sys.stderr)
-        die("generate_samples.py service returned no data")
-    write_text(services_path, stdout.strip() + ("\n" if stdout.strip() else ""))
+            die("generate_samples.py service failed")
+        if not stdout.strip():
+            if stderr.strip():
+                print(stderr, file=sys.stderr)
+            die("generate_samples.py service returned no data")
+        write_text(services_path, stdout.strip() + ("\n" if stdout.strip() else ""))
 
     aggregate_rows: List[Dict[str, str]] = []
     details_rows: List[Dict[str, str]] = []
@@ -421,6 +460,24 @@ def main() -> int:
             handle.write(f"== {filename} ==\n")
             handle.write(content)
             handle.write("\n\n")
+
+    log_info("Condensing explains")
+    condensed_path = root_dir / "explains_all.txt.condensed.txt"
+    log_command(
+        [
+            sys.executable,
+            "condense_explains.py",
+            str(explains_all_path),
+            "--out",
+            str(condensed_path),
+        ]
+    )
+    code, stdout, stderr = run_command(
+        [sys.executable, "condense_explains.py", str(explains_all_path), "--out", str(condensed_path)]
+    )
+    if code != 0:
+        print(stderr, file=sys.stderr)
+        warn("condense_explains.py failed")
 
     log_info("Generating Excel summary")
     excel_path = root_dir / f"summary-{timestamp}.xlsx"

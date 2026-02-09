@@ -19,8 +19,8 @@ pip install openpyxl
 
 ```bash
 ./run_iterated_benchmark.py \
-  --party-pool 50000 \
-  --service-pool 5000 \
+  --generate-party-pool-with-count 50000 \
+  --generate-service-pool-with-count 5000 \
   --generate-set "1,1,1; 1,3000,1; 5,3000,2; 100,3000,20; 200,3000,40; 1000,1,1; 2000,1,1; 10000,1,1" \
   --sqls "sql/*.sql" \
   --iterations 10 \
@@ -41,6 +41,10 @@ benchmark-YYYYMMDD-HHMM/
     2001/
       001-1p-1s-1g.json
       ...
+  sqls/
+    party.sql
+    service.sql
+    ...
   output/
     parties.txt
     services.txt
@@ -52,16 +56,18 @@ benchmark-YYYYMMDD-HHMM/
         <case>__<sql>.txt
       2001/
         <case>__<sql>.txt
-  summary.csv
-  summary.xlsx
+  summary-YYYYMMDDHHMM.csv
+  summary-YYYYMMDDHHMM.xlsx
   explains_all.txt
+  explains_all.txt.condensed.txt
 ```
 
 Notes:
 - Each iteration is seeded from `--seed` + iteration index, and the directory name is the seed (zero‑padded).
 - Case filenames omit the seed (stable names across iterations) so aggregation groups cleanly.
-- `summary.csv` is aggregated per `(sql, case)` across all iterations, with exec/read/hit stats.
-- `summary.xlsx` contains a Summary sheet (aggregated by sql) and a Details sheet (per case).
+- `summary-YYYYMMDDHHMM.csv` is aggregated per `(sql, case)` across all iterations, with exec/read/hit stats.
+- `summary-YYYYMMDDHHMM.xlsx` contains a Summary sheet (aggregated by sql) and a Details sheet (per case).
+- `explains_all.txt.condensed.txt` is a compressed version of `explains_all.txt`.
 
 ## Script Reference
 
@@ -69,7 +75,10 @@ Notes:
 Runs full benchmark iterations end‑to‑end.
 
 Key options:
-- `--party-pool` / `--service-pool`: pool sizes for sampling.
+- `--generate-party-pool-with-count`: generate party pool with the given size.
+- `--with-party-pool-file`: use an existing party pool file.
+- `--generate-service-pool-with-count`: generate service pool with the given size.
+- `--with-service-pool-file`: use an existing service pool file.
 - `--generate-set`: semicolon‑separated list of `parties,services,groups`.
 - `--sqls`: quoted glob(s) for SQL files.
 - `--iterations`: number of iterations.
@@ -146,5 +155,10 @@ Usage:
 
 - Ensure `PG_CONNECTION_STRING` is set before running anything.
 - Use `--out-dir` to keep outputs separate when testing multiple runs.
-
+- In order to use in a remote environment (ie a ssh-jumper) in which there is no immediately available ways to upload/download files, you can:
+  1. Create a tarball with `tar cfz benchmark.tgz dialogsearch-benchmark/`
+  2. Upload the file to a Filebin, ie. `curl -sS -X POST --data-binary @benchmark.tgz -H "Content-Type: application/octet-stream" https://filebin.net/<bin>/benchmark.tgz`
+  3. Unpack the tarball with `tar zxvf benchmark.tgz`
+  4. Run the scripts within `dialogsearch-benchmark/`
+- The same procedure can be made in order to dowload a output directory for local analysys
 

@@ -35,7 +35,10 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var name = '${namePrefix}-db-migration-job'
 
-var baseTags = {}
+var baseTags = {
+  Environment: environment
+  Product: 'Dialogporten'
+}
 
 var tags = finopsTags(baseTags, environment)
 

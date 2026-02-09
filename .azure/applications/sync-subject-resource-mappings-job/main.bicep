@@ -45,6 +45,8 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 var name = '${namePrefix}-sync-sr-mappings'
 
 var baseTags = {
+  Environment: environment
+  Product: 'Dialogporten'
   FullName: '${namePrefix}-sync-subject-resource-mappings'
   Description: 'Synchronizes subject resource mappings'
   JobType: 'Scheduled'

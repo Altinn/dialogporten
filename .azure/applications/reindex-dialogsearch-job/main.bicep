@@ -40,6 +40,8 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var name = '${namePrefix}-reindex-search'
 var baseTags = {
+  Environment: environment
+  Product: 'Dialogporten'
   FullName: name
   Description: 'Manual janitor job to reindex dialog search'
   JobType: 'Manual'

@@ -45,6 +45,8 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 var name = '${namePrefix}-custom-metrics'
 
 var baseTags = {
+  Environment: environment
+  Product: 'Dialogporten'
   FullName: '${namePrefix}-custom-metrics'
   Description: 'Collects custom metrics and emits to Azure Monitor'
   JobType: 'Scheduled'

@@ -54,6 +54,8 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 var appInsightsName = 'dp-be-${environment}-applicationInsights'
 
 var baseTags = {
+  Environment: environment
+  Product: 'Dialogporten'
   FullName: '${namePrefix}-aggregate-cost-metrics'
   Description: 'Aggregates cost metrics from Application Insights across environments'
   JobType: 'Scheduled'

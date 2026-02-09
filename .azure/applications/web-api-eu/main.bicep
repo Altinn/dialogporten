@@ -57,7 +57,10 @@ param workloadProfileName string = 'Consumption'
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-var baseTags = {}
+var baseTags = {
+  Environment: environment
+  Product: 'Dialogporten'
+}
 
 var tags = finopsTags(baseTags, environment)
 

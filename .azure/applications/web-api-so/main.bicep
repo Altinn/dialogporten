@@ -1,6 +1,6 @@
 targetScope = 'resourceGroup'
 
-import { finopsTags } from '../../functions/finopsTags.bicep'
+import { baseTags } from '../../functions/baseTags.bicep'
 
 import { Scale } from '../../modules/containerApp/main.bicep'
 
@@ -89,12 +89,10 @@ param scale Scale = {
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
-var baseTags = {
-  Environment: environment
-  Product: 'Dialogporten'
+var aditionalTags = {
 }
 
-var tags = finopsTags(baseTags, environment)
+var tags = baseTags(aditionalTags, environment)
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationName

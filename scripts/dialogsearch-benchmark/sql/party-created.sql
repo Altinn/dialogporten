@@ -1,5 +1,5 @@
 EXPLAIN (ANALYZE, BUFFERS, TIMING)
-SELECT d."Id", d."CreatedAt", d."CreatedAt", d."Deleted", d."DeletedAt", d."DueAt", d."ExpiresAt", d."ExtendedStatus", d."ExternalReference", d."FromPartyTransmissionsCount", d."FromServiceOwnerTransmissionsCount", d."Frozen", d."HasUnopenedContent", d."IdempotentKey", d."IsApiOnly", d."Org", d."Party", d."PrecedingProcess", d."Process", d."Progress", d."Revision", d."ServiceResource", d."ServiceResourceType", d."StatusId", d."UpdatedAt", d."VisibleFrom"
+SELECT d."Id", d."ContentUpdatedAt", d."CreatedAt", d."Deleted", d."DeletedAt", d."DueAt", d."ExpiresAt", d."ExtendedStatus", d."ExternalReference", d."FromPartyTransmissionsCount", d."FromServiceOwnerTransmissionsCount", d."Frozen", d."HasUnopenedContent", d."IdempotentKey", d."IsApiOnly", d."Org", d."Party", d."PrecedingProcess", d."Process", d."Progress", d."Revision", d."ServiceResource", d."ServiceResourceType", d."StatusId", d."UpdatedAt", d."VisibleFrom"
 FROM (
     WITH raw_permissions AS (
        SELECT p.party, s.service
@@ -23,8 +23,8 @@ FROM (
     WHERE d."Party" = ppm.party
     AND d."ServiceResource" = ANY(ppm.allowed_services)
            AND d."StatusId" = ANY(ARRAY[7, 2, 8]::int[])
-      AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= '2026-02-05T13:56:28.8523270+00:00'::timestamptz)
-      AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > '2026-02-05T13:56:28.8523270+00:00'::timestamptz)
+      AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= NOW())
+      AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > NOW())
       AND d."Deleted" = false::boolean
      AND EXISTS (
         SELECT 1

@@ -2,15 +2,16 @@
 import argparse
 import csv
 import datetime as dt
+import glob
 import math
-import os
 import re
 import shutil
-import glob
 import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+from stats_utils import summarize
 
 
 def die(message: str) -> None:
@@ -26,16 +27,26 @@ def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
-def run_command(cmd: List[str], cwd: Optional[Path] = None) -> Tuple[int, str, str]:
-    process = subprocess.Popen(
-        cmd,
-        cwd=str(cwd) if cwd else None,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    stdout, stderr = process.communicate()
-    return process.returncode, stdout, stderr
+def run_command(
+    cmd: List[str], cwd: Optional[Path] = None, timeout_s: Optional[int] = None
+) -> Tuple[int, str, str]:
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=str(cwd) if cwd else None,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=timeout_s,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout or ""
+        stderr = (exc.stderr or "").rstrip()
+        timeout_suffix = f"error: command timed out after {timeout_s} seconds"
+        stderr = f"{stderr}\n{timeout_suffix}" if stderr else timeout_suffix
+        return 124, stdout, stderr
+    return process.returncode, process.stdout, process.stderr
 
 
 def log_command(cmd: List[str]) -> None:
@@ -46,8 +57,12 @@ def log_info(message: str) -> None:
     print(f"[info] {message}", file=sys.stderr)
 
 
+def split_patterns(patterns: str) -> List[str]:
+    return [pattern.strip() for pattern in patterns.split(",") if pattern.strip()]
+
+
 def resolve_globs(patterns: str) -> List[Path]:
-    globs = [p.strip() for p in re.split(r"[,\s]+", patterns) if p.strip()]
+    globs = split_patterns(patterns)
     paths: List[Path] = []
     for pattern in globs:
         paths.extend(Path(p) for p in glob.glob(pattern))
@@ -86,43 +101,6 @@ def parse_explains(output: str) -> Dict[Tuple[str, str], List[str]]:
             current_lines.append(line)
     flush()
     return blocks
-
-
-def percentile(values: List[float], pct: float) -> float:
-    if not values:
-        return math.nan
-    ordered = sorted(values)
-    if pct <= 0:
-        return ordered[0]
-    if pct >= 100:
-        return ordered[-1]
-    rank = (pct / 100) * (len(ordered) - 1)
-    low = int(math.floor(rank))
-    high = int(math.ceil(rank))
-    if low == high:
-        return ordered[low]
-    weight = rank - low
-    return ordered[low] * (1 - weight) + ordered[high] * weight
-
-
-def summarize(values: List[float]) -> Dict[str, float]:
-    if not values:
-        return {
-            "avg": math.nan,
-            "min": math.nan,
-            "max": math.nan,
-            "p50": math.nan,
-            "p95": math.nan,
-            "p99": math.nan,
-        }
-    return {
-        "avg": sum(values) / len(values),
-        "min": min(values),
-        "max": max(values),
-        "p50": percentile(values, 50),
-        "p95": percentile(values, 95),
-        "p99": percentile(values, 99),
-    }
 
 
 def parse_csv_rows(path: Path) -> List[Dict[str, str]]:
@@ -176,7 +154,7 @@ def main() -> int:
         required=True,
         help="Semicolon-separated list of parties,services,groups",
     )
-    parser.add_argument("--sqls", required=True, help="Quoted glob(s) for SQL files")
+    parser.add_argument("--sqls", required=True, help="Comma-separated quoted glob(s) for SQL files")
     parser.add_argument("--iterations", type=int, required=True, help="Number of iterations")
     parser.add_argument("--seed", type=int, required=True, help="Base seed")
     parser.add_argument(
@@ -189,6 +167,12 @@ def main() -> int:
         "--out-dir",
         help="Output directory (default: benchmark-YYYYMMDD-HHMM in cwd)",
     )
+    parser.add_argument(
+        "--script-timeout",
+        type=int,
+        default=600,
+        help="Timeout in seconds for each child script invocation (default: 600)",
+    )
 
     args = parser.parse_args()
 
@@ -198,12 +182,16 @@ def main() -> int:
         die("generate-party-pool-with-count must be >= 1")
     if args.generate_service_pool_with_count is not None and args.generate_service_pool_with_count < 1:
         die("generate-service-pool-with-count must be >= 1")
+    if args.script_timeout < 1:
+        die("script-timeout must be >= 1")
 
-    timestamp = dt.datetime.now().strftime("%Y%m%d%H%M")
+    now = dt.datetime.now()
+    timestamp = now.strftime("%Y%m%d%H%M")
+    timestamp_for_dir = now.strftime("%Y%m%d-%H%M")
     if args.out_dir:
         root_dir = Path(args.out_dir)
     else:
-        root_dir = Path.cwd() / f"benchmark-{dt.datetime.now().strftime('%Y%m%d-%H%M')}"
+        root_dir = Path.cwd() / f"benchmark-{timestamp_for_dir}"
     casesets_dir = root_dir / "casesets"
     output_dir = root_dir / "output"
     sqls_dir = root_dir / "sqls"
@@ -222,8 +210,12 @@ def main() -> int:
     if not sql_paths:
         die(f"No SQL files found for: {args.sqls}")
     log_info(f"Copying {len(sql_paths)} SQL files into {sqls_dir}")
+    copied_sql_paths: List[Path] = []
     for path in sorted(sql_paths):
-        shutil.copy2(path, sqls_dir / path.name)
+        copied = sqls_dir / path.name
+        shutil.copy2(path, copied)
+        copied_sql_paths.append(copied)
+    copied_sql_patterns = ",".join(str(path) for path in copied_sql_paths)
 
     if args.with_party_pool_file:
         src = Path(args.with_party_pool_file)
@@ -233,12 +225,9 @@ def main() -> int:
         shutil.copy2(src, parties_path)
     else:
         log_info("Generating party samples")
-        log_command(
-            [sys.executable, "generate_samples.py", "party", str(args.generate_party_pool_with_count)]
-        )
-        code, stdout, stderr = run_command(
-            [sys.executable, "generate_samples.py", "party", str(args.generate_party_pool_with_count)]
-        )
+        cmd = [sys.executable, "generate_samples.py", "party", str(args.generate_party_pool_with_count)]
+        log_command(cmd)
+        code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
         if code != 0:
             print(stderr, file=sys.stderr)
             die("generate_samples.py party failed")
@@ -246,7 +235,7 @@ def main() -> int:
             if stderr.strip():
                 print(stderr, file=sys.stderr)
             die("generate_samples.py party returned no data")
-        write_text(parties_path, stdout.strip() + ("\n" if stdout.strip() else ""))
+        write_text(parties_path, stdout.strip() + "\n")
 
     if args.with_service_pool_file:
         src = Path(args.with_service_pool_file)
@@ -256,12 +245,9 @@ def main() -> int:
         shutil.copy2(src, services_path)
     else:
         log_info("Generating service samples")
-        log_command(
-            [sys.executable, "generate_samples.py", "service", str(args.generate_service_pool_with_count)]
-        )
-        code, stdout, stderr = run_command(
-            [sys.executable, "generate_samples.py", "service", str(args.generate_service_pool_with_count)]
-        )
+        cmd = [sys.executable, "generate_samples.py", "service", str(args.generate_service_pool_with_count)]
+        log_command(cmd)
+        code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
         if code != 0:
             print(stderr, file=sys.stderr)
             die("generate_samples.py service failed")
@@ -269,10 +255,9 @@ def main() -> int:
             if stderr.strip():
                 print(stderr, file=sys.stderr)
             die("generate_samples.py service returned no data")
-        write_text(services_path, stdout.strip() + ("\n" if stdout.strip() else ""))
+        write_text(services_path, stdout.strip() + "\n")
 
     aggregate_rows: List[Dict[str, str]] = []
-    details_rows: List[Dict[str, str]] = []
     explain_catalog: List[Tuple[str, str]] = []
 
     for iteration in range(args.iterations):
@@ -283,70 +268,40 @@ def main() -> int:
         iter_explains_dir = explains_dir / iter_name
         ensure_dir(iter_cases_dir)
         ensure_dir(iter_explains_dir)
-        log_command(
-            [
-                sys.executable,
-                "generate_cases.py",
-                "--parties-path",
-                str(parties_path),
-                "--services-path",
-                str(services_path),
-                "--out-dir",
-                str(iter_cases_dir),
-                "--seed",
-                str(iter_seed),
-                "--omit-seed-in-filename",
-                "--generate-set",
-                args.generate_set,
-            ]
-        )
-        code, stdout, stderr = run_command(
-            [
-                sys.executable,
-                "generate_cases.py",
-                "--parties-path",
-                str(parties_path),
-                "--services-path",
-                str(services_path),
-                "--out-dir",
-                str(iter_cases_dir),
-                "--seed",
-                str(iter_seed),
-                "--omit-seed-in-filename",
-                "--generate-set",
-                args.generate_set,
-            ]
-        )
+        cmd = [
+            sys.executable,
+            "generate_cases.py",
+            "--parties-path",
+            str(parties_path),
+            "--services-path",
+            str(services_path),
+            "--out-dir",
+            str(iter_cases_dir),
+            "--seed",
+            str(iter_seed),
+            "--omit-seed-in-filename",
+            "--generate-set",
+            args.generate_set,
+        ]
+        log_command(cmd)
+        code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
         if code != 0:
             print(stderr, file=sys.stderr)
             die(f"generate_cases.py failed for iteration {iter_name}")
 
         csv_path = csvs_dir / f"{iter_name}.csv"
-        log_command(
-            [
-                sys.executable,
-                "run_benchmark.py",
-                "--cases",
-                str(iter_cases_dir / "*.json"),
-                "--sqls",
-                args.sqls,
-                "--csv",
-                "--print-explain",
-            ]
-        )
-        code, stdout, stderr = run_command(
-            [
-                sys.executable,
-                "run_benchmark.py",
-                "--cases",
-                str(iter_cases_dir / "*.json"),
-                "--sqls",
-                args.sqls,
-                "--csv",
-                "--print-explain",
-            ]
-        )
-        write_text(csv_path, stdout)
+        cmd = [
+            sys.executable,
+            "run_benchmark.py",
+            "--cases",
+            str(iter_cases_dir / "*.json"),
+            "--sqls",
+            copied_sql_patterns,
+            "--csv",
+            "--print-explain",
+        ]
+        log_command(cmd)
+        code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
 
         if stderr.strip():
             explain_blocks = parse_explains(stderr)
@@ -358,10 +313,11 @@ def main() -> int:
 
         if code != 0:
             warn(f"run_benchmark.py returned {code} for iteration {iter_name}")
+            continue
 
-        if csv_path.exists():
-            iteration_rows = parse_csv_rows(csv_path)
-            aggregate_rows.extend(iteration_rows)
+        write_text(csv_path, stdout)
+        iteration_rows = parse_csv_rows(csv_path)
+        aggregate_rows.extend(iteration_rows)
 
     log_info("Writing summary and concatenated explains")
     summary_path = root_dir / f"summary-{timestamp}.csv"
@@ -463,36 +419,30 @@ def main() -> int:
 
     log_info("Condensing explains")
     condensed_path = root_dir / "explains_all.txt.condensed.txt"
-    log_command(
-        [
-            sys.executable,
-            "condense_explains.py",
-            str(explains_all_path),
-            "--out",
-            str(condensed_path),
-        ]
-    )
-    code, stdout, stderr = run_command(
-        [sys.executable, "condense_explains.py", str(explains_all_path), "--out", str(condensed_path)]
-    )
+    cmd = [
+        sys.executable,
+        "condense_explains.py",
+        str(explains_all_path),
+        "--out",
+        str(condensed_path),
+    ]
+    log_command(cmd)
+    code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
     if code != 0:
         print(stderr, file=sys.stderr)
         warn("condense_explains.py failed")
 
     log_info("Generating Excel summary")
     excel_path = root_dir / f"summary-{timestamp}.xlsx"
-    log_command(
-        [
-            sys.executable,
-            "generate_excel_summary.py",
-            str(summary_path),
-            "--out",
-            str(excel_path),
-        ]
-    )
-    code, stdout, stderr = run_command(
-        [sys.executable, "generate_excel_summary.py", str(summary_path), "--out", str(excel_path)]
-    )
+    cmd = [
+        sys.executable,
+        "generate_excel_summary.py",
+        str(summary_path),
+        "--out",
+        str(excel_path),
+    ]
+    log_command(cmd)
+    code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
     if code != 0:
         print(stderr, file=sys.stderr)
         warn("generate_excel_summary.py failed")

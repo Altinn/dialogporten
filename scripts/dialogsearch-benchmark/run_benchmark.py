@@ -10,6 +10,7 @@ import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
 PLACEHOLDER = "--PARTIESANDSERVICESPLACEHOLDER--"
 EXPLAIN_PREFIX = "EXPLAIN (ANALYZE, BUFFERS, TIMING)"
@@ -84,32 +85,49 @@ def clean_explain_output(output: str) -> str:
     return "\n".join(cleaned)
 
 
+def split_patterns(patterns: str) -> list[str]:
+    return [pattern.strip() for pattern in patterns.split(",") if pattern.strip()]
+
+
+def parse_shared_buffers(buffer_line: str) -> tuple[Optional[int], Optional[int], Optional[int]]:
+    shared_match = re.search(r"\bshared\b(?P<section>.*)", buffer_line)
+    if not shared_match:
+        return None, None, None
+    section = shared_match.group("section")
+    hit_match = re.search(r"\bhit=(\d+)", section)
+    read_match = re.search(r"\bread=(\d+)", section)
+    dirtied_match = re.search(r"\bdirtied=(\d+)", section)
+    return (
+        int(read_match.group(1)) if read_match else 0,
+        int(hit_match.group(1)) if hit_match else 0,
+        int(dirtied_match.group(1)) if dirtied_match else 0,
+    )
+
+
 def parse_explain(output: str):
     exec_time = None
     m = re.search(r"Execution Time: ([0-9.]+) ms", output)
     if m:
         exec_time = float(m.group(1))
-    buf_hit = buf_read = buf_dirtied = None
-    for line in output.splitlines():
-        if "Buffers:" in line:
-            if buf_hit is None:
-                buf_hit = 0
-            if buf_read is None:
-                buf_read = 0
-            if buf_dirtied is None:
-                buf_dirtied = 0
-            shared_match = re.search(r"shared ([^,]+)", line)
-            if shared_match:
-                shared_part = shared_match.group(1)
-                m = re.search(r"hit=(\d+)", shared_part)
-                if m:
-                    buf_hit += int(m.group(1))
-                m = re.search(r"read=(\d+)", shared_part)
-                if m:
-                    buf_read += int(m.group(1))
-                m = re.search(r"dirtied=(\d+)", shared_part)
-                if m:
-                    buf_dirtied += int(m.group(1))
+    buf_read = buf_hit = buf_dirtied = None
+    lines = output.splitlines()
+    planning_start = next((idx for idx, line in enumerate(lines) if line.strip() == "Planning:"), len(lines))
+    plan_buffer_lines = []
+    for line in lines[:planning_start]:
+        if "Buffers:" not in line:
+            continue
+        indent = len(line) - len(line.lstrip())
+        plan_buffer_lines.append((indent, line))
+    if not plan_buffer_lines:
+        for line in lines:
+            if "Buffers:" not in line:
+                continue
+            indent = len(line) - len(line.lstrip())
+            plan_buffer_lines.append((indent, line))
+    if plan_buffer_lines:
+        min_indent = min(indent for indent, _ in plan_buffer_lines)
+        selected_line = [line for indent, line in plan_buffer_lines if indent == min_indent][-1]
+        buf_read, buf_hit, buf_dirtied = parse_shared_buffers(selected_line)
     return exec_time, buf_read, buf_hit, buf_dirtied
 
 
@@ -210,8 +228,16 @@ def render_output(results, sql_files, args) -> int:
 
 def main():
     parser = argparse.ArgumentParser(description="Run DialogSearch SQL variants across test cases.")
-    parser.add_argument("--cases", required=True, help="Quoted glob(s) for JSON cases (e.g. 'defaultset/*.json')")
-    parser.add_argument("--sqls", required=True, help="Quoted glob(s) for SQL files (e.g. 'sql/*.sql')")
+    parser.add_argument(
+        "--cases",
+        required=True,
+        help="Comma-separated quoted glob(s) for JSON cases (e.g. 'defaultset/*.json')",
+    )
+    parser.add_argument(
+        "--sqls",
+        required=True,
+        help="Comma-separated quoted glob(s) for SQL files (e.g. 'sql/*.sql')",
+    )
     parser.add_argument("--csv", action="store_true", help="Emit CSV instead of Markdown")
     parser.add_argument("--print-explain", action="store_true", help="Print full EXPLAIN output")
     parser.add_argument("--party-hi", type=int, default=10, help="High party threshold (default: 10)")
@@ -229,7 +255,7 @@ def main():
         warn("PG_CONNECTION_STRING not set")
         return 1
 
-    case_globs = [pattern.strip() for pattern in re.split(r"[,\s]+", args.cases) if pattern.strip()]
+    case_globs = split_patterns(args.cases)
     case_paths = []
     for pattern in case_globs:
         case_paths.extend(Path(p) for p in glob.glob(pattern))
@@ -245,7 +271,7 @@ def main():
         return 1
 
     sql_files = []
-    sql_globs = [pattern.strip() for pattern in re.split(r"[,\s]+", args.sqls) if pattern.strip()]
+    sql_globs = split_patterns(args.sqls)
     sql_paths = []
     for pattern in sql_globs:
         sql_paths.extend(Path(p) for p in glob.glob(pattern))

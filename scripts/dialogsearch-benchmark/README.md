@@ -31,7 +31,7 @@ This creates a new output directory named `benchmark-YYYYMMDD-HHMM` in the curre
 
 ## Output Layout (run_iterated_benchmark)
 
-```
+```text
 benchmark-YYYYMMDD-HHMM/
   casesets/
     2000/
@@ -80,7 +80,7 @@ Key options:
 - `--generate-service-pool-with-count`: generate service pool with the given size.
 - `--with-service-pool-file`: use an existing service pool file.
 - `--generate-set`: semicolon‑separated list of `parties,services,groups`.
-- `--sqls`: quoted glob(s) for SQL files.
+- `--sqls`: comma-separated quoted glob(s) for SQL files.
 - `--iterations`: number of iterations.
 - `--seed`: base seed.
 - `--out-dir`: override output directory (optional).
@@ -99,8 +99,8 @@ Behavior:
 Runs a set of SQL files against a set of JSON cases.
 
 Key options:
-- `--cases`: quoted glob(s) for JSON cases.
-- `--sqls`: quoted glob(s) for SQL files.
+- `--cases`: comma-separated quoted glob(s) for JSON cases.
+- `--sqls`: comma-separated quoted glob(s) for SQL files.
 - `--csv`: emit CSV instead of Markdown.
 - `--print-explain`: prints the full EXPLAIN output for each run to stderr (cleaned of `QUERY PLAN` and separators).
 - `--timeout`: per‑run timeout.
@@ -155,10 +155,9 @@ Usage:
 
 - Ensure `PG_CONNECTION_STRING` is set before running anything.
 - Use `--out-dir` to keep outputs separate when testing multiple runs.
-- In order to use in a remote environment (ie a ssh-jumper) in which there is no immediately available ways to upload/download files, you can:
+- To use a remote environment (i.e. an SSH jumper) where there is no immediately available way to upload/download files, you can:
   1. Create a tarball with `tar cfz benchmark.tgz dialogsearch-benchmark/`
-  2. Upload the file to a Filebin, ie. `curl -sS -X POST --data-binary @benchmark.tgz -H "Content-Type: application/octet-stream" https://filebin.net/<bin>/benchmark.tgz`
+  2. Upload the file to a Filebin, i.e. `curl -sS -X POST --data-binary @benchmark.tgz -H "Content-Type: application/octet-stream" https://filebin.net/<bin>/benchmark.tgz`
   3. Unpack the tarball with `tar zxvf benchmark.tgz`
   4. Run the scripts within `dialogsearch-benchmark/`
-- The same procedure can be made in order to dowload a output directory for local analysys
-
+- The same procedure can be used to download an output directory for local analysis.

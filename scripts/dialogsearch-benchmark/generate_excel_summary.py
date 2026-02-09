@@ -5,7 +5,9 @@ import math
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
+
+from stats_utils import summarize
 
 try:
     from openpyxl import Workbook
@@ -22,6 +24,9 @@ except ImportError as exc:
 HEADER_FILL = PatternFill("solid", fgColor="1F4E78")
 HEADER_FONT = Font(color="FFFFFF", bold=True)
 HEADER_ALIGNMENT = Alignment(horizontal="center", vertical="center", wrap_text=True)
+SUMMARY_METRIC_KEYS = ["exec_avg", "exec_min", "exec_max", "exec_p50", "exec_p95", "exec_p99"]
+DETAIL_INTEGER_COLS = {"party_count", "service_count"}
+DETAIL_EXTRA_NUMERIC_COLS = {"shared_read", "shared_hit", "shared_dirtied"} | DETAIL_INTEGER_COLS
 
 
 def die(message: str) -> None:
@@ -68,9 +73,8 @@ def build_details_sheet(wb: Workbook, rows: List[Dict[str, str]], headers: List[
         if h.startswith("exec_")
         or h.startswith("read_")
         or h.startswith("hit_")
-        or h in {"exec_ms", "shared_read", "shared_hit", "shared_dirtied", "party_count", "service_count"}
+        or h in DETAIL_EXTRA_NUMERIC_COLS
     ]
-    integer_cols = {"party_count", "service_count"}
     for col_index, header in enumerate(headers, start=1):
         if header in numeric_cols:
             for row_index in range(2, ws.max_row + 1):
@@ -82,12 +86,12 @@ def build_details_sheet(wb: Workbook, rows: List[Dict[str, str]], headers: List[
                 except ValueError:
                     continue
             for row_index in range(2, ws.max_row + 1):
-                fmt = "0" if header in integer_cols else "0.00"
+                fmt = "0" if header in DETAIL_INTEGER_COLS else "0.00"
                 ws.cell(row=row_index, column=col_index).number_format = fmt
 
     if ws.max_row > 1:
         for header in numeric_cols:
-            if header in integer_cols:
+            if header in DETAIL_INTEGER_COLS:
                 continue
             col_idx = headers.index(header) + 1
             col_letter = ws.cell(row=1, column=col_idx).column_letter
@@ -107,34 +111,6 @@ def build_details_sheet(wb: Workbook, rows: List[Dict[str, str]], headers: List[
     autosize_columns(ws)
 
 
-def percentile(values: List[float], pct: float) -> float:
-    if not values:
-        return math.nan
-    ordered = sorted(values)
-    if pct <= 0:
-        return ordered[0]
-    if pct >= 100:
-        return ordered[-1]
-    rank = (pct / 100) * (len(ordered) - 1)
-    low = int(math.floor(rank))
-    high = int(math.ceil(rank))
-    if low == high:
-        return ordered[low]
-    weight = rank - low
-    return ordered[low] * (1 - weight) + ordered[high] * weight
-
-
-def summarize(values: List[float]) -> Dict[str, float]:
-    if not values:
-        return {"avg": math.nan, "p50": math.nan, "p95": math.nan, "p99": math.nan}
-    return {
-        "avg": sum(values) / len(values),
-        "p50": percentile(values, 50),
-        "p95": percentile(values, 95),
-        "p99": percentile(values, 99),
-    }
-
-
 def build_summary_sheet(wb: Workbook, rows: List[Dict[str, str]]) -> None:
     ws = wb.active
     ws.title = "Summary"
@@ -147,12 +123,14 @@ def build_summary_sheet(wb: Workbook, rows: List[Dict[str, str]]) -> None:
         cell.font = HEADER_FONT
         cell.alignment = HEADER_ALIGNMENT
 
-    grouped: Dict[str, Dict[str, List[float]]] = defaultdict(lambda: {"exec_avg": [], "exec_min": [], "exec_max": [], "exec_p50": [], "exec_p95": [], "exec_p99": []})
+    grouped: Dict[str, Dict[str, List[float]]] = defaultdict(
+        lambda: {key: [] for key in SUMMARY_METRIC_KEYS}
+    )
     for row in rows:
         variant = row.get("variant") or ""
         if not variant:
             continue
-        for key in ["exec_avg", "exec_min", "exec_max", "exec_p50", "exec_p95", "exec_p99"]:
+        for key in SUMMARY_METRIC_KEYS:
             value = row.get(key)
             try:
                 parsed = float(value) if value not in (None, "", "None") else None

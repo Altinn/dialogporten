@@ -3,7 +3,10 @@ import os
 import sys
 import subprocess
 
-def run_query(conn_str, sql):
+DEFAULT_TIMEOUT_SECONDS = 30
+
+
+def run_query(conn_str, sql, timeout_s=DEFAULT_TIMEOUT_SECONDS):
     """Executes a SQL command via psql and returns the stdout."""
     try:
         process = subprocess.Popen(
@@ -12,12 +15,17 @@ def run_query(conn_str, sql):
             stderr=subprocess.PIPE,
             text=True
         )
-        stdout, stderr = process.communicate()
+        stdout, stderr = process.communicate(timeout=timeout_s)
         if process.returncode != 0:
             if stderr:
                 print(f"SQL Error: {stderr.strip()}", file=sys.stderr)
             return None
         return stdout.strip()
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.communicate()
+        print(f"SQL Error: query timed out after {timeout_s} seconds.", file=sys.stderr)
+        return None
     except FileNotFoundError:
         print("Error: 'psql' not found in PATH.", file=sys.stderr)
         sys.exit(1)
@@ -39,6 +47,9 @@ def main():
         target_count = int(sys.argv[2])
     except ValueError:
         print("Error: Count must be an integer.", file=sys.stderr)
+        sys.exit(1)
+    if target_count < 1:
+        print("Error: Count must be >= 1.", file=sys.stderr)
         sys.exit(1)
 
     # 2. Map type to Column Name
@@ -69,6 +80,7 @@ def main():
     percent = min(percent, 100.0)
 
     while len(distinct_values) < target_count and iteration <= 20:
+        prev_count = len(distinct_values)
         query = (
             f'SELECT DISTINCT {col_name} FROM "Dialog" '
             f'TABLESAMPLE SYSTEM ({percent}) REPEATABLE ({iteration}) '
@@ -82,6 +94,8 @@ def main():
                 if val.strip():
                     distinct_values.add(val.strip())
 
+        if len(distinct_values) == prev_count:
+            percent = min(percent * 2, 100.0)
         iteration += 1
 
     # 5. Output Clean Results

@@ -66,6 +66,7 @@ def next_counter(seed: int, out_dir: str, include_seed: bool) -> int:
 
 
 def distribute_parties(rng: random.Random, parties: list[str], group_count: int) -> list[list[str]]:
+    parties = list(parties)
     rng.shuffle(parties)
     groups = [[] for _ in range(group_count)]
     for index, party in enumerate(parties):
@@ -116,6 +117,10 @@ def generate_case(
 
 
 def pick_evenly_spaced_indices(count: int, target: int) -> list[int]:
+    if target <= 0:
+        raise ValueError("target must be >= 1")
+    if target == 1:
+        return [count // 2] if count > 0 else []
     if count <= target:
         return list(range(count))
     step = (count - 1) / (target - 1)
@@ -235,68 +240,11 @@ def main() -> None:
 
     created = []
 
-    if args.generate_default_set:
-        combos = build_default_combinations(party_pool, service_pool)
-        for total_parties, total_services, group_count in combos:
-            if total_parties < group_count:
-                warn(
-                    f"Skipping {total_parties} parties with {group_count} groups (no empty groups allowed)."
-                )
-                continue
-            case = generate_case(
-                rng,
-                party_pool,
-                service_pool,
-                total_parties,
-                total_services,
-                group_count,
-            )
-            filename = write_case(
-                args.out_dir,
-                counter,
-                args.seed,
-                case,
-                (total_parties, total_services, group_count),
-                include_seed,
-            )
-            created.append(filename)
-            counter += 1
-    elif args.generate_set:
-        combos = parse_generate_set(args.generate_set)
-        for total_parties, total_services, group_count in combos:
-            total_parties = clamp_value(total_parties, len(party_pool), "party count")
-            total_services = clamp_value(total_services, len(service_pool), "service count")
-            if total_parties < group_count:
-                warn(
-                    f"Skipping {total_parties} parties with {group_count} groups (no empty groups allowed)."
-                )
-                continue
-            case = generate_case(
-                rng,
-                party_pool,
-                service_pool,
-                total_parties,
-                total_services,
-                group_count,
-            )
-            filename = write_case(
-                args.out_dir,
-                counter,
-                args.seed,
-                case,
-                (total_parties, total_services, group_count),
-                include_seed,
-            )
-            created.append(filename)
-            counter += 1
-    else:
-        if args.parties is None or args.services is None:
-            raise SystemExit("Both --parties and --services are required unless --generate-default-set is used.")
-
-        total_parties = clamp_value(args.parties, len(party_pool), "party count")
-        total_services = clamp_value(args.services, len(service_pool), "service count")
-        group_count = args.groups
-
+    def emit_case(total_parties: int, total_services: int, group_count: int) -> None:
+        nonlocal counter
+        if total_parties < group_count:
+            warn(f"Skipping {total_parties} parties with {group_count} groups (no empty groups allowed).")
+            return
         case = generate_case(
             rng,
             party_pool,
@@ -314,6 +262,28 @@ def main() -> None:
             include_seed,
         )
         created.append(filename)
+        counter += 1
+
+    def process_combinations(combos: list[tuple[int, int, int]], clamp_counts: bool) -> None:
+        for total_parties, total_services, group_count in combos:
+            if clamp_counts:
+                total_parties = clamp_value(total_parties, len(party_pool), "party count")
+                total_services = clamp_value(total_services, len(service_pool), "service count")
+            emit_case(total_parties, total_services, group_count)
+
+    if args.generate_default_set:
+        process_combinations(build_default_combinations(party_pool, service_pool), clamp_counts=False)
+    elif args.generate_set:
+        process_combinations(parse_generate_set(args.generate_set), clamp_counts=True)
+    else:
+        if args.parties is None or args.services is None:
+            raise SystemExit("Both --parties and --services are required unless --generate-default-set is used.")
+
+        total_parties = clamp_value(args.parties, len(party_pool), "party count")
+        total_services = clamp_value(args.services, len(service_pool), "service count")
+        group_count = args.groups
+
+        emit_case(total_parties, total_services, group_count)
 
     for name in created:
         print(name)

@@ -1,5 +1,5 @@
 EXPLAIN (ANALYZE, BUFFERS, TIMING)
-SELECT d."Id", d."CreatedAt", d."CreatedAt", d."Deleted", d."DeletedAt", d."DueAt", d."ExpiresAt", d."ExtendedStatus", d."ExternalReference", d."FromPartyTransmissionsCount", d."FromServiceOwnerTransmissionsCount", d."Frozen", d."HasUnopenedContent", d."IdempotentKey", d."IsApiOnly",
+SELECT d."Id", d."ContentUpdatedAt", d."CreatedAt", d."Deleted", d."DeletedAt", d."DueAt", d."ExpiresAt", d."ExtendedStatus", d."ExternalReference", d."FromPartyTransmissionsCount", d."FromServiceOwnerTransmissionsCount", d."Frozen", d."HasUnopenedContent", d."IdempotentKey", d."IsApiOnly",
   d."Org", d."Party", d."PrecedingProcess", d."Process", d."Progress", d."Revision", d."ServiceResource", d."ServiceResourceType", d."StatusId", d."UpdatedAt", d."VisibleFrom"
 FROM (
     WITH permission_groups AS (
@@ -33,8 +33,8 @@ FROM (
     JOIN "Dialog" d ON d."Id" = cd."Id"
     WHERE 1=1
       AND d."StatusId" = ANY(ARRAY[7, 2, 8]::int[])
-      AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= '2026-02-05T13:56:28.8523270+00:00'::timestamptz)
-      AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > '2026-02-05T13:56:28.8523270+00:00'::timestamptz)
+      AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= NOW())
+      AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > NOW())
       AND d."Deleted" = false::boolean
       AND EXISTS (
         SELECT 1

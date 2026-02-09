@@ -82,8 +82,8 @@ def should_keep(line: str) -> bool:
     return False
 
 
-def condense(lines: list[str]) -> list[str]:
-    out: list[str] = []
+def condense(lines: List[str]) -> List[str]:
+    out: List[str] = []
     for line in lines:
         stripped = line.strip()
         if not stripped:
@@ -157,20 +157,18 @@ def build_term_dict() -> Dict[str, str]:
 
 def extract_index_names(lines: List[str]) -> List[str]:
     names = []
-    pattern = re.compile(r"Index (?:Only )?Scan using ([^\s]+)")
+    index_scan_pattern = re.compile(r"Index (?:Only )?Scan using ([^\s]+)")
     table_pattern = re.compile(r"\b(?:on|using)\s+\"([^\"]+)\"")
     table_pattern_bare = re.compile(r"\b(?:on|using)\s+([A-Za-z0-9_\.]+)")
     quoted_pattern = re.compile(r"\"([^\"]+)\"")
     for line in lines:
-        match = pattern.search(line)
-        if not match:
-            match = None
+        match = index_scan_pattern.search(line)
         if match:
             name = match.group(1).strip().strip('"')
             if name not in names:
                 names.append(name)
-        for pattern in (table_pattern, table_pattern_bare):
-            for m in pattern.finditer(line):
+        for tbl_pattern in (table_pattern, table_pattern_bare):
+            for m in tbl_pattern.finditer(line):
                 name = m.group(1).strip().strip('"')
                 if not name or len(name) <= 1:
                     continue

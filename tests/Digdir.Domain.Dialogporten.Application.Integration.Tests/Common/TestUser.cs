@@ -54,6 +54,16 @@ internal static class TestUsers
                 .Configure(configure)
                 .Build());
 
+        public TFlowStep AsCorrespondenceUser() => flowStep.AsUser(ClaimsPrincipalBuilder
+            .Create(UserStore.IntegrationTestUser)
+            .WithScope(AuthorizationScope.CorrespondenceScope)
+            .Build());
+
+        public TFlowStep AsAdminUser() => flowStep.AsUser(ClaimsPrincipalBuilder
+            .Create(UserStore.IntegrationTestUser)
+            .WithScope(AuthorizationScope.ServiceOwnerAdminScope)
+            .Build());
+
         public TFlowStep AsCorrespondenceUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
             flowStep.AsUser(() => FromDefault()
                 .WithScope(AuthorizationScope.CorrespondenceScope)

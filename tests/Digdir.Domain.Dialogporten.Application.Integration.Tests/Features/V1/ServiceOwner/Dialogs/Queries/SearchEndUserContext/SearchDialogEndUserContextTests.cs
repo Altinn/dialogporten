@@ -15,7 +15,6 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
     [Fact]
     public Task Search_Returns_EndUserContext_Labels_With_Any_Label_Match() =>
         FlowBuilder.For(Application)
-            // .CreateSimpleDialog(x => x.Dto.Party = IntegrationTestUser.DefaultParty)
             .CreateSimpleDialog()
             .SetSystemLabelsServiceOwner(x => x.AddLabels = [SystemLabel.Values.Archive])
             .SearchServiceOwnerDialogEndUserContexts((query, ctx) =>
@@ -42,8 +41,7 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
                 services.ConfigureAltinnAuthorization(x =>
                     x.ConfigureGetAuthorizedResourcesForSearch(new DialogSearchAuthorizationResult()));
             })
-            // .CreateSimpleDialog(x => x.Dto.Party = IntegrationTestUser.DefaultParty)
-            .CreateSimpleDialog()
+            .CreateSimpleDialog(x => x.Dto.Party = TestUsers.DefaultParty)
             .SearchServiceOwnerDialogEndUserContexts((query, ctx) =>
             {
                 query.Party = [ctx.GetParty()];
@@ -55,7 +53,6 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
     [Fact]
     public Task Search_Returns_All_System_Labels() =>
         FlowBuilder.For(Application)
-            // .CreateSimpleDialog(x => x.Dto.Party = IntegrationTestUser.DefaultParty)
             .CreateSimpleDialog()
             .SetSystemLabelsServiceOwner(x => x.AddLabels = [SystemLabel.Values.Archive, SystemLabel.Values.MarkedAsUnopened])
             .SearchServiceOwnerDialogEndUserContexts((query, ctx) => query.Party = [ctx.GetParty()])

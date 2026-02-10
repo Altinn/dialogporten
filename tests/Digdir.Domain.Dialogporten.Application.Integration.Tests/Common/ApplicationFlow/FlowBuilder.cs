@@ -5,24 +5,19 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applic
 
 public static class FlowBuilder
 {
-    public static IFlowStep For(DialogApplication application, Action<IServiceCollection>? appConfig = null)
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
+    public static IFlowStep For(DialogApplication application, Action<IServiceCollection> appConfig)
     {
-        if (appConfig is not null)
-        {
-            application.ConfigureServices(appConfig);
-        }
+        application.ConfigureServices(appConfig);
         return new FlowStep<object?>(new FlowContext(application, [], []));
     }
+
+    public static IFlowStep For(DialogApplication application) =>
+        new FlowStep<object?>(new FlowContext(application, [], []));
 }
 
 public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
 {
-    public IFlowStep Do(Action<FlowContext> action)
-    {
-        action.Invoke(Context);
-        return this;
-    }
-
     public FlowContext Context { get; }
 
     public FlowStep(FlowContext context)
@@ -36,18 +31,16 @@ public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
     public IFlowExecutor<TOut> SendCommand<TOut>(Func<TIn, FlowContext, IRequest<TOut>> commandSelector)
     {
         var context = Context;
-        context.Commands.Add((input, cancellationToken) =>
+        context.Commands.Add(async (input, cancellationToken) =>
         {
             var command = commandSelector((TIn)input!, context);
-            return context.Application
-                .Send(command, cancellationToken)
-                .ContinueWith(t => (object?)t.Result, cancellationToken);
+            return await context.Application.Send(command, cancellationToken);
         });
         return new FlowStep<TOut>(context);
     }
 
-    public IFlowExecutor<TOut> Select<TOut>(Func<TIn, TOut> selector)
-        => Select((@in, _) => selector(@in));
+    public IFlowExecutor<TOut> Select<TOut>(Func<TIn, TOut> selector) =>
+        Select((@in, _) => selector(@in));
 
     public IFlowExecutor<TOut> Select<TOut>(Func<TIn, FlowContext, TOut> selector)
     {

@@ -75,12 +75,14 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
         this IFlowStep step,
-        Action<CreateTransmissionDto> modify) =>
-        step.CreateTransmission((transmission, _) => modify(transmission));
+        Action<CreateTransmissionDto> modify,
+        Guid? ifMatchDialogRevision = null) =>
+        step.CreateTransmission((transmission, _) => modify(transmission), ifMatchDialogRevision);
 
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
         this IFlowStep step,
-        Action<CreateTransmissionDto, FlowContext>? modify) =>
+        Action<CreateTransmissionDto, FlowContext>? modify,
+        Guid? ifMatchDialogRevision = null) =>
         step.SendCommand(ctx =>
         {
             var transmission = new CreateTransmissionDto
@@ -108,6 +110,7 @@ public static class IFlowStepExtensions
             var command = new CreateTransmissionCommand
             {
                 DialogId = ctx.GetDialogId(),
+                IfMatchDialogRevision = ifMatchDialogRevision,
                 Transmissions = [transmission]
             };
 
@@ -187,12 +190,14 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
         step.Do(x =>
         {
             x.Application.ConfigureServices(configure);
         });
 
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
         step.Select(x =>
         {
@@ -200,29 +205,15 @@ public static class IFlowStepExtensions
             return x;
         });
 
-    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, TimeSpan skew) =>
-        step.Select(x =>
-        {
-            DialogApplication.Clock.OverrideUtc(skew);
-            return x;
-        });
-
-    public static IFlowStep OverrideUtc(this IFlowStep step, TimeSpan skew) =>
-        step.Do(_ => DialogApplication.Clock.OverrideUtc(skew));
-
-    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, DateTimeOffset time) =>
-        step.Select(x =>
-        {
-            DialogApplication.Clock.OverrideUtc(time);
-            return x;
-        });
-
-    public static IFlowStep OverrideUtc(this IFlowStep step, DateTimeOffset time) =>
-        step.Do(_ => DialogApplication.Clock.OverrideUtc(time));
-
-    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
+    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step,
+        Action<DeleteDialogCommand>? modify = null) =>
         step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x => new DeleteDialogCommand { Id = x.DialogId });
+            .SendCommand(x =>
+            {
+                var command = new DeleteDialogCommand { Id = x.DialogId };
+                modify?.Invoke(command);
+                return command;
+            });
 
     public static IFlowExecutor<RestoreDialogResult> RestoreDialog(this IFlowStep<DeleteDialogResult> step,
         Action<RestoreDialogCommand>? modify = null) =>
@@ -247,6 +238,7 @@ public static class IFlowStepExtensions
                 modify(command);
                 return command;
             });
+
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
         Action<UpdateDialogCommand> modify) => step
         .SendCommand((x, ctx) =>

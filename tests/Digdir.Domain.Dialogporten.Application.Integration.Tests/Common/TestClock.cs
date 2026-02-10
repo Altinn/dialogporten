@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
@@ -15,4 +16,13 @@ public sealed class TestClock : IClock
     public void OverrideUtc(DateTimeOffset dateTimeOffset) => _override = dateTimeOffset;
     public void OverrideUtc(TimeSpan skew) => _override = UtcNowOffset.Add(skew);
     public void Reset() => _override = null;
+}
+
+internal static class TestClockExtensions
+{
+    extension<TFlowStep>(TFlowStep flowStep) where TFlowStep : IFlowStep
+    {
+        public TFlowStep OverrideUtc(DateTimeOffset dateTimeOffset) => flowStep.Do(_ => DialogApplication.Clock.OverrideUtc(dateTimeOffset));
+        public TFlowStep OverrideUtc(TimeSpan skew) => flowStep.Do(_ => DialogApplication.Clock.OverrideUtc(skew));
+    }
 }

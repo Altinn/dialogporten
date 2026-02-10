@@ -1,6 +1,6 @@
 targetScope = 'resourceGroup'
 
-import { finopsTags } from '../../functions/finopsTags.bicep'
+import { baseTags } from '../../functions/baseTags.bicep'
 
 @description('The tag of the image to be used')
 @minLength(3)
@@ -53,13 +53,13 @@ var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 // Pattern: dp-be-{environment}-applicationInsights
 var appInsightsName = 'dp-be-${environment}-applicationInsights'
 
-var baseTags = {
+var additionalTags = {
   FullName: '${namePrefix}-aggregate-cost-metrics'
   Description: 'Aggregates cost metrics from Application Insights across environments'
   JobType: 'Scheduled'
 }
 
-var tags = finopsTags(baseTags, environment)
+var tags = baseTags(additionalTags, environment)
 
 var name = '${namePrefix}-cost-metrics'
 

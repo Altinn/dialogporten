@@ -74,6 +74,11 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new EntityNotFound<DialogEntity>(notFound);
         }
 
+        if (RevisionsHasMismatch(request, dialogs))
+        {
+            return new ConcurrencyError();
+        }
+
         await dialogs.MergeAsync(
             sources: request.Dto.Dialogs,
             destinationKeySelector: x => x.Id,
@@ -89,6 +94,21 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             domainError => domainError,
             concurrencyError => concurrencyError,
             conflict => conflict);
+    }
+
+    private static bool RevisionsHasMismatch(BulkSetSystemLabelCommand request, List<DialogEntity> dialogs)
+    {
+        var dialogsById = dialogs.ToDictionary(x => x.Id);
+        foreach (var dto in request.Dto.Dialogs)
+        {
+            if (dto.EndUserContextRevision is { } expected &&
+                dialogsById[dto.DialogId].EndUserContext.Revision != expected)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async Task<(List<string>, List<string>)> GetDistinctPartiesAndServiceResources(

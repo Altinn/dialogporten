@@ -13,7 +13,7 @@ param resources = {
     memory: '2Gi'
 }
 
-param otelTraceSamplerRatio = '1'
+param otelTraceSamplerRatio = '0.05'
 
 // secrets
 param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_VAULT_NAME')

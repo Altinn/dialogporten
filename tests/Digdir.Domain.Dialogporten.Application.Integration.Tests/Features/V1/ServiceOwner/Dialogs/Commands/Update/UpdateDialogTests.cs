@@ -132,6 +132,48 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                     .BeCloseTo(initialDate, TimeSpan.FromSeconds(1)));
     }
 
+    private sealed class DatesInPastTestData : TheoryData<string, Action<UpdateDialogCommand>>
+    {
+        public DatesInPastTestData()
+        {
+            var pastDate = DateTimeOffset.UtcNow.AddDays(-1);
+            Add("Can update dialog with DueAt in the past when IsSilentUpdate is set or admin scope is present",
+                x => x.Dto.DueAt = pastDate);
+            Add("Can update dialog with ExpiresAt in the past when IsSilentUpdate is set or admin scope is present",
+                x => x.Dto.ExpiresAt = pastDate);
+        }
+    }
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Can_Update_Dialog_With_Past_Dates_When_Admin_Scope(
+        string _, Action<UpdateDialogCommand> updateDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AsAdminUser()
+            .UpdateDialog(updateDialog)
+            .ExecuteAndAssert<UpdateDialogSuccess>();
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Can_Update_Dialog_With_Past_Dates_When_Silent_Update(
+        string _, Action<UpdateDialogCommand> updateDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x =>
+            {
+                x.IsSilentUpdate = true;
+                updateDialog(x);
+            })
+            .ExecuteAndAssert<UpdateDialogSuccess>();
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Cannot_Update_Dialog_With_Past_Dates_Without_Silent_Update(
+        string _, Action<UpdateDialogCommand> updateDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(updateDialog)
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText("must be in future"));
+
     [Fact]
     public async Task UpdateDialogCommand_Should_Return_New_Revision()
     {

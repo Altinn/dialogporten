@@ -50,6 +50,9 @@ Use the shared E2E base class and custom attributes so hooks and explicit behavi
 - Use `[E2EFact]` or `[E2ETheory]` on every test (do not use `[Fact]`/`[Theory]`).
 - Explicit behavior is centralized in `E2EExplicitOptions` in `Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs`.
 
+Tests must not assume a clean environment. When listing dialogs (or similar), account for other dialogs that may exist for the same test org
+or service resource.
+
 ## Run tests
 These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile this project, so you get compile-time checks even when the E2E tests do not run.
 
@@ -60,3 +63,14 @@ Use the xUnit explicit switch:
 - `dotnet test -- xUnit.Explicit=off` (default; do not run explicit tests)
 - `dotnet test -- xUnit.Explicit=on` (run all tests, including explicit)
 - `dotnet test -- xUnit.Explicit=only` (run only explicit tests)
+
+## Test data cleanup
+Cleanup is scheduled via GitHub Actions at 04:00 UTC for `test`, `staging`, and `yt01`
+in `.github/workflows/dispatch-purge-e2e-test-data.yml`, and can be triggered manually via Actions → “Purge E2E test data”.
+
+To run the cleanup locally:
+```bash
+dotnet test tests/Digdir.Domain.Dialogporten.E2E.Cleanup.Tests/Digdir.Domain.Dialogporten.E2E.Cleanup.Tests.csproj \
+  --configuration Release \
+  -- xUnit.Explicit=only
+```

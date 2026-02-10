@@ -1,7 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
@@ -163,12 +162,10 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         DialogActivityType.Values activityType, bool expectedHasUnOpenedContent) =>
         FlowBuilder.For(Application, x =>
             {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-
                 x.RemoveAll<IResourceRegistry>();
                 x.AddScoped<IResourceRegistry, TestResourceRegistry>();
             })
+            .AsIntegrationTestUser(x => x.WithScope(AuthorizationScope.CorrespondenceScope))
             .CreateSimpleDialog(x => x.AddActivity(activityType))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>

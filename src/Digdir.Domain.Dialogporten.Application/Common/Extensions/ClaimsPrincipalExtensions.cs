@@ -13,13 +13,13 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {
-    private const string ConsumerClaim = "consumer";
+    public const string ConsumerClaim = "consumer";
     private const string SupplierClaim = "supplier";
     private const string AuthorityValue = "iso6523-actorid-upis";
     private const char IdDelimiter = ':';
     private const string IdPrefix = "0192";
     private const string AltinnClaimPrefix = "urn:altinn:";
-    private const string IdportenAuthLevelClaim = "acr";
+    public const string IdportenAuthLevelClaim = "acr";
     private const string IdportenAmrClaim = "amr";
     private const string AmrSelfRegisteredEmail = "Selfregistered-email";
     private const string AmrSelfIdentified = "SelfIdentified";
@@ -32,7 +32,7 @@ public static class ClaimsPrincipalExtensions
     private const string PartyUuidClaim = "urn:altinn:party:uuid";
     private const string PartyIdClaim = "urn:altinn:partyid";
     private const char ScopeClaimSeparator = ' ';
-    private const string PidClaim = "pid";
+    public const string PidClaim = "pid";
     public const string ScopeClaim = "scope";
     public const string AltinnOrgClaim = "urn:altinn:org";
 

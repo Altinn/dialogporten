@@ -473,7 +473,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         FlowBuilder.For(Application)
             .CreateSimpleDialog(createDialog)
             .ExecuteAndAssert<DomainError>(x =>
-                x.ShouldHaveErrorWithText("ust be in future"));
+                x.ShouldHaveErrorWithText("must be in the future"));
 
     private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
     {

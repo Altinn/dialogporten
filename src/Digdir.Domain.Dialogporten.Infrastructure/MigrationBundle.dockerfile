@@ -34,4 +34,4 @@ ENV Infrastructure__DialogDbConnectionString=""
 WORKDIR /app
 USER $APP_UID
 COPY --from=build /app/publish .
-ENTRYPOINT ./efbundle -v --connection "${Infrastructure__DialogDbConnectionString}Command Timeout=0;"
+ENTRYPOINT ["sh", "-c", "./efbundle -v --connection \"${Infrastructure__DialogDbConnectionString}Command Timeout=0;\""]

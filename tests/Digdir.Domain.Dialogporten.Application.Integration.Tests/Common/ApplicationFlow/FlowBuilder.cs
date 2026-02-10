@@ -5,7 +5,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applic
 
 public static class FlowBuilder
 {
-    [Obsolete("If you use this, you smell. You don't want to smell, do you?.")]
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep For(DialogApplication application, Action<IServiceCollection> appConfig)
     {
         application.ConfigureServices(appConfig);

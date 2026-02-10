@@ -20,16 +20,20 @@ public sealed class FreezeDialogTests(DialogApplication application) : Applicati
     public Task Freeze_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.ServiceResource = "urn:altinn:resource:SuperKulTest")
+            .AsAdminUser()
             .SendCommand((_, ctx) => new FreezeDialogCommand
             {
                 Id = ctx.GetDialogId()
             })
+            .AssertSuccess()
             .ConfigureServices(x =>
             {
-                x.RemoveAll<IServiceResourceAuthorizer>();
-                x.AddSingleton<IServiceResourceAuthorizer, TestServiceResourceAuthorizer>();
+                // x.RemoveAll<IServiceResourceAuthorizer>();
+                // x.AddSingleton<IServiceResourceAuthorizer, TestServiceResourceAuthorizer>();
                 x.Decorate<IUserResourceRegistry, TestUserResourceRegistry>();
             })
+            // .AsIntegrationTestUser()
+            // .AsAdminUser()
             .UpdateDialog(x => x.Dto.Progress = 98)
             .ExecuteAndAssert<Forbidden>();
 
@@ -65,13 +69,13 @@ internal sealed class TestUserResourceRegistry(IUserResourceRegistry userResourc
     public bool IsCurrentUserServiceOwnerAdmin() => false;
     public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) => throw new NotImplementedException();
 }
-
-internal sealed class TestServiceResourceAuthorizer : IServiceResourceAuthorizer
-{
-    public Task<AuthorizeServiceResourcesResult> AuthorizeServiceResources(DialogEntity dialog, CancellationToken cancellationToken) => Task.FromResult<AuthorizeServiceResourcesResult>(new Success());
-    public Task<SetResourceTypeResult> SetResourceType(DialogEntity dialog, CancellationToken cancellationToken)
-    {
-        dialog.ServiceResourceType = "GenericAccessResource";
-        return Task.FromResult<SetResourceTypeResult>(new Success());
-    }
-}
+//
+// internal sealed class TestServiceResourceAuthorizer : IServiceResourceAuthorizer
+// {
+//     public Task<AuthorizeServiceResourcesResult> AuthorizeServiceResources(DialogEntity dialog, CancellationToken cancellationToken) => Task.FromResult<AuthorizeServiceResourcesResult>(new Success());
+//     public Task<SetResourceTypeResult> SetResourceType(DialogEntity dialog, CancellationToken cancellationToken)
+//     {
+//         dialog.ServiceResourceType = "GenericAccessResource";
+//         return Task.FromResult<SetResourceTypeResult>(new Success());
+//     }
+// }

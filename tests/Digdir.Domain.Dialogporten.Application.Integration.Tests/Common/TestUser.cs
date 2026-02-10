@@ -60,7 +60,12 @@ internal static class TestUserExtensions
             .Create(UserStore.IntegrationTestUser)
             .WithScope(AuthorizationScope.CorrespondenceScope)
             .Build());
-        public TFlowStep AsAdminUser() => throw new NotImplementedException();
+
+        public TFlowStep AsAdminUser() => flowStep.AsUser(ClaimsPrincipalBuilder
+            .Create(UserStore.IntegrationTestUser)
+            .WithScope(AuthorizationScope.ServiceOwnerAdminScope)
+            .Build());
+
         public TFlowStep AsEndUser() => throw new NotImplementedException();
         public TFlowStep AsServiceOwnerUser() => throw new NotImplementedException();
 

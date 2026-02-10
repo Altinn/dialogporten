@@ -14,6 +14,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -100,6 +101,8 @@ public class DialogApplication : IAsyncLifetime
             .RemoveAll<IClock>()
             .AddSingleton<IClock>(Clock)
             .AddSingleton<IUser>(User)
+            .RemoveAll<IServiceResourceAuthorizer>()
+            .AddSingleton<IServiceResourceAuthorizer, IntegrationTestServiceResourceAuthorizer>()
             .AddDistributedMemoryCache()
             .AddLogging()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()

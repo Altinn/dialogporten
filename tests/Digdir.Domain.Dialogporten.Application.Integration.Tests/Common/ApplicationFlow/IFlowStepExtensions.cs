@@ -205,7 +205,8 @@ public static class IFlowStepExtensions
             return x;
         });
 
-    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
+    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step,
+        Action<DeleteDialogCommand>? modify = null) =>
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand(x =>
             {

@@ -187,38 +187,20 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
         step.Do(x =>
         {
             x.Application.ConfigureServices(configure);
         });
 
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
         step.Select(x =>
         {
             step.Context.Application.ConfigureServices(configure);
             return x;
         });
-
-    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, TimeSpan skew) =>
-        step.Select(x =>
-        {
-            DialogApplication.Clock.OverrideUtc(skew);
-            return x;
-        });
-
-    public static IFlowStep OverrideUtc(this IFlowStep step, TimeSpan skew) =>
-        step.Do(_ => DialogApplication.Clock.OverrideUtc(skew));
-
-    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, DateTimeOffset time) =>
-        step.Select(x =>
-        {
-            DialogApplication.Clock.OverrideUtc(time);
-            return x;
-        });
-
-    public static IFlowStep OverrideUtc(this IFlowStep step, DateTimeOffset time) =>
-        step.Do(_ => DialogApplication.Clock.OverrideUtc(time));
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
         step.AssertResult<CreateDialogSuccess>()

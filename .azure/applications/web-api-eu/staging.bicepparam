@@ -8,7 +8,7 @@ param whitelistedIPs = [
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param revisionSuffix = readEnvironmentVariable('REVISION_SUFFIX')
 
-param otelTraceSamplerRatio = '1'
+param otelTraceSamplerRatio = '0.05'
 
 // secrets
 param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_VAULT_NAME')

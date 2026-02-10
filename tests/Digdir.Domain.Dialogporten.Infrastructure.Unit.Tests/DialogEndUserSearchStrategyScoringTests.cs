@@ -21,8 +21,8 @@ public class DialogEndUserSearchStrategyScoringTests
         var serviceScore = serviceDriven.Score(context);
 
         // Assert
-        Assert.Equal(100, partyScore);
-        Assert.Equal(1, serviceScore);
+        Assert.Equal(0, partyScore);
+        Assert.Equal(100, serviceScore);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class DialogEndUserSearchStrategyScoringTests
         var serviceScore = serviceDriven.Score(context);
 
         // Assert
-        Assert.Equal(1, partyScore);
+        Assert.Equal(0, partyScore);
         Assert.Equal(100, serviceScore);
     }
 
@@ -55,8 +55,8 @@ public class DialogEndUserSearchStrategyScoringTests
         var serviceScore = serviceDriven.Score(context);
 
         // Assert
-        Assert.Equal(100, partyScore);
-        Assert.Equal(1, serviceScore);
+        Assert.Equal(0, partyScore);
+        Assert.Equal(100, serviceScore);
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class DialogEndUserSearchStrategyScoringTests
         var serviceScore = serviceDriven.Score(context);
 
         // Assert
-        Assert.Equal(1, partyScore);
+        Assert.Equal(0, partyScore);
         Assert.Equal(100, serviceScore);
     }
 

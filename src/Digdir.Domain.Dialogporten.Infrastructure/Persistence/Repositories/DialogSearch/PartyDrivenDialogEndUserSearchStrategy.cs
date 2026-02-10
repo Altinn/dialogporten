@@ -7,7 +7,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDrivenDialogEndUserSearchStrategy> logger)
     : IDialogEndUserSearchStrategy
 {
-    private const int ServiceCountThreshold = 5;
     private readonly ILogger<PartyDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public string Name => "PartyDriven";
@@ -16,11 +15,11 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
     public void SetContext(EndUserSearchContext context) =>
         Context = context ?? throw new ArgumentNullException(nameof(context));
 
-    // Party-driven is preferred when service cardinality is low.
+    // Party-driven is kept as fallback only when branching logic is disabled.
     public int Score(EndUserSearchContext context)
     {
-        var totalServiceCount = DialogEndUserSearchSqlHelpers.GetTotalServiceCount(context);
-        return totalServiceCount <= ServiceCountThreshold ? 100 : 1;
+        _ = context;
+        return 0;
     }
 
     public PostgresFormattableStringBuilder BuildSql()
@@ -33,10 +32,8 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
             context.AuthorizedResources);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
-        var postPermissionFilters = DialogEndUserSearchSqlHelpers.BuildPostPermissionFilters(
-            query,
-            includeSearchFilter: false,
-            includePaginationCondition: false);
+        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
+        var postPermissionFilters = DialogEndUserSearchSqlHelpers.BuildPostPermissionFilters(query);
 
         return new PostgresFormattableStringBuilder()
             .Append("WITH ")
@@ -83,6 +80,7 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
                 SELECT d.*
                 FROM candidate_dialogs cd
                 JOIN "Dialog" d ON d."Id" = cd."Id"
+                {searchJoin}
                 {postPermissionFilters}
 
                 """);

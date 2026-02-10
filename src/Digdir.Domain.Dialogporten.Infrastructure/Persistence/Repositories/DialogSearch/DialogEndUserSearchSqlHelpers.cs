@@ -7,20 +7,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 
 internal static partial class DialogEndUserSearchSqlHelpers
 {
-    internal static PostgresFormattableStringBuilder BuildPostPermissionFilters(
-        GetDialogsQuery query,
-        bool includeSearchFilter,
-        bool includePaginationCondition)
-    {
-        var builder = new PostgresFormattableStringBuilder()
-            .Append("WHERE 1=1");
-
-        if (includeSearchFilter)
-        {
-            builder.AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """);
-        }
-
-        builder
+    internal static PostgresFormattableStringBuilder BuildPostPermissionFilters(GetDialogsQuery query) =>
+        new PostgresFormattableStringBuilder()
+            .Append("WHERE 1=1")
+            .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
@@ -38,17 +28,10 @@ internal static partial class DialogEndUserSearchSqlHelpers
             .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
-            .AppendSystemLabelFilterCondition(query.SystemLabel);
-
-        if (includePaginationCondition)
-        {
-            builder.ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d");
-        }
-
-        return builder
+            .AppendSystemLabelFilterCondition(query.SystemLabel)
+            .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
-    }
 
     internal static PostgresFormattableStringBuilder BuildSearchJoin(bool includeSearch)
     {
@@ -68,9 +51,7 @@ internal static partial class DialogEndUserSearchSqlHelpers
 
     internal static List<PartiesAndServices> BuildPartiesAndServices(
         GetDialogsQuery query,
-        DialogSearchAuthorizationResult authorizedResources)
-    {
-        var partiesAndServices = authorizedResources.ResourcesByParties
+        DialogSearchAuthorizationResult authorizedResources) => authorizedResources.ResourcesByParties
             .Select(x => (party: x.Key, services: x.Value))
             .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
             .Select(x => new PartiesAndServices(
@@ -84,9 +65,6 @@ internal static partial class DialogEndUserSearchSqlHelpers
             )
             .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
             .ToList();
-
-        return partiesAndServices;
-    }
 
     internal static void LogPartiesAndServicesCount(
         ILogger logger,
@@ -115,65 +93,4 @@ internal static partial class DialogEndUserSearchSqlHelpers
         int totalServicesCount,
         int groupsCount,
         List<(int PartiesCount, int ServicesCount)> groupSizes);
-
-    internal static int GetTotalServiceCount(EndUserSearchContext context)
-    {
-        var uniqueServices = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-        var constrainedParties = context.Query.Party;
-        var constrainedServices = context.Query.ServiceResource;
-
-        foreach (var (party, services) in context.AuthorizedResources.ResourcesByParties)
-        {
-            if (constrainedParties is not null && constrainedParties.Count != 0 && !constrainedParties.Contains(party))
-            {
-                continue;
-            }
-
-            foreach (var service in services)
-            {
-                if (constrainedServices is not null && constrainedServices.Count != 0 && !constrainedServices.Contains(service))
-                {
-                    continue;
-                }
-
-                uniqueServices.Add(service);
-            }
-        }
-
-        return uniqueServices.Count;
-    }
-
-    internal static int GetTotalPartyCount(EndUserSearchContext context)
-    {
-        var uniqueParties = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-        var constrainedParties = context.Query.Party;
-        var constrainedServices = context.Query.ServiceResource;
-
-        foreach (var (party, services) in context.AuthorizedResources.ResourcesByParties)
-        {
-            if (constrainedParties is not null && constrainedParties.Count != 0 && !constrainedParties.Contains(party))
-            {
-                continue;
-            }
-
-            if (constrainedServices is null || constrainedServices.Count == 0)
-            {
-                uniqueParties.Add(party);
-                continue;
-            }
-
-            foreach (var service in services)
-            {
-                if (!constrainedServices.Contains(service))
-                {
-                    continue;
-                }
-
-                uniqueParties.Add(party);
-                break;
-            }
-        }
-
-        return uniqueParties.Count;
-    }
 }

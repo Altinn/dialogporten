@@ -8,7 +8,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDrivenDialogEndUserSearchStrategy> logger)
     : IDialogEndUserSearchStrategy
 {
-    private const int ServiceCountThreshold = 5;
     private readonly ILogger<ServiceDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public string Name => "ServiceDriven";
@@ -17,11 +16,11 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
     public void SetContext(EndUserSearchContext context) =>
         Context = context ?? throw new ArgumentNullException(nameof(context));
 
-    // Service-driven is preferred when service cardinality is high.
+    // Service-driven is always preferred when branching logic is enabled.
     public int Score(EndUserSearchContext context)
     {
-        var totalServiceCount = DialogEndUserSearchSqlHelpers.GetTotalServiceCount(context);
-        return totalServiceCount > ServiceCountThreshold ? 100 : 1;
+        _ = context;
+        return 100;
     }
 
     public PostgresFormattableStringBuilder BuildSql()
@@ -33,11 +32,8 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
             query,
             context.AuthorizedResources);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices);
-        var permissionCandidateDialogs = BuildPermissionCandidateDialogs();
-        var postPermissionFilters = DialogEndUserSearchSqlHelpers.BuildPostPermissionFilters(
-            query,
-            includeSearchFilter: query.Search is not null,
-            includePaginationCondition: true);
+        var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
+        var postPermissionFilters = DialogEndUserSearchSqlHelpers.BuildPostPermissionFilters(query);
         var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
@@ -85,16 +81,49 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
                 """);
     }
 
-    private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs() =>
-        new PostgresFormattableStringBuilder()
+    private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
+    {
+        var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+
+        return new PostgresFormattableStringBuilder()
             .Append(
-                """
-                SELECT d."Id"
+                $"""
+                SELECT d_inner."Id"
                 FROM service_permissions sp
-                JOIN "Dialog" d ON d."ServiceResource" = sp.service
-                               AND d."Party" = ANY(sp.allowed_parties)
-                WHERE 1=1
+                CROSS JOIN LATERAL (
+                    SELECT d."Id"
+                    FROM "Dialog" d
+                    WHERE d."ServiceResource" = sp.service
+                      AND d."Party" = ANY(sp.allowed_parties)
+                      {permissionCandidateFilters}
+                """)
+            .ApplyPaginationOrder(query.OrderBy!, alias: "d")
+            .Append(
+                $"""
+                    LIMIT {query.Limit + 1}
+                ) d_inner
 
                 """);
+    }
 
+    private static PostgresFormattableStringBuilder BuildPermissionCandidateFilters(GetDialogsQuery query) =>
+        new PostgresFormattableStringBuilder()
+            .AppendManyFilter(query.Org, nameof(query.Org))
+            .AppendManyFilter(query.Status, "StatusId", "int")
+            .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
+            .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
+            .AppendIf(query.ExpiresAfter is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresAfter}::timestamptz) """)
+            .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
+            .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
+            .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)
+            .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore}::timestamptz """)
+            .AppendIf(query.UpdatedAfter is not null, $""" AND {query.UpdatedAfter}::timestamptz <= d."UpdatedAt" """)
+            .AppendIf(query.UpdatedBefore is not null, $""" AND d."UpdatedAt" <= {query.UpdatedBefore}::timestamptz """)
+            .AppendIf(query.ContentUpdatedAfter is not null, $""" AND {query.ContentUpdatedAfter}::timestamptz <= d."ContentUpdatedAt" """)
+            .AppendIf(query.ContentUpdatedBefore is not null, $""" AND d."ContentUpdatedAt" <= {query.ContentUpdatedBefore}::timestamptz """)
+            .AppendIf(query.DueAfter is not null, $""" AND {query.DueAfter}::timestamptz <= d."DueAt" """)
+            .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
+            .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
+            .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
+            .AppendSystemLabelFilterCondition(query.SystemLabel);
 }

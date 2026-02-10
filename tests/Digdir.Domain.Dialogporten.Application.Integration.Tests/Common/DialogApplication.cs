@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using HotChocolate.Subscriptions;
@@ -120,6 +121,14 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
             .AddScoped<IOptionsSnapshot<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
             .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>())
+            .AddScoped<IOptionsMonitor<ApplicationSettings>>(sp =>
+            {
+                var monitor = Substitute.For<IOptionsMonitor<ApplicationSettings>>();
+                var settings = sp.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>().Value;
+                monitor.CurrentValue.Returns(settings);
+                monitor.Get(Arg.Any<string>()).Returns(settings);
+                return monitor;
+            })
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
@@ -131,6 +140,9 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
 
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
+            .AddTransient<IDialogEndUserSearchStrategySelector, DialogEndUserSearchStrategySelector>()
+            .AddTransient<IDialogEndUserSearchStrategy, PartyDrivenDialogEndUserSearchStrategy>()
+            .AddTransient<IDialogEndUserSearchStrategy, ServiceDrivenDialogEndUserSearchStrategy>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
             .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();

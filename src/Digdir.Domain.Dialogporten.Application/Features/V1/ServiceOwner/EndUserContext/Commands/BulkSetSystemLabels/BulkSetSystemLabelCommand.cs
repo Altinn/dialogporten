@@ -86,6 +86,10 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return new Forbidden().WithInvalidDialogIds(missing);
         }
 
+        if (RevisionsHasMismatch(request, dialogs))
+        {
+            return new ConcurrencyError();
+        }
 
         foreach (var dialog in dialogs)
         {
@@ -103,6 +107,21 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             domainError => domainError,
             concurrencyError => concurrencyError,
             conflict => conflict);
+    }
+
+    private static bool RevisionsHasMismatch(BulkSetSystemLabelCommand request, List<DialogEntity> dialogs)
+    {
+        var dialogsById = dialogs.ToDictionary(x => x.Id);
+        foreach (var dto in request.Dto.Dialogs)
+        {
+            if (dto.EndUserContextRevision is { } expected &&
+                dialogsById[dto.DialogId].EndUserContext.Revision != expected)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async Task<(LabelAssignmentLogActor? Actor, Forbidden? Error)> TryCreatePerformedByActor(

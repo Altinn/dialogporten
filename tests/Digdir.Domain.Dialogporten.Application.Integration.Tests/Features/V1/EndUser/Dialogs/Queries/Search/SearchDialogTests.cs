@@ -143,7 +143,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                             ResourcesByParties = new Dictionary<string, HashSet<string>>
                             {
                                 // Default integration test user party
-                                { IntegrationTestUser.DefaultParty, [DummyService] }
+                                { TestUsers.DefaultParty, [DummyService] }
                             },
                             // Delegated dialog
                             DialogIds = [delegatedDialogId]
@@ -161,7 +161,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             {
                 // Default integration test user dialog
                 x.Dto.ServiceResource = DummyService;
-                x.Dto.Party = IntegrationTestUser.DefaultParty;
+                x.Dto.Party = TestUsers.DefaultParty;
             })
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
@@ -176,7 +176,7 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 // Default integration test user dialog
                 x.Items.Should().ContainSingle(d =>
                     d.Id != delegatedDialogId &&
-                    d.Party == IntegrationTestUser.DefaultParty);
+                    d.Party == TestUsers.DefaultParty);
             });
     }
 }

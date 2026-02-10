@@ -59,6 +59,11 @@ internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWo
             return new DomainError(new DomainFailure(nameof(DialogActivity.Type), $"Only {nameof(DialogActivityType.Values.FormSaved)} activities is allowed to be updated using admin scope."));
         }
 
+        if (request.IfMatchDialogRevision is { } revision && revision != activity.Dialog.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         activity.CreatedAt = request.NewCreatedAt;
 
         // Since we are opting out of UpdatableFilter through ISilentUpdater

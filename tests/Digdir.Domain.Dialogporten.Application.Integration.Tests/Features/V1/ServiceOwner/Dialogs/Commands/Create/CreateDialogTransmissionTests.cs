@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -11,7 +12,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionDto;
@@ -188,56 +188,63 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .ExecuteAndAssert<ValidationError>(result => result
                 .ShouldHaveErrorWithText(nameof(DialogTransmission.ExternalReference)));
 
-    private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<TransmissionDto>, Type>
+    private sealed class HtmlContentTestData : TheoryData<string, ClaimsPrincipal, Action<TransmissionDto>, Type>
     {
+
         public HtmlContentTestData()
         {
+            var legacyHtmlScopeUser = TestUsers.FromDefault()
+                .WithScope(AuthorizationScope.LegacyHtmlScope)
+                .Build();
+            var defaultUser = TestUsers.FromDefault().Build();
+
             Add("Cannot create transmission with HTML content without valid html scope",
-                _ => { }, // No change in user scopes
+                defaultUser, // No change in user scopes
                 x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create transmission with embeddable HTML content without valid html scope",
-                _ => { }, // No change in user scopes
+                defaultUser, // No change in user scopes
                 x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(ValidationError));
 
             Add("Cannot create transmission title content with HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create transmission summary content with HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create title content with embeddable HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(ValidationError));
 
             Add("Cannot create transmission with embeddable HTML content without valid html scope",
-                _ => { }, // No change in user scopes
+                defaultUser, // No change in user scopes
                 x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtmlDeprecated),
                 typeof(ValidationError));
 
             Add("Cannot create content with HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Can create contentRef content with embeddable HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(CreateDialogSuccess));
         }
     }
 
     [Theory, ClassData(typeof(HtmlContentTestData))]
-    public Task Html_Content_Tests(string _, Action<IServiceCollection> appConfig,
+    public Task Html_Content_Tests(string _, ClaimsPrincipal user,
         Action<TransmissionDto> createTransmission, Type expectedType) =>
-        FlowBuilder.For(Application, appConfig)
+        FlowBuilder.For(Application)
+            .AsUser(user)
             .CreateSimpleDialog(x =>
                 x.AddTransmission(createTransmission))
             .ExecuteAndAssert(x =>
@@ -255,8 +262,8 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
     [Fact]
     public Task Transmission_With_Legacy_Embeddable_HTML_Returns_New_Embeddable_MediaType() =>
-        FlowBuilder.For(Application,
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope))
+        FlowBuilder.For(Application)
+            .AsIntegrationTestUser(x => x.WithScope(AuthorizationScope.LegacyHtmlScope))
             .CreateSimpleDialog(x => x
                 .AddTransmission(SetLegacyEmbeddableHtmlDeprecated))
             .GetServiceOwnerDialog()

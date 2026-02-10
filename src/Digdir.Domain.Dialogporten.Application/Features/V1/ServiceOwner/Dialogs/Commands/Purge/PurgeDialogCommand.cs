@@ -60,6 +60,12 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
         {
             return new Forbidden($"User cannot modify resource type {dialog.ServiceResourceType}.");
         }
+
+        if (request.IfMatchDialogRevision is { } revision && revision != dialog.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         _db.Dialogs.HardRemove(dialog);
         var saveResult = await _unitOfWork
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -16,7 +17,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Microsoft.Extensions.DependencyInjection;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -310,76 +310,82 @@ public class CreateDialogTests : ApplicationCollectionFixture
         }]
     };
 
-    private sealed class HtmlContentTestData : TheoryData<string, Action<IServiceCollection>, Action<CreateDialogCommand>, Type>
+    private sealed class HtmlContentTestData : TheoryData<string, ClaimsPrincipal, Action<CreateDialogCommand>, Type>
     {
         public HtmlContentTestData()
         {
+            var legacyHtmlScopeUser = TestUsers
+                .FromDefault()
+                .WithScope(AuthorizationScope.LegacyHtmlScope)
+                .Build();
+
             Add("Cannot create dialog with HTML content without valid html scope",
-                _ => { }, // No change in user scopes
+                TestUsers.FromDefault(), // No change in user scopes
                 x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Can create dialog with HTML content with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(CreateDialogSuccess));
 
             Add("Can create HTML content with table tag with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateTableHtml(),
                 typeof(CreateDialogSuccess));
 
             Add("Cannot create dialog with forbidden HTML tags: iframe",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<iframe src='malicious site'></iframe>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: script",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<script>alert('hack');</script>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: img",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<img src='evil.png' />"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: div",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<div>Not allowed</div>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: span",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<span>Not allowed</span>"),
                 typeof(ValidationError));
 
             Add("Cannot create title content with HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create summary content with HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create title content with embeddable HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(ValidationError));
 
             Add("Can create mainContentRef content with embeddable HTML media type with valid html scope",
-                ConfigureUserWithScope(AuthorizationScope.LegacyHtmlScope),
+                legacyHtmlScopeUser,
                 x => x.Dto.Content!.MainContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(CreateDialogSuccess));
         }
     }
 
     [Theory, ClassData(typeof(HtmlContentTestData))]
-    public Task Html_Content_Tests(string _, Action<IServiceCollection> appConfig,
+    public Task Html_Content_Tests(string _, ClaimsPrincipal user,
         Action<CreateDialogCommand> createDialog, Type expectedType) =>
-        FlowBuilder.For(Application, appConfig)
+        FlowBuilder.For(Application)
+            .AsUser(user)
             .CreateSimpleDialog(createDialog)
             .ExecuteAndAssert(expectedType);
 
@@ -427,6 +433,47 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Dto.Content = null;
             })
             .ExecuteAndAssert(expectedType);
+
+    private sealed class DatesInPastTestData : TheoryData<string, Action<CreateDialogCommand>>
+    {
+        public DatesInPastTestData()
+        {
+            var pastDate = DateTimeOffset.UtcNow.AddDays(-1);
+            Add("Can create dialog with DueAt in the past when IsSilentUpdate is set or admin scope is present",
+                x => x.Dto.DueAt = pastDate);
+            Add("Can create dialog with ExpiresAt in the past when IsSilentUpdate is set or admin scope is present",
+                x => x.Dto.ExpiresAt = pastDate);
+            Add("Can create dialog with VisibleFrom in the past when IsSilentUpdate is set or admin scope is present",
+                x => x.Dto.VisibleFrom = pastDate);
+        }
+    }
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Can_Create_Dialog_With_Past_Dates_When_Admin_Scope(
+        string _, Action<CreateDialogCommand> createDialog) =>
+        FlowBuilder.For(Application)
+            .AsAdminUser()
+            .CreateSimpleDialog(createDialog)
+            .ExecuteAndAssert<CreateDialogSuccess>();
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Can_Create_Dialog_With_Past_Dates_When_Silent_Update(
+        string _, Action<CreateDialogCommand> createDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.IsSilentUpdate = true;
+                createDialog(x);
+            })
+            .ExecuteAndAssert<CreateDialogSuccess>();
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Cannot_Create_Dialog_With_Past_Dates_Without_Silent_Update_Or_Admin_Scope(
+        string _, Action<CreateDialogCommand> createDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(createDialog)
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText("must be in the future"));
 
     private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
     {

@@ -17,7 +17,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Microsoft.Extensions.DependencyInjection;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -315,13 +314,13 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         public HtmlContentTestData()
         {
-            var legacyHtmlScopeUser = ClaimsPrincipalBuilder
-                .From(TestUsers.Default)
+            var legacyHtmlScopeUser = TestUsers
+                .FromDefault()
                 .WithScope(AuthorizationScope.LegacyHtmlScope)
                 .Build();
 
             Add("Cannot create dialog with HTML content without valid html scope",
-                TestUsers.Default, // No change in user scopes
+                TestUsers.FromDefault(), // No change in user scopes
                 x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 

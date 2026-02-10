@@ -187,12 +187,14 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+    [Obsolete("If you use this, you smell. You don't want to smell, do you?.")]
     public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
         step.Do(x =>
         {
             x.Application.ConfigureServices(configure);
         });
 
+    [Obsolete("If you use this, you smell. You don't want to smell, do you?.")]
     public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
         step.Select(x =>
         {

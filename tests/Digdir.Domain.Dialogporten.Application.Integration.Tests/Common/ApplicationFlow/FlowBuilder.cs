@@ -5,14 +5,15 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applic
 
 public static class FlowBuilder
 {
-    public static IFlowStep For(DialogApplication application, Action<IServiceCollection>? appConfig = null)
+    [Obsolete("If you use this, you smell. You don't want to smell, do you?.")]
+    public static IFlowStep For(DialogApplication application, Action<IServiceCollection> appConfig)
     {
-        if (appConfig is not null)
-        {
-            application.ConfigureServices(appConfig);
-        }
+        application.ConfigureServices(appConfig);
         return new FlowStep<object?>(new FlowContext(application, [], []));
     }
+
+    public static IFlowStep For(DialogApplication application) =>
+        new FlowStep<object?>(new FlowContext(application, [], []));
 }
 
 public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>

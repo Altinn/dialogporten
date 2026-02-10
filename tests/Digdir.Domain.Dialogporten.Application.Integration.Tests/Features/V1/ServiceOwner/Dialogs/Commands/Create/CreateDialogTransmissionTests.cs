@@ -12,7 +12,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionDto;
@@ -194,18 +193,18 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
         public HtmlContentTestData()
         {
-            var legacyHtmlScopeUser = ClaimsPrincipalBuilder
-                .From(TestUsers.Default)
+            var legacyHtmlScopeUser = TestUsers.FromDefault()
                 .WithScope(AuthorizationScope.LegacyHtmlScope)
                 .Build();
+            var defaultUser = TestUsers.FromDefault().Build();
 
             Add("Cannot create transmission with HTML content without valid html scope",
-                TestUsers.Default, // No change in user scopes
+                defaultUser, // No change in user scopes
                 x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create transmission with embeddable HTML content without valid html scope",
-                TestUsers.Default, // No change in user scopes
+                defaultUser, // No change in user scopes
                 x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(ValidationError));
 
@@ -225,7 +224,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 typeof(ValidationError));
 
             Add("Cannot create transmission with embeddable HTML content without valid html scope",
-                TestUsers.Default, // No change in user scopes
+                defaultUser, // No change in user scopes
                 x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtmlDeprecated),
                 typeof(ValidationError));
 

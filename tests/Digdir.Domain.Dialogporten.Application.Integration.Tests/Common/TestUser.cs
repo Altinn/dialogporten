@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Security.Principal;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -10,10 +9,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 public sealed class TestUser : IUser
 {
-    private static string DefaultPid => "22834498646";
-    public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
-
-    private static readonly ClaimsPrincipal DefaultPrincipal = new(TestUsers.Default);
+    private static readonly ClaimsPrincipal DefaultPrincipal = TestUsers.FromDefault();
 
     private ClaimsPrincipal? _override;
 
@@ -26,24 +22,23 @@ public sealed class TestUser : IUser
 
 internal static class TestUsers
 {
-    public const string DefaultPid ="22834498646";
-    // public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
-    public static readonly ClaimsPrincipal Default = new(new ClaimsIdentity(
-    [
-        new Claim(ClaimTypes.Name, "Integration Test User"),
-        new Claim("acr", Constants.IdportenLoaHigh),
-        new Claim(ClaimTypes.NameIdentifier, "integration-test-user"),
-        new Claim("pid", DefaultPid),
-        new Claim("consumer",
+    private static string DefaultPid => "22834498646";
+    public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
+
+    private static readonly Dictionary<string, string> Default = new()
+    {
+        [ClaimTypes.Name] = "Integration Test User",
+        [ClaimsPrincipalExtensions.IdportenAuthLevelClaim] = Constants.IdportenLoaHigh,
+        [ClaimTypes.NameIdentifier] = "integration-test-user",
+        [ClaimsPrincipalExtensions.PidClaim] = DefaultPid,
+        [ClaimsPrincipalExtensions.ConsumerClaim] =
             """
             {
                 "authority": "iso6523-actorid-upis",
                 "ID": "0192:991825827"
             }
-            """)
-    ]));
-    
-    public static readonly 
+            """
+    };
 
     public static ClaimsPrincipalBuilder FromDefault() => ClaimsPrincipalBuilder.From(Default);
 
@@ -54,24 +49,17 @@ internal static class TestUsers
                 .Configure(configure)
                 .Build());
 
-        public TFlowStep AsCorrespondenceUser() => flowStep.AsUser(ClaimsPrincipalBuilder
-            .Create(UserStore.IntegrationTestUser)
-            .WithScope(AuthorizationScope.CorrespondenceScope)
-            .Build());
-
-        public TFlowStep AsAdminUser() => flowStep.AsUser(ClaimsPrincipalBuilder
-            .Create(UserStore.IntegrationTestUser)
-            .WithScope(AuthorizationScope.ServiceOwnerAdminScope)
-            .Build());
-
         public TFlowStep AsCorrespondenceUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
             flowStep.AsUser(() => FromDefault()
                 .WithScope(AuthorizationScope.CorrespondenceScope)
                 .Configure(configure)
                 .Build());
-        public TFlowStep AsAdminUser() => throw new NotImplementedException();
-        public TFlowStep AsEndUser() => throw new NotImplementedException();
-        public TFlowStep AsServiceOwnerUser() => throw new NotImplementedException();
+
+        public TFlowStep AsAdminUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromDefault()
+                .WithScope(AuthorizationScope.ServiceOwnerAdminScope)
+                .Configure(configure)
+                .Build());
 
         public TFlowStep AsUser(ClaimsPrincipal claimsPrincipal) =>
             flowStep.Do(_ => DialogApplication.User.OverrideUser(claimsPrincipal));
@@ -87,34 +75,14 @@ internal sealed class ClaimsPrincipalBuilder
 
     private ClaimsPrincipalBuilder() { }
 
-    public static ClaimsPrincipalBuilder From(IIdentity? identity = null)
+    public static ClaimsPrincipalBuilder From(Dictionary<string, string> claims)
     {
         var builder = new ClaimsPrincipalBuilder();
-        if (identity != null) builder.WithIdentity(identity);
-        return builder;
-    }
-
-    public static ClaimsPrincipalBuilder From(ClaimsPrincipal? identity = null)
-    {
-        var builder = new ClaimsPrincipalBuilder();
-        if (identity != null) builder.WithIdentity(identity);
-        return builder;
-    }
-
-    public ClaimsPrincipalBuilder WithIdentity(ClaimsPrincipal identity) => WithClaims(identity.Claims);
-
-    public ClaimsPrincipalBuilder WithIdentity(IIdentity identity) =>
-        identity is not ClaimsIdentity claimsIdentity
-            ? throw new ArgumentException("Identity must be a ClaimsIdentity", nameof(identity))
-            : WithClaims(claimsIdentity.Claims);
-
-    public ClaimsPrincipalBuilder WithClaims(params IEnumerable<Claim> claims)
-    {
         foreach (var claim in claims)
         {
-            WithClaim(claim.Type, claim.Value);
+            builder.WithClaim(claim.Key, claim.Value);
         }
-        return this;
+        return builder;
     }
 
     public ClaimsPrincipalBuilder WithClaim(string type, string value)

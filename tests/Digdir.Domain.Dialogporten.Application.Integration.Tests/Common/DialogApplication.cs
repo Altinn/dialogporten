@@ -75,6 +75,7 @@ public class DialogApplication : IAsyncLifetime
     /// You may only call this or equivalent methods once per test.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the method is called more than once per test.</exception>
+    [Obsolete("If you use this, you smell. You don't want to smell, do you?.")]
     public void ConfigureServices(Action<IServiceCollection> configure)
     {
         if (_rootProvider != _fixtureRootProvider)

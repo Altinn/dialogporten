@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, cast
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+
 try:
     from stats_utils import summarize
 except ModuleNotFoundError:
@@ -210,7 +212,7 @@ SUMMARY_FIELDS = [
 
 def build_summary_rows(rows: List[Dict[str, str]]) -> List[Dict[str, str]]:
     summary_rows: List[Dict[str, str]] = []
-    grouped: Dict[Tuple[str, str], Dict[str, List[float] | int]] = {}
+    grouped: Dict[Tuple[str, str], Dict[str, object]] = {}
     meta: Dict[Tuple[str, str], Dict[str, str]] = {}
 
     for row in rows:
@@ -392,7 +394,12 @@ def main() -> int:
         shutil.copy2(src, parties_path)
     else:
         log_info("Generating party samples")
-        cmd = [sys.executable, "generate_samples.py", "party", str(args.generate_party_pool_with_count)]
+        cmd = [
+            sys.executable,
+            str(SCRIPT_DIR / "generate_samples.py"),
+            "party",
+            str(args.generate_party_pool_with_count),
+        ]
         log_command(cmd)
         code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
         if code != 0:
@@ -412,7 +419,12 @@ def main() -> int:
         shutil.copy2(src, services_path)
     else:
         log_info("Generating service samples")
-        cmd = [sys.executable, "generate_samples.py", "service", str(args.generate_service_pool_with_count)]
+        cmd = [
+            sys.executable,
+            str(SCRIPT_DIR / "generate_samples.py"),
+            "service",
+            str(args.generate_service_pool_with_count),
+        ]
         log_command(cmd)
         code, stdout, stderr = run_command(cmd, timeout_s=args.script_timeout)
         if code != 0:
@@ -437,7 +449,7 @@ def main() -> int:
         ensure_dir(iter_explains_dir)
         cmd = [
             sys.executable,
-            "generate_cases.py",
+            str(SCRIPT_DIR / "generate_cases.py"),
             "--parties-path",
             str(parties_path),
             "--services-path",
@@ -470,7 +482,7 @@ def main() -> int:
             for position, sql_path in enumerate(ordered_sql_paths, start=1):
                 cmd = [
                     sys.executable,
-                    "run_benchmark.py",
+                    str(SCRIPT_DIR / "run_benchmark.py"),
                     "--cases",
                     str(iter_cases_dir / "*.json"),
                     "--sqls",
@@ -561,7 +573,7 @@ def main() -> int:
     condensed_path = root_dir / "explains_all.txt.condensed.txt"
     cmd = [
         sys.executable,
-        "condense_explains.py",
+        str(SCRIPT_DIR / "condense_explains.py"),
         str(explains_all_path),
         "--out",
         str(condensed_path),
@@ -576,7 +588,7 @@ def main() -> int:
     excel_path = root_dir / f"summary-{timestamp}.xlsx"
     cmd = [
         sys.executable,
-        "generate_excel_summary.py",
+        str(SCRIPT_DIR / "generate_excel_summary.py"),
         str(summary_path),
         "--out",
         str(excel_path),

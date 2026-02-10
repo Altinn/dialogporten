@@ -312,6 +312,16 @@ def main():
                 except subprocess.TimeoutExpired:
                     warn(f"Timeout after {args.timeout}s: {sql['path'].name} on {case['name']}")
                     exec_ms = buf_read = buf_hit = buf_dirtied = None
+                except subprocess.CalledProcessError as ex:
+                    warn(
+                        (
+                            f"SQL error for {sql['path'].name} on {case['name']}: "
+                            f"exit code {ex.returncode}"
+                        )
+                    )
+                    if ex.output:
+                        warn(ex.output.strip())
+                    exec_ms = buf_read = buf_hit = buf_dirtied = None
                 else:
                     if args.print_explain:
                         print(

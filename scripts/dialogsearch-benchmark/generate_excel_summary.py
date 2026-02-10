@@ -205,8 +205,8 @@ def summarize_rows_by_variant(rows: List[Dict[str, str]]) -> List[List[Union[flo
         bucket = grouped[variant]
         stats = {
             "exec_avg": summarize(bucket["exec_avg"])["avg"],
-            "exec_min": summarize(bucket["exec_min"])["avg"],
-            "exec_max": summarize(bucket["exec_max"])["avg"],
+            "exec_min": summarize(bucket["exec_min"])["min"],
+            "exec_max": summarize(bucket["exec_max"])["max"],
             "exec_p50": summarize(bucket["exec_p50"])["avg"],
             "exec_p95": summarize(bucket["exec_p95"])["avg"],
             "exec_p99": summarize(bucket["exec_p99"])["avg"],

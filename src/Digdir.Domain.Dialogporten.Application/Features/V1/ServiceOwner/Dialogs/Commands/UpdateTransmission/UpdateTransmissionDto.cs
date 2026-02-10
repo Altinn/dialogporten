@@ -92,10 +92,10 @@ public sealed class TransmissionContentDto
     /// </summary>
     public ContentValueDto Title { get; set; } = null!;
 
-    /// <summary>
-    /// The transmission summary.
-    /// </summary>
-    public ContentValueDto? Summary { get; set; }
+    // /// <summary>
+    // /// The transmission summary.
+    // /// </summary>
+    // public ContentValueDto? Summary { get; set; }
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.

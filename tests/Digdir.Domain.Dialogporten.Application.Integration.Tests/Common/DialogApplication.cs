@@ -127,14 +127,6 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
             .AddScoped<IOptionsSnapshot<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
             .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>())
-            .AddScoped<IOptionsMonitor<ApplicationSettings>>(sp =>
-            {
-                var monitor = Substitute.For<IOptionsMonitor<ApplicationSettings>>();
-                var settings = sp.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>().Value;
-                monitor.CurrentValue.Returns(settings);
-                monitor.Get(Arg.Any<string>()).Returns(settings);
-                return monitor;
-            })
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))

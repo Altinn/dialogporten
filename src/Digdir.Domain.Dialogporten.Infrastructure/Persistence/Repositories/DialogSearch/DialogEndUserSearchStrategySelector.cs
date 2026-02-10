@@ -11,7 +11,7 @@ internal interface IDialogEndUserSearchStrategySelector
 // Selects the most suitable end-user dialog search strategy based on a score.
 // This keeps the repository logic simple while allowing strategies to evolve independently.
 internal sealed class DialogEndUserSearchStrategySelector(
-    IOptionsMonitor<ApplicationSettings> applicationSettings,
+    IOptionsSnapshot<ApplicationSettings> applicationSettings,
     IEnumerable<IDialogEndUserSearchStrategy> strategies) : IDialogEndUserSearchStrategySelector
 {
     private const string DefaultStrategyName = "PartyDriven";
@@ -20,7 +20,7 @@ internal sealed class DialogEndUserSearchStrategySelector(
     public IDialogEndUserSearchStrategy Select(EndUserSearchContext context)
     {
         // Feature flag controls whether we branch at all; otherwise stick to the default strategy.
-        if (!applicationSettings.CurrentValue.FeatureToggle.UseBranchingLogicForDialogSearch)
+        if (!applicationSettings.Value.FeatureToggle.UseBranchingLogicForDialogSearch)
         {
             var fallback = GetDefaultStrategy();
             fallback.SetContext(context);

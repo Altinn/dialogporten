@@ -13,8 +13,8 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20260209113346_AddDialogServiceResourcePartyContentUpdatedAtIndex")]
-    partial class AddDialogServiceResourcePartyContentUpdatedAtIndex
+    [Migration("20260210203908_AddNewSearchIndices")]
+    partial class AddNewSearchIndices
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -257,7 +257,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DialogId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_DialogEndUserContext_DialogId_IncludeId");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("DialogId"), new[] { "Id" });
 
                     b.ToTable("DialogEndUserContext");
                 });

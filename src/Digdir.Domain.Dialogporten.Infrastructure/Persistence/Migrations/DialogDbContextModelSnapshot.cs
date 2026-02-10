@@ -254,7 +254,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DialogId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_DialogEndUserContext_DialogId_IncludeId");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("DialogId"), new[] { "Id" });
 
                     b.ToTable("DialogEndUserContext");
                 });

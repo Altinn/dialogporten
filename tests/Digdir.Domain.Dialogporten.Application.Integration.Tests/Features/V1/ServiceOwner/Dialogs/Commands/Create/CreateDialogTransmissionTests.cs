@@ -195,17 +195,17 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         public HtmlContentTestData()
         {
             var legacyHtmlScopeUser = ClaimsPrincipalBuilder
-                .Create(UserStore.IntegrationTestUser)
+                .From(TestUsers.Default)
                 .WithScope(AuthorizationScope.LegacyHtmlScope)
                 .Build();
 
             Add("Cannot create transmission with HTML content without valid html scope",
-                UserStore.IntegrationTestUser, // No change in user scopes
+                TestUsers.Default, // No change in user scopes
                 x => x.Content!.ContentReference = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create transmission with embeddable HTML content without valid html scope",
-                UserStore.IntegrationTestUser, // No change in user scopes
+                TestUsers.Default, // No change in user scopes
                 x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(ValidationError));
 
@@ -225,7 +225,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 typeof(ValidationError));
 
             Add("Cannot create transmission with embeddable HTML content without valid html scope",
-                UserStore.IntegrationTestUser, // No change in user scopes
+                TestUsers.Default, // No change in user scopes
                 x => x.Content!.ContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtmlDeprecated),
                 typeof(ValidationError));
 

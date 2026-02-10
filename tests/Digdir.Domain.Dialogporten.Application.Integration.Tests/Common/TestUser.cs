@@ -13,7 +13,7 @@ public sealed class TestUser : IUser
     private static string DefaultPid => "22834498646";
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
 
-    private static readonly ClaimsPrincipal DefaultPrincipal = new(UserStore.IntegrationTestUser);
+    private static readonly ClaimsPrincipal DefaultPrincipal = new(TestUsers.Default);
 
     private ClaimsPrincipal? _override;
 
@@ -24,16 +24,16 @@ public sealed class TestUser : IUser
     public void Reset() => _override = null;
 }
 
-internal static class UserStore
+internal static class TestUsers
 {
-    private static string DefaultPid => "22834498646";
-    public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
-    public static readonly ClaimsPrincipal IntegrationTestUser = new(new ClaimsIdentity(
+    public const string DefaultPid ="22834498646";
+    // public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
+    public static readonly ClaimsPrincipal Default = new(new ClaimsIdentity(
     [
         new Claim(ClaimTypes.Name, "Integration Test User"),
         new Claim("acr", Constants.IdportenLoaHigh),
         new Claim(ClaimTypes.NameIdentifier, "integration-test-user"),
-        new Claim("pid", "22834498646"),
+        new Claim("pid", DefaultPid),
         new Claim("consumer",
             """
             {
@@ -42,24 +42,23 @@ internal static class UserStore
             }
             """)
     ]));
-}
+    
+    public static readonly 
 
-internal static class TestUserExtensions
-{
+    public static ClaimsPrincipalBuilder FromDefault() => ClaimsPrincipalBuilder.From(Default);
+
     extension<TFlowStep>(TFlowStep flowStep) where TFlowStep : IFlowStep
     {
         public TFlowStep AsIntegrationTestUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
-            flowStep.AsUser(() =>
-            {
-                var builder = ClaimsPrincipalBuilder.Create(UserStore.IntegrationTestUser);
-                configure?.Invoke(builder);
-                return builder.Build();
-            });
+            flowStep.AsUser(() => FromDefault()
+                .Configure(configure)
+                .Build());
 
-        public TFlowStep AsCorrespondenceUser() => flowStep.AsUser(ClaimsPrincipalBuilder
-            .Create(UserStore.IntegrationTestUser)
-            .WithScope(AuthorizationScope.CorrespondenceScope)
-            .Build());
+        public TFlowStep AsCorrespondenceUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromDefault()
+                .WithScope(AuthorizationScope.CorrespondenceScope)
+                .Configure(configure)
+                .Build());
         public TFlowStep AsAdminUser() => throw new NotImplementedException();
         public TFlowStep AsEndUser() => throw new NotImplementedException();
         public TFlowStep AsServiceOwnerUser() => throw new NotImplementedException();
@@ -78,14 +77,14 @@ internal sealed class ClaimsPrincipalBuilder
 
     private ClaimsPrincipalBuilder() { }
 
-    public static ClaimsPrincipalBuilder Create(IIdentity? identity = null)
+    public static ClaimsPrincipalBuilder From(IIdentity? identity = null)
     {
         var builder = new ClaimsPrincipalBuilder();
         if (identity != null) builder.WithIdentity(identity);
         return builder;
     }
 
-    public static ClaimsPrincipalBuilder Create(ClaimsPrincipal? identity = null)
+    public static ClaimsPrincipalBuilder From(ClaimsPrincipal? identity = null)
     {
         var builder = new ClaimsPrincipalBuilder();
         if (identity != null) builder.WithIdentity(identity);
@@ -133,7 +132,18 @@ internal sealed class ClaimsPrincipalBuilder
         return this;
     }
 
+    public ClaimsPrincipalBuilder Configure(Action<ClaimsPrincipalBuilder>? configure = null)
+    {
+        configure?.Invoke(this);
+        return this;
+    }
+
     public ClaimsPrincipal Build() =>
         new(new ClaimsIdentity(_claims
             .Select(x => new Claim(x.Key, x.Value))));
+
+    public static implicit operator ClaimsPrincipal(ClaimsPrincipalBuilder builder)
+    {
+        return builder.Build();
+    }
 }

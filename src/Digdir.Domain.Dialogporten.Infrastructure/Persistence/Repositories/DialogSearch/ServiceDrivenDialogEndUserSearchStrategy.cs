@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
@@ -25,16 +24,14 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
 
     public PostgresFormattableStringBuilder BuildSql()
     {
-        var context = Context;
-        var query = context.Query;
-        // Service-first candidate scan reduces per-party random I/O when services are limited.
+        var (query, dialogSearchAuthorizationResult) = Context;
         var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
             query,
-            context.AuthorizedResources);
+            dialogSearchAuthorizationResult);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
-        var postPermissionFilters = DialogEndUserSearchSqlHelpers.BuildPostPermissionFilters(query);
         var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
+        var postPermissionFilters = DialogEndUserSearchSqlHelpers.BuildPostPermissionFilters(query);
 
         return new PostgresFormattableStringBuilder()
             .Append("WITH ")
@@ -65,7 +62,7 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
                     {permissionCandidateDialogs}
                 )
                 ,delegated_dialogs AS (
-                    SELECT unnest({context.AuthorizedResources.DialogIds.ToArray()}::uuid[]) AS "Id"
+                    SELECT unnest({dialogSearchAuthorizationResult.DialogIds.ToArray()}::uuid[]) AS "Id"
                 )
                 ,candidate_dialogs AS (
                     SELECT "Id" FROM permission_candidate_ids

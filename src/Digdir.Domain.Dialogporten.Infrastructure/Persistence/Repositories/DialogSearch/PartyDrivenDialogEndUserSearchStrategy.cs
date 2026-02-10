@@ -24,12 +24,10 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
 
     public PostgresFormattableStringBuilder BuildSql()
     {
-        var context = Context;
-        var query = context.Query;
-        // Builds party/service groups once to keep lateral probing localized per party.
+        var (query, dialogSearchAuthorizationResult) = Context;
         var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
             query,
-            context.AuthorizedResources);
+            dialogSearchAuthorizationResult);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
         var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
@@ -70,7 +68,7 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
                     ) d_inner
                 )
                 ,delegated_dialogs AS (
-                    SELECT unnest({context.AuthorizedResources.DialogIds.ToArray()}::uuid[]) AS "Id"
+                    SELECT unnest({dialogSearchAuthorizationResult.DialogIds.ToArray()}::uuid[]) AS "Id"
                 )
                 ,candidate_dialogs AS (
                     SELECT "Id" FROM permission_candidate_ids

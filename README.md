@@ -10,6 +10,45 @@
 ![NuGet Version](https://img.shields.io/nuget/v/Altinn.ApiClients.Dialogporten)
 ![NPM Version](https://img.shields.io/npm/v/%40digdir%2Fdialogporten-schema)
 
+## Table of Contents
+- [Getting started with local development](#getting-started-with-local-development)
+  - [Mac](#mac)
+    - [Prerequisites](#prerequisites)
+    - [Installing Podman (Mac)](#installing-podman-mac)
+  - [Windows](#windows)
+    - [Prerequisites](#prerequisites-1)
+    - [Installing Podman (Windows)](#installing-podman-windows)
+  - [Running the project](#running-the-project)
+  - [Running the WebApi/GraphQl in an IDE](#running-the-webapigraphql-in-an-ide)
+- [DB development](#db-development)
+  - [DB development through PMC](#db-development-through-pmc)
+  - [DB development through CLI](#db-development-through-cli)
+  - [Restoring a database from an Azure backup](#restoring-a-database-from-an-azure-backup)
+- [Health Checks](#health-checks)
+- [Observability with OpenTelemetry](#observability-with-opentelemetry)
+  - [Core Features](#core-features)
+  - [Configuration](#configuration)
+  - [Local Development](#local-development)
+  - [Accessing Observability Tools](#accessing-observability-tools)
+    - [Distributed Tracing with Jaeger](#distributed-tracing-with-jaeger)
+    - [Metrics with Prometheus](#metrics-with-prometheus)
+    - [Log Aggregation with Loki](#log-aggregation-with-loki)
+    - [Metrics and Dashboards in Grafana](#metrics-and-dashboards-in-grafana)
+    - [OpenTelemetry Collector Endpoints](#opentelemetry-collector-endpoints)
+  - [Request Filtering](#request-filtering)
+- [Updating the SDK in global.json](#updating-the-sdk-in-globaljson)
+- [Development in local and test environments](#development-in-local-and-test-environments)
+  - [Local development settings](#local-development-settings)
+  - [Using `appsettings.local.json`](#using-appsettingslocaljson)
+  - [Adding `appsettings.local.json` to new projects](#adding-appsettingslocaljson-to-new-projects)
+- [Additional documentation](#additional-documentation)
+- [Testing](#testing)
+- [Pull requests](#pull-requests)
+- [Deployment](#deployment)
+  - [Deployment process / GitHub actions](#deployment-process--github-actions)
+  - [Infrastructure](#infrastructure)
+  - [Applications](#applications)
+
 ## Getting started with local development
 
 ### Mac 
@@ -70,10 +109,14 @@ You can run the entire project locally using `podman compose`. (This uses docker
 podman compose up
 ```
 
+For local dev, the WebAPI and GraphQl containers read dotnet user secrets from `/home/app/.microsoft/usersecrets` in the container.
+We mount your host secrets folder into that location via `USER_SECRETS_DIR`.
+If you are on Windows, set `USER_SECRETS_DIR` to `%APPDATA%/Microsoft/UserSecrets` before running `podman compose`.
+
 The following GUI services should now be available:
-* WebAPI/SwaggerUI: [localhost:7124/swagger](https://localhost:7214/swagger/index.html)
-* GraphQl/BananaCakePop: [localhost:7215/graphql](https://localhost:7214/swagger/index.html)
-* Redis/Insight: [localhost:7216](https://localhost:7214/swagger/index.html)
+* WebAPI/SwaggerUI: [localhost:7214/swagger](https://localhost:7214/swagger/index.html)
+* GraphQl/Nitro: [localhost:7215/graphql](https://localhost:7215/graphql)
+* Redis/Insight: [localhost:7216](https://localhost:7216)
 
 The WebAPI and GraphQl services are behind a nginx proxy, and you can change the number of replicas by setting the `scale` property in the `docker-compose.yml` file.
 
@@ -125,12 +168,6 @@ dotnet ef migrations add TestMigration
 
 ### Restoring a database from an Azure backup
 See [docs/RestoreDatabase.md](docs/RestoreDatabase.md)
-
-## Testing
-
-Besides ordinary unit and integration tests, there are test suites for both functional and non-functional end-to-end tests implemented with [K6](https://k6.io/).
-
-See [tests/k6/README.md](tests/k6/README.md) for more information.
 
 ## Health Checks
 
@@ -327,6 +364,25 @@ builder.Configuration
 
 // Left out for brevity
 ```
+
+## Additional documentation
+- [CI/CD](docs/CI-CD.md)
+- [Configuration](docs/Configuration.md)
+- [Infrastructure](docs/Infrastructure.md)
+- [Monitoring](docs/Monitoring.md)
+- [Deployment Lag Monitoring](docs/DeploymentLagMonitoring.md)
+- [Feature Metrics](docs/FeatureMetrics.md)
+- [Restore Database](docs/RestoreDatabase.md)
+- [Schema (V1)](docs/schema/V1/README.md)
+
+## Testing
+
+Besides ordinary unit and integration tests, the primary end-to-end tests are the WebAPI and GraphQL C# test projects listed below. K6 tests still exist, but new end-to-end coverage should be added to the C# projects.
+
+- [WebAPI E2E tests](tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests/README.md)
+- [GraphQL E2E tests](tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests/README.md)
+- [Scripts E2E](scripts/e2e/README.md)
+- [K6 testing](tests/k6/README.md)
 
 ## Pull requests
 For pull requests, the title must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).

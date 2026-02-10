@@ -18,8 +18,24 @@ public interface IFlowStep<out TIn> : IFlowStep
 public interface IFlowStep
 {
     IFlowExecutor<TOut> SendCommand<TOut>(Func<FlowContext, IRequest<TOut>> commandSelector);
-    IFlowStep Do(Action<FlowContext> action);
     FlowContext Context { get; }
+}
+
+internal static class FlowStepExtensions
+{
+    extension<TFlowStep>(TFlowStep flowStep) where TFlowStep : IFlowStep
+    {
+        public TFlowStep Do(Action<FlowContext> action)
+        {
+            var context = flowStep.Context;
+            context.Commands.Add((x, _) =>
+            {
+                action.Invoke(context);
+                return Task.FromResult(x);
+            });
+            return flowStep;
+        }
+    }
 }
 
 public record FlowContext(

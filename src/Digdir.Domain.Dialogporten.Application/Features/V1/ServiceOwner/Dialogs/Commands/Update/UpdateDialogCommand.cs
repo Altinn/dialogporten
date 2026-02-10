@@ -116,7 +116,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
 
-        if (!request.IsSilentUpdate || !isCurrentUserServiceOwnerAdmin)
+        if (!request.IsSilentUpdate && !isCurrentUserServiceOwnerAdmin)
         {
             ValidateTimeFields(dialog);
         }

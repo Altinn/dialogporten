@@ -434,6 +434,47 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert(expectedType);
 
+    private sealed class DatesInPastTestData : TheoryData<string, Action<CreateDialogCommand>>
+    {
+        public DatesInPastTestData()
+        {
+            var pastDate = DateTimeOffset.UtcNow.AddDays(-1);
+            Add("Can create dialog with DueAt in the past when IsSilentUpdate is set or admin scope is present",
+                x => x.Dto.DueAt = pastDate);
+            Add("Can create dialog with ExpiresAt in the past when IsSilentUpdate is set or admin scope is present",
+                x => x.Dto.ExpiresAt = pastDate);
+            Add("Can create dialog with VisibleFrom in the past when IsSilentUpdate is set or admin scope is present",
+                x => x.Dto.VisibleFrom = pastDate);
+        }
+    }
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Can_Create_Dialog_With_Past_Dates_When_Admin_Scope(
+        string _, Action<CreateDialogCommand> createDialog) =>
+        FlowBuilder.For(Application)
+            .AsAdminUser()
+            .CreateSimpleDialog(createDialog)
+            .ExecuteAndAssert<CreateDialogSuccess>();
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Can_Create_Dialog_With_Past_Dates_When_Silent_Update(
+        string _, Action<CreateDialogCommand> createDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.IsSilentUpdate = true;
+                createDialog(x);
+            })
+            .ExecuteAndAssert<CreateDialogSuccess>();
+
+    [Theory, ClassData(typeof(DatesInPastTestData))]
+    public Task Cannot_Create_Dialog_With_Past_Dates_Without_Silent_Update_Or_Admin_Scope(
+        string _, Action<CreateDialogCommand> createDialog) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(createDialog)
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText("must be in the future"));
+
     private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
     {
         public TransmissionsCountTestData()

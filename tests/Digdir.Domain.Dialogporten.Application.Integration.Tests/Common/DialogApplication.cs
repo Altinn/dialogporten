@@ -147,7 +147,7 @@ public class DialogApplication : IAsyncLifetime
             .AddTransient<IDialogEndUserSearchStrategySelector, DialogEndUserSearchStrategySelector>()
             .AddTransient<IDialogEndUserSearchStrategy, PartyDrivenDialogEndUserSearchStrategy>()
             .AddTransient<IDialogEndUserSearchStrategy, ServiceDrivenDialogEndUserSearchStrategy>()
-            .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 
     private static IPartyNameRegistry CreateNameRegistrySubstitute()

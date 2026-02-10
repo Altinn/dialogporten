@@ -135,8 +135,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
-            .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
-            .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();
+            .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 
     private static IPartyNameRegistry CreateNameRegistrySubstitute()

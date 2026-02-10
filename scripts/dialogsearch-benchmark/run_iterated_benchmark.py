@@ -178,6 +178,111 @@ def safe_int(value: Optional[str]) -> Optional[int]:
         return None
 
 
+SUMMARY_FIELDS = [
+    "variant",
+    "case",
+    "category",
+    "party_count",
+    "service_count",
+    "samples",
+    "attempted",
+    "completion_rate_pct",
+    "exec_avg",
+    "exec_min",
+    "exec_max",
+    "exec_p50",
+    "exec_p95",
+    "exec_p99",
+    "read_avg",
+    "read_min",
+    "read_max",
+    "read_p50",
+    "read_p95",
+    "read_p99",
+    "hit_avg",
+    "hit_min",
+    "hit_max",
+    "hit_p50",
+    "hit_p95",
+    "hit_p99",
+]
+
+
+def build_summary_rows(rows: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    summary_rows: List[Dict[str, str]] = []
+    grouped: Dict[Tuple[str, str], Dict[str, List[float] | int]] = {}
+    meta: Dict[Tuple[str, str], Dict[str, str]] = {}
+
+    for row in rows:
+        case_name = row.get("case") or ""
+        variant = row.get("variant") or ""
+        if not case_name or not variant:
+            continue
+        key = (variant, case_name)
+        meta[key] = {
+            "variant": variant,
+            "case": case_name,
+            "category": row.get("category") or "",
+            "party_count": row.get("party_count") or "",
+            "service_count": row.get("service_count") or "",
+        }
+        bucket = grouped.setdefault(
+            key, {"exec_ms": [], "shared_read": [], "shared_hit": [], "attempted": 0}
+        )
+        bucket["attempted"] = int(bucket["attempted"]) + 1
+        exec_ms = safe_float(row.get("exec_ms"))
+        if exec_ms is not None:
+            cast(List[float], bucket["exec_ms"]).append(exec_ms)
+        shared_read = safe_int(row.get("shared_read"))
+        if shared_read is not None:
+            cast(List[float], bucket["shared_read"]).append(float(shared_read))
+        shared_hit = safe_int(row.get("shared_hit"))
+        if shared_hit is not None:
+            cast(List[float], bucket["shared_hit"]).append(float(shared_hit))
+
+    for key, values in grouped.items():
+        meta_row = meta.get(key, {})
+        exec_values = cast(List[float], values["exec_ms"])
+        read_values = cast(List[float], values["shared_read"])
+        hit_values = cast(List[float], values["shared_hit"])
+        attempted = int(values["attempted"])
+        samples = len(exec_values)
+        completion_rate = (samples / attempted * 100.0) if attempted > 0 else math.nan
+        exec_stats = summarize(exec_values)
+        read_stats = summarize(read_values)
+        hit_stats = summarize(hit_values)
+        summary_rows.append(
+            {
+                **meta_row,
+                "samples": str(samples),
+                "attempted": str(attempted),
+                "completion_rate_pct": (
+                    f"{completion_rate:.2f}" if not math.isnan(completion_rate) else ""
+                ),
+                "exec_avg": f"{exec_stats['avg']:.4f}" if not math.isnan(exec_stats["avg"]) else "",
+                "exec_min": f"{exec_stats['min']:.4f}" if not math.isnan(exec_stats["min"]) else "",
+                "exec_max": f"{exec_stats['max']:.4f}" if not math.isnan(exec_stats["max"]) else "",
+                "exec_p50": f"{exec_stats['p50']:.4f}" if not math.isnan(exec_stats["p50"]) else "",
+                "exec_p95": f"{exec_stats['p95']:.4f}" if not math.isnan(exec_stats["p95"]) else "",
+                "exec_p99": f"{exec_stats['p99']:.4f}" if not math.isnan(exec_stats["p99"]) else "",
+                "read_avg": f"{read_stats['avg']:.2f}" if not math.isnan(read_stats["avg"]) else "",
+                "read_min": f"{read_stats['min']:.0f}" if not math.isnan(read_stats["min"]) else "",
+                "read_max": f"{read_stats['max']:.0f}" if not math.isnan(read_stats["max"]) else "",
+                "read_p50": f"{read_stats['p50']:.0f}" if not math.isnan(read_stats["p50"]) else "",
+                "read_p95": f"{read_stats['p95']:.0f}" if not math.isnan(read_stats["p95"]) else "",
+                "read_p99": f"{read_stats['p99']:.0f}" if not math.isnan(read_stats["p99"]) else "",
+                "hit_avg": f"{hit_stats['avg']:.2f}" if not math.isnan(hit_stats["avg"]) else "",
+                "hit_min": f"{hit_stats['min']:.0f}" if not math.isnan(hit_stats["min"]) else "",
+                "hit_max": f"{hit_stats['max']:.0f}" if not math.isnan(hit_stats["max"]) else "",
+                "hit_p50": f"{hit_stats['p50']:.0f}" if not math.isnan(hit_stats["p50"]) else "",
+                "hit_p95": f"{hit_stats['p95']:.0f}" if not math.isnan(hit_stats["p95"]) else "",
+                "hit_p99": f"{hit_stats['p99']:.0f}" if not math.isnan(hit_stats["p99"]) else "",
+            }
+        )
+
+    return sorted(summary_rows, key=lambda row: (row.get("variant", ""), row.get("case", "")))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run iterated benchmarks with generated samples.")
     party_group = parser.add_mutually_exclusive_group(required=True)
@@ -439,111 +544,11 @@ def main() -> int:
 
     log_info("Writing summary and concatenated explains")
     summary_path = root_dir / f"summary-{timestamp}.csv"
-    summary_rows: List[Dict[str, str]] = []
-
-    grouped: Dict[Tuple[str, str], Dict[str, List[float] | int]] = {}
-    meta: Dict[Tuple[str, str], Dict[str, str]] = {}
-
-    for row in aggregate_rows:
-        case_name = row.get("case") or ""
-        variant = row.get("variant") or ""
-        if not case_name or not variant:
-            continue
-        key = (variant, case_name)
-        meta[key] = {
-            "variant": variant,
-            "case": case_name,
-            "category": row.get("category") or "",
-            "party_count": row.get("party_count") or "",
-            "service_count": row.get("service_count") or "",
-        }
-        bucket = grouped.setdefault(
-            key, {"exec_ms": [], "shared_read": [], "shared_hit": [], "attempted": 0}
-        )
-        bucket["attempted"] = int(bucket["attempted"]) + 1
-        exec_ms = safe_float(row.get("exec_ms"))
-        if exec_ms is not None:
-            cast(List[float], bucket["exec_ms"]).append(exec_ms)
-        shared_read = safe_int(row.get("shared_read"))
-        if shared_read is not None:
-            cast(List[float], bucket["shared_read"]).append(float(shared_read))
-        shared_hit = safe_int(row.get("shared_hit"))
-        if shared_hit is not None:
-            cast(List[float], bucket["shared_hit"]).append(float(shared_hit))
-
-    for key, values in grouped.items():
-        meta_row = meta.get(key, {})
-        exec_values = cast(List[float], values["exec_ms"])
-        read_values = cast(List[float], values["shared_read"])
-        hit_values = cast(List[float], values["shared_hit"])
-        attempted = int(values["attempted"])
-        samples = len(exec_values)
-        completion_rate = (samples / attempted * 100.0) if attempted > 0 else math.nan
-        exec_stats = summarize(exec_values)
-        read_stats = summarize(read_values)
-        hit_stats = summarize(hit_values)
-        summary_rows.append(
-            {
-                **meta_row,
-                "samples": str(samples),
-                "attempted": str(attempted),
-                "completion_rate_pct": (
-                    f"{completion_rate:.2f}" if not math.isnan(completion_rate) else ""
-                ),
-                "exec_avg": f"{exec_stats['avg']:.4f}" if not math.isnan(exec_stats["avg"]) else "",
-                "exec_min": f"{exec_stats['min']:.4f}" if not math.isnan(exec_stats["min"]) else "",
-                "exec_max": f"{exec_stats['max']:.4f}" if not math.isnan(exec_stats["max"]) else "",
-                "exec_p50": f"{exec_stats['p50']:.4f}" if not math.isnan(exec_stats["p50"]) else "",
-                "exec_p95": f"{exec_stats['p95']:.4f}" if not math.isnan(exec_stats["p95"]) else "",
-                "exec_p99": f"{exec_stats['p99']:.4f}" if not math.isnan(exec_stats["p99"]) else "",
-                "read_avg": f"{read_stats['avg']:.2f}" if not math.isnan(read_stats["avg"]) else "",
-                "read_min": f"{read_stats['min']:.0f}" if not math.isnan(read_stats["min"]) else "",
-                "read_max": f"{read_stats['max']:.0f}" if not math.isnan(read_stats["max"]) else "",
-                "read_p50": f"{read_stats['p50']:.0f}" if not math.isnan(read_stats["p50"]) else "",
-                "read_p95": f"{read_stats['p95']:.0f}" if not math.isnan(read_stats["p95"]) else "",
-                "read_p99": f"{read_stats['p99']:.0f}" if not math.isnan(read_stats["p99"]) else "",
-                "hit_avg": f"{hit_stats['avg']:.2f}" if not math.isnan(hit_stats["avg"]) else "",
-                "hit_min": f"{hit_stats['min']:.0f}" if not math.isnan(hit_stats["min"]) else "",
-                "hit_max": f"{hit_stats['max']:.0f}" if not math.isnan(hit_stats["max"]) else "",
-                "hit_p50": f"{hit_stats['p50']:.0f}" if not math.isnan(hit_stats["p50"]) else "",
-                "hit_p95": f"{hit_stats['p95']:.0f}" if not math.isnan(hit_stats["p95"]) else "",
-                "hit_p99": f"{hit_stats['p99']:.0f}" if not math.isnan(hit_stats["p99"]) else "",
-            }
-        )
-
-    summary_fields = [
-        "variant",
-        "case",
-        "category",
-        "party_count",
-        "service_count",
-        "samples",
-        "attempted",
-        "completion_rate_pct",
-        "exec_avg",
-        "exec_min",
-        "exec_max",
-        "exec_p50",
-        "exec_p95",
-        "exec_p99",
-        "read_avg",
-        "read_min",
-        "read_max",
-        "read_p50",
-        "read_p95",
-        "read_p99",
-        "hit_avg",
-        "hit_min",
-        "hit_max",
-        "hit_p50",
-        "hit_p95",
-        "hit_p99",
-    ]
-
-    with summary_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=summary_fields)
-        writer.writeheader()
-        writer.writerows(summary_rows)
+    write_csv_rows(summary_path, build_summary_rows(aggregate_rows), SUMMARY_FIELDS)
+    for round_number in range(1, args.rounds_per_iteration + 1):
+        round_path = root_dir / f"summary-round{round_number}.csv"
+        round_rows = [row for row in aggregate_rows if row.get("round") == str(round_number)]
+        write_csv_rows(round_path, build_summary_rows(round_rows), SUMMARY_FIELDS)
 
     explains_all_path = root_dir / "explains_all.txt"
     with explains_all_path.open("w", encoding="utf-8") as handle:

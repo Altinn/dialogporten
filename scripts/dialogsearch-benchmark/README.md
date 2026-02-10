@@ -63,6 +63,9 @@ benchmark-YYYYMMDD-HHMM/
       2001/
         <case>__<sql>__rXX_pYY.txt
   summary-YYYYMMDDHHMM.csv
+  summary-round1.csv
+  summary-round2.csv
+  summary-roundN.csv
   summary-YYYYMMDDHHMM.xlsx
   explains_all.txt
   explains_all.txt.condensed.txt
@@ -73,7 +76,10 @@ Notes:
 - Case filenames omit the seed (stable names across iterations) so aggregation groups cleanly.
 - Each `output/csvs/<seed>.csv` file contains combined rows from all rounds and SQL positions for that seed.
 - `summary-YYYYMMDDHHMM.csv` is aggregated per `(sql, case)` across all iterations/rounds, with completion rate and exec/read/hit stats.
-- `summary-YYYYMMDDHHMM.xlsx` contains a Summary sheet (aggregated by sql) and a Details sheet (per case).
+- `summary-roundN.csv` files are generated for each fairness round (`N = 1..--rounds-per-iteration`).
+- `summary-YYYYMMDDHHMM.xlsx` contains:
+  - `Summary`: total aggregate plus one table/chart per round.
+  - `Details - total` and `Details - rN`: per-case rows from total and each round summary.
 - `explains_all.txt.condensed.txt` is a compressed version of `explains_all.txt`.
 
 ## Script Reference
@@ -101,7 +107,10 @@ Behavior:
    - Runs each SQL file separately via `run_benchmark.py` with `--csv` and `--print-explain`.
    - Rotates SQL order per round/iteration, alternating forward/reverse order.
    - Stores one combined CSV per seed and per-run explain outputs.
-3. Aggregates all runs into `summary.csv` and builds `summary.xlsx`.
+3. Aggregates all runs into:
+   - `summary-YYYYMMDDHHMM.csv` (total),
+   - `summary-roundN.csv` for all rounds,
+   and builds `summary-YYYYMMDDHHMM.xlsx` from them.
 4. Concatenates all explains into `explains_all.txt`.
 
 ### `run_benchmark.py`

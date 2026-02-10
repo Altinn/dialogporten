@@ -105,8 +105,7 @@ internal sealed class ClaimsPrincipalBuilder
 
     public ClaimsPrincipalBuilder WithPid(string pid)
     {
-        const string pidClaimType = "pid";
-        _claims[pidClaimType] = pid;
+        _claims[ClaimsPrincipalExtensions.PidClaim] = pid;
         return this;
     }
 

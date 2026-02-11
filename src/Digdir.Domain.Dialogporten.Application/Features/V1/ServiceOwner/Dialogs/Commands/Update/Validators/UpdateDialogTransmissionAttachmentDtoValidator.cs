@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.Validators;
@@ -18,6 +19,10 @@ internal sealed class UpdateDialogTransmissionAttachmentDtoValidator : AbstractV
 
         RuleFor(x => x.DisplayName)
             .SetValidator(localizationsValidator);
+
+        RuleFor(x => x.Name)
+            .MaximumLength(Constants.DefaultMaxStringLength)
+            .When(x => x.Name is not null);
 
         RuleFor(x => x.Urls)
             .NotEmpty()

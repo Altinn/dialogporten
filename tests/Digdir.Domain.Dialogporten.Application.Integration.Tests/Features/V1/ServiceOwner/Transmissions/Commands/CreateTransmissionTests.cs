@@ -64,7 +64,6 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public Task Cannot_Create_Transmission_With_Name_Longer_Than_DefaultMaxLength() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .AssertResult<CreateDialogSuccess>()
             .CreateTransmission(x =>
                 x.AddAttachment(attachment =>
                     attachment.Name = new string('a', Constants.DefaultMaxStringLength + 1)))

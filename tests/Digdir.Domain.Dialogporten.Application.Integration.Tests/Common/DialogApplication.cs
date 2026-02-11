@@ -182,7 +182,8 @@ public class DialogApplication : IAsyncLifetime
                 FeatureToggle = new FeatureToggle
                 {
                     UseAltinnAutoAuthorizedPartiesQueryParameters = true,
-                    UseCorrectPersonNameOrdering = true
+                    UseCorrectPersonNameOrdering = true,
+                    UseBranchingLogicForDialogSearch = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

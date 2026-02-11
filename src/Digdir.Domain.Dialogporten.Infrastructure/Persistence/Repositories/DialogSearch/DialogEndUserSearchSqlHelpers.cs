@@ -7,10 +7,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 
 internal static partial class DialogEndUserSearchSqlHelpers
 {
-    internal static PostgresFormattableStringBuilder BuildPostPermissionFilters(GetDialogsQuery query) =>
-        new PostgresFormattableStringBuilder()
+    internal static PostgresFormattableStringBuilder BuildPostPermissionFilters(
+        GetDialogsQuery query,
+        bool includeSearchFilter = true,
+        bool includePaginationCondition = true)
+    {
+        var builder = new PostgresFormattableStringBuilder()
             .Append("WHERE 1=1")
-            .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
+            .AppendIf(includeSearchFilter && query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
@@ -28,10 +32,17 @@ internal static partial class DialogEndUserSearchSqlHelpers
             .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
-            .AppendSystemLabelFilterCondition(query.SystemLabel)
-            .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
+            .AppendSystemLabelFilterCondition(query.SystemLabel);
+
+        if (includePaginationCondition)
+        {
+            builder.ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d");
+        }
+
+        return builder
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
+    }
 
     internal static PostgresFormattableStringBuilder BuildSearchJoin(bool includeSearch)
     {

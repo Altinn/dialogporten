@@ -30,8 +30,8 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
             dialogSearchAuthorizationResult);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
-        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
-        var postPermissionFilters = DialogEndUserSearchSqlHelpers.BuildPostPermissionFilters(query);
+        var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, dialogSearchAuthorizationResult.DialogIds.ToArray());
+        var postPermissionFilters = BuildPostPermissionOrderAndLimit(query);
 
         return new PostgresFormattableStringBuilder()
             .Append("WITH ")
@@ -62,7 +62,7 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
                     {permissionCandidateDialogs}
                 )
                 ,delegated_dialogs AS (
-                    SELECT unnest({dialogSearchAuthorizationResult.DialogIds.ToArray()}::uuid[]) AS "Id"
+                    {delegatedCandidateDialogs}
                 )
                 ,candidate_dialogs AS (
                     SELECT "Id" FROM permission_candidate_ids
@@ -72,7 +72,6 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
                 SELECT d.*
                 FROM candidate_dialogs cd
                 JOIN "Dialog" d ON d."Id" = cd."Id"
-                {searchJoin}
                 {postPermissionFilters}
 
                 """);
@@ -81,6 +80,7 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
     {
         var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
             .Append(
@@ -90,6 +90,7 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
                 CROSS JOIN LATERAL (
                     SELECT d."Id"
                     FROM "Dialog" d
+                    {searchJoin}
                     WHERE d."ServiceResource" = sp.service
                       AND d."Party" = ANY(sp.allowed_parties)
                       {permissionCandidateFilters}
@@ -103,8 +104,33 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
                 """);
     }
 
+    private static PostgresFormattableStringBuilder BuildDelegatedCandidateDialogs(
+        GetDialogsQuery query,
+        Guid[] dialogIds)
+    {
+        var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
+
+        return new PostgresFormattableStringBuilder()
+            .Append(
+                $"""
+                SELECT d."Id"
+                FROM unnest({dialogIds}::uuid[]) AS dd("Id")
+                JOIN "Dialog" d ON d."Id" = dd."Id"
+                {searchJoin}
+                WHERE 1=1
+                {permissionCandidateFilters}
+                """);
+    }
+
+    private static PostgresFormattableStringBuilder BuildPostPermissionOrderAndLimit(GetDialogsQuery query) =>
+        new PostgresFormattableStringBuilder()
+            .ApplyPaginationOrder(query.OrderBy!, alias: "d")
+            .ApplyPaginationLimit(query.Limit);
+
     private static PostgresFormattableStringBuilder BuildPermissionCandidateFilters(GetDialogsQuery query) =>
         new PostgresFormattableStringBuilder()
+            .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
@@ -122,5 +148,6 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
             .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
-            .AppendSystemLabelFilterCondition(query.SystemLabel);
+            .AppendSystemLabelFilterCondition(query.SystemLabel)
+            .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d");
 }

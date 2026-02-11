@@ -1,9 +1,13 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using AwesomeAssertions;
@@ -178,5 +182,102 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                     d.Id != delegatedDialogId &&
                     d.Party == TestUsers.DefaultParty);
             });
+    }
+
+    [Fact]
+    public async Task Search_Should_Not_Truncate_Page_Two()
+    {
+        var dialogId1 = NewUuidV7();
+        var dialogId2 = NewUuidV7();
+        var dialogId3 = NewUuidV7();
+        var dialogId4 = NewUuidV7();
+        var dialogId5 = NewUuidV7();
+        var dialogId6 = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Id = dialogId1;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(1);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Id = dialogId2;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(2);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Id = dialogId3;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(3);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Id = dialogId4;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(4);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Id = dialogId5;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(5);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Id = dialogId6;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.ServiceResource = DummyService;
+                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(6);
+            })
+            .ExecuteAndAssert(_ => { });
+
+        var orderBy = OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse("createdAt_asc", out var orderSet)
+            ? orderSet
+            : throw new InvalidOperationException("Unable to parse createdAt order.");
+
+        var firstPage = await FlowBuilder.For(Application)
+            .SearchEndUserDialogs(x =>
+            {
+                x.Party = [TestUsers.DefaultParty];
+                x.ServiceResource = [DummyService];
+                x.Limit = 2;
+                x.OrderBy = orderBy;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>();
+
+        firstPage.Items.Should().HaveCount(2);
+        firstPage.Items.Select(x => x.Id).Should().Equal([dialogId1, dialogId2]);
+        firstPage.HasNextPage.Should().BeTrue();
+        firstPage.ContinuationToken.Should().NotBeNullOrWhiteSpace();
+
+        var continuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(
+            firstPage.ContinuationToken,
+            out var parsedToken)
+            ? parsedToken
+            : throw new InvalidOperationException("Unable to parse continuation token.");
+
+        var secondPage = await FlowBuilder.For(Application)
+            .SearchEndUserDialogs(x =>
+            {
+                x.Party = [TestUsers.DefaultParty];
+                x.ServiceResource = [DummyService];
+                x.Limit = 2;
+                x.OrderBy = orderBy;
+                x.ContinuationToken = continuationToken;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>();
+
+        secondPage.Items.Should().HaveCount(2);
+        secondPage.Items.Select(x => x.Id).Should().Equal([dialogId3, dialogId4]);
+        secondPage.Items.Select(x => x.Id).Should().NotIntersectWith(firstPage.Items.Select(x => x.Id));
+        secondPage.HasNextPage.Should().BeTrue();
     }
 }

@@ -1,5 +1,4 @@
 using System.Data;
-using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Freeze;
@@ -7,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.SystemLabels.Commands;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
@@ -73,11 +71,8 @@ public sealed class IfMatchConcurrencyEarlyExitTests(DialogApplication applicati
     public Task FreezeDialog_Returns_ConcurrencyError_On_IfMatchDialogRevision_Mismatch() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x =>
-            {
-                DecorateUserAsAdmin(x);
-                DecorateSaveChangesForbidden(x);
-            })
+            .AsAdminUser()
+            .ConfigureServices(DecorateSaveChangesForbidden)
             .SendCommand((_, ctx) => new FreezeDialogCommand
             {
                 Id = ctx.GetDialogId(),
@@ -91,11 +86,8 @@ public sealed class IfMatchConcurrencyEarlyExitTests(DialogApplication applicati
         var activityId = Guid.CreateVersion7();
         return FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.AddActivity(DialogActivityType.Values.FormSaved, a => a.Id = activityId))
-            .ConfigureServices(x =>
-            {
-                DecorateUserAsAdmin(x);
-                DecorateSaveChangesForbidden(x);
-            })
+            .AsAdminUser()
+            .ConfigureServices(DecorateSaveChangesForbidden)
             .SendCommand((_, ctx) => new UpdateFormSavedActivityTimeCommand
             {
                 DialogId = ctx.GetDialogId(),
@@ -177,9 +169,6 @@ public sealed class IfMatchConcurrencyEarlyExitTests(DialogApplication applicati
 
     private static void DecorateSaveChangesForbidden(IServiceCollection services) =>
         services.Decorate<IUnitOfWork, SaveChangesForbiddenUnitOfWork>();
-
-    private static void DecorateUserAsAdmin(IServiceCollection services) =>
-        services.Decorate<IUserResourceRegistry, AdminUserResourceRegistryDecorator>();
 }
 
 // Decorating IUnitOfWork to throw an exception when SaveChangesAsync is called to verify early-exit concurrency checks

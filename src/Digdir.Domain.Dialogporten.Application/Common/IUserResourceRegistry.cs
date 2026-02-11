@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common;
@@ -21,12 +22,18 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
     private readonly IUser _user;
     private readonly IResourceRegistry _resourceRegistry;
     private readonly ILogger<UserResourceRegistry> _logger;
+    private readonly IHostEnvironment _hostEnvironment;
 
-    public UserResourceRegistry(IUser user, IResourceRegistry resourceRegistry, ILogger<UserResourceRegistry> logger)
+    public UserResourceRegistry(
+        IUser user,
+        IResourceRegistry resourceRegistry,
+        ILogger<UserResourceRegistry> logger,
+        IHostEnvironment hostEnvironment)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
     }
 
     public async Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken)
@@ -67,6 +74,12 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
 
         if (orgShortNames.Length > 1)
         {
+            if (_hostEnvironment.EnvironmentName == "prod")
+            {
+                var exceptionMessage = $"More than one short name found for org number {orgNumber}: {string.Join(", ", orgShortNames)}";
+                throw new UnreachableException(exceptionMessage);
+            }
+
             _logger.LogWarning("More than one short name found for org number {OrgNumber}: {ShortNames}", orgNumber, string.Join(", ", orgShortNames));
         }
 

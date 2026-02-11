@@ -60,8 +60,17 @@ setRepoPath() {
 }
 
 podman_check() {
-  postgre_run=$(podman ps -f "status=running" -f name=postgres -q)
-  redis_run=$(podman ps -f "status=running" -f name=redis -q)
+  COMMAND="" 
+  if COMMAND -v podman >/dev/null 2>&1; then
+    COMMAND="podman"
+  elif ! COMMAND -v podman >/dev/null 2>&1; then
+    COMMAND="docker"
+  fi
+  echo $COMMAND
+  
+
+  postgre_run=$($COMMAND ps -f "status=running" -f name=postgres -q)
+  redis_run=$($COMMAND ps -f "status=running" -f name=redis -q)
   podman_log="${script_dir}/dialogporten-podman.log"
   if [[ -n "${postgre_run:-}" && -n "${redis_run:-}" ]]; then
     echo "postgre is running"
@@ -69,7 +78,7 @@ podman_check() {
     return
   fi
 
-  podman compose -f $repo_root/docker-compose-db-redis.yml up > "$podman_log" 2>&1 &
+  COMMAND compose -f $repo_root/docker-compose-db-redis.yml up > "$podman_log" 2>&1 &
 }
 
 trap cleanup EXIT INT TERM

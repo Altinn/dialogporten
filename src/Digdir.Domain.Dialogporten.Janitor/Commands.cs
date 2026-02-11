@@ -144,7 +144,8 @@ internal static partial class Commands
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "collect-custom-metrics command failed with exception: {Message}", ex.Messagpull req                    return -1;
+                    logger.LogError(ex, "collect-custom-metrics command failed with exception: {Message}", ex.Message);
+                    return -1;
                 }
             });
 

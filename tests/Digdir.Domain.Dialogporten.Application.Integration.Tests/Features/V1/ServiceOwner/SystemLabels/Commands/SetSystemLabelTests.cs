@@ -122,7 +122,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     {
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, AdminUserResourceRegistryDecorator>())
+            .AsAdminUser()
             .SetSystemLabelsServiceOwner(command =>
             {
                 command.EndUserId = null;
@@ -144,7 +144,6 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     public Task Set_PerformedBy_For_Non_Admin_Is_Forbidden() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, NonAdminUserResourceRegistryDecorator>())
             .SetSystemLabelsServiceOwner(command =>
             {
                 command.EndUserId = null;
@@ -174,38 +173,4 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         log.PerformedBy.ActorNameEntity.Should().NotBeNull();
         log.PerformedBy.ActorNameEntity!.ActorId.Should().Be(AdminPerformedByActorId);
     }
-}
-
-internal sealed class AdminUserResourceRegistryDecorator(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry
-{
-    public Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken) =>
-        userResourceRegistry.CurrentUserIsOwner(serviceResource, cancellationToken);
-
-    public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) =>
-        userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-
-    public bool UserCanModifyResourceType(string serviceResourceType) =>
-        userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
-
-    public bool IsCurrentUserServiceOwnerAdmin() => true;
-
-    public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
-        userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
-}
-
-internal sealed class NonAdminUserResourceRegistryDecorator(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry
-{
-    public Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken) =>
-        userResourceRegistry.CurrentUserIsOwner(serviceResource, cancellationToken);
-
-    public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) =>
-        userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-
-    public bool UserCanModifyResourceType(string serviceResourceType) =>
-        userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
-
-    public bool IsCurrentUserServiceOwnerAdmin() => false;
-
-    public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
-        userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
 }

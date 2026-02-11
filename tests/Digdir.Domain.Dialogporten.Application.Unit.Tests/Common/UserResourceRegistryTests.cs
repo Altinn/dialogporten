@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -19,10 +20,7 @@ public sealed class UserResourceRegistryTests
         var user = CreateUserWithConsumerOrgNumber(orgNumber);
         var resourceRegistry = CreateResourceRegistryWithShortNames(orgNumber, "org1", "org2");
         var logger = new TestLogger<UserResourceRegistry>();
-        var options = new OptionsMock<DataIntegrityOptions>(new DataIntegrityOptions
-        {
-            BadUserResourceDataHandling = BadDataHandling.WarnAndContinue
-        });
+        var options = new OptionsMock<ApplicationSettings>(CreateApplicationSettings(BadDataHandling.WarnAndContinue));
 
         var sut = new UserResourceRegistry(user, resourceRegistry, logger, options);
 
@@ -43,10 +41,7 @@ public sealed class UserResourceRegistryTests
         var user = CreateUserWithConsumerOrgNumber(orgNumber);
         var resourceRegistry = CreateResourceRegistryWithShortNames(orgNumber, "org1", "org2");
         var logger = new TestLogger<UserResourceRegistry>();
-        var options = new OptionsMock<DataIntegrityOptions>(new DataIntegrityOptions
-        {
-            BadUserResourceDataHandling = BadDataHandling.Throw
-        });
+        var options = new OptionsMock<ApplicationSettings>(CreateApplicationSettings(BadDataHandling.Throw));
 
         var sut = new UserResourceRegistry(user, resourceRegistry, logger, options);
 
@@ -81,4 +76,28 @@ public sealed class UserResourceRegistryTests
 
         return resourceRegistry;
     }
+
+    private static ApplicationSettings CreateApplicationSettings(BadDataHandling handling) => new()
+    {
+        BadDataHandling = handling,
+        Dialogporten = new DialogportenSettings
+        {
+            BaseUri = new Uri("https://example.test/dialogporten"),
+            Ed25519KeyPairs = new Ed25519KeyPairs
+            {
+                Primary = new Ed25519KeyPair
+                {
+                    Kid = "primary",
+                    PrivateComponent = "private",
+                    PublicComponent = "public"
+                },
+                Secondary = new Ed25519KeyPair
+                {
+                    Kid = "secondary",
+                    PrivateComponent = "private",
+                    PublicComponent = "public"
+                }
+            }
+        }
+    };
 }

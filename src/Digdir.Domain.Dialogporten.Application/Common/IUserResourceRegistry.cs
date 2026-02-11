@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -22,18 +23,18 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
     private readonly IUser _user;
     private readonly IResourceRegistry _resourceRegistry;
     private readonly ILogger<UserResourceRegistry> _logger;
-    private readonly DataIntegrityOptions _dataIntegrityOptions;
+    private readonly ApplicationSettings _applicationSettings;
 
     public UserResourceRegistry(
         IUser user,
         IResourceRegistry resourceRegistry,
         ILogger<UserResourceRegistry> logger,
-        IOptions<DataIntegrityOptions> dataIntegrityOptions)
+        IOptions<ApplicationSettings> applicationSettings)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _dataIntegrityOptions = dataIntegrityOptions?.Value ?? throw new ArgumentNullException(nameof(dataIntegrityOptions));
+        _applicationSettings = applicationSettings?.Value ?? throw new ArgumentNullException(nameof(applicationSettings));
     }
 
     public async Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken)
@@ -77,7 +78,7 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
             const string messageTemplate = "More than one short name found for org number {OrgNumber}: {ShortNames}";
             var shortNames = string.Join(", ", orgShortNames);
 
-            if (_dataIntegrityOptions.BadUserResourceDataHandling == BadDataHandling.Throw)
+            if (_applicationSettings.BadDataHandling == BadDataHandling.Throw)
             {
                 var message = messageTemplate
                     .Replace("{OrgNumber}", orgNumber, StringComparison.Ordinal)

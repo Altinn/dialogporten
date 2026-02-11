@@ -11,10 +11,6 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
     private readonly ILogger<PartyDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public string Name => StrategyName;
-    public EndUserSearchContext Context { get; private set; } = null!;
-
-    public void SetContext(EndUserSearchContext context) =>
-        Context = context ?? throw new ArgumentNullException(nameof(context));
 
     // Party-driven is kept as fallback only when branching logic is disabled.
     public int Score(EndUserSearchContext context)
@@ -23,9 +19,10 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
         return 0;
     }
 
-    public PostgresFormattableStringBuilder BuildSql()
+    public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
     {
-        var (query, dialogSearchAuthorizationResult) = Context;
+        ArgumentNullException.ThrowIfNull(context);
+        var (query, dialogSearchAuthorizationResult) = context;
         var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
             query,
             dialogSearchAuthorizationResult);

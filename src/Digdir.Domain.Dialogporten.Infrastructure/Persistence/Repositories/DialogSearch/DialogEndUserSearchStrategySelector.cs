@@ -22,9 +22,7 @@ internal sealed class DialogEndUserSearchStrategySelector(
         // Feature flag controls whether we branch at all; otherwise stick to the default strategy.
         if (!applicationSettings.Value.FeatureToggle.UseBranchingLogicForDialogSearch)
         {
-            var fallback = GetDefaultStrategy();
-            fallback.SetContext(context);
-            return fallback;
+            return GetDefaultStrategy();
         }
 
         // Highest positive score wins; ties are stable by name.
@@ -36,7 +34,6 @@ internal sealed class DialogEndUserSearchStrategySelector(
             .Select(x => x.Strategy)
             .FirstOrDefault()
             ?? GetDefaultStrategy();
-        resolved.SetContext(context);
         return resolved;
     }
 

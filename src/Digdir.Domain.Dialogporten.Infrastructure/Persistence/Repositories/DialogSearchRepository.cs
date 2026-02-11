@@ -278,15 +278,16 @@ internal sealed class DialogSearchRepository(
 
         var context = new EndUserSearchContext(query, authorizedResources);
         var strategy = _endUserSearchStrategySelector.Select(context);
-        return await GetDialogsAsEndUserInternal(strategy, cancellationToken);
+        return await GetDialogsAsEndUserInternal(strategy, context, cancellationToken);
     }
 
     private async Task<PaginatedList<DialogEntity>> GetDialogsAsEndUserInternal(
         IDialogEndUserSearchStrategy strategy,
+        EndUserSearchContext context,
         CancellationToken cancellationToken)
     {
-        var queryBuilder = strategy.BuildSql();
-        var query = strategy.Context.Query;
+        var queryBuilder = strategy.BuildSql(context);
+        var query = context.Query;
 
         var efQuery = _db.Dialogs
             .FromSql(queryBuilder.ToFormattableString())

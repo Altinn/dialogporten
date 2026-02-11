@@ -10,10 +10,6 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
     private readonly ILogger<ServiceDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public string Name => "ServiceDriven";
-    public EndUserSearchContext Context { get; private set; } = null!;
-
-    public void SetContext(EndUserSearchContext context) =>
-        Context = context ?? throw new ArgumentNullException(nameof(context));
 
     // Service-driven is always preferred when branching logic is enabled.
     public int Score(EndUserSearchContext context)
@@ -22,9 +18,10 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
         return 100;
     }
 
-    public PostgresFormattableStringBuilder BuildSql()
+    public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
     {
-        var (query, dialogSearchAuthorizationResult) = Context;
+        ArgumentNullException.ThrowIfNull(context);
+        var (query, dialogSearchAuthorizationResult) = context;
         var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
             query,
             dialogSearchAuthorizationResult);

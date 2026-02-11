@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.Limits.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -15,8 +14,6 @@ using FluentValidation;
 using HotChocolate.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using MediatR;
-using Microsoft.Net.Http.Headers;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
@@ -162,19 +159,6 @@ static void BuildAndRun(string[] args)
         .UseAuthentication()
         .UseAuthorization()
         .UseAzureConfiguration();
-
-    app.MapGet("/api/v1/metadata/limits", async (ISender sender, HttpContext context, CancellationToken cancellationToken) =>
-        {
-            var result = await sender.Send(new GetLimitsQuery(), cancellationToken);
-
-            context.Response.GetTypedHeaders().CacheControl = new CacheControlHeaderValue
-            {
-                Public = true,
-                MaxAge = TimeSpan.FromMinutes(5)
-            };
-            return Results.Ok(result);
-        })
-        .AllowAnonymous();
 
     app.MapGraphQL()
         .RequireCors(GraphQlCorsOptions.PolicyName)

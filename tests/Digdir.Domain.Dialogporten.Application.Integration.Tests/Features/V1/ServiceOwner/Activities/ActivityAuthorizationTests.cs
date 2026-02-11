@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
@@ -10,9 +9,6 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Activities;
 
@@ -41,11 +37,8 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
 
     [Fact]
     public Task Can_Create_Correspondence_Activities_With_Required_Scope() =>
-        FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-            })
+        FlowBuilder.For(Application)
+            .AsCorrespondenceUser()
             .CreateSimpleDialog(x =>
             {
                 x.Dto.Activities
@@ -83,11 +76,8 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
 
     [Fact]
     public Task Can_Update_Correspondence_Activities_With_Required_Scope() =>
-        FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-            })
+        FlowBuilder.For(Application)
+            .AsCorrespondenceUser()
             .CreateSimpleDialog()
             .AssertSuccessAndUpdateDialog(x =>
             {

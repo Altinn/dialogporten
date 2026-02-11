@@ -106,10 +106,15 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden("User cannot modify frozen dialog");
         }
 
+        if (request.IfMatchDialogRevision is { } revision && revision != dialog.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
 
-        if (!request.IsSilentUpdate || !isCurrentUserServiceOwnerAdmin)
+        if (!request.IsSilentUpdate && !isCurrentUserServiceOwnerAdmin)
         {
             ValidateTimeFields(dialog);
         }

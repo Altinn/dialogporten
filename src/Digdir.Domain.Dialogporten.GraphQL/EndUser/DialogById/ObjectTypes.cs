@@ -352,6 +352,9 @@ public sealed class Attachment
     [GraphQLDescription("The display name of the attachment that should be used in GUIs.")]
     public List<Localization> DisplayName { get; set; } = [];
 
+    [GraphQLDescription("The logical name of the attachment.")]
+    public string? Name { get; set; }
+
     [GraphQLDescription("The URLs associated with the attachment, each referring to a different representation of the attachment.")]
     public List<AttachmentUrl> Urls { get; set; } = [];
 

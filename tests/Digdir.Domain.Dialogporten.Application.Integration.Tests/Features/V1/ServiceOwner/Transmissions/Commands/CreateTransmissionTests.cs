@@ -4,8 +4,12 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission.TransmissionAttachmentDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -41,4 +45,28 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 result.Transmissions.Last().RelatedTransmissionId.Should()
                     .Be(result.Transmissions.First().Id);
             });
+
+    private const string TransmissionAttachmentName = "transmission-attachment";
+
+    [Fact]
+    public Task Can_Create_Transmission_With_Attachment_Name() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateTransmission(x => x.AddAttachment(x => x.Name = TransmissionAttachmentName))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(result =>
+                result.Transmissions.Last()
+                    .Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == TransmissionAttachmentName));
+
+    [Fact]
+    public Task Cannot_Create_Transmission_With_Name_Longer_Than_DefaultMaxLength() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateTransmission(x =>
+                x.AddAttachment(attachment =>
+                    attachment.Name = new string('a', Constants.DefaultMaxStringLength + 1)))
+            .ExecuteAndAssert<ValidationError>(result =>
+                result.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Name)));
 }

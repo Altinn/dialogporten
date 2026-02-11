@@ -1,6 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.QueryLimits;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -13,8 +14,11 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Que
 
 internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialogQuery>
 {
-    public SearchDialogQueryValidator()
+    public SearchDialogQueryValidator(IQueryLimitsService queryLimitsService)
     {
+        ArgumentNullException.ThrowIfNull(queryLimitsService);
+        var limits = queryLimitsService.GetEndUserSearchDialogLimits();
+
         Include(new PaginationParameterValidator<SearchDialogQueryOrderDefinition, DialogEntity>());
         RuleFor(x => x.Search)
             .MinimumLength(3)
@@ -36,16 +40,16 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .IsValidPartyIdentifier();
 
         RuleFor(x => x.Org!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(limits.Org)
             .When(x => x.Org is not null);
         RuleFor(x => x.ServiceResource!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(limits.ServiceResource)
             .When(x => x.ServiceResource is not null);
         RuleFor(x => x.Party!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(limits.Party)
             .When(x => x.Party is not null);
         RuleFor(x => x.ExtendedStatus!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(limits.ExtendedStatus)
             .When(x => x.ExtendedStatus is not null);
 
         RuleFor(x => x.Process)

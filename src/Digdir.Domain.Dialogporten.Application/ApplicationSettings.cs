@@ -9,6 +9,7 @@ public sealed class ApplicationSettings
 
     public required DialogportenSettings Dialogporten { get; init; }
     public FeatureToggle FeatureToggle { get; init; } = new();
+    public LimitsSettings Limits { get; init; } = new();
 }
 
 public sealed class FeatureToggle
@@ -39,13 +40,40 @@ public sealed class Ed25519KeyPair
     public required string PublicComponent { get; init; }
 }
 
+public sealed class LimitsSettings
+{
+    public EndUserSearchQueryLimits EndUserSearch { get; init; } = new();
+    public ServiceOwnerSearchQueryLimits ServiceOwnerSearch { get; init; } = new();
+}
+
+public sealed class EndUserSearchQueryLimits
+{
+    public int Party { get; init; } = 100;
+    public int ServiceResource { get; init; } = 20;
+    public int Org { get; init; } = 20;
+    public int ExtendedStatus { get; init; } = 20;
+}
+
+public sealed class ServiceOwnerSearchQueryLimits
+{
+    public int Party { get; init; } = 20;
+    public int ServiceResource { get; init; } = 20;
+    public int ExtendedStatus { get; init; } = 20;
+}
+
 internal sealed class ApplicationSettingsValidator : AbstractValidator<ApplicationSettings>
 {
-    public ApplicationSettingsValidator(IValidator<DialogportenSettings> dialogportenSettingsValidator)
+    public ApplicationSettingsValidator(
+        IValidator<DialogportenSettings> dialogportenSettingsValidator,
+        IValidator<LimitsSettings> limitsSettingsValidator)
     {
         RuleFor(x => x.Dialogporten)
             .NotEmpty()
             .SetValidator(dialogportenSettingsValidator);
+
+        RuleFor(x => x.Limits)
+            .NotEmpty()
+            .SetValidator(limitsSettingsValidator);
     }
 }
 
@@ -54,5 +82,42 @@ internal sealed class DialogportenSettingsValidator : AbstractValidator<Dialogpo
     public DialogportenSettingsValidator()
     {
         RuleFor(x => x.BaseUri).NotEmpty().IsValidUri();
+    }
+}
+
+internal sealed class LimitsSettingsValidator : AbstractValidator<LimitsSettings>
+{
+    public LimitsSettingsValidator(
+        IValidator<EndUserSearchQueryLimits> endUserSearchValidator,
+        IValidator<ServiceOwnerSearchQueryLimits> serviceOwnerSearchValidator)
+    {
+        RuleFor(x => x.EndUserSearch)
+            .NotEmpty()
+            .SetValidator(endUserSearchValidator);
+
+        RuleFor(x => x.ServiceOwnerSearch)
+            .NotEmpty()
+            .SetValidator(serviceOwnerSearchValidator);
+    }
+}
+
+internal sealed class EndUserSearchQueryLimitsValidator : AbstractValidator<EndUserSearchQueryLimits>
+{
+    public EndUserSearchQueryLimitsValidator()
+    {
+        RuleFor(x => x.Party).GreaterThan(0);
+        RuleFor(x => x.ServiceResource).GreaterThan(0);
+        RuleFor(x => x.Org).GreaterThan(0);
+        RuleFor(x => x.ExtendedStatus).GreaterThan(0);
+    }
+}
+
+internal sealed class ServiceOwnerSearchQueryLimitsValidator : AbstractValidator<ServiceOwnerSearchQueryLimits>
+{
+    public ServiceOwnerSearchQueryLimitsValidator()
+    {
+        RuleFor(x => x.Party).GreaterThan(0);
+        RuleFor(x => x.ServiceResource).GreaterThan(0);
+        RuleFor(x => x.ExtendedStatus).GreaterThan(0);
     }
 }

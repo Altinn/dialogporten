@@ -34,7 +34,6 @@ public sealed class GetLimitsEndpoint : EndpointWithoutRequest<GetLimitsDto>
             Public = true,
             MaxAge = TimeSpan.FromMinutes(5)
         };
-        HttpContext.Response.Headers[HeaderNames.Vary] = new[] { "Accept-Encoding" };
 
         await SendOkAsync(result, ct);
     }

@@ -5,7 +5,6 @@ End-to-end tests that call Dialogporten endpoints using test tokens from the tok
 ## Test Projects
 - WebAPI: [tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests](../tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests)
 - GraphQL: [tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests](../tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests) (calls both GraphQL and WebAPI)
-- E2E scripts: [scripts/e2e/README.md](../scripts/e2e/README.md)
 
 ## Run tests
 These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile these projects, so you get compile-time checks even when the E2E tests do not run.

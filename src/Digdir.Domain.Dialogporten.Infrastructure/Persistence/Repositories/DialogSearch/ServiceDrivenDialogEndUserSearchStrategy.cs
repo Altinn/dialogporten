@@ -31,7 +31,7 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
         var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, dialogSearchAuthorizationResult.DialogIds.ToArray());
-        var postPermissionFilters = BuildPostPermissionOrderAndLimit(query);
+        var postPermissionOrderAndLimit = BuildPostPermissionOrderAndLimit(query);
 
         return new PostgresFormattableStringBuilder()
             .Append("WITH ")
@@ -72,7 +72,7 @@ internal sealed class ServiceDrivenDialogEndUserSearchStrategy(ILogger<ServiceDr
                 SELECT d.*
                 FROM candidate_dialogs cd
                 JOIN "Dialog" d ON d."Id" = cd."Id"
-                {postPermissionFilters}
+                {postPermissionOrderAndLimit}
 
                 """);
     }

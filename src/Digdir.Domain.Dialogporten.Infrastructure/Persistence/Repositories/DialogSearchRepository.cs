@@ -346,8 +346,7 @@ internal sealed class DialogSearchRepository(
     {
         var parameters = new
         {
-            DialogIds = dialogIds,
-            AuthLevel = userAuthLevel
+            DialogIds = dialogIds
         };
 
         const string sql =
@@ -439,7 +438,6 @@ internal sealed class DialogSearchRepository(
         string? currentUserId,
         CancellationToken cancellationToken)
     {
-
         var parameters = new
         {
             DialogIds = dialogIds,

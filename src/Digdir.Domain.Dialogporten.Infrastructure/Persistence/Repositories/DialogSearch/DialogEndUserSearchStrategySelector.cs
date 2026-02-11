@@ -14,7 +14,7 @@ internal sealed class DialogEndUserSearchStrategySelector(
     IOptionsSnapshot<ApplicationSettings> applicationSettings,
     IEnumerable<IDialogEndUserSearchStrategy> strategies) : IDialogEndUserSearchStrategySelector
 {
-    private const string DefaultStrategyName = "PartyDriven";
+    private const string DefaultStrategyName = PartyDrivenDialogEndUserSearchStrategy.StrategyName;
     private readonly IReadOnlyList<IDialogEndUserSearchStrategy> _strategies = strategies.ToList();
 
     public IDialogEndUserSearchStrategy Select(EndUserSearchContext context)
@@ -28,15 +28,14 @@ internal sealed class DialogEndUserSearchStrategySelector(
         }
 
         // Highest positive score wins; ties are stable by name.
-        var selected = _strategies
+        var resolved = _strategies
             .Select(strategy => (Strategy: strategy, Score: strategy.Score(context)))
             .Where(x => x.Score > 0)
             .OrderByDescending(x => x.Score)
             .ThenBy(x => x.Strategy.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(x => x.Strategy)
             .FirstOrDefault()
-            .Strategy;
-
-        var resolved = selected ?? GetDefaultStrategy();
+            ?? GetDefaultStrategy();
         resolved.SetContext(context);
         return resolved;
     }

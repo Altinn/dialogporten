@@ -7,9 +7,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDrivenDialogEndUserSearchStrategy> logger)
     : IDialogEndUserSearchStrategy
 {
+    internal const string StrategyName = "PartyDriven";
     private readonly ILogger<PartyDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    public string Name => "PartyDriven";
+    public string Name => StrategyName;
     public EndUserSearchContext Context { get; private set; } = null!;
 
     public void SetContext(EndUserSearchContext context) =>

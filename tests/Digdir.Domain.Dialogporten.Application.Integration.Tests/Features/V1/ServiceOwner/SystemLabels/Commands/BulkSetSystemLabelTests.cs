@@ -194,7 +194,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     {
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, AdminUserResourceRegistryDecorator>())
+            .AsAdminUser()
             .BulkSetSystemLabelServiceOwner((command, ctx) =>
             {
                 command.EndUserId = null;
@@ -220,7 +220,6 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     public Task BulkSet_PerformedBy_For_Non_Admin_Is_Forbidden() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, NonAdminUserResourceRegistryDecorator>())
             .BulkSetSystemLabelServiceOwner((command, ctx) =>
             {
                 command.EndUserId = null;

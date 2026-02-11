@@ -38,8 +38,8 @@ public class DialogApplication : IAsyncLifetime
 {
     private IMapper? _mapper;
     private Respawner _respawner = null!;
-    private ServiceProvider _rootProvider = null!;
-    private ServiceProvider _fixtureRootProvider = null!;
+    // private ServiceProvider _rootProvider = null!;
+    private ServiceProvider _serviceProvider = null!;
     private readonly List<object> _publishedEvents = [];
 
     internal static TestClock Clock { get; } = new();
@@ -61,31 +61,12 @@ public class DialogApplication : IAsyncLifetime
             .Using<DateTimeOffset>(ctx => ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMicroseconds(1)))
             .WhenTypeIs<DateTimeOffset>());
 
-        _fixtureRootProvider = _rootProvider = BuildServiceCollection().BuildServiceProvider();
+        _serviceProvider = BuildServiceCollection().BuildServiceProvider();
 
         await _dbContainer.StartAsync();
         await EnsureDatabaseAsync();
         await BuildRespawnState();
 
-    }
-
-    /// <summary>
-    /// This method lets you configure the IoC container for an integration test.
-    /// It will be reset to the default configuration after each test.
-    /// You may only call this or equivalent methods once per test.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if the method is called more than once per test.</exception>
-    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
-    public void ConfigureServices(Action<IServiceCollection> configure)
-    {
-        if (_rootProvider != _fixtureRootProvider)
-        {
-            throw new InvalidOperationException($"Only one call to {nameof(ConfigureServices)} or equivalent methods are allowed per test.");
-        }
-
-        var serviceCollection = BuildServiceCollection();
-        configure(serviceCollection);
-        _rootProvider = serviceCollection.BuildServiceProvider();
     }
 
     private IServiceCollection BuildServiceCollection()
@@ -223,15 +204,14 @@ public class DialogApplication : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await _rootProvider.DisposeAsync();
-        await _fixtureRootProvider.DisposeAsync();
+        await _serviceProvider.DisposeAsync();
         await _dbContainer.DisposeAsync();
         GC.SuppressFinalize(this);
     }
 
     public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
-        using var scope = _rootProvider.CreateScope();
+        using var scope = _serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
         return await mediator.Send(request, cancellationToken);
     }
@@ -244,16 +224,16 @@ public class DialogApplication : IAsyncLifetime
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();
         await _respawner.ResetAsync(connection);
-        if (_rootProvider != _fixtureRootProvider)
-        {
-            await _rootProvider.DisposeAsync();
-            _rootProvider = _fixtureRootProvider;
-        }
+        // if (_rootProvider != _fixtureRootProvider)
+        // {
+        //     await _rootProvider.DisposeAsync();
+        //     _rootProvider = _fixtureRootProvider;
+        // }
     }
 
     private async Task EnsureDatabaseAsync()
     {
-        using var scope = _rootProvider.CreateScope();
+        using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
         await context.Database.MigrateAsync();
     }
@@ -276,11 +256,11 @@ public class DialogApplication : IAsyncLifetime
 
     public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
 
-    public ServiceProvider GetServiceProvider() => _rootProvider;
+    // public ServiceProvider GetServiceProvider() => _rootProvider;
 
     public async Task<List<T>> GetDbEntities<T>() where T : class
     {
-        using var scope = _rootProvider.CreateScope();
+        using var scope = _serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
         return await db
             .Set<T>()
@@ -290,7 +270,7 @@ public class DialogApplication : IAsyncLifetime
 
     private ReadOnlyCollection<Table> GetLookupTables()
     {
-        using var scope = _rootProvider.CreateScope();
+        using var scope = _serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
         return db.Model.GetEntityTypes()
             .Where(x => typeof(ILookupEntity).IsAssignableFrom(x.ClrType))

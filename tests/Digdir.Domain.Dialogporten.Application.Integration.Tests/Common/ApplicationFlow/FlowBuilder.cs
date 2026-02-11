@@ -1,17 +1,9 @@
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
 public static class FlowBuilder
 {
-    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
-    public static IFlowStep For(DialogApplication application, Action<IServiceCollection> appConfig)
-    {
-        application.ConfigureServices(appConfig);
-        return new FlowStep<object?>(new FlowContext(application, [], []));
-    }
-
     public static IFlowStep For(DialogApplication application) =>
         new FlowStep<object?>(new FlowContext(application, [], []));
 }

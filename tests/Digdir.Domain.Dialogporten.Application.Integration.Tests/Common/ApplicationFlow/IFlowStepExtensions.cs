@@ -190,20 +190,20 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
-    public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
-        step.Do(x =>
-        {
-            x.Application.ConfigureServices(configure);
-        });
+    // [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
+    // public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
+    //     step.Do(x =>
+    //     {
+    //         x.Application.ConfigureServices(configure);
+    //     });
 
-    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
-    public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
-        step.Select(x =>
-        {
-            step.Context.Application.ConfigureServices(configure);
-            return x;
-        });
+    // [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
+    // public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
+    //     step.Select(x =>
+    //     {
+    //         step.Context.Application.ConfigureServices(configure);
+    //         return x;
+    //     });
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step,
         Action<DeleteDialogCommand>? modify = null) =>

@@ -10,6 +10,7 @@ public abstract class Attachment : IEntity
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset? ExpiresAt { get; set; }
+    public string? Name { get; set; }
 
     // === Principal relationships ===
     [AggregateChild]

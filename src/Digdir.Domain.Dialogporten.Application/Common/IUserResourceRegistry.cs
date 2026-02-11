@@ -3,8 +3,8 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Application.Common;
 
@@ -22,12 +22,18 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
     private readonly IUser _user;
     private readonly IResourceRegistry _resourceRegistry;
     private readonly ILogger<UserResourceRegistry> _logger;
+    private readonly DataIntegrityOptions _dataIntegrityOptions;
 
-    public UserResourceRegistry(IUser user, IResourceRegistry resourceRegistry, ILogger<UserResourceRegistry> logger)
+    public UserResourceRegistry(
+        IUser user,
+        IResourceRegistry resourceRegistry,
+        ILogger<UserResourceRegistry> logger,
+        IOptions<DataIntegrityOptions> dataIntegrityOptions)
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _dataIntegrityOptions = dataIntegrityOptions?.Value ?? throw new ArgumentNullException(nameof(dataIntegrityOptions));
     }
 
     public async Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken)
@@ -68,14 +74,18 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
 
         if (orgShortNames.Length > 1)
         {
-            var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-            if (environment == "prod")
+            const string messageTemplate = "More than one short name found for org number {OrgNumber}: {ShortNames}";
+            var shortNames = string.Join(", ", orgShortNames);
+
+            if (_dataIntegrityOptions.BadUserResourceDataHandling == BadDataHandling.Throw)
             {
-                var exceptionMessage = $"More than one short name found for org number {orgNumber}: {string.Join(", ", orgShortNames)}";
-                throw new UnreachableException(exceptionMessage);
+                var message = messageTemplate
+                    .Replace("{OrgNumber}", orgNumber, StringComparison.Ordinal)
+                    .Replace("{ShortNames}", shortNames, StringComparison.Ordinal);
+                throw new UnreachableException(message);
             }
 
-            _logger.LogWarning("More than one short name found for org number {OrgNumber}: {ShortNames}", orgNumber, string.Join(", ", orgShortNames));
+            _logger.LogWarning(messageTemplate, orgNumber, shortNames);
         }
 
         // Each organization number should only have one short name in RR

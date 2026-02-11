@@ -31,6 +31,10 @@ public static class ApplicationExtensions
             .ValidateFluently()
             .ValidateOnStart();
 
+        services.AddOptions<DataIntegrityOptions>()
+            .Bind(configuration.GetSection(DataIntegrityOptions.ConfigurationSectionName))
+            .ValidateOnStart();
+
         // Configures FluentValidation to use property names as
         // display names without an added space.
         // 'CreatedAt', not 'Created At'.

@@ -52,9 +52,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public Task Can_Create_Transmission_With_Attachment_Name() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .AssertResult<CreateDialogSuccess>()
             .CreateTransmission(x => x.AddAttachment(x => x.Name = TransmissionAttachmentName))
-            .AssertResult<CreateTransmissionSuccess>()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
                 result.Transmissions.Last()

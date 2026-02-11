@@ -136,7 +136,6 @@ public static class DialogTestData
         var attachment = new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
         {
             DisplayName = [CreateLocalization("Forsendelsevedlegg")],
-            Name = null!,
             Urls =
             [
                 new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl

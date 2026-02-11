@@ -57,15 +57,15 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .IsValidPartyIdentifier();
 
         RuleFor(x => x.ServiceResource!.Count)
-            .LessThanOrEqualTo(limits.ServiceResource)
+            .LessThanOrEqualTo(limits.MaxServiceResourceFilterValues)
             .When(x => x.ServiceResource is not null);
 
         RuleFor(x => x.Party!.Count)
-            .LessThanOrEqualTo(limits.Party)
+            .LessThanOrEqualTo(limits.MaxPartyFilterValues)
             .When(x => x.Party is not null);
 
         RuleFor(x => x.ExtendedStatus!.Count)
-            .LessThanOrEqualTo(limits.ExtendedStatus)
+            .LessThanOrEqualTo(limits.MaxExtendedStatusFilterValues)
             .When(x => x.ExtendedStatus is not null);
 
         RuleForEach(x => x.Status).IsInEnum();

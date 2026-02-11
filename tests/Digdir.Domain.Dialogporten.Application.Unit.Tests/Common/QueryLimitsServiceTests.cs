@@ -17,14 +17,14 @@ public sealed class QueryLimitsServiceTests
         var endUserLimits = service.GetEndUserSearchDialogLimits();
         var serviceOwnerLimits = service.GetServiceOwnerSearchDialogLimits();
 
-        Assert.Equal(100, endUserLimits.Party);
-        Assert.Equal(20, endUserLimits.ServiceResource);
-        Assert.Equal(20, endUserLimits.Org);
-        Assert.Equal(20, endUserLimits.ExtendedStatus);
+        Assert.Equal(20, endUserLimits.MaxPartyFilterValues);
+        Assert.Equal(20, endUserLimits.MaxServiceResourceFilterValues);
+        Assert.Equal(20, endUserLimits.MaxOrgFilterValues);
+        Assert.Equal(20, endUserLimits.MaxExtendedStatusFilterValues);
 
-        Assert.Equal(20, serviceOwnerLimits.Party);
-        Assert.Equal(20, serviceOwnerLimits.ServiceResource);
-        Assert.Equal(20, serviceOwnerLimits.ExtendedStatus);
+        Assert.Equal(20, serviceOwnerLimits.MaxPartyFilterValues);
+        Assert.Equal(20, serviceOwnerLimits.MaxServiceResourceFilterValues);
+        Assert.Equal(20, serviceOwnerLimits.MaxExtendedStatusFilterValues);
     }
 
     [Fact]
@@ -34,16 +34,16 @@ public sealed class QueryLimitsServiceTests
         {
             EndUserSearch = new EndUserSearchQueryLimits
             {
-                Party = 101,
-                ServiceResource = 21,
-                Org = 31,
-                ExtendedStatus = 41
+                MaxPartyFilterValues = 101,
+                MaxServiceResourceFilterValues = 21,
+                MaxOrgFilterValues = 31,
+                MaxExtendedStatusFilterValues = 41
             },
             ServiceOwnerSearch = new ServiceOwnerSearchQueryLimits
             {
-                Party = 11,
-                ServiceResource = 12,
-                ExtendedStatus = 13
+                MaxPartyFilterValues = 11,
+                MaxServiceResourceFilterValues = 12,
+                MaxExtendedStatusFilterValues = 13
             }
         });
 
@@ -55,14 +55,14 @@ public sealed class QueryLimitsServiceTests
         var endUserLimits = service.GetEndUserSearchDialogLimits();
         var serviceOwnerLimits = service.GetServiceOwnerSearchDialogLimits();
 
-        Assert.Equal(101, endUserLimits.Party);
-        Assert.Equal(21, endUserLimits.ServiceResource);
-        Assert.Equal(31, endUserLimits.Org);
-        Assert.Equal(41, endUserLimits.ExtendedStatus);
+        Assert.Equal(101, endUserLimits.MaxPartyFilterValues);
+        Assert.Equal(21, endUserLimits.MaxServiceResourceFilterValues);
+        Assert.Equal(31, endUserLimits.MaxOrgFilterValues);
+        Assert.Equal(41, endUserLimits.MaxExtendedStatusFilterValues);
 
-        Assert.Equal(11, serviceOwnerLimits.Party);
-        Assert.Equal(12, serviceOwnerLimits.ServiceResource);
-        Assert.Equal(13, serviceOwnerLimits.ExtendedStatus);
+        Assert.Equal(11, serviceOwnerLimits.MaxPartyFilterValues);
+        Assert.Equal(12, serviceOwnerLimits.MaxServiceResourceFilterValues);
+        Assert.Equal(13, serviceOwnerLimits.MaxExtendedStatusFilterValues);
     }
 
     private static ApplicationSettings CreateSettings(LimitsSettings? limits = null) =>

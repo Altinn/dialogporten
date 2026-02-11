@@ -48,17 +48,17 @@ public sealed class LimitsSettings
 
 public sealed class EndUserSearchQueryLimits
 {
-    public int Party { get; init; } = 100;
-    public int ServiceResource { get; init; } = 20;
-    public int Org { get; init; } = 20;
-    public int ExtendedStatus { get; init; } = 20;
+    public int MaxPartyFilterValues { get; init; } = 20;
+    public int MaxServiceResourceFilterValues { get; init; } = 20;
+    public int MaxOrgFilterValues { get; init; } = 20;
+    public int MaxExtendedStatusFilterValues { get; init; } = 20;
 }
 
 public sealed class ServiceOwnerSearchQueryLimits
 {
-    public int Party { get; init; } = 20;
-    public int ServiceResource { get; init; } = 20;
-    public int ExtendedStatus { get; init; } = 20;
+    public int MaxPartyFilterValues { get; init; } = 20;
+    public int MaxServiceResourceFilterValues { get; init; } = 20;
+    public int MaxExtendedStatusFilterValues { get; init; } = 20;
 }
 
 internal sealed class ApplicationSettingsValidator : AbstractValidator<ApplicationSettings>
@@ -105,10 +105,10 @@ internal sealed class EndUserSearchQueryLimitsValidator : AbstractValidator<EndU
 {
     public EndUserSearchQueryLimitsValidator()
     {
-        RuleFor(x => x.Party).GreaterThan(0);
-        RuleFor(x => x.ServiceResource).GreaterThan(0);
-        RuleFor(x => x.Org).GreaterThan(0);
-        RuleFor(x => x.ExtendedStatus).GreaterThan(0);
+        RuleFor(x => x.MaxPartyFilterValues).GreaterThan(0);
+        RuleFor(x => x.MaxServiceResourceFilterValues).GreaterThan(0);
+        RuleFor(x => x.MaxOrgFilterValues).GreaterThan(0);
+        RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0);
     }
 }
 
@@ -116,8 +116,8 @@ internal sealed class ServiceOwnerSearchQueryLimitsValidator : AbstractValidator
 {
     public ServiceOwnerSearchQueryLimitsValidator()
     {
-        RuleFor(x => x.Party).GreaterThan(0);
-        RuleFor(x => x.ServiceResource).GreaterThan(0);
-        RuleFor(x => x.ExtendedStatus).GreaterThan(0);
+        RuleFor(x => x.MaxPartyFilterValues).GreaterThan(0);
+        RuleFor(x => x.MaxServiceResourceFilterValues).GreaterThan(0);
+        RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0);
     }
 }

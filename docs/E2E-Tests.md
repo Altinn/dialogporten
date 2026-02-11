@@ -6,6 +6,19 @@ End-to-end tests that call Dialogporten endpoints using test tokens from the tok
 - WebAPI: `tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests`
 - GraphQL: `tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests` (calls both GraphQL and WebAPI)
 
+## Run tests
+These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile these projects, so you get compile-time checks even when the E2E tests do not run.
+
+To enable these tests locally for debugging, set `E2EExplicitOptions.ExplicitTests` to `false`
+(when `true`, tests are marked explicit and skipped unless you pass `xUnit.Explicit=on/only`).
+
+Use the xUnit explicit switch:
+- `dotnet test -- xUnit.Explicit=off` (default; do not run explicit tests)
+- `dotnet test -- xUnit.Explicit=on` (run all tests, including explicit)
+- `dotnet test -- xUnit.Explicit=only` (run only explicit tests)
+
+The tests can also be run with the scripts at `scripts/e2e/README.md`
+
 ## Prerequisites
 - Dialogporten running locally (see repo `README.md`).
   - WebAPI E2E: WebAPI only.
@@ -64,16 +77,7 @@ Use the shared E2E base class and custom attributes so hooks and explicit behavi
 Tests must not assume a clean environment. When listing dialogs (or similar), account for other dialogs that may exist for the same test org
 or service resource.
 
-## Run tests
-These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile these projects, so you get compile-time checks even when the E2E tests do not run.
 
-To enable these tests locally for debugging, set `E2EExplicitOptions.ExplicitTests` to `false`
-(when `true`, tests are marked explicit and skipped unless you pass `xUnit.Explicit=on/only`).
-
-Use the xUnit explicit switch:
-- `dotnet test -- xUnit.Explicit=off` (default; do not run explicit tests)
-- `dotnet test -- xUnit.Explicit=on` (run all tests, including explicit)
-- `dotnet test -- xUnit.Explicit=only` (run only explicit tests)
 
 ## Test data cleanup
 Cleanup is scheduled via GitHub Actions at 04:00 UTC for `test`, `staging`, and `yt01`

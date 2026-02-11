@@ -3,9 +3,9 @@
 End-to-end tests that call Dialogporten endpoints using test tokens from the token generator.
 
 ## Test Projects
-- WebAPI: [tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests](tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests)
-- GraphQL: [tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests](tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests) (calls both GraphQL and WebAPI)
-- E2E scripts: [scripts/e2e/README.md](scripts/e2e/README.md)
+- WebAPI: [tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests](../tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests)
+- GraphQL: [tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests](../tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests) (calls both GraphQL and WebAPI)
+- E2E scripts: [scripts/e2e/README.md](../scripts/e2e/README.md)
 
 ## Run tests
 These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile these projects, so you get compile-time checks even when the E2E tests do not run.
@@ -18,10 +18,10 @@ Use the xUnit explicit switch:
 - `dotnet test -- xUnit.Explicit=on` (run all tests, including explicit)
 - `dotnet test -- xUnit.Explicit=only` (run only explicit tests)
 
-The tests can also be run with the scripts at [scripts/e2e/README.md](scripts/e2e/README.md).
+The tests can also be run with the scripts at [scripts/e2e/README.md](../scripts/e2e/README.md).
 
 ## Prerequisites
-- Dialogporten running locally (see repo [README.md](README.md)).
+- Dialogporten running locally (see repo [README.md](../README.md)).
   - WebAPI E2E: WebAPI only.
   - GraphQL E2E: WebAPI + GraphQL.
 - Access to Altinn testtools token generator credentials.
@@ -73,7 +73,7 @@ Use the shared E2E base class and custom attributes so hooks and explicit behavi
 - GraphQL: inherit `E2ETestBase<GraphQlE2EFixture>`.
 - Keep tests under `Features/*`.
 - Use `[E2EFact]` or `[E2ETheory]` on every test (do not use `[Fact]`/`[Theory]`).
-- Explicit behavior is centralized in `E2EExplicitOptions` in [Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs](src/Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs).
+- Explicit behavior is centralized in `E2EExplicitOptions` in [Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs](../src/Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs).
 
 Tests must not assume a clean environment. When listing dialogs (or similar), account for other dialogs that may exist for the same test org
 or service resource.
@@ -82,7 +82,7 @@ or service resource.
 
 ## Test data cleanup
 Cleanup is scheduled via GitHub Actions at 04:00 UTC for `test`, `staging`, and `yt01`
-in [.github/workflows/dispatch-purge-e2e-test-data.yml](.github/workflows/dispatch-purge-e2e-test-data.yml), and can be triggered manually via Actions -> "Purge E2E test data".
+in [.github/workflows/dispatch-purge-e2e-test-data.yml](../.github/workflows/dispatch-purge-e2e-test-data.yml), and can be triggered manually via Actions -> "Purge E2E test data".
 
 To run the cleanup locally:
 ```bash

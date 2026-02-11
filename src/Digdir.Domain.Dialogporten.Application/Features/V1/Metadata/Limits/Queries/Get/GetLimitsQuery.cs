@@ -15,12 +15,12 @@ internal sealed class GetLimitsQueryHandler : IRequestHandler<GetLimitsQuery, Ge
         _queryLimitsService = queryLimitsService ?? throw new ArgumentNullException(nameof(queryLimitsService));
     }
 
-    public async Task<GetLimitsDto> Handle(GetLimitsQuery request, CancellationToken cancellationToken)
+    public Task<GetLimitsDto> Handle(GetLimitsQuery request, CancellationToken cancellationToken)
     {
         var endUserSearchLimits = _queryLimitsService.GetEndUserSearchDialogLimits();
         var serviceOwnerSearchLimits = _queryLimitsService.GetServiceOwnerSearchDialogLimits();
 
-        return await Task.FromResult(new GetLimitsDto
+        return Task.FromResult(new GetLimitsDto
         {
             EndUserSearch = new EndUserSearchLimitsDto
             {

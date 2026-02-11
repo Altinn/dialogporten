@@ -105,10 +105,10 @@ internal sealed class EndUserSearchQueryLimitsValidator : AbstractValidator<EndU
 {
     public EndUserSearchQueryLimitsValidator()
     {
-        RuleFor(x => x.MaxPartyFilterValues).GreaterThan(0);
-        RuleFor(x => x.MaxServiceResourceFilterValues).GreaterThan(0);
-        RuleFor(x => x.MaxOrgFilterValues).GreaterThan(0);
-        RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0);
+        RuleFor(x => x.MaxPartyFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
+        RuleFor(x => x.MaxServiceResourceFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
+        RuleFor(x => x.MaxOrgFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
+        RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
     }
 }
 
@@ -116,8 +116,8 @@ internal sealed class ServiceOwnerSearchQueryLimitsValidator : AbstractValidator
 {
     public ServiceOwnerSearchQueryLimitsValidator()
     {
-        RuleFor(x => x.MaxPartyFilterValues).GreaterThan(0);
-        RuleFor(x => x.MaxServiceResourceFilterValues).GreaterThan(0);
-        RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0);
+        RuleFor(x => x.MaxPartyFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
+        RuleFor(x => x.MaxServiceResourceFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
+        RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
     }
 }

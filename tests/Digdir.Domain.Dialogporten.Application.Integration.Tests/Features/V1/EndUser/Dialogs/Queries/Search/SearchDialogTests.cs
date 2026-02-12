@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -193,50 +194,15 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
         var dialogId4 = NewUuidV7();
         var dialogId5 = NewUuidV7();
         var dialogId6 = NewUuidV7();
+        var createdAtBase = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = dialogId1;
-                x.Dto.Party = TestUsers.DefaultParty;
-                x.Dto.ServiceResource = DummyService;
-                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(1);
-            })
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = dialogId2;
-                x.Dto.Party = TestUsers.DefaultParty;
-                x.Dto.ServiceResource = DummyService;
-                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(2);
-            })
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = dialogId3;
-                x.Dto.Party = TestUsers.DefaultParty;
-                x.Dto.ServiceResource = DummyService;
-                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(3);
-            })
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = dialogId4;
-                x.Dto.Party = TestUsers.DefaultParty;
-                x.Dto.ServiceResource = DummyService;
-                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(4);
-            })
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = dialogId5;
-                x.Dto.Party = TestUsers.DefaultParty;
-                x.Dto.ServiceResource = DummyService;
-                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(5);
-            })
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = dialogId6;
-                x.Dto.Party = TestUsers.DefaultParty;
-                x.Dto.ServiceResource = DummyService;
-                x.Dto.CreatedAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(6);
-            })
+            .CreateSimpleDialog(x => ConfDialog(x, dialogId1, createdAtBase.AddMinutes(1)))
+            .CreateSimpleDialog(x => ConfDialog(x, dialogId2, createdAtBase.AddMinutes(2)))
+            .CreateSimpleDialog(x => ConfDialog(x, dialogId3, createdAtBase.AddMinutes(3)))
+            .CreateSimpleDialog(x => ConfDialog(x, dialogId4, createdAtBase.AddMinutes(4)))
+            .CreateSimpleDialog(x => ConfDialog(x, dialogId5, createdAtBase.AddMinutes(5)))
+            .CreateSimpleDialog(x => ConfDialog(x, dialogId6, createdAtBase.AddMinutes(6)))
             .ExecuteAndAssert(_ => { });
 
         var orderBy = OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse("createdAt_asc", out var orderSet)
@@ -279,5 +245,13 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
         secondPage.Items.Select(x => x.Id).Should().Equal([dialogId3, dialogId4]);
         secondPage.Items.Select(x => x.Id).Should().NotIntersectWith(firstPage.Items.Select(x => x.Id));
         secondPage.HasNextPage.Should().BeTrue();
+    }
+
+    private static void ConfDialog(CreateDialogCommand command, Guid dialogId, DateTimeOffset createdAt)
+    {
+        command.Dto.Id = dialogId;
+        command.Dto.Party = TestUsers.DefaultParty;
+        command.Dto.ServiceResource = DummyService;
+        command.Dto.CreatedAt = createdAt;
     }
 }

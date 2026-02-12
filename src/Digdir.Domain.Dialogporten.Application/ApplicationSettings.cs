@@ -9,6 +9,7 @@ public sealed class ApplicationSettings
 
     public required DialogportenSettings Dialogporten { get; init; }
     public FeatureToggle FeatureToggle { get; init; } = new();
+    public BadDataHandling BadDataHandling { get; init; } = BadDataHandling.WarnAndContinue;
 }
 
 public sealed class FeatureToggle
@@ -18,6 +19,12 @@ public sealed class FeatureToggle
     public bool UseAccessManagementForAltinnSelfIdentifiedUsers { get; init; }
     public bool UseAccessManagementForIdportenEmailUsers { get; init; }
     public bool UseAccessManagementForFeideUsers { get; init; }
+}
+
+public enum BadDataHandling
+{
+    WarnAndContinue,
+    Throw
 }
 
 public sealed class DialogportenSettings

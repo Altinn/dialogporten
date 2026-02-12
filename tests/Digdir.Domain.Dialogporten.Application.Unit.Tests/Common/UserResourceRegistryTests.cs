@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Security.Claims;
-using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -80,24 +79,6 @@ public sealed class UserResourceRegistryTests
     private static ApplicationSettings CreateApplicationSettings(BadDataHandling handling) => new()
     {
         BadDataHandling = handling,
-        Dialogporten = new DialogportenSettings
-        {
-            BaseUri = new Uri("https://example.test/dialogporten"),
-            Ed25519KeyPairs = new Ed25519KeyPairs
-            {
-                Primary = new Ed25519KeyPair
-                {
-                    Kid = "primary",
-                    PrivateComponent = "private",
-                    PublicComponent = "public"
-                },
-                Secondary = new Ed25519KeyPair
-                {
-                    Kid = "secondary",
-                    PrivateComponent = "private",
-                    PublicComponent = "public"
-                }
-            }
-        }
+        Dialogporten = null!
     };
 }

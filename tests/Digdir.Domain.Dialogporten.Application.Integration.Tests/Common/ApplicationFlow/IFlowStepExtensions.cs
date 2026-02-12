@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
+using System.Runtime.CompilerServices;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Actors;
@@ -401,6 +402,17 @@ public static class IFlowStepExtensions
             return @in;
         });
 
+    public static IFlowExecutor<TOut> SelectAsync<TIn, TOut>(
+        this IFlowStep<TIn> step,
+        Func<TIn, FlowContext, CancellationToken, Task<TOut>> selector)
+    {
+        var context = step.Context;
+        context.Commands.Add(async (input, cancellationToken) =>
+            await selector((TIn)input!, context, cancellationToken));
+
+        return new FlowStep<TOut>(context);
+    }
+
     public static Task<object> ExecuteAndAssert(
         this IFlowStep<IOneOf> step,
         Action<object>? assert) =>
@@ -424,6 +436,36 @@ public static class IFlowStepExtensions
 
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
         => step.AssertResult(assert).ExecuteAsync();
+
+    public static async Task VerifySnapshot<T>(
+        this IFlowStep<IOneOf> flowStep,
+        Action<VerifySettings>? configureSettings = null,
+        [CallerFilePath] string sourceFile = "")
+    {
+        var result = await flowStep.ExecuteAndAssert<T>();
+        await result.VerifySnapshot(configureSettings, sourceFile);
+    }
+
+    public static async Task VerifySnapshot<T>(
+        this IFlowExecutor<T> flowStep,
+        Action<VerifySettings>? configureSettings = null,
+        [CallerFilePath] string sourceFile = "")
+    {
+        var result = await flowStep.ExecuteAsync();
+        await result.VerifySnapshot(configureSettings, sourceFile);
+    }
+
+    public static Task VerifySnapshot<T>(
+        this T target,
+        Action<VerifySettings>? configureSettings = null,
+        [CallerFilePath] string sourceFile = "")
+    {
+        var settings = new VerifySettings();
+        configureSettings?.Invoke(settings);
+
+        return Verify(target, settings, sourceFile)
+            .UseDirectory("Snapshots");
+    }
 
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>
         step.Select(result =>

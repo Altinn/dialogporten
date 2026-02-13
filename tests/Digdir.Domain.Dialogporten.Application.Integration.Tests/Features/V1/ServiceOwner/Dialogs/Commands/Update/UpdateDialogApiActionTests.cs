@@ -47,4 +47,57 @@ public class UpdateDialogApiActionTests(DialogApplication application) : Applica
                     .Which.Id.Should().Be(apiActionEndpointId);
             });
     }
+
+    [Fact]
+    public async Task Foo_Can_Create_Api_Action_Endpoint_With_Supplied_Id()
+    {
+        var apiActionId = NewUuidV7();
+        var apiActionEndpointId = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog(x => x.Dto.ApiActions = [
+                new()
+                {
+                    Id = apiActionId,
+                    Action = "read",
+                    Endpoints =
+                    [
+                        new()
+                        {
+                            Id = apiActionEndpointId,
+                            HttpMethod = HttpVerb.Values.GET,
+                            Url = new Uri("https://example.com/api/read")
+                        }
+                    ]
+                }
+            ])
+            .UpdateDialog(x =>
+            {
+                x.Dto.ApiActions =
+                [
+                    new()
+                    {
+                        Id = apiActionId,
+                        Action = "read",
+                        Endpoints =
+                        [
+                            new()
+                            {
+                                Id = NewUuidV7(),
+                                HttpMethod = HttpVerb.Values.POST,
+                                Url = new Uri("https://example.com/api/read")
+                            }
+                        ]
+                    }
+                ];
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var apiAction = x.ApiActions.Single();
+                apiAction.Id.Should().Be(apiActionId);
+                apiAction.Endpoints.Should().ContainSingle()
+                    .Which.Id.Should().Be(apiActionEndpointId);
+            });
+    }
 }

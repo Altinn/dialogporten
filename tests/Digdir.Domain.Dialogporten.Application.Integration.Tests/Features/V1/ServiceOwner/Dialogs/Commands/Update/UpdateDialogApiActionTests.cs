@@ -52,6 +52,7 @@ public class UpdateDialogApiActionTests(DialogApplication application) : Applica
     public async Task Foo_Can_Create_Api_Action_Endpoint_With_Supplied_Id()
     {
         var apiActionId = NewUuidV7();
+        var newApiActionEndpointId = NewUuidV7();
         var apiActionEndpointId = NewUuidV7();
 
         await FlowBuilder.For(Application)
@@ -83,7 +84,7 @@ public class UpdateDialogApiActionTests(DialogApplication application) : Applica
                         [
                             new()
                             {
-                                Id = NewUuidV7(),
+                                Id = newApiActionEndpointId,
                                 HttpMethod = HttpVerb.Values.POST,
                                 Url = new Uri("https://example.com/api/read")
                             }
@@ -97,7 +98,7 @@ public class UpdateDialogApiActionTests(DialogApplication application) : Applica
                 var apiAction = x.ApiActions.Single();
                 apiAction.Id.Should().Be(apiActionId);
                 apiAction.Endpoints.Should().ContainSingle()
-                    .Which.Id.Should().Be(apiActionEndpointId);
+                    .Which.Id.Should().Be(newApiActionEndpointId);
             });
     }
 }

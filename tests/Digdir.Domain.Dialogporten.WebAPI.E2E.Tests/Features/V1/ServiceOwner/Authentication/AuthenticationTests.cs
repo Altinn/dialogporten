@@ -11,19 +11,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.A
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
-    private static readonly HashSet<string> AuthenticationMethodNames =
-    [
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog),
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog),
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog),
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsCommandsUpdateDialog),
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsPatchDialog),
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog),
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission),
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsQueriesGetActivityDialogActivity),
-        nameof(IServiceownerApi.V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity)
-    ];
-
     public static TheoryData<AuthScenario, EndpointScenario> AuthenticationCases => BuildAuthenticationCases();
 
     [E2ETheory]
@@ -63,11 +50,12 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         var endpointScenarios = typeof(IServiceownerApi)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-            .Where(method => AuthenticationMethodNames.Contains(method.Name))
+            .Where(IsRefitHttpMethod)
             .OrderBy(method => method.Name)
             .Select(method => new EndpointScenario(
                 Name: method.Name,
-                Call: (api, cancellationToken) => InvokeEndpointAsync(api, method, cancellationToken)))
+                Call: (api, cancellationToken) =>
+                    InvokeEndpointAsync(api, method, cancellationToken)))
             .ToArray();
 
         var result = new TheoryData<AuthScenario, EndpointScenario>();
@@ -89,7 +77,7 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         CancellationToken cancellationToken)
     {
         var arguments = method.GetParameters()
-            .Select(parameter => CreateArgument(parameter.ParameterType, cancellationToken))
+            .Select(parameter => CreateArgument(parameter.ParameterType, [], cancellationToken))
             .ToArray();
 
         var invocationResult = method.Invoke(serviceownerApi, arguments)
@@ -111,43 +99,93 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         return response;
     }
 
-    private static object? CreateArgument(Type parameterType, CancellationToken cancellationToken)
+    private static bool IsRefitHttpMethod(MethodInfo method) =>
+        method.GetCustomAttributes(inherit: true)
+            .Any(attribute => attribute.GetType().Namespace == "Refit" && attribute.GetType().Name is
+                "GetAttribute" or
+                "PostAttribute" or
+                "PutAttribute" or
+                "PatchAttribute" or
+                "DeleteAttribute" or
+                "HeadAttribute" or
+                "OptionsAttribute");
+
+    private static object? CreateArgument(
+        Type parameterType,
+        HashSet<Type> creationStack,
+        CancellationToken cancellationToken)
     {
-        if (parameterType == typeof(CancellationToken))
+        if (!creationStack.Add(parameterType))
         {
-            return cancellationToken;
+            return parameterType.IsValueType
+                ? Activator.CreateInstance(parameterType)
+                : null;
         }
 
-        if (parameterType == typeof(Guid))
+        try
         {
-            return Guid.NewGuid();
-        }
+            if (parameterType == typeof(CancellationToken))
+            {
+                return cancellationToken;
+            }
 
-        if (Nullable.GetUnderlyingType(parameterType) is not null)
+            if (parameterType == typeof(Guid))
+            {
+                return Guid.NewGuid();
+            }
+
+            if (Nullable.GetUnderlyingType(parameterType) is not null)
+            {
+                return null;
+            }
+
+            if (parameterType == typeof(string))
+            {
+                return string.Empty;
+            }
+
+            if (parameterType.IsEnum || parameterType.IsValueType)
+            {
+                return Activator.CreateInstance(parameterType);
+            }
+
+            if (parameterType.IsArray)
+            {
+                var elementType = parameterType.GetElementType()
+                    ?? throw new InvalidOperationException($"Unable to determine element type for '{parameterType}'.");
+                return Array.CreateInstance(elementType, 0);
+            }
+
+            if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                var elementType = parameterType.GetGenericArguments()[0];
+                return Array.CreateInstance(elementType, 0);
+            }
+
+            var defaultCtor = parameterType.GetConstructor(Type.EmptyTypes);
+            if (defaultCtor is not null)
+            {
+                return Activator.CreateInstance(parameterType)
+                    ?? throw new InvalidOperationException($"Unable to instantiate argument of type '{parameterType}'.");
+            }
+
+            var constructor = parameterType
+                .GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+                .OrderBy(ctor => ctor.GetParameters().Length)
+                .FirstOrDefault()
+                ?? throw new InvalidOperationException(
+                    $"Unable to instantiate argument of type '{parameterType}' because no public constructors were found.");
+
+            var constructorArguments = constructor.GetParameters()
+                .Select(parameter => CreateArgument(parameter.ParameterType, creationStack, cancellationToken))
+                .ToArray();
+
+            return constructor.Invoke(constructorArguments);
+        }
+        finally
         {
-            return null;
+            _ = creationStack.Remove(parameterType);
         }
-
-        if (parameterType == typeof(string))
-        {
-            return string.Empty;
-        }
-
-        if (parameterType.IsArray)
-        {
-            var elementType = parameterType.GetElementType()
-                ?? throw new InvalidOperationException($"Unable to determine element type for '{parameterType}'.");
-            return Array.CreateInstance(elementType, 0);
-        }
-
-        if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-        {
-            var elementType = parameterType.GetGenericArguments()[0];
-            return Array.CreateInstance(elementType, 0);
-        }
-
-        return Activator.CreateInstance(parameterType)
-            ?? throw new InvalidOperationException($"Unable to instantiate argument of type '{parameterType}'.");
     }
 
     public sealed record AuthScenario(

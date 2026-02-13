@@ -101,14 +101,14 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
     private static bool IsRefitHttpMethod(MethodInfo method) =>
         method.GetCustomAttributes(inherit: true)
-            .Any(attribute => attribute.GetType().Namespace == "Refit" && attribute.GetType().Name is
-                "GetAttribute" or
-                "PostAttribute" or
-                "PutAttribute" or
-                "PatchAttribute" or
-                "DeleteAttribute" or
-                "HeadAttribute" or
-                "OptionsAttribute");
+            .Any(attribute => attribute is
+                GetAttribute or
+                PostAttribute or
+                PutAttribute or
+                PatchAttribute or
+                DeleteAttribute or
+                HeadAttribute or
+                OptionsAttribute);
 
     private static object? CreateArgument(
         Type parameterType,

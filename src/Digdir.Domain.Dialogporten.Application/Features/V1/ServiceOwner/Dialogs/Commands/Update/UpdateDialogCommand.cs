@@ -410,9 +410,19 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 .Merge(source.Endpoints,
                     destinationKeySelector: x => x.Id,
                     sourceKeySelector: x => x.Id,
-                    create: _mapper.Map<List<DialogApiActionEndpoint>>,
+                    create: CreateApiActionEndpoint,
                     update: _mapper.Update,
                     delete: DeleteDelegate.Default);
+        }
+    }
+
+    private IEnumerable<DialogApiActionEndpoint> CreateApiActionEndpoint(IEnumerable<ApiActionEndpointDto> creatables)
+    {
+        foreach (var apiActionEndpointDto in creatables)
+        {
+            var apiActionEndpoint = _mapper.Map<DialogApiActionEndpoint>(apiActionEndpointDto);
+            _db.DialogApiActionEndpoints.Add(apiActionEndpoint);
+            yield return apiActionEndpoint;
         }
     }
 

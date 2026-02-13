@@ -2,6 +2,7 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -20,23 +21,18 @@ public class UpdateDialogApiActionTests(DialogApplication application) : Applica
             .CreateSimpleDialog()
             .UpdateDialog(x =>
             {
-                x.Dto.ApiActions =
-                [
-                    new()
+                x.AddApiAction(apiAction =>
+                {
+                    apiAction.Id = apiActionId;
+                    apiAction.Action = "read";
+                    apiAction.Endpoints.Clear();
+                    apiAction.AddEndpoint(apiActionEndpoint =>
                     {
-                        Id = apiActionId,
-                        Action = "read",
-                        Endpoints =
-                        [
-                            new()
-                            {
-                                Id = apiActionEndpointId,
-                                HttpMethod = HttpVerb.Values.GET,
-                                Url = new Uri("https://example.com/api/read")
-                            }
-                        ]
-                    }
-                ];
+                        apiActionEndpoint.Id = apiActionEndpointId;
+                        apiActionEndpoint.HttpMethod = HttpVerb.Values.GET;
+                        apiActionEndpoint.Url = new Uri("https://example.com/api/read");
+                    });
+                });
             })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
@@ -56,41 +52,22 @@ public class UpdateDialogApiActionTests(DialogApplication application) : Applica
         var newApiActionEndpointId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.ApiActions = [
-                new()
+            .CreateSimpleDialog(x =>
+                x.AddApiAction(apiAction =>
                 {
-                    Id = apiActionId,
-                    Action = "read",
-                    Endpoints =
-                    [
-                        new()
-                        {
-                            Id = apiActionEndpointId,
-                            HttpMethod = HttpVerb.Values.GET,
-                            Url = new Uri("https://example.com/api/read")
-                        }
-                    ]
-                }
-            ])
+                    apiAction.Id = apiActionId;
+                    apiAction.Endpoints.Clear();
+                    apiAction.AddEndpoint(apiActionEndpoint =>
+                    {
+                        apiActionEndpoint.Id = apiActionEndpointId;
+                    });
+                }))
             .UpdateDialog(x =>
             {
-                x.Dto.ApiActions =
-                [
-                    new()
-                    {
-                        Id = apiActionId,
-                        Action = "read",
-                        Endpoints =
-                        [
-                            new()
-                            {
-                                Id = newApiActionEndpointId,
-                                HttpMethod = HttpVerb.Values.POST,
-                                Url = new Uri("https://example.com/api/read")
-                            }
-                        ]
-                    }
-                ];
+                var apiAction = x.Dto.ApiActions.First();
+                apiAction.Endpoints.Clear();
+                apiAction.AddEndpoint(apiActionEndpoint =>
+                    apiActionEndpoint.Id = newApiActionEndpointId);
             })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>

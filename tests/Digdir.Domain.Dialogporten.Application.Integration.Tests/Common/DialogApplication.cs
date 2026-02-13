@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
@@ -135,6 +136,9 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
+            .AddTransient<IDialogEndUserSearchStrategySelector, DialogEndUserSearchStrategySelector>()
+            .AddTransient<IDialogEndUserSearchStrategy, PartyDrivenDialogEndUserSearchStrategy>()
+            .AddTransient<IDialogEndUserSearchStrategy, ServiceDrivenDialogEndUserSearchStrategy>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 
@@ -178,7 +182,8 @@ public class DialogApplication : IAsyncLifetime
                 FeatureToggle = new FeatureToggle
                 {
                     UseAltinnAutoAuthorizedPartiesQueryParameters = true,
-                    UseCorrectPersonNameOrdering = true
+                    UseCorrectPersonNameOrdering = true,
+                    UseBranchingLogicForDialogSearch = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

@@ -44,30 +44,55 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
 
     private async Task<List<PaginatedList<DialogDto>>> GetAllPages(string orderBy)
     {
+        const int maxPages = 100;
         List<PaginatedList<DialogDto>> pages = [];
+        var parsedOrderBy = OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(
+            orderBy,
+            out var orderSet)
+            ? orderSet
+            : throw new InvalidOperationException($"Unable to parse orderBy value '{orderBy}'.");
+
         bool hasNextPage;
         string? continuationToken = null;
+        var pageCount = 0;
         do
         {
+            pageCount++;
+            if (pageCount > maxPages)
+            {
+                throw new InvalidOperationException($"Pagination did not terminate within {maxPages} pages for orderBy '{orderBy}'.");
+            }
+
             var previousToken = continuationToken;
+            var parsedContinuationToken = previousToken is null
+                ? null
+                : ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(previousToken, out var token)
+                    ? token
+                    : throw new InvalidOperationException($"Unable to parse continuation token for orderBy '{orderBy}'. Token: '{previousToken}'.");
+
             var page = await FlowBuilder.For(Application)
                 .SearchEndUserDialogs(x =>
                 {
                     x.Limit = 2;
                     x.Party = [TestUsers.DefaultParty];
-                    x.ContinuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>
-                        .TryParse(previousToken, out var token) ? token : null;
-                    x.OrderBy =
-                        OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(orderBy,
-                            out var orderSet)
-                            ? orderSet
-                            : null;
+                    x.ContinuationToken = parsedContinuationToken;
+                    x.OrderBy = parsedOrderBy;
                 })
                 .ExecuteAndAssert<PaginatedList<DialogDto>>();
 
             pages.Add(page);
             hasNextPage = page.HasNextPage;
             continuationToken = page.ContinuationToken;
+
+            if (hasNextPage && continuationToken is null)
+            {
+                throw new InvalidOperationException($"HasNextPage was true but continuation token was null for orderBy '{orderBy}'.");
+            }
+
+            if (hasNextPage && string.Equals(previousToken, continuationToken, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException($"Continuation token did not advance for orderBy '{orderBy}'. Token: '{continuationToken}'.");
+            }
         } while (hasNextPage);
 
         return pages;

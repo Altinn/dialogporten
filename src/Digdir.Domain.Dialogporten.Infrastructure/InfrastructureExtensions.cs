@@ -1,6 +1,7 @@
 using System.Data;
 using System.Globalization;
 using Altinn.ApiClients.Maskinporten.Extensions;
+using Dapper;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -28,6 +29,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using HotChocolate.Subscriptions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -56,6 +58,8 @@ public static class InfrastructureExtensions
     {
         ArgumentNullException.ThrowIfNull(builderContext);
         var (services, configuration, environment, infrastructureSettings, _) = builderContext;
+
+        SqlMapper.AddTypeHandler(new GuidArrayTypeHandler());
 
         services
             .AddSingleton(sp =>
@@ -125,6 +129,9 @@ public static class InfrastructureExtensions
             .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
+            .AddTransient<IDialogEndUserSearchStrategySelector, DialogEndUserSearchStrategySelector>()
+            .AddTransient<IDialogEndUserSearchStrategy, PartyDrivenDialogEndUserSearchStrategy>()
+            .AddTransient<IDialogEndUserSearchStrategy, ServiceDrivenDialogEndUserSearchStrategy>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()

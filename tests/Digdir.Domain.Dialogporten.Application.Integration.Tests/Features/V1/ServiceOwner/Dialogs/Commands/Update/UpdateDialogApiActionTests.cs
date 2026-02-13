@@ -49,11 +49,11 @@ public class UpdateDialogApiActionTests(DialogApplication application) : Applica
     }
 
     [Fact]
-    public async Task Foo_Can_Create_Api_Action_Endpoint_With_Supplied_Id()
+    public async Task Can_Update_Dialog_With_New_ApiActionEndpoint_Having_User_Defined_Id()
     {
         var apiActionId = NewUuidV7();
-        var newApiActionEndpointId = NewUuidV7();
         var apiActionEndpointId = NewUuidV7();
+        var newApiActionEndpointId = NewUuidV7();
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog(x => x.Dto.ApiActions = [

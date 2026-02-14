@@ -51,8 +51,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             return;
         }
 
-        var dialogId = createResponse.Content.ToGuid();
-        await PurgeAsDefault(dialogId);
+        _ = createResponse.Content.ToGuid();
     }
 
     [E2ETheory]
@@ -220,18 +219,11 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
     {
         var (dialogId, transmissionId, activityId) = await CreateAuthorizedDialogWithIdentifiersAsync();
 
-        try
-        {
-            var statusCode = await WithScenarioOverrides(
-                scenario,
-                () => operation(dialogId, transmissionId, activityId));
+        var statusCode = await WithScenarioOverrides(
+            scenario,
+            () => operation(dialogId, transmissionId, activityId));
 
-            AssertStatus(statusCode, expectedSuccess, expectedFailure, scenario.ShouldSucceed);
-        }
-        finally
-        {
-            await PurgeAsDefault(dialogId);
-        }
+        AssertStatus(statusCode, expectedSuccess, expectedFailure, scenario.ShouldSucceed);
     }
 
     private async Task<(Guid dialogId, Guid transmissionId, Guid activityId)> CreateAuthorizedDialogWithIdentifiersAsync()
@@ -255,17 +247,6 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         var activityId = dialog.Activities.Should().NotBeEmpty().And.Subject.First().Id;
 
         return (dialogId, transmissionId, activityId);
-    }
-
-    private async Task PurgeAsDefault(Guid dialogId)
-    {
-        var purgeResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsPurgeDialog(
-            dialogId,
-            if_Match: null,
-            TestContext.Current.CancellationToken);
-
-        (purgeResponse.StatusCode is HttpStatusCode.NoContent or HttpStatusCode.NotFound)
-            .Should().BeTrue();
     }
 
     private static V1ServiceOwnerDialogsCommandsCreate_Dialog CreateAuthorizationDialog()

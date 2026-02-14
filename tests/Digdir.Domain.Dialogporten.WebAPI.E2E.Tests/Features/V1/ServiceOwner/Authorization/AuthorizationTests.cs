@@ -41,7 +41,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         var createResponse = await WithScenarioOverrides(
             scenario,
             () => Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
-                CreateAuthorizationDialog(),
+                CreateSeedDialog(),
                 TestContext.Current.CancellationToken));
 
         AssertStatus(createResponse.StatusCode, HttpStatusCode.Created, HttpStatusCode.Forbidden, scenario.ShouldSucceed);
@@ -51,7 +51,8 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             return;
         }
 
-        _ = createResponse.Content.ToGuid();
+        createResponse.Content.ToGuid()
+            .Should().NotBeEmpty();
     }
 
     [E2ETheory]
@@ -230,7 +231,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
     private async Task<(Guid dialogId, Guid transmissionId, Guid activityId)> CreateAuthorizedDialogWithIdentifiersAsync()
     {
         var createResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
-            CreateAuthorizationDialog(),
+            CreateSeedDialog(),
             TestContext.Current.CancellationToken);
 
         createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -250,50 +251,12 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         return (dialogId, transmissionId, activityId);
     }
 
-    private static V1ServiceOwnerDialogsCommandsCreate_Dialog CreateAuthorizationDialog()
-    {
-        var dialog = DialogTestData.CreateSimpleDialog();
+    private static V1ServiceOwnerDialogsCommandsCreate_Dialog CreateSeedDialog() =>
+        DialogTestData.CreateSimpleDialog()
+            .AddTransmission()
+            .AddApiAction()
+            .AddActivity();
 
-        dialog.AddTransmission();
-
-        dialog.ApiActions =
-        [
-            new()
-            {
-                Action = "some_unauthorized_action",
-                Name = "confirm",
-                Endpoints =
-                [
-                    new()
-                    {
-                        Url = new Uri("https://digdir.no"),
-                        HttpMethod = Http_HttpVerb.GET
-                    },
-                    new()
-                    {
-                        Url = new Uri("https://digdir.no/deprecated"),
-                        HttpMethod = Http_HttpVerb.GET,
-                        Deprecated = true
-                    }
-                ]
-            }
-        ];
-
-        dialog.Activities =
-        [
-            new()
-            {
-                Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
-                PerformedBy = new()
-                {
-                    ActorType = Actors_ActorType.PartyRepresentative,
-                    ActorName = "Some custom name"
-                }
-            }
-        ];
-
-        return dialog;
-    }
 
     private static V1ServiceOwnerDialogsCommandsUpdate_Dialog CreateUpdateDialogDto() =>
         new()

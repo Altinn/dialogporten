@@ -204,8 +204,9 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
     {
         using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: AuthorizationScope.ServiceProvider);
 
-        var searchWithoutScopeResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(
-            new V1ServiceOwnerDialogsQueriesSearchDialogQueryParams(),
+        var searchWithoutScopeResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsQueriesSearchDialog(
+            new(),
             TestContext.Current.CancellationToken);
 
         searchWithoutScopeResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -257,18 +258,18 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
 
         dialog.ApiActions =
         [
-            new V1ServiceOwnerDialogsCommandsCreate_ApiAction
+            new()
             {
                 Action = "some_unauthorized_action",
                 Name = "confirm",
                 Endpoints =
                 [
-                    new V1ServiceOwnerDialogsCommandsCreate_ApiActionEndpoint
+                    new()
                     {
                         Url = new Uri("https://digdir.no"),
                         HttpMethod = Http_HttpVerb.GET
                     },
-                    new V1ServiceOwnerDialogsCommandsCreate_ApiActionEndpoint
+                    new()
                     {
                         Url = new Uri("https://digdir.no/deprecated"),
                         HttpMethod = Http_HttpVerb.GET,
@@ -280,10 +281,10 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
 
         dialog.Activities =
         [
-            new V1ServiceOwnerDialogsCommandsCreate_Activity
+            new()
             {
                 Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
-                PerformedBy = new V1ServiceOwnerCommonActors_Actor
+                PerformedBy = new()
                 {
                     ActorType = Actors_ActorType.PartyRepresentative,
                     ActorName = "Some custom name"
@@ -298,7 +299,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         new()
         {
             Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.NotApplicable,
-            Content = new V1ServiceOwnerDialogsCommandsUpdate_Content
+            Content = new()
             {
                 Title = DialogTestData.CreateContentValue(
                     value: "Updated title",
@@ -321,7 +322,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         new()
         {
             Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
-            PerformedBy = new V1ServiceOwnerCommonActors_Actor
+            PerformedBy = new()
             {
                 ActorType = Actors_ActorType.PartyRepresentative,
                 ActorName = "Some custom name"

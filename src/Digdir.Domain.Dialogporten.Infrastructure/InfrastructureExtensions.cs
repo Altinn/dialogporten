@@ -29,7 +29,6 @@ using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using HotChocolate.Subscriptions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -41,6 +40,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using MassTransit;
 using MediatR;
 
@@ -132,6 +132,7 @@ public static class InfrastructureExtensions
             .AddTransient<IDialogEndUserSearchStrategySelector, DialogEndUserSearchStrategySelector>()
             .AddTransient<IDialogEndUserSearchStrategy, PartyDrivenDialogEndUserSearchStrategy>()
             .AddTransient<IDialogEndUserSearchStrategy, ServiceDrivenDialogEndUserSearchStrategy>()
+            .AddTransient<IPartyServiceAssociationRepository, PartyServiceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
@@ -220,6 +221,11 @@ public static class InfrastructureExtensions
         {
             IsFailSafeEnabled = false,
             Duration = TimeSpan.FromMinutes(5)
+        })
+        .ConfigureFusionCache(nameof(IPartyServiceAssociationRepository), new()
+        {
+            Duration = TimeSpan.FromHours(6),
+            FailSafeMaxDuration = TimeSpan.FromHours(8)
         });
 
         if (environment.IsEnvironment("yt01"))

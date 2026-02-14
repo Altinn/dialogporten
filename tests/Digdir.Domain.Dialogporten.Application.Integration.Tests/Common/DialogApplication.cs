@@ -12,10 +12,10 @@ using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -139,6 +139,7 @@ public class DialogApplication : IAsyncLifetime
             .AddTransient<IDialogEndUserSearchStrategySelector, DialogEndUserSearchStrategySelector>()
             .AddTransient<IDialogEndUserSearchStrategy, PartyDrivenDialogEndUserSearchStrategy>()
             .AddTransient<IDialogEndUserSearchStrategy, ServiceDrivenDialogEndUserSearchStrategy>()
+            .AddTransient<IPartyServiceAssociationRepository, PartyServiceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 

@@ -14,6 +14,7 @@ public sealed class ApplicationSettings
 public sealed class FeatureToggle
 {
     public bool UseBranchingLogicForDialogSearch { get; init; }
+    public bool UsePartyServicePruning { get; init; }
     public bool UseAltinnAutoAuthorizedPartiesQueryParameters { get; init; }
     public bool UseCorrectPersonNameOrdering { get; init; }
     public bool UseAccessManagementForAltinnSelfIdentifiedUsers { get; init; }

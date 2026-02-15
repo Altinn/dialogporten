@@ -21,7 +21,7 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     {
         using var _ = Fixture.UseServiceOwnerTokenOverrides(tokenOverride: authenticationScenario.TokenOverride);
 
-        var response = await endpointScenario.Call(Fixture.ServiceownerApi, TestContext.Current.CancellationToken);
+        var response = await CallEndpointAsync(endpointScenario);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
@@ -33,6 +33,9 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         authenticateHeaderValue.Should().Contain("Bearer");
         authenticateHeaderValue.Should().Contain(authenticationScenario.ExpectedAuthenticateHeaderFragment);
     }
+
+    private Task<IApiResponse> CallEndpointAsync(EndpointScenario endpointScenario) =>
+        endpointScenario.Call(Fixture.ServiceownerApi, TestContext.Current.CancellationToken);
 
     private static TheoryData<AuthenticationScenario, EndpointScenario> BuildAuthenticationCases()
     {

@@ -6,7 +6,7 @@ using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Authorization;
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Auth;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
@@ -314,13 +314,4 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         bool shouldSucceed) =>
         actual.Should().Be(shouldSucceed ? success : failure);
 
-    public sealed record AuthorizationScenario(
-        string Name,
-        bool ShouldSucceed,
-        string? OrgNumber = null,
-        string? OrgName = null,
-        string? Scopes = null)
-    {
-        public override string ToString() => Name;
-    }
 }

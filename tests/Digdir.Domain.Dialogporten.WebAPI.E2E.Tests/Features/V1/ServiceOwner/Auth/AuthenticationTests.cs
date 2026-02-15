@@ -6,7 +6,7 @@ using Digdir.Library.Dialogporten.E2E.Common;
 using Refit;
 using Xunit;
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Authentication;
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Auth;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
@@ -186,14 +186,6 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         {
             _ = creationStack.Remove(parameterType);
         }
-    }
-
-    public sealed record AuthScenario(
-        string Name,
-        string TokenOverride,
-        string ExpectedAuthenticateHeaderFragment)
-    {
-        public override string ToString() => Name;
     }
 
     public sealed record EndpointScenario(

@@ -51,12 +51,25 @@ internal static class UpdateDialogCommandExtensions
         {
             Action = "Test action",
             Name = "Test action",
-            Endpoints = [new() { Url = new Uri("https://example.com"), HttpMethod = HttpVerb.Values.GET }]
         };
 
+        apiAction.AddEndpoint();
         modify?.Invoke(apiAction);
         command.Dto.ApiActions.Add(apiAction);
         return command;
+    }
+
+    public static ApiActionDto AddEndpoint(this ApiActionDto apiAction, Action<ApiActionEndpointDto>? modify = null)
+    {
+        var endpoint = new ApiActionEndpointDto
+        {
+            Url = new Uri("https://example.com"),
+            HttpMethod = HttpVerb.Values.GET
+        };
+
+        modify?.Invoke(endpoint);
+        apiAction.Endpoints.Add(endpoint);
+        return apiAction;
     }
 
     public static UpdateDialogCommand AddAttachment(this UpdateDialogCommand command, Action<AttachmentDto>? modify = null)

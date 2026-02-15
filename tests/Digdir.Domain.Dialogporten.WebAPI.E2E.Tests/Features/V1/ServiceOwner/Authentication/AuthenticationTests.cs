@@ -6,20 +6,20 @@ using Digdir.Library.Dialogporten.E2E.Common;
 using Refit;
 using Xunit;
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Auth;
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Authentication;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
-    public static TheoryData<AuthScenario, EndpointScenario> AuthenticationCases => BuildAuthenticationCases();
+    public static TheoryData<AuthenticationScenario, EndpointScenario> AuthenticationCases => BuildAuthenticationCases();
 
     [E2ETheory]
     [MemberData(nameof(AuthenticationCases))]
     public async Task Should_Return_401_With_Expected_WwwAuthenticate_Header(
-        AuthScenario authScenario,
+        AuthenticationScenario authenticationScenario,
         EndpointScenario endpointScenario)
     {
-        using var _ = Fixture.UseServiceOwnerTokenOverrides(tokenOverride: authScenario.TokenOverride);
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(tokenOverride: authenticationScenario.TokenOverride);
 
         var response = await endpointScenario.Call(Fixture.ServiceownerApi, TestContext.Current.CancellationToken);
 
@@ -31,18 +31,18 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         var authenticateHeaderValue = string.Join(',', authenticateHeaders ?? []);
         authenticateHeaderValue.Should().Contain("Bearer");
-        authenticateHeaderValue.Should().Contain(authScenario.ExpectedAuthenticateHeaderFragment);
+        authenticateHeaderValue.Should().Contain(authenticationScenario.ExpectedAuthenticateHeaderFragment);
     }
 
-    private static TheoryData<AuthScenario, EndpointScenario> BuildAuthenticationCases()
+    private static TheoryData<AuthenticationScenario, EndpointScenario> BuildAuthenticationCases()
     {
         var authScenarios = new[]
         {
-            new AuthScenario(
+            new AuthenticationScenario(
                 Name: "missing token",
                 TokenOverride: string.Empty,
                 ExpectedAuthenticateHeaderFragment: "Bearer"),
-            new AuthScenario(
+            new AuthenticationScenario(
                 Name: "malformed token",
                 TokenOverride: "thisisnotavalidtoken",
                 ExpectedAuthenticateHeaderFragment: "error=\"invalid_token\"")
@@ -58,7 +58,7 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                     InvokeEndpointAsync(api, method, cancellationToken)))
             .ToArray();
 
-        var theoryData = new TheoryData<AuthScenario, EndpointScenario>();
+        var theoryData = new TheoryData<AuthenticationScenario, EndpointScenario>();
 
         foreach (var authScenario in authScenarios)
         {

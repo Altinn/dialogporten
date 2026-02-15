@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
-public static class ServiceownerApiExtensions
+public static class ServiceOwnerApiExtensions
 {
     extension(IServiceownerApi serviceownerApi)
     {

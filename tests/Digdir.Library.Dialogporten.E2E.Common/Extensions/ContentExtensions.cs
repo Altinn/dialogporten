@@ -1,5 +1,4 @@
 using AwesomeAssertions;
-using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
@@ -9,20 +8,13 @@ public static class ContentExtensions
     {
         public Guid ToGuid()
         {
-            if (content is null)
-            {
-                Assert.Fail("Content was null, expected GUID.");
-            }
-
+            content.Should().NotBeNull();
             var rawContent = content.Trim('"');
 
-            if (!Guid.TryParse(rawContent, out var id))
-            {
-                Assert.Fail($"Could not parse guid from content, {rawContent}");
-            }
+            Guid.TryParse(rawContent, out var id)
+                .Should().BeTrue();
 
             id.Should().NotBe(Guid.Empty);
-
             return id;
         }
     }

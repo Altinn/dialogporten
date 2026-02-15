@@ -41,6 +41,12 @@ public sealed class TestTokenHandler : DelegatingHandler
     {
         var token = await GetToken(cancellationToken);
 
+        if (token.Length == 0)
+        {
+            request.Headers.Authorization = null;
+            return await base.SendAsync(request, cancellationToken);
+        }
+
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return await base.SendAsync(request, cancellationToken);
     }
@@ -56,7 +62,7 @@ public sealed class TestTokenHandler : DelegatingHandler
             _ => null
         };
 
-        if (!string.IsNullOrWhiteSpace(overrideToken))
+        if (overrideToken is not null)
         {
             return overrideToken;
         }

@@ -1,6 +1,4 @@
 // This file is generated, see "scripts" directory
-import { default as authentication } from './authentication.js';
-import { default as authorization } from './authorization.js';
 import { default as concurrency } from './concurrency.js';
 import { default as contextCreateSOLabels } from './contextCreateSOLabels.js';
 import { default as contextDeleteSOLabels } from './contextDeleteSOLabels.js';
@@ -24,8 +22,6 @@ import { default as dialogSystemLabels } from './dialogSystemLabels.js';
 import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
 
 export default function() {
-  authentication();
-  authorization();
   concurrency();
   contextCreateSOLabels();
   contextDeleteSOLabels();

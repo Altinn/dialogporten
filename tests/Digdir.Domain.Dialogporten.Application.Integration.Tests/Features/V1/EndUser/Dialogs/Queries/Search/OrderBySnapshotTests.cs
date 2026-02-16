@@ -54,7 +54,7 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
                 .SearchEndUserDialogs(x =>
                 {
                     x.Limit = 2;
-                    x.Party = [IntegrationTestUser.DefaultParty];
+                    x.Party = [TestUsers.DefaultParty];
                     x.ContinuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>
                         .TryParse(previousToken, out var token) ? token : null;
                     x.OrderBy =
@@ -88,7 +88,7 @@ public static class OrderByExtensions
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.Activities.Clear();
-                x.Dto.Party = IntegrationTestUser.DefaultParty;
+                x.Dto.Party = TestUsers.DefaultParty;
 
                 x.Dto.CreatedAt = DateAnchor.AddDays(addDays);
                 x.Dto.UpdatedAt = DateAnchor.AddDays(addDays);

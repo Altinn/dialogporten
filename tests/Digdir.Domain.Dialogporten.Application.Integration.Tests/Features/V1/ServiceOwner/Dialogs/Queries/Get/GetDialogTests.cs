@@ -88,6 +88,32 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                             .And.NotBe(Constants.ExpiredUri)));
             });
 
+    private const string DialogAttachmentName = "dialog-attachment";
+    private const string TransmissionAttachmentName = "transmission-attachment";
+
+    [Fact]
+    public Task Get_Dialog_Should_Return_Attachment_Names() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddAttachment(attachment =>
+                    attachment.Name = DialogAttachmentName);
+                x.AddTransmission(transmission =>
+                    transmission.AddAttachment(attachment =>
+                        attachment.Name = TransmissionAttachmentName));
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == DialogAttachmentName);
+                x.Transmissions.Should().ContainSingle()
+                    .Which.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == TransmissionAttachmentName);
+            });
+
     [Fact]
     public async Task Get_ReturnsDialog_WhenDialogExists()
     {

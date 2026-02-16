@@ -2,6 +2,7 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -11,6 +12,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
+
 #pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -62,7 +64,7 @@ internal sealed class MappingProfile : Profile
         CreateMap<DialogSearchTag, SearchTagDto>();
 
         CreateMap<List<DialogContent>?, ContentDto?>()
-            .ConvertUsing<DialogContentOutputConverter<ContentDto>>();
+            .ConvertUsing<DialogContentContentDtoConverter>();
 
         CreateMap<List<DialogTransmissionContent>?, DialogTransmissionContentDto?>()
             .ConvertUsing<TransmissionContentOutputConverter<DialogTransmissionContentDto>>();

@@ -1,19 +1,19 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
@@ -48,6 +48,118 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     }
 
     [Fact]
+    public Task Get_Dialog_Should_Include_MainContentReference() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+                x.Dto.Content!.MainContentReference = new ContentValueDto
+                {
+                    MediaType = MediaTypes.EmbeddableMarkdown,
+                    Value =
+                    [
+                        new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = "https://localhost/nb"
+                        },
+                        new LocalizationDto
+                        {
+                            LanguageCode = "nn",
+                            Value = "https://localhost/nn"
+                        },
+                        new LocalizationDto
+                        {
+                            LanguageCode = "en",
+                            Value = "https://localhost/en"
+                        }
+                    ]
+                })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Content.MainContentReference!.Should().BeEquivalentTo(
+                    new AuthorizationContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        IsAuthorized = true,
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "https://localhost/nb"
+                            },
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nn",
+                                Value = "https://localhost/nn"
+                            },
+                            new LocalizationDto
+                            {
+                                LanguageCode = "en",
+                                Value = "https://localhost/en"
+                            }
+                        ],
+                    }
+                );
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_Unauthorized_MainContentReference() =>
+        FlowBuilder.For(Application, ConfigureMainOnlyAuthorization)
+            .CreateSimpleDialog(x =>
+                x.Dto.Content!.MainContentReference = new ContentValueDto
+                {
+                    MediaType = MediaTypes.EmbeddableMarkdown,
+                    Value =
+                    [
+                        new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = "https://localhost/nb"
+                        },
+                        new LocalizationDto
+                        {
+                            LanguageCode = "nn",
+                            Value = "https://localhost/nn"
+                        },
+                        new LocalizationDto
+                        {
+                            LanguageCode = "en",
+                            Value = "https://localhost/en"
+                        }
+                    ]
+                })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Content.MainContentReference!.Should().BeEquivalentTo(
+                    new AuthorizationContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        IsAuthorized = false,
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = Constants.UnauthorizedUri.ToString()
+                            },
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nn",
+                                Value = Constants.UnauthorizedUri.ToString()
+                            },
+                            new LocalizationDto
+                            {
+                                LanguageCode = "en",
+                                Value = Constants.UnauthorizedUri.ToString()
+                            }
+                        ],
+                    }
+                );
+            });
+
+    [Fact]
     public Task Get_Dialog_Should_Include_Transmission_ExternalReference() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(x =>
@@ -68,11 +180,14 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     transmission.Content!.ContentReference = new ContentValueDto
                     {
                         MediaType = MediaTypes.EmbeddableMarkdown,
-                        Value = [new LocalizationDto
-                        {
-                            LanguageCode = "nb",
-                            Value = "https://example.com/secret"
-                        }]
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "https://example.com/secret"
+                            }
+                        ]
                     };
                 }))
             .GetEndUserDialog()
@@ -177,6 +292,15 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         var authorizationResult = new DialogDetailsAuthorizationResult
         {
             AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+        };
+        services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+    }
+
+    private static void ConfigureMainOnlyAuthorization(IServiceCollection services)
+    {
+        var authorizationResult = new DialogDetailsAuthorizationResult
+        {
+            AuthorizedAltinnActions = [new AltinnAction(Constants.MainResource)]
         };
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }

@@ -224,7 +224,7 @@ public sealed class Content
     public ContentValue? ExtendedStatus { get; set; }
 
     [GraphQLDescription("Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.")]
-    public ContentValue? MainContentReference { get; set; }
+    public AutorizationContentValue? MainContentReference { get; set; }
 }
 
 public sealed class TransmissionContent

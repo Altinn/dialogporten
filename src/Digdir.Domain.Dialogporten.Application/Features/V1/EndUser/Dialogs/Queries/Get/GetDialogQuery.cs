@@ -2,14 +2,14 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
@@ -246,6 +246,11 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 }
             }
 
+            if (action == Constants.ReadAction)
+            {
+                dto.Content.MainContentReference?.IsAuthorized = true;
+            }
+
             var authorizedTransmissions = dto.Transmissions.Where(t =>
                 authorizationResult.HasReadAccessToDialogTransmission(t.AuthorizationAttribute));
             foreach (var transmission in authorizedTransmissions)
@@ -269,6 +274,11 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             {
                 endpoint.Url = Constants.UnauthorizedUri;
             }
+        }
+
+        if (dto.Content.MainContentReference?.IsAuthorized == false)
+        {
+            dto.Content.MainContentReference.ReplaceUnauthorizedContentReference();
         }
 
         foreach (var dialogTransmission in dto.Transmissions.Where(e => !e.IsAuthorized))

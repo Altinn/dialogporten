@@ -1,23 +1,23 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
-using Digdir.Domain.Dialogporten.Application.Common.QueryLimits;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using FluentValidation;
+using Microsoft.Extensions.Options;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.ValidationErrorStrings;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 
 internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialogQuery>
 {
-    public SearchDialogQueryValidator(IQueryLimitsService queryLimitsService)
+    public SearchDialogQueryValidator(IOptionsSnapshot<ApplicationSettings> applicationSettings)
     {
-        ArgumentNullException.ThrowIfNull(queryLimitsService);
-        var limits = queryLimitsService.GetEndUserSearchDialogLimits();
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+        var limits = applicationSettings.Value.Limits.EndUserSearch;
 
         Include(new PaginationParameterValidator<SearchDialogQueryOrderDefinition, DialogEntity>());
         RuleFor(x => x.Search)

@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Common.QueryLimits;
 using MediatR;
+using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.Limits.Queries.Get;
 
@@ -8,17 +8,18 @@ public sealed class GetLimitsQuery : IRequest<GetLimitsDto>, IFeatureMetricServi
 
 internal sealed class GetLimitsQueryHandler : IRequestHandler<GetLimitsQuery, GetLimitsDto>
 {
-    private readonly IQueryLimitsService _queryLimitsService;
+    private readonly ApplicationSettings _applicationSettings;
 
-    public GetLimitsQueryHandler(IQueryLimitsService queryLimitsService)
+    public GetLimitsQueryHandler(IOptionsSnapshot<ApplicationSettings> applicationSettings)
     {
-        _queryLimitsService = queryLimitsService ?? throw new ArgumentNullException(nameof(queryLimitsService));
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+        _applicationSettings = applicationSettings.Value;
     }
 
     public Task<GetLimitsDto> Handle(GetLimitsQuery request, CancellationToken cancellationToken)
     {
-        var endUserSearchLimits = _queryLimitsService.GetEndUserSearchDialogLimits();
-        var serviceOwnerSearchLimits = _queryLimitsService.GetServiceOwnerSearchDialogLimits();
+        var endUserSearchLimits = _applicationSettings.Limits.EndUserSearch;
+        var serviceOwnerSearchLimits = _applicationSettings.Limits.ServiceOwnerSearch;
 
         return Task.FromResult(new GetLimitsDto
         {

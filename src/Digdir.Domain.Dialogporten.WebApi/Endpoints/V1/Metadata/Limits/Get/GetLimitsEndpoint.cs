@@ -3,7 +3,6 @@ using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.PreProcessors;
 using FastEndpoints;
 using MediatR;
-using Microsoft.Net.Http.Headers;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Metadata.Limits.Get;
 
@@ -28,12 +27,6 @@ public sealed class GetLimitsEndpoint : EndpointWithoutRequest<GetLimitsDto>
     public override async Task HandleAsync(CancellationToken ct)
     {
         var result = await _sender.Send(new GetLimitsQuery(), ct);
-
-        HttpContext.Response.GetTypedHeaders().CacheControl = new CacheControlHeaderValue
-        {
-            Public = true,
-            MaxAge = TimeSpan.FromMinutes(5)
-        };
 
         await SendOkAsync(result, ct);
     }

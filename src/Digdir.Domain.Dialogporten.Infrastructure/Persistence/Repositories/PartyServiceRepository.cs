@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Dapper;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -9,8 +11,13 @@ using ZiggyCreatures.Caching.Fusion.NullObjects;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-// Reads DialogParty/DialogServiceResource/DialogPartyServiceSummary to provide
-// a cheap "which services exist for this party" lookup, with per-party cache entries.
+/// <summary>
+/// Resolves existing <c>party x service</c> associations from summary tables and caches
+/// service sets per party using FusionCache.
+///
+/// Input parties and services are expected as full URNs. Internally, parties are compacted
+/// to type prefix + identifier and services are handled as resource suffixes.
+/// </summary>
 internal sealed class PartyServiceRepository(
     NpgsqlDataSource dataSource,
     IFusionCacheProvider? cacheProvider = null) : IPartyServiceAssociationRepository
@@ -174,7 +181,11 @@ internal sealed class PartyServiceRepository(
             ? throw new InvalidOperationException($"Unsupported party type '{partyType}'.")
             : $"{prefixWithSeparator}{partyIdentifier}";
 
-    private static string GetCacheKey(string party) => $"{CacheKeyPrefix}{party}";
+    private static string GetCacheKey(string party)
+    {
+        var hashedParty = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(party)));
+        return $"{CacheKeyPrefix}{hashedParty}";
+    }
 
     private sealed record CompactParty(char PartyType, string PartyIdentifier);
 

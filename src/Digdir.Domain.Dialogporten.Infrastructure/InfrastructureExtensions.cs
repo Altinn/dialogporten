@@ -224,8 +224,8 @@ public static class InfrastructureExtensions
         })
         .ConfigureFusionCache(nameof(IPartyServiceAssociationRepository), new()
         {
-            Duration = TimeSpan.FromHours(6),
-            FailSafeMaxDuration = TimeSpan.FromHours(8)
+            Duration = TimeSpan.FromMinutes(30),
+            FailSafeMaxDuration = TimeSpan.FromMinutes(60)
         });
 
         if (environment.IsEnvironment("yt01"))

@@ -6,7 +6,8 @@
     "trimUnusedSchema": true,
     "multipleInterfaces": "ByTag",
     "includeTags": [
-        "Serviceowner"
+        "Serviceowner",
+        "Enduser"
     ],
     "useCancellationTokens": true,
     "returnIApiResponse": true,

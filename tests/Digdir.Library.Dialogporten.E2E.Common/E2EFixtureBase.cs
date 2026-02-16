@@ -19,6 +19,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
     private PreflightState? PreflightState { get; set; }
 
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
+    public IEnduserApi EnduserApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -63,6 +64,15 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.ServiceOwner));
 
+        services
+            .AddRefitClient<IEnduserApi>(new RefitSettings
+            {
+                ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
+            })
+            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri)
+            .AddHttpMessageHandler(serviceProvider =>
+                ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser));
+
         services.Decorate<IServiceownerApi, EphemeralDialogDecorator>();
 
         var graphQlPath = environment == Environments.Development ? "/graphql" : "/dialogporten/graphql";
@@ -84,6 +94,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         _serviceProvider = services.BuildServiceProvider();
 
         ServiceownerApi = _serviceProvider.GetRequiredService<IServiceownerApi>();
+        EnduserApi = _serviceProvider.GetRequiredService<IEnduserApi>();
         _tokenOverridesAccessor = _serviceProvider.GetRequiredService<ITokenOverridesAccessor>();
 
         AfterServiceProviderBuilt(_serviceProvider);

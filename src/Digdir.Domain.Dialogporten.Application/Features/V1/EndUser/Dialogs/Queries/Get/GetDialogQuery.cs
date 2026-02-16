@@ -246,7 +246,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 }
             }
 
-            if (action == Constants.ReadAction)
+            if (action == Constants.ReadAction && resource == Constants.MainResource)
             {
                 dto.Content.MainContentReference?.IsAuthorized = true;
             }

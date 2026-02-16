@@ -105,7 +105,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
 
     [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_MainContentReference() =>
-        FlowBuilder.For(Application, ConfigureMainOnlyAuthorization)
+        FlowBuilder.For(Application, ConfigureWriteOnlyAuthorization)
             .CreateSimpleDialog(x =>
                 x.Dto.Content!.MainContentReference = new ContentValueDto
                 {
@@ -296,11 +296,11 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }
 
-    private static void ConfigureMainOnlyAuthorization(IServiceCollection services)
+    private static void ConfigureWriteOnlyAuthorization(IServiceCollection services)
     {
         var authorizationResult = new DialogDetailsAuthorizationResult
         {
-            AuthorizedAltinnActions = [new AltinnAction(Constants.MainResource)]
+            AuthorizedAltinnActions = [new AltinnAction("write")]
         };
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }

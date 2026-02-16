@@ -3,7 +3,7 @@ using Dapper;
 using Npgsql;
 using NpgsqlTypes;
 
-namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
+namespace Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 
 internal sealed class GuidArrayTypeHandler : SqlMapper.TypeHandler<Guid[]>
 {

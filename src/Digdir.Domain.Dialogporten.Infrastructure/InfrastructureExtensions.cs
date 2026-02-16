@@ -41,6 +41,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using MassTransit;
 using MediatR;
 
@@ -58,8 +59,6 @@ public static class InfrastructureExtensions
     {
         ArgumentNullException.ThrowIfNull(builderContext);
         var (services, configuration, environment, infrastructureSettings, _) = builderContext;
-
-        SqlMapper.AddTypeHandler(new GuidArrayTypeHandler());
 
         services
             .AddSingleton(sp =>
@@ -105,6 +104,7 @@ public static class InfrastructureExtensions
                         services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
                     );
             })
+            .AddDapperTypeHandlers()
             .AddHostedService<FusionCacheWarmupHostedService>()
             .AddHostedService<DevelopmentMigratorHostedService>()
             .AddHostedService<DevelopmentCleanupOutboxHostedService>()
@@ -130,8 +130,8 @@ public static class InfrastructureExtensions
 
             // Transient
             .AddTransient<IDialogEndUserSearchStrategySelector, DialogEndUserSearchStrategySelector>()
-            .AddTransient<IDialogEndUserSearchStrategy, PartyDrivenDialogEndUserSearchStrategy>()
-            .AddTransient<IDialogEndUserSearchStrategy, ServiceDrivenDialogEndUserSearchStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()

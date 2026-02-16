@@ -16,6 +16,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogS
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -120,6 +121,7 @@ public class DialogApplication : IAsyncLifetime
                     .EnableDetailedErrors()
                     .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
                     .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>()))
+            .AddDapperTypeHandlers()
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
@@ -137,8 +139,8 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<IDialogEndUserSearchStrategySelector, DialogEndUserSearchStrategySelector>()
-            .AddTransient<IDialogEndUserSearchStrategy, PartyDrivenDialogEndUserSearchStrategy>()
-            .AddTransient<IDialogEndUserSearchStrategy, ServiceDrivenDialogEndUserSearchStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 

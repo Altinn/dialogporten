@@ -4,31 +4,31 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 
-internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDrivenDialogEndUserSearchStrategy> logger)
-    : IDialogEndUserSearchStrategy
+internal sealed class ServiceDrivenQueryStrategy(ILogger<ServiceDrivenQueryStrategy> logger)
+    : IQueryStrategy<EndUserSearchContext>
 {
-    internal const string StrategyName = "PartyDriven";
-    private readonly ILogger<PartyDrivenDialogEndUserSearchStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<ServiceDrivenQueryStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    public string Name => StrategyName;
+    public string Name => "ServiceDriven";
 
-    // Party-driven is kept as fallback only when branching logic is disabled.
+    // Service-driven is always preferred when branching logic is enabled.
     public int Score(EndUserSearchContext context)
     {
         _ = context;
-        return 0;
+        return 100;
     }
 
     public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        var (query, dialogSearchAuthorizationResult) = context;
+        var query = context.Query;
+        var authorizedResources = context.AuthorizedResources;
         var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
             query,
-            dialogSearchAuthorizationResult);
+            authorizedResources);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
-        var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, dialogSearchAuthorizationResult.DialogIds.ToArray());
+        var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, authorizedResources.DialogIds.ToArray());
         var postPermissionOrderAndLimit = BuildPostPermissionOrderAndLimit(query);
 
         return new PostgresFormattableStringBuilder()
@@ -45,25 +45,19 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
                 """)
             .Append(
                 $"""
-                raw_permissions AS (
-                    SELECT p.party
-                         , s.service
+                permission_groups AS (
+                    SELECT x."Parties" AS parties
+                         , x."Services" AS services
                     FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
-                    CROSS JOIN LATERAL unnest(x."Services") AS s(service)
-                    CROSS JOIN LATERAL unnest(x."Parties") AS p(party)
                 )
-                ,party_permission_map AS (
-                    SELECT party
-                         , ARRAY_AGG(service) AS allowed_services
-                    FROM raw_permissions
-                    GROUP BY party
+                ,service_permissions AS (
+                    SELECT s.service
+                         , pg.parties AS allowed_parties
+                    FROM permission_groups pg
+                    CROSS JOIN LATERAL unnest(pg.services) AS s(service)
                 )
                 ,permission_candidate_ids AS (
-                    SELECT d_inner."Id"
-                    FROM party_permission_map ppm
-                    CROSS JOIN LATERAL (
-                        {permissionCandidateDialogs}
-                    ) d_inner
+                    {permissionCandidateDialogs}
                 )
                 ,delegated_dialogs AS (
                     {delegatedCandidateDialogs}
@@ -83,34 +77,27 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
 
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
     {
-        var permissionCandidateFilters = BuildPermissionCandidateFilters(query, includeSearchFilter: false);
+        var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
-            .AppendIf(query.Search is null,
-                """
-                SELECT d."Id"
-                FROM "Dialog" d
-                WHERE d."Party" = ppm.party
-
-                """)
-            .AppendIf(query.Search is not null,
-                """
-                SELECT d."Id"
-                FROM search."DialogSearch" ds
-                JOIN "Dialog" d ON d."Id" = ds."DialogId"
-                CROSS JOIN searchString ss
-                WHERE ds."Party" = ppm.party AND ds."SearchVector" @@ ss.searchVector
-
-                """)
             .Append(
-                """
-                AND d."ServiceResource" = ANY(ppm.allowed_services)
+                $"""
+                SELECT d_inner."Id"
+                FROM service_permissions sp
+                CROSS JOIN LATERAL (
+                    SELECT d."Id"
+                    FROM "Dialog" d
+                    {searchJoin}
+                    WHERE d."ServiceResource" = sp.service
+                      AND d."Party" = ANY(sp.allowed_parties)
+                      {permissionCandidateFilters}
                 """)
-            .Append($"{permissionCandidateFilters}")
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .Append(
                 $"""
-                 LIMIT {query.Limit + 1}
+                    LIMIT {query.Limit + 1}
+                ) d_inner
 
                 """);
     }
@@ -119,8 +106,8 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
         GetDialogsQuery query,
         Guid[] dialogIds)
     {
-        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
         var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
             .Append(
@@ -131,7 +118,6 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
                 {searchJoin}
                 WHERE 1=1
                 {permissionCandidateFilters}
-
                 """);
     }
 
@@ -140,11 +126,9 @@ internal sealed class PartyDrivenDialogEndUserSearchStrategy(ILogger<PartyDriven
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
 
-    private static PostgresFormattableStringBuilder BuildPermissionCandidateFilters(
-        GetDialogsQuery query,
-        bool includeSearchFilter = true) =>
+    private static PostgresFormattableStringBuilder BuildPermissionCandidateFilters(GetDialogsQuery query) =>
         new PostgresFormattableStringBuilder()
-            .AppendIf(includeSearchFilter && query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
+            .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))

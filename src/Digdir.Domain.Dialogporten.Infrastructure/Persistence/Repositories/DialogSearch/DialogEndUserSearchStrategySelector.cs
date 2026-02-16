@@ -5,19 +5,19 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 
 internal interface IDialogEndUserSearchStrategySelector
 {
-    IDialogEndUserSearchStrategy Select(EndUserSearchContext context);
+    IQueryStrategy<EndUserSearchContext> Select(EndUserSearchContext context);
 }
 
 // Selects the most suitable end-user dialog search strategy based on a score.
 // This keeps the repository logic simple while allowing strategies to evolve independently.
 internal sealed class DialogEndUserSearchStrategySelector(
     IOptionsSnapshot<ApplicationSettings> applicationSettings,
-    IEnumerable<IDialogEndUserSearchStrategy> strategies) : IDialogEndUserSearchStrategySelector
+    IEnumerable<IQueryStrategy<EndUserSearchContext>> strategies) : IDialogEndUserSearchStrategySelector
 {
-    private const string DefaultStrategyName = PartyDrivenDialogEndUserSearchStrategy.StrategyName;
-    private readonly IReadOnlyList<IDialogEndUserSearchStrategy> _strategies = strategies.ToList();
+    private const string DefaultStrategyName = PartyDrivenQueryStrategy.StrategyName;
+    private readonly IReadOnlyList<IQueryStrategy<EndUserSearchContext>> _strategies = strategies.ToList();
 
-    public IDialogEndUserSearchStrategy Select(EndUserSearchContext context)
+    public IQueryStrategy<EndUserSearchContext> Select(EndUserSearchContext context)
     {
         // Feature flag controls whether we branch at all; otherwise stick to the default strategy.
         if (!applicationSettings.Value.FeatureToggle.UseBranchingLogicForDialogSearch)
@@ -26,18 +26,15 @@ internal sealed class DialogEndUserSearchStrategySelector(
         }
 
         // Highest positive score wins; ties are stable by name.
-        var resolved = _strategies
+        return _strategies
             .Select(strategy => (Strategy: strategy, Score: strategy.Score(context)))
-            .Where(x => x.Score > 0)
             .OrderByDescending(x => x.Score)
             .ThenBy(x => x.Strategy.Name, StringComparer.OrdinalIgnoreCase)
             .Select(x => x.Strategy)
-            .FirstOrDefault()
-            ?? GetDefaultStrategy();
-        return resolved;
+            .First();
     }
 
-    private IDialogEndUserSearchStrategy GetDefaultStrategy()
+    private IQueryStrategy<EndUserSearchContext> GetDefaultStrategy()
     {
         var fallback = _strategies
             .FirstOrDefault(strategy => string.Equals(

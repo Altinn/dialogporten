@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Dapper;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
@@ -282,7 +281,7 @@ internal sealed class DialogSearchRepository(
     }
 
     private async Task<PaginatedList<DialogEntity>> GetDialogsAsEndUserInternal(
-        IDialogEndUserSearchStrategy strategy,
+        IQueryStrategy<EndUserSearchContext> strategy,
         EndUserSearchContext context,
         CancellationToken cancellationToken)
     {

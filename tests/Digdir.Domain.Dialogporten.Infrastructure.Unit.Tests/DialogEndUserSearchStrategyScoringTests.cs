@@ -13,8 +13,8 @@ public class DialogEndUserSearchStrategyScoringTests
     {
         // Arrange
         var context = CreateContext(BuildResourcesByParties(partyCount: 3, serviceCount: 2));
-        var partyDriven = new PartyDrivenDialogEndUserSearchStrategy(NullLogger<PartyDrivenDialogEndUserSearchStrategy>.Instance);
-        var serviceDriven = new ServiceDrivenDialogEndUserSearchStrategy(NullLogger<ServiceDrivenDialogEndUserSearchStrategy>.Instance);
+        var partyDriven = new PartyDrivenQueryStrategy(NullLogger<PartyDrivenQueryStrategy>.Instance);
+        var serviceDriven = new ServiceDrivenQueryStrategy(NullLogger<ServiceDrivenQueryStrategy>.Instance);
 
         // Act
         var partyScore = partyDriven.Score(context);
@@ -30,8 +30,8 @@ public class DialogEndUserSearchStrategyScoringTests
     {
         // Arrange
         var context = CreateContext(BuildResourcesByParties(partyCount: 3, serviceCount: 6));
-        var partyDriven = new PartyDrivenDialogEndUserSearchStrategy(NullLogger<PartyDrivenDialogEndUserSearchStrategy>.Instance);
-        var serviceDriven = new ServiceDrivenDialogEndUserSearchStrategy(NullLogger<ServiceDrivenDialogEndUserSearchStrategy>.Instance);
+        var partyDriven = new PartyDrivenQueryStrategy(NullLogger<PartyDrivenQueryStrategy>.Instance);
+        var serviceDriven = new ServiceDrivenQueryStrategy(NullLogger<ServiceDrivenQueryStrategy>.Instance);
 
         // Act
         var partyScore = partyDriven.Score(context);
@@ -47,8 +47,8 @@ public class DialogEndUserSearchStrategyScoringTests
     {
         // Arrange
         var context = CreateContext(BuildResourcesByParties(partyCount: 5000, serviceCount: 1));
-        var partyDriven = new PartyDrivenDialogEndUserSearchStrategy(NullLogger<PartyDrivenDialogEndUserSearchStrategy>.Instance);
-        var serviceDriven = new ServiceDrivenDialogEndUserSearchStrategy(NullLogger<ServiceDrivenDialogEndUserSearchStrategy>.Instance);
+        var partyDriven = new PartyDrivenQueryStrategy(NullLogger<PartyDrivenQueryStrategy>.Instance);
+        var serviceDriven = new ServiceDrivenQueryStrategy(NullLogger<ServiceDrivenQueryStrategy>.Instance);
 
         // Act
         var partyScore = partyDriven.Score(context);
@@ -65,8 +65,8 @@ public class DialogEndUserSearchStrategyScoringTests
         // Arrange
         var context = CreateContext(
             BuildResourcesByParties(partyCount: 5000, serviceCount: 6));
-        var partyDriven = new PartyDrivenDialogEndUserSearchStrategy(NullLogger<PartyDrivenDialogEndUserSearchStrategy>.Instance);
-        var serviceDriven = new ServiceDrivenDialogEndUserSearchStrategy(NullLogger<ServiceDrivenDialogEndUserSearchStrategy>.Instance);
+        var partyDriven = new PartyDrivenQueryStrategy(NullLogger<PartyDrivenQueryStrategy>.Instance);
+        var serviceDriven = new ServiceDrivenQueryStrategy(NullLogger<ServiceDrivenQueryStrategy>.Instance);
 
         // Act
         var partyScore = partyDriven.Score(context);

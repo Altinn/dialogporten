@@ -165,34 +165,9 @@ public sealed class DialogEntity :
     public void OnRestore(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogRestoredDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, string? endUserName)
+    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, int seenLogId = 1)
     {
-        var lastSeenAt = SeenLog
-                         .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
-                         .MaxBy(x => x.CreatedAt)
-                         ?.CreatedAt
-         ?? DateTimeOffset.MinValue;
-
-        if (lastSeenAt >= UpdatedAt)
-        {
-            return;
-        }
-
-        SeenLog.Add(new DialogSeenLog
-        {
-            EndUserTypeId = userTypeId,
-            IsViaServiceOwner = userTypeId == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
-            SeenBy = new DialogSeenLogSeenByActor
-            {
-                ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorNameEntity = new ActorName
-                {
-                    Name = endUserName,
-                    ActorId = endUserId
-                }
-            }
-        });
-        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, endUserId, userTypeId, seenLogId));
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];

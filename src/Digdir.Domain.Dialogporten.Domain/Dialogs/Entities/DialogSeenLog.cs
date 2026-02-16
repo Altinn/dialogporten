@@ -12,6 +12,8 @@ public sealed class DialogSeenLog : IImmutableEntity, IIdentifiableEntity, ICrea
     public DateTimeOffset CreatedAt { get; set; }
     public bool IsViaServiceOwner { get; set; }
 
+    public int? LastSeenLogId { get; set; }
+
     // === Principal relationships ===
     [AggregateChild]
     public DialogSeenLogSeenByActor SeenBy { get; set; } = null!;

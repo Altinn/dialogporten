@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 
@@ -7,4 +8,7 @@ public sealed record DialogSeenDomainEvent(
     string ServiceResource,
     string Party,
     string? Process,
-    string? PrecedingProcess) : DomainEvent, IProcessEvent;
+    string? PrecedingProcess,
+    string EnduserId,
+    DialogUserType.Values UserType,
+    int SeenLogId) : DomainEvent, IProcessEvent;

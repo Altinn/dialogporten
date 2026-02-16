@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using AutoMapper;
+﻿using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -9,9 +8,11 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
-using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Http;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -32,26 +33,26 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 {
     private readonly IDialogDbContext _db;
     private readonly IMapper _mapper;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
+    private readonly IUser _user;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogTokenGenerator _dialogTokenGenerator;
 
     public GetDialogQueryHandler(
         IDialogDbContext db,
         IMapper mapper,
-        IUnitOfWork unitOfWork,
         IClock clock,
         IUserRegistry userRegistry,
+        IUser user,
         IAltinnAuthorization altinnAuthorization,
         IDialogTokenGenerator dialogTokenGenerator)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        _user = user ?? throw new ArgumentNullException(nameof(user));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _dialogTokenGenerator = dialogTokenGenerator ?? throw new ArgumentNullException(nameof(dialogTokenGenerator));
     }
@@ -65,44 +66,44 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
                 dbCtx.Dialogs
                     .Include(x => x.Content)
-                        .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                     .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.Content)
-                        .ThenInclude(x => x.Value.Localizations)
+                    .ThenInclude(x => x.Content)
+                    .ThenInclude(x => x.Value.Localizations)
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.Sender)
-                        .ThenInclude(x => x.ActorNameEntity)
+                    .ThenInclude(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.Attachments)
-                        .ThenInclude(x => x.Urls)
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.Urls)
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.Attachments)
-                        .ThenInclude(x => x.DisplayName!.Localizations)
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.DisplayName!.Localizations)
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.Activities)
-                        .ThenInclude(x => x.Description!.Localizations)
+                    .ThenInclude(x => x.Description!.Localizations)
                     .Include(x => x.Activities)
-                        .ThenInclude(x => x.PerformedBy)
-                        .ThenInclude(x => x.ActorNameEntity)
+                    .ThenInclude(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.SeenLog
                         .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
                         .OrderBy(x => x.CreatedAt))
-                        .ThenInclude(x => x.SeenBy)
-                        .ThenInclude(x => x.ActorNameEntity)
+                    .ThenInclude(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.EndUserContext)
-                        .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                    .ThenInclude(x => x.DialogEndUserContextSystemLabels)
                     .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(x => x.Id == request.DialogId, ct),
             cancellationToken);
@@ -150,33 +151,45 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         // TODO: What if name lookup fails
         // https://github.com/altinn/dialogporten/issues/387
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
+        var userId = _userRegistry.GetCurrentUserId();
+
+        var externalId = userId.ExternalIdWithPrefix;
+        if (userId.Type == DialogUserType.Values.SystemUser)
+        {
+            externalId = _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
+                ? NorwegianOrganizationIdentifier.PrefixWithSeparator + systemOrgNumber
+                : throw new InvalidOperationException("Systemuser organization number not found");
+        }
+
+        var lastSeenLogId = dialog.SeenLog.MaxBy(x => x.LastSeenLogId)?.LastSeenLogId ?? 1;
         dialog.UpdateSeenAt(
-            currentUserInformation.UserId.ExternalIdWithPrefix,
-            currentUserInformation.UserId.Type,
-            currentUserInformation.Name);
+            externalId,
+            userId.Type,
+            lastSeenLogId);
 
-        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
+        // var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
+        // var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
 
-        dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [],
-            removeLabels: [SystemLabel.Values.MarkedAsUnopened],
-            performedBy);
+        // dialog.EndUserContext.UpdateSystemLabels(
+        //     addLabels: [],
+        //     removeLabels: [SystemLabel.Values.MarkedAsUnopened],
+        //     performedBy);
 
-        var saveResult = await _unitOfWork
-            .DisableUpdatableFilter()
-            .DisableVersionableFilter()
-            .SaveChangesAsync(cancellationToken);
+        // var saveResult = await _unitOfWork
+        //     .DisableUpdatableFilter()
+        //     .DisableVersionableFilter()
+        //     .SaveChangesAsync(cancellationToken);
 
-        saveResult.Switch(
-            success => { },
-            domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
-            concurrencyError =>
-                throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
-            conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
+        // saveResult.Switch(
+        //     success => { },
+        //     domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
+        //     concurrencyError =>
+        //         throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
+        //     conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
+        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
@@ -231,7 +244,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var apiAction in dto.ApiActions.Where(a => a.Action == action))
             {
                 if ((apiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
+                 || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
                 {
                     apiAction.IsAuthorized = true;
                 }
@@ -240,7 +253,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var guiAction in dto.GuiActions.Where(a => a.Action == action))
             {
                 if ((guiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
+                 || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
                 {
                     guiAction.IsAuthorized = true;
                 }

@@ -7,12 +7,8 @@ using Xunit;
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialogs.Queries.Get;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
-public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
+public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
-    public GetDialogTests(WebApiE2EFixture fixture) : base(fixture)
-    {
-    }
-
     [E2EFact]
     public async Task Should_Get_Dialog_By_Id()
     {

@@ -1,5 +1,5 @@
 {
-    "openApiPath": "../../../docs/schema/v1/swagger.verified.json",
+    "openApiPath": "../../../docs/schema/V1/swagger.verified.json",
     "namespace": "Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Interfaces.V1",
     "outputFolder": "Interfaces/V1",
     "operationNameGenerator": "SingleClientFromOperationId",

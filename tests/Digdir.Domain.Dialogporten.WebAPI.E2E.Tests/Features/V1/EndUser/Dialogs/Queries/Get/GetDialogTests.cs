@@ -1,5 +1,5 @@
-using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Interfaces.V1;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;

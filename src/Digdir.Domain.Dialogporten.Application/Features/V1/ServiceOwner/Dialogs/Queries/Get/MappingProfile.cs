@@ -64,7 +64,7 @@ internal sealed class MappingProfile : Profile
         CreateMap<DialogSearchTag, SearchTagDto>();
 
         CreateMap<List<DialogContent>?, ContentDto?>()
-            .ConvertUsing<DialogContentContentDtoConverter>();
+            .ConvertUsing<DialogContentToContentDtoConverter>();
 
         CreateMap<List<DialogTransmissionContent>?, DialogTransmissionContentDto?>()
             .ConvertUsing<TransmissionContentOutputConverter<DialogTransmissionContentDto>>();

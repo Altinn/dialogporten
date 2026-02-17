@@ -1,6 +1,7 @@
 using System.Data;
 using System.Globalization;
 using Altinn.ApiClients.Maskinporten.Extensions;
+using Dapper;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -28,6 +29,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using HotChocolate.Subscriptions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -39,6 +41,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using MassTransit;
 using MediatR;
 
@@ -101,6 +104,7 @@ public static class InfrastructureExtensions
                         services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
                     );
             })
+            .AddDapperTypeHandlers()
             .AddHostedService<FusionCacheWarmupHostedService>()
             .AddHostedService<DevelopmentMigratorHostedService>()
             .AddHostedService<DevelopmentCleanupOutboxHostedService>()
@@ -125,6 +129,9 @@ public static class InfrastructureExtensions
             .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
+            .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()

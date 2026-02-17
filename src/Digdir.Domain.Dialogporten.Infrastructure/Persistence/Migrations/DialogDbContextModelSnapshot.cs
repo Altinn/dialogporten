@@ -258,7 +258,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DialogId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_DialogEndUserContext_DialogId_IncludeId");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("DialogId"), new[] { "Id" });
 
                     b.ToTable("DialogEndUserContext");
                 });
@@ -1056,6 +1059,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Org", "ServiceResource", "ContentUpdatedAt", "Id")
                         .IsDescending(false, false, true, true);
+
+                    b.HasIndex("ServiceResource", "Party", "ContentUpdatedAt", "Id")
+                        .IsDescending(false, false, true, true)
+                        .HasDatabaseName("IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted")
+                        .HasFilter("\"Deleted\" = false");
 
                     b.ToTable("Dialog", (string)null);
                 });

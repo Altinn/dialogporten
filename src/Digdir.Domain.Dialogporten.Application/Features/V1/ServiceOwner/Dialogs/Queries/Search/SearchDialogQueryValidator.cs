@@ -9,14 +9,19 @@ using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using FluentValidation;
+using Microsoft.Extensions.Options;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.ValidationErrorStrings;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
 internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialogQuery>
 {
-    public SearchDialogQueryValidator()
+    public SearchDialogQueryValidator(IOptionsSnapshot<ApplicationSettings> applicationSettings)
     {
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+        var limitsServiceOwnerSearch = applicationSettings.Value.Limits.ServiceOwnerSearch;
+        var limitsEndUserSearch = applicationSettings.Value.Limits.EndUserSearch;
+
         Include(new PaginationParameterValidator<SearchDialogQueryOrderDefinition, DialogEntity>());
 
         RuleForEach(x => x.ServiceOwnerLabels)
@@ -53,15 +58,21 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .IsValidPartyIdentifier();
 
         RuleFor(x => x.ServiceResource!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(x => x.EndUserId != null
+                ? limitsEndUserSearch.MaxServiceResourceFilterValues
+                : limitsServiceOwnerSearch.MaxServiceResourceFilterValues)
             .When(x => x.ServiceResource is not null);
 
         RuleFor(x => x.Party!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(x => x.EndUserId != null
+                ? limitsEndUserSearch.MaxPartyFilterValues
+                : limitsServiceOwnerSearch.MaxPartyFilterValues)
             .When(x => x.Party is not null);
 
         RuleFor(x => x.ExtendedStatus!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(x => x.EndUserId != null
+                ? limitsEndUserSearch.MaxExtendedStatusFilterValues
+                : limitsServiceOwnerSearch.MaxExtendedStatusFilterValues)
             .When(x => x.ExtendedStatus is not null);
 
         RuleForEach(x => x.Status).IsInEnum();

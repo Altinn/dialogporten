@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 #nullable enable annotations
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Interfaces.V1
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 {
     public class V1EndUserDialogsQueriesSearchDialogQueryParams
     {
@@ -672,7 +672,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Interfaces.V1
 #pragma warning disable 8625 // Disable "CS8625 Cannot convert null literal to non-nullable reference type"
 #pragma warning disable 8765 // Disable "CS8765 Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes)."
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Interfaces.V1
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 {
     using System = global::System;
 

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Interfaces.V1;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;

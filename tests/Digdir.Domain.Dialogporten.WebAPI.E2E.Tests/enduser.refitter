@@ -1,6 +1,6 @@
 {
     "openApiPath": "../../docs/schema/V1/swagger.verified.json",
-    "namespace": "Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Interfaces.V1",
+    "namespace": "Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1",
     "outputFolder": "Features/V1",
     "operationNameGenerator": "SingleClientFromOperationId",
     "trimUnusedSchema": true,

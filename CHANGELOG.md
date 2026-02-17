@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.104.1](https://github.com/Altinn/dialogporten/compare/v1.104.0...v1.104.1) (2026-02-17)
+
+
+### Miscellaneous Chores
+
+* **deps:** upgrade dotnet SDK to 10.0.103 ([#3471](https://github.com/Altinn/dialogporten/issues/3471)) ([f714d26](https://github.com/Altinn/dialogporten/commit/f714d267f2ad9c195111a45a52b6dbd677c9002f))
+
 ## [1.104.0](https://github.com/Altinn/dialogporten/compare/v1.103.1...v1.104.0) (2026-02-16)
 
 

@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.104.0](https://github.com/Altinn/dialogporten/compare/v1.103.1...v1.104.0) (2026-02-16)
+
+
+### Features
+
+* name field on attachments ([#3396](https://github.com/Altinn/dialogporten/issues/3396)) ([6816531](https://github.com/Altinn/dialogporten/commit/68165315940b65d4ca58ed0899450737b446336d))
+
+
+### Bug Fixes
+
+* allow admin scope user to set DueAt/ExpiresAt in the past ([#3439](https://github.com/Altinn/dialogporten/issues/3439)) ([289b720](https://github.com/Altinn/dialogporten/commit/289b720e397054432d3d23c1b44bbbc00ef051b3))
+* **app:** allow adding new ApiActionEndpoints on dialog update ([#3459](https://github.com/Altinn/dialogporten/issues/3459)) ([d2b8364](https://github.com/Altinn/dialogporten/commit/d2b8364c5223c5cc37ff273bd816826e54a778c3))
+
+
+### Miscellaneous Chores
+
+* Add application validation for transmission counts to prevent overflow ([#3409](https://github.com/Altinn/dialogporten/issues/3409)) ([8b81a90](https://github.com/Altinn/dialogporten/commit/8b81a90dab0084441baa0ba360235640778f90d3))
+* adjust otel trace sampler ratio ([#3434](https://github.com/Altinn/dialogporten/issues/3434)) ([67517e2](https://github.com/Altinn/dialogporten/commit/67517e2b78404e867410a3895774b81f4f50d25d))
+* Check for docker or podman in e2e script ([#3452](https://github.com/Altinn/dialogporten/issues/3452)) ([398264e](https://github.com/Altinn/dialogporten/commit/398264e1e3aa49f2dcf8b0fe00246ab2261ef7c3))
+* correct restore layer caching in dockerfiles ([#3425](https://github.com/Altinn/dialogporten/issues/3425)) ([7eb144a](https://github.com/Altinn/dialogporten/commit/7eb144aa9a870a245f715984c971853c8caba6dd)), closes [#3426](https://github.com/Altinn/dialogporten/issues/3426)
+* **deps:** update dependency parquet.net to 5.5.0 ([#3444](https://github.com/Altinn/dialogporten/issues/3444)) ([bd47657](https://github.com/Altinn/dialogporten/commit/bd47657076fd272446b108d2038f5ef445f7be57))
+* **deps:** update dependency verify.xunitv3 to 31.11.0 ([#3466](https://github.com/Altinn/dialogporten/issues/3466)) ([fa84ffc](https://github.com/Altinn/dialogporten/commit/fa84ffc17ebce75f27b805eda4499340548f283c))
+* **deps:** update grafana/loki docker tag to v3.6.5 ([#3463](https://github.com/Altinn/dialogporten/issues/3463)) ([41e4bb5](https://github.com/Altinn/dialogporten/commit/41e4bb56f23991568eabcef370e67a0e305dc884))
+* **deps:** update nginx docker tag to v1.29.5 ([#3464](https://github.com/Altinn/dialogporten/issues/3464)) ([0928743](https://github.com/Altinn/dialogporten/commit/0928743745ce5a3b9c845d4fd274afc43177d3c3))
+* **deps:** update peter-evans/repository-dispatch action to v4 ([#3445](https://github.com/Altinn/dialogporten/issues/3445)) ([dfdea83](https://github.com/Altinn/dialogporten/commit/dfdea830a727cb13229c2b78f53a50df55afedbd))
+* **deps:** update step-security/harden-runner action to v2.14.1 ([#3443](https://github.com/Altinn/dialogporten/issues/3443)) ([6d73f97](https://github.com/Altinn/dialogporten/commit/6d73f97a431f5cdb10acb5cfbdc8cdf73f690b5c))
+* **deps:** update step-security/harden-runner action to v2.14.2 ([#3465](https://github.com/Altinn/dialogporten/issues/3465)) ([231d4bf](https://github.com/Altinn/dialogporten/commit/231d4bf16b749f6433b1a4e482fde6f1b7b2f723))
+* remove scripts and tools ([#3441](https://github.com/Altinn/dialogporten/issues/3441)) ([12928a0](https://github.com/Altinn/dialogporten/commit/12928a0fc1f4f2aebbaa468aed2d6e9dd58ef287))
+* return early on if-match mismatch ([#3416](https://github.com/Altinn/dialogporten/issues/3416)) ([e285523](https://github.com/Altinn/dialogporten/commit/e285523c254ffca0076e5ee706f74bfa146735ce))
+
 ## [1.103.1](https://github.com/Altinn/dialogporten/compare/v1.103.0...v1.103.1) (2026-02-09)
 
 

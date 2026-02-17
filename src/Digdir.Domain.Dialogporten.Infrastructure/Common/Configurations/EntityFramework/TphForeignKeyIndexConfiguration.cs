@@ -13,7 +13,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Entity
 /// </summary>
 internal static class TphForeignKeyIndexConfiguration
 {
-    public static ModelBuilder ConfigureTphForeignKeyIndexes<TBase>(
+    public static ModelBuilder ConfigureTphForeignKeyPartialIndexes<TBase>(
         this ModelBuilder modelBuilder)
         where TBase : class
     {
@@ -73,7 +73,9 @@ internal static class TphForeignKeyIndexConfiguration
 
         // In shared-table TPH, multiple CLR types can expose the same FK property name
         // while mapping to different physical columns (e.g. GuiActionId vs DialogGuiActionPrompt_GuiActionId).
-        // Resolve those collisions deterministically so index names/filters target the correct column.
+        // We intentionally normalize those names here to preserve the existing schema shape:
+        // relying purely on EF's per-target column resolution can collapse both mappings to one
+        // column and scaffold a destructive migration (dropping DialogGuiActionPrompt_GuiActionId).
         var duplicateGroups = indexTargets
             .GroupBy(x => (x.TableName, x.Property.Name))
             .Where(group => group.Count() > 1)

@@ -147,9 +147,9 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
         modelBuilder.Entity<Actor>();
         modelBuilder.Entity<Attachment>();
         modelBuilder.Entity<LocalizationSet>();
-        modelBuilder.ConfigureTphForeignKeyIndexes<Actor>();
-        modelBuilder.ConfigureTphForeignKeyIndexes<Attachment>();
-        modelBuilder.ConfigureTphForeignKeyIndexes<LocalizationSet>();
+        modelBuilder.ConfigureTphForeignKeyPartialIndexes<Actor>();
+        modelBuilder.ConfigureTphForeignKeyPartialIndexes<Attachment>();
+        modelBuilder.ConfigureTphForeignKeyPartialIndexes<LocalizationSet>();
 
         modelBuilder
             .HasPostgresExtension(Constants.PostgreSqlTrigram)

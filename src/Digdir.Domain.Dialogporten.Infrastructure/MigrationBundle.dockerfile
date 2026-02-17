@@ -1,11 +1,11 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0.2@sha256:7feda9a96737a8c268cc7636c92d0efda3512ef019e3c409dd97c7c9ae9e2bdb AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0.3@sha256:13fda51806e4b84fccf84abf86b35313edf89200a17a7b01c4ea587c88a0fa20 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.102@sha256:6ba533cc61a5d8c5e7d4b3a3e33e2ddc2efef200b112e4d658303516bfd24255 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.103@sha256:0a506ab0c8aa077361af42f82569d364ab1b8741e967955d883e3f23683d473a AS build
 WORKDIR /src
 
 ENV PATH="/root/.dotnet/tools:${PATH}"
-RUN dotnet tool install --global dotnet-ef --version 10.0.2
+RUN dotnet tool install --global dotnet-ef --version 10.0.3
 
 COPY [".editorconfig", "."]
 COPY ["Directory.Build.props", "."]

@@ -379,8 +379,7 @@ builder.Configuration
 
 Besides ordinary unit and integration tests, the primary end-to-end tests are the WebAPI and GraphQL C# test projects listed below. K6 tests still exist, but new end-to-end coverage should be added to the C# projects.
 
-- [WebAPI E2E tests](tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests/README.md)
-- [GraphQL E2E tests](tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests/README.md)
+- [E2E tests (WebAPI + GraphQL)](docs/E2E-Tests.md)
 - [Scripts E2E](scripts/e2e/README.md)
 - [K6 testing](tests/k6/README.md)
 

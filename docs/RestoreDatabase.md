@@ -6,7 +6,7 @@ PGPASSWORD='supersecret' pg_dump -h localhost -p 5432 -U postgres -d dialogporte
 ```
 
 If you need to verify migrations against a proper database backup (e.g., from the tt02 environment), you’ll first need to use the database forwarder.  
-See [these docs](../scripts/database-forwarder/README.md) for setup instructions.
+See [database-forwarder in dialogporten-utils](https://github.com/Altinn/dialogporten-utils/blob/main/database-forwarder/README.md) for setup instructions.
 
 Once the forwarder is running, set the database password for the current terminal session:
 ```sh

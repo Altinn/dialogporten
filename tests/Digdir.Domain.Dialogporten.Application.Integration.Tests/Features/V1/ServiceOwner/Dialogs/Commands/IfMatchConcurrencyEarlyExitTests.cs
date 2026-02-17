@@ -85,7 +85,7 @@ public sealed class IfMatchConcurrencyEarlyExitTests(DialogApplication applicati
     {
         var activityId = Guid.CreateVersion7();
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.AddActivity(DialogActivityType.Values.FormSaved, a => a.Id = activityId))
+            .CreateSimpleDialog((x, _) => x.AddActivity(DialogActivityType.Values.FormSaved, a => a.Id = activityId))
             .AsAdminUser()
             .ConfigureServices(DecorateSaveChangesForbidden)
             .SendCommand((_, ctx) => new UpdateFormSavedActivityTimeCommand

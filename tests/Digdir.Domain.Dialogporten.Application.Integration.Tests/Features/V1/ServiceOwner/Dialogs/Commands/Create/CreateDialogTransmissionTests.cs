@@ -26,7 +26,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Create_Transmission_Without_Summary() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.Content!.Summary = null))
             .GetServiceOwnerDialog()
@@ -36,7 +36,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Create_Transmission_With_Embeddable_Content() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                 transmission.Content!.ContentReference = new ContentValueDto
@@ -63,7 +63,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Create_Transmission_Embeddable_Content_With_Http_Url() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                 transmission.Content!.ContentReference = new ContentValueDto
@@ -83,7 +83,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Create_Transmission_NavigationalAction_With_Long_Title() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                     transmission.AddNavigationalAction(action =>
                         action.Title =
@@ -100,7 +100,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Create_Transmission_NavigationalAction_With_Http_Url() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                     transmission.AddNavigationalAction(action =>
                         action.Url = new Uri("http://example.com/action"))))
@@ -110,7 +110,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Create_Transmission_NavigationalAction_With_ExpiresAt_In_Past() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                     transmission.AddNavigationalAction(action =>
                         action.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1))))
@@ -120,7 +120,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Create_Related_Transmission_With_Null_Id() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmissions = DialogGenerator.GenerateFakeDialogTransmissions(2);
 
@@ -138,7 +138,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Create_Transmission_With_Empty_Content() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                 transmission.Content = null!;
@@ -150,7 +150,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Create_Dialog_With_Empty_Transmission_Content_If_IsApiOnly() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                 transmission.Content = null!;
@@ -162,7 +162,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Create_Transmission_With_ExternalReference() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                 transmission.ExternalReference = "unique-key";
@@ -179,7 +179,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Create_Transmission_With_ExternalReference_Over_Max_Length() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                 transmission.ExternalReference = new string('a', Constants.DefaultMaxStringLength + 1);
@@ -245,7 +245,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         Action<TransmissionDto> createTransmission, Type expectedType) =>
         FlowBuilder.For(Application)
             .AsUser(user)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(createTransmission))
             .ExecuteAndAssert(x =>
             {
@@ -264,7 +264,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public Task Transmission_With_Legacy_Embeddable_HTML_Returns_New_Embeddable_MediaType() =>
         FlowBuilder.For(Application)
             .AsIntegrationTestUser(x => x.WithScope(AuthorizationScope.LegacyHtmlScope))
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission(SetLegacyEmbeddableHtmlDeprecated))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>

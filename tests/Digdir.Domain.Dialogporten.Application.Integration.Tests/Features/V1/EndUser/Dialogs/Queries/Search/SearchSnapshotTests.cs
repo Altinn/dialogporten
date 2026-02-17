@@ -21,28 +21,28 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
     public async Task Search_Dialog_Verify_Output()
     {
         var searchResult = await FlowBuilder.For(Application)
-            .CreateComplexDialog(x =>
+            .CreateComplexDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.Activities.Clear();
             })
             .GetEndUserDialog() // Trigger seen log
-            .CreateComplexDialog(x =>
+            .CreateComplexDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.Attachments.Clear();
             })
-            .CreateComplexDialog(x =>
+            .CreateComplexDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.Transmissions.Clear();
             })
-            .CreateComplexDialog(x =>
+            .CreateComplexDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.SystemLabel = SystemLabel.Values.Archive;
             })
-            .CreateComplexDialog(x =>
+            .CreateComplexDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.ServiceOwnerContext = new DialogServiceOwnerContextDto

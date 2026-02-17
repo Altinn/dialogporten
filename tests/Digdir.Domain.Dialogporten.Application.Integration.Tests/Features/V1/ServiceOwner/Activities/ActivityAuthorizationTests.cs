@@ -20,7 +20,7 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Create_Correspondence_Activities_Without_Required_Scope() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Activities
                     .Add(DialogGenerator.GenerateFakeDialogActivity(
@@ -39,7 +39,7 @@ public class ActivityAuthorizationTests : ApplicationCollectionFixture
     public Task Can_Create_Correspondence_Activities_With_Required_Scope() =>
         FlowBuilder.For(Application)
             .AsCorrespondenceUser()
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Activities
                     .Add(DialogGenerator.GenerateFakeDialogActivity(

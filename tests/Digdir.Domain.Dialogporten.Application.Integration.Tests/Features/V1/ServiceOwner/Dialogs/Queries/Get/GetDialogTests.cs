@@ -24,7 +24,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
-            .CreateSimpleDialog(x => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
+            .CreateSimpleDialog((x, _) => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
@@ -43,7 +43,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         CreateDialogDto createDto = null!;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => createDto = x.Dto)
+            .CreateSimpleDialog((x, _) => createDto = x.Dto)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
@@ -64,7 +64,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Not_Mask_Expired_Attachment_Urls() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
                 x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
@@ -94,7 +94,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Return_Attachment_Names() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddAttachment(attachment =>
                     attachment.Name = DialogAttachmentName);
@@ -120,7 +120,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         CreateDialogDto createDto = null!;
 
         await FlowBuilder.For(Application)
-            .CreateComplexDialog(x => createDto = x.Dto)
+            .CreateComplexDialog((x, _) => createDto = x.Dto)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {

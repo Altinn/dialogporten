@@ -5,7 +5,7 @@
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class PartialTbhIndices : Migration
+    public partial class PartialTphIndices : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,10 +52,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropIndex(
                 name: "IX_Actor_ActorNameEntityId",
-                table: "Actor");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Actor_ActorTypeId",
                 table: "Actor");
 
             migrationBuilder.DropIndex(
@@ -145,12 +141,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 filter: "\"ActorNameEntityId\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Actor_ActorTypeId",
-                table: "Actor",
-                column: "ActorTypeId",
-                filter: "\"ActorTypeId\" IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Actor_DialogSeenLogId",
                 table: "Actor",
                 column: "DialogSeenLogId",
@@ -217,10 +207,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropIndex(
                 name: "IX_Actor_ActorNameEntityId",
-                table: "Actor");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Actor_ActorTypeId",
                 table: "Actor");
 
             migrationBuilder.DropIndex(
@@ -297,11 +283,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 name: "IX_Actor_ActorNameEntityId",
                 table: "Actor",
                 column: "ActorNameEntityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Actor_ActorTypeId",
-                table: "Actor",
-                column: "ActorTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Actor_DialogSeenLogId",

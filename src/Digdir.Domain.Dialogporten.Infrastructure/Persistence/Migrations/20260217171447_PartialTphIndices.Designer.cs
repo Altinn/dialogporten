@@ -13,8 +13,8 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20260217134722_PartialTbhIndices")]
-    partial class PartialTbhIndices
+    [Migration("20260217171447_PartialTphIndices")]
+    partial class PartialTphIndices
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,8 +40,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnName("ActorNameEntityId");
 
                     b.Property<int>("ActorTypeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("ActorTypeId");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -64,9 +63,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("IX_Actor_ActorNameEntityId")
                         .HasFilter("\"ActorNameEntityId\" IS NOT NULL");
 
-                    b.HasIndex("ActorTypeId")
-                        .HasDatabaseName("IX_Actor_ActorTypeId")
-                        .HasFilter("\"ActorTypeId\" IS NOT NULL");
+                    b.HasIndex("ActorTypeId");
 
                     b.ToTable("Actor");
 

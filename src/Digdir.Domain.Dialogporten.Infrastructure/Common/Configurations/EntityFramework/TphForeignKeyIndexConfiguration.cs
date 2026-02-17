@@ -30,8 +30,8 @@ internal static class TphForeignKeyIndexConfiguration
 
         var indexTargets = entityType
             .GetDerivedTypes()
-            // Include the TPH base type itself because it may declare FKs/indexes
-            // on shared-table columns (for this model: ActorNameEntityId and ActorTypeId on Actor).
+            // Include the TPH base type itself because it may declare nullable FKs/indexes
+            // on shared-table columns (for this model: ActorNameEntityId on Actor).
             .Prepend(entityType)
             .SelectMany(derivedType =>
             {
@@ -43,10 +43,13 @@ internal static class TphForeignKeyIndexConfiguration
 
                 return derivedType
                     .GetForeignKeys()
-                    // Only keep FKs declared directly on this CLR type and only single-column FKs.
+                    // Only keep FKs declared directly on this CLR type and only single-column nullable FKs.
                     // This avoids re-processing inherited FKs from the base type and skips composite
                     // FKs that don't map to the one-column index pattern used here.
-                    .Where(foreignKey => foreignKey.DeclaringEntityType == derivedType && foreignKey.Properties.Count == 1)
+                    .Where(foreignKey =>
+                        foreignKey.DeclaringEntityType == derivedType &&
+                        foreignKey.Properties.Count == 1 &&
+                        foreignKey.Properties[0].IsColumnNullable(table.Value))
                     .Select(foreignKey =>
                     {
                         var property = foreignKey.Properties[0];

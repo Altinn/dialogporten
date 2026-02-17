@@ -37,8 +37,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnName("ActorNameEntityId");
 
                     b.Property<int>("ActorTypeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("ActorTypeId");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -61,9 +60,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("IX_Actor_ActorNameEntityId")
                         .HasFilter("\"ActorNameEntityId\" IS NOT NULL");
 
-                    b.HasIndex("ActorTypeId")
-                        .HasDatabaseName("IX_Actor_ActorTypeId")
-                        .HasFilter("\"ActorTypeId\" IS NOT NULL");
+                    b.HasIndex("ActorTypeId");
 
                     b.ToTable("Actor");
 

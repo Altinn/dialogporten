@@ -120,7 +120,7 @@ public static class ClaimsPrincipalExtensions
             return false;
         }
 
-        systemUserId = systemUserDetails.SystemUserIds.FirstOrDefault();
+        systemUserId = systemUserDetails.SystemUserIds.FirstOrDefault()?.ToLowerInvariant();
 
         return systemUserId is not null;
     }
@@ -165,13 +165,27 @@ public static class ClaimsPrincipalExtensions
         }
     }
 
-    public static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
-        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
-           && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfRegisteredEmail];
+    private static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal,
+        [NotNullWhen(true)] out string? username)
+    {
+        username = claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
+            && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfIdentified]
+            ? username.ToLowerInvariant()
+            : null;
 
-    public static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? username)
-        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
-        && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfIdentified];
+        return username is not null;
+    }
+
+
+    private static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
+    {
+        email = claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
+            && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfRegisteredEmail]
+            ? email.ToLowerInvariant()
+            : null;
+
+        return email is not null;
+    }
 
     public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
         => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);

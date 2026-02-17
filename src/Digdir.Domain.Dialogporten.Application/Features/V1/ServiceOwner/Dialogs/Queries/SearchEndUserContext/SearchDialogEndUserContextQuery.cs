@@ -71,8 +71,10 @@ internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<S
         var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
         DialogSearchAuthorizationResult? authorizedResources = null;
 
+        request.Party = request.Party.Select(x => x.ToLowerInvariant()).ToList();
         if (request.EndUserId is not null)
         {
+            request.EndUserId = request.EndUserId.ToLowerInvariant();
             authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
                 request.Party,
                 [],

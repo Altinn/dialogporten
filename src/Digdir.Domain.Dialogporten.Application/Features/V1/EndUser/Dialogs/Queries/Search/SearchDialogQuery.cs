@@ -166,6 +166,9 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
+        // Make sure we compare lowercase Party with DB
+        request.Party = request.Party?.Select(x => x.ToLowerInvariant()).ToList();
+
         var dialogs = await _searchRepository.GetDialogsAsEndUser(
             request.ToGetDialogsQuery(_clock.UtcNowOffset),
             authorizedResources,

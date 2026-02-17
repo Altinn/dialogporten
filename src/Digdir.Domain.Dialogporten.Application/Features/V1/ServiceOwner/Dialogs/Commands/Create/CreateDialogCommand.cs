@@ -88,6 +88,9 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             .Concat(dialog.Attachments)
             .EnsureIds();
 
+        // Make sure Party get stored lowercased in db
+        dialog.Party = dialog.Party.ToLowerInvariant();
+
         await _serviceResourceAuthorizer.SetResourceType(dialog, cancellationToken);
         var serviceResourceAuthorizationResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
         if (serviceResourceAuthorizationResult.Value is Forbidden forbiddenResult)

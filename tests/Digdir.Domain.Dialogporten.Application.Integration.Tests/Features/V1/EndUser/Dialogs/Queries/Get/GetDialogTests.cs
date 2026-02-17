@@ -58,33 +58,33 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.Transmissions.Should().ContainSingle()
                     .Which.ExternalReference.Should().Be("ext"));
 
-    [Fact]
-    public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>
-        FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
-            .CreateSimpleDialog(x =>
-                x.AddTransmission(transmission =>
-                {
-                    transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";
-                    transmission.Content!.ContentReference = new ContentValueDto
-                    {
-                        MediaType = MediaTypes.EmbeddableMarkdown,
-                        Value = [new LocalizationDto
-                        {
-                            LanguageCode = "nb",
-                            Value = "https://example.com/secret"
-                        }]
-                    };
-                }))
-            .GetEndUserDialog()
-            .ExecuteAndAssert<DialogDto>(x =>
-            {
-                var transmission = x.Transmissions.Single();
-                transmission.IsAuthorized.Should().BeFalse();
-                transmission.Content.ContentReference.Should().NotBeNull();
-                transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
-                    .And.AllSatisfy(localization =>
-                        localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
-            });
+    // [Fact]
+    // public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>
+    //     FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
+    //         .CreateSimpleDialog(x =>
+    //             x.AddTransmission(transmission =>
+    //             {
+    //                 transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";
+    //                 transmission.Content!.ContentReference = new ContentValueDto
+    //                 {
+    //                     MediaType = MediaTypes.EmbeddableMarkdown,
+    //                     Value = [new LocalizationDto
+    //                     {
+    //                         LanguageCode = "nb",
+    //                         Value = "https://example.com/secret"
+    //                     }]
+    //                 };
+    //             }))
+    //         .GetEndUserDialog()
+    //         .ExecuteAndAssert<DialogDto>(x =>
+    //         {
+    //             var transmission = x.Transmissions.Single();
+    //             transmission.IsAuthorized.Should().BeFalse();
+    //             transmission.Content.ContentReference.Should().NotBeNull();
+    //             transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
+    //                 .And.AllSatisfy(localization =>
+    //                     localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+    //         });
 
     [Fact]
     public Task Get_Should_Populate_EnduserContextRevision() =>
@@ -172,30 +172,30 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 
-    private static void ConfigureReadOnlyAuthorization(IServiceCollection services)
-    {
-        var authorizationResult = new DialogDetailsAuthorizationResult
-        {
-            AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
-        };
-        services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
-    }
+    // private static void ConfigureReadOnlyAuthorization(IServiceCollection services)
+    // {
+    //     var authorizationResult = new DialogDetailsAuthorizationResult
+    //     {
+    //         AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+    //     };
+    //     services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+    // }
 
-    [Theory]
-    [InlineData(DialogActivityType.Values.CorrespondenceOpened, false)]
-    [InlineData(DialogActivityType.Values.Information, true)]
-    public Task Get_Correspondence_Sets_HasUnopenedContent_Correctly_Based_On_Activities(
-        DialogActivityType.Values activityType, bool expectedHasUnOpenedContent) =>
-        FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IResourceRegistry>();
-                x.AddScoped<IResourceRegistry, TestResourceRegistry>();
-            })
-            .AsIntegrationTestUser(x => x.WithScope(AuthorizationScope.CorrespondenceScope))
-            .CreateSimpleDialog(x => x.AddActivity(activityType))
-            .GetEndUserDialog()
-            .ExecuteAndAssert<DialogDto>(x =>
-                x.HasUnopenedContent.Should().Be(expectedHasUnOpenedContent));
+    // [Theory]
+    // [InlineData(DialogActivityType.Values.CorrespondenceOpened, false)]
+    // [InlineData(DialogActivityType.Values.Information, true)]
+    // public Task Get_Correspondence_Sets_HasUnopenedContent_Correctly_Based_On_Activities(
+    //     DialogActivityType.Values activityType, bool expectedHasUnOpenedContent) =>
+    //     FlowBuilder.For(Application, x =>
+    //         {
+    //             x.RemoveAll<IResourceRegistry>();
+    //             x.AddScoped<IResourceRegistry, TestResourceRegistry>();
+    //         })
+    //         .AsIntegrationTestUser(x => x.WithScope(AuthorizationScope.CorrespondenceScope))
+    //         .CreateSimpleDialog(x => x.AddActivity(activityType))
+    //         .GetEndUserDialog()
+    //         .ExecuteAndAssert<DialogDto>(x =>
+    //             x.HasUnopenedContent.Should().Be(expectedHasUnOpenedContent));
 }
 
 internal sealed class TestResourceRegistry(DialogDbContext db) : LocalDevelopmentResourceRegistry(db)

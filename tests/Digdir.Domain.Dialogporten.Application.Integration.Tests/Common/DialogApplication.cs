@@ -78,7 +78,7 @@ public class DialogApplication : IAsyncLifetime
             .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<CancellationToken>()))
             .Do(x => _publishedEvents.Add(x[0]));
 
-        return serviceCollection
+        var services = serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
             .RemoveAll<IClock>()
             .AddSingleton<IClock>(Clock)
@@ -117,6 +117,11 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
+
+        services.RemoveAll<FeatureMetricRecorder>()
+            .AddSingleton<FeatureMetricRecorder>();
+
+        return services;
     }
 
     private static IPartyNameRegistry CreateNameRegistrySubstitute()
@@ -221,6 +226,7 @@ public class DialogApplication : IAsyncLifetime
         Clock.Reset();
         User.Reset();
         _publishedEvents.Clear();
+        _serviceProvider.GetRequiredService<FeatureMetricRecorder>().Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();
         await _respawner.ResetAsync(connection);
@@ -256,7 +262,7 @@ public class DialogApplication : IAsyncLifetime
 
     public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
 
-    // public ServiceProvider GetServiceProvider() => _rootProvider;
+    internal ServiceProvider GetServiceProvider() => _serviceProvider;
 
     public async Task<List<T>> GetDbEntities<T>() where T : class
     {

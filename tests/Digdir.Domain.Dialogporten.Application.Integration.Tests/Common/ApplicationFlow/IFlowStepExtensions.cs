@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -444,6 +445,21 @@ public static class IFlowStepExtensions
             assert(typedResult, context);
             return typedResult;
         });
+
+    internal static IFlowExecutor<TIn> AssertFeatureMetrics<TIn>(
+        this IFlowStep<TIn> step,
+        Action<IReadOnlyCollection<FeatureMetricRecord>> assert)
+    {
+        ArgumentNullException.ThrowIfNull(assert);
+
+        return step.Select((@in, ctx) =>
+        {
+            using var scope = ctx.Application.GetServiceProvider().CreateScope();
+            var recorder = scope.ServiceProvider.GetRequiredService<FeatureMetricRecorder>();
+            assert(recorder.Records);
+            return @in;
+        });
+    }
 
     public static IFlowStep AssertSuccess(this IFlowStep<IOneOf> step) =>
         step.Select(result =>

@@ -127,56 +127,56 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
 
     private const string DummyService = "urn:altinn:resource:test-service";
 
-    [Fact(Skip = "Not yet supported")]
-    public async Task Search_Should_Return_Delegated_Instances()
-    {
-        var delegatedDialogId = NewUuidV7();
-        var delegatedDialogParty = NorwegianPersonIdentifier.PrefixWithSeparator + "13213312833";
-
-        await FlowBuilder.For(Application, x =>
-            {
-                x.ConfigureAltinnAuthorization(x =>
-                {
-                    x.ConfigureGetAuthorizedResourcesForSearch(
-                        new DialogSearchAuthorizationResult
-                        {
-                            ResourcesByParties = new Dictionary<string, HashSet<string>>
-                            {
-                                // Default integration test user party
-                                { TestUsers.DefaultParty, [DummyService] }
-                            },
-                            // Delegated dialog
-                            DialogIds = [delegatedDialogId]
-                        });
-                });
-            })
-            .CreateSimpleDialog(x =>
-            {
-                // Delegated dialog
-                x.Dto.ServiceResource = DummyService;
-                x.Dto.Id = delegatedDialogId;
-                x.Dto.Party = delegatedDialogParty;
-            })
-            .CreateSimpleDialog(x =>
-            {
-                // Default integration test user dialog
-                x.Dto.ServiceResource = DummyService;
-                x.Dto.Party = TestUsers.DefaultParty;
-            })
-            .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
-            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-            {
-                x.Items.Should().HaveCount(2);
-
-                // Delegated dialog
-                x.Items.Should().ContainSingle(d =>
-                    d.Id == delegatedDialogId &&
-                    d.Party == delegatedDialogParty);
-
-                // Default integration test user dialog
-                x.Items.Should().ContainSingle(d =>
-                    d.Id != delegatedDialogId &&
-                    d.Party == TestUsers.DefaultParty);
-            });
-    }
+    // [Fact(Skip = "Not yet supported")]
+    // public async Task Search_Should_Return_Delegated_Instances()
+    // {
+    //     var delegatedDialogId = NewUuidV7();
+    //     var delegatedDialogParty = NorwegianPersonIdentifier.PrefixWithSeparator + "13213312833";
+    //
+    //     await FlowBuilder.For(Application, x =>
+    //         {
+    //             x.ConfigureAltinnAuthorization(x =>
+    //             {
+    //                 x.ConfigureGetAuthorizedResourcesForSearch(
+    //                     new DialogSearchAuthorizationResult
+    //                     {
+    //                         ResourcesByParties = new Dictionary<string, HashSet<string>>
+    //                         {
+    //                             // Default integration test user party
+    //                             { TestUsers.DefaultParty, [DummyService] }
+    //                         },
+    //                         // Delegated dialog
+    //                         DialogIds = [delegatedDialogId]
+    //                     });
+    //             });
+    //         })
+    //         .CreateSimpleDialog(x =>
+    //         {
+    //             // Delegated dialog
+    //             x.Dto.ServiceResource = DummyService;
+    //             x.Dto.Id = delegatedDialogId;
+    //             x.Dto.Party = delegatedDialogParty;
+    //         })
+    //         .CreateSimpleDialog(x =>
+    //         {
+    //             // Default integration test user dialog
+    //             x.Dto.ServiceResource = DummyService;
+    //             x.Dto.Party = TestUsers.DefaultParty;
+    //         })
+    //         .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
+    //         .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+    //         {
+    //             x.Items.Should().HaveCount(2);
+    //
+    //             // Delegated dialog
+    //             x.Items.Should().ContainSingle(d =>
+    //                 d.Id == delegatedDialogId &&
+    //                 d.Party == delegatedDialogParty);
+    //
+    //             // Default integration test user dialog
+    //             x.Items.Should().ContainSingle(d =>
+    //                 d.Id != delegatedDialogId &&
+    //                 d.Party == TestUsers.DefaultParty);
+    //         });
+    // }
 }

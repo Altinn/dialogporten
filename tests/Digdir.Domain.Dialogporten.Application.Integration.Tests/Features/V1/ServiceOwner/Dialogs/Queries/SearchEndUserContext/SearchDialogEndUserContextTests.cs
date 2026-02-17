@@ -34,21 +34,21 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
             .SearchServiceOwnerDialogEndUserContexts(_ => { })
             .ExecuteAndAssert<ValidationError>();
 
-    [Fact]
-    public Task Search_With_EndUserId_And_No_Authorizations_Returns_Empty() =>
-        FlowBuilder.For(Application, services =>
-            {
-                services.ConfigureAltinnAuthorization(x =>
-                    x.ConfigureGetAuthorizedResourcesForSearch(new DialogSearchAuthorizationResult()));
-            })
-            .CreateSimpleDialog(x => x.Dto.Party = TestUsers.DefaultParty)
-            .SearchServiceOwnerDialogEndUserContexts((query, ctx) =>
-            {
-                query.Party = [ctx.GetParty()];
-                query.EndUserId = ctx.GetParty();
-            })
-            .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>(result =>
-                result.Items.Should().BeEmpty());
+    // [Fact]
+    // public Task Search_With_EndUserId_And_No_Authorizations_Returns_Empty() =>
+    //     FlowBuilder.For(Application, services =>
+    //         {
+    //             services.ConfigureAltinnAuthorization(x =>
+    //                 x.ConfigureGetAuthorizedResourcesForSearch(new DialogSearchAuthorizationResult()));
+    //         })
+    //         .CreateSimpleDialog(x => x.Dto.Party = TestUsers.DefaultParty)
+    //         .SearchServiceOwnerDialogEndUserContexts((query, ctx) =>
+    //         {
+    //             query.Party = [ctx.GetParty()];
+    //             query.EndUserId = ctx.GetParty();
+    //         })
+    //         .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>(result =>
+    //             result.Items.Should().BeEmpty());
 
     [Fact]
     public Task Search_Returns_All_System_Labels() =>

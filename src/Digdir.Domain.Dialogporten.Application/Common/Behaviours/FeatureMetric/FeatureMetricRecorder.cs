@@ -7,6 +7,7 @@ internal sealed class FeatureMetricRecorder
     private readonly List<FeatureMetricRecord> _records = [];
     public ReadOnlyCollection<FeatureMetricRecord> Records => _records.AsReadOnly();
     public void Record(FeatureMetricRecord record) => _records.Add(record);
+    public void Clear() => _records.Clear();
 }
 
 internal sealed record FeatureMetricRecord(

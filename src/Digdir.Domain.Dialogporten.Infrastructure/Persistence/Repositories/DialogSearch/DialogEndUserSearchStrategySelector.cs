@@ -25,7 +25,7 @@ internal sealed class DialogEndUserSearchStrategySelector(
             return GetDefaultStrategy();
         }
 
-        // Highest positive score wins; ties are stable by name.
+        // Highest score wins; ties are stable by name.
         return _strategies
             .Select(strategy => (Strategy: strategy, Score: strategy.Score(context)))
             .OrderByDescending(x => x.Score)

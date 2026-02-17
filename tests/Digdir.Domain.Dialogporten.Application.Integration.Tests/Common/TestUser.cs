@@ -23,30 +23,53 @@ public sealed class TestUser : IUser
 internal static class TestUsers
 {
     private static string DefaultPid => "22834498646";
+    private static string DefaultUserName => "UserName";
+    private static string DefaultEmail => "TEST@TEST.NO";
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
+
+    private const string DefaultConsumerClaim =
+        """
+        {
+            "authority": "iso6523-actorid-upis",
+            "ID": "0192:991825827"
+        }
+        """;
 
     private static readonly Dictionary<string, string> Default = new()
     {
         [ClaimTypes.Name] = "Integration Test User",
-        [ClaimsPrincipalExtensions.AltinnOrgClaim] = "ttd",
         [ClaimsPrincipalExtensions.IdportenAuthLevelClaim] = Constants.IdportenLoaHigh,
-        [ClaimTypes.NameIdentifier] = "integration-test-user",
         [ClaimsPrincipalExtensions.PidClaim] = DefaultPid,
-        [ClaimsPrincipalExtensions.ConsumerClaim] =
-            """
-            {
-                "authority": "iso6523-actorid-upis",
-                "ID": "0192:991825827"
-            }
-            """
+        [ClaimTypes.NameIdentifier] = "integration-test-user",
+        [ClaimsPrincipalExtensions.ConsumerClaim] = DefaultConsumerClaim
     };
 
     public static ClaimsPrincipalBuilder FromDefault() => ClaimsPrincipalBuilder.From(Default);
+
+    private static ClaimsPrincipalBuilder FromSelfIdentifiedUser() =>
+        ClaimsPrincipalBuilder.From(Default)
+            .RemoveClaim(ClaimsPrincipalExtensions.PidClaim)
+            .WithClaim(ClaimsPrincipalExtensions.IdportenAuthLevelClaim, Constants.IdportenLoaLow)
+            .WithClaim(ClaimTypes.Name, "SI and email test user");
 
     extension<TFlowStep>(TFlowStep flowStep) where TFlowStep : IFlowStep
     {
         public TFlowStep AsIntegrationTestUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
             flowStep.AsUser(() => FromDefault()
+                .Configure(configure)
+                .Build());
+
+        public TFlowStep AsIntegrationEmailUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromSelfIdentifiedUser()
+                .WithAmr(ClaimsPrincipalExtensions.AmrSelfRegisteredEmail)
+                .WithClaim(ClaimsPrincipalExtensions.IdportenEmailClaim, DefaultEmail)
+                .Configure(configure)
+                .Build());
+
+        public TFlowStep AsIntegrationLegacySIUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromSelfIdentifiedUser()
+                .WithAmr(ClaimsPrincipalExtensions.AmrSelfIdentified)
+                .WithClaim(ClaimsPrincipalExtensions.AltinnUsernameClaim, DefaultUserName)
                 .Configure(configure)
                 .Build());
 
@@ -83,6 +106,7 @@ internal sealed class ClaimsPrincipalBuilder
         {
             builder.WithClaim(claim.Key, claim.Value);
         }
+
         return builder;
     }
 
@@ -92,7 +116,20 @@ internal sealed class ClaimsPrincipalBuilder
         {
             return WithScope(value);
         }
+
         _claims[type] = value;
+        return this;
+    }
+
+    public ClaimsPrincipalBuilder RemoveClaim(string claim)
+    {
+        _claims.Remove(claim);
+        return this;
+    }
+
+    public ClaimsPrincipalBuilder WithAmr(string value)
+    {
+        _claims[ClaimsPrincipalExtensions.IdportenAmrClaim] = value;
         return this;
     }
 

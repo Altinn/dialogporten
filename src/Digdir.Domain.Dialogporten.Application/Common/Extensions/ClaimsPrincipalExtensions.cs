@@ -20,14 +20,14 @@ public static class ClaimsPrincipalExtensions
     private const string IdPrefix = "0192";
     private const string AltinnClaimPrefix = "urn:altinn:";
     public const string IdportenAuthLevelClaim = "acr";
-    private const string IdportenAmrClaim = "amr";
-    private const string AmrSelfRegisteredEmail = "Selfregistered-email";
-    private const string AmrSelfIdentified = "SelfIdentified";
+    public const string IdportenAmrClaim = "amr";
+    public const string AmrSelfRegisteredEmail = "Selfregistered-email";
+    public const string AmrSelfIdentified = "SelfIdentified";
     private const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
-    private const string IdportenEmailClaim = "email";
-    private const string AltinnUsernameClaim = "urn:altinn:username";
+    public const string IdportenEmailClaim = "email";
+    public const string AltinnUsernameClaim = "urn:altinn:username";
     private const string FeideSubjectClaim = "orgsub";
     private const string PartyUuidClaim = "urn:altinn:party:uuid";
     private const string PartyIdClaim = "urn:altinn:partyid";
@@ -120,7 +120,7 @@ public static class ClaimsPrincipalExtensions
             return false;
         }
 
-        systemUserId = systemUserDetails.SystemUserIds.FirstOrDefault();
+        systemUserId = systemUserDetails.SystemUserIds.FirstOrDefault()?.ToLowerInvariant();
 
         return systemUserId is not null;
     }
@@ -165,13 +165,27 @@ public static class ClaimsPrincipalExtensions
         }
     }
 
-    public static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
-        => claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
-           && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfRegisteredEmail];
+    private static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal,
+        [NotNullWhen(true)] out string? username)
+    {
+        username = claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
+            && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfIdentified]
+            ? username.ToLowerInvariant()
+            : null;
 
-    public static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? username)
-        => claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
-        && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfIdentified];
+        return username is not null;
+    }
+
+
+    private static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
+    {
+        email = claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
+            && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfRegisteredEmail]
+            ? email.ToLowerInvariant()
+            : null;
+
+        return email is not null;
+    }
 
     public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
         => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);

@@ -104,8 +104,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
         {
             Add("Can create dialog with OrganizationIdentifier as Party", "urn:altinn:organization:identifier-no:974760673");
             Add("Can create dialog with PersonalIdentifier as Party", "urn:altinn:person:identifier-no:15915299854");
-            Add("Can create dialog with A2 SI User as Party", "urn:altinn:person:legacy-selfidentified:someusername");
-            Add("Can create dialog with ID-Porten email as Party", "urn:altinn:person:idporten-email:foo@bar.com");
+            Add("Can create dialog with A2 SI User as Party", "urn:altinn:person:legacy-selfidentified:SOMEUSER");
+            Add("Can create dialog with ID-Porten email as Party", "urn:altinn:person:idporten-email:foo@BAR.com");
             // Not supported yet
             //Add("Can create dialog with Feide orgsub", "urn:altinn:feide-subject:33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551");
         }
@@ -126,7 +126,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.Id.Should().Be(expectedDialogId);
-                x.Party.Should().Be(party);
+                x.Party.Should().Be(party.ToLowerInvariant());
             });
     }
 

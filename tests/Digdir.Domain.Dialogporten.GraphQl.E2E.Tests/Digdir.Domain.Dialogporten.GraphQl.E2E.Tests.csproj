@@ -6,10 +6,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.4" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.2" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.2" />
+        <PackageReference Include="coverlet.collector" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.3" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
         <PackageReference Include="StrawberryShake.Server" Version="15.1.12" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
@@ -17,11 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="appsettings.test.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="appsettings.staging.json" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="appsettings.yt01.json" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="..\Digdir.Library.Dialogporten.E2E.Common\appsettings*.json" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

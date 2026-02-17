@@ -60,16 +60,129 @@ setRepoPath() {
 }
 
 podman_check() {
-  postgre_run=$(podman ps -f "status=running" -f name=postgres -q)
-  redis_run=$(podman ps -f "status=running" -f name=redis -q)
-  podman_log="${script_dir}/dialogporten-podman.log"
-  if [[ -n "${postgre_run:-}" && -n "${redis_run:-}" ]]; then
-    echo "postgre is running"
-    echo "redis is running"
+  local engine=""
+  local compose_file="$repo_root/docker-compose-db-redis.yml"
+  local postgres_service="dialogporten-postgres"
+  local redis_service="dialogporten-redis"
+  local postgres_container="dialogporten-postgres-1"
+  local redis_container="dialogporten-redis-1"
+  local timeout_seconds=60
+  local poll_interval_seconds=1
+
+  if command -v podman >/dev/null 2>&1; then
+    engine="podman"
+  elif command -v docker >/dev/null 2>&1; then
+    engine="docker"
+  else
+    echo "ERROR: Neither podman nor docker is installed." >&2
+    exit 1
+  fi
+
+  resolve_container_ref() {
+    local service_name="$1"
+    local preferred_name="$2"
+    local container_ref=""
+
+    if "$engine" inspect "$preferred_name" >/dev/null 2>&1; then
+      echo "$preferred_name"
+      return
+    fi
+
+    container_ref=$("$engine" compose -f "$compose_file" ps -q "$service_name" 2>/dev/null | head -n 1 || true)
+    if [[ -n "$container_ref" ]]; then
+      echo "$container_ref"
+      return
+    fi
+
+    container_ref=$("$engine" ps -a --filter "name=$service_name" --format '{{.ID}}' 2>/dev/null | head -n 1 || true)
+    if [[ -n "$container_ref" ]]; then
+      echo "$container_ref"
+      return
+    fi
+
+    echo ""
+  }
+
+  is_container_running() {
+    local container_ref="$1"
+    local running_state=""
+    if [[ -z "$container_ref" ]]; then
+      return 1
+    fi
+    running_state=$("$engine" inspect --format '{{.State.Running}}' "$container_ref" 2>/dev/null || true)
+    [[ "$running_state" == "true" ]]
+  }
+
+  local postgres_running=0
+  local redis_running=0
+  local container_log="${script_dir}/dialogporten-podman.log"
+
+  postgres_container=$(resolve_container_ref "$postgres_service" "$postgres_container")
+  redis_container=$(resolve_container_ref "$redis_service" "$redis_container")
+
+  if is_container_running "$postgres_container"; then
+    postgres_running=1
+  fi
+  if is_container_running "$redis_container"; then
+    redis_running=1
+  fi
+
+  if (( postgres_running == 1 && redis_running == 1 )); then
+    echo "Postgres container is running: ${postgres_container:-not-found}"
+    echo "Redis container is running: ${redis_container:-not-found}"
     return
   fi
 
-  podman compose -f $repo_root/docker-compose-db-redis.yml up > "$podman_log" 2>&1 &
+  echo "Starting db/redis with $engine compose (missing containers detected)..."
+  "$engine" compose -f "$compose_file" up -d > "$container_log" 2>&1
+
+  postgres_container=$(resolve_container_ref "$postgres_service" "dialogporten-postgres-1")
+  redis_container=$(resolve_container_ref "$redis_service" "dialogporten-redis-1")
+
+  local started_at
+  started_at=$(date +%s)
+  echo "Waiting up to ${timeout_seconds}s for containers to be running..."
+  while true; do
+    postgres_running=0
+    redis_running=0
+    if is_container_running "$postgres_container"; then
+      postgres_running=1
+    fi
+    if is_container_running "$redis_container"; then
+      redis_running=1
+    fi
+
+    if (( postgres_running == 1 && redis_running == 1 )); then
+      break
+    fi
+
+    local elapsed=$(( $(date +%s) - started_at ))
+    local remaining=$(( timeout_seconds - elapsed ))
+    if (( remaining < 0 )); then
+      remaining=0
+    fi
+    echo "Still waiting: postgres=${postgres_running} (${postgres_container:-not-found}), redis=${redis_running} (${redis_container:-not-found}), elapsed=${elapsed}s, remaining=${remaining}s"
+    if (( elapsed >= timeout_seconds )); then
+      echo "ERROR: Timed out after ${timeout_seconds}s waiting for containers to be running." >&2
+      echo "Postgres running: $postgres_running (${postgres_container:-not-found})" >&2
+      echo "Redis running: $redis_running (${redis_container:-not-found})" >&2
+      echo "Debug commands:" >&2
+      echo "  $engine compose -f \"$compose_file\" ps" >&2
+      echo "  $engine ps -a --filter \"name=$postgres_service\"" >&2
+      echo "  $engine ps -a --filter \"name=$redis_service\"" >&2
+      echo "See log: $container_log" >&2
+      exit 1
+    fi
+
+    echo "Sleeping ${poll_interval_seconds}s before next check..."
+    sleep "$poll_interval_seconds"
+
+    postgres_container=$(resolve_container_ref "$postgres_service" "${postgres_container:-dialogporten-postgres-1}")
+    redis_container=$(resolve_container_ref "$redis_service" "${redis_container:-dialogporten-redis-1}")
+  done
+
+  echo "Postgres container is running: ${postgres_container:-not-found}"
+  echo "Redis container is running: ${redis_container:-not-found}"
 }
 
 trap cleanup EXIT INT TERM

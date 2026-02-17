@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Hosting;
 
-namespace Digdir.Library.Dialogporten.E2E.Common;
+namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
 public static class EnvironmentExtensions
 {

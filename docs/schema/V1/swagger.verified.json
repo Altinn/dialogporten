@@ -986,6 +986,12 @@
             "format": "guid",
             "type": "string"
           },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
           "urls": {
             "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
             "items": {
@@ -1271,6 +1277,12 @@
             "format": "guid",
             "type": "string"
           },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
           "urls": {
             "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
             "items": {
@@ -1466,6 +1478,12 @@
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
             "type": "string"
           },
           "urls": {
@@ -2086,6 +2104,12 @@
             "format": "guid",
             "type": "string"
           },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
           "urls": {
             "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
             "items": {
@@ -2405,6 +2429,58 @@
         },
         "type": "object"
       },
+      "V1MetadataLimitsQueriesGet_EndUserSearchLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "maxExtendedStatusFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxOrgFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPartyFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxServiceResourceFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataLimitsQueriesGet_Limits": {
+        "additionalProperties": false,
+        "properties": {
+          "endUserSearch": {
+            "$ref": "#/components/schemas/V1MetadataLimitsQueriesGet_EndUserSearchLimits"
+          },
+          "serviceOwnerSearch": {
+            "$ref": "#/components/schemas/V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "maxExtendedStatusFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPartyFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxServiceResourceFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerCommonActors_Actor": {
         "additionalProperties": false,
         "properties": {
@@ -2627,6 +2703,12 @@
           "id": {
             "description": "A self-defined UUIDv7 may be provided to support idempotent creation of attachments. If not provided, a new UUIDv7 will be generated.",
             "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
             "nullable": true,
             "type": "string"
           },
@@ -3140,6 +3222,12 @@
             "nullable": true,
             "type": "string"
           },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
           "urls": {
             "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
             "items": {
@@ -3309,6 +3397,12 @@
             "description": "A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
             "nullable": true,
             "type": "string"
           },
@@ -3665,6 +3759,12 @@
             "description": "A self-defined UUIDv7 may be provided to support idempotent additions of attachments. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
             "nullable": true,
             "type": "string"
           },
@@ -4096,6 +4196,12 @@
             "description": "A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
             "nullable": true,
             "type": "string"
           },
@@ -4680,6 +4786,12 @@
             "format": "guid",
             "type": "string"
           },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
           "urls": {
             "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
             "items": {
@@ -4987,6 +5099,12 @@
             "format": "guid",
             "type": "string"
           },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
           "urls": {
             "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
             "items": {
@@ -5181,6 +5299,12 @@
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
             "type": "string"
           },
           "urls": {
@@ -5874,6 +5998,12 @@
           "id": {
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
             "type": "string"
           },
           "urls": {
@@ -7644,6 +7774,47 @@
         "summary": "Gets the list of authorized parties for the end user",
         "tags": [
           "Enduser"
+        ]
+      }
+    },
+    "/api/v1/metadata/limits": {
+      "get": {
+        "description": "Returns the active limits for EndUser and ServiceOwner search filters.",
+        "operationId": "V1MetadataLimitsGet_Limits",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1MetadataLimitsQueriesGet_Limits"
+                }
+              }
+            },
+            "description": "The currently enforced application-level query limits."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets currently enforced application-level query limits",
+        "tags": [
+          "Metadata"
         ]
       }
     },

@@ -77,6 +77,8 @@ type Attachment {
   id: UUID!
   "The display name of the attachment that should be used in GUIs."
   displayName: [Localization!]!
+  "The logical name of the attachment."
+  name: String
   "The URLs associated with the attachment, each referring to a different representation of the attachment."
   urls: [AttachmentUrl!]!
   "The UTC timestamp when the attachment expires and is no longer available."
@@ -270,6 +272,13 @@ type EndUserContext {
   systemLabels: [SystemLabel!]!
 }
 
+type EndUserSearchLimits {
+  maxPartyFilterValues: Int!
+  maxServiceResourceFilterValues: Int!
+  maxOrgFilterValues: Int!
+  maxExtendedStatusFilterValues: Int!
+}
+
 type GuiAction {
   "The unique identifier for the action in UUIDv7 format."
   id: UUID!
@@ -293,6 +302,11 @@ type GuiAction {
   prompt: [Localization!]
 }
 
+type Limits {
+  endUserSearch: EndUserSearchLimits!
+  serviceOwnerSearch: ServiceOwnerSearchLimits!
+}
+
 type Localization {
   value: String!
   languageCode: String!
@@ -306,6 +320,7 @@ type Mutations {
 type Queries @authorize(policy: "enduser") {
   dialogById(dialogId: UUID!): DialogByIdPayload!
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
+  limits: Limits!
   parties: [AuthorizedParty!]!
 }
 
@@ -412,6 +427,12 @@ type SeenLog {
   seenBy: Actor!
   isViaServiceOwner: Boolean
   isCurrentEndUser: Boolean!
+}
+
+type ServiceOwnerSearchLimits {
+  maxPartyFilterValues: Int!
+  maxServiceResourceFilterValues: Int!
+  maxExtendedStatusFilterValues: Int!
 }
 
 type SetSystemLabelConcurrencyError implements SetSystemLabelError {

@@ -25,10 +25,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="Interfaces/enduser.refitter" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Digdir.Library.Dialogporten.E2E.Common\Digdir.Library.Dialogporten.E2E.Common.csproj" />
     </ItemGroup>
 

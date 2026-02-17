@@ -3,16 +3,11 @@ using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 
-internal interface IDialogEndUserSearchStrategySelector
-{
-    IQueryStrategy<EndUserSearchContext> Select(EndUserSearchContext context);
-}
-
 // Selects the most suitable end-user dialog search strategy based on a score.
 // This keeps the repository logic simple while allowing strategies to evolve independently.
 internal sealed class DialogEndUserSearchStrategySelector(
     IOptionsSnapshot<ApplicationSettings> applicationSettings,
-    IEnumerable<IQueryStrategy<EndUserSearchContext>> strategies) : IDialogEndUserSearchStrategySelector
+    IEnumerable<IQueryStrategy<EndUserSearchContext>> strategies) : ISearchStrategySelector<EndUserSearchContext>
 {
     private const string DefaultStrategyName = PartyDrivenQueryStrategy.StrategyName;
     private readonly IReadOnlyList<IQueryStrategy<EndUserSearchContext>> _strategies = strategies.ToList();

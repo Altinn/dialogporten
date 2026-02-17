@@ -23,11 +23,11 @@ internal sealed class DialogSearchRepository(
     DialogDbContext dbContext,
     ILogger<DialogSearchRepository> logger,
     NpgsqlDataSource dataSource,
-    IDialogEndUserSearchStrategySelector endUserSearchStrategySelector) : IDialogSearchRepository
+    ISearchStrategySelector<EndUserSearchContext> endUserSearchStrategySelector) : IDialogSearchRepository
 {
     private readonly DialogDbContext _db = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
-    private readonly IDialogEndUserSearchStrategySelector _endUserSearchStrategySelector =
+    private readonly ISearchStrategySelector<EndUserSearchContext> _endUserSearchStrategySelector =
         endUserSearchStrategySelector ?? throw new ArgumentNullException(nameof(endUserSearchStrategySelector));
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)

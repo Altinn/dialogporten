@@ -11,13 +11,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Linq.Expressions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
+using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.EntityFramework;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using EntityFramework.Exceptions.PostgreSQL;
 using MassTransit;
@@ -140,8 +143,13 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Explicitly configure the Actor entity so that it will register as TPH in the database
+        // Explicitly register TPH base entities in the model.
         modelBuilder.Entity<Actor>();
+        modelBuilder.Entity<Attachment>();
+        modelBuilder.Entity<LocalizationSet>();
+        modelBuilder.ConfigureTphForeignKeyIndexes<Actor>();
+        modelBuilder.ConfigureTphForeignKeyIndexes<Attachment>();
+        modelBuilder.ConfigureTphForeignKeyIndexes<LocalizationSet>();
 
         modelBuilder
             .HasPostgresExtension(Constants.PostgreSqlTrigram)
@@ -175,5 +183,4 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
         await transaction.CommitAsync(cancellationToken);
         return result;
     }
-
 }

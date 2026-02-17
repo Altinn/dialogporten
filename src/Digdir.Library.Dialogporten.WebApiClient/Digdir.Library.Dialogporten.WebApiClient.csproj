@@ -30,7 +30,7 @@
 
     <ItemGroup>
         <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
         <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="Refit" Version="9.0.2" />
         <PackageReference Include="Refit.HttpClientFactory" Version="9.0.2" />

@@ -1,8 +1,9 @@
 using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Microsoft.Extensions.Options;
-using static Digdir.Library.Dialogporten.E2E.Common.TestTokenConstants;
+using static Digdir.Library.Dialogporten.E2E.Common.E2EConstants;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 

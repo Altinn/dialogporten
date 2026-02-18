@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { baseTags } from '../../functions/baseTags.bicep'
+
 import { Scale } from '../../modules/containerApp/main.bicep'
 
 @description('The tag of the image to be used')
@@ -54,10 +56,10 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-var tags = {
-  Environment: environment
-  Product: 'Dialogporten'
-}
+
+var additionalTags = {}
+
+var tags = baseTags(additionalTags, environment)
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationName

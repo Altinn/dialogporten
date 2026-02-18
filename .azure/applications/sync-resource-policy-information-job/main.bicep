@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { baseTags } from '../../functions/baseTags.bicep'
+
 @description('The tag of the image to be used')
 @minLength(3)
 param imageTag string
@@ -39,14 +41,16 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-var tags = {
+
+var name = '${namePrefix}-sync-rp-info'
+
+var additionalTags = {
   FullName: '${namePrefix}-sync-resource-policy-information'
-  Environment: environment
-  Product: 'Dialogporten'
   Description: 'Synchronizes resource policy information'
   JobType: 'Scheduled'
 }
-var name = '${namePrefix}-sync-rp-info'
+
+var tags = baseTags(additionalTags, environment)
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

@@ -4,8 +4,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
@@ -18,12 +16,9 @@ using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using OneOf.Types;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
-using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Events;
 
@@ -73,11 +68,8 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     {
         var activityCount = 0;
 
-        await FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-            })
+        await FlowBuilder.For(Application)
+            .AsCorrespondenceUser()
             .CreateSimpleDialog(x =>
             {
                 var allActivityTypes = Enum.GetValues<DialogActivityType.Values>().ToList();

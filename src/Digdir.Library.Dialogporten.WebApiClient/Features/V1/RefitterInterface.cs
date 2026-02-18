@@ -232,7 +232,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     /// <summary>Retrieve service owner labels for a dialog.</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.2.0")]
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
     public partial interface IServiceownerApi
     {
         /// <summary>Retrieve service owner labels for a dialog.</summary>
@@ -1830,6 +1830,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -2684,6 +2690,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -3127,6 +3139,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -3306,6 +3324,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("displayName")]
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
@@ -3977,6 +4001,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -4146,6 +4176,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("displayName")]
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
@@ -4324,7 +4360,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of Api Action Endpoints. If not provided, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
@@ -4561,6 +4597,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("displayName")]
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
@@ -4960,6 +5002,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -5122,6 +5170,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("displayName")]
         public ICollection<V1CommonLocalizations_Localization> DisplayName { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
@@ -5298,6 +5352,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_ApiActionEndpoint
     {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of Api Action Endpoints. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
         /// <summary>
         /// Arbitrary string indicating the version of the endpoint.

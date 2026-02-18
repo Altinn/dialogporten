@@ -1,14 +1,17 @@
 using System.Diagnostics;
+using Digdir.Domain.Dialogporten.Infrastructure;
+using Microsoft.Extensions.Options;
 
 namespace Digdir.Library.Utils.AspNet;
 
 public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 {
-    private readonly bool _enabledSqlStatementLogging;
+    private readonly IOptionsMonitor<InfrastructureSettings> _optionsMonitor;
 
-    public PostgresFilter(bool enabledSqlStatementLogging)
+    public PostgresFilter(IOptionsMonitor<InfrastructureSettings> optionsMonitor)
     {
-        _enabledSqlStatementLogging = enabledSqlStatementLogging;
+        ArgumentNullException.ThrowIfNull(optionsMonitor);
+        _optionsMonitor = optionsMonitor;
     }
 
     public override void OnEnd(Activity activity)
@@ -19,7 +22,15 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
             return;
         }
 
-        if (activity.Tags.IsSuccessfulSqlStatementActivity() && !_enabledSqlStatementLogging)
+        var currentOptions = _optionsMonitor.CurrentValue;
+
+        // Add parameter information to the activity if enabled
+        if (currentOptions.EnableSqlParametersLogging)
+        {
+            AddParameterInformation(activity);
+        }
+
+        if (!currentOptions.EnableSqlStatementLogging && activity.Tags.IsSuccessfulSqlStatementActivity())
         {
             activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
             return;
@@ -32,6 +43,30 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
         }
 
         base.OnEnd(activity);
+    }
+
+    private static void AddParameterInformation(Activity activity)
+    {
+        // Npgsql's OpenTelemetry instrumentation adds parameter information to activity tags
+        // when EnableParameterLogging() is called on the data source.
+        // Parameters are added with keys like "db.query.parameter.<name>" following OpenTelemetry semantic conventions
+        var parameters = activity.Tags
+            .Where(t => t.Key.StartsWith(Constants.DbQueryParameterPrefix, StringComparison.Ordinal) ||
+                       t.Key.StartsWith(Constants.DbStatementParameterPrefix, StringComparison.Ordinal))
+            .OrderBy(t => t.Key)
+            .Select(t =>
+            {
+                var paramName = t.Key.Replace(Constants.DbQueryParameterPrefix, "")
+                                    .Replace(Constants.DbStatementParameterPrefix, "@p");
+                return $"{paramName}={t.Value}";
+            })
+            .ToList();
+
+        if (parameters.Count > 0)
+        {
+            // Add a consolidated parameter tag for easier viewing in logs
+            activity.SetTag(Constants.DbQueryParameters, string.Join("; ", parameters));
+        }
     }
 }
 

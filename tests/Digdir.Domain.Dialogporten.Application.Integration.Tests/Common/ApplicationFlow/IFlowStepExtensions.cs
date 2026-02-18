@@ -6,6 +6,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
@@ -66,6 +70,50 @@ public static class IFlowStepExtensions
             ctx.Bag[DialogIdKey] = command.Dto.Id;
             ctx.Bag[ServiceResource] = command.Dto.ServiceResource;
             ctx.Bag[PartyKey] = command.Dto.Party;
+            return command;
+        });
+
+    public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
+        this IFlowStep step,
+        Action<CreateTransmissionDto> modify,
+        Guid? ifMatchDialogRevision = null) =>
+        step.CreateTransmission((transmission, _) => modify(transmission), ifMatchDialogRevision);
+
+    public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
+        this IFlowStep step,
+        Action<CreateTransmissionDto, FlowContext>? modify,
+        Guid? ifMatchDialogRevision = null) =>
+        step.SendCommand(ctx =>
+        {
+            var transmission = new CreateTransmissionDto
+            {
+                Type = DialogTransmissionType.Values.Information,
+                Sender = new()
+                {
+                    ActorType = ActorType.Values.ServiceOwner
+                },
+                Content = new()
+                {
+                    Title = new ContentValueDto
+                    {
+                        Value = [new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = "Ny melding"
+                        }]
+                    }
+                }
+            };
+
+            modify?.Invoke(transmission, ctx);
+
+            var command = new CreateTransmissionCommand
+            {
+                DialogId = ctx.GetDialogId(),
+                IfMatchDialogRevision = ifMatchDialogRevision,
+                Transmissions = [transmission]
+            };
+
             return command;
         });
 
@@ -142,12 +190,14 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
         step.Do(x =>
         {
             x.Application.ConfigureServices(configure);
         });
 
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
         step.Select(x =>
         {
@@ -155,29 +205,15 @@ public static class IFlowStepExtensions
             return x;
         });
 
-    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, TimeSpan skew) =>
-        step.Select(x =>
-        {
-            DialogApplication.Clock.OverrideUtc(skew);
-            return x;
-        });
-
-    public static IFlowStep OverrideUtc(this IFlowStep step, TimeSpan skew) =>
-        step.Do(_ => DialogApplication.Clock.OverrideUtc(skew));
-
-    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, DateTimeOffset time) =>
-        step.Select(x =>
-        {
-            DialogApplication.Clock.OverrideUtc(time);
-            return x;
-        });
-
-    public static IFlowStep OverrideUtc(this IFlowStep step, DateTimeOffset time) =>
-        step.Do(_ => DialogApplication.Clock.OverrideUtc(time));
-
-    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
+    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step,
+        Action<DeleteDialogCommand>? modify = null) =>
         step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x => new DeleteDialogCommand { Id = x.DialogId });
+            .SendCommand(x =>
+            {
+                var command = new DeleteDialogCommand { Id = x.DialogId };
+                modify?.Invoke(command);
+                return command;
+            });
 
     public static IFlowExecutor<RestoreDialogResult> RestoreDialog(this IFlowStep<DeleteDialogResult> step,
         Action<RestoreDialogCommand>? modify = null) =>
@@ -202,6 +238,7 @@ public static class IFlowStepExtensions
                 modify(command);
                 return command;
             });
+
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
         Action<UpdateDialogCommand> modify) => step
         .SendCommand((x, ctx) =>

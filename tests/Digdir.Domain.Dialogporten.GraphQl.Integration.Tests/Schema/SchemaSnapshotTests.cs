@@ -24,10 +24,13 @@ public class SchemaSnapshotTests
         var schemaPath = Path.Combine(rootPath!, "docs/schema/V1");
 
         // This mock is needed for ApplicationInsightEventListener
+        const string connectionString =
+            "InstrumentationKey=test;IngestionEndpoint=https://test;" +
+            "LiveEndpoint=https://test;ApplicationId=test";
+
         var telemetryConfig = new TelemetryConfiguration
         {
-            TelemetryChannel = Substitute.For<ITelemetryChannel>(),
-            TelemetryInitializers = { new OperationCorrelationTelemetryInitializer() }
+            ConnectionString = connectionString
         };
 
         var builder = WebApplication.CreateBuilder([]);

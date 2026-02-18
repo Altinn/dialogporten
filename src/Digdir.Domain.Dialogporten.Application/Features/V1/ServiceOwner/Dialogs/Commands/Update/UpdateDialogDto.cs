@@ -344,7 +344,7 @@ public sealed class ApiActionDto
 public sealed class ApiActionEndpointDto
 {
     /// <summary>
-    /// A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.
+    /// A self-defined UUIDv7 may be provided to support idempotent creation of Api Action Endpoints. If not provided, a new UUIDv7 will be generated.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
     public Guid? Id { get; set; }
@@ -476,6 +476,12 @@ public sealed class AttachmentDto
     public List<LocalizationDto> DisplayName { get; set; } = [];
 
     /// <summary>
+    /// The logical name of the attachment.
+    /// </summary>
+    /// <example>receipt</example>
+    public string? Name { get; set; }
+
+    /// <summary>
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.
     /// </summary>
     public List<AttachmentUrlDto> Urls { get; set; } = [];
@@ -526,6 +532,12 @@ public sealed class TransmissionAttachmentDto
     /// The display name of the attachment that should be used in GUIs.
     /// </summary>
     public List<LocalizationDto> DisplayName { get; set; } = [];
+
+    /// <summary>
+    /// The logical name of the attachment.
+    /// </summary>
+    /// <example>receipt</example>
+    public string? Name { get; set; }
 
     /// <summary>
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.

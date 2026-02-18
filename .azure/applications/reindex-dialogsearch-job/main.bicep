@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { baseTags } from '../../functions/baseTags.bicep'
+
 @description('The tag of the image to be used')
 @minLength(3)
 param imageTag string
@@ -35,14 +37,15 @@ param workloadProfileName string = 'Consumption'
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+
 var name = '${namePrefix}-reindex-search'
-var tags = {
+var additionalTags = {
   FullName: name
-  Environment: environment
-  Product: 'Dialogporten'
   Description: 'Manual janitor job to reindex dialog search'
   JobType: 'Manual'
 }
+
+var tags = baseTags(additionalTags, environment)
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
   name: containerAppEnvironmentName

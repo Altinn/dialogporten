@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -41,7 +42,7 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
     }
 }
 
-public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
+public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, DialogEntity>
 {
     /// <summary>
     /// Filter by one or more service owner codes

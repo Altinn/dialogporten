@@ -2,30 +2,10 @@
   {
     Items: [
       {
-        Content: {
-          Title: {
-            Value: [
-              {
-                Value: Dette er en tittel, dialog,
-                LanguageCode: nb
-              }
-            ],
-            MediaType: text/plain
-          },
-          Summary: {
-            Value: [
-              {
-                Value: Dette er et sammendrag, dialog,
-                LanguageCode: nb
-              }
-            ],
-            MediaType: text/plain
-          }
-        },
         Id: Guid_1,
         Org: ttd,
         ServiceResource: urn:altinn:resource:1337,
-        ServiceResourceType: localresourcetype,
+        ServiceResourceType: GenericAccessResource,
         Party: urn:altinn:person:identifier-no:22834498646,
         Progress: 22,
         Process: some-process,
@@ -46,9 +26,7 @@
           SystemLabels: [
             Default
           ]
-        }
-      },
-      {
+        },
         Content: {
           Title: {
             Value: [
@@ -68,11 +46,13 @@
             ],
             MediaType: text/plain
           }
-        },
+        }
+      },
+      {
         Id: Guid_3,
         Org: ttd,
         ServiceResource: urn:altinn:resource:1337,
-        ServiceResourceType: localresourcetype,
+        ServiceResourceType: GenericAccessResource,
         Party: urn:altinn:person:identifier-no:22834498646,
         Progress: 22,
         Process: some-process,
@@ -93,15 +73,7 @@
           SystemLabels: [
             Default
           ]
-        }
-      }
-    ],
-    HasNextPage: true,
-    OrderBy: dueat_desc,id_desc
-  },
-  {
-    Items: [
-      {
+        },
         Content: {
           Title: {
             Value: [
@@ -121,11 +93,19 @@
             ],
             MediaType: text/plain
           }
-        },
+        }
+      }
+    ],
+    HasNextPage: true,
+    OrderBy: dueat_desc,id_desc
+  },
+  {
+    Items: [
+      {
         Id: Guid_5,
         Org: ttd,
         ServiceResource: urn:altinn:resource:1337,
-        ServiceResourceType: localresourcetype,
+        ServiceResourceType: GenericAccessResource,
         Party: urn:altinn:person:identifier-no:22834498646,
         Progress: 22,
         Process: some-process,
@@ -146,9 +126,7 @@
           SystemLabels: [
             Default
           ]
-        }
-      },
-      {
+        },
         Content: {
           Title: {
             Value: [
@@ -168,11 +146,13 @@
             ],
             MediaType: text/plain
           }
-        },
+        }
+      },
+      {
         Id: Guid_7,
         Org: ttd,
         ServiceResource: urn:altinn:resource:1337,
-        ServiceResourceType: localresourcetype,
+        ServiceResourceType: GenericAccessResource,
         Party: urn:altinn:person:identifier-no:22834498646,
         Progress: 22,
         Process: some-process,
@@ -193,15 +173,7 @@
           SystemLabels: [
             Default
           ]
-        }
-      }
-    ],
-    HasNextPage: true,
-    OrderBy: dueat_desc,id_desc
-  },
-  {
-    Items: [
-      {
+        },
         Content: {
           Title: {
             Value: [
@@ -221,11 +193,19 @@
             ],
             MediaType: text/plain
           }
-        },
+        }
+      }
+    ],
+    HasNextPage: true,
+    OrderBy: dueat_desc,id_desc
+  },
+  {
+    Items: [
+      {
         Id: Guid_9,
         Org: ttd,
         ServiceResource: urn:altinn:resource:1337,
-        ServiceResourceType: localresourcetype,
+        ServiceResourceType: GenericAccessResource,
         Party: urn:altinn:person:identifier-no:22834498646,
         Progress: 22,
         Process: some-process,
@@ -246,6 +226,26 @@
           SystemLabels: [
             Default
           ]
+        },
+        Content: {
+          Title: {
+            Value: [
+              {
+                Value: Dette er en tittel, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          },
+          Summary: {
+            Value: [
+              {
+                Value: Dette er et sammendrag, dialog,
+                LanguageCode: nb
+              }
+            ],
+            MediaType: text/plain
+          }
         }
       }
     ],

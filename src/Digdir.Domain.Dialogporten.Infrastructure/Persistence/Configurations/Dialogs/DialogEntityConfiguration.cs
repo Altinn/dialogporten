@@ -57,6 +57,11 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.HasIndex(x => new { x.Org, x.UpdatedAt, x.Id })
             .IsDescending(false, true, true);
 
+        builder.HasIndex(x => new { x.ServiceResource, x.Party, x.ContentUpdatedAt, x.Id })
+            .HasDatabaseName("IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted")
+            .IsDescending(false, false, true, true)
+            .HasFilter($"\"{nameof(DialogEntity.Deleted)}\" = false");
+
         builder.Property(x => x.Org).UseCollation("C");
         builder.Property(x => x.Party).UseCollation("C");
         builder.Property(x => x.ServiceResource).HasMaxLength(Domain.Common.Constants.DefaultMaxStringLength);

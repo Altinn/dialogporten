@@ -7,13 +7,13 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -194,7 +194,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     {
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, AdminUserResourceRegistryDecorator>())
+            .AsAdminUser()
             .BulkSetSystemLabelServiceOwner((command, ctx) =>
             {
                 command.EndUserId = null;
@@ -220,7 +220,6 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     public Task BulkSet_PerformedBy_For_Non_Admin_Is_Forbidden() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, NonAdminUserResourceRegistryDecorator>())
             .BulkSetSystemLabelServiceOwner((command, ctx) =>
             {
                 command.EndUserId = null;

@@ -1,0 +1,78 @@
+name: Build and push images to GCR
+
+on:
+  workflow_call:
+    secrets:
+      GCR_PASSWORD:
+        description: "Password for Github Container Registry"
+        required: true
+    inputs:
+      dockerImageBaseName:
+        description: "Base image name for docker images"
+        required: true
+        type: string
+      version:
+        description: "Version to tag"
+        required: true
+        type: string
+      push:
+        description: "Whether to push images to the registry"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  publish-docker-images:
+    env:
+      DOCKER_IMAGE_BASE_NAME: ${{ inputs.dockerImageBaseName }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - dockerfile: ./src/Digdir.Domain.Dialogporten.WebApi/Dockerfile
+            imageName: webapi
+          - dockerfile: ./src/Digdir.Domain.Dialogporten.GraphQL/Dockerfile
+            imageName: graphql
+          - dockerfile: ./src/Digdir.Domain.Dialogporten.Service/Dockerfile
+            imageName: service
+          - dockerfile: ./src/Digdir.Domain.Dialogporten.Infrastructure/MigrationBundle.dockerfile
+            imageName: migration-bundle
+          - dockerfile: ./src/Digdir.Domain.Dialogporten.Janitor/Dockerfile
+            imageName: janitor
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GCR_PASSWORD }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        with:
+          images: ${{ env.DOCKER_IMAGE_BASE_NAME }}${{ matrix.imageName }}
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+      - name: Build and push docker image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: ${{ inputs.push }}
+          tags: |
+            ${{ env.DOCKER_IMAGE_BASE_NAME }}${{ matrix.imageName }}:${{ inputs.version }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.imageName }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.imageName }}

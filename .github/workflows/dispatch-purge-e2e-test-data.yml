@@ -1,0 +1,62 @@
+name: Purge E2E test data
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options:
+          - all
+          - test
+          - staging
+          - yt01
+        default: test
+      ref:
+        description: "The branch or tag ref to run the cleanup on. Using default checkout ref if not provided."
+        required: false
+        default: main
+        type: string
+
+jobs:
+  purge-e2e-test-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        environment: >-
+          ${{ fromJSON(
+            github.event_name == 'workflow_dispatch' &&
+            inputs.environment != 'all' &&
+            format('["{0}"]', inputs.environment)
+            ||
+            '["test","staging","yt01"]'
+          ) }}
+
+    steps:
+      - uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
+        with:
+          global-json-file: ./global.json
+
+      - name: Run E2E cleanup
+        env:
+          DOTNET_ENVIRONMENT: ${{ matrix.environment }}
+          TokenGeneratorUser: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
+          TokenGeneratorPassword: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+        run: |
+          dotnet test tests/Digdir.Domain.Dialogporten.E2E.Cleanup.Tests/Digdir.Domain.Dialogporten.E2E.Cleanup.Tests.csproj \
+            --configuration Release \
+            -- xUnit.Explicit=only

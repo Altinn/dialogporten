@@ -1,5 +1,7 @@
 targetScope = 'subscription'
 
+import { baseTags } from '../functions/baseTags.bicep'
+
 @description('The environment for the deployment')
 @minLength(3)
 param environment string
@@ -103,10 +105,9 @@ var secrets = {
 
 var namePrefix = 'dp-be-${environment}'
 
-var tags = {
-  Environment: environment
-  Product: 'Dialogporten'
-}
+var additionalTags = {}
+
+var tags = baseTags(additionalTags, environment)
 
 // Create resource groups
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {

@@ -1,11 +1,13 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
@@ -42,30 +44,55 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
 
     private async Task<List<PaginatedList<DialogDto>>> GetAllPages(string orderBy)
     {
+        const int maxPages = 100;
         List<PaginatedList<DialogDto>> pages = [];
+        var parsedOrderBy = OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(
+            orderBy,
+            out var orderSet)
+            ? orderSet
+            : throw new InvalidOperationException($"Unable to parse orderBy value '{orderBy}'.");
+
         bool hasNextPage;
         string? continuationToken = null;
+        var pageCount = 0;
         do
         {
+            pageCount++;
+            if (pageCount > maxPages)
+            {
+                throw new InvalidOperationException($"Pagination did not terminate within {maxPages} pages for orderBy '{orderBy}'.");
+            }
+
             var previousToken = continuationToken;
+            var parsedContinuationToken = previousToken is null
+                ? null
+                : ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(previousToken, out var token)
+                    ? token
+                    : throw new InvalidOperationException($"Unable to parse continuation token for orderBy '{orderBy}'. Token: '{previousToken}'.");
+
             var page = await FlowBuilder.For(Application)
                 .SearchEndUserDialogs(x =>
                 {
                     x.Limit = 2;
-                    x.Party = [IntegrationTestUser.DefaultParty];
-                    x.ContinuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>
-                        .TryParse(previousToken, out var token) ? token : null;
-                    x.OrderBy =
-                        OrderSet<SearchDialogQueryOrderDefinition, IntermediateDialogDto>.TryParse(orderBy,
-                            out var orderSet)
-                            ? orderSet
-                            : null;
+                    x.Party = [TestUsers.DefaultParty];
+                    x.ContinuationToken = parsedContinuationToken;
+                    x.OrderBy = parsedOrderBy;
                 })
                 .ExecuteAndAssert<PaginatedList<DialogDto>>();
 
             pages.Add(page);
             hasNextPage = page.HasNextPage;
             continuationToken = page.ContinuationToken;
+
+            if (hasNextPage && continuationToken is null)
+            {
+                throw new InvalidOperationException($"HasNextPage was true but continuation token was null for orderBy '{orderBy}'.");
+            }
+
+            if (hasNextPage && string.Equals(previousToken, continuationToken, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException($"Continuation token did not advance for orderBy '{orderBy}'. Token: '{continuationToken}'.");
+            }
         } while (hasNextPage);
 
         return pages;
@@ -86,7 +113,7 @@ public static class OrderByExtensions
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.Activities.Clear();
-                x.Dto.Party = IntegrationTestUser.DefaultParty;
+                x.Dto.Party = TestUsers.DefaultParty;
 
                 x.Dto.CreatedAt = DateAnchor.AddDays(addDays);
                 x.Dto.UpdatedAt = DateAnchor.AddDays(addDays);

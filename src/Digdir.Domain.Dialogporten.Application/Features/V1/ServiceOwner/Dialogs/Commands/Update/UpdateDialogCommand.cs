@@ -108,10 +108,15 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden("User cannot modify frozen dialog");
         }
 
+        if (request.IfMatchDialogRevision is { } revision && revision != dialog.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
 
-        if (!request.IsSilentUpdate || !isCurrentUserServiceOwnerAdmin)
+        if (!request.IsSilentUpdate && !isCurrentUserServiceOwnerAdmin)
         {
             ValidateTimeFields(dialog);
         }
@@ -405,9 +410,19 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 .Merge(source.Endpoints,
                     destinationKeySelector: x => x.Id,
                     sourceKeySelector: x => x.Id,
-                    create: _mapper.Map<List<DialogApiActionEndpoint>>,
+                    create: CreateApiActionEndpoint,
                     update: _mapper.Update,
                     delete: DeleteDelegate.Default);
+        }
+    }
+
+    private IEnumerable<DialogApiActionEndpoint> CreateApiActionEndpoint(IEnumerable<ApiActionEndpointDto> creatables)
+    {
+        foreach (var apiActionEndpointDto in creatables)
+        {
+            var apiActionEndpoint = _mapper.Map<DialogApiActionEndpoint>(apiActionEndpointDto);
+            _db.DialogApiActionEndpoints.Add(apiActionEndpoint);
+            yield return apiActionEndpoint;
         }
     }
 

@@ -13,15 +13,9 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureToggle;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchNew;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchNew;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using SearchDialogQueryEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
-using SearchDialogResultEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
-using SearchDialogQuerySo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
-using SearchDialogResultSo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
 
 namespace Digdir.Domain.Dialogporten.Application;
 
@@ -75,8 +69,6 @@ public static class ApplicationExtensions
             .AddTransient<IClock, Clock>()
             .AddTransient<IDialogTransmissionAppender, DialogTransmissionAppender>()
             .AddTransient<ITransmissionHierarchyValidator, TransmissionHierarchyValidator>()
-            .AddTransient<IApplicationFeatureToggle<SearchDialogQueryEu, SearchDialogResultEu>, OptimizedEndUserDialogSearchFeatureToggle>()
-            .AddTransient<IApplicationFeatureToggle<SearchDialogQuerySo, SearchDialogResultSo>, OptimizedServiceOwnerDialogSearchFeatureToggle>()
             .AddDataLoaders()
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationFeatureToggleBehavior<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))

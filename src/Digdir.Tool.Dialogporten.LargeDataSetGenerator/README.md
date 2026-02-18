@@ -4,7 +4,7 @@ This project generates large data sets for `yt01`, our performance environment.
 
 
 #### Long-running jobs in yt01
-Long-running jobs in yt01 should be done from the [ssh jumper](../../scripts/database-forwarder/README.md) in Azure.
+Long-running jobs in yt01 should be done from the [ssh jumper](https://github.com/Altinn/dialogporten-utils/blob/main/database-forwarder/README.md) in Azure.
 
 1. Suspend the CI/CD pipeline for YT01 in GitHub Actions GUI
    "Actions" => "CI/CD YT01" => "Disable workflow", menu top right

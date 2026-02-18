@@ -22,7 +22,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+      - uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
@@ -49,14 +49,14 @@ jobs:
     with:
       apps_base_sha: ${{ needs.release-please.outputs.previous_release_sha }}
 
-  publish:
+  publish-docker-images:
     name: Build and publish docker images
     needs: [release-please, check-for-changes]
     if: needs.release-please.outputs.release_created == 'true'
     permissions:
       contents: read
       packages: write
-    uses: ./.github/workflows/workflow-publish.yml
+    uses: ./.github/workflows/workflow-publish-docker-images.yml
     secrets:
       GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
     with:
@@ -65,17 +65,17 @@ jobs:
 
   notify-release-created:
     name: Notify release created
-    needs: [release-please, publish]
+    needs: [release-please, publish-docker-images]
     if: ${{ always() && !failure() && !cancelled() && needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
     permissions: {}
     steps:
-      - uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+      - uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
       - name: Notify release created
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           token: ${{ secrets.RELEASE_PLEASE_PAT }}
           event-type: release_created
@@ -83,14 +83,14 @@ jobs:
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [release-please, publish, notify-release-created]
+    needs: [release-please, publish-docker-images, notify-release-created]
     if: ${{ always() && failure() && !cancelled() }}
     permissions:
       contents: read
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:
       environment: release-please
-      publish_status: ${{ needs.publish.result }}
+      publish_status: ${{ needs.publish-docker-images.result }}
       release_please_status: ${{ needs.release-please.result }}
       notify_release_created_status: ${{ needs.notify-release-created.result }}
     secrets:

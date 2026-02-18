@@ -4,10 +4,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -86,6 +86,32 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
                         .And.AllSatisfy(url => url.Url.Should().NotBeNull()
                             .And.NotBe(Constants.ExpiredUri)));
+            });
+
+    private const string DialogAttachmentName = "dialog-attachment";
+    private const string TransmissionAttachmentName = "transmission-attachment";
+
+    [Fact]
+    public Task Get_Dialog_Should_Return_Attachment_Names() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(x =>
+            {
+                x.AddAttachment(attachment =>
+                    attachment.Name = DialogAttachmentName);
+                x.AddTransmission(transmission =>
+                    transmission.AddAttachment(attachment =>
+                        attachment.Name = TransmissionAttachmentName));
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == DialogAttachmentName);
+                x.Transmissions.Should().ContainSingle()
+                    .Which.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == TransmissionAttachmentName);
             });
 
     [Fact]

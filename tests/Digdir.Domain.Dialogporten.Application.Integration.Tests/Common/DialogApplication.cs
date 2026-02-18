@@ -12,8 +12,11 @@ using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -42,9 +45,10 @@ public class DialogApplication : IAsyncLifetime
     private readonly List<object> _publishedEvents = [];
 
     internal static TestClock Clock { get; } = new();
+    internal static TestUser User { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer =
-        new PostgreSqlBuilder("postgres:16.10")
+        new PostgreSqlBuilder("postgres:16.11")
         .Build();
 
     public async ValueTask InitializeAsync()
@@ -73,6 +77,7 @@ public class DialogApplication : IAsyncLifetime
     /// You may only call this or equivalent methods once per test.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the method is called more than once per test.</exception>
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public void ConfigureServices(Action<IServiceCollection> configure)
     {
         if (_rootProvider != _fixtureRootProvider)
@@ -98,6 +103,9 @@ public class DialogApplication : IAsyncLifetime
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
             .RemoveAll<IClock>()
             .AddSingleton<IClock>(Clock)
+            .AddSingleton<IUser>(User)
+            .RemoveAll<IServiceResourceAuthorizer>()
+            .AddSingleton<IServiceResourceAuthorizer, IntegrationTestServiceResourceAuthorizer>()
             .AddDistributedMemoryCache()
             .AddLogging()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
@@ -113,6 +121,7 @@ public class DialogApplication : IAsyncLifetime
                     .EnableDetailedErrors()
                     .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
                     .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>()))
+            .AddDapperTypeHandlers()
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
@@ -127,13 +136,12 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
-            .AddSingleton<IUser, IntegrationTestUser>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
-
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
-            .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
-            .Decorate<IUserResourceRegistry, LocalDevelopmentUserResourceRegistryDecorator>()
-            .Decorate<IUserRegistry, LocalDevelopmentUserRegistryDecorator>();
+            .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
+            .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 
     private static IPartyNameRegistry CreateNameRegistrySubstitute()
@@ -175,10 +183,9 @@ public class DialogApplication : IAsyncLifetime
             {
                 FeatureToggle = new FeatureToggle
                 {
-                    UseOptimizedEndUserDialogSearch = true,
-                    UseOptimizedServiceOwnerDialogSearch = true,
                     UseAltinnAutoAuthorizedPartiesQueryParameters = true,
-                    UseCorrectPersonNameOrdering = true
+                    UseCorrectPersonNameOrdering = true,
+                    UseBranchingLogicForDialogSearch = true
                 },
                 Dialogporten = new DialogportenSettings
                 {
@@ -239,6 +246,7 @@ public class DialogApplication : IAsyncLifetime
     public async ValueTask ResetState()
     {
         Clock.Reset();
+        User.Reset();
         _publishedEvents.Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();

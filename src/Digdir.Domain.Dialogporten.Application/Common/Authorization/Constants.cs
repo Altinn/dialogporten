@@ -11,8 +11,10 @@ public static class Constants
     public static readonly Uri UnauthorizedUri = new("urn:dialogporten:unauthorized");
     public static readonly Uri ExpiredUri = new("urn:dialogporten:expired");
 
+    public const string IdportenLoaLow = "idporten-loa-low";
     public const string IdportenLoaSubstantial = "idporten-loa-substantial";
     public const string IdportenLoaHigh = "idporten-loa-high";
+    public const string IdportenLoaEmail = "selfregistered-email";
     public const string AltinnAuthLevelTooLow = "Altinn authentication level too low.";
 
     public static readonly ImmutableArray<string> SupportedResourceTypes =

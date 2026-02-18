@@ -94,6 +94,7 @@ internal sealed class InfrastructureBuilder :
         _services.AddOptions<InfrastructureSettings>()
             .Bind(infrastructureConfigurationSection)
             .ValidateFluently();
+
         var settings = infrastructureConfigurationSection.Get<InfrastructureSettings>()
                        ?? throw new InvalidOperationException("Infrastructure settings are not configured.");
         var validator = new FluentValidationOptions<InfrastructureSettings>(InfrastructureAssemblyMarker.Assembly);

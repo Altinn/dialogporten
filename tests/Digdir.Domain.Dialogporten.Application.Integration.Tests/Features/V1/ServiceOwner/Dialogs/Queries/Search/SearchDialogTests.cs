@@ -39,7 +39,7 @@ public class SearchDialogTests : ApplicationCollectionFixture
     {
         string? party = null;
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => party = x.Dto.Party)
+            .CreateSimpleDialog((x, _) => party = x.Dto.Party)
             .SearchServiceOwnerDialogs(x => x.Party = [party!])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle(x =>
@@ -49,7 +49,7 @@ public class SearchDialogTests : ApplicationCollectionFixture
     [Fact]
     public Task Search_Should_Return_Number_Of_Transmissions_From_Party_And_ServiceOwner() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission(x => x.Type = DialogTransmissionType.Values.Alert)
                 .AddTransmission(x => x.Type = DialogTransmissionType.Values.Submission))
             .SearchServiceOwnerDialogs((x, ctx) => x.Party = [ctx.GetParty()])

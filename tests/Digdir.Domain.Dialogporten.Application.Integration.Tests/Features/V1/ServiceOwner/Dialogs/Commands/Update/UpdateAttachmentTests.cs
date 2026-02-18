@@ -14,7 +14,7 @@ public class UpdateAttachmentTests(DialogApplication application) : ApplicationC
     [Fact]
     public Task Can_Update_Dialog_Attachment_ExpiresAt() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddAttachment(x =>
                     x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(3)))
             .UpdateDialog(x =>
@@ -30,7 +30,7 @@ public class UpdateAttachmentTests(DialogApplication application) : ApplicationC
     [Fact]
     public Task Can_Remove_Dialog_Attachment_ExpiresAt() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddAttachment(x =>
                     x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)))
             .UpdateDialog(x =>
@@ -43,7 +43,7 @@ public class UpdateAttachmentTests(DialogApplication application) : ApplicationC
     [Fact]
     public Task Cannot_Update_Dialog_Attachment_ExpiresAt_To_Past_Date() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddAttachment(x =>
                     x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(2)))
             .UpdateDialog(x =>

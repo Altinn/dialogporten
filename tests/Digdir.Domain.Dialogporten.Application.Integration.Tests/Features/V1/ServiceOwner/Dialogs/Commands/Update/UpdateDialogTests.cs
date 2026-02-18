@@ -75,7 +75,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             {
                 revision = x.IfMatchDialogRevision!.Value;
                 x.IsSilentUpdate = true;
-                x.Dto.Progress = (x.Dto.Progress % 100) + 1;
+                x.Dto.Progress = 1;
             })
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
@@ -184,7 +184,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .AssertSuccessAndUpdateDialog(x =>
             {
                 initialRevision = x.IfMatchDialogRevision!.Value;
-                x.Dto.Progress = (x.Dto.Progress % 100) + 1;
+                x.Dto.Progress = 1;
             })
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
@@ -481,7 +481,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public Task ContentUpdatedAt_Should_Not_Change_When_Content_Not_Updated(string _,
         Action<UpdateDialogCommand> updateDialog) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog()
+            .CreateSimpleDialog((x, _) => x.Dto.Progress = 1)
             .AssertSuccessAndUpdateDialog(updateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>

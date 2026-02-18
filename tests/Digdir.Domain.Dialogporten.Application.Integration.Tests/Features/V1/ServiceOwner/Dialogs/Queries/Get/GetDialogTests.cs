@@ -43,7 +43,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         CreateDialogDto createDto = null!;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) => createDto = x.Dto)
+            .CreateComplexDialog((x, _) => createDto = x.Dto)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {

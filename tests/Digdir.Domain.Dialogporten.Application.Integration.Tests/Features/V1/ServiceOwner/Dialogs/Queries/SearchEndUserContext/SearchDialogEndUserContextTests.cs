@@ -41,7 +41,7 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
                 services.ConfigureAltinnAuthorization(x =>
                     x.ConfigureGetAuthorizedResourcesForSearch(new DialogSearchAuthorizationResult()));
             })
-            .CreateSimpleDialog(x => x.Dto.Party = TestUsers.DefaultParty)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = TestUsers.DefaultParty)
             .SearchServiceOwnerDialogEndUserContexts((query, ctx) =>
             {
                 query.Party = [ctx.GetParty()];

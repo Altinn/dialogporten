@@ -109,7 +109,7 @@ public static class OrderByExtensions
         for (var i = 0; i < 5; i++)
         {
             var addDays = i;
-            executor = step.CreateSimpleDialog(x =>
+            executor = step.CreateSimpleDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.Activities.Clear();

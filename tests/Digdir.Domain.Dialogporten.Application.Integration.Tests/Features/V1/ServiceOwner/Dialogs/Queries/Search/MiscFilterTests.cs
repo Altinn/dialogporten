@@ -24,12 +24,12 @@ public class MiscFilterTests : ApplicationCollectionFixture
         var matchingDialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = Party;
                 x.Dto.ServiceResource = otherServiceResource;
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = matchingDialogId;
                 x.Dto.Party = Party;
@@ -50,12 +50,12 @@ public class MiscFilterTests : ApplicationCollectionFixture
         var matchingDialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = Party;
                 x.Dto.SystemLabel = SystemLabel.Values.Default;
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = matchingDialogId;
                 x.Dto.Party = Party;
@@ -77,12 +77,12 @@ public class MiscFilterTests : ApplicationCollectionFixture
         var matchingDialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = Party;
                 x.Dto.ExtendedStatus = "other-status";
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = matchingDialogId;
                 x.Dto.Party = Party;
@@ -104,12 +104,12 @@ public class MiscFilterTests : ApplicationCollectionFixture
         var matchingDialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = Party;
                 x.Dto.ExternalReference = "other-ref";
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = matchingDialogId;
                 x.Dto.Party = Party;
@@ -130,12 +130,12 @@ public class MiscFilterTests : ApplicationCollectionFixture
         var matchingDialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = Party;
                 x.Dto.Status = DialogStatusInput.Awaiting;
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = matchingDialogId;
                 x.Dto.Party = Party;
@@ -157,12 +157,12 @@ public class MiscFilterTests : ApplicationCollectionFixture
         var matchingDialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = Party;
                 x.Dto.Process = "other-process";
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = matchingDialogId;
                 x.Dto.Party = Party;
@@ -184,13 +184,13 @@ public class MiscFilterTests : ApplicationCollectionFixture
         var normalDialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = apiOnlyDialogId;
                 x.Dto.Party = Party;
                 x.Dto.IsApiOnly = true;
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = normalDialogId;
                 x.Dto.Party = Party;
@@ -212,13 +212,13 @@ public class MiscFilterTests : ApplicationCollectionFixture
         var activeDialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = deletedDialogId;
                 x.Dto.Party = Party;
             })
             .DeleteDialog()
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = activeDialogId;
                 x.Dto.Party = Party;

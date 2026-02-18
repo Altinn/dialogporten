@@ -9,7 +9,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class LanguageCodeTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    private sealed class CreateDialogLanguageCodeTestData : TheoryData<Action<CreateDialogCommand>, bool>
+    private sealed class CreateDialogLanguageCodeTestData : TheoryData<Action<CreateDialogCommand, FlowContext>, bool>
     {
         public CreateDialogLanguageCodeTestData()
         {
@@ -27,7 +27,7 @@ public class LanguageCodeTests(DialogApplication application) : ApplicationColle
 
     [Theory, ClassData(typeof(CreateDialogLanguageCodeTestData))]
     public Task Can_Create_Localization_With_Valid_LanguageCode(
-        Action<CreateDialogCommand> modifyCommand,
+        Action<CreateDialogCommand, FlowContext> modifyCommand,
         bool shouldSucceed)
         => FlowBuilder.For(Application)
             .CreateSimpleDialog(modifyCommand)
@@ -45,8 +45,8 @@ public class LanguageCodeTests(DialogApplication application) : ApplicationColle
                 }
             });
 
-    private static Action<CreateDialogCommand> CreateTitleWithLanguageCode(string languageCode) =>
-        x => x.Dto.Content!.Title = new ContentValueDto
+    private static Action<CreateDialogCommand, FlowContext> CreateTitleWithLanguageCode(string languageCode) =>
+        (x, _) => x.Dto.Content!.Title = new ContentValueDto
         {
             Value = [new() { LanguageCode = languageCode, Value = "text" }]
         };

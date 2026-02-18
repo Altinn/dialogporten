@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.ValueConverters;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Conventions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
@@ -139,6 +140,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
         configurationBuilder.Properties<Uri>(x => x.HaveMaxLength(Domain.Common.Constants.DefaultMaxUriLength));
         configurationBuilder.Properties<DateTimeOffset>().HaveConversion<DateTimeOffsetConverter>();
         configurationBuilder.Properties<TimeSpan>().HaveConversion<TimeSpanToStringConverter>();
+        configurationBuilder.Conventions.Add(_ => new ReplacesIndexConvention());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

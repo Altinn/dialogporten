@@ -47,6 +47,7 @@ public static class IFlowStepExtensions
     private const string DialogIdKey = "DialogId";
     private const string PartyKey = "Party";
     private const string ServiceResource = "ServiceResource";
+    private const int DefaultSeed = 12345678;
 
     public static IFlowExecutor<CreateDialogSuccess> CreateDialogs(this IFlowStep step,
         params CreateDialogCommand[] commands)
@@ -118,33 +119,30 @@ public static class IFlowStepExtensions
         });
 
     public static IFlowExecutor<CreateDialogResult> CreateComplexDialog(this IFlowStep step,
-        Action<CreateDialogCommand>? initialState = null) =>
+        Action<CreateDialogCommand, FlowContext>? initialState = null, int seed = DefaultSeed) =>
         step.CreateDialog(_ =>
         {
-            var command = DialogGenerator.GenerateFakeCreateDialogCommand();
-            initialState?.Invoke(command);
+            var command = new CreateDialogCommand
+            {
+                Dto = DialogGenerator.CreateDialogFaker
+                    .UseSeed(seed).Generate()
+            };
+
+            initialState?.Invoke(command, step.Context);
             return command;
         });
 
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
-        Action<CreateDialogCommand> initialState) =>
+        Action<CreateDialogCommand, FlowContext>? initialState = null, int seed = DefaultSeed) =>
         step.CreateDialog(_ =>
         {
-            var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-            initialState.Invoke(command);
-            return command;
-        });
+            var command = new CreateDialogCommand
+            {
+                Dto = DialogGenerator.CreateSimpleDialogFaker
+                    .UseSeed(seed).Generate()
+            };
 
-    public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step) =>
-        step.CreateDialog(_ => DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
-
-    public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(
-        this IFlowStep step,
-        Action<CreateDialogCommand, FlowContext> initialState) =>
-        step.CreateDialog(ctx =>
-        {
-            var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-            initialState.Invoke(command, ctx);
+            initialState?.Invoke(command, step.Context);
             return command;
         });
 

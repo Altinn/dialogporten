@@ -437,34 +437,18 @@ public static class IFlowStepExtensions
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
         => step.AssertResult(assert).ExecuteAsync();
 
-    public static async Task VerifySnapshot<T>(
-        this IFlowStep<IOneOf> flowStep,
+    public static TFlowStep VerifySnapshot<TFlowStep>(
+        this TFlowStep flowStep,
         Action<VerifySettings>? configureSettings = null,
-        [CallerFilePath] string sourceFile = "")
+        [CallerFilePath] string sourceFile = "") where TFlowStep : IFlowStep
     {
-        var result = await flowStep.ExecuteAndAssert<T>();
-        await result.VerifySnapshot(configureSettings, sourceFile);
-    }
-
-    public static async Task VerifySnapshot<T>(
-        this IFlowExecutor<T> flowStep,
-        Action<VerifySettings>? configureSettings = null,
-        [CallerFilePath] string sourceFile = "")
-    {
-        var result = await flowStep.ExecuteAsync();
-        await result.VerifySnapshot(configureSettings, sourceFile);
-    }
-
-    public static Task VerifySnapshot<T>(
-        this T target,
-        Action<VerifySettings>? configureSettings = null,
-        [CallerFilePath] string sourceFile = "")
-    {
-        var settings = new VerifySettings();
-        configureSettings?.Invoke(settings);
-
-        return Verify(target, settings, sourceFile)
-            .UseDirectory("Snapshots");
+        return flowStep.Do((x, _) =>
+        {
+            var settings = new VerifySettings();
+            configureSettings?.Invoke(settings);
+            Verify(x, settings, sourceFile)
+                .UseDirectory("Snapshots");
+        });
     }
 
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>

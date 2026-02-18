@@ -50,8 +50,9 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
                 };
             })
             .SearchEndUserDialogs((x, _) => x.ServiceResource = [SnapshotDialog.ServiceResource])
-            .VerifySnapshot<PaginatedList<DialogDto>>(x =>
-                x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken)));
+            .VerifySnapshot(x =>
+                x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken)))
+            .ExecuteAsync();
 
     [ModuleInitializer]
     internal static void Init()

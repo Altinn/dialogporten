@@ -47,6 +47,7 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
             })
             .GetEndUserDialog() // Trigger seen log
             .SearchServiceOwnerDialogs(_ => { })
-            .VerifySnapshot<PaginatedList<DialogDto>>(x =>
-                x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken)));
+            .VerifySnapshot(x =>
+                x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken)))
+            .ExecuteAsync();
 }

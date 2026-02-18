@@ -33,7 +33,8 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
                 x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken));
                 x.UseFileName($"OrderBySnapshotTests.{orderBy}");
                 x.DontScrubDateTimes();
-            });
+            })
+            .ExecuteAsync();
 }
 
 public static class OrderByExtensions

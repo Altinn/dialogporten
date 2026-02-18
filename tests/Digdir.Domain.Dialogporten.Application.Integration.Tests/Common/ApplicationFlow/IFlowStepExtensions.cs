@@ -440,16 +440,14 @@ public static class IFlowStepExtensions
     public static TFlowStep VerifySnapshot<TFlowStep>(
         this TFlowStep flowStep,
         Action<VerifySettings>? configureSettings = null,
-        [CallerFilePath] string sourceFile = "") where TFlowStep : IFlowStep
-    {
-        return flowStep.Do((x, _) =>
+        [CallerFilePath] string sourceFile = "") where TFlowStep : IFlowStep =>
+        flowStep.Do((x, _) =>
         {
             var settings = new VerifySettings();
             configureSettings?.Invoke(settings);
             Verify(x, settings, sourceFile)
                 .UseDirectory("Snapshots");
         });
-    }
 
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>
         step.Select(result =>

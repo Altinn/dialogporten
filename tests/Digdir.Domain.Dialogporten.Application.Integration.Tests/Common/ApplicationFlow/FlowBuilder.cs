@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,6 +37,17 @@ public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
             var command = commandSelector((TIn)input!, context);
             return await context.Application.Send(command, cancellationToken);
         });
+        return new FlowStep<TOut>(context);
+    }
+    public IFlowExecutor<TOut> SendInteraction<TOut>()
+    {
+        var context = Context;
+        context.Commands.Add(async (ctx, _) =>
+        {
+            await context.Application.PublishEvents();
+            return ctx;
+        });
+
         return new FlowStep<TOut>(context);
     }
 

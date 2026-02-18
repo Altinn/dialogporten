@@ -13,6 +13,7 @@ public interface IFlowStep<out TIn> : IFlowStep
     IFlowExecutor<TOut> SendCommand<TOut>(Func<TIn, FlowContext, IRequest<TOut>> commandSelector);
     IFlowExecutor<TOut> Select<TOut>(Func<TIn, TOut> selector);
     IFlowExecutor<TOut> Select<TOut>(Func<TIn, FlowContext, TOut> selector);
+    IFlowExecutor<TOut> SendInteraction<TOut>();
 }
 
 public interface IFlowStep

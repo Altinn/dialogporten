@@ -15,6 +15,8 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -47,7 +49,7 @@ public class DialogApplication : IAsyncLifetime
 
     private readonly PostgreSqlContainer _dbContainer =
         new PostgreSqlBuilder("postgres:16.11")
-        .Build();
+            .Build();
 
     public async ValueTask InitializeAsync()
     {
@@ -107,7 +109,7 @@ public class DialogApplication : IAsyncLifetime
             .AddDistributedMemoryCache()
             .AddLogging()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
-            .AddScoped<PopulateActorNameInterceptor>()
+            // .AddScoped<PopulateActorNameInterceptor>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
             .AddSingleton<NpgsqlDataSource>(_ => new NpgsqlDataSourceBuilder(_dbContainer.GetConnectionString() + ";Include Error Detail=true").Build())
             .AddDbContext<DialogDbContext>((services, options) =>
@@ -118,7 +120,7 @@ public class DialogApplication : IAsyncLifetime
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors()
                     .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
-                    .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>()))
+            )
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
@@ -234,6 +236,22 @@ public class DialogApplication : IAsyncLifetime
         using var scope = _rootProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
         return await mediator.Send(request, cancellationToken);
+    }
+
+    public async Task<object?> PublishEvents()
+    {
+        var handlers = _rootProvider.GetServices<INotificationHandler<DialogSeenDomainEvent>>().GroupBy(x => x.GetType());
+        foreach (var handlerGroup in handlers)
+        {
+            var aa = GetPublishedEvents()
+                .OfType<DialogSeenDomainEvent>();
+
+            foreach (var handler in handlerGroup)
+            {
+                Task.WaitAll(aa.Select(async x => await handler.Handle(x, CancellationToken.None)));
+            }
+        }
+        return null;
     }
 
     public async ValueTask ResetState()

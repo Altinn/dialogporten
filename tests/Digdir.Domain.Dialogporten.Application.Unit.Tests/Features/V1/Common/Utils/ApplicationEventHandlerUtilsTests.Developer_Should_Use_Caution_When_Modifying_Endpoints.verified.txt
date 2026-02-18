@@ -7,5 +7,6 @@
   DialogEventToAltinnForwarder_DialogTransmissionCreatedDomainEvent,
   DialogEventToAltinnForwarder_DialogUpdatedDomainEvent,
   DialogSearchIndexer_DialogCreatedDomainEvent,
-  DialogSearchIndexer_DialogUpdatedDomainEvent
+  DialogSearchIndexer_DialogUpdatedDomainEvent,
+  DialogSeenEvent_DialogSeenDomainEvent
 ]

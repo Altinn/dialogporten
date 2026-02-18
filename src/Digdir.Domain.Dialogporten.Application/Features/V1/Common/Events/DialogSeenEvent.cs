@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
@@ -12,23 +13,23 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events;
 
 public sealed class DialogSeenEvent(
     IPartyNameRegistry partyNameRegistry,
-    IDialogDbContext db
+    IDialogDbContext db,
+    IUnitOfWork unitOfWork
 ) : INotificationHandler<DialogSeenDomainEvent>
 {
     private readonly IPartyNameRegistry _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
     private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
+    private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
     public async Task Handle(DialogSeenDomainEvent dialogSeenDomainEvent, CancellationToken cancellationToken)
     {
-        var userTypeId = dialogSeenDomainEvent.UserType;
-        var endUserId = dialogSeenDomainEvent.EnduserId;
         var userId = new UserId
         {
-            Type = userTypeId,
-            ExternalId = endUserId,
+            Type = dialogSeenDomainEvent.UserType,
+            ExternalId = dialogSeenDomainEvent.UserId,
         };
 
-        var name = userTypeId switch
+        var name = userId.Type switch
         {
             UserIdType.Person or
                 UserIdType.ServiceOwnerOnBehalfOfPerson or
@@ -41,43 +42,60 @@ public sealed class DialogSeenEvent(
             _ => throw new UnreachableException()
         };
 
-        var dialog = _db.Dialogs
-            .Where(x => x.Id == dialogSeenDomainEvent.DialogId)
+        var dialog = await _db.Dialogs
             .Include(x => x.SeenLog
                 .Where(log => log.CreatedAt >= log.Dialog.ContentUpdatedAt)
                 .OrderBy(log => log.CreatedAt))
-            .FirstOrDefault();
+            .ThenInclude(x => x.SeenBy)
+            .ThenInclude(x => x.ActorNameEntity)
+            .Include(x => x.EndUserContext)
+            .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(x => x.Id == dialogSeenDomainEvent.DialogId, cancellationToken);
 
         if (dialog == null)
         {
             return;
         }
 
-        var lastSeenAt = dialog.SeenLog
-                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
-                .MaxBy(x => x.CreatedAt)
-                ?.CreatedAt
-         ?? DateTimeOffset.MinValue;
+        var lastSeen = dialog.SeenLog
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId.ExternalId)
+            .MaxBy(x => x.CreatedAt);
 
-        if (lastSeenAt >= dialog.UpdatedAt)
+        if (lastSeen is not null && lastSeen.CreatedAt >= dialog.UpdatedAt)
         {
             return;
         }
-
-        dialog.SeenLog.Add(new DialogSeenLog
+        var id = dialogSeenDomainEvent.DialogId.CreateDeterministicSubUuidV7($"{userId.ExternalId}{(lastSeen is not null ? lastSeen.Id.ToString() : "")}");
+        var dialogSeenLogSeenByActor = new DialogSeenLogSeenByActor
         {
-            EndUserTypeId = userTypeId,
-            IsViaServiceOwner = userTypeId == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
-            LastSeenLogId = dialogSeenDomainEvent.SeenLogId + 1,
-            SeenBy = new DialogSeenLogSeenByActor
+            ActorTypeId = ActorType.Values.PartyRepresentative,
+            ActorNameEntity = new ActorName
             {
-                ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorNameEntity = new ActorName
-                {
-                    Name = name,
-                    ActorId = endUserId
-                }
+                Name = name,
+                ActorId = userId.ExternalId
             }
-        });
+        };
+        var aaa = new DialogSeenLog
+        {
+            Id = id,
+            EndUserTypeId = userId.Type,
+            IsViaServiceOwner = userId.Type == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
+            SeenBy = dialogSeenLogSeenByActor
+        };
+        dialog.SeenLog.Add(aaa);
+        _db.DialogSeenLog.Add(aaa);
+
+        var result = await _unitOfWork
+            .DisableUpdatableFilter()
+            .DisableVersionableFilter()
+            .SaveChangesAsync(cancellationToken);
+
+        result.Switch(
+            success => { },
+            domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
+            concurrencyError =>
+                throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
+            conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
     }
 }

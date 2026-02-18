@@ -1,8 +1,10 @@
 ﻿using System.Data;
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
@@ -110,7 +112,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             return new DomainError(_domainContext.Pop());
         }
 
-        if (!_dialogDbContext.ChangeTracker.HasChanges())
+        if (!_dialogDbContext.ChangeTracker.HasChanges() && !HasPendingEvents())
         {
             return new Success();
         }
@@ -167,6 +169,10 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             ? new DomainError(_domainContext.Pop())
             : new Success();
     }
+    private bool HasPendingEvents() => _dialogDbContext.ChangeTracker.Entries()
+        .Select(x => x.Entity)
+        .OfType<IEventPublisher>()
+        .Any(x => x.HasEvents());
 
     private static bool IsSerializationFailure(Exception ex)
     {

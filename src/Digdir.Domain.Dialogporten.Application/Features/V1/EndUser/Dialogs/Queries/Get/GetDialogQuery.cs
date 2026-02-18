@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Diagnostics;
+using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -38,9 +39,11 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private readonly IUser _user;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogTokenGenerator _dialogTokenGenerator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public GetDialogQueryHandler(
         IDialogDbContext db,
+        IUnitOfWork unitOfWork,
         IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
@@ -49,6 +52,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         IDialogTokenGenerator dialogTokenGenerator)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
@@ -161,31 +165,20 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 : throw new InvalidOperationException("Systemuser organization number not found");
         }
 
-        var lastSeenLogId = dialog.SeenLog.MaxBy(x => x.LastSeenLogId)?.LastSeenLogId ?? 1;
-        dialog.UpdateSeenAt(
-            externalId,
-            userId.Type,
-            lastSeenLogId);
+        dialog.UpdateSeenAt(externalId, userId.Type);
 
-        // var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        // var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
+        var saveResult = await _unitOfWork
+            .DisableUpdatableFilter()
+            .DisableVersionableFilter()
+            .SaveChangesAsync(cancellationToken);
 
-        // dialog.EndUserContext.UpdateSystemLabels(
-        //     addLabels: [],
-        //     removeLabels: [SystemLabel.Values.MarkedAsUnopened],
-        //     performedBy);
+        saveResult.Switch(
+            success => { },
+            domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
+            concurrencyError =>
+                throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
+            conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
-        // var saveResult = await _unitOfWork
-        //     .DisableUpdatableFilter()
-        //     .DisableVersionableFilter()
-        //     .SaveChangesAsync(cancellationToken);
-
-        // saveResult.Switch(
-        //     success => { },
-        //     domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
-        //     concurrencyError =>
-        //         throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
-        //     conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
         dialog.FilterLocalizations(request.AcceptedLanguages);
 

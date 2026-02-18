@@ -48,6 +48,7 @@ public sealed class DialogActivity : IImmutableEntity, IIdentifiableEntity, ICre
         _domainEvents.Clear();
         return events;
     }
+    public bool HasEvents() => _domainEvents.Count != 0;
 }
 
 public sealed class DialogActivityDescription : LocalizationSet

@@ -157,6 +157,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 AddLabels = [SystemLabel.Values.MarkedAsUnopened]
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
+            .SendInteraction<GetDialogResult>()
+            .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened));
 

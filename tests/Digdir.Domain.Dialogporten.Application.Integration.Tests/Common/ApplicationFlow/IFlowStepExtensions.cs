@@ -13,6 +13,9 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
@@ -96,11 +99,14 @@ public static class IFlowStepExtensions
                 {
                     Title = new ContentValueDto
                     {
-                        Value = [new LocalizationDto
-                        {
-                            LanguageCode = "nb",
-                            Value = "Ny melding"
-                        }]
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "Ny melding"
+                            }
+                        ]
                     }
                 }
             };
@@ -137,6 +143,7 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step) =>
         step.CreateDialog(_ => DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
+
 
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(
         this IFlowStep step,

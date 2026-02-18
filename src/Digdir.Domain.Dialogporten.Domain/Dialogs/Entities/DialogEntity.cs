@@ -165,9 +165,9 @@ public sealed class DialogEntity :
     public void OnRestore(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogRestoredDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, int seenLogId = 1)
+    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId)
     {
-        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, endUserId, userTypeId, seenLogId));
+        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, endUserId, userTypeId));
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];
@@ -178,6 +178,7 @@ public sealed class DialogEntity :
         _domainEvents.Clear();
         return events;
     }
+    public bool HasEvents() => _domainEvents.Count != 0;
 }
 
 public sealed class DialogAttachment : Attachment

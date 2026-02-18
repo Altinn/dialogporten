@@ -26,7 +26,6 @@ public class AuthorizationHelperTests
             constraintParties,
             constraintResources,
             GetSubjectResources,
-            NoPruneResourcesByParties,
             CancellationToken.None);
 
         // Assert
@@ -180,11 +179,6 @@ public class AuthorizationHelperTests
             new() { Subject = "accesspackage2", Resource = "resource8" }
         });
     }
-
-    private static Task<IReadOnlyDictionary<string, HashSet<string>>> NoPruneResourcesByParties(
-        IReadOnlyDictionary<string, HashSet<string>> resourcesByParties,
-        CancellationToken token) =>
-        Task.FromResult(resourcesByParties);
 
     private static AuthorizedPartiesResult GetAuthorizedParties()
     {

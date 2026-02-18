@@ -131,7 +131,7 @@ public static class InfrastructureExtensions
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
-            .AddTransient<IPartyServiceAssociationRepository, PartyServiceRepository>()
+            .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
@@ -221,7 +221,7 @@ public static class InfrastructureExtensions
             IsFailSafeEnabled = false,
             Duration = TimeSpan.FromMinutes(5)
         })
-        .ConfigureFusionCache(nameof(IPartyServiceAssociationRepository), new()
+        .ConfigureFusionCache(nameof(IPartyResourceReferenceRepository), new()
         {
             Duration = TimeSpan.FromMinutes(30),
             FailSafeMaxDuration = TimeSpan.FromMinutes(60)

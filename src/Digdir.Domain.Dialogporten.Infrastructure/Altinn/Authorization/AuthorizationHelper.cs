@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -26,9 +27,6 @@ internal static class AuthorizationHelper
     /// <param name="getAllSubjectResources">
     /// Callback that resolves all known subject-resource mappings (roles/access packages to resources).
     /// </param>
-    /// <param name="pruneResourcesByParties">
-    /// Callback that can prune the final <c>ResourcesByParties</c> map (for example via party-service summary lookups).
-    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
     /// A <see cref="DialogSearchAuthorizationResult"/> containing resolved resources by party and delegated instance IDs.
@@ -38,7 +36,6 @@ internal static class AuthorizationHelper
         List<string> constraintParties,
         List<string> constraintResources,
         Func<CancellationToken, Task<List<SubjectResource>>> getAllSubjectResources,
-        Func<IReadOnlyDictionary<string, HashSet<string>>, CancellationToken, Task<IReadOnlyDictionary<string, HashSet<string>>>> pruneResourcesByParties,
         CancellationToken cancellationToken)
     {
         var result = new DialogSearchAuthorizationResult
@@ -149,20 +146,74 @@ internal static class AuthorizationHelper
             }
         }
 
-        // Finally, prune the resources
-        if (result.ResourcesByParties.Count > 0)
-        {
-            var prunedEntries = (await pruneResourcesByParties(result.ResourcesByParties, cancellationToken))
-                .Where(x => x.Value.Count > 0)
-                .ToList();
+        return result;
+    }
 
-            result.ResourcesByParties.Clear();
-            foreach (var (party, services) in prunedEntries)
-            {
-                result.ResourcesByParties[party] = services;
-            }
+    /// <summary>
+    /// Prunes resolved service resources for each party by intersecting authorized resources with
+    /// existing party-service references. This is an optimization step before the actual dialog search,
+    /// to avoid spending time looking for service resources not actually referenced by the give party.
+    /// </summary>
+    /// <param name="result">Resolved dialog search authorization result to prune in-place.</param>
+    /// <param name="partyResourceReferenceRepository">
+    /// Repository used to resolve existing service resources per party.
+    /// </param>
+    /// <param name="maxPartiesForPruning">
+    /// Optional upper bound for number of parties eligible for pruning.
+    /// </param>
+    /// <param name="resourcePruningThreshold">
+    /// Minimum number of distinct service resources required before pruning is attempted.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public static async Task PruneUnreferencedResources(
+        DialogSearchAuthorizationResult result,
+        IPartyResourceReferenceRepository partyResourceReferenceRepository,
+        int? maxPartiesForPruning,
+        int resourcePruningThreshold,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(partyResourceReferenceRepository);
+
+        if (result.ResourcesByParties.Count == 0)
+        {
+            return;
         }
 
-        return result;
+        if (maxPartiesForPruning is > 0
+            && result.ResourcesByParties.Count > maxPartiesForPruning.Value)
+        {
+            return;
+        }
+
+        var distinctResources = result.ResourcesByParties
+            .Values
+            .SelectMany(x => x)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (distinctResources.Length <= resourcePruningThreshold)
+        {
+            return;
+        }
+
+        var existingResourcesByParty = await partyResourceReferenceRepository.GetReferencedResourcesByParty(
+            [.. result.ResourcesByParties.Keys],
+            distinctResources,
+            cancellationToken);
+
+        var prunedEntries = result.ResourcesByParties
+            .Select(x => (x.Key, Resources: existingResourcesByParty.TryGetValue(x.Key, out var existingServices)
+                ? x.Value.Intersect(existingServices, StringComparer.OrdinalIgnoreCase)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase)
+                : []))
+            .Where(x => x.Resources.Count > 0)
+            .ToList();
+
+        result.ResourcesByParties.Clear();
+        foreach (var (party, services) in prunedEntries)
+        {
+            result.ResourcesByParties[party] = services;
+        }
     }
 }

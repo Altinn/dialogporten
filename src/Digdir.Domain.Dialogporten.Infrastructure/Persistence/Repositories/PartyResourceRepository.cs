@@ -12,32 +12,32 @@ using ZiggyCreatures.Caching.Fusion.NullObjects;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 /// <summary>
-/// Resolves existing <c>party x service</c> associations from summary tables and caches
+/// Resolves existing <c>party x service resource</c> references from summary tables and caches
 /// service sets per party using FusionCache.
 ///
-/// Input parties and services are expected as full URNs. Internally, parties are compacted
-/// to type prefix + identifier and services are handled as resource suffixes.
+/// Input parties and services resources are expected as full URNs. Internally, parties are compacted
+/// to type prefix + identifier and service resource are handled unprefixed.
 /// </summary>
-internal sealed class PartyServiceRepository(
+internal sealed class PartyResourceRepository(
     NpgsqlDataSource dataSource,
-    IFusionCacheProvider? cacheProvider = null) : IPartyServiceAssociationRepository
+    IFusionCacheProvider? cacheProvider = null) : IPartyResourceReferenceRepository
 {
-    private const string ServicePrefix = "urn:altinn:resource:";
+    private const string ResourcePrefix = "urn:altinn:resource:";
     private const string CacheKeyPrefix = "ps:";
 
     private static readonly StringComparer Comparer = StringComparer.InvariantCultureIgnoreCase;
 
     private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
     private readonly IFusionCache _cache =
-        cacheProvider?.GetCache(nameof(IPartyServiceAssociationRepository))
+        cacheProvider?.GetCache(nameof(IPartyResourceReferenceRepository))
         ?? new NullFusionCache(Options.Create(new FusionCacheOptions()));
 
-    public async Task<Dictionary<string, HashSet<string>>> GetExistingServicesByParty(
+    public async Task<Dictionary<string, HashSet<string>>> GetReferencedResourcesByParty(
         IReadOnlyCollection<string> parties,
-        IReadOnlyCollection<string> services,
+        IReadOnlyCollection<string> resources,
         CancellationToken cancellationToken)
     {
-        if (parties.Count == 0 || services.Count == 0)
+        if (parties.Count == 0 || resources.Count == 0)
         {
             return [];
         }
@@ -52,16 +52,16 @@ internal sealed class PartyServiceRepository(
             return [];
         }
 
-        var requestedServices = services
+        var requestedResources = resources
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .ToHashSet(Comparer);
 
-        if (requestedServices.Count == 0)
+        if (requestedResources.Count == 0)
         {
             return [];
         }
 
-        var cachedServiceIdentifiersByParty = new Dictionary<string, HashSet<string>>(Comparer);
+        var cachedResourcesByParty = new Dictionary<string, HashSet<string>>(Comparer);
         var cacheMisses = new List<string>();
 
         foreach (var party in requestedParties)
@@ -73,35 +73,35 @@ internal sealed class PartyServiceRepository(
                 continue;
             }
 
-            cachedServiceIdentifiersByParty[party] = cached.ToHashSet(Comparer);
+            cachedResourcesByParty[party] = cached.ToHashSet(Comparer);
         }
 
         if (cacheMisses.Count > 0)
         {
-            var fetchedServiceIdentifiersByParty = await FetchServiceIdentifiersByParty(cacheMisses, cancellationToken);
+            var fetchedResourcesByParty = await FetchResourcesByParty(cacheMisses, cancellationToken);
             foreach (var party in cacheMisses)
             {
-                if (!fetchedServiceIdentifiersByParty.TryGetValue(party, out var serviceIdentifiers))
+                if (!fetchedResourcesByParty.TryGetValue(party, out var resourceIds))
                 {
-                    serviceIdentifiers = [];
+                    resourceIds = [];
                 }
 
-                cachedServiceIdentifiersByParty[party] = serviceIdentifiers;
-                await _cache.SetAsync(GetCacheKey(party), serviceIdentifiers.ToArray(), token: cancellationToken);
+                cachedResourcesByParty[party] = resourceIds;
+                await _cache.SetAsync(GetCacheKey(party), resourceIds.ToArray(), token: cancellationToken);
             }
         }
 
         var result = new Dictionary<string, HashSet<string>>(Comparer);
         foreach (var party in requestedParties)
         {
-            if (!cachedServiceIdentifiersByParty.TryGetValue(party, out var serviceIdentifiers))
+            if (!cachedResourcesByParty.TryGetValue(party, out var resourceIds))
             {
                 continue;
             }
 
-            var matchingServices = serviceIdentifiers
-                .Select(x => $"{ServicePrefix}{x}")
-                .Where(requestedServices.Contains)
+            var matchingServices = resourceIds
+                .Select(x => $"{ResourcePrefix}{x}")
+                .Where(requestedResources.Contains)
                 .ToHashSet(Comparer);
 
             if (matchingServices.Count > 0)
@@ -113,7 +113,13 @@ internal sealed class PartyServiceRepository(
         return result;
     }
 
-    private async Task<Dictionary<string, HashSet<string>>> FetchServiceIdentifiersByParty(
+    public async Task InvalidateCachedReferencesForParty(string party, CancellationToken cancellationToken)
+    {
+        // This uses the backplane to invalidate the cache across replicas.
+        await _cache.ExpireAsync(GetCacheKey(party), token: cancellationToken);
+    }
+
+    private async Task<Dictionary<string, HashSet<string>>> FetchResourcesByParty(
         List<string> parties,
         CancellationToken cancellationToken)
     {

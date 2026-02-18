@@ -445,7 +445,11 @@ public static class IFlowStepExtensions
         {
             var settings = new VerifySettings();
             configureSettings?.Invoke(settings);
-            Verify(x, settings, sourceFile)
+
+            return x is IOneOf oneOf
+                ? Verify(oneOf.Value, settings, sourceFile)
+                    .UseDirectory("Snapshots")
+                : Verify(x, settings, sourceFile)
                 .UseDirectory("Snapshots");
         });
 

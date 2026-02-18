@@ -46,6 +46,28 @@ internal static class FlowStepExtensions
             });
             return flowStep;
         }
+
+        public TFlowStep Do(Func<FlowContext, Task> action)
+        {
+            var context = flowStep.Context;
+            context.Commands.Add(async (x, _) =>
+            {
+                await action.Invoke(context);
+                return x;
+            });
+            return flowStep;
+        }
+
+        public TFlowStep Do(Func<object?, FlowContext, Task> action)
+        {
+            var context = flowStep.Context;
+            context.Commands.Add(async (x, _) =>
+            {
+                await action.Invoke(x, context);
+                return x;
+            });
+            return flowStep;
+        }
     }
 }
 

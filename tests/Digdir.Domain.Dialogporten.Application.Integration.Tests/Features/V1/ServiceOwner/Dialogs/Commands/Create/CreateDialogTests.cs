@@ -68,7 +68,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public Task Create_Dialog_With_Specified_DialogId_Tests(string _, Guid guidInput, Type assertType) =>
         FlowBuilder.For(Application)
             .OverrideUtc(CreateDialogWithSpecifiedDialogIdTestData.FixedUtcNow)
-            .CreateSimpleDialog(x => x.Dto.Id = guidInput)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = guidInput)
             .ExecuteAndAssert(assertType);
 
     private sealed class CreateDialogWithSpecifiedCreatedAtTestData : TheoryData<string, DateTimeOffset, Type>
@@ -95,7 +95,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public Task Create_Dialog_With_Specified_CreatedAt_Tests(string _, DateTimeOffset createdAt, Type assertType) =>
         FlowBuilder.For(Application)
             .OverrideUtc(CreateDialogWithSpecifiedCreatedAtTestData.FixedUtcNow)
-            .CreateSimpleDialog(x => x.Dto.CreatedAt = createdAt)
+            .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = createdAt)
             .ExecuteAndAssert(assertType);
 
     private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<string, string>
@@ -117,7 +117,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = expectedDialogId;
                 x.Dto.Party = party;
@@ -136,7 +136,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var visibleFrom = DateTimeOffset.UtcNow.AddDays(3);
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.VisibleFrom = visibleFrom)
+            .CreateSimpleDialog((x, _) => x.Dto.VisibleFrom = visibleFrom)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
             {
@@ -150,7 +150,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Create_Dialog_With_Empty_Content_Summary() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Content!.Summary = null)
+            .CreateSimpleDialog((x, _) => x.Dto.Content!.Summary = null)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Content!.Summary.Should().BeNull());
@@ -161,7 +161,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
         await FlowBuilder.For(Application)
-            .CreateComplexDialog(x => x.Dto.Id = expectedDialogId)
+            .CreateComplexDialog((x, _) => x.Dto.Id = expectedDialogId)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Id.Should().Be(expectedDialogId));
@@ -192,7 +192,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         DateTimeOffset updatedAt)
     {
         var dialog = await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.UpdatedAt = updatedAt;
                 x.Dto.CreatedAt = createdAt;
@@ -232,7 +232,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [Theory, ClassData(typeof(InvalidUpdatedAtTestData))]
     public Task Invalid_UpdatedAt_Tests(string _, DateTimeOffset? createdAt, DateTimeOffset updatedAt) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.CreatedAt = createdAt;
                 x.Dto.UpdatedAt = updatedAt;
@@ -268,7 +268,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [Theory, ClassData(typeof(InvalidTransmissionContentTestData))]
     public Task Invalid_Transmission_Content(string _, TransmissionContentDto? content) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                 transmission.Content = content;
@@ -310,7 +310,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
         }]
     };
 
-    private sealed class HtmlContentTestData : TheoryData<string, ClaimsPrincipal, Action<CreateDialogCommand>, Type>
+    private sealed class HtmlContentTestData : TheoryData<string, ClaimsPrincipal, Action<CreateDialogCommand, FlowContext>, Type>
     {
         public HtmlContentTestData()
         {
@@ -321,69 +321,69 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
             Add("Cannot create dialog with HTML content without valid html scope",
                 TestUsers.FromDefault(), // No change in user scopes
-                x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                (x, _) => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Can create dialog with HTML content with valid html scope",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                (x, _) => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(CreateDialogSuccess));
 
             Add("Can create HTML content with table tag with valid html scope",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.AdditionalInfo = CreateTableHtml(),
+                (x, _) => x.Dto.Content!.AdditionalInfo = CreateTableHtml(),
                 typeof(CreateDialogSuccess));
 
             Add("Cannot create dialog with forbidden HTML tags: iframe",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<iframe src='malicious site'></iframe>"),
+                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<iframe src='malicious site'></iframe>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: script",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<script>alert('hack');</script>"),
+                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<script>alert('hack');</script>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: img",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<img src='evil.png' />"),
+                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<img src='evil.png' />"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: div",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<div>Not allowed</div>"),
+                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<div>Not allowed</div>"),
                 typeof(ValidationError));
 
             Add("Cannot create dialog with forbidden HTML tags: span",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<span>Not allowed</span>"),
+                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<span>Not allowed</span>"),
                 typeof(ValidationError));
 
             Add("Cannot create title content with HTML media type with valid html scope",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                (x, _) => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create summary content with HTML media type with valid html scope",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                (x, _) => x.Dto.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 typeof(ValidationError));
 
             Add("Cannot create title content with embeddable HTML media type with valid html scope",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                (x, _) => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(ValidationError));
 
             Add("Can create mainContentRef content with embeddable HTML media type with valid html scope",
                 legacyHtmlScopeUser,
-                x => x.Dto.Content!.MainContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                (x, _) => x.Dto.Content!.MainContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
                 typeof(CreateDialogSuccess));
         }
     }
 
     [Theory, ClassData(typeof(HtmlContentTestData))]
     public Task Html_Content_Tests(string _, ClaimsPrincipal user,
-        Action<CreateDialogCommand> createDialog, Type expectedType) =>
+        Action<CreateDialogCommand, FlowContext> createDialog, Type expectedType) =>
         FlowBuilder.For(Application)
             .AsUser(user)
             .CreateSimpleDialog(createDialog)
@@ -400,7 +400,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public async Task Can_Create_Actors_With_Same_Name_Without_ActorId()
     {
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Transmissions = DialogGenerator.GenerateFakeDialogTransmissions(2);
                 x.Dto.Transmissions[0].Sender = new ActorDto
@@ -427,30 +427,30 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [InlineData(false, typeof(ValidationError))]
     public Task Dialog_With_Empty_Content_Tests(bool isApiOnly, Type expectedType) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.IsApiOnly = isApiOnly;
                 x.Dto.Content = null;
             })
             .ExecuteAndAssert(expectedType);
 
-    private sealed class DatesInPastTestData : TheoryData<string, Action<CreateDialogCommand>>
+    private sealed class DatesInPastTestData : TheoryData<string, Action<CreateDialogCommand, FlowContext>>
     {
         public DatesInPastTestData()
         {
             var pastDate = DateTimeOffset.UtcNow.AddDays(-1);
             Add("Can create dialog with DueAt in the past when IsSilentUpdate is set or admin scope is present",
-                x => x.Dto.DueAt = pastDate);
+                (x, _) => x.Dto.DueAt = pastDate);
             Add("Can create dialog with ExpiresAt in the past when IsSilentUpdate is set or admin scope is present",
-                x => x.Dto.ExpiresAt = pastDate);
+                (x, _) => x.Dto.ExpiresAt = pastDate);
             Add("Can create dialog with VisibleFrom in the past when IsSilentUpdate is set or admin scope is present",
-                x => x.Dto.VisibleFrom = pastDate);
+                (x, _) => x.Dto.VisibleFrom = pastDate);
         }
     }
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Can_Create_Dialog_With_Past_Dates_When_Admin_Scope(
-        string _, Action<CreateDialogCommand> createDialog) =>
+        string _, Action<CreateDialogCommand, FlowContext> createDialog) =>
         FlowBuilder.For(Application)
             .AsAdminUser()
             .CreateSimpleDialog(createDialog)
@@ -458,29 +458,29 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Can_Create_Dialog_With_Past_Dates_When_Silent_Update(
-        string _, Action<CreateDialogCommand> createDialog) =>
+        string _, Action<CreateDialogCommand, FlowContext> createDialog) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, ctx) =>
             {
                 x.IsSilentUpdate = true;
-                createDialog(x);
+                createDialog(x, ctx);
             })
             .ExecuteAndAssert<CreateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Cannot_Create_Dialog_With_Past_Dates_Without_Silent_Update_Or_Admin_Scope(
-        string _, Action<CreateDialogCommand> createDialog) =>
+        string _, Action<CreateDialogCommand, FlowContext> createDialog) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(createDialog)
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithText("must be in the future"));
 
-    private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand>, int, int>
+    private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand, FlowContext>, int, int>
     {
         public TransmissionsCountTestData()
         {
             Add("2 From Party, 1 From ServiceOwner",
-                x =>
+                (x, _) =>
                 {
                     x.AddTransmission(x =>
                     {
@@ -501,7 +501,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 }, 2, 1
             );
 
-            Add("1 From ServiceOwner", x =>
+            Add("1 From ServiceOwner", (x, _) =>
             {
                 x.AddTransmission(x =>
                 {
@@ -510,7 +510,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 });
             }, 0, 1);
 
-            Add("1 From Party", x =>
+            Add("1 From Party", (x, _) =>
             {
                 x.AddTransmission(x =>
                 {
@@ -523,7 +523,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
     [Theory, ClassData(typeof(TransmissionsCountTestData))]
     public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(
-        string _, Action<CreateDialogCommand> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
+        string _, Action<CreateDialogCommand, FlowContext> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
         FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
@@ -546,7 +546,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public async Task Dialog_Has_Unopened_Content()
     {
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.Type = DialogTransmissionType.Values.Information))
             .GetServiceOwnerDialog()
@@ -561,7 +561,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
         DialogTransmissionType.Values transmissionType, bool shouldAddSentLabel) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.Type = transmissionType))
             .GetServiceOwnerDialog()
@@ -599,7 +599,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public Task SystemLabel_On_Dialog_Create_Should_Be_Accepted_When_In_Default_DAB_Group(
         SystemLabel.Values systemLabel, bool shouldSucceed) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.Dto.SystemLabel = systemLabel)
             .ExecuteAndAssert(result =>
             {
@@ -618,7 +618,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Create_Dialog_Without_Supplying_Dialog_Status() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Status = null)
+            .CreateSimpleDialog((x, _) => x.Dto.Status = null)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Status.Should().Be(DialogStatus.Values.NotApplicable));
@@ -636,7 +636,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [InlineData("    ", typeof(ValidationError))]
     public Task Create_With_AuthorizationAttribute(string? authAttribute, Type expectedTye) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.AuthorizationAttribute = authAttribute))
             .ExecuteAndAssert(expectedTye);
@@ -644,7 +644,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [Fact]
     public Task Supplied_UpdatedAt_Should_Be_Used_For_ContentUpdatedAt() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.Dto.UpdatedAt = x.Dto.CreatedAt = DateTimeOffset.UtcNow.AddDays(-1))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
@@ -661,12 +661,12 @@ public class CreateDialogTests : ApplicationCollectionFixture
                     x.ContentUpdatedAt == x.CreatedAt));
 
     [Theory, ClassData(typeof(DialogContentLengthTestData))]
-    public Task Content_Length_Validation_Test(Action<CreateDialogCommand> action, Type expectedResult) =>
+    public Task Content_Length_Validation_Test(Action<CreateDialogCommand, FlowContext> action, Type expectedResult) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(action)
             .ExecuteAndAssert(expectedResult);
 
-    private sealed class DialogContentLengthTestData : TheoryData<Action<CreateDialogCommand>, Type>
+    private sealed class DialogContentLengthTestData : TheoryData<Action<CreateDialogCommand, FlowContext>, Type>
     {
         private static string Repeat(char c, int x) => new(c, x);
         private static int GetMaxLength(DialogContentType.Values value) =>
@@ -698,8 +698,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
         private void AddLengthTests(Action<CreateDialogCommand, string> applyValue, int maxLength)
         {
-            Add(x => applyValue(x, Repeat('x', maxLength)), typeof(CreateDialogSuccess));
-            Add(x => applyValue(x, Repeat('x', maxLength + 1)), typeof(ValidationError));
+            Add((x, _) => applyValue(x, Repeat('x', maxLength)), typeof(CreateDialogSuccess));
+            Add((x, _) => applyValue(x, Repeat('x', maxLength + 1)), typeof(ValidationError));
         }
     }
 

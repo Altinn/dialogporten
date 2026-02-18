@@ -14,7 +14,7 @@ public class EnduserContextRevisionTests(DialogApplication application) : Applic
     {
         string? serviceResource = null;
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => serviceResource = x.Dto.ServiceResource)
+            .CreateSimpleDialog((x, _) => serviceResource = x.Dto.ServiceResource)
             .SearchServiceOwnerDialogs(x => x.ServiceResource = [serviceResource!])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle(x =>

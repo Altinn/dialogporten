@@ -14,7 +14,7 @@ public class CreateAttachmentTests(DialogApplication application) : ApplicationC
     [Fact]
     public Task Can_Create_Dialog_Attachment_With_ExpiryDate() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddAttachment(x =>
                     x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)))
             .GetServiceOwnerDialog()
@@ -26,7 +26,7 @@ public class CreateAttachmentTests(DialogApplication application) : ApplicationC
     [Fact]
     public Task Can_Create_Transmission_Attachment_With_ExpiryDate() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.AddAttachment(x =>
                         x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1))))
@@ -39,7 +39,7 @@ public class CreateAttachmentTests(DialogApplication application) : ApplicationC
     [Fact]
     public Task Cannot_Create_Dialog_Attachment_With_Past_ExpiryDate() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddAttachment(x =>
                     x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1)))
             .ExecuteAndAssert<ValidationError>(x =>
@@ -48,7 +48,7 @@ public class CreateAttachmentTests(DialogApplication application) : ApplicationC
     [Fact]
     public Task Cannot_Create_Transmission_Attachment_With_ExpiryDate_In_The_Past() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.AddAttachment(x =>
                         x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1))))

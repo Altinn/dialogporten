@@ -31,7 +31,7 @@ public class NotificationConditionTests(DialogApplication application) : Applica
         Guid? transmissionId = null;
         await FlowBuilder.For(Application)
             .AsCorrespondenceUser()
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 switch (conditionType)
                 {

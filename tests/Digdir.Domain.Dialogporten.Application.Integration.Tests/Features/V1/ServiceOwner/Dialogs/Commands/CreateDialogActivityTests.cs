@@ -208,12 +208,13 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     [Fact]
     public Task Can_Create_Activity_On_TransmissionId()
     {
+        var transmissionId = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
         return FlowBuilder.For(Application)
             .CreateComplexDialog(x => x.Dto.Transmissions =
             [
                 new TransmissionDto
                 {
-                    Id = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f"),
+                    Id = transmissionId,
                     CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
                     AuthorizationAttribute = null,
                     ExtendedType = null,
@@ -255,7 +256,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
                     ExtendedType = null,
                     Type = DialogActivityType.Values.TransmissionOpened,
-                    TransmissionId = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f"),
+                    TransmissionId = transmissionId,
                     PerformedBy = new ActorDto
                     {
                         ActorType = ActorType.Values.PartyRepresentative,

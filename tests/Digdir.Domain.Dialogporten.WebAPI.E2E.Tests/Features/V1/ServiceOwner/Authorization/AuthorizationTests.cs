@@ -1,5 +1,6 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
+// using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -284,10 +285,10 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
     private static V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest CreateActivityRequest() =>
         new()
         {
-            Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
+            Type = Altinn.ApiClients.Dialogporten.Features.V1.DialogsEntitiesActivities_DialogActivityType.DialogCreated,
             PerformedBy = new()
             {
-                ActorType = Actors_ActorType.PartyRepresentative,
+                ActorType = Altinn.ApiClients.Dialogporten.Features.V1.Actors_ActorType.PartyRepresentative,
                 ActorName = "Some custom name"
             }
         };

@@ -1,6 +1,5 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
-// using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Library.Dialogporten.E2E.Common;

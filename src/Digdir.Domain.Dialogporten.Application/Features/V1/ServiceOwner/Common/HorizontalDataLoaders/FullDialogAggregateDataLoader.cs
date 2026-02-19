@@ -35,7 +35,7 @@ public sealed class FullDialogAggregateDataLoader
     private static readonly Expression<Func<DialogEntity, IEnumerable<DialogSeenLog>>> OrderedSeenLog =
         e => e.SeenLog.OrderBy(s => s.CreatedAt);
     private static readonly Expression<Func<DialogTransmission, IEnumerable<DialogTransmissionContent>>> OrderedTransmissionContent =
-        t => t.Content.OrderBy(c => c.Id).ThenBy(c => c.CreatedAt);
+        t => t.Content.OrderBy(c => c.CreatedAt).ThenBy(c => c.Id);
     private static readonly Expression<Func<DialogTransmission, IEnumerable<DialogTransmissionAttachment>>> OrderedTransmissionAttachments =
         t => t.Attachments.OrderBy(a => a.CreatedAt).ThenBy(a => a.Id);
     private static readonly Expression<Func<DialogTransmission, IEnumerable<DialogTransmissionNavigationalAction>>> OrderedTransmissionNavigationalActions =

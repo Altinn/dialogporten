@@ -97,7 +97,6 @@ public static class InfrastructureExtensions
                     })
                     .EnableSensitiveDataLogging(environment.IsDevelopment())
                     .AddInterceptors(
-                        // services.GetRequiredService<PopulateActorNameInterceptor>(),
                         services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
                     );
             })
@@ -122,7 +121,6 @@ public static class InfrastructureExtensions
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
-            // .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()

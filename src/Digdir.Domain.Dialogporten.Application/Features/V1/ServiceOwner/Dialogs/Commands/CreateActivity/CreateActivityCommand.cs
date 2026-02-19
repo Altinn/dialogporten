@@ -92,7 +92,7 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         }
 
         var newActivity = _mapper.Map<DialogActivity>(request.Activity);
-        newActivity.Id = newActivity.Id.CreateVersion7IfDefault();
+        newActivity.Id = newActivity.EnsureId();
         newActivity.DialogId = dialog.Id;
 
         _db.DialogActivities.Add(newActivity);

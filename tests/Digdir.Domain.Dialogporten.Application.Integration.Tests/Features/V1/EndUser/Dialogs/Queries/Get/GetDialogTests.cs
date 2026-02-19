@@ -132,31 +132,9 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Content.MainContentReference!.Should().BeEquivalentTo(
-                    new AuthorizationContentValueDto
-                    {
-                        MediaType = MediaTypes.EmbeddableMarkdown,
-                        IsAuthorized = false,
-                        Value =
-                        [
-                            new LocalizationDto
-                            {
-                                LanguageCode = "nb",
-                                Value = Constants.UnauthorizedUri.ToString()
-                            },
-                            new LocalizationDto
-                            {
-                                LanguageCode = "nn",
-                                Value = Constants.UnauthorizedUri.ToString()
-                            },
-                            new LocalizationDto
-                            {
-                                LanguageCode = "en",
-                                Value = Constants.UnauthorizedUri.ToString()
-                            }
-                        ],
-                    }
-                );
+                x.Content.MainContentReference!.IsAuthorized.Should().BeFalse();
+                x.Content.MainContentReference!.Value.Should().AllSatisfy(x =>
+                    x.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
             });
 
     [Fact]

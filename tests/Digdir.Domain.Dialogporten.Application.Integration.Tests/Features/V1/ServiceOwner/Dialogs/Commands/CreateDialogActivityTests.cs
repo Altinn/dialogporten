@@ -70,7 +70,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     }
 
     [Fact]
-    public Task Can_Create_Activity_On_Existing_Dialog_And_Get_The_Dialog_Afterwards()
+    public Task Can_Create_Activity_On_Existing_Dialog_And_Get_The_Activity_Afterwards()
     {
         var guid = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
         return FlowBuilder.For(Application)

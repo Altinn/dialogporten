@@ -42,11 +42,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 },
                 Description = []
             })
-            .ExecuteAndAssert<CreateActivitySuccess>(x =>
-            {
-                x.ActivityIds.Count.Should().Be(1);
-                x.ActivityIds.First().Should().Be(guid);
-            });
+            .ExecuteAndAssert<CreateActivitySuccess>(x => x.ActivityId.Should().Be(guid));
     }
 
     [Fact]
@@ -70,11 +66,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 },
                 Description = []
             })
-            .ExecuteAndAssert<CreateActivitySuccess>(x =>
-            {
-                x.ActivityIds.Count.Should().Be(1);
-                x.ActivityIds.First().Should().NotBe(Guid.Empty);
-            });
+            .ExecuteAndAssert<CreateActivitySuccess>(x => x.ActivityId.Should().NotBe(Guid.Empty));
     }
 
     [Fact]
@@ -128,8 +120,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             {
                 DialogId = Guid.Parse("019c2345-514f-7d6d-9a56-ba272874429e"),
                 IfMatchDialogRevision = null,
-                Activities =
-                [
+                Activity =
                     new CreateActivityDto
                     {
                         Id = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f"),
@@ -144,8 +135,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
                         Description = []
-                    }
-                ],
+                    },
                 IsSilentUpdate = false
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x =>
@@ -300,53 +290,36 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
 
         public CreateInvalidActivityTestData()
         {
-            Add("Empty Guid and Empty Activities",
+            Add("Empty Guid",
                 ctx => new CreateActivityCommand
                 {
                     DialogId = Guid.Empty,
                     IfMatchDialogRevision = null,
-                    Activities = [],
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00c717c3-cd80-7cc7-9507-aa6a9fdd595b"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                        },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
-                ["'DialogId' must not be empty.", "'Activities' must not be empty."]);
+                ["'DialogId' must not be empty."]);
 
             Add("Activity.Id must not be Guid v7",
                 ctx => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
                     IfMatchDialogRevision = null,
-                    Activities =
-                    [
-                        new CreateActivityDto
-                        {
-                            Id = Guid.Parse("7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
-                        }
-                    ],
-                    IsSilentUpdate = false
-                },
-                [
-                    "Invalid Id. Expected big endian UUIDv7 format. Got '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
-                    "Invalid Id. Expected the unix timestamp portion of the UUIDv7 to be in the past. Extrapolated '6302-08-09T22:01:26.2600000+00:00' from '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'."
-                ]);
-
-            Add("Activity.Id must not be Guid v4 or empty",
-                ctx => new CreateActivityCommand
-                {
-                    DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
-                    IfMatchDialogRevision = null,
-                    Activities =
-                    [
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef"),
@@ -362,6 +335,47 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
+                    IsSilentUpdate = false
+                },
+                [
+                    "Invalid Id. Expected big endian UUIDv7 format. Got '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
+                    "Invalid Id. Expected the unix timestamp portion of the UUIDv7 to be in the past. Extrapolated '6302-08-09T22:01:26.2600000+00:00' from '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'."
+                ]);
+
+            Add("Activity.Id must not be Guid v4",
+                ctx => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
+                    IfMatchDialogRevision = null,
+                    Activity =
+                        new CreateActivityDto
+                        {
+                            Id = Guid.Parse("7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef"),
+                            CreatedAt = Time,
+                            ExtendedType = null,
+                            Type = DialogActivityType.Values.FormSubmitted,
+                            TransmissionId = null,
+                            PerformedBy = new ActorDto
+                            {
+                                ActorType = ActorType.Values.PartyRepresentative,
+                                ActorName = null,
+                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                            },
+                            Description = []
+                        },
+                    IsSilentUpdate = false
+                },
+                [
+                    "Invalid Id. Expected big endian UUIDv7 format. Got '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
+                    "Invalid Id. Expected the unix timestamp portion of the UUIDv7 to be in the past. Extrapolated '6302-08-09T22:01:26.2600000+00:00' from '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
+                ]);
+
+            Add("Activity.Id must not be empty",
+                ctx => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
+                    IfMatchDialogRevision = null,
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Empty,
@@ -376,13 +390,10 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                                 ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                             },
                             Description = []
-                        }
-                    ],
+                        },
                     IsSilentUpdate = false
                 },
                 [
-                    "Invalid Id. Expected big endian UUIDv7 format. Got '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
-                    "Invalid Id. Expected the unix timestamp portion of the UUIDv7 to be in the past. Extrapolated '6302-08-09T22:01:26.2600000+00:00' from '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
                     "Invalid Id. Expected big endian UUIDv7 format. Got '00000000-0000-0000-0000-000000000000'."
                 ]);
 
@@ -391,8 +402,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activities =
-                    [
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
@@ -408,20 +418,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
-                    ],
                     IsSilentUpdate = false
                 },
                 [
                     "'CreatedAt' must be in the past.",
                 ]);
 
-            Add("Activity.ExtendedType is a valid Uri",
+            Add("Activity.ExtendedType must be a well formatted uri",
                 ctx => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activities =
-                    [
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
@@ -437,6 +445,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
+                    IsSilentUpdate = false
+                },
+                [
+                    "'ExtendedType' is not a well formatted URI.",
+                ]);
+
+            Add("Activity.ExtendedType uri cant be 1025 or longer",
+                ctx => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
+                    IfMatchDialogRevision = null,
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
@@ -452,21 +472,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
-                    ],
                     IsSilentUpdate = false
                 },
                 [
-                    "'ExtendedType' is not a well formatted URI.",
                     "The length of 'ExtendedType' must be 1023 characters or fewer. You entered 1025 characters.",
                 ]);
 
-            Add("Activity.PerformedBy cant be null and actor must be valid",
+            Add("Activity.PerformedBy cant be null",
                 ctx => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activities =
-                    [
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
@@ -477,6 +494,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             PerformedBy = null!,
                             Description = []
                         },
+                    IsSilentUpdate = false
+                },
+                [
+                    "'PerformedBy' must not be empty.",
+                ]);
+
+            Add("Activity.PerformedBy.ActorId must be a valid urn",
+                ctx => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
+                    IfMatchDialogRevision = null,
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7f99-9357-4211b7d182ed"),
@@ -492,6 +521,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
+                    IsSilentUpdate = false
+                },
+                [
+                    "'ActorId' must be on format 'urn:altinn:organization:identifier-no:{norwegian org-nr}', 'urn:altinn:person:identifier-no:{norwegian f-nr/d-nr}', 'urn:altinn:person:legacy-selfidentified:{username}' or 'urn:altinn:person:idporten-email:{e-mail}' with valid values, respectively.",
+                ]);
+
+            Add("Activity.PerformedBy cant have both ActorName and ActorId when ActorType is not ServiceOwner",
+                ctx => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
+                    IfMatchDialogRevision = null,
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7f99-9357-4211b7d182ed"),
@@ -507,6 +548,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
+                    IsSilentUpdate = false
+                },
+                [
+                    "If 'ActorType' is 'ServiceOwner', both 'ActorId' and 'ActorName' must be null. For any other value of 'ActorType', 'ActorId' or 'ActorName' must be set, but not both simultaneously.",
+                ]);
+
+            Add("Activity.PerformedBy must have either actorName or ActorId when ActorType is snot ServiceOwner",
+                ctx => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
+                    IfMatchDialogRevision = null,
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7868-b434-9bcd2891c588"),
@@ -522,23 +575,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
-                    ],
                     IsSilentUpdate = false
                 },
                 [
-                    "'PerformedBy' must not be empty.",
-                    "'ActorId' must be on format 'urn:altinn:organization:identifier-no:{norwegian org-nr}', 'urn:altinn:person:identifier-no:{norwegian f-nr/d-nr}', 'urn:altinn:person:legacy-selfidentified:{username}' or 'urn:altinn:person:idporten-email:{e-mail}' with valid values, respectively.",
-                    "If 'ActorType' is 'ServiceOwner', both 'ActorId' and 'ActorName' must be null. For any other value of 'ActorType', 'ActorId' or 'ActorName' must be set, but not both simultaneously.",
                     "If 'ActorType' is 'ServiceOwner', both 'ActorId' and 'ActorName' must be null. For any other value of 'ActorType', 'ActorId' or 'ActorName' must be set, but not both simultaneously.",
                 ]);
 
-            Add("Activity.Description is only allowed when the type is 'Information'.",
+            Add("Activity.Description is required when the type is 'Information'.",
                 ctx => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activities =
-                    [
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
@@ -554,6 +602,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
+                    IsSilentUpdate = false
+                },
+                [
+                    "Description is required when the type is 'Information'.",
+                ]);
+
+            Add("Activity.Description is only allowed when the type is 'Information'.",
+                ctx => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
+                    IfMatchDialogRevision = null,
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
@@ -576,11 +636,9 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                                 }
                             ]
                         },
-                    ],
                     IsSilentUpdate = false
                 },
                 [
-                    "Description is required when the type is 'Information'.",
                     "Description is only allowed when the type is 'Information'.",
                 ]);
 
@@ -589,8 +647,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activities =
-                    [
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
@@ -606,6 +663,18 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
+                    IsSilentUpdate = false
+                },
+                [
+                    "Only activities of type TransmissionOpened can reference a transmission.",
+                ]);
+
+            Add("Activity.TransmissionId must be set then TransmissionOpened",
+                ctx => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
+                    IfMatchDialogRevision = null,
+                    Activity =
                         new CreateActivityDto
                         {
                             Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
@@ -621,11 +690,9 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                             },
                             Description = []
                         },
-                    ],
                     IsSilentUpdate = false
                 },
                 [
-                    "Only activities of type TransmissionOpened can reference a transmission.",
                     "An activity of type TransmissionOpened needs to reference a transmission."
                 ]);
         }

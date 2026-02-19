@@ -41,17 +41,16 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
             DialogId = req.DialogId,
             IfMatchDialogRevision = req.IfMatchDialogRevision,
             IsSilentUpdate = req.IsSilentUpdate ?? false,
-            Activities = [req],
+            Activity = req,
         }, ct);
 
         await result.Match(
             success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
-                var activityId = success.ActivityIds.First();
                 return SendCreatedAtAsync<GetDialogActivityEndpoint>(
-                    new GetActivityQuery { DialogId = req.DialogId, ActivityId = activityId },
-                    activityId,
+                    new GetActivityQuery { DialogId = req.DialogId, ActivityId = success.ActivityId },
+                    success.ActivityId,
                     cancellation: ct
                 );
             },

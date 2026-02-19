@@ -9,10 +9,10 @@ internal sealed class CreateActivityCommandValidator : AbstractValidator<CreateA
         RuleFor(x => x.DialogId)
             .NotEmpty();
 
-        RuleFor(x => x.Activities)
+        RuleFor(x => x.Activity)
             .NotEmpty();
 
-        RuleForEach(x => x.Activities)
+        RuleFor(x => x.Activity)
             .SetValidator(createActivityValidator);
     }
 }

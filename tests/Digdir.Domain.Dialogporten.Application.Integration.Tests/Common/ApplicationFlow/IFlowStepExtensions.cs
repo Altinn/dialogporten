@@ -1,16 +1,15 @@
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Freeze;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -425,13 +424,13 @@ public static class IFlowStepExtensions
             {
                 DialogId = ctx.GetDialogId(),
                 IfMatchDialogRevision = null,
-                Activities = [activity],
+                Activity = activity,
                 IsSilentUpdate = false
             });
 
     public static IFlowExecutor<GetActivityResult> GetActivity(
         this IFlowStep<CreateActivityResult> step) =>
-        step.AssertResult<CreateActivitySuccess>((x, a) => a.Bag[ActivityIdKey] = x.ActivityIds.First())
+        step.AssertResult<CreateActivitySuccess>((x, a) => a.Bag[ActivityIdKey] = x.ActivityId)
             .SendCommand(ctx => new GetActivityQuery
             {
                 DialogId = ctx.GetDialogId(),

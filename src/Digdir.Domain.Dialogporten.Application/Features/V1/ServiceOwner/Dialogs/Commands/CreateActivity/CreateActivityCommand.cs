@@ -26,7 +26,7 @@ public sealed class CreateActivityCommand : IRequest<CreateActivityResult>,
 
     public Guid? IfMatchDialogRevision { get; set; }
 
-    public List<CreateActivityDto> Activities { get; set; } = [];
+    public required CreateActivityDto Activity { get; set; }
 
     public bool IsSilentUpdate { get; set; }
 }
@@ -43,7 +43,7 @@ public sealed partial class CreateActivityResult : OneOfBase<
     Conflict
 >;
 
-public sealed record CreateActivitySuccess(Guid Revision, IReadOnlyCollection<Guid> ActivityIds);
+public sealed record CreateActivitySuccess(Guid Revision, Guid ActivityId);
 
 internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActivityCommand, CreateActivityResult>
 {
@@ -91,16 +91,11 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
             return new Forbidden("User cannot modify frozen dialog");
         }
 
-        var newActivities = _mapper.Map<List<DialogActivity>>(request.Activities)
-            .Select(activity =>
-            {
-                activity.Id = activity.Id.CreateVersion7IfDefault();
-                activity.DialogId = dialog.Id;
-                return activity;
-            })
-            .ToList();
+        var newActivity = _mapper.Map<DialogActivity>(request.Activity);
+        newActivity.Id = newActivity.Id.CreateVersion7IfDefault();
+        newActivity.DialogId = dialog.Id;
 
-        _db.DialogActivities.AddRange(newActivities);
+        _db.DialogActivities.Add(newActivity);
 
         var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
         if (authorizeResult.Value is Forbidden forbidden)
@@ -119,7 +114,7 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
             .SaveChangesAsync(cancellationToken);
 
         return saveResult.Match<CreateActivityResult>(
-            success => new CreateActivitySuccess(dialog.Revision, newActivities.Select(x => x.Id).ToArray()),
+            success => new CreateActivitySuccess(dialog.Revision, newActivity.Id),
             domainError => domainError,
             concurrencyError => concurrencyError,
             conflict => conflict);

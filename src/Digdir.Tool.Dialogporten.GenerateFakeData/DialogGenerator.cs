@@ -26,39 +26,29 @@ public static class DialogGenerator
         .RuleFor(o => o.Value, f => f.Random.AlphaNumeric(10));
 
     private static readonly Faker<AttachmentUrlDto> AttachmentUrlFaker = new Faker<AttachmentUrlDto>()
-        .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
+        .RuleFor(o => o.Url, GenerateHttpsUri())
         .RuleFor(o => o.ConsumerType, f => f.PickRandom<AttachmentUrlConsumerType.Values>());
 
     private static readonly Faker<AttachmentDto> AttachmentFaker = new Faker<AttachmentDto>()
         .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.DisplayName, f => GenerateFakeLocalizations(f.Random, f.Random.Number(2, 5)))
-        .RuleFor(o => o.Urls, f =>
-        {
-            var seed = f.Random.Int();
-            var urlCount = f.Random.Number(1, 3);
-            return AttachmentUrlFaker.Clone().UseSeed(seed).Generate(urlCount);
-        });
+        .RuleFor(o => o.Urls, GenerateAttachmentUrls());
 
     private static readonly Faker<ApiActionEndpointDto> ApiActionEndpointFaker = new Faker<ApiActionEndpointDto>()
         .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
-        .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
+        .RuleFor(o => o.Url, GenerateHttpsUri())
         .RuleFor(o => o.HttpMethod, f => f.PickRandom<HttpVerb.Values>())
         .RuleFor(o => o.Version, f => "v" + f.Random.Number(100, 999))
         .RuleFor(o => o.Deprecated, f => f.Random.Bool())
-        .RuleFor(o => o.RequestSchema, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
-        .RuleFor(o => o.ResponseSchema, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
-        .RuleFor(o => o.DocumentationUrl, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)));
+        .RuleFor(o => o.RequestSchema, GenerateHttpsUri())
+        .RuleFor(o => o.ResponseSchema, GenerateHttpsUri())
+        .RuleFor(o => o.DocumentationUrl, GenerateHttpsUri());
 
     private static readonly Faker<ApiActionDto> ApiActionFaker = new Faker<ApiActionDto>()
         .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.Action, f => f.Random.AlphaNumeric(8))
         .RuleFor(o => o.Name, f => f.Random.AlphaNumeric(8))
-        .RuleFor(o => o.Endpoints, f =>
-        {
-            var seed = f.Random.Int();
-            var endpointCount = f.Random.Number(min: 1, max: 4);
-            return ApiActionEndpointFaker.Clone().UseSeed(seed).Generate(endpointCount);
-        });
+        .RuleFor(o => o.Endpoints, GenerateApiActionEndpoint());
 
     private static readonly List<DialogActivityType.Values> AllowedActivityTypes = Enum.GetValues<DialogActivityType.Values>()
             .Where(x => x is not DialogActivityType.Values.TransmissionOpened
@@ -69,7 +59,7 @@ public static class DialogGenerator
     private static readonly Faker<ActivityDto> ActivityFaker = new Faker<ActivityDto>()
         .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.CreatedAt, f => f.Date.Past())
-        .RuleFor(o => o.ExtendedType, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps))) // Potential Optimization
+        .RuleFor(o => o.ExtendedType, GenerateHttpsUri()) // Potential Optimization
         .RuleFor(o => o.Type, f => AllowedActivityTypes[f.Random.Number(0, AllowedActivityTypes.Count - 1)])
         .RuleFor(o => o.PerformedBy, f => new ActorDto { ActorType = ActorType.Values.PartyRepresentative, ActorName = f.Name.FullName() }) // Allocates ActorDto
         .RuleFor(o => o.Description, (f, o) => o.Type == DialogActivityType.Values.Information
@@ -490,6 +480,25 @@ public static class DialogGenerator
         var urlCount = count ?? r.Number(1, 3);
         return AttachmentUrlFaker.Clone().UseSeed(seed).Generate(urlCount);
     }
+
+    private static Func<Faker, Uri> GenerateHttpsUri() =>
+        f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps));
+
+    private static Func<Faker, List<AttachmentUrlDto>> GenerateAttachmentUrls() =>
+        f =>
+        {
+            var seed = f.Random.Int();
+            var urlCount = f.Random.Number(1, 3);
+            return AttachmentUrlFaker.Clone().UseSeed(seed).Generate(urlCount);
+        };
+
+    private static Func<Faker, List<ApiActionEndpointDto>> GenerateApiActionEndpoint() =>
+        f =>
+        {
+            var seed = f.Random.Int();
+            var endpointCount = f.Random.Number(min: 1, max: 4);
+            return ApiActionEndpointFaker.Clone().UseSeed(seed).Generate(endpointCount);
+        };
 
     public static List<AttachmentUrlDto> GenerateFakeDialogAttachmentUrls(int? count = null)
         => GenerateFakeDialogAttachmentUrls(new Randomizer(), count);

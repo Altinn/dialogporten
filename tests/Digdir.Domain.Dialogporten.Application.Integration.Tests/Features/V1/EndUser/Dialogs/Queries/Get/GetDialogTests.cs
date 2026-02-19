@@ -34,7 +34,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
-            .CreateSimpleDialog(x => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
+            .CreateSimpleDialog((x, _) => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
@@ -50,7 +50,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Include_MainContentReference() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.Dto.Content!.MainContentReference = new ContentValueDto
                 {
                     MediaType = MediaTypes.EmbeddableMarkdown,
@@ -106,7 +106,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_MainContentReference() =>
         FlowBuilder.For(Application, ConfigureWriteOnlyAuthorization)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.Dto.Content!.MainContentReference = new ContentValueDto
                 {
                     MediaType = MediaTypes.EmbeddableMarkdown,
@@ -140,7 +140,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Include_Transmission_ExternalReference() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.ExternalReference = "ext"))
             .GetEndUserDialog()
@@ -151,7 +151,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>
         FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                 {
                     transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";
@@ -190,7 +190,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Mask_Expired_Attachment_Urls() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
                 x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
@@ -220,7 +220,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Return_Attachment_Names() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddAttachment(attachment =>
                     attachment.Name = DialogAttachmentName);
@@ -294,7 +294,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.AddScoped<IResourceRegistry, TestResourceRegistry>();
             })
             .AsIntegrationTestUser(x => x.WithScope(AuthorizationScope.CorrespondenceScope))
-            .CreateSimpleDialog(x => x.AddActivity(activityType))
+            .CreateSimpleDialog((x, _) => x.AddActivity(activityType))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.HasUnopenedContent.Should().Be(expectedHasUnOpenedContent));

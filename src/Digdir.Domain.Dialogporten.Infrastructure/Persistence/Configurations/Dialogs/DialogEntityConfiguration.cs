@@ -10,18 +10,8 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
     {
         builder.ToTable("Dialog");
 
-        builder.HasIndex(x => x.CreatedAt);
-        builder.HasIndex(x => x.UpdatedAt);
-        builder.HasIndex(x => x.DueAt);
         builder.HasIndex(x => x.VisibleFrom);
-        builder.HasIndex(x => x.ContentUpdatedAt);
-        builder.HasIndex(x => x.ExtendedStatus);
-        builder.HasIndex(x => x.ExternalReference);
-        builder.HasIndex(x => x.Process);
-        builder.HasIndex(x => x.IsApiOnly);
         builder.HasIndex(x => x.ServiceResource);
-        builder.HasIndex(x => x.Party);
-        builder.HasIndex(x => x.Org);
         builder.HasIndex(x => new { x.Org, x.IdempotentKey }).IsUnique()
             .HasFilter($"\"{nameof(DialogEntity.IdempotentKey)}\" is not null");
 
@@ -29,12 +19,13 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.HasIndex(x => new { x.Party, x.ContentUpdatedAt, x.Id })
             .HasDatabaseName("IX_Dialog_Party_ContentUpdatedAt_Id_Covering")
             .IsDescending(false, true, true)
-            .IncludeProperties(x => new { x.ServiceResource, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt });
+            .IncludeProperties(x => new { x.ServiceResource, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt })
+            .HasFilter($"\"{nameof(DialogEntity.Deleted)}\" = false");
 
-        // Index specially optimized for querying dialogs with FTS in Arbeidsflate
+        // Index specially optimized for querying dialogs with FTS in Arbeidsflate / SO-API
         builder.HasIndex(x => new { x.Id })
             .HasDatabaseName("IX_Dialog_Id_Covering")
-            .IncludeProperties(x => new { x.ServiceResource, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt, x.ContentUpdatedAt });
+            .IncludeProperties(x => new { x.ServiceResource, x.Deleted, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt, x.ContentUpdatedAt });
 
         builder.HasIndex(x => new { x.Party, x.CreatedAt, x.Id })
             .IsDescending(false, true, true)
@@ -65,6 +56,11 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
 
         builder.HasIndex(x => new { x.Org, x.UpdatedAt, x.Id })
             .IsDescending(false, true, true);
+
+        builder.HasIndex(x => new { x.ServiceResource, x.Party, x.ContentUpdatedAt, x.Id })
+            .HasDatabaseName("IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted")
+            .IsDescending(false, false, true, true)
+            .HasFilter($"\"{nameof(DialogEntity.Deleted)}\" = false");
 
         builder.Property(x => x.Org).UseCollation("C");
         builder.Property(x => x.Party).UseCollation("C");

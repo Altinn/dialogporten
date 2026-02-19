@@ -24,7 +24,6 @@ internal sealed class DialogSearchConfiguration : IEntityTypeConfiguration<Dialo
             .HasForeignKey<DialogSearch>(ds => ds.DialogId)
             .HasPrincipalKey<DialogEntity>(x => x.Id)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.HasIndex(ds => ds.SearchVector).HasMethod("GIN");
         builder.HasIndex(ds => new { ds.Party, ds.SearchVector }).HasMethod("GIN");
     }
 }

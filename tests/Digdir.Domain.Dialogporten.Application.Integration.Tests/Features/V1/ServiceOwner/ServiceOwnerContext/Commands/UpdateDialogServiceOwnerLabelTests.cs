@@ -47,7 +47,7 @@ public class UpdateDialogServiceOwnerLabelTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Remove_ServiceOwnerLabels() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddServiceOwnerLabels("Scadrial"))
             .UpdateServiceOwnerContext(x => x.Dto = new()
             {

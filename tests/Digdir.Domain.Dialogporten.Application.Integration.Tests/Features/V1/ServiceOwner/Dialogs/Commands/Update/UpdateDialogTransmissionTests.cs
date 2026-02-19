@@ -26,7 +26,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
         var existingAttachmentId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.AddAttachment(x => x.Id = existingAttachmentId)))
             .AssertSuccessAndUpdateDialog(x =>
@@ -85,7 +85,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
         var existingTransmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
                 transmission.Id = existingTransmissionId;
@@ -104,7 +104,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Add_Transmissions_Without_Content_In_IsApiOnlyFalse_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = false)
             .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
@@ -117,7 +117,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Can_Add_Transmissions_Without_Content_In_IsApiOnlyFTrue_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = true)
             .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
@@ -135,7 +135,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
     [Fact]
     public Task Should_Validate_Supplied_Transmission_Content_If_IsApiOnlyTrue_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = true)
             .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();

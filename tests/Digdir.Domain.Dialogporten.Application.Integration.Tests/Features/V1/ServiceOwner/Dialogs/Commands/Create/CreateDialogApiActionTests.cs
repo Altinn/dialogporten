@@ -17,7 +17,7 @@ public class CreateDialogApiActionTests(DialogApplication application) : Applica
         var apiActionEndpointId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.ApiActions =
                 [

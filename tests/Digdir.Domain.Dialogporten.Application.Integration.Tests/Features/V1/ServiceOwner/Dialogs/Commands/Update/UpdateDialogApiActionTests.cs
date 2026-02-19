@@ -52,7 +52,7 @@ public class UpdateDialogApiActionTests(DialogApplication application) : Applica
         var newApiActionEndpointId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddApiAction(apiAction =>
                 {
                     apiAction.Id = apiActionId;

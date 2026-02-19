@@ -70,7 +70,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
 
         await FlowBuilder.For(Application)
             .AsCorrespondenceUser()
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var allActivityTypes = Enum.GetValues<DialogActivityType.Values>().ToList();
 
@@ -229,7 +229,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task AltinnEvents_Should_Be_Disabled_When_IsSilentUpdate_Is_Set() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Activities.Add(DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information));
                 x.IsSilentUpdate = true;
@@ -270,7 +270,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Only_Create_And_Update_DomainEvents_When_IsSilentUpdate_Is_Set() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Activities.Add(DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information));
                 x.Dto.Transmissions.Add(DialogGenerator.GenerateFakeDialogTransmissions(1).First());

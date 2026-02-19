@@ -79,7 +79,7 @@ public static class DialogGenerator
         .RuleFor(o => o.Sender, _ => new ActorDto { ActorType = ActorType.Values.ServiceOwner })
         .RuleFor(o => o.Content, _ => GenerateFakeTransmissionContent());
 
-    private static readonly Faker<CreateDialogDto> CreateDialogFaker = new Faker<CreateDialogDto>()
+    public static readonly Faker<CreateDialogDto> CreateDialogFaker = new Faker<CreateDialogDto>()
         // We need to handle id, serviceResource, party, and others passed as arguments
         // RuleFor cannot directly use external parameters easily. We handle these post-generation.
         // Placeholder rules are set, real values might be overridden later.
@@ -99,7 +99,20 @@ public static class DialogGenerator
         .RuleFor(o => o.ApiActions, _ => GenerateFakeDialogApiActions())
         .RuleFor(o => o.Activities, _ => GenerateFakeDialogActivities())
         .RuleFor(o => o.Process, _ => GenerateFakeProcessUri())
-        .RuleFor(o => o.Transmissions, _ => GenerateFakeDialogTransmissions());
+        .RuleFor(o => o.Transmissions, _ => GenerateFakeDialogTransmissions())
+        .RuleFor(o => o.ServiceOwnerContext, _ => new());
+
+    public static readonly Faker<CreateDialogDto> CreateSimpleDialogFaker = new Faker<CreateDialogDto>()
+        .RuleFor(o => o.ServiceResource, _ => GenerateFakeResource())
+        .RuleFor(o => o.Party, _ => GenerateRandomParty())
+        .RuleFor(o => o.Content, _ => new()
+        {
+            Title = new()
+            {
+                Value = GenerateFakeLocalizations(3)
+            }
+        })
+        .RuleFor(o => o.ServiceOwnerContext, _ => new());
 
     public static void SetSeed(int seed) => Randomizer.Seed = new Random(seed);
 

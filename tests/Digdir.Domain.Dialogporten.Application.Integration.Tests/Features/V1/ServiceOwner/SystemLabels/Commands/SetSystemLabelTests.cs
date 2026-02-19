@@ -51,7 +51,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         Guid? revision = null;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId)
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>(x =>
             {
@@ -108,7 +108,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     [Fact]
     public Task Cannot_Remove_Existing_Sent_System_Label() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.Type = DialogTransmissionType.Values.Submission))
             .SetSystemLabelsServiceOwner(x =>

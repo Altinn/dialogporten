@@ -46,10 +46,10 @@ param postgresConfiguration = {
     tier: 'MemoryOptimized'
   }
   storage: {
-    storageSizeGB: 4096
+    storageSizeGB: 8192
     autoGrow: 'Enabled'
     type: 'Premium_LRS'
-    tier: 'P50'
+    tier: 'P60'
   }
   // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true

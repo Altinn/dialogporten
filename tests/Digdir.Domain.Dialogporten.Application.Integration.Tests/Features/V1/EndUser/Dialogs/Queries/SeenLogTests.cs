@@ -23,7 +23,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     [Fact]
     public Task Search_Dialog_SeenLog_Should_Not_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.ServiceResource = DummyService)
+            .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
             .AssertResult<DialogDto>(result =>
                 result.SeenSinceLastUpdate.AssertSingleActorIdHashed())
@@ -102,7 +102,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         var dialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.ServiceResource = DummyService;
                 x.Dto.Id = dialogId;
@@ -125,7 +125,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     [Fact]
     public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastUpdate_On_Dialog_Search() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.ServiceResource = DummyService)
+            .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
             .AssertResult<DialogDto>()
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")

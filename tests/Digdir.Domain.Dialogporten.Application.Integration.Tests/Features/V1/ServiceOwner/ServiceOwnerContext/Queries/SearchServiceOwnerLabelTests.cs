@@ -22,7 +22,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = labeledDialogId;
                 x.Dto.ServiceOwnerContext!.ServiceOwnerLabels = [new() { Value = label }];
@@ -45,14 +45,14 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.ServiceOwnerContext!.ServiceOwnerLabels =
                 [
                     new() { Value = label1 }
                 ];
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = dialogIdMatchingBothLabels;
                 x.Dto.ServiceOwnerContext!.ServiceOwnerLabels =
@@ -80,7 +80,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         var dialogIdMatchingAllSearchCriteria = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.ServiceOwnerContext!.ServiceOwnerLabels =
                 [
@@ -89,7 +89,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
                     new() { Value = adonalsium }
                 ];
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = dialogIdMatchingAllSearchCriteria;
                 x.Dto.ServiceOwnerContext!.ServiceOwnerLabels =
@@ -115,7 +115,7 @@ public class SearchServiceOwnerLabelTests : ApplicationCollectionFixture
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .CreateSimpleDialog()
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.ServiceOwnerContext!.ServiceOwnerLabels =
                 [

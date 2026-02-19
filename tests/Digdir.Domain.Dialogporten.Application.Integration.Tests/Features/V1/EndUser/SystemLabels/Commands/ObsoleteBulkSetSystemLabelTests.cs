@@ -25,8 +25,8 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
         Guid? dialogId2 = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId1)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId2)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)
             .BulkSetSystemLabelEndUser((x, _) => x.Dto = new()
             {
                 Dialogs =
@@ -53,8 +53,8 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
         Guid? revision2 = null;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId1))
-            .CreateSimpleDialog(x => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId2))
+            .CreateSimpleDialog((x, _) => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId1))
+            .CreateSimpleDialog((x, _) => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId2))
             .SearchEndUserDialogs(x => x.Party = [enduserId])
             .AssertResult<PaginatedList<SearchDialogDto>>(x =>
             {

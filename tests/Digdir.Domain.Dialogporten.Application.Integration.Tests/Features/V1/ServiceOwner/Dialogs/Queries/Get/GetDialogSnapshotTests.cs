@@ -8,14 +8,10 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class GetDialogSnapshotTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
-    public async Task Get_ServiceOwner_Dialog_Snapshot_Test()
-    {
-        var result = await FlowBuilder.For(Application)
+    public Task Get_ServiceOwner_Dialog_Snapshot_Test() =>
+        FlowBuilder.For(Application)
             .CreateComplexDialog()
             .GetServiceOwnerDialog()
+            .VerifySnapshot()
             .ExecuteAndAssert<DialogDto>();
-
-        await Verify(result)
-            .UseDirectory("Snapshots");
-    }
 }

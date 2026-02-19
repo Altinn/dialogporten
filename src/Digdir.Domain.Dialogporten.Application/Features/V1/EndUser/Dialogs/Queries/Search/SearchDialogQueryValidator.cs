@@ -7,14 +7,18 @@ using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using FluentValidation;
+using Microsoft.Extensions.Options;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.ValidationErrorStrings;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 
 internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialogQuery>
 {
-    public SearchDialogQueryValidator()
+    public SearchDialogQueryValidator(IOptionsSnapshot<ApplicationSettings> applicationSettings)
     {
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+        var limits = applicationSettings.Value.Limits.EndUserSearch;
+
         Include(new PaginationParameterValidator<SearchDialogQueryOrderDefinition, DialogEntity>());
         RuleFor(x => x.Search)
             .MinimumLength(3)
@@ -36,16 +40,16 @@ internal sealed class SearchDialogQueryValidator : AbstractValidator<SearchDialo
             .IsValidPartyIdentifier();
 
         RuleFor(x => x.Org!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(limits.MaxOrgFilterValues)
             .When(x => x.Org is not null);
         RuleFor(x => x.ServiceResource!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(limits.MaxServiceResourceFilterValues)
             .When(x => x.ServiceResource is not null);
         RuleFor(x => x.Party!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(limits.MaxPartyFilterValues)
             .When(x => x.Party is not null);
         RuleFor(x => x.ExtendedStatus!.Count)
-            .LessThanOrEqualTo(20)
+            .LessThanOrEqualTo(limits.MaxExtendedStatusFilterValues)
             .When(x => x.ExtendedStatus is not null);
 
         RuleFor(x => x.Process)

@@ -19,11 +19,11 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
         DateTimeOffset? contentUpdatedAt = null!;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
             .GetEndUserDialog()
             .AssertResult<DialogDto>(x => contentUpdatedAt = x.ContentUpdatedAt)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
             .SearchEndUserDialogs(x =>
             {
                 x.Party = [Party];
@@ -39,9 +39,9 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
         DateTimeOffset? contentUpdatedAt = null!;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
             .GetEndUserDialog()
             .AssertResult<DialogDto>(x => contentUpdatedAt = x.ContentUpdatedAt)
             .SearchEndUserDialogs(x =>

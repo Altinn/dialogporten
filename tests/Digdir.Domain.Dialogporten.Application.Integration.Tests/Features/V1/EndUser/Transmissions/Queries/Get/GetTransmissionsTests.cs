@@ -22,7 +22,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                 {
                     x.Id = transmissionId;
@@ -39,7 +39,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                 {
                     x.Id = transmissionId;
@@ -59,7 +59,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                 {
                     x.Id = transmissionId;
@@ -82,7 +82,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                 {
                     transmission.Id = transmissionId;
@@ -114,7 +114,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                 {
                     transmission.Id = transmissionId;

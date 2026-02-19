@@ -22,38 +22,38 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
 
     # region Create
 
-    private sealed class ExistingDbIdTestData : TheoryData<string, Action<CreateDialogCommand>, string>
+    private sealed class ExistingDbIdTestData : TheoryData<string, Action<CreateDialogCommand, FlowContext>, string>
     {
         public ExistingDbIdTestData()
         {
             var dialogId = NewUuidV7();
             Add("Cannot create dialog with existing id",
-                x => x.Dto.Id = dialogId,
+                (x, _) => x.Dto.Id = dialogId,
                 dialogId.ToString());
 
             var dialogAttachment = DialogGenerator.GenerateFakeDialogAttachment();
             Add("Cannot create dialog attachment with existing attachment id",
-                x => x.Dto.Attachments.Add(dialogAttachment),
+                (x, _) => x.Dto.Attachments.Add(dialogAttachment),
                 dialogAttachment.Id.ToString()!);
 
             var dialogActivity = DialogGenerator.GenerateFakeDialogActivity();
             Add("Cannot create dialog activity with existing id",
-                x => x.Dto.Activities.Add(dialogActivity),
+                (x, _) => x.Dto.Activities.Add(dialogActivity),
                 dialogActivity.Id.ToString()!);
 
             var guiAction = DialogGenerator.GenerateFakeDialogGuiActions()[0];
             Add("Cannot create dialog gui action with existing id",
-                x => x.Dto.GuiActions.Add(guiAction),
+                (x, _) => x.Dto.GuiActions.Add(guiAction),
                 guiAction.Id.ToString()!);
 
             var apiAction = DialogGenerator.GenerateFakeDialogApiActions()[0];
             Add("Cannot create dialog api action with existing id",
-                x => x.Dto.ApiActions.Add(apiAction),
+                (x, _) => x.Dto.ApiActions.Add(apiAction),
                 apiAction.Id.ToString()!);
 
             var dialogTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
             Add("Cannot create dialog transmission with existing id",
-                x => x.Dto.Transmissions.Add(dialogTransmission),
+                (x, _) => x.Dto.Transmissions.Add(dialogTransmission),
                 dialogTransmission.Id.ToString()!);
 
             var transmissionAttachment = new TransmissionAttachmentDto
@@ -70,7 +70,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
                 ]
             };
             Add("Cannot create transmission attachment with existing id",
-                x =>
+                (x, _) =>
                 {
                     var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                     transmission.Attachments.Add(transmissionAttachment);
@@ -82,7 +82,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
 
     [Theory, ClassData(typeof(ExistingDbIdTestData))]
     public Task Existing_Database_Ids_Tests(string _,
-        Action<CreateDialogCommand> createDialogCommand, string conflictingId) =>
+        Action<CreateDialogCommand, FlowContext> createDialogCommand, string conflictingId) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(createDialogCommand)
             .CreateSimpleDialog(createDialogCommand)
@@ -95,8 +95,8 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
         var idempotentKey = NewUuidV7().ToString();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IdempotentKey = idempotentKey)
-            .CreateSimpleDialog(x => x.Dto.IdempotentKey = idempotentKey)
+            .CreateSimpleDialog((x, _) => x.Dto.IdempotentKey = idempotentKey)
+            .CreateSimpleDialog((x, _) => x.Dto.IdempotentKey = idempotentKey)
             .ExecuteAndAssert<Conflict>(x =>
                 x.ErrorMessage.Should().Contain(idempotentKey));
     }
@@ -104,7 +104,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Exceed_Dialog_IdempotentKey_Max_Length_When_Creating_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .Dto.IdempotentKey = "Random string which is longer than maximum allowed idempotentKey length")
             .ExecuteAndAssert<ValidationError>(x =>
             {
@@ -116,7 +116,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Go_Below_The_Dialog_IdempotentKey_Min_Length_When_Creating_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                     .Dto.IdempotentKey = "be")
             .ExecuteAndAssert<ValidationError>(x =>
             {
@@ -132,7 +132,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
         var idempotentKey2 = NewUuidV7().ToString();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission(x =>
                     x.IdempotentKey = idempotentKey1)
                 .AddTransmission(x =>
@@ -148,7 +148,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Exceed_Transmission_IdempotentKey_Max_Length_When_Creating_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission(x =>
                     x.IdempotentKey = "Random string which is longer than maximum allowed idempotentKey length"))
             .ExecuteAndAssert<ValidationError>(x =>
@@ -161,7 +161,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     [Fact]
     public Task Cannot_Go_Below_The_Transmission_IdempotentKey_Min_Length_When_Creating_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission(x =>
                     x.IdempotentKey = "be"))
             .ExecuteAndAssert<ValidationError>(x =>
@@ -180,7 +180,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     {
         var originalTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Transmissions.Add(originalTransmission))
+            .CreateSimpleDialog((x, _) => x.Dto.Transmissions.Add(originalTransmission))
             .AssertSuccessAndUpdateDialog(x =>
             {
                 var transmission = new TransmissionDto
@@ -207,7 +207,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
         var idempotentKey2 = NewUuidV7().ToString();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission(x =>
                     x.IdempotentKey = idempotentKey1)
                 .AddTransmission(x =>
@@ -240,7 +240,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     public async Task Cannot_Exceed_Transmission_IdempotentKey_Max_Length_When_Updating_Dialog()
     {
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission())
             .UpdateDialog(x => x.AddTransmission(x =>
                 x.IdempotentKey = "Random string which is longer than maximum allowed idempotentKey length"))
@@ -256,7 +256,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     public async Task Cannot_Go_Below_The_Transmission_IdempotentKey_Min_Length_When_Updating_Dialog()
     {
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission())
             .UpdateDialog(x => x.AddTransmission(x =>
                 x.IdempotentKey = "be"))
@@ -274,7 +274,7 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
         var dialogActivity = DialogGenerator.GenerateFakeDialogActivities(1)[0];
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Activities.Add(dialogActivity))
+            .CreateSimpleDialog((x, _) => x.Dto.Activities.Add(dialogActivity))
             .AssertSuccessAndUpdateDialog(x =>
             {
                 x.Dto.Activities.Add(new()

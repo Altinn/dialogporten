@@ -12,11 +12,13 @@ using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -120,6 +122,7 @@ public class DialogApplication : IAsyncLifetime
                     .EnableDetailedErrors()
                     .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
             )
+            .AddDapperTypeHandlers()
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
@@ -136,6 +139,9 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
+            .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 
@@ -179,7 +185,8 @@ public class DialogApplication : IAsyncLifetime
                 FeatureToggle = new FeatureToggle
                 {
                     UseAltinnAutoAuthorizedPartiesQueryParameters = true,
-                    UseCorrectPersonNameOrdering = true
+                    UseCorrectPersonNameOrdering = true,
+                    UseBranchingLogicForDialogSearch = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

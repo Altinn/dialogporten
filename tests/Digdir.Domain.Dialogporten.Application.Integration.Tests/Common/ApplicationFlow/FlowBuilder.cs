@@ -61,13 +61,14 @@ public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
         return new FlowStep<TOut>(context);
     }
 
-    public async Task<TIn> ExecuteAsync(CancellationToken cancellationToken = default)
+    public async Task<TIn> ExecuteAsync(CancellationToken? cancellationToken = null)
     {
         object? current = null;
+        cancellationToken ??= TestContext.Current.CancellationToken;
 
         foreach (var command in Context.Commands)
         {
-            current = await command(current, cancellationToken);
+            current = await command(current, cancellationToken.Value);
         }
 
         return (TIn)current!;

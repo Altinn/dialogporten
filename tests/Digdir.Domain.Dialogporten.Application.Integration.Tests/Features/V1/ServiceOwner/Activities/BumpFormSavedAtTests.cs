@@ -21,7 +21,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
 
         var formSavedActivityId = Guid.CreateVersion7();
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.CreatedAt = x.Dto.UpdatedAt = dialogCreatedAt;
                 x.AddActivity(DialogActivityType.Values.FormSaved, a =>
@@ -53,7 +53,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
 
         var formSavedActivityId = Guid.CreateVersion7();
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.CreatedAt = x.Dto.UpdatedAt = dialogCreatedAt;
                 x.AddActivity(DialogActivityType.Values.FormSaved, a =>
@@ -82,7 +82,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
         Guid? initialRevision = null;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.AddActivity(DialogActivityType.Values.FormSaved, a => a.Id = activityId))
+            .CreateSimpleDialog((x, _) => x.AddActivity(DialogActivityType.Values.FormSaved, a => a.Id = activityId))
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>(x => initialRevision = x.Revision)
             .AsAdminUser()
@@ -105,7 +105,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     {
         var activityId = Guid.CreateVersion7();
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.AddActivity(DialogActivityType.Values.Information, a => a.Id = activityId))
+            .CreateSimpleDialog((x, _) => x.AddActivity(DialogActivityType.Values.Information, a => a.Id = activityId))
             .AsAdminUser()
             .UpdateFormSavedActivityTime(activityId)
             .ExecuteAndAssert<DomainError>(x =>
@@ -118,7 +118,7 @@ public class BumpFormSavedAtTests(DialogApplication application) : ApplicationCo
     {
         var activityId = Guid.CreateVersion7();
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.AddActivity(DialogActivityType.Values.Information, a => a.Id = activityId))
+            .CreateSimpleDialog((x, _) => x.AddActivity(DialogActivityType.Values.Information, a => a.Id = activityId))
             .UpdateFormSavedActivityTime(activityId)
             .ExecuteAndAssert<Forbidden>();
     }

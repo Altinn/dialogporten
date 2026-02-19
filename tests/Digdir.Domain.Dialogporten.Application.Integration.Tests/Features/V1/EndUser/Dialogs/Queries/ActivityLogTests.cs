@@ -23,7 +23,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
         var unhashedActorId = activity.PerformedBy.ActorId;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Activities.Add(activity))
+            .CreateSimpleDialog((x, _) => x.Dto.Activities.Add(activity))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
@@ -40,7 +40,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
         var unhashedActorId = activity.PerformedBy.ActorId;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = unhashedActorId!;
                 x.Dto.Activities.Add(activity);
@@ -62,7 +62,7 @@ public class ActivityLogTests(DialogApplication application) : ApplicationCollec
         var unhashedActorId = activity.PerformedBy.ActorId;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Activities.Add(activity))
+            .CreateSimpleDialog((x, _) => x.Dto.Activities.Add(activity))
             .SendCommand((_, ctx) => new GetActivityQuery
             {
                 DialogId = ctx.GetDialogId(),

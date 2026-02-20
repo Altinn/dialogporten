@@ -14,9 +14,8 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
     public SearchSnapshotTests(DialogApplication application) : base(application) { }
 
     [Fact]
-    public async Task Search_Dialog_Verify_Output()
-    {
-        var searchResult = await FlowBuilder.For(Application)
+    public Task Search_Dialog_Verify_Output() =>
+        FlowBuilder.For(Application)
             .CreateComplexDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
@@ -48,14 +47,7 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
             })
             .GetEndUserDialog() // Trigger seen log
             .SearchServiceOwnerDialogs(_ => { })
-            .ExecuteAndAssert<PaginatedList<DialogDto>>();
-
-        var settings = new VerifySettings();
-
-        // Timestamps and tiebreaker UUIDs on continuation token will differ on each run
-        settings.IgnoreMember(nameof(PaginatedList<>.ContinuationToken));
-
-        await Verify(searchResult, settings)
-            .UseDirectory("Snapshots");
-    }
+            .VerifySnapshot(x =>
+                x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken)))
+            .ExecuteAsync();
 }

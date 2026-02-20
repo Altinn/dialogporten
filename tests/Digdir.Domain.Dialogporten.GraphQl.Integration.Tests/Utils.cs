@@ -6,7 +6,7 @@ public static class Utils
     {
         var currentDirectory = Directory.GetCurrentDirectory();
         var solutionFolder = currentDirectory;
-        while (solutionFolder != null && Directory.GetFiles(solutionFolder, "*.sln").Length == 0)
+        while (solutionFolder != null && Directory.GetFiles(solutionFolder, "*.slnx").Length == 0)
         {
             solutionFolder = Directory.GetParent(solutionFolder)?.FullName;
         }

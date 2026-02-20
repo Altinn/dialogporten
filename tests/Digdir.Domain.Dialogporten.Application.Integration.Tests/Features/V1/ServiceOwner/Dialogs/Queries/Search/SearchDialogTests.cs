@@ -25,26 +25,25 @@ public class SearchDialogTests : ApplicationCollectionFixture
                 x.Party = [DialogGenerator.GenerateRandomParty()];
                 x.EndUserId = DialogGenerator.GenerateRandomParty(forcePerson: true);
             })
-            .ExecuteAndAssert<PaginatedList<DialogDto>>();
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+                x.Items.Should().BeEmpty());
 
     [Fact]
     public Task Freetext_Search_Without_EndUserId_Results_In_ValidationError() =>
         FlowBuilder.For(Application)
             .SearchServiceOwnerDialogs(x => x.Search = "foobar")
-            .ExecuteAndAssert<ValidationError>();
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.ShouldHaveErrorWithText(nameof(SearchDialogQuery.EndUserId)));
 
     [Fact]
     [Obsolete("Testing obsolete SystemLabel, will be removed in future versions.")]
-    public async Task Search_Should_Populate_Obsolete_SystemLabel()
-    {
-        string? party = null;
-        await FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) => party = x.Dto.Party)
-            .SearchServiceOwnerDialogs(x => x.Party = [party!])
+    public Task Search_Should_Populate_Obsolete_SystemLabel() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SearchServiceOwnerDialogs((x, ctx) => x.Party = [ctx.GetParty()])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle(x =>
                     x.SystemLabel == SystemLabel.Values.Default));
-    }
 
     [Fact]
     public Task Search_Should_Return_Number_Of_Transmissions_From_Party_And_ServiceOwner() =>

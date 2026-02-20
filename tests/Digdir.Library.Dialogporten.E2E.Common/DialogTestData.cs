@@ -127,6 +127,25 @@ public static class DialogTestData
         return transmission;
     }
 
+    public static V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest CreateSimpleActivity(
+        Action<V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest>? modify = null)
+    {
+        var activity = new V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
+        {
+            Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
+            ExtendedType = new Uri("http://localhost"),
+            PerformedBy = new V1ServiceOwnerCommonActors_Actor
+            {
+                ActorType = Actors_ActorType.PartyRepresentative,
+                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+            },
+            Description = []
+        };
+
+        modify?.Invoke(activity);
+        return activity;
+    }
+
     public static V1ServiceOwnerDialogsCommandsCreate_Transmission AddAttachment(this V1ServiceOwnerDialogsCommandsCreate_Transmission transmission,
         Action<V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment>? modify = null)
     {

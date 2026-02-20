@@ -395,14 +395,19 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<CreateActivityResult> CreateActivity<TIn>(
         this IFlowExecutor<TIn> step,
-        CreateActivityDto activity) =>
+        Action<CreateActivityCommand, FlowContext> modify) =>
         step
-            .SendCommand(ctx => new CreateActivityCommand
+            .SendCommand(ctx =>
             {
-                DialogId = ctx.GetDialogId(),
-                IfMatchDialogRevision = null,
-                Activity = activity,
-                IsSilentUpdate = false
+                var createActivityCommand = new CreateActivityCommand
+                {
+                    DialogId = ctx.GetDialogId(),
+                    IfMatchDialogRevision = null,
+                    Activity = new(),
+                    IsSilentUpdate = false
+                };
+                modify(createActivityCommand, ctx);
+                return createActivityCommand;
             });
 
     public static IFlowExecutor<GetActivityResult> GetActivity(

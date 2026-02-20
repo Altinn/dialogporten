@@ -27,7 +27,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .AssertResult<CreateDialogSuccess>()
-            .CreateActivity(new CreateActivityDto
+            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
             {
                 Id = guid,
                 CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -51,7 +51,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .AssertResult<CreateDialogSuccess>()
-            .CreateActivity(new CreateActivityDto
+            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
             {
                 Id = null,
                 CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -76,7 +76,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .AssertResult<CreateDialogSuccess>()
-            .CreateActivity(new CreateActivityDto
+            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
             {
                 Id = guid,
                 CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -120,22 +120,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             {
                 DialogId = Guid.Parse("019c2345-514f-7d6d-9a56-ba272874429e"),
                 IfMatchDialogRevision = null,
-                Activity =
-                    new CreateActivityDto
+                Activity = new CreateActivityDto
+                {
+                    Id = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f"),
+                    CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                    ExtendedType = null,
+                    Type = DialogActivityType.Values.DialogCreated,
+                    TransmissionId = null,
+                    PerformedBy = new ActorDto
                     {
-                        Id = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f"),
-                        CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
-                        ExtendedType = null,
-                        Type = DialogActivityType.Values.DialogCreated,
-                        TransmissionId = null,
-                        PerformedBy = new ActorDto
-                        {
-                            ActorType = ActorType.Values.PartyRepresentative,
-                            ActorName = null,
-                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                        },
-                        Description = []
+                        ActorType = ActorType.Values.PartyRepresentative,
+                        ActorName = null,
+                        ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                     },
+                    Description = []
+                },
                 IsSilentUpdate = false
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x =>
@@ -155,7 +154,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .CreateSimpleDialog()
             .DeleteDialog()
             .CreateActivity(
-                new CreateActivityDto
+                (c, _) => c.Activity = new CreateActivityDto
                 {
                     Id = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f"),
                     CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -186,7 +185,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .CreateActivity(
-                new CreateActivityDto
+                (c, _) => c.Activity = new CreateActivityDto
                 {
                     Id = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f"),
                     CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -250,7 +249,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             ])
             .AssertResult<CreateDialogSuccess>()
             .CreateActivity(
-                new CreateActivityDto
+                (c, _) => c.Activity = new CreateActivityDto
                 {
                     Id = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
                     CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -320,22 +319,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -348,22 +346,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -376,22 +373,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Empty,
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Empty,
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -403,22 +399,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
+                        CreatedAt = Time.AddSeconds(16),
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
-                            CreatedAt = Time.AddSeconds(16),
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -430,22 +425,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
+                        CreatedAt = Time.AddSeconds(15),
+                        ExtendedType = new Uri("http://example.com/%zz"),
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
-                            CreatedAt = Time.AddSeconds(15),
-                            ExtendedType = new Uri("http://example.com/%zz"),
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -457,22 +451,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
+                        CreatedAt = Time.AddSeconds(15),
+                        ExtendedType = new Uri("http://localhost?q=" + new string('a', 1024 - 19)),
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
-                            CreatedAt = Time.AddSeconds(15),
-                            ExtendedType = new Uri("http://localhost?q=" + new string('a', 1024 - 19)),
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -484,17 +477,16 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
-                        {
-                            Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = null!,
-                            Description = []
-                        },
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = null!,
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -506,22 +498,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7f99-9357-4211b7d182ed"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7f99-9357-4211b7d182ed"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "invalid-urn"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "invalid-urn"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -533,22 +524,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7f99-9357-4211b7d182ed"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7f99-9357-4211b7d182ed"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = "cant have both name and id",
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = "cant have both name and id",
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -560,22 +550,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7868-b434-9bcd2891c588"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7868-b434-9bcd2891c588"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = null
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = null
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -587,22 +576,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.Information,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.Information,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -614,29 +602,28 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description =
-                            [
-                                new LocalizationDto
-                                {
-                                    Value = "value",
-                                    LanguageCode = "nb"
-                                }
-                            ]
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description =
+                        [
+                            new LocalizationDto
+                            {
+                                Value = "value",
+                                LanguageCode = "nb"
+                            }
+                        ]
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -648,22 +635,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.FormSubmitted,
+                        TransmissionId = Guid.Parse("00bfa652-d580-7161-864d-09ef6558c7d8"),
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.FormSubmitted,
-                            TransmissionId = Guid.Parse("00bfa652-d580-7161-864d-09ef6558c7d8"),
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [
@@ -675,22 +661,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
-                    Activity =
-                        new CreateActivityDto
+                    Activity = new CreateActivityDto
+                    {
+                        Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
+                        CreatedAt = Time,
+                        ExtendedType = null,
+                        Type = DialogActivityType.Values.TransmissionOpened,
+                        TransmissionId = null,
+                        PerformedBy = new ActorDto
                         {
-                            Id = Guid.Parse("00bfa652-d580-7033-a7ed-848d8fa2578c"),
-                            CreatedAt = Time,
-                            ExtendedType = null,
-                            Type = DialogActivityType.Values.TransmissionOpened,
-                            TransmissionId = null,
-                            PerformedBy = new ActorDto
-                            {
-                                ActorType = ActorType.Values.PartyRepresentative,
-                                ActorName = null,
-                                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                            },
-                            Description = []
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorName = null,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
                         },
+                        Description = []
+                    },
                     IsSilentUpdate = false
                 },
                 [

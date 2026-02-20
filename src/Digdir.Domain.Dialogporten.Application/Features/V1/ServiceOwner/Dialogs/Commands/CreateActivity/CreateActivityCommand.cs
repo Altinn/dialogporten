@@ -79,7 +79,7 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        if (dialog.Deleted)
+        if (dialog.Deleted && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
         {
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }

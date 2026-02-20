@@ -18,7 +18,7 @@ public sealed class ContentValue : IContentValue
     public string MediaType { get; set; } = null!;
 }
 
-public sealed class AutorizationContentValue : IContentValue
+public sealed class AuthorizationContentValue : IContentValue
 {
     public List<Localization> Value { get; set; } = [];
     public string MediaType { get; set; } = null!;

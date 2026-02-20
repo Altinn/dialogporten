@@ -96,6 +96,12 @@ type AttachmentUrl {
   consumerType: AttachmentUrlConsumer!
 }
 
+type AuthorizationContentValue {
+  value: [Localization!]!
+  mediaType: String!
+  isAuthorized: Boolean!
+}
+
 type AuthorizedParty {
   hasOnlyAccessToSubParties: Boolean!
   subParties: [AuthorizedSubParty!]
@@ -124,12 +130,6 @@ type AuthorizedSubParty {
   isCurrentEndUser: Boolean!
   isMainAdministrator: Boolean!
   isAccessManager: Boolean!
-}
-
-type AuthorizationContentValue {
-  value: [Localization!]!
-  mediaType: String!
-  isAuthorized: Boolean!
 }
 
 type BulkSetSystemLabelConcurrencyError implements BulkSetSystemLabelError {

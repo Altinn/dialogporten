@@ -12,7 +12,8 @@
 
 - [ ] **Your** code builds clean without any errors or warnings
 - [ ] Manual testing done (required)
-- [ ] Relevant automated test added (if you find this hard, leave it and we'll help out)
+- [ ] Relevant automated test added 
+- [ ] Database changes manually applied to prod/YT01 (if relevant)
 
 ## Documentation
 

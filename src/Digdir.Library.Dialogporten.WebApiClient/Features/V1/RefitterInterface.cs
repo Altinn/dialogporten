@@ -3106,7 +3106,32 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// </summary>
         [JsonPropertyName("mainContentReference")]
-        public V1CommonContent_ContentValue MainContentReference { get; set; }
+        public V1CommonContent_AuthorizationContentValue MainContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonContent_AuthorizationContentValue
+    {
+
+        /// <summary>
+        /// A list of localizations for the content.
+        /// </summary>
+        [JsonPropertyName("value")]
+        public ICollection<V1CommonLocalizations_Localization> Value { get; set; }
+
+        /// <summary>
+        /// Media type of the content, this can also indicate that the content is embeddable.
+        /// </summary>
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// True if the authenticated user is authorized for this action. If not, the action will not be available
+        /// <br/>and all endpoints will be replaced with a fixed placeholder.
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; }
 
     }
 

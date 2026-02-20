@@ -1615,12 +1615,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
-        /// The logical name of the attachment.
-        /// </summary>
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -1905,12 +1899,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
-        /// The logical name of the attachment.
-        /// </summary>
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -2069,12 +2057,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The logical name of the attachment.
-        /// </summary>
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
@@ -2632,12 +2614,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
-
-        /// <summary>
-        /// The logical name of the attachment.
-        /// </summary>
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.

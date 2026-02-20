@@ -126,6 +126,12 @@ type AuthorizedSubParty {
   isAccessManager: Boolean!
 }
 
+type AutorizationContentValue {
+  value: [Localization!]!
+  mediaType: String!
+  isAuthorized: Boolean!
+}
+
 type BulkSetSystemLabelConcurrencyError implements BulkSetSystemLabelError {
   message: String!
 }
@@ -163,7 +169,7 @@ type Content {
   "Used as the human-readable label used to describe the 'ExtendedStatus' field."
   extendedStatus: ContentValue
   "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL."
-  mainContentReference: ContentValue
+  mainContentReference: AutorizationContentValue
 }
 
 type ContentValue {

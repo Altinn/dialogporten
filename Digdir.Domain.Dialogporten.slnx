@@ -1,0 +1,51 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="AGENTS.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Digdir.Domain.Dialogporten.Application/Digdir.Domain.Dialogporten.Application.csproj" />
+    <Project Path="src/Digdir.Domain.Dialogporten.Domain/Digdir.Domain.Dialogporten.Domain.csproj" />
+    <Project Path="src/Digdir.Domain.Dialogporten.GraphQL/Digdir.Domain.Dialogporten.GraphQL.csproj" />
+    <Project Path="src/Digdir.Domain.Dialogporten.Infrastructure/Digdir.Domain.Dialogporten.Infrastructure.csproj" />
+    <Project Path="src/Digdir.Domain.Dialogporten.Janitor/Digdir.Domain.Dialogporten.Janitor.csproj" />
+    <Project Path="src/Digdir.Domain.Dialogporten.Service/Digdir.Domain.Dialogporten.Service.csproj" />
+    <Project Path="src/Digdir.Domain.Dialogporten.WebApi/Digdir.Domain.Dialogporten.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/src/Libraries/">
+    <Project Path="src/Digdir.Library.Utils.AspNet/Digdir.Library.Utils.AspNet.csproj" />
+  </Folder>
+  <Folder Name="/src/Libraries/Entity/">
+    <Project Path="src/Digdir.Library.Entity.Abstractions/Digdir.Library.Entity.Abstractions.csproj" />
+    <Project Path="src/Digdir.Library.Entity.EntityFrameworkCore/Digdir.Library.Entity.EntityFrameworkCore.csproj" />
+  </Folder>
+  <Folder Name="/src/Libraries/WebApiClient/">
+    <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.WebApiSample/Digdir.Library.Dialogporten.WebApiClient.WebApiSample.csproj" />
+    <Project Path="src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj" />
+  </Folder>
+  <Folder Name="/src/Tools/">
+    <Project Path="src/Digdir.Tool.Dialogporten.GenerateFakeData/Digdir.Tool.Dialogporten.GenerateFakeData.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Digdir.Domain.Dialogporten.Application.Integration.Tests/Digdir.Domain.Dialogporten.Application.Integration.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.Application.Unit.Tests/Digdir.Domain.Dialogporten.Application.Unit.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.Architecture.Tests/Digdir.Domain.Dialogporten.Architecture.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.GraphQl.Integration.Tests/Digdir.Domain.Dialogporten.GraphQl.Integration.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.GraphQl.Unit.Tests/Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests/Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.WebApi.Unit.Tests/Digdir.Domain.Dialogporten.WebApi.Unit.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Libraries/" />
+  <Folder Name="/tests/Libraries/E2E/">
+    <Project Path="tests/Digdir.Domain.Dialogporten.E2E.Cleanup.Tests/Digdir.Domain.Dialogporten.E2E.Cleanup.Tests.csproj" />
+    <Project Path="tests/Digdir.Library.Dialogporten.E2E.Common/Digdir.Library.Dialogporten.E2E.Common.csproj" />
+  </Folder>
+  <Folder Name="/tests/Libraries/WebApiClient/">
+    <Project Path="tests/Digdir.Library.Dialogporten.WebApiClient.Unit.Tests/Digdir.Library.Dialogporten.WebApiClient.Unit.Tests.csproj" />
+  </Folder>
+</Solution>

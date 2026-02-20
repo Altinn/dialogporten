@@ -3,8 +3,8 @@
 This file describes how AI coding agents should interact with the repository.
 
 ## Build & Test Commands
-- **Build**: `dotnet build Digdir.Domain.Dialogporten.sln`
-- **Test all**: `dotnet test Digdir.Domain.Dialogporten.sln`
+- **Build**: `dotnet build Digdir.Domain.Dialogporten.slnx`
+- **Test all**: `dotnet test Digdir.Domain.Dialogporten.slnx`
 - **Test single**: `dotnet test --filter "FullyQualifiedName=Namespace.TestClass.TestMethod"`
 - **Run project**: `cd src/ProjectDir && dotnet run`
 - **Add DB migration**: `dotnet ef migrations add <Name> -p .\src\Digdir.Domain.Dialogporten.Infrastructure\`
@@ -13,7 +13,7 @@ This file describes how AI coding agents should interact with the repository.
 
 Always run `dotnet build` and `dotnet test` after making changes to *.cs files in `./src/**` or `./tests/**`.  
 
-If integration tests fail because test containers are blocked by sandboxing, use `dotnet test Digdir.Domain.Dialogporten.sln --filter 'FullyQualifiedName!~Integration'` to skip them.
+If integration tests fail because test containers are blocked by sandboxing, use `dotnet test Digdir.Domain.Dialogporten.slnx --filter 'FullyQualifiedName!~Integration'` to skip them.
 
 All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyzers.
 

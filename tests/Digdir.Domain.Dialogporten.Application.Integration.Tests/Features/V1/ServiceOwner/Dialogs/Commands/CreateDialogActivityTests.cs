@@ -5,10 +5,12 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -106,6 +108,21 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                         ActorId = "urn:altinn:person:legacy-selfidentified:leif"
                     });
                     x.Description.Should().BeNull();
+                }
+            );
+    }
+
+    [Fact]
+    public Task Create_Activity_Always_Restores_Dialog_System_Label()
+    {
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Bin)
+            .AssertResult<CreateDialogSuccess>()
+            .CreateSimpleActivity()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                {
+                    x.EndUserContext.SystemLabels.Should().BeEquivalentTo([SystemLabel.Values.Default]);
                 }
             );
     }

@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
@@ -12,6 +13,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -20,29 +22,52 @@ using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
-using GetDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
-using SearchDialogResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
-using SearchDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
-using GetDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogQuery;
-using GetDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
-using SearchDialogResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
-using SearchDialogQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
-using SearchDialogEndUserContextResult = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextResult;
-using SearchDialogEndUserContextQuery = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextQuery;
-using GetTransmissionQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
-using GetTransmissionQuerySO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
-using GetTransmissionResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionResult;
-using GetTransmissionResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionResult;
-using BulkSetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
-using BulkSetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
-using BulkSetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
-using BulkSetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
-using GetActivityQuery = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.GetActivityQuery;
-using GetActivityResult = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.GetActivityResult;
-using SetSystemLabelResultEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelResult;
-using SetSystemLabelCommandEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
-using SetSystemLabelResultSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelResult;
-using SetSystemLabelCommandSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelCommand;
+using GetDialogResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogResult;
+using SearchDialogResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogResult;
+using SearchDialogQueryEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
+using GetDialogQuerySO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogQuery;
+using GetDialogResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.GetDialogResult;
+using SearchDialogResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogResult;
+using SearchDialogQuerySO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.SearchDialogQuery;
+using SearchDialogEndUserContextResult =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextResult;
+using SearchDialogEndUserContextQuery =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext.SearchDialogEndUserContextQuery;
+using GetTransmissionQueryEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
+using GetTransmissionQuerySO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionQuery;
+using GetTransmissionResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.GetTransmissionResult;
+using GetTransmissionResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.GetTransmissionResult;
+using BulkSetSystemLabelResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
+using BulkSetSystemLabelCommandEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+using BulkSetSystemLabelResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelResult;
+using BulkSetSystemLabelCommandSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
+using GetActivityQuery =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.GetActivityQuery;
+using GetActivityResult =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.GetActivityResult;
+using SetSystemLabelResultEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelResult;
+using SetSystemLabelCommandEU =
+    Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
+using SetSystemLabelResultSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelResult;
+using SetSystemLabelCommandSO =
+    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels.SetSystemLabelCommand;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -65,10 +90,11 @@ public static class IFlowStepExtensions
         }
 
         return step as IFlowExecutor<CreateDialogSuccess>
-         ?? throw new ArgumentException("At least one command is required to create dialogs.", nameof(commands));
+               ?? throw new ArgumentException("At least one command is required to create dialogs.", nameof(commands));
     }
 
-    public static IFlowExecutor<CreateDialogResult> CreateDialog(this IFlowStep step, Func<FlowContext, CreateDialogCommand> commandSelector) =>
+    public static IFlowExecutor<CreateDialogResult> CreateDialog(this IFlowStep step,
+        Func<FlowContext, CreateDialogCommand> commandSelector) =>
         step.SendCommand(ctx =>
         {
             var command = commandSelector(ctx);
@@ -102,11 +128,14 @@ public static class IFlowStepExtensions
                 {
                     Title = new ContentValueDto
                     {
-                        Value = [new LocalizationDto
-                        {
-                            LanguageCode = "nb",
-                            Value = "Ny melding"
-                        }]
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "Ny melding"
+                            }
+                        ]
                     }
                 }
             };
@@ -164,7 +193,8 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    public static IFlowExecutor<SetSystemLabelResultSO> SetSystemLabelsServiceOwner(this IFlowStep<CreateDialogResult> step,
+    public static IFlowExecutor<SetSystemLabelResultSO> SetSystemLabelsServiceOwner(
+        this IFlowStep<CreateDialogResult> step,
         Action<SetSystemLabelCommandSO>? modify = null) =>
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand(x =>
@@ -193,14 +223,13 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
+    [Obsolete(
+        "We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
-        step.Do(x =>
-        {
-            x.Application.ConfigureServices(configure);
-        });
+        step.Do(x => { x.Application.ConfigureServices(configure); });
 
-    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
+    [Obsolete(
+        "We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
         step.Select(x =>
         {
@@ -261,7 +290,9 @@ public static class IFlowStepExtensions
             modify(command);
             return command;
         });
-    public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(this IFlowStep<CreateDialogResult> step,
+
+    public static IFlowExecutor<UpdateDialogServiceOwnerContextResult> UpdateServiceOwnerContext(
+        this IFlowStep<CreateDialogResult> step,
         Action<UpdateDialogServiceOwnerContextCommand> modify) =>
         step.AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) =>
@@ -311,10 +342,13 @@ public static class IFlowStepExtensions
         });
     }
 
-    public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(this IFlowStep step,
-        Action<SearchDialogEndUserContextQuery> modify) => step.SearchServiceOwnerDialogEndUserContexts((query, _) => modify(query));
+    public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(
+        this IFlowStep step,
+        Action<SearchDialogEndUserContextQuery> modify) =>
+        step.SearchServiceOwnerDialogEndUserContexts((query, _) => modify(query));
 
-    public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(this IFlowStep step,
+    public static IFlowExecutor<SearchDialogEndUserContextResult> SearchServiceOwnerDialogEndUserContexts(
+        this IFlowStep step,
         Action<SearchDialogEndUserContextQuery, FlowContext> modify) =>
         step.SendCommand(_ =>
         {
@@ -366,6 +400,28 @@ public static class IFlowStepExtensions
                 ActivityId = activityId,
                 NewCreatedAt = newCreatedAt ?? DateTimeOffset.UtcNow
             });
+
+    public static IFlowExecutor<CreateActivityResult> CreateSimpleActivity<TIn>(this IFlowExecutor<TIn> step)
+    {
+        return CreateActivity(step, (x, _) =>
+        {
+            x.Activity = new CreateActivityDto
+            {
+                Id = Guid.CreateVersion7(),
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                ExtendedType = new Uri("https://altinn.no"),
+                Type = DialogActivityType.Values.DialogCreated,
+                TransmissionId = null,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = null,
+                    ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                },
+                Description = []
+            };
+        });
+    }
 
     public static IFlowExecutor<CreateActivityResult> CreateActivity<TIn>(
         this IFlowExecutor<TIn> step,
@@ -455,7 +511,7 @@ public static class IFlowStepExtensions
                 ? Verify(oneOf.Value, settings, sourceFile)
                     .UseDirectory("Snapshots")
                 : Verify(x, settings, sourceFile)
-                .UseDirectory("Snapshots");
+                    .UseDirectory("Snapshots");
         });
 
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>

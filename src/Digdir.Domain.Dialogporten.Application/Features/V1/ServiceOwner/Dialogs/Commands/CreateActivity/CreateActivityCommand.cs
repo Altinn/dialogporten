@@ -60,7 +60,8 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         IDialogDbContext db,
         IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
-        IMapper mapper, ISystemLabelAdder systemLabelAdder)
+        IMapper mapper,
+        ISystemLabelAdder systemLabelAdder)
     {
         _domainContext = domainContext;
         _unitOfWork = unitOfWork;

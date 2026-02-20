@@ -209,7 +209,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     {
         var transmissionId = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
         return FlowBuilder.For(Application)
-            .CreateComplexDialog(x => x.Dto.Transmissions =
+            .CreateComplexDialog((x, _) => x.Dto.Transmissions =
             [
                 new TransmissionDto
                 {

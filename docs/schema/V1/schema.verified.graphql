@@ -96,6 +96,12 @@ type AttachmentUrl {
   consumerType: AttachmentUrlConsumer!
 }
 
+type AuthorizationContentValue {
+  value: [Localization!]!
+  mediaType: String!
+  isAuthorized: Boolean!
+}
+
 type AuthorizedParty {
   hasOnlyAccessToSubParties: Boolean!
   subParties: [AuthorizedSubParty!]
@@ -163,7 +169,7 @@ type Content {
   "Used as the human-readable label used to describe the 'ExtendedStatus' field."
   extendedStatus: ContentValue
   "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL."
-  mainContentReference: ContentValue
+  mainContentReference: AuthorizationContentValue
 }
 
 type ContentValue {

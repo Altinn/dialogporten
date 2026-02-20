@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.105.0](https://github.com/Altinn/dialogporten/compare/v1.104.1...v1.105.0) (2026-02-20)
+
+
+### Features
+
+* **api:** configurable limits, metadata endpoint ([#3455](https://github.com/Altinn/dialogporten/issues/3455)) ([4041464](https://github.com/Altinn/dialogporten/commit/4041464c6a52676299fdaafbdd6362e32809babd))
+
+
+### Bug Fixes
+
+* **dialog:** add ordering to transmissions and related entities in FullDialogAggregateDataLoader ([#3457](https://github.com/Altinn/dialogporten/issues/3457)) ([b2fb7b5](https://github.com/Altinn/dialogporten/commit/b2fb7b52b3f6edb525284f22c42c0c36b92fb155))
+* **perf:** Sql strategy selection mechanism, optimizations, reenable instance delegations checks ([#3292](https://github.com/Altinn/dialogporten/issues/3292)) ([9369850](https://github.com/Altinn/dialogporten/commit/93698502ee053452dde294d3dee5640dedcec617))
+* **test:** deterministic randomness in dialog generator ([#3490](https://github.com/Altinn/dialogporten/issues/3490)) ([8d7850e](https://github.com/Altinn/dialogporten/commit/8d7850ee82d2257f1fa30f01e601754cc167d04e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency deterministicguids to 1.0.10 ([#3479](https://github.com/Altinn/dialogporten/issues/3479)) ([8fd68e3](https://github.com/Altinn/dialogporten/commit/8fd68e3713fbbb49f7b0f29ce7f4993616b0f795))
+* **deps:** update docker/build-push-action action to v6.19.0 ([#3480](https://github.com/Altinn/dialogporten/issues/3480)) ([3a8f8bc](https://github.com/Altinn/dialogporten/commit/3a8f8bcc71f1a454172a62dbd0a2398fe4e5e326))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.145.0 ([#3481](https://github.com/Altinn/dialogporten/issues/3481)) ([ca22d28](https://github.com/Altinn/dialogporten/commit/ca22d281f8cc5f18120f84514862de41b2a44bf1))
+* **infra:** Consolidating indexes with production ([#3379](https://github.com/Altinn/dialogporten/issues/3379)) ([142d81b](https://github.com/Altinn/dialogporten/commit/142d81b9672e69547ef938cfd6ee09ef23f87634))
+* **infra:** increase PostgreSQL disk to 8TB, P60 ([#3483](https://github.com/Altinn/dialogporten/issues/3483)) ([22ff499](https://github.com/Altinn/dialogporten/commit/22ff499d4781aceb0a533b647422a180e3352dcc))
+
 ## [1.104.1](https://github.com/Altinn/dialogporten/compare/v1.104.0...v1.104.1) (2026-02-17)
 
 

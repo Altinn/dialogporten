@@ -22,39 +22,33 @@ public static class DialogGenerator
         Randomizer.Seed = new Random(123456);
     }
 
-    [field: ThreadStatic]
-    private static Randomizer MyRandomizer => field ??= new Randomizer();
-
-    [field: ThreadStatic]
-    private static Faker MyFaker => field ??= new Faker();
-
     private static readonly Faker<SearchTagDto> SearchTagFaker = new Faker<SearchTagDto>()
         .RuleFor(o => o.Value, f => f.Random.AlphaNumeric(10));
 
     private static readonly Faker<AttachmentUrlDto> AttachmentUrlFaker = new Faker<AttachmentUrlDto>()
-        .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
+        .RuleFor(o => o.Url, GenerateHttpsUri())
         .RuleFor(o => o.ConsumerType, f => f.PickRandom<AttachmentUrlConsumerType.Values>());
 
     private static readonly Faker<AttachmentDto> AttachmentFaker = new Faker<AttachmentDto>()
         .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
-        .RuleFor(o => o.DisplayName, f => GenerateFakeLocalizations(f.Random.Number(2, 5)))
-        .RuleFor(o => o.Urls, _ => AttachmentUrlFaker.Generate(MyRandomizer.Number(1, 3)));
+        .RuleFor(o => o.DisplayName, f => GenerateFakeLocalizations(f.Random, f.Random.Number(2, 5)))
+        .RuleFor(o => o.Urls, GenerateAttachmentUrls());
 
     private static readonly Faker<ApiActionEndpointDto> ApiActionEndpointFaker = new Faker<ApiActionEndpointDto>()
         .RuleFor(o => o.Id, _ => IdentifiableExtensions.CreateVersion7())
-        .RuleFor(o => o.Url, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
+        .RuleFor(o => o.Url, GenerateHttpsUri())
         .RuleFor(o => o.HttpMethod, f => f.PickRandom<HttpVerb.Values>())
         .RuleFor(o => o.Version, f => "v" + f.Random.Number(100, 999))
         .RuleFor(o => o.Deprecated, f => f.Random.Bool())
-        .RuleFor(o => o.RequestSchema, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
-        .RuleFor(o => o.ResponseSchema, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)))
-        .RuleFor(o => o.DocumentationUrl, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)));
+        .RuleFor(o => o.RequestSchema, GenerateHttpsUri())
+        .RuleFor(o => o.ResponseSchema, GenerateHttpsUri())
+        .RuleFor(o => o.DocumentationUrl, GenerateHttpsUri());
 
     private static readonly Faker<ApiActionDto> ApiActionFaker = new Faker<ApiActionDto>()
         .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.Action, f => f.Random.AlphaNumeric(8))
         .RuleFor(o => o.Name, f => f.Random.AlphaNumeric(8))
-        .RuleFor(o => o.Endpoints, _ => ApiActionEndpointFaker.Generate(MyRandomizer.Number(min: 1, 4)));
+        .RuleFor(o => o.Endpoints, GenerateApiActionEndpoint());
 
     private static readonly List<DialogActivityType.Values> AllowedActivityTypes = Enum.GetValues<DialogActivityType.Values>()
             .Where(x => x is not DialogActivityType.Values.TransmissionOpened
@@ -65,11 +59,11 @@ public static class DialogGenerator
     private static readonly Faker<ActivityDto> ActivityFaker = new Faker<ActivityDto>()
         .RuleFor(o => o.Id, () => IdentifiableExtensions.CreateVersion7())
         .RuleFor(o => o.CreatedAt, f => f.Date.Past())
-        .RuleFor(o => o.ExtendedType, f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps))) // Potential Optimization
+        .RuleFor(o => o.ExtendedType, GenerateHttpsUri()) // Potential Optimization
         .RuleFor(o => o.Type, f => AllowedActivityTypes[f.Random.Number(0, AllowedActivityTypes.Count - 1)])
         .RuleFor(o => o.PerformedBy, f => new ActorDto { ActorType = ActorType.Values.PartyRepresentative, ActorName = f.Name.FullName() }) // Allocates ActorDto
         .RuleFor(o => o.Description, (f, o) => o.Type == DialogActivityType.Values.Information
-            ? GenerateFakeLocalizations(f.Random.Number(4, 8)) // Potential Optimization
+            ? GenerateFakeLocalizations(f.Random, f.Random.Number(4, 8)) // Potential Optimization
             : null);
 
     private static readonly Faker<TransmissionDto> TransmissionFaker = new Faker<TransmissionDto>()
@@ -77,14 +71,14 @@ public static class DialogGenerator
         .RuleFor(o => o.CreatedAt, f => f.Date.Past())
         .RuleFor(o => o.Type, f => f.PickRandom<DialogTransmissionType.Values>())
         .RuleFor(o => o.Sender, _ => new ActorDto { ActorType = ActorType.Values.ServiceOwner })
-        .RuleFor(o => o.Content, _ => GenerateFakeTransmissionContent());
+        .RuleFor(o => o.Content, f => GenerateFakeTransmissionContent(f.Random));
 
     public static readonly Faker<CreateDialogDto> CreateDialogFaker = new Faker<CreateDialogDto>()
         // We need to handle id, serviceResource, party, and others passed as arguments
         // RuleFor cannot directly use external parameters easily. We handle these post-generation.
         // Placeholder rules are set, real values might be overridden later.
-        .RuleFor(o => o.ServiceResource, _ => GenerateFakeResource())
-        .RuleFor(o => o.Party, _ => GenerateRandomParty())
+        .RuleFor(o => o.ServiceResource, f => GenerateFakeResource(f.Random))
+        .RuleFor(o => o.Party, f => GenerateRandomParty(f.Random))
         .RuleFor(o => o.Progress, f => f.Random.Number(0, 100))
         .RuleFor(o => o.ExtendedStatus, f => f.Random.AlphaNumeric(10))
         .RuleFor(o => o.ExternalReference, f => f.Random.AlphaNumeric(10))
@@ -92,24 +86,24 @@ public static class DialogGenerator
         .RuleFor(o => o.UpdatedAt, _ => null)
         .RuleFor(o => o.VisibleFrom, _ => null)
         .RuleFor(o => o.Status, f => f.PickRandom<DialogStatusInput>())
-        .RuleFor(o => o.Content, _ => GenerateFakeContent())
-        .RuleFor(o => o.SearchTags, _ => GenerateFakeSearchTags())
-        .RuleFor(o => o.Attachments, _ => GenerateFakeDialogAttachments())
-        .RuleFor(o => o.GuiActions, _ => GenerateUniquePriorityGuiActionsList())
-        .RuleFor(o => o.ApiActions, _ => GenerateFakeDialogApiActions())
-        .RuleFor(o => o.Activities, _ => GenerateFakeDialogActivities())
-        .RuleFor(o => o.Process, _ => GenerateFakeProcessUri())
-        .RuleFor(o => o.Transmissions, _ => GenerateFakeDialogTransmissions())
+        .RuleFor(o => o.Content, f => GenerateFakeContent(f.Random))
+        .RuleFor(o => o.SearchTags, f => GenerateFakeSearchTags(f.Random))
+        .RuleFor(o => o.Attachments, f => GenerateFakeDialogAttachments(f.Random))
+        .RuleFor(o => o.GuiActions, f => GenerateUniquePriorityGuiActionsList(f))
+        .RuleFor(o => o.ApiActions, f => GenerateFakeDialogApiActions(f.Random))
+        .RuleFor(o => o.Activities, f => GenerateFakeDialogActivities(f.Random))
+        .RuleFor(o => o.Process, f => GenerateFakeProcessUri(f))
+        .RuleFor(o => o.Transmissions, f => GenerateFakeDialogTransmissions(f.Random))
         .RuleFor(o => o.ServiceOwnerContext, _ => new());
 
     public static readonly Faker<CreateDialogDto> CreateSimpleDialogFaker = new Faker<CreateDialogDto>()
-        .RuleFor(o => o.ServiceResource, _ => GenerateFakeResource())
-        .RuleFor(o => o.Party, _ => GenerateRandomParty())
-        .RuleFor(o => o.Content, _ => new()
+        .RuleFor(o => o.ServiceResource, f => GenerateFakeResource(f.Random))
+        .RuleFor(o => o.Party, f => GenerateRandomParty(f.Random))
+        .RuleFor(o => o.Content, f => new()
         {
             Title = new()
             {
-                Value = GenerateFakeLocalizations(3)
+                Value = GenerateFakeLocalizations(f.Random, 3)
             }
         })
         .RuleFor(o => o.ServiceOwnerContext, _ => new());
@@ -295,30 +289,26 @@ public static class DialogGenerator
             transmissions: []);
     }
 
-    public static string GenerateFakeResource(Func<string?>? generator = null)
-    {
-        var generatedValue = generator?.Invoke();
-        if (generatedValue != null) return generatedValue;
+    public static string GenerateFakeResource() => GenerateFakeResource(new Randomizer());
 
+    public static string GenerateFakeResource(Randomizer r)
+    {
         const string resourcePrefix = "urn:altinn:resource:";
         // Apply a power function to skew the distribution towards higher numbers
         const int numberOfDistinctResources = 1000;
         const int exponent = 15;
-        var biasedRandom = Math.Pow(MyRandomizer.Double(), 1.0 / exponent);
+        var biasedRandom = Math.Pow(r.Double(), 1.0 / exponent);
         var result = 1 + (int)(biasedRandom * (numberOfDistinctResources - 1));
 
         return resourcePrefix + result.ToString("D4", CultureInfo.InvariantCulture);
     }
 
-    public static string GenerateRandomParty(Func<string?>? generator = null, bool forcePerson = false)
-    {
-        var generatedValue = generator?.Invoke();
-        if (generatedValue != null) return generatedValue;
+    public static string GenerateRandomParty(bool forcePerson = false) => GenerateRandomParty(new Randomizer(), forcePerson);
 
-        return MyRandomizer.Bool() && !forcePerson
-            ? $"urn:altinn:organization:identifier-no:{GenerateFakeOrgNo()}"
-            : $"urn:altinn:person:identifier-no:{GenerateFakePid()}";
-    }
+    public static string GenerateRandomParty(Randomizer r, bool forcePerson = false)
+        => r.Bool() && !forcePerson
+            ? $"urn:altinn:organization:identifier-no:{GenerateFakeOrgNo(r)}"
+            : $"urn:altinn:person:identifier-no:{GenerateFakePid(r)}";
 
     private static readonly int[] SocialSecurityNumberWeights1 = [3, 7, 6, 1, 8, 9, 4, 5, 2];
     private static readonly int[] SocialSecurityNumberWeights2 = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
@@ -327,14 +317,14 @@ public static class DialogGenerator
     private static readonly DateTime BirthDateRangeEnd = new(1970, 1, 1);
     private static readonly int BirthDateRangeDays = (BirthDateRangeEnd - BirthDateRangeBegin).Days;
 
-    private static string GenerateFakePid()
+    private static string GenerateFakePid(Randomizer r)
     {
         int c1, c2;
         string pidWithoutControlDigits;
         do
         {
-            var dateOfBirth = BirthDateRangeBegin.AddDays(MyRandomizer.Number(BirthDateRangeDays));
-            var individualNumber = GetRandomIndividualNumber(dateOfBirth.Year);
+            var dateOfBirth = BirthDateRangeBegin.AddDays(r.Number(BirthDateRangeDays));
+            var individualNumber = GetRandomIndividualNumber(r, dateOfBirth.Year);
             pidWithoutControlDigits = dateOfBirth.ToString("ddMMyy", CultureInfo.InvariantCulture) + individualNumber;
             c1 = CalculateControlDigit(pidWithoutControlDigits, SocialSecurityNumberWeights1);
             c2 = CalculateControlDigit(pidWithoutControlDigits + c1, SocialSecurityNumberWeights2);
@@ -343,19 +333,19 @@ public static class DialogGenerator
     }
 
 
-    private static string GenerateFakeOrgNo()
+    private static string GenerateFakeOrgNo(Randomizer r)
     {
         string orgNumberWithoutControlDigit;
         int c;
         do
         {
-            orgNumberWithoutControlDigit = MyRandomizer.Number(99000000, 99999999).ToString(CultureInfo.InvariantCulture);
+            orgNumberWithoutControlDigit = r.Number(99000000, 99999999).ToString(CultureInfo.InvariantCulture);
             c = CalculateControlDigit(orgNumberWithoutControlDigit, OrgNumberWeights);
         } while (c == -1);
         return orgNumberWithoutControlDigit + c;
     }
 
-    private static string GetRandomIndividualNumber(int year)
+    private static string GetRandomIndividualNumber(Randomizer r, int year)
     {
         int rangeStart, rangeEnd;
         switch (year)
@@ -375,7 +365,7 @@ public static class DialogGenerator
                 throw new ArgumentException($"Invalid birth year: {year}", nameof(year));
         }
 
-        return MyRandomizer.Number(rangeStart, rangeEnd).ToString("D3", CultureInfo.InvariantCulture);
+        return r.Number(rangeStart, rangeEnd).ToString("D3", CultureInfo.InvariantCulture);
     }
 
     private static int CalculateControlDigit(string input, int[] weights)
@@ -390,22 +380,28 @@ public static class DialogGenerator
     }
 
     public static ActivityDto GenerateFakeDialogActivity(DialogActivityType.Values? type = null)
+        => GenerateFakeDialogActivity(new Randomizer(), type);
+
+    private static ActivityDto GenerateFakeDialogActivity(Randomizer r, DialogActivityType.Values? type)
     {
-        var activity = ActivityFaker.Generate();
+        var seed = r.Int();
+        var activity = ActivityFaker.Clone().UseSeed(seed).Generate();
         if (type != null)
         {
             activity.Type = type.Value;
             activity.Description = (activity.Type == DialogActivityType.Values.Information
-                ? GenerateFakeLocalizations(MyRandomizer.Number(4, 8)) // Potential Optimization
+                ? GenerateFakeLocalizations(r, r.Number(4, 8)) // Potential Optimization
                 : null)!;
         }
 
         return activity;
     }
 
-    public static List<TransmissionDto> GenerateFakeDialogTransmissions(int? count = null, DialogTransmissionType.Values? type = null)
+    public static List<TransmissionDto> GenerateFakeDialogTransmissions(Randomizer r, int? count = null, DialogTransmissionType.Values? type = null)
     {
-        var transmissions = TransmissionFaker.Generate(count ?? MyRandomizer.Number(1, 4));
+        var seed = r.Int();
+        var transmissionCount = count ?? r.Number(1, 4);
+        var transmissions = TransmissionFaker.Clone().UseSeed(seed).Generate(transmissionCount);
         if (type == null) return transmissions;
         foreach (var transmission in transmissions)
         {
@@ -415,9 +411,14 @@ public static class DialogGenerator
         return transmissions;
     }
 
-    public static List<ActivityDto> GenerateFakeDialogActivities(int? count = null, DialogActivityType.Values? type = null)
+    public static List<TransmissionDto> GenerateFakeDialogTransmissions(int? count = null, DialogTransmissionType.Values? type = null)
+        => GenerateFakeDialogTransmissions(new Randomizer(), count, type);
+
+    public static List<ActivityDto> GenerateFakeDialogActivities(Randomizer r, int? count = null, DialogActivityType.Values? type = null)
     {
-        var activities = ActivityFaker.Generate(count ?? MyRandomizer.Number(1, 4));
+        var seed = r.Int();
+        var activityCount = count ?? r.Number(1, 4);
+        var activities = ActivityFaker.Clone().UseSeed(seed).Generate(activityCount);
         if (type == null) return activities;
         foreach (var activity in activities)
         {
@@ -427,72 +428,140 @@ public static class DialogGenerator
         return activities;
     }
 
+    public static List<ActivityDto> GenerateFakeDialogActivities(int? count = null, DialogActivityType.Values? type = null)
+        => GenerateFakeDialogActivities(new Randomizer(), count, type);
+
+    public static List<ApiActionDto> GenerateFakeDialogApiActions(Randomizer r, int? count = null)
+    {
+        var seed = r.Int();
+        var actionCount = count ?? r.Number(1, 4);
+        return ApiActionFaker.Clone().UseSeed(seed).Generate(actionCount);
+    }
+
     public static List<ApiActionDto> GenerateFakeDialogApiActions(int? count = null)
-        => ApiActionFaker.Generate(count ?? MyRandomizer.Number(1, 4));
+        => GenerateFakeDialogApiActions(new Randomizer(), count);
+
+    public static List<ApiActionEndpointDto> GenerateFakeDialogApiActionEndpoints(Randomizer r, int? count = null)
+    {
+        var seed = r.Int();
+        var endpointCount = count ?? r.Number(1, 4);
+        return ApiActionEndpointFaker.Clone().UseSeed(seed).Generate(endpointCount);
+    }
 
     public static List<ApiActionEndpointDto> GenerateFakeDialogApiActionEndpoints(int? count = null)
-         => ApiActionEndpointFaker.Generate(count ?? MyRandomizer.Number(1, 4));
+         => GenerateFakeDialogApiActionEndpoints(new Randomizer(), count);
 
-    public static string GenerateFakeProcessUri() => MyFaker.Internet.UrlWithPath(Uri.UriSchemeHttps);
+    public static string GenerateFakeProcessUri() => GenerateFakeProcessUri(new Faker());
+
+    public static string GenerateFakeProcessUri(Faker f) => f.Internet.UrlWithPath(Uri.UriSchemeHttps);
 
     public static List<GuiActionDto> GenerateFakeDialogGuiActions(int? count = null)
-        => GenerateUniquePriorityGuiActionsList(count);
+        => GenerateUniquePriorityGuiActionsList(new Faker(), count);
 
     public static AttachmentDto GenerateFakeDialogAttachment()
-        => AttachmentFaker.Generate();
+    {
+        var r = new Randomizer();
+        return AttachmentFaker.Clone().UseSeed(r.Int()).Generate();
+    }
+
+    public static List<AttachmentDto> GenerateFakeDialogAttachments(Randomizer r, int? count = null)
+    {
+        var seed = r.Int();
+        var attachmentCount = count ?? r.Number(1, 6);
+        return AttachmentFaker.Clone().UseSeed(seed).Generate(attachmentCount);
+    }
 
     public static List<AttachmentDto> GenerateFakeDialogAttachments(int? count = null)
-        => AttachmentFaker.Generate(count ?? MyRandomizer.Number(1, 6));
+        => GenerateFakeDialogAttachments(new Randomizer(), count);
+
+    public static List<AttachmentUrlDto> GenerateFakeDialogAttachmentUrls(Randomizer r, int? count = null)
+    {
+        var seed = r.Int();
+        var urlCount = count ?? r.Number(1, 3);
+        return AttachmentUrlFaker.Clone().UseSeed(seed).Generate(urlCount);
+    }
+
+    private static Func<Faker, Uri> GenerateHttpsUri() =>
+        f => new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps));
+
+    private static Func<Faker, List<AttachmentUrlDto>> GenerateAttachmentUrls() =>
+        f =>
+        {
+            var seed = f.Random.Int();
+            var urlCount = f.Random.Number(1, 3);
+            return AttachmentUrlFaker.Clone().UseSeed(seed).Generate(urlCount);
+        };
+
+    private static Func<Faker, List<ApiActionEndpointDto>> GenerateApiActionEndpoint() =>
+        f =>
+        {
+            var seed = f.Random.Int();
+            var endpointCount = f.Random.Number(min: 1, max: 4);
+            return ApiActionEndpointFaker.Clone().UseSeed(seed).Generate(endpointCount);
+        };
 
     public static List<AttachmentUrlDto> GenerateFakeDialogAttachmentUrls(int? count = null)
-        => AttachmentUrlFaker.Generate(count ?? MyRandomizer.Number(1, 3));
+        => GenerateFakeDialogAttachmentUrls(new Randomizer(), count);
+
+    public static List<SearchTagDto> GenerateFakeSearchTags(Randomizer r, int? count = null)
+    {
+        var seed = r.Int();
+        var tagCount = count ?? r.Number(1, 6);
+        return SearchTagFaker.Clone().UseSeed(seed).Generate(tagCount);
+    }
 
     public static List<SearchTagDto> GenerateFakeSearchTags(int? count = null)
-        => SearchTagFaker.Generate(count ?? MyRandomizer.Number(1, 6));
+        => GenerateFakeSearchTags(new Randomizer(), count);
 
-    public static ContentDto GenerateFakeContent()
+    public static ContentDto GenerateFakeContent(Randomizer r)
     {
         var content = new ContentDto
         {
-            Title = new ContentValueDto { Value = GenerateFakeLocalizations(MyRandomizer.Number(1, 4)) },
-            Summary = new ContentValueDto { Value = GenerateFakeLocalizations(MyRandomizer.Number(7, 10)) }
+            Title = new ContentValueDto { Value = GenerateFakeLocalizations(r, r.Number(1, 4)) },
+            Summary = new ContentValueDto { Value = GenerateFakeLocalizations(r, r.Number(7, 10)) }
         };
 
-        if (MyRandomizer.Bool())
+        if (r.Bool())
         {
-            content.SenderName = new ContentValueDto { Value = GenerateFakeLocalizations(MyRandomizer.Number(1, 3)) };
+            content.SenderName = new ContentValueDto { Value = GenerateFakeLocalizations(r, r.Number(1, 3)) };
         }
-        if (MyRandomizer.Bool())
+        if (r.Bool())
         {
-            content.AdditionalInfo = new ContentValueDto { MediaType = Domain.Dialogporten.Domain.MediaTypes.PlainText, Value = GenerateFakeLocalizations(MyRandomizer.Number(10, 20)) };
+            content.AdditionalInfo = new ContentValueDto { MediaType = Domain.Dialogporten.Domain.MediaTypes.PlainText, Value = GenerateFakeLocalizations(r, r.Number(10, 20)) };
         }
         return content;
     }
 
-    public static TransmissionContentDto GenerateFakeTransmissionContent()
+    public static ContentDto GenerateFakeContent() => GenerateFakeContent(new Randomizer());
+
+    public static TransmissionContentDto GenerateFakeTransmissionContent(Randomizer r)
     {
         var content = new TransmissionContentDto
         {
-            Title = new ContentValueDto { Value = GenerateFakeLocalizations(MyRandomizer.Number(1, 4)) },
-            Summary = new ContentValueDto { Value = GenerateFakeLocalizations(MyRandomizer.Number(7, 10)) }
+            Title = new ContentValueDto { Value = GenerateFakeLocalizations(r, r.Number(1, 4)) },
+            Summary = new ContentValueDto { Value = GenerateFakeLocalizations(r, r.Number(7, 10)) }
         };
 
         return content;
     }
 
-    public static List<LocalizationDto> GenerateFakeLocalizations(int wordCount)
+    public static TransmissionContentDto GenerateFakeTransmissionContent() => GenerateFakeTransmissionContent(new Randomizer());
+
+    public static List<LocalizationDto> GenerateFakeLocalizations(Randomizer r, int wordCount)
     {
         return
         [
-            new() { LanguageCode = "nb", Value = MyRandomizer.Words(wordCount) },
-            new() { LanguageCode = "nn", Value = MyRandomizer.Words(wordCount) },
-            new() { LanguageCode = "en", Value = MyRandomizer.Words(wordCount) }
+            new() { LanguageCode = "nb", Value = r.Words(wordCount) },
+            new() { LanguageCode = "nn", Value = r.Words(wordCount) },
+            new() { LanguageCode = "en", Value = r.Words(wordCount) }
         ];
     }
 
-    private static List<GuiActionDto> GenerateUniquePriorityGuiActionsList(int? count = null)
+    public static List<LocalizationDto> GenerateFakeLocalizations(int wordCount) => GenerateFakeLocalizations(new Randomizer(), wordCount);
+
+    private static List<GuiActionDto> GenerateUniquePriorityGuiActionsList(Faker f, int? count = null)
     {
-        var actualCount = count ?? MyRandomizer.Number(min: 1, 4);
+        var actualCount = count ?? f.Random.Number(min: 1, 4);
         var actions = new List<GuiActionDto>(actualCount);
 
         for (var i = 0; i < actualCount; i++)
@@ -507,10 +576,10 @@ public static class DialogGenerator
             var action = new GuiActionDto
             {
                 Id = IdentifiableExtensions.CreateVersion7(),
-                Action = MyRandomizer.AlphaNumeric(8),
+                Action = f.Random.AlphaNumeric(8),
                 Priority = priority,
-                Url = new Uri(MyFaker.Internet.UrlWithPath(Uri.UriSchemeHttps)),
-                Title = GenerateFakeLocalizations(MyRandomizer.Number(1, 3))
+                Url = new Uri(f.Internet.UrlWithPath(Uri.UriSchemeHttps)),
+                Title = GenerateFakeLocalizations(f.Random, f.Random.Number(1, 3))
             };
             actions.Add(action);
         }

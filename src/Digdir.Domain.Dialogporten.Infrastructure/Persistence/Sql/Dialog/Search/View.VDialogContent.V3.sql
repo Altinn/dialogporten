@@ -1,51 +1,94 @@
--- Collects every plain-text fragment per dialog so all rebuild workers share identical inputs.
 CREATE OR REPLACE VIEW search."VDialogContent" AS
-WITH RankedContent AS (
-    SELECT dc."DialogId" AS "DialogId",
+WITH ScopedContent AS (
+    -- 1. Dialog Content (Direct)
+    SELECT
+        dc."DialogId",
         CASE dc."TypeId" WHEN 1 THEN 'B' ELSE 'D' END AS "Weight",
-        l."LanguageCode" AS "LanguageCode",
-        l."Value"        AS "Value",
+        l."LanguageCode",
+        l."Value",
         1 AS "OuterPriority",
-        dc."TypeId" as "InnerPriority"
+        dc."TypeId" AS "InnerPriority"
     FROM "DialogContent" dc
     JOIN "LocalizationSet" dcls ON dc."Id" = dcls."DialogContentId"
-    JOIN "Localization"   l     ON dcls."Id" = l."LocalizationSetId"
+    JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
     WHERE dc."MediaType" = 'text/plain'
 
     UNION ALL
--- Search tags are language-agnostic keywords; force the simple configuration.
-    SELECT dst."DialogId", 'D', 'simple'::varchar(15), dst."Value"::varchar(4095), 2, 0
+
+    -- 2. Search Tags
+    SELECT
+        dst."DialogId",
+        'D'::text,
+        'simple'::varchar(15),
+        dst."Value"::varchar(4095),
+        2,
+        0
     FROM "DialogSearchTag" dst
 
     UNION ALL
--- Dialog-linked attachments are discoverable alongside the root dialog text.
-    SELECT a."DialogId", 'D', l."LanguageCode", l."Value", 3, EXTRACT(EPOCH FROM a."CreatedAt")::bigint
-    FROM "Attachment" a
-    JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
-    JOIN "Localization"   l     ON l."LocalizationSetId" = dcls."Id"
+
+    -- 3. Attachments for both dialog and transmissions (Capped at 1000 per Dialog)
+    -- We limit the IDs BEFORE joining the heavy Localization tables
+    SELECT
+        a_limited."DialogId",
+        'D'::text,
+        l."LanguageCode",
+        l."Value",
+        3,
+        EXTRACT(EPOCH FROM a_limited."CreatedAt")::bigint
+    FROM (
+        SELECT "DialogId", "Id", "CreatedAt",
+               ROW_NUMBER() OVER (PARTITION BY "DialogId" ORDER BY "CreatedAt" DESC) as rnk
+        FROM "Attachment"
+    ) a_limited
+    JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a_limited."Id"
+    JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
+    WHERE a_limited.rnk <= 1000
 
     UNION ALL
-    SELECT dt."DialogId", 'D', l."LanguageCode", l."Value", 4, EXTRACT(EPOCH FROM dt."CreatedAt")::bigint
-    FROM "DialogTransmission" dt
-    JOIN "DialogTransmissionContent" dtc ON dt."Id" = dtc."TransmissionId"
-    JOIN "LocalizationSet" dcls          ON dtc."Id" = dcls."TransmissionContentId"
-    JOIN "Localization"   l              ON dcls."Id" = l."LocalizationSetId"
-    WHERE dtc."MediaType" = 'text/plain'
+
+    -- 4. Transmissions (Capped at 1000 per Dialog)
+    SELECT
+        dt_limited."DialogId",
+        'D'::text,
+        l."LanguageCode",
+        l."Value",
+        4,
+        EXTRACT(EPOCH FROM dt_limited."CreatedAt")::bigint
+    FROM (
+        SELECT "DialogId", "Id", "CreatedAt",
+               ROW_NUMBER() OVER (PARTITION BY "DialogId" ORDER BY "CreatedAt" DESC) as rnk
+        FROM "DialogTransmission"
+    ) dt_limited
+    JOIN "DialogTransmissionContent" dtc ON dt_limited."Id" = dtc."TransmissionId"
+    JOIN "LocalizationSet" dcls ON dtc."Id" = dcls."TransmissionContentId"
+    JOIN "Localization" l ON dcls."Id" = l."LocalizationSetId"
+    WHERE dt_limited.rnk <= 1000 AND dtc."MediaType" = 'text/plain'
 
     UNION ALL
-    SELECT da."DialogId", 'D', l."LanguageCode", l."Value", 5, EXTRACT(EPOCH FROM da."CreatedAt")::bigint
-    FROM "DialogActivity" da
-    JOIN "LocalizationSet" dcls ON da."Id" = dcls."ActivityId"
-    JOIN "Localization"   l     ON l."LocalizationSetId" = dcls."Id"
 
-    UNION ALL
--- Transmission attachments inherit the enclosing dialog as their search scope.
-    SELECT dt."DialogId", 'D', l."LanguageCode", l."Value", 6, EXTRACT(EPOCH FROM a."CreatedAt")::bigint
-    FROM "DialogTransmission" dt
-    JOIN "Attachment" a         ON a."TransmissionId" = dt."Id"
-    JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a."Id"
-    JOIN "Localization"   l     ON l."LocalizationSetId" = dcls."Id"
+    -- 5. Activities (Capped at 1000 per Dialog)
+    SELECT
+        da_limited."DialogId",
+        'D'::text,
+        l."LanguageCode",
+        l."Value",
+        5,
+        EXTRACT(EPOCH FROM da_limited."CreatedAt")::bigint
+    FROM (
+        SELECT "DialogId", "Id", "CreatedAt",
+               ROW_NUMBER() OVER (PARTITION BY "DialogId" ORDER BY "CreatedAt" DESC) as rnk
+        FROM "DialogActivity"
+    ) da_limited
+    JOIN "LocalizationSet" dcls ON da_limited."Id" = dcls."ActivityId"
+    JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
+    WHERE da_limited.rnk <= 1000
 )
-SELECT "DialogId", "Weight", "LanguageCode", "Value"
-FROM RankedContent
+SELECT
+    "DialogId",
+    "Weight",
+    "LanguageCode",
+    "Value"
+FROM ScopedContent
 ORDER BY "DialogId", "OuterPriority", "InnerPriority";
+

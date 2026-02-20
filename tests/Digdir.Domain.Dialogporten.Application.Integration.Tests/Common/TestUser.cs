@@ -28,6 +28,7 @@ internal static class TestUsers
     private static readonly Dictionary<string, string> Default = new()
     {
         [ClaimTypes.Name] = "Integration Test User",
+        [ClaimsPrincipalExtensions.AltinnOrgClaim] = "ttd",
         [ClaimsPrincipalExtensions.IdportenAuthLevelClaim] = Constants.IdportenLoaHigh,
         [ClaimTypes.NameIdentifier] = "integration-test-user",
         [ClaimsPrincipalExtensions.PidClaim] = DefaultPid,

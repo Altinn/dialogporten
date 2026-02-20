@@ -40,7 +40,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = id = NewUuidV7();
                 x.Dto.ExternalReference = "I'm so original...";
@@ -75,7 +75,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             {
                 revision = x.IfMatchDialogRevision!.Value;
                 x.IsSilentUpdate = true;
-                x.Dto.Progress = (x.Dto.Progress % 100) + 1;
+                x.Dto.Progress = 1;
             })
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
@@ -89,7 +89,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var expectedSystemLabel = SystemLabel.Values.Bin;
 
         var updatedDialog = await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => { x.Dto.SystemLabel = expectedSystemLabel; })
+            .CreateSimpleDialog((x, _) => { x.Dto.SystemLabel = expectedSystemLabel; })
             .AssertSuccessAndUpdateDialog(x =>
             {
                 x.IsSilentUpdate = true;
@@ -108,7 +108,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
         await FlowBuilder.For(Application)
             // CreateAt must be set when UpdatedAt is set
-            .CreateSimpleDialog(x => x.Dto.UpdatedAt = x.Dto.CreatedAt = initialUpdatedAt)
+            .CreateSimpleDialog((x, _) => x.Dto.UpdatedAt = x.Dto.CreatedAt = initialUpdatedAt)
             .AssertResult<CreateDialogSuccess>()
             .SendCommand((_, ctx) => new GetDialogQuery { DialogId = ctx.GetDialogId() })
             .AssertResult<DialogDto>(x => initialUpdatedAt = x.UpdatedAt)
@@ -122,7 +122,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     {
         var initialDate = DateTimeOffset.UtcNow.AddYears(-1);
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.Dto.UpdatedAt = x.Dto.CreatedAt =
                     initialDate)
             .AssertSuccessAndUpdateDialog(_ => { })
@@ -184,7 +184,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .AssertSuccessAndUpdateDialog(x =>
             {
                 initialRevision = x.IfMatchDialogRevision!.Value;
-                x.Dto.Progress = (x.Dto.Progress % 100) + 1;
+                x.Dto.Progress = 1;
             })
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
@@ -198,7 +198,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var existingActivityId = NewUuidV7();
 
         var domainError = await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var activity =
                     DialogGenerator.GenerateFakeDialogActivity(type: DialogActivityType.Values.DialogCreated);
@@ -230,7 +230,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var existingTransmissionId = NewUuidV7();
 
         var domainError = await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
                 transmission.Id = existingTransmissionId;
@@ -258,7 +258,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Can_Set_Dialog_Summary_To_Null_On_Update() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Content!.Summary = new()
+            .CreateSimpleDialog((x, _) => x.Dto.Content!.Summary = new()
             {
                 Value = DialogGenerator.GenerateFakeLocalizations(1)
             })
@@ -271,28 +271,28 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = false)
             .AssertSuccessAndUpdateDialog(x => x.Dto.Content = null!)
             .ExecuteAndAssert<ValidationError>();
 
     [Fact]
     public Task Can_Update_Content_To_Null_If_IsApiOnlyTrue_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = true)
             .AssertSuccessAndUpdateDialog(x => x.Dto.Content = null!)
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Fact]
     public Task Can_Update_Content_Summary_To_Null_If_IsApiOnlyTrue_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = true)
             .AssertSuccessAndUpdateDialog(x => x.Dto.Content!.Summary = null)
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Fact]
     public Task Should_Validate_Supplied_Content_If_IsApiOnlyTrue_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = true)
             .AssertSuccessAndUpdateDialog(x => { x.Dto.Content!.Title = null!; })
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content.Title)));
@@ -300,7 +300,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Can_Update_IsApiOnly_From_False_To_True() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = false)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = false)
             .AssertSuccessAndUpdateDialog(x => x.Dto.IsApiOnly = true)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x => x.IsApiOnly.Should().BeTrue());
@@ -308,7 +308,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Can_Update_IsApiOnly_From_True_To_False() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.IsApiOnly = true)
+            .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = true)
             .AssertSuccessAndUpdateDialog(x => x.Dto.IsApiOnly = false)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x => x.IsApiOnly.Should().BeFalse());
@@ -316,7 +316,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Cannot_Update_IsApiOnly_To_False_If_Dialog_Content_Is_Null() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.IsApiOnly = true;
                 x.Dto.Content = null;
@@ -327,7 +327,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Cannot_Update_IsApiOnly_To_False_If_Transmission_Content_Is_Null() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddTransmission(x => x.Content = null);
                 x.Dto.IsApiOnly = true;
@@ -338,7 +338,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Can_Update_IsApiOnly_To_False_If_Transmission_Content_Is_Not_Null() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddTransmission();
                 x.Dto.IsApiOnly = true;
@@ -451,7 +451,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public Task ContentUpdatedAt_Should_Change_When_Content_Updates(string _,
         Action<UpdateDialogCommand> updateDialog) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Status = DialogStatusInput.Awaiting)
+            .CreateSimpleDialog((x, _) => x.Dto.Status = DialogStatusInput.Awaiting)
             .AssertSuccessAndUpdateDialog(updateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
@@ -481,7 +481,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public Task ContentUpdatedAt_Should_Not_Change_When_Content_Not_Updated(string _,
         Action<UpdateDialogCommand> updateDialog) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog()
+            .CreateSimpleDialog((x, _) => x.Dto.Progress = 1)
             .AssertSuccessAndUpdateDialog(updateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
@@ -496,7 +496,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var visibleFrom = DateTimeOffset.UtcNow.AddDays(7);
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.VisibleFrom = visibleFrom;
                 x.Dto.Progress = 36;
@@ -518,7 +518,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.VisibleFrom = visibleFrom;
                 x.Dto.DueAt = visibleFrom.AddDays(1);
@@ -535,7 +535,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         var visibleFrom = DateTimeOffset.UtcNow.AddDays(5);
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.VisibleFrom = visibleFrom;
                 x.Dto.DueAt = visibleFrom.AddDays(1);
@@ -582,7 +582,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     {
         var transmissionId = Guid.CreateVersion7();
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.AddTransmission(transmissionDto =>
+            .CreateSimpleDialog((x, _) => x.AddTransmission(transmissionDto =>
             {
                 transmissionDto.Id = transmissionId;
                 transmissionDto.Type = DialogTransmissionType.Values.Information;
@@ -653,7 +653,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
         DialogTransmissionType.Values transmissionType, bool shouldAddSentLabel) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x => x.Type = transmissionType))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>

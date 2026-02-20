@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
@@ -23,55 +24,17 @@ public class OrderBySnapshotTests(DialogApplication application) : ApplicationCo
     [InlineData("contentUpdatedAt_asc")]
     [InlineData("dueAt")]
     [InlineData("dueAt_asc")]
-    public async Task OrderBy_Search_Verify_Output(string orderBy)
-    {
-        await FlowBuilder.For(Application)
+    public Task OrderBy_Search_Verify_Output(string orderBy) =>
+        FlowBuilder.For(Application)
             .AddOrderByDialogs()
-            .ExecuteAndAssert(_ => { });
-
-        var pages = await GetAllPages(orderBy);
-
-        var settings = new VerifySettings();
-
-        // Timestamps and tiebreaker UUIDs on continuation token will differ on each run
-        settings.IgnoreMember(nameof(PaginatedList<>.ContinuationToken));
-        settings.UseFileName($"OrderBySnapshotTests.{orderBy}");
-
-        await Verify(pages, settings)
-            .UseDirectory("Snapshots")
-            .DontScrubDateTimes();
-    }
-
-    private async Task<List<PaginatedList<DialogDto>>> GetAllPages(string orderBy)
-    {
-        List<PaginatedList<DialogDto>> pages = [];
-        bool hasNextPage;
-        string? continuationToken = null;
-        do
-        {
-            var previousToken = continuationToken;
-            var page = await FlowBuilder.For(Application)
-                .SearchEndUserDialogs(x =>
-                {
-                    x.Limit = 2;
-                    x.Party = [TestUsers.DefaultParty];
-                    x.ContinuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>
-                        .TryParse(previousToken, out var token) ? token : null;
-                    x.OrderBy =
-                        OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(orderBy,
-                            out var orderSet)
-                            ? orderSet
-                            : null;
-                })
-                .ExecuteAndAssert<PaginatedList<DialogDto>>();
-
-            pages.Add(page);
-            hasNextPage = page.HasNextPage;
-            continuationToken = page.ContinuationToken;
-        } while (hasNextPage);
-
-        return pages;
-    }
+            .GetAllPages(orderBy)
+            .VerifySnapshot(x =>
+            {
+                x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken));
+                x.UseFileName($"OrderBySnapshotTests.{orderBy}");
+                x.DontScrubDateTimes();
+            })
+            .ExecuteAsync();
 }
 
 public static class OrderByExtensions
@@ -84,7 +47,7 @@ public static class OrderByExtensions
         for (var i = 0; i < 5; i++)
         {
             var addDays = i;
-            executor = step.CreateSimpleDialog(x =>
+            executor = step.CreateSimpleDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
                 x.Dto.Activities.Clear();
@@ -99,4 +62,38 @@ public static class OrderByExtensions
 
         return executor;
     }
+
+    public static IFlowExecutor<List<PaginatedList<DialogDto>>> GetAllPages<TIn>(
+        this IFlowStep<TIn> step,
+        string orderBy) =>
+        step.SelectAsync(async (_, context, cancellationToken) =>
+        {
+            List<PaginatedList<DialogDto>> pages = [];
+            string? continuationToken = null;
+            bool hasNextPage;
+
+            do
+            {
+                var previousToken = continuationToken;
+                var page = await context.Application.Send(new SearchDialogQuery
+                {
+                    Limit = 2,
+                    Party = [TestUsers.DefaultParty],
+                    ContinuationToken = ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>
+                        .TryParse(previousToken, out var token)
+                        ? token
+                        : null,
+                    OrderBy = OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(orderBy, out var orderSet)
+                        ? orderSet
+                        : null
+                }, cancellationToken);
+
+                var typedPage = page.Value.Should().BeOfType<PaginatedList<DialogDto>>().Subject;
+                pages.Add(typedPage);
+                continuationToken = typedPage.ContinuationToken;
+                hasNextPage = typedPage.HasNextPage;
+            } while (hasNextPage);
+
+            return pages;
+        });
 }

@@ -2429,6 +2429,58 @@
         },
         "type": "object"
       },
+      "V1MetadataLimitsQueriesGet_EndUserSearchLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "maxExtendedStatusFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxOrgFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPartyFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxServiceResourceFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataLimitsQueriesGet_Limits": {
+        "additionalProperties": false,
+        "properties": {
+          "endUserSearch": {
+            "$ref": "#/components/schemas/V1MetadataLimitsQueriesGet_EndUserSearchLimits"
+          },
+          "serviceOwnerSearch": {
+            "$ref": "#/components/schemas/V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "maxExtendedStatusFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPartyFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxServiceResourceFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerCommonActors_Actor": {
         "additionalProperties": false,
         "properties": {
@@ -7722,6 +7774,47 @@
         "summary": "Gets the list of authorized parties for the end user",
         "tags": [
           "Enduser"
+        ]
+      }
+    },
+    "/api/v1/metadata/limits": {
+      "get": {
+        "description": "Returns the active limits for EndUser and ServiceOwner search filters.",
+        "operationId": "V1MetadataLimitsGet_Limits",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1MetadataLimitsQueriesGet_Limits"
+                }
+              }
+            },
+            "description": "The currently enforced application-level query limits."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets currently enforced application-level query limits",
+        "tags": [
+          "Metadata"
         ]
       }
     },

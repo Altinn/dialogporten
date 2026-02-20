@@ -4,7 +4,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applic
 
 public interface IFlowExecutor<TOut> : IFlowStep<TOut>
 {
-    Task<TOut> ExecuteAsync(CancellationToken cancellationToken = default);
+    Task<TOut> ExecuteAsync(CancellationToken? cancellationToken = null);
 }
 
 public interface IFlowStep<out TIn> : IFlowStep
@@ -32,6 +32,39 @@ internal static class FlowStepExtensions
             {
                 action.Invoke(context);
                 return Task.FromResult(x);
+            });
+            return flowStep;
+        }
+
+        public TFlowStep Do(Action<object?, FlowContext> action)
+        {
+            var context = flowStep.Context;
+            context.Commands.Add((x, _) =>
+            {
+                action.Invoke(x, context);
+                return Task.FromResult(x);
+            });
+            return flowStep;
+        }
+
+        public TFlowStep Do(Func<FlowContext, Task> action)
+        {
+            var context = flowStep.Context;
+            context.Commands.Add(async (x, _) =>
+            {
+                await action.Invoke(context);
+                return x;
+            });
+            return flowStep;
+        }
+
+        public TFlowStep Do(Func<object?, FlowContext, Task> action)
+        {
+            var context = flowStep.Context;
+            context.Commands.Add(async (x, _) =>
+            {
+                await action.Invoke(x, context);
+                return x;
             });
             return flowStep;
         }

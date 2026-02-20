@@ -27,33 +27,13 @@ WITH ScopedContent AS (
 
     UNION ALL
 
-    -- 3. Attachments for both dialog and transmissions (Capped at 1000 per Dialog)
-    -- We limit the IDs BEFORE joining the heavy Localization tables
-    SELECT
-        a_limited."DialogId",
-        'D'::text,
-        l."LanguageCode",
-        l."Value",
-        3,
-        EXTRACT(EPOCH FROM a_limited."CreatedAt")::bigint
-    FROM (
-        SELECT "DialogId", "Id", "CreatedAt",
-               ROW_NUMBER() OVER (PARTITION BY "DialogId" ORDER BY "CreatedAt" DESC) as rnk
-        FROM "Attachment"
-    ) a_limited
-    JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a_limited."Id"
-    JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
-    WHERE a_limited.rnk <= 1000
-
-    UNION ALL
-
-    -- 4. Transmissions (Capped at 1000 per Dialog)
+    -- 3. Transmissions (Capped at 1000 per Dialog)
     SELECT
         dt_limited."DialogId",
         'D'::text,
         l."LanguageCode",
         l."Value",
-        4,
+        3,
         EXTRACT(EPOCH FROM dt_limited."CreatedAt")::bigint
     FROM (
         SELECT "DialogId", "Id", "CreatedAt",
@@ -67,13 +47,56 @@ WITH ScopedContent AS (
 
     UNION ALL
 
-    -- 5. Activities (Capped at 1000 per Dialog)
+    -- 4. Attachments for dialogs (Capped at 1000 per Dialog)
+    SELECT
+        a_limited."DialogId",
+        'D'::text,
+        l."LanguageCode",
+        l."Value",
+        4,
+        EXTRACT(EPOCH FROM a_limited."CreatedAt")::bigint
+    FROM (
+        SELECT "DialogId", "Id", "CreatedAt",
+               ROW_NUMBER() OVER (PARTITION BY "DialogId" ORDER BY "CreatedAt" DESC) as rnk
+        FROM "Attachment"
+    ) a_limited
+    JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = a_limited."Id"
+    JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
+    WHERE a_limited.rnk <= 1000
+
+    UNION ALL
+
+	-- 5. Attachments for transmissions (Capped at 1000 per Dialog)
+    SELECT
+        at_limited."DialogId",
+        'D'::text,
+        l."LanguageCode",
+        l."Value",
+        5,
+        EXTRACT(EPOCH FROM at_limited."CreatedAt")::bigint
+    FROM (
+        SELECT
+            dt."DialogId",
+            a."Id",
+            a."CreatedAt",
+            ROW_NUMBER() OVER (PARTITION BY dt."DialogId" ORDER BY a."CreatedAt" DESC) as rnk
+        FROM "Attachment" a
+        JOIN "DialogTransmission" dt ON a."TransmissionId" = dt."Id"
+        WHERE a."TransmissionId" IS NOT NULL
+    ) at_limited
+    JOIN "LocalizationSet" dcls ON dcls."AttachmentId" = at_limited."Id"
+    JOIN "Localization" l ON l."LocalizationSetId" = dcls."Id"
+    WHERE at_limited.rnk <= 1000
+
+	UNION ALL
+
+    -- 6. Activities (Capped at 1000 per Dialog)
     SELECT
         da_limited."DialogId",
         'D'::text,
         l."LanguageCode",
         l."Value",
-        5,
+        6,
         EXTRACT(EPOCH FROM da_limited."CreatedAt")::bigint
     FROM (
         SELECT "DialogId", "Id", "CreatedAt",
@@ -88,7 +111,8 @@ SELECT
     "DialogId",
     "Weight",
     "LanguageCode",
-    "Value"
+    "Value",
+    "OuterPriority",
+    "InnerPriority"
 FROM ScopedContent
 ORDER BY "DialogId", "OuterPriority", "InnerPriority";
-

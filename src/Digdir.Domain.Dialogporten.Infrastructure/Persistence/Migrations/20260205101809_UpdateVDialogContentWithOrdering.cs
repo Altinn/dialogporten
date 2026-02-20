@@ -13,7 +13,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
             var scripts = new[]
             {
-                "Dialog/Search/View.VDialogContent.V3.sql"
+                "Dialog/Search/View.VDialogContent.V3.sql",
+                "Dialog/Search/View.VDialogDocument.V4.sql",
             };
 
             foreach (var sql in MigrationSqlLoader.LoadAll(scripts))
@@ -27,7 +28,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
             var scripts = new[]
             {
-                "Dialog/Search/View.VDialogContent.V2.sql"
+                "Dialog/Search/View.VDialogDocument.V3.sql",
+                "Dialog/Search/View.VDialogContent.V2.sql",
             };
 
             foreach (var sql in MigrationSqlLoader.LoadAll(scripts))

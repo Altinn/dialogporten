@@ -49,6 +49,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
+    private readonly ISystemLabelAdder _systemLabelAdder;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IResourceRegistry _resourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
@@ -63,12 +64,14 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         IMapper mapper,
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
+        ISystemLabelAdder systemLabelAdder,
         IUserResourceRegistry userResourceRegistry,
         IResourceRegistry resourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
         IDataLoaderContext dataLoaderContext,
         IDialogTransmissionAppender dialogTransmissionAppender,
-        ITransmissionHierarchyValidator transmissionHierarchyValidator)
+        ITransmissionHierarchyValidator transmissionHierarchyValidator
+    )
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
@@ -82,6 +85,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
         _dialogTransmissionAppender = dialogTransmissionAppender ?? throw new ArgumentNullException(nameof(dialogTransmissionAppender));
         _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
+        _systemLabelAdder = systemLabelAdder;
     }
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
@@ -201,7 +205,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (!request.IsSilentUpdate)
         {
-            SystemLabelAdder.AddSystemLabel(_user, _domainContext, dialog, SystemLabel.Values.Default);
+            _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Default);
         }
 
         var saveResult = await _unitOfWork
@@ -357,7 +361,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (appendResult.ContainsEndUserTransmission)
         {
-            SystemLabelAdder.AddSystemLabel(_user, _domainContext, dialog, SystemLabel.Values.Sent);
+            _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
     }
 

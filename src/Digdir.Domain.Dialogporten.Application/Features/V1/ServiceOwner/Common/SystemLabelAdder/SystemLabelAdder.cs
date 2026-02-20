@@ -10,18 +10,28 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 
-internal static class SystemLabelAdder
+public interface ISystemLabelAdder
 {
-    public static void AddSystemLabel(
-        IUser user,
-        IDomainContext domainContext,
-        DialogEntity dialog,
-        SystemLabel.Values labelToAdd
-    )
+    void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd);
+}
+
+public sealed class SystemLabelAdder : ISystemLabelAdder
+{
+    private readonly IUser _user;
+    private readonly IDomainContext _domainContext;
+
+    public SystemLabelAdder(IUser user, IDomainContext domainContext)
     {
-        if (!user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
+        _user = user;
+        _domainContext = domainContext;
+    }
+
+
+    public void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
+    {
+        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
         {
-            domainContext.AddError(
+            _domainContext.AddError(
                 new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user.")
             );
             return;

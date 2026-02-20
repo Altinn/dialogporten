@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -47,29 +46,28 @@ public sealed record CreateActivitySuccess(Guid Revision, Guid ActivityId);
 
 internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActivityCommand, CreateActivityResult>
 {
-    private readonly IUser _user;
     private readonly IDomainContext _domainContext;
     private readonly IDialogDbContext _db;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly IMapper _mapper;
+    private readonly ISystemLabelAdder _systemLabelAdder;
 
     public CreateActivityCommandHandler(
         IDomainContext domainContext,
-        IUser user,
         IUnitOfWork unitOfWork,
         IDialogDbContext db,
         IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
-        IMapper mapper)
+        IMapper mapper, ISystemLabelAdder systemLabelAdder)
     {
-        _user = user;
         _domainContext = domainContext;
         _unitOfWork = unitOfWork;
         _db = db;
         _userResourceRegistry = userResourceRegistry;
         _mapper = mapper;
+        _systemLabelAdder = systemLabelAdder;
         _serviceResourceAuthorizer = serviceResourceAuthorizer;
     }
 
@@ -106,7 +104,7 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
 
         if (!request.IsSilentUpdate)
         {
-            SystemLabelAdder.AddSystemLabel(_user, _domainContext, dialog, SystemLabel.Values.Default);
+            _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Default);
         }
 
         var saveResult = await _unitOfWork

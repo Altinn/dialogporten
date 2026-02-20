@@ -43,6 +43,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
     private readonly IResourceRegistry _resourceRegistry;
+    private readonly ISystemLabelAdder _systemLabelAdder;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
     private readonly IUser _user;
@@ -57,9 +58,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IResourceRegistry resourceRegistry,
+        ISystemLabelAdder systemLabelAdder,
         IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
-        ITransmissionHierarchyValidator transmissionHierarchyValidator)
+        ITransmissionHierarchyValidator transmissionHierarchyValidator
+    )
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -67,6 +70,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+        _systemLabelAdder = systemLabelAdder ?? throw new ArgumentNullException(nameof(systemLabelAdder));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
@@ -150,7 +154,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         if (dialog.Transmissions.ContainsTransmissionByEndUser())
         {
-            SystemLabelAdder.AddSystemLabel(_user, _domainContext, dialog, SystemLabel.Values.Sent);
+            _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
 
         _db.Dialogs.Add(dialog);
@@ -213,7 +217,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return;
         }
 
-        SystemLabelAdder.AddSystemLabel(_user, _domainContext, dialog, request.Dto.SystemLabel.Value);
+        _systemLabelAdder.AddSystemLabel(dialog, request.Dto.SystemLabel.Value);
     }
 
     private void CreateDialogServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)

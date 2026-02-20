@@ -177,6 +177,10 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
         PaginatedList<DialogEntity> dialogs;
 
+        // Make sure we use lowercase of both Party and EndUserId when comparing with DB
+        request.Party = request.Party?.Select(x => x.ToLowerInvariant()).ToList();
+        request.EndUserId = request.EndUserId?.ToLowerInvariant();
+
         if (authorizedResources is not null)
         {
             if (authorizedResources.HasNoAuthorizations)

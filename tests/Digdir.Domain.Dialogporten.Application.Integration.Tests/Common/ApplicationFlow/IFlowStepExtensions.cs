@@ -126,7 +126,9 @@ public static class IFlowStepExtensions
             var command = new CreateDialogCommand
             {
                 Dto = DialogGenerator.CreateDialogFaker
-                    .UseSeed(seed).Generate()
+                    .Clone()
+                    .UseSeed(seed)
+                    .Generate()
             };
 
             initialState?.Invoke(command, step.Context);
@@ -140,7 +142,9 @@ public static class IFlowStepExtensions
             var command = new CreateDialogCommand
             {
                 Dto = DialogGenerator.CreateSimpleDialogFaker
-                    .UseSeed(seed).Generate()
+                    .Clone()
+                    .UseSeed(seed)
+                    .Generate()
             };
 
             initialState?.Invoke(command, step.Context);

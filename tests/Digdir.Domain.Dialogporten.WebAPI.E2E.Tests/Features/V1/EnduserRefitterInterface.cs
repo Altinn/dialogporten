@@ -1087,6 +1087,31 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonContent_AuthorizationContentValue
+    {
+
+        /// <summary>
+        /// True if the authenticated user is authorized for this action. If not, the action will not be available
+        /// <br/>and all endpoints will be replaced with a fixed placeholder.
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; }
+
+        /// <summary>
+        /// Media type of the content, this can also indicate that the content is embeddable.
+        /// </summary>
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// A list of localizations for the content.
+        /// </summary>
+        [JsonPropertyName("value")]
+        public ICollection<V1CommonLocalizations_Localization> Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1CommonContent_ContentValue
     {
 
@@ -1188,7 +1213,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
         /// </summary>
         [JsonPropertyName("mainContentReference")]
-        public V1CommonContent_ContentValue MainContentReference { get; set; }
+        public V1CommonContent_AuthorizationContentValue MainContentReference { get; set; }
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name.
@@ -1615,6 +1640,12 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -1899,6 +1930,12 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         public System.Guid Id { get; set; }
 
         /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
         [JsonPropertyName("urls")]
@@ -2057,6 +2094,12 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
@@ -2614,6 +2657,12 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
+
+        /// <summary>
+        /// The logical name of the attachment.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.

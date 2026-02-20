@@ -6,6 +6,11 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
+using System.Runtime.CompilerServices;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
@@ -43,6 +48,7 @@ public static class IFlowStepExtensions
     private const string DialogIdKey = "DialogId";
     private const string PartyKey = "Party";
     private const string ServiceResource = "ServiceResource";
+    private const int DefaultSeed = 12345678;
 
     public static IFlowExecutor<CreateDialogSuccess> CreateDialogs(this IFlowStep step,
         params CreateDialogCommand[] commands)
@@ -69,34 +75,75 @@ public static class IFlowStepExtensions
             return command;
         });
 
+    public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
+        this IFlowStep step,
+        Action<CreateTransmissionDto> modify,
+        Guid? ifMatchDialogRevision = null) =>
+        step.CreateTransmission((transmission, _) => modify(transmission), ifMatchDialogRevision);
+
+    public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
+        this IFlowStep step,
+        Action<CreateTransmissionDto, FlowContext>? modify,
+        Guid? ifMatchDialogRevision = null) =>
+        step.SendCommand(ctx =>
+        {
+            var transmission = new CreateTransmissionDto
+            {
+                Type = DialogTransmissionType.Values.Information,
+                Sender = new()
+                {
+                    ActorType = ActorType.Values.ServiceOwner
+                },
+                Content = new()
+                {
+                    Title = new ContentValueDto
+                    {
+                        Value = [new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = "Ny melding"
+                        }]
+                    }
+                }
+            };
+
+            modify?.Invoke(transmission, ctx);
+
+            var command = new CreateTransmissionCommand
+            {
+                DialogId = ctx.GetDialogId(),
+                IfMatchDialogRevision = ifMatchDialogRevision,
+                Transmissions = [transmission]
+            };
+
+            return command;
+        });
+
     public static IFlowExecutor<CreateDialogResult> CreateComplexDialog(this IFlowStep step,
-        Action<CreateDialogCommand>? initialState = null) =>
+        Action<CreateDialogCommand, FlowContext>? initialState = null, int seed = DefaultSeed) =>
         step.CreateDialog(_ =>
         {
-            var command = DialogGenerator.GenerateFakeCreateDialogCommand();
-            initialState?.Invoke(command);
+            var command = new CreateDialogCommand
+            {
+                Dto = DialogGenerator.CreateDialogFaker
+                    .UseSeed(seed).Generate()
+            };
+
+            initialState?.Invoke(command, step.Context);
             return command;
         });
 
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
-        Action<CreateDialogCommand> initialState) =>
+        Action<CreateDialogCommand, FlowContext>? initialState = null, int seed = DefaultSeed) =>
         step.CreateDialog(_ =>
         {
-            var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-            initialState.Invoke(command);
-            return command;
-        });
+            var command = new CreateDialogCommand
+            {
+                Dto = DialogGenerator.CreateSimpleDialogFaker
+                    .UseSeed(seed).Generate()
+            };
 
-    public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step) =>
-        step.CreateDialog(_ => DialogGenerator.GenerateSimpleFakeCreateDialogCommand());
-
-    public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(
-        this IFlowStep step,
-        Action<CreateDialogCommand, FlowContext> initialState) =>
-        step.CreateDialog(ctx =>
-        {
-            var command = DialogGenerator.GenerateSimpleFakeCreateDialogCommand();
-            initialState.Invoke(command, ctx);
+            initialState?.Invoke(command, step.Context);
             return command;
         });
 
@@ -142,12 +189,14 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep ConfigureServices(this IFlowStep step, Action<IServiceCollection> configure) =>
         step.Do(x =>
         {
             x.Application.ConfigureServices(configure);
         });
 
+    [Obsolete("We should not need to override services for any tests. If we do, we should consider using the same pattern as for TestUser and TestClock.")]
     public static IFlowStep<T> ConfigureServices<T>(this IFlowStep<T> step, Action<IServiceCollection> configure) =>
         step.Select(x =>
         {
@@ -155,29 +204,15 @@ public static class IFlowStepExtensions
             return x;
         });
 
-    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, TimeSpan skew) =>
-        step.Select(x =>
-        {
-            DialogApplication.Clock.OverrideUtc(skew);
-            return x;
-        });
-
-    public static IFlowStep OverrideUtc(this IFlowStep step, TimeSpan skew) =>
-        step.Do(_ => DialogApplication.Clock.OverrideUtc(skew));
-
-    public static IFlowStep<T> OverrideUtc<T>(this IFlowStep<T> step, DateTimeOffset time) =>
-        step.Select(x =>
-        {
-            DialogApplication.Clock.OverrideUtc(time);
-            return x;
-        });
-
-    public static IFlowStep OverrideUtc(this IFlowStep step, DateTimeOffset time) =>
-        step.Do(_ => DialogApplication.Clock.OverrideUtc(time));
-
-    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step) =>
+    public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step,
+        Action<DeleteDialogCommand>? modify = null) =>
         step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x => new DeleteDialogCommand { Id = x.DialogId });
+            .SendCommand(x =>
+            {
+                var command = new DeleteDialogCommand { Id = x.DialogId };
+                modify?.Invoke(command);
+                return command;
+            });
 
     public static IFlowExecutor<RestoreDialogResult> RestoreDialog(this IFlowStep<DeleteDialogResult> step,
         Action<RestoreDialogCommand>? modify = null) =>
@@ -202,6 +237,7 @@ public static class IFlowStepExtensions
                 modify(command);
                 return command;
             });
+
     public static IFlowExecutor<UpdateDialogResult> UpdateDialog(this IFlowStep<DialogDtoSO> step,
         Action<UpdateDialogCommand> modify) => step
         .SendCommand((x, ctx) =>
@@ -235,36 +271,11 @@ public static class IFlowStepExtensions
                 return command;
             });
 
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateDialogResult> step) =>
-        step.AssertResult<UpdateDialogSuccess>()
-            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep step) =>
+        step.SendCommand(ctx => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateDialogServiceOwnerContextResult> step) =>
-        step.AssertResult<UpdateServiceOwnerContextSuccess>()
-            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
-
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<CreateDialogResult> step) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
-
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<CreateTransmissionResult> step) =>
-        step.AssertResult<CreateTransmissionSuccess>()
-            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
-
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<CreateTransmissionSuccess> step) =>
-        step.SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
-
-    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep<UpdateFormSavedActivityTimeResult> step) =>
-        step.AssertResult<UpdateFormSavedActivityTimeSuccess>()
-            .SendCommand((_, ctx) => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
-
-    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<CreateDialogResult> step) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
-
-    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep<UpdateDialogResult> step) =>
-        step.AssertResult<UpdateDialogSuccess>()
-            .SendCommand((_, ctx) => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
+    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep step) =>
+        step.SendCommand(ctx => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 
     public static IFlowExecutor<GetTransmissionResultSO> GetServiceOwnerTransmission(this IFlowStep step,
         Guid transmissionId) =>
@@ -366,6 +377,17 @@ public static class IFlowStepExtensions
             return @in;
         });
 
+    public static IFlowExecutor<TOut> SelectAsync<TIn, TOut>(
+        this IFlowStep<TIn> step,
+        Func<TIn, FlowContext, CancellationToken, Task<TOut>> selector)
+    {
+        var context = step.Context;
+        context.Commands.Add(async (input, cancellationToken) =>
+            await selector((TIn)input!, context, cancellationToken));
+
+        return new FlowStep<TOut>(context);
+    }
+
     public static Task<object> ExecuteAndAssert(
         this IFlowStep<IOneOf> step,
         Action<object>? assert) =>
@@ -389,6 +411,22 @@ public static class IFlowStepExtensions
 
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
         => step.AssertResult(assert).ExecuteAsync();
+
+    public static TFlowStep VerifySnapshot<TFlowStep>(
+        this TFlowStep flowStep,
+        Action<VerifySettings>? configureSettings = null,
+        [CallerFilePath] string sourceFile = "") where TFlowStep : IFlowStep =>
+        flowStep.Do((x, _) =>
+        {
+            var settings = new VerifySettings();
+            configureSettings?.Invoke(settings);
+
+            return x is IOneOf oneOf
+                ? Verify(oneOf.Value, settings, sourceFile)
+                    .UseDirectory("Snapshots")
+                : Verify(x, settings, sourceFile)
+                .UseDirectory("Snapshots");
+        });
 
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>
         step.Select(result =>

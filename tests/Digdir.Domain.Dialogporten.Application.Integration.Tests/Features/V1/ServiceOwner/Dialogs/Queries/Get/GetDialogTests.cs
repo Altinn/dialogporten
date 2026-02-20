@@ -4,10 +4,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -24,7 +24,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
-            .CreateSimpleDialog(x => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
+            .CreateSimpleDialog((x, _) => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
@@ -43,7 +43,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         CreateDialogDto createDto = null!;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => createDto = x.Dto)
+            .CreateComplexDialog((x, _) => createDto = x.Dto)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
@@ -64,7 +64,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Not_Mask_Expired_Attachment_Urls() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
                 x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
@@ -88,13 +88,39 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                             .And.NotBe(Constants.ExpiredUri)));
             });
 
+    private const string DialogAttachmentName = "dialog-attachment";
+    private const string TransmissionAttachmentName = "transmission-attachment";
+
+    [Fact]
+    public Task Get_Dialog_Should_Return_Attachment_Names() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddAttachment(attachment =>
+                    attachment.Name = DialogAttachmentName);
+                x.AddTransmission(transmission =>
+                    transmission.AddAttachment(attachment =>
+                        attachment.Name = TransmissionAttachmentName));
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == DialogAttachmentName);
+                x.Transmissions.Should().ContainSingle()
+                    .Which.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == TransmissionAttachmentName);
+            });
+
     [Fact]
     public async Task Get_ReturnsDialog_WhenDialogExists()
     {
         CreateDialogDto createDto = null!;
 
         await FlowBuilder.For(Application)
-            .CreateComplexDialog(x => createDto = x.Dto)
+            .CreateComplexDialog((x, _) => createDto = x.Dto)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {

@@ -4,8 +4,6 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
@@ -18,12 +16,9 @@ using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using OneOf.Types;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
-using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Events;
 
@@ -73,12 +68,9 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     {
         var activityCount = 0;
 
-        await FlowBuilder.For(Application, x =>
-            {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-            })
-            .CreateSimpleDialog(x =>
+        await FlowBuilder.For(Application)
+            .AsCorrespondenceUser()
+            .CreateSimpleDialog((x, _) =>
             {
                 var allActivityTypes = Enum.GetValues<DialogActivityType.Values>().ToList();
 
@@ -237,7 +229,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task AltinnEvents_Should_Be_Disabled_When_IsSilentUpdate_Is_Set() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Activities.Add(DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information));
                 x.IsSilentUpdate = true;
@@ -278,7 +270,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
     [Fact]
     public Task Only_Create_And_Update_DomainEvents_When_IsSilentUpdate_Is_Set() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Activities.Add(DialogGenerator.GenerateFakeDialogActivity(DialogActivityType.Values.Information));
                 x.Dto.Transmissions.Add(DialogGenerator.GenerateFakeDialogTransmissions(1).First());

@@ -1,8 +1,9 @@
 using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Microsoft.Extensions.Options;
-using static Digdir.Library.Dialogporten.E2E.Common.TestTokenConstants;
+using static Digdir.Library.Dialogporten.E2E.Common.E2EConstants;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
@@ -40,6 +41,12 @@ public sealed class TestTokenHandler : DelegatingHandler
     {
         var token = await GetToken(cancellationToken);
 
+        if (token.Length == 0)
+        {
+            request.Headers.Authorization = null;
+            return await base.SendAsync(request, cancellationToken);
+        }
+
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return await base.SendAsync(request, cancellationToken);
     }
@@ -55,7 +62,7 @@ public sealed class TestTokenHandler : DelegatingHandler
             _ => null
         };
 
-        if (!string.IsNullOrWhiteSpace(overrideToken))
+        if (overrideToken is not null)
         {
             return overrideToken;
         }

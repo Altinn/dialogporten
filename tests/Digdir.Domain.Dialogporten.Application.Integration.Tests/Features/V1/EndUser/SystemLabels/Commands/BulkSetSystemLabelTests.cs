@@ -5,15 +5,14 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
-
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
 
@@ -27,8 +26,8 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         Guid? dialogId2 = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId1)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId2)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)
             .BulkSetSystemLabelEndUser((x, _) => x.Dto = new()
             {
                 Dialogs =
@@ -55,8 +54,8 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         Guid? revision2 = null;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId1))
-            .CreateSimpleDialog(x => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId2))
+            .CreateSimpleDialog((x, _) => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId1))
+            .CreateSimpleDialog((x, _) => (x.Dto.Party, x.Dto.Id) = (enduserId, dialogId2))
             .SearchEndUserDialogs(x => x.Party = [enduserId])
             .AssertResult<PaginatedList<SearchDialogDto>>(x =>
             {
@@ -120,7 +119,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     [Fact]
     public Task Bulk_Remove_Bin_Label_Should_Reset_To_Default_SystemLabel() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.SystemLabel = SystemLabel.Values.Bin)
+            .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Bin)
             .BulkSetSystemLabelEndUser((x, ctx) => x.Dto = new()
             {
                 Dialogs = [new() { DialogId = ctx.GetDialogId() }],
@@ -150,7 +149,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     [Fact]
     public Task Cannot_Bulk_Remove_Existing_Sent_System_Label() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.Type = DialogTransmissionType.Values.Submission))
             .BulkSetSystemLabelEndUser((x, ctx) =>

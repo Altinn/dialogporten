@@ -5,9 +5,9 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -22,7 +22,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                 {
                     x.Id = transmissionId;
@@ -39,7 +39,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                 {
                     x.Id = transmissionId;
@@ -59,7 +59,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                 {
                     x.Id = transmissionId;
@@ -82,7 +82,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                 {
                     transmission.Id = transmissionId;
@@ -114,7 +114,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
         var transmissionId = NewUuidV7();
 
         await FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                 {
                     transmission.Id = transmissionId;

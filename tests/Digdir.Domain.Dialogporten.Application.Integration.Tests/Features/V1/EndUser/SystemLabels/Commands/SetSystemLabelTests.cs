@@ -4,10 +4,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
@@ -43,7 +43,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         Guid? revision = null;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId)
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x => revision = x.EndUserContext.Revision);
 
@@ -64,7 +64,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     {
         var dialogId = NewUuidV7();
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId)
             .SetSystemLabelsEndUser(x =>
                 x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
             .ExecuteAndAssert<SetSystemLabelSuccess>();
@@ -103,7 +103,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     [Fact]
     public Task Cannot_Remove_Existing_Sent_System_Label() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.Type = DialogTransmissionType.Values.Submission))
             .SetSystemLabelsEndUser(x =>

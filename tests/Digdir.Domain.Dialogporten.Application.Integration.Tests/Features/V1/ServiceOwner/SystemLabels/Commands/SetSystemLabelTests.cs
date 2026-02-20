@@ -6,12 +6,12 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -51,7 +51,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         Guid? revision = null;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId)
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>(x =>
             {
@@ -108,7 +108,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     [Fact]
     public Task Cannot_Remove_Existing_Sent_System_Label() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.Type = DialogTransmissionType.Values.Submission))
             .SetSystemLabelsServiceOwner(x =>
@@ -122,7 +122,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     {
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, AdminUserResourceRegistryDecorator>())
+            .AsAdminUser()
             .SetSystemLabelsServiceOwner(command =>
             {
                 command.EndUserId = null;
@@ -144,7 +144,6 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     public Task Set_PerformedBy_For_Non_Admin_Is_Forbidden() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ConfigureServices(x => x.Decorate<IUserResourceRegistry, NonAdminUserResourceRegistryDecorator>())
             .SetSystemLabelsServiceOwner(command =>
             {
                 command.EndUserId = null;
@@ -174,38 +173,4 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         log.PerformedBy.ActorNameEntity.Should().NotBeNull();
         log.PerformedBy.ActorNameEntity!.ActorId.Should().Be(AdminPerformedByActorId);
     }
-}
-
-internal sealed class AdminUserResourceRegistryDecorator(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry
-{
-    public Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken) =>
-        userResourceRegistry.CurrentUserIsOwner(serviceResource, cancellationToken);
-
-    public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) =>
-        userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-
-    public bool UserCanModifyResourceType(string serviceResourceType) =>
-        userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
-
-    public bool IsCurrentUserServiceOwnerAdmin() => true;
-
-    public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
-        userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
-}
-
-internal sealed class NonAdminUserResourceRegistryDecorator(IUserResourceRegistry userResourceRegistry) : IUserResourceRegistry
-{
-    public Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken) =>
-        userResourceRegistry.CurrentUserIsOwner(serviceResource, cancellationToken);
-
-    public Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken) =>
-        userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-
-    public bool UserCanModifyResourceType(string serviceResourceType) =>
-        userResourceRegistry.UserCanModifyResourceType(serviceResourceType);
-
-    public bool IsCurrentUserServiceOwnerAdmin() => false;
-
-    public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
-        userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
 }

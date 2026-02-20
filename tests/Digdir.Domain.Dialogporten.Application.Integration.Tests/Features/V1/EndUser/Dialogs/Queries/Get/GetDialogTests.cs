@@ -1,20 +1,19 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
@@ -35,7 +34,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
-            .CreateSimpleDialog(x => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
+            .CreateSimpleDialog((x, _) => (x.Dto.Id, x.Dto.ExternalReference) = (id, externalReference))
             .CreateSimpleDialog()
             .CreateSimpleDialog()
             .CreateSimpleDialog()
@@ -51,7 +50,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Include_Transmission_ExternalReference() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.ExternalReference = "ext"))
             .GetEndUserDialog()
@@ -62,7 +61,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>
         FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                 {
                     transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";
@@ -98,7 +97,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Fact]
     public Task Get_Dialog_Should_Mask_Expired_Attachment_Urls() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
                 x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.Now.AddDays(1));
@@ -120,6 +119,32 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     .And.AllSatisfy(a => a.Urls.Should().NotBeEmpty()
                         .And.AllSatisfy(url => url.Url.Should().NotBeNull()
                             .And.Be(Constants.ExpiredUri)));
+            });
+
+    private const string DialogAttachmentName = "dialog-attachment";
+    private const string TransmissionAttachmentName = "transmission-attachment";
+
+    [Fact]
+    public Task Get_Dialog_Should_Return_Attachment_Names() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddAttachment(attachment =>
+                    attachment.Name = DialogAttachmentName);
+                x.AddTransmission(transmission =>
+                    transmission.AddAttachment(attachment =>
+                        attachment.Name = TransmissionAttachmentName));
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == DialogAttachmentName);
+                x.Transmissions.Should().ContainSingle()
+                    .Which.Attachments.Should()
+                    .ContainSingle(attachment =>
+                        attachment.Name == TransmissionAttachmentName);
             });
 
     [Fact]
@@ -163,13 +188,11 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         DialogActivityType.Values activityType, bool expectedHasUnOpenedContent) =>
         FlowBuilder.For(Application, x =>
             {
-                x.RemoveAll<IUser>();
-                x.AddSingleton<IUser>(CreateUserWithScope(AuthorizationScope.CorrespondenceScope));
-
                 x.RemoveAll<IResourceRegistry>();
                 x.AddScoped<IResourceRegistry, TestResourceRegistry>();
             })
-            .CreateSimpleDialog(x => x.AddActivity(activityType))
+            .AsIntegrationTestUser(x => x.WithScope(AuthorizationScope.CorrespondenceScope))
+            .CreateSimpleDialog((x, _) => x.AddActivity(activityType))
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.HasUnopenedContent.Should().Be(expectedHasUnOpenedContent));

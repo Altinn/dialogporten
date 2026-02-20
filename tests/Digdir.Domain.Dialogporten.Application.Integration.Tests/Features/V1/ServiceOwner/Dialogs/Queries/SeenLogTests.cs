@@ -1,5 +1,4 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetSeenLog;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
@@ -96,17 +95,12 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         var dialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId)
             .GetEndUserDialog() // Default integration test user
             .AssertResult<DialogDtoEU>()
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-            .ExecuteAndAssert<UpdateDialogSuccess>();
-
-        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
-
-        await FlowBuilder.For(Application)
-            // Fetch as new EndUser
+            .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQueryEU { DialogId = dialogId })
             .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
             .ExecuteAndAssert<DialogDtoSO>(x =>
@@ -145,7 +139,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         var dialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.ServiceResource = DummyService;
                 x.Dto.Id = dialogId;
@@ -154,12 +148,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .AssertResult<DialogDtoEU>()
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-            .ExecuteAndAssert<UpdateDialogSuccess>();
-
-        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
-
-        await FlowBuilder.For(Application)
-            // Fetch as new EndUser
+            .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQueryEU { DialogId = dialogId })
             .SearchServiceOwnerDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
@@ -173,7 +162,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     [Fact]
     public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastUpdate_On_Dialog_Search() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.ServiceResource = DummyService)
+            .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
             .AssertResult<DialogDtoEU>()
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")

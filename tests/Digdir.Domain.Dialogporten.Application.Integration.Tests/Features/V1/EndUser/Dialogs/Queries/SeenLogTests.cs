@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetSeenLog;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -24,7 +23,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     [Fact]
     public Task Search_Dialog_SeenLog_Should_Not_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.ServiceResource = DummyService)
+            .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
             .AssertResult<DialogDto>(result =>
                 result.SeenSinceLastUpdate.AssertSingleActorIdHashed())
@@ -66,23 +65,15 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator));
 
     [Fact]
-    public async Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_Different_Users()
-    {
-        var dialogId = NewUuidV7();
-
-        await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Id = dialogId)
+    public Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_Different_Users() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
             .GetEndUserDialog() // Default integration test user
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-            .ExecuteAndAssert<UpdateDialogSuccess>();
-
-        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
-
-        await FlowBuilder.For(Application)
-            // Fetch as new EndUser
-            .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
+            .AsIntegrationTestUser(x => x.WithPid("13213312833"))
+            .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 // Both users should be in SeenSinceLastContentUpdate
@@ -91,7 +82,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 // Only the new user should be in SeenSinceLastUpdate
                 x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
             });
-    }
 
     [Fact]
     public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastContentUpdate() =>
@@ -112,7 +102,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         var dialogId = NewUuidV7();
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.ServiceResource = DummyService;
                 x.Dto.Id = dialogId;
@@ -121,12 +111,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-            .ExecuteAndAssert<UpdateDialogSuccess>();
-
-        Application.ConfigureServices(x => x.ChangeUserPid("13213312833"));
-
-        await FlowBuilder.For(Application)
-            // Fetch as new EndUser
+            .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
@@ -140,7 +125,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     [Fact]
     public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastUpdate_On_Dialog_Search() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.ServiceResource = DummyService)
+            .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
             .AssertResult<DialogDto>()
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")

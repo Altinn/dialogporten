@@ -3,11 +3,11 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
@@ -39,7 +39,7 @@ public class SearchDialogTests : ApplicationCollectionFixture
     {
         string? party = null;
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => party = x.Dto.Party)
+            .CreateSimpleDialog((x, _) => party = x.Dto.Party)
             .SearchServiceOwnerDialogs(x => x.Party = [party!])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle(x =>
@@ -49,7 +49,7 @@ public class SearchDialogTests : ApplicationCollectionFixture
     [Fact]
     public Task Search_Should_Return_Number_Of_Transmissions_From_Party_And_ServiceOwner() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x
+            .CreateSimpleDialog((x, _) => x
                 .AddTransmission(x => x.Type = DialogTransmissionType.Values.Alert)
                 .AddTransmission(x => x.Type = DialogTransmissionType.Values.Submission))
             .SearchServiceOwnerDialogs((x, ctx) => x.Party = [ctx.GetParty()])

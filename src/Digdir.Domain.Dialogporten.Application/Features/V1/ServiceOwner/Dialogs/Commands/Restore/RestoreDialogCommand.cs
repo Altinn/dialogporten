@@ -52,6 +52,11 @@ internal sealed class RestoreDialogCommandHandler : IRequestHandler<RestoreDialo
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
+        if (request.IfMatchDialogRevision is { } revision && revision != dialog.Revision)
+        {
+            return new ConcurrencyError();
+        }
+
         if (!dialog.Deleted)
         {
             return new RestoreDialogSuccess(dialog.Revision);

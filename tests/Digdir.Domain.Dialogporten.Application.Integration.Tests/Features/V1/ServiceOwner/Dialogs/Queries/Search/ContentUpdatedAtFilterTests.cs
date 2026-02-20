@@ -19,11 +19,11 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
         DateTimeOffset? contentUpdatedAt = null!;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>(x => contentUpdatedAt = x.ContentUpdatedAt)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
             .SearchServiceOwnerDialogs(x =>
             {
                 x.Party = [Party];
@@ -39,17 +39,17 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
         DateTimeOffset? contentUpdatedAt = null!;
 
         await FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.UpdatedAt = DateTimeOffset.Now.AddDays(-2);
                 x.Dto.Party = Party;
             })
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.UpdatedAt = DateTimeOffset.Now.AddDays(-2);
                 x.Dto.Party = Party;
             })
-            .CreateSimpleDialog(x => x.Dto.Party = Party)
+            .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>(x => contentUpdatedAt = x.ContentUpdatedAt)
             .SearchServiceOwnerDialogs(x =>

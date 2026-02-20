@@ -1,5 +1,74 @@
 # Changelog
 
+## [1.104.1](https://github.com/Altinn/dialogporten/compare/v1.104.0...v1.104.1) (2026-02-17)
+
+
+### Miscellaneous Chores
+
+* **deps:** upgrade dotnet SDK to 10.0.103 ([#3471](https://github.com/Altinn/dialogporten/issues/3471)) ([f714d26](https://github.com/Altinn/dialogporten/commit/f714d267f2ad9c195111a45a52b6dbd677c9002f))
+
+## [1.104.0](https://github.com/Altinn/dialogporten/compare/v1.103.1...v1.104.0) (2026-02-16)
+
+
+### Features
+
+* name field on attachments ([#3396](https://github.com/Altinn/dialogporten/issues/3396)) ([6816531](https://github.com/Altinn/dialogporten/commit/68165315940b65d4ca58ed0899450737b446336d))
+
+
+### Bug Fixes
+
+* allow admin scope user to set DueAt/ExpiresAt in the past ([#3439](https://github.com/Altinn/dialogporten/issues/3439)) ([289b720](https://github.com/Altinn/dialogporten/commit/289b720e397054432d3d23c1b44bbbc00ef051b3))
+* **app:** allow adding new ApiActionEndpoints on dialog update ([#3459](https://github.com/Altinn/dialogporten/issues/3459)) ([d2b8364](https://github.com/Altinn/dialogporten/commit/d2b8364c5223c5cc37ff273bd816826e54a778c3))
+
+
+### Miscellaneous Chores
+
+* Add application validation for transmission counts to prevent overflow ([#3409](https://github.com/Altinn/dialogporten/issues/3409)) ([8b81a90](https://github.com/Altinn/dialogporten/commit/8b81a90dab0084441baa0ba360235640778f90d3))
+* adjust otel trace sampler ratio ([#3434](https://github.com/Altinn/dialogporten/issues/3434)) ([67517e2](https://github.com/Altinn/dialogporten/commit/67517e2b78404e867410a3895774b81f4f50d25d))
+* Check for docker or podman in e2e script ([#3452](https://github.com/Altinn/dialogporten/issues/3452)) ([398264e](https://github.com/Altinn/dialogporten/commit/398264e1e3aa49f2dcf8b0fe00246ab2261ef7c3))
+* correct restore layer caching in dockerfiles ([#3425](https://github.com/Altinn/dialogporten/issues/3425)) ([7eb144a](https://github.com/Altinn/dialogporten/commit/7eb144aa9a870a245f715984c971853c8caba6dd)), closes [#3426](https://github.com/Altinn/dialogporten/issues/3426)
+* **deps:** update dependency parquet.net to 5.5.0 ([#3444](https://github.com/Altinn/dialogporten/issues/3444)) ([bd47657](https://github.com/Altinn/dialogporten/commit/bd47657076fd272446b108d2038f5ef445f7be57))
+* **deps:** update dependency verify.xunitv3 to 31.11.0 ([#3466](https://github.com/Altinn/dialogporten/issues/3466)) ([fa84ffc](https://github.com/Altinn/dialogporten/commit/fa84ffc17ebce75f27b805eda4499340548f283c))
+* **deps:** update grafana/loki docker tag to v3.6.5 ([#3463](https://github.com/Altinn/dialogporten/issues/3463)) ([41e4bb5](https://github.com/Altinn/dialogporten/commit/41e4bb56f23991568eabcef370e67a0e305dc884))
+* **deps:** update nginx docker tag to v1.29.5 ([#3464](https://github.com/Altinn/dialogporten/issues/3464)) ([0928743](https://github.com/Altinn/dialogporten/commit/0928743745ce5a3b9c845d4fd274afc43177d3c3))
+* **deps:** update peter-evans/repository-dispatch action to v4 ([#3445](https://github.com/Altinn/dialogporten/issues/3445)) ([dfdea83](https://github.com/Altinn/dialogporten/commit/dfdea830a727cb13229c2b78f53a50df55afedbd))
+* **deps:** update step-security/harden-runner action to v2.14.1 ([#3443](https://github.com/Altinn/dialogporten/issues/3443)) ([6d73f97](https://github.com/Altinn/dialogporten/commit/6d73f97a431f5cdb10acb5cfbdc8cdf73f690b5c))
+* **deps:** update step-security/harden-runner action to v2.14.2 ([#3465](https://github.com/Altinn/dialogporten/issues/3465)) ([231d4bf](https://github.com/Altinn/dialogporten/commit/231d4bf16b749f6433b1a4e482fde6f1b7b2f723))
+* remove scripts and tools ([#3441](https://github.com/Altinn/dialogporten/issues/3441)) ([12928a0](https://github.com/Altinn/dialogporten/commit/12928a0fc1f4f2aebbaa468aed2d6e9dd58ef287))
+* return early on if-match mismatch ([#3416](https://github.com/Altinn/dialogporten/issues/3416)) ([e285523](https://github.com/Altinn/dialogporten/commit/e285523c254ffca0076e5ee706f74bfa146735ce))
+
+## [1.103.1](https://github.com/Altinn/dialogporten/compare/v1.103.0...v1.103.1) (2026-02-09)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunitv3 to 31.10.0 ([#3419](https://github.com/Altinn/dialogporten/issues/3419)) ([e8e2411](https://github.com/Altinn/dialogporten/commit/e8e2411149be5a2170fc5994d1e5a035987fec0c))
+* **deps:** update docker/login-action action to v3.7.0 ([#3420](https://github.com/Altinn/dialogporten/issues/3420)) ([b8306c4](https://github.com/Altinn/dialogporten/commit/b8306c41e4c5adc987f3184839d8d7c6def087fa))
+* **deps:** update dotnet monorepo ([#3418](https://github.com/Altinn/dialogporten/issues/3418)) ([8fe7f2c](https://github.com/Altinn/dialogporten/commit/8fe7f2c0e3518eaf32663f6dac7b81dcb22c5db1))
+* re-introduce base tags for all apps and jobs ([#3430](https://github.com/Altinn/dialogporten/issues/3430)) ([8acec9c](https://github.com/Altinn/dialogporten/commit/8acec9c7a88631d5ab0565034b0426e50ca61fcb))
+
+## [1.103.0](https://github.com/Altinn/dialogporten/compare/v1.102.4...v1.103.0) (2026-02-06)
+
+
+### Features
+
+* enable parameter logging for npsql ([#3058](https://github.com/Altinn/dialogporten/issues/3058)) ([385562e](https://github.com/Altinn/dialogporten/commit/385562ec57d2cb6aa60c33b6eaa580d77e988ce5))
+* support user supplied IDs for ApiActionEndpoint ([#3408](https://github.com/Altinn/dialogporten/issues/3408)) ([7aa4100](https://github.com/Altinn/dialogporten/commit/7aa41001f19912012b19267e9dafd8f3f7e1c408))
+
+
+### Miscellaneous Chores
+
+* **app:** remove old search queries ([#3391](https://github.com/Altinn/dialogporten/issues/3391)) ([4467f61](https://github.com/Altinn/dialogporten/commit/4467f61133f8003ef2f19c72bb6f0e9d949f18e2))
+* **ci:** implement finops tags ([#3330](https://github.com/Altinn/dialogporten/issues/3330)) ([df627f5](https://github.com/Altinn/dialogporten/commit/df627f58f06206d98490c8cdf30fa943c750dc11))
+* create e2e scripts ([#3355](https://github.com/Altinn/dialogporten/issues/3355)) ([123b1a6](https://github.com/Altinn/dialogporten/commit/123b1a62669a09aeb761b2b96dfccc7eac90caf2))
+* **deps:** update dependency refitter.sourcegenerator to 1.7.3 ([#3382](https://github.com/Altinn/dialogporten/issues/3382)) ([325f53d](https://github.com/Altinn/dialogporten/commit/325f53deb25c24194e898eb4f68c1907882b9833))
+* **deps:** update grafana/grafana docker tag to v11.6.9 ([#3393](https://github.com/Altinn/dialogporten/issues/3393)) ([83f87bf](https://github.com/Altinn/dialogporten/commit/83f87bf5cc23bd534276cbecd667582807d943a2))
+* **deps:** update grafana/loki docker tag to v3.6.4 ([#3384](https://github.com/Altinn/dialogporten/issues/3384)) ([1ad4840](https://github.com/Altinn/dialogporten/commit/1ad48408a08db0df263f5f0e2c24faddab894135))
+* **deps:** update step-security/harden-runner action to v2.14.1 ([#3385](https://github.com/Altinn/dialogporten/issues/3385)) ([3bd5cf3](https://github.com/Altinn/dialogporten/commit/3bd5cf306246172d310391f082b91dd21c90a5fc))
+* **deps:** upgrade local postgres version to 16.11 ([#3400](https://github.com/Altinn/dialogporten/issues/3400)) ([a1b0a66](https://github.com/Altinn/dialogporten/commit/a1b0a660b3c5412568d88b5fcd3d38e6759756d4))
+* feat toggle for statement logging ([#3402](https://github.com/Altinn/dialogporten/issues/3402)) ([ca92026](https://github.com/Altinn/dialogporten/commit/ca920269eb39b55e11cd4034100f269a9e2c169b))
+* remove postgresql info logs from yt01 and prod ([#3401](https://github.com/Altinn/dialogporten/issues/3401)) ([db727a3](https://github.com/Altinn/dialogporten/commit/db727a36273f65647594ef758aa1ff17845407b1))
+
 ## [1.102.4](https://github.com/Altinn/dialogporten/compare/v1.102.3...v1.102.4) (2026-02-03)
 
 

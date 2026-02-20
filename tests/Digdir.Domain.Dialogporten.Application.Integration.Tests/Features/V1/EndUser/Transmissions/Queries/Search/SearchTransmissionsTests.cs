@@ -5,9 +5,9 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchTransmissions;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Domain;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Transmissions.Queries.Search;
@@ -18,7 +18,7 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
     [Fact]
     public Task Search_Transmission_Should_Include_ExternalReference() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x => x.ExternalReference = "ext"))
             .SendCommand((_, ctx) => new SearchTransmissionQuery
             {
@@ -31,7 +31,7 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
     [Fact]
     public Task Search_Transmission_Should_Mask_Expired_Attachment_Urls() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
             {
                 x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
                 x.AddTransmission(x => x.AddAttachment(x => x.ExpiresAt = DateTimeOffset.UtcNow.AddDays(1)));
@@ -52,7 +52,7 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
     [Fact]
     public Task Search_Transmission_Should_Mask_Unauthorized_ContentReference() =>
         FlowBuilder.For(Application, ConfigureReadOnlyAuthorization)
-            .CreateSimpleDialog(x =>
+            .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(transmission =>
                 {
                     transmission.AuthorizationAttribute = "urn:altinn:resource:restricted";

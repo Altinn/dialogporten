@@ -1,31 +1,11 @@
 ﻿{
   Items: [
     {
-      Content: {
-        Title: {
-          Value: [
-            {
-              Value: Dette er en tittel, dialog,
-              LanguageCode: nb
-            }
-          ],
-          MediaType: text/plain
-        },
-        Summary: {
-          Value: [
-            {
-              Value: Dette er et sammendrag, dialog,
-              LanguageCode: nb
-            }
-          ],
-          MediaType: text/plain
-        }
-      },
       Id: Guid_1,
       Org: ttd,
       Revision: Guid_2,
       ServiceResource: urn:altinn:resource:1337,
-      ServiceResourceType: localresourcetype,
+      ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
       Progress: 22,
       Process: some-process,
@@ -87,9 +67,7 @@
         SystemLabels: [
           Default
         ]
-      }
-    },
-    {
+      },
       Content: {
         Title: {
           Value: [
@@ -109,12 +87,14 @@
           ],
           MediaType: text/plain
         }
-      },
+      }
+    },
+    {
       Id: Guid_7,
       Org: ttd,
       Revision: Guid_8,
       ServiceResource: urn:altinn:resource:1337,
-      ServiceResourceType: localresourcetype,
+      ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
       Progress: 22,
       Process: some-process,
@@ -145,9 +125,7 @@
         SystemLabels: [
           Archive
         ]
-      }
-    },
-    {
+      },
       Content: {
         Title: {
           Value: [
@@ -167,12 +145,14 @@
           ],
           MediaType: text/plain
         }
-      },
+      }
+    },
+    {
       Id: Guid_12,
       Org: ttd,
       Revision: Guid_13,
       ServiceResource: urn:altinn:resource:1337,
-      ServiceResourceType: localresourcetype,
+      ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
       Progress: 22,
       Process: some-process,
@@ -202,9 +182,7 @@
         SystemLabels: [
           Default
         ]
-      }
-    },
-    {
+      },
       Content: {
         Title: {
           Value: [
@@ -224,12 +202,14 @@
           ],
           MediaType: text/plain
         }
-      },
+      }
+    },
+    {
       Id: Guid_17,
       Org: ttd,
       Revision: Guid_18,
       ServiceResource: urn:altinn:resource:1337,
-      ServiceResourceType: localresourcetype,
+      ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
       Progress: 22,
       Process: some-process,
@@ -260,9 +240,7 @@
         SystemLabels: [
           Default
         ]
-      }
-    },
-    {
+      },
       Content: {
         Title: {
           Value: [
@@ -282,12 +260,14 @@
           ],
           MediaType: text/plain
         }
-      },
+      }
+    },
+    {
       Id: Guid_22,
       Org: ttd,
       Revision: Guid_23,
       ServiceResource: urn:altinn:resource:1337,
-      ServiceResourceType: localresourcetype,
+      ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
       Progress: 22,
       Process: some-process,
@@ -336,9 +316,29 @@
         SystemLabels: [
           Default
         ]
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Dette er en tittel, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Dette er et sammendrag, dialog,
+              LanguageCode: nb
+            }
+          ],
+          MediaType: text/plain
+        }
       }
     }
   ],
   HasNextPage: false,
-  OrderBy: contentupdatedat_desc,id_desc
+  OrderBy: createdat_desc,id_desc
 }

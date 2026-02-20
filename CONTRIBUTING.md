@@ -38,8 +38,8 @@ A useful issue includes:
 5. Run build and tests locally:
 
 ```bash
-dotnet build Digdir.Domain.Dialogporten.sln
-dotnet test Digdir.Domain.Dialogporten.sln
+dotnet build Digdir.Domain.Dialogporten.slnx
+dotnet test Digdir.Domain.Dialogporten.slnx
 ```
 
 6. Open a pull request: <https://github.com/Altinn/dialogporten/pulls>

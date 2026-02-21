@@ -7,5 +7,7 @@
   DialogEventToAltinnForwarder_DialogTransmissionCreatedDomainEvent,
   DialogEventToAltinnForwarder_DialogUpdatedDomainEvent,
   DialogSearchIndexer_DialogCreatedDomainEvent,
-  DialogSearchIndexer_DialogUpdatedDomainEvent
+  DialogSearchIndexer_DialogUpdatedDomainEvent,
+  PartyResourceReferenceCacheInvalidator_DialogCreatedDomainEvent,
+  PartyResourceReferenceCacheInvalidator_DialogDeletedDomainEvent
 ]

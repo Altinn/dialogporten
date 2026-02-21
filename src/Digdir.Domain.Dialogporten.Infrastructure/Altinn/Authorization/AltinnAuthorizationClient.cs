@@ -25,6 +25,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 {
     private const string AuthorizeUrl = "authorization/api/v1/authorize";
     private const string AuthorizedPartiesBaseUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties";
+    private const int ResourcePruningThreshold = 20;
 
     private readonly HttpClient _httpClient;
     private readonly IFusionCache _pdpCache;
@@ -32,6 +33,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     private readonly IFusionCache _subjectResourcesCache;
     private readonly IUser _user;
     private readonly IDialogDbContext _db;
+    private readonly IPartyResourceReferenceRepository _partyResourceReferenceRepository;
     private readonly ILogger _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IOptionsMonitor<ApplicationSettings> _applicationSettings;
@@ -47,6 +49,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         IFusionCacheProvider cacheProvider,
         IUser user,
         IDialogDbContext db,
+        IPartyResourceReferenceRepository partyResourceReferenceRepository,
         ILogger<AltinnAuthorizationClient> logger,
         IServiceScopeFactory serviceScopeFactory,
         IOptionsMonitor<ApplicationSettings> applicationSettings)
@@ -57,6 +60,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         _subjectResourcesCache = cacheProvider.GetCache(nameof(SubjectResource)) ?? throw new ArgumentNullException(nameof(cacheProvider));
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
+        _partyResourceReferenceRepository = partyResourceReferenceRepository ?? throw new ArgumentNullException(nameof(partyResourceReferenceRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
         _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
@@ -298,6 +302,17 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             request.ConstraintServiceResources,
             GetAllSubjectResources,
             cancellationToken);
+
+        var featureToggle = _applicationSettings.CurrentValue.FeatureToggle;
+        if (featureToggle.UsePartyResourcePruning)
+        {
+            await AuthorizationHelper.PruneUnreferencedResources(
+                result,
+                _partyResourceReferenceRepository,
+                featureToggle.MaxPartiesForPruning,
+                ResourcePruningThreshold,
+                cancellationToken);
+        }
 
         return await PopulateDialogIdsFromInstanceDelegationIds(result, cancellationToken);
     }

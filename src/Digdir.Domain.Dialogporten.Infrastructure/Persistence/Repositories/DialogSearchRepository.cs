@@ -185,7 +185,7 @@ internal sealed class DialogSearchRepository(
                 return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
             }
 
-            DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(logger, partiesAndServices);
+            DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(logger, partiesAndServices, "so-endusercontext");
 
             queryBuilder
                 .Append(

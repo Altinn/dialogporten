@@ -1,8 +1,8 @@
-CREATE TABLE public."Resource"
+CREATE TABLE partyresource."Resource"
 (
     "Id" integer GENERATED ALWAYS AS IDENTITY,
-    "Identifier" text NOT NULL,
+    "UnprefixedResourceIdentifier" text NOT NULL,
 
     CONSTRAINT "PK_Resource" PRIMARY KEY ("Id"),
-    CONSTRAINT "UX_Resource_Identifier" UNIQUE ("Identifier")
+    CONSTRAINT "UX_Resource_UnprefixedResourceIdentifier" UNIQUE ("UnprefixedResourceIdentifier")
 );

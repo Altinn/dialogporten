@@ -1,5 +1,5 @@
 -- Strips fixed resource URN prefix.
-CREATE OR REPLACE FUNCTION public.resource_from_urn(p_resource text)
+CREATE OR REPLACE FUNCTION partyresource.resource_from_urn(p_resource text)
 RETURNS text
 LANGUAGE plpgsql
 IMMUTABLE

@@ -1,5 +1,5 @@
-CREATE OR REPLACE FUNCTION public.party_parse_urn(p_party text)
-RETURNS TABLE("ShortPrefix" char(1), "Identifier" text)
+CREATE OR REPLACE FUNCTION partyresource.party_parse_urn(p_party text)
+RETURNS TABLE("ShortPrefix" char(1), "UnprefixedPartyIdentifier" text)
 LANGUAGE plpgsql
 IMMUTABLE
 STRICT

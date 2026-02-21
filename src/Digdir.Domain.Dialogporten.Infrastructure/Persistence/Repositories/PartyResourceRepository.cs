@@ -12,11 +12,11 @@ using ZiggyCreatures.Caching.Fusion.NullObjects;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 /// <summary>
-/// Resolves existing <c>party x service resource</c> references from summary tables and caches
-/// service sets per party using FusionCache.
+/// Resolves existing <c>party x resource</c> references from dedicated partyresource tables and caches
+/// resource sets per party using FusionCache.
 ///
-/// Input parties and services resources are expected as full URNs. Internally, parties are compacted
-/// to type prefix + identifier and service resource are handled unprefixed.
+/// Input parties and resources are expected as full URNs. Internally, parties and resources are handled
+/// in unprefixed form together with a separate short party prefix.
 /// </summary>
 internal sealed class PartyResourceRepository(
     NpgsqlDataSource dataSource,
@@ -99,14 +99,14 @@ internal sealed class PartyResourceRepository(
                 continue;
             }
 
-            var matchingServices = resourceIds
+            var matchingResources = resourceIds
                 .Select(x => $"{ResourcePrefix}{x}")
                 .Where(requestedResources.Contains)
                 .ToHashSet(Comparer);
 
-            if (matchingServices.Count > 0)
+            if (matchingResources.Count > 0)
             {
-                result[party] = matchingServices;
+                result[party] = matchingResources;
             }
         }
 
@@ -123,12 +123,12 @@ internal sealed class PartyResourceRepository(
         List<string> parties,
         CancellationToken cancellationToken)
     {
-        var compactParties = parties
-            .Select(ToCompactParty)
+        var unprefixedParties = parties
+            .Select(ToUnprefixedParty)
             .Distinct()
             .ToList();
 
-        if (compactParties.Count == 0)
+        if (unprefixedParties.Count == 0)
         {
             return [];
         }
@@ -136,22 +136,22 @@ internal sealed class PartyResourceRepository(
         const string sql =
             """
             WITH input_parties AS (
-                SELECT x."PartyType"
-                     , x."PartyIdentifier"
+                SELECT x."ShortPrefix"
+                     , x."UnprefixedPartyIdentifier"
                 FROM jsonb_to_recordset(@Parties::jsonb)
-                    AS x("PartyType" char(1), "PartyIdentifier" text)
+                    AS x("ShortPrefix" char(1), "UnprefixedPartyIdentifier" text)
             )
-            SELECT dp."PartyType" AS "PartyType"
-                 , dp."PartyIdentifier" AS "PartyIdentifier"
-                 , dsr."ServiceResourceIdentifier" AS "ServiceResourceIdentifier"
+            SELECT p."ShortPrefix" AS "ShortPrefix"
+                 , p."UnprefixedPartyIdentifier" AS "UnprefixedPartyIdentifier"
+                 , r."UnprefixedResourceIdentifier" AS "UnprefixedResourceIdentifier"
             FROM input_parties ip
-            JOIN "DialogParty" dp
-              ON dp."PartyType" = ip."PartyType"
-             AND dp."PartyIdentifier" = ip."PartyIdentifier"
-            JOIN "DialogPartyServiceSummary" dpss
-              ON dpss."PartyId" = dp."Id"
-            JOIN "DialogServiceResource" dsr
-              ON dsr."Id" = dpss."ServiceResourceId"
+            JOIN partyresource."Party" p
+              ON p."ShortPrefix" = ip."ShortPrefix"
+             AND p."UnprefixedPartyIdentifier" = ip."UnprefixedPartyIdentifier"
+            JOIN partyresource."PartyResource" pr
+              ON pr."PartyId" = p."Id"
+            JOIN partyresource."Resource" r
+              ON r."Id" = pr."ResourceId"
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
@@ -159,33 +159,33 @@ internal sealed class PartyResourceRepository(
             sql,
             new
             {
-                Parties = JsonSerializer.Serialize(compactParties)
+                Parties = JsonSerializer.Serialize(unprefixedParties)
             },
             cancellationToken: cancellationToken);
         var rows = await connection.QueryAsync<SummaryRow>(command);
 
         return rows
             .GroupBy(
-                x => ToPartyUrn(x.PartyType, x.PartyIdentifier),
+                x => ToPartyUrn(x.ShortPrefix, x.UnprefixedPartyIdentifier),
                 Comparer)
             .ToDictionary(
                 x => x.Key,
                 x => x
-                    .Select(y => y.ServiceResourceIdentifier)
+                    .Select(y => y.UnprefixedResourceIdentifier)
                     .ToHashSet(Comparer),
                 Comparer);
     }
 
-    private static CompactParty ToCompactParty(string party) =>
+    private static UnprefixedParty ToUnprefixedParty(string party) =>
         !PartyIdentifier.TryParse(party.AsSpan(), out var partyIdentifier)
         || !PartyIdentifier.TryGetShortPrefix(partyIdentifier, out var shortPrefix)
             ? throw new InvalidOperationException($"Unsupported party URN format: {party}")
-            : new CompactParty(shortPrefix, partyIdentifier.Id);
+            : new UnprefixedParty(shortPrefix, partyIdentifier.Id);
 
-    private static string ToPartyUrn(char partyType, string partyIdentifier) =>
-        !PartyIdentifier.TryGetPrefixWithSeparator(partyType, out var prefixWithSeparator)
-            ? throw new InvalidOperationException($"Unsupported party type '{partyType}'.")
-            : $"{prefixWithSeparator}{partyIdentifier}";
+    private static string ToPartyUrn(char shortPrefix, string unprefixedPartyIdentifier) =>
+        !PartyIdentifier.TryGetPrefixWithSeparator(shortPrefix, out var prefixWithSeparator)
+            ? throw new InvalidOperationException($"Unsupported short prefix '{shortPrefix}'.")
+            : $"{prefixWithSeparator}{unprefixedPartyIdentifier}";
 
     private static string GetCacheKey(string party)
     {
@@ -193,7 +193,7 @@ internal sealed class PartyResourceRepository(
         return $"{CacheKeyPrefix}{hashedParty}";
     }
 
-    private sealed record CompactParty(char PartyType, string PartyIdentifier);
+    private sealed record UnprefixedParty(char ShortPrefix, string UnprefixedPartyIdentifier);
 
-    private sealed record SummaryRow(char PartyType, string PartyIdentifier, string ServiceResourceIdentifier);
+    private sealed record SummaryRow(char ShortPrefix, string UnprefixedPartyIdentifier, string UnprefixedResourceIdentifier);
 }

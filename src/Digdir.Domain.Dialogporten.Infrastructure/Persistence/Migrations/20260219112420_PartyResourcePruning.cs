@@ -13,6 +13,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
             var scripts = new[]
             {
+                "PartyResource/Schema.PartyResource.sql",
                 "PartyResource/Function.PartyParseUrn.sql",
                 "PartyResource/Function.ResourceFromUrn.sql",
                 "PartyResource/Table.Party.sql",
@@ -37,15 +38,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 DROP TRIGGER IF EXISTS "TR_PR_AfterDelete" ON public."Dialog";
                 DROP TRIGGER IF EXISTS "TR_PR_AfterInsert_Row" ON public."Dialog";
 
-                DROP FUNCTION IF EXISTS public.party_resource_after_delete_row();
-                DROP FUNCTION IF EXISTS public.party_resource_after_insert_row();
+                DROP FUNCTION IF EXISTS partyresource.party_resource_after_delete_row();
+                DROP FUNCTION IF EXISTS partyresource.party_resource_after_insert_row();
 
-                DROP TABLE IF EXISTS public."PartyResource";
-                DROP TABLE IF EXISTS public."Resource";
-                DROP TABLE IF EXISTS public."Party";
+                DROP TABLE IF EXISTS partyresource."PartyResource";
+                DROP TABLE IF EXISTS partyresource."Resource";
+                DROP TABLE IF EXISTS partyresource."Party";
 
-                DROP FUNCTION IF EXISTS public.resource_from_urn(text);
-                DROP FUNCTION IF EXISTS public.party_parse_urn(text);
+                DROP FUNCTION IF EXISTS partyresource.resource_from_urn(text);
+                DROP FUNCTION IF EXISTS partyresource.party_parse_urn(text);
+                DROP SCHEMA IF EXISTS partyresource;
                 """);
         }
     }

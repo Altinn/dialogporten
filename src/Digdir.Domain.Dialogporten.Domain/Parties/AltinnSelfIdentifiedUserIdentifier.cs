@@ -12,7 +12,7 @@ public sealed record AltinnSelfIdentifiedUserIdentifier : IPartyIdentifier
 
     private AltinnSelfIdentifiedUserIdentifier(ReadOnlySpan<char> value)
     {
-        Id = value.ToString();
+        Id = value.ToString().ToLowerInvariant();
         FullId = PrefixWithSeparator + Id;
     }
 

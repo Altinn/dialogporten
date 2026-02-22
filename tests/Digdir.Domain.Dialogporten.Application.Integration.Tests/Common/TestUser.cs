@@ -23,12 +23,27 @@ public sealed class TestUser : IUser
 internal static class TestUsers
 {
     private static string DefaultPid => "22834498646";
+    private static string DefaultUser => "UserName";
+    private static string DefaultEmail => "TEST@TEST.NO";
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
+
+    private static readonly Dictionary<string, string> DefaultNoPid = new()
+    {
+        [ClaimTypes.Name] = "SI and email test user",
+        [ClaimTypes.NameIdentifier] = "integration-test-user",
+        [ClaimsPrincipalExtensions.IdportenAuthLevelClaim] = Constants.IdportenLoaLow,
+        [ClaimsPrincipalExtensions.ConsumerClaim] =
+            """
+            {
+                "authority": "iso6523-actorid-upis",
+                "ID": "0192:991825827"
+            }
+            """
+    };
 
     private static readonly Dictionary<string, string> Default = new()
     {
         [ClaimTypes.Name] = "Integration Test User",
-        [ClaimsPrincipalExtensions.AltinnOrgClaim] = "ttd",
         [ClaimsPrincipalExtensions.IdportenAuthLevelClaim] = Constants.IdportenLoaHigh,
         [ClaimTypes.NameIdentifier] = "integration-test-user",
         [ClaimsPrincipalExtensions.PidClaim] = DefaultPid,
@@ -43,10 +58,26 @@ internal static class TestUsers
 
     public static ClaimsPrincipalBuilder FromDefault() => ClaimsPrincipalBuilder.From(Default);
 
+    public static ClaimsPrincipalBuilder FromDefaultNoPid() => ClaimsPrincipalBuilder.From(DefaultNoPid);
+
     extension<TFlowStep>(TFlowStep flowStep) where TFlowStep : IFlowStep
     {
         public TFlowStep AsIntegrationTestUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
             flowStep.AsUser(() => FromDefault()
+                .Configure(configure)
+                .Build());
+
+        public TFlowStep AsIntegrationEmailUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromDefaultNoPid()
+                .WithClaim(ClaimsPrincipalExtensions.IdportenEmailClaim, DefaultEmail)
+                .WithClaim(ClaimsPrincipalExtensions.IdportenAmrClaim, ClaimsPrincipalExtensions.AmrSelfRegisteredEmail)
+                .Configure(configure)
+                .Build());
+
+        public TFlowStep AsIntegrationlegacySIUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromDefaultNoPid()
+                .WithClaim(ClaimsPrincipalExtensions.AltinnUsernameClaim, DefaultUser)
+                .WithClaim(ClaimsPrincipalExtensions.IdportenAmrClaim, ClaimsPrincipalExtensions.AmrSelfIdentified)
                 .Configure(configure)
                 .Build());
 

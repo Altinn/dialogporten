@@ -157,7 +157,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
-            request.Party ?? [],
+            request.Party?.Select(x => x.ToLowerInvariant()).ToList() ?? [],
             request.ServiceResource ?? [],
             cancellationToken: cancellationToken);
 
@@ -165,9 +165,6 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         {
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
-
-        // Make sure we compare lowercase Party with DB
-        request.Party = request.Party?.Select(x => x.ToLowerInvariant()).ToList();
 
         var dialogs = await _searchRepository.GetDialogsAsEndUser(
             request.ToGetDialogsQuery(_clock.UtcNowOffset),
@@ -392,7 +389,7 @@ internal static class SearchDialogQueryExtensions
             ExternalReference = request.ExternalReference,
             ExtendedStatus = request.ExtendedStatus,
             Org = request.Org,
-            Party = request.Party,
+            Party = request.Party?.Select(x => x.ToLowerInvariant()).ToList(),
             ServiceResource = request.ServiceResource,
             Status = request.Status,
         };

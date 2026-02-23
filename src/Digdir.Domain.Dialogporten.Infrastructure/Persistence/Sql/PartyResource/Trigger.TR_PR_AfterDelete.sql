@@ -1,4 +1,7 @@
 DROP TRIGGER IF EXISTS "TR_PR_AfterDelete" ON public."Dialog";
+-- NOTE: This trigger only runs on physical row deletion.
+-- Soft-deletes do not fire this trigger; stale party-resource pairs are expected
+-- until regular purge/hard-delete has removed the row.
 CREATE TRIGGER "TR_PR_AfterDelete"
 AFTER DELETE ON public."Dialog"
 FOR EACH ROW

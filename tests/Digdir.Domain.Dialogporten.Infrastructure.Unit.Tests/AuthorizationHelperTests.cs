@@ -147,6 +147,56 @@ public class AuthorizationHelperTests
         Assert.Contains("resource2", repo.LastRequestedResources);
     }
 
+    [Fact]
+    public async Task ResolveDialogSearchAuthorization_ThenPruneUnreferencedResources_ShouldPruneExpectedServiceResources()
+    {
+        const string party = "urn:altinn:organization:identifier-no:313130983";
+        const string resourceA = "urn:altinn:resource:resource-a";
+        const string resourceB = "urn:altinn:resource:resource-b";
+
+        var authorizedParties = new AuthorizedPartiesResult
+        {
+            AuthorizedParties =
+            [
+                new()
+                {
+                    Party = party,
+                    PartyId = 313130983,
+                    AuthorizedRolesAndAccessPackages = [],
+                    AuthorizedResources = [resourceA, resourceB],
+                    AuthorizedInstances = []
+                }
+            ]
+        };
+
+        var resolved = await AuthorizationHelper.ResolveDialogSearchAuthorization(
+            authorizedParties,
+            constraintParties: [],
+            constraintResources: [],
+            _ => Task.FromResult(new List<SubjectResource>()),
+            CancellationToken.None);
+
+        var repo = new FakePartyResourceReferenceRepository
+        {
+            ReferencedResourcesByParty = new Dictionary<string, HashSet<string>>
+            {
+                [party] = [resourceB]
+            }
+        };
+
+        await AuthorizationHelper.PruneUnreferencedResources(
+            resolved,
+            repo,
+            maxPartiesForPruning: null,
+            resourcePruningThreshold: 0,
+            CancellationToken.None);
+
+        Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
+        Assert.True(resolved.ResourcesByParties.TryGetValue(party, out var prunedResources));
+        Assert.Single(prunedResources);
+        Assert.Contains(resourceB, prunedResources);
+    }
+
     [Theory]
     [MemberData(nameof(ResolvingScenarios))]
     public async Task ResolveDialogSearchAuthorization_ShouldResolveCorrectly(

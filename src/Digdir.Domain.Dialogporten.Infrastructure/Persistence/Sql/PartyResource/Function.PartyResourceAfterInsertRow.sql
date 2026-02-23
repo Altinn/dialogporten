@@ -18,14 +18,27 @@ BEGIN
     INSERT INTO partyresource."Party" ("ShortPrefix", "UnprefixedPartyIdentifier")
     VALUES (v_party_prefix, v_unprefixed_party_identifier)
     ON CONFLICT ("ShortPrefix", "UnprefixedPartyIdentifier")
-    DO UPDATE SET "UnprefixedPartyIdentifier" = EXCLUDED."UnprefixedPartyIdentifier"
+    DO NOTHING
     RETURNING "Id" INTO v_party_id;
+
+    IF v_party_id IS NULL THEN
+        SELECT "Id" INTO v_party_id
+        FROM partyresource."Party"
+        WHERE "ShortPrefix" = v_party_prefix
+          AND "UnprefixedPartyIdentifier" = v_unprefixed_party_identifier;
+    END IF;
 
     INSERT INTO partyresource."Resource" ("UnprefixedResourceIdentifier")
     VALUES (v_unprefixed_resource_identifier)
     ON CONFLICT ("UnprefixedResourceIdentifier")
-    DO UPDATE SET "UnprefixedResourceIdentifier" = EXCLUDED."UnprefixedResourceIdentifier"
+    DO NOTHING
     RETURNING "Id" INTO v_resource_id;
+
+    IF v_resource_id IS NULL THEN
+        SELECT "Id" INTO v_resource_id
+        FROM partyresource."Resource"
+        WHERE "UnprefixedResourceIdentifier" = v_unprefixed_resource_identifier;
+    END IF;
 
     INSERT INTO partyresource."PartyResource" ("PartyId", "ResourceId")
     VALUES (v_party_id, v_resource_id)

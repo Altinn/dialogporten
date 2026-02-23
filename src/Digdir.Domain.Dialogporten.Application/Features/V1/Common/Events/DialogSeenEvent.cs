@@ -119,7 +119,8 @@ public sealed class DialogSeenEvent(
             success => { },
             domainError =>
             {
-                if (!IsDuplicateSeenLogIdError(domainError))
+                if (!IsDuplicateSeenLogIdError(domainError)
+                    && !IsDuplicateActorNameError(domainError))
                 {
                     throw new UnreachableException("Should not get domain error when updating SeenAt.");
                 }
@@ -133,5 +134,11 @@ public sealed class DialogSeenEvent(
         domainError.Errors.Any(x =>
             x.PropertyName == "DialogSeenLog"
             && x.ErrorMessage.Contains("(Id)=", StringComparison.Ordinal)
+            && x.ErrorMessage.Contains("already exists", StringComparison.Ordinal));
+
+    private static bool IsDuplicateActorNameError(DomainError domainError) =>
+        domainError.Errors.Any(x =>
+            x.PropertyName == "ActorName"
+            && x.ErrorMessage.Contains("(ActorId, Name)=", StringComparison.Ordinal)
             && x.ErrorMessage.Contains("already exists", StringComparison.Ordinal));
 }

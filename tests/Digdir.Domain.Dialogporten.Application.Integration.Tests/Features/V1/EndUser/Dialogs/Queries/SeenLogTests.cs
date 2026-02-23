@@ -124,6 +124,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.Id = dialogId;
             })
             .GetEndUserDialog() // Default integration test user
+            .GetEndUserDialog()
             .ConsumeEvents()
             .GetEndUserDialog()
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)

@@ -197,6 +197,34 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     }
 
     [Fact]
+    public Task Can_Create_Activity_On_Deleted_Dialog_When_Admin()
+    {
+        var guid = Guid.Parse("019c89bc-413f-7bb1-ae9f-9c6225c4d9c5");
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .DeleteDialog()
+            .AsAdminUser()
+            .CreateActivity(
+                (c, _) => c.Activity = new CreateActivityDto
+                {
+                    Id = guid,
+                    CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                    ExtendedType = null,
+                    Type = DialogActivityType.Values.DialogCreated,
+                    TransmissionId = null,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.PartyRepresentative,
+                        ActorName = null,
+                        ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                    },
+                    Description = []
+                }
+            )
+            .ExecuteAndAssert<CreateActivitySuccess>(x => x.ActivityId.Should().Be(guid));
+    }
+
+    [Fact]
     public Task Can_Not_Create_Activity_On_Unknown_TransmissionId()
     {
         return FlowBuilder.For(Application)

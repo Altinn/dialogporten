@@ -56,9 +56,8 @@ param redisSku = {
 }
 
 param serviceBusSku = {
-  name: 'Premium'
-  tier: 'Premium'
-  capacity: 1
+  name: 'Standard'
+  tier: 'Standard'
 }
 // Altinn Product Dialogporten: Developers Dev
 param sshJumperConfig = {

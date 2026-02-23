@@ -20,10 +20,9 @@ param tags object
 
 @export()
 type Sku = {
-  name: 'Premium'
-  tier: 'Premium'
-  @minValue(1)
-  capacity: int
+  name: ('Premium' | 'Standard')
+  tier: ('Premium' | 'Standard')
+  capacity: int?
 }
 
 @description('The SKU of the Service Bus')

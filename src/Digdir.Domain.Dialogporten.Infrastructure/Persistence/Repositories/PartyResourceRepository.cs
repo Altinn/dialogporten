@@ -52,11 +52,9 @@ internal sealed class PartyResourceRepository(
             cacheLookup.CachedResourcesByParty);
     }
 
-    public async Task InvalidateCachedReferencesForParty(string party, CancellationToken cancellationToken)
-    {
+    public async Task InvalidateCachedReferencesForParty(string party, CancellationToken cancellationToken) =>
         // This uses the backplane to invalidate the cache across replicas.
         await _cache.ExpireAsync(GetCacheKey(party), token: cancellationToken);
-    }
 
     private async Task<Dictionary<string, HashSet<string>>> FetchResourcesByParty(
         List<string> parties,
@@ -232,6 +230,5 @@ internal sealed class PartyResourceRepository(
     private sealed record NormalizedRequest(List<string> Parties, HashSet<string> Resources);
     private sealed record CacheLookup(Dictionary<string, HashSet<string>> CachedResourcesByParty, List<string> CacheMisses);
     private sealed record UnprefixedParty(char ShortPrefix, string UnprefixedPartyIdentifier);
-
     private sealed record SummaryRow(char ShortPrefix, string UnprefixedPartyIdentifier, string UnprefixedResourceIdentifier);
 }

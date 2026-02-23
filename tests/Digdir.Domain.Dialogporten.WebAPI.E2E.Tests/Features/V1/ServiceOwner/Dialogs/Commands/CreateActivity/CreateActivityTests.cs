@@ -128,9 +128,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = response.Content ?? throw new InvalidOperationException("Expected a body");
-        var guid = Guid.Parse(content.Replace("\"", ""));
-        guid.Should().NotBe(Guid.Empty);
+        response.Content.ToGuid();
     }
 
     [E2EFact]

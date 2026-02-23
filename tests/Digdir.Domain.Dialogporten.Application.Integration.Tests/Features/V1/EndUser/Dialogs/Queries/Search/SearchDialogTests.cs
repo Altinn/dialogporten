@@ -256,9 +256,9 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
-    public async Task Search_Dialogs_As_Email_User() =>
+    public Task Search_Dialogs_As_Email_User() =>
         // IntegrationEmailUser have this email: TEST@TEST.NO
-        await FlowBuilder.For(Application)
+        FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = IdportenEmailUserIdentifier.PrefixWithSeparator + "Test@Test.no";
@@ -272,14 +272,14 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.Items.Should().ContainSingle());
 
     [Fact]
-    public async Task Search_Dialogs_As_Legacy_SI_User() =>
+    public Task Search_Dialogs_As_Legacy_SI_User() =>
         // IntegrationLegacySIUser have this username: UserName
-        await FlowBuilder.For(Application)
+        FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + "USERNAME";
             })
-            .AsIntegrationlegacySIUser()
+            .AsIntegrationLegacySIUser()
             .SearchEndUserDialogs(x =>
             {
                 x.Party = [AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + "uSeRnAmE"];

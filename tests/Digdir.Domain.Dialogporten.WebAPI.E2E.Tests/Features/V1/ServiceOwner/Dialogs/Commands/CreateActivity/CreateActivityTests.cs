@@ -101,21 +101,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
         await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);
-        var request = new V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest
-        {
-            Id = null,
-            CreatedAt = null,
-            ExtendedType = new Uri("http://localhost"),
-            Type = DialogCreated,
-            TransmissionId = null,
-            PerformedBy = new V1ServiceOwnerCommonActors_Actor
-            {
-                ActorType = PartyRepresentative,
-                ActorName = null!,
-                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-            },
-            Description = []
-        };
+        var request = DialogTestData.CreateSimpleActivity();
 
         // Act
         var response = await Fixture

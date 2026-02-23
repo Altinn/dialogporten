@@ -165,7 +165,15 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 : throw new InvalidOperationException("Systemuser organization number not found");
         }
 
-        dialog.UpdateSeenAt(externalId, userId.Type);
+        var lastSeen = dialog.SeenLog
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId.ExternalIdWithPrefix)
+            .MaxBy(x => x.CreatedAt);
+
+        if (lastSeen is null || lastSeen.CreatedAt <= dialog.UpdatedAt)
+        {
+            dialog.UpdateSeenAt(externalId, userId.Type);
+        }
+
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()

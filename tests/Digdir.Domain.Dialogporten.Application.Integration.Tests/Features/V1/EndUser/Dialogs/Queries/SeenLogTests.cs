@@ -25,6 +25,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
+            .ConsumeEvents()
+            .GetEndUserDialog()
             .AssertResult<DialogDto>(result =>
                 result.SeenSinceLastUpdate.AssertSingleActorIdHashed())
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
@@ -37,6 +39,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     public Task Get_SeenLog_Should_Not_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .ConsumeEvents()
             .GetEndUserDialog()
             .AssertResult<DialogDto>()
             .SendCommand(x => new GetSeenLogQuery
@@ -56,6 +60,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
+            .ConsumeEvents()
+            .GetEndUserDialog()
             .AssertResult<DialogDto>()
             .SendCommand(x => new SearchSeenLogQuery { DialogId = x.Id })
             .ExecuteAndAssert<List<SearchSeenLogDto>>(result => result.Single()
@@ -69,11 +75,15 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog() // Default integration test user
+            .ConsumeEvents()
+            .GetEndUserDialog() // Default integration test user
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .GetEndUserDialog()
+            .ConsumeEvents()
+            .GetEndUserDialog() // Default integration test user
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 // Both users should be in SeenSinceLastContentUpdate
@@ -88,11 +98,17 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
+            .ConsumeEvents()
+            .GetEndUserDialog()
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .GetEndUserDialog()
+            .ConsumeEvents()
+            .GetEndUserDialog()
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             .UpdateDialog(x => x.Dto.ExternalReference = "bar:baz")
+            .GetEndUserDialog()
+            .ConsumeEvents()
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(BothSeenLogsContainsOneHashedEntry);
 
@@ -108,11 +124,14 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.Id = dialogId;
             })
             .GetEndUserDialog() // Default integration test user
+            .ConsumeEvents()
+            .GetEndUserDialog()
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
+            .ConsumeEvents()
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
             {
@@ -127,14 +146,18 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDto>()
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDto>()
             .UpdateDialog(x => x.Dto.ExternalReference = "bar:baz")
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDto>()
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
+            .ConsumeEvents()
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x => x.Items
                 .Single()
                 .SeenSinceLastContentUpdate

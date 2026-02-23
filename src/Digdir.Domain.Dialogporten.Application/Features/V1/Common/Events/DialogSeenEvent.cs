@@ -1,10 +1,13 @@
 using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UserIdType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
@@ -28,6 +31,7 @@ public sealed class DialogSeenEvent(
             Type = dialogSeenDomainEvent.UserType,
             ExternalId = dialogSeenDomainEvent.UserId,
         };
+        var normalizedActorId = userId.ExternalId.ToLowerInvariant();
 
         var name = userId.Type switch
         {
@@ -66,25 +70,44 @@ public sealed class DialogSeenEvent(
         {
             return;
         }
-        var id = dialogSeenDomainEvent.DialogId.CreateDeterministicSubUuidV7($"{userId.ExternalId}{(lastSeen is not null ? lastSeen.Id.ToString() : "")}");
+
+        var actorNameEntity = await _db.ActorName
+                .FirstOrDefaultAsync(
+                    x => x.ActorId == normalizedActorId && x.Name == name,
+                    cancellationToken)
+         ?? new ActorName { Name = name, ActorId = normalizedActorId };
+
+        // Amund: ples explain
+        var id = dialogSeenDomainEvent.DialogId
+            .CreateDeterministicSubUuidV7($"{userId.ExternalId}{(lastSeen is not null ? lastSeen.Id.ToString() : "")}");
         var dialogSeenLogSeenByActor = new DialogSeenLogSeenByActor
         {
             ActorTypeId = ActorType.Values.PartyRepresentative,
-            ActorNameEntity = new ActorName
-            {
-                Name = name,
-                ActorId = userId.ExternalId
-            }
+            ActorNameEntity = actorNameEntity
         };
-        var aaa = new DialogSeenLog
+
+
+        var seenLog = new DialogSeenLog
         {
             Id = id,
             EndUserTypeId = userId.Type,
             IsViaServiceOwner = userId.Type == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
             SeenBy = dialogSeenLogSeenByActor
         };
-        dialog.SeenLog.Add(aaa);
-        _db.DialogSeenLog.Add(aaa);
+
+        var performedBy = LabelAssignmentLogActorFactory.Create(
+            dialogSeenLogSeenByActor.ActorTypeId,
+            actorNameEntity.ActorId,
+            actorNameEntity.Name);
+
+        performedBy.ActorNameEntity = dialogSeenLogSeenByActor.ActorNameEntity;
+
+        dialog.EndUserContext.UpdateSystemLabels(
+            addLabels: [],
+            removeLabels: [SystemLabel.Values.MarkedAsUnopened],
+            performedBy);
+        dialog.SeenLog.Add(seenLog);
+        _db.DialogSeenLog.Add(seenLog);
 
         var result = await _unitOfWork
             .DisableUpdatableFilter()

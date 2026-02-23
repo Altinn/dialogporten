@@ -39,17 +39,6 @@ public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>
         });
         return new FlowStep<TOut>(context);
     }
-    public IFlowExecutor<TOut> SendInteraction<TOut>()
-    {
-        var context = Context;
-        context.Commands.Add(async (ctx, _) =>
-        {
-            await context.Application.PublishEvents();
-            return ctx;
-        });
-
-        return new FlowStep<TOut>(context);
-    }
 
     public IFlowExecutor<TOut> Select<TOut>(Func<TIn, TOut> selector) =>
         Select((@in, _) => selector(@in));

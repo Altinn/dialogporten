@@ -14,9 +14,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
@@ -418,6 +415,10 @@ public static class IFlowStepExtensions
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
         => step.AssertResult(assert).ExecuteAsync();
 
+    public static TFlowStep ConsumeEvents<TFlowStep>(this TFlowStep flowStep) where TFlowStep : IFlowStep =>
+        flowStep.Do(async ctx =>
+            await ctx.Application.PublishEvents());
+
     public static TFlowStep VerifySnapshot<TFlowStep>(
         this TFlowStep flowStep,
         Action<VerifySettings>? configureSettings = null,
@@ -431,7 +432,7 @@ public static class IFlowStepExtensions
                 ? Verify(oneOf.Value, settings, sourceFile)
                     .UseDirectory("Snapshots")
                 : Verify(x, settings, sourceFile)
-                .UseDirectory("Snapshots");
+                    .UseDirectory("Snapshots");
         });
 
     public static IFlowExecutor<T> AssertResult<T>(this IFlowStep<IOneOf> step, Action<T>? assert = null) =>

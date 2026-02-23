@@ -68,11 +68,14 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     transmission.Content!.ContentReference = new ContentValueDto
                     {
                         MediaType = MediaTypes.EmbeddableMarkdown,
-                        Value = [new LocalizationDto
-                        {
-                            LanguageCode = "nb",
-                            Value = "https://example.com/secret"
-                        }]
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "https://example.com/secret"
+                            }
+                        ]
                     };
                 }))
             .GetEndUserDialog()
@@ -157,7 +160,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 AddLabels = [SystemLabel.Values.MarkedAsUnopened]
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
-            .SendInteraction<GetDialogResult>()
+            .ConsumeEvents()
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened));

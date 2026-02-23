@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors;
@@ -116,9 +117,21 @@ public sealed class DialogSeenEvent(
 
         result.Switch(
             success => { },
-            domainError => throw new UnreachableException("Should not get domain error when updating SeenAt."),
+            domainError =>
+            {
+                if (!IsDuplicateSeenLogIdError(domainError))
+                {
+                    throw new UnreachableException("Should not get domain error when updating SeenAt.");
+                }
+            },
             concurrencyError =>
                 throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
     }
+
+    private static bool IsDuplicateSeenLogIdError(DomainError domainError) =>
+        domainError.Errors.Any(x =>
+            x.PropertyName == "DialogSeenLog"
+            && x.ErrorMessage.Contains("(Id)=", StringComparison.Ordinal)
+            && x.ErrorMessage.Contains("already exists", StringComparison.Ordinal));
 }

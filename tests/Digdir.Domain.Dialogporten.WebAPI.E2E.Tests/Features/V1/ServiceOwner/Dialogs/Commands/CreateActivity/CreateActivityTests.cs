@@ -1,9 +1,12 @@
 using System.Net;
+using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
+using static Altinn.ApiClients.Dialogporten.Features.V1.Actors_ActorType;
+using static Altinn.ApiClients.Dialogporten.Features.V1.DialogsEntitiesActivities_DialogActivityType;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 
@@ -28,9 +31,15 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     {
         // Arrange
         using var _ = Fixture.UseServiceOwnerTokenOverrides(
-            scopes: TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
+            scopes: E2EConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
         );
-        await Should_Create_Activity_As_Service_Owner();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var activityId = await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId);
+
+        // Assert
+        activityId.Should().NotBe(Guid.Empty);
     }
 
     [E2EFact]
@@ -97,11 +106,11 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             Id = null,
             CreatedAt = null,
             ExtendedType = new Uri("http://localhost"),
-            Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
+            Type = DialogCreated,
             TransmissionId = null,
             PerformedBy = new V1ServiceOwnerCommonActors_Actor
             {
-                ActorType = Actors_ActorType.PartyRepresentative,
+                ActorType = PartyRepresentative,
                 ActorName = null!,
                 ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
             },
@@ -123,7 +132,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     {
         // Arrange
         using var _ = Fixture.UseServiceOwnerTokenOverrides(
-            scopes: TestTokenConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
+            scopes: E2EConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
         );
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
         await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);
@@ -132,11 +141,11 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             Id = null,
             CreatedAt = null,
             ExtendedType = new Uri("http://localhost"),
-            Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
+            Type = DialogCreated,
             TransmissionId = null,
             PerformedBy = new V1ServiceOwnerCommonActors_Actor
             {
-                ActorType = Actors_ActorType.PartyRepresentative,
+                ActorType = PartyRepresentative,
                 ActorName = null!,
                 ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
             },

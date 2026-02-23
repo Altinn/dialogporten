@@ -1,12 +1,9 @@
 using System.Net;
-using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
-using static Altinn.ApiClients.Dialogporten.Features.V1.Actors_ActorType;
-using static Altinn.ApiClients.Dialogporten.Features.V1.DialogsEntitiesActivities_DialogActivityType;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 

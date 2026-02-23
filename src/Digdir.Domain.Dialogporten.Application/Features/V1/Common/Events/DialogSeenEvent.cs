@@ -8,7 +8,6 @@ using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UserIdType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
@@ -78,9 +77,12 @@ public sealed class DialogSeenEvent(
                     cancellationToken)
          ?? new ActorName { Name = name, ActorId = normalizedActorId };
 
-        // Amund: ples explain
+        // Use a deterministic id to make the seen-log insert idempotent.
+        // If multiple seen events are produced without dialog changes in between,
+        // they represent the same logical "seen" and should not create duplicates.
         var id = dialogSeenDomainEvent.DialogId
             .CreateDeterministicSubUuidV7($"{userId.ExternalId}{(lastSeen is not null ? lastSeen.Id.ToString() : "")}");
+
         var dialogSeenLogSeenByActor = new DialogSeenLogSeenByActor
         {
             ActorTypeId = ActorType.Values.PartyRepresentative,
@@ -110,17 +112,36 @@ public sealed class DialogSeenEvent(
         dialog.SeenLog.Add(seenLog);
         _db.DialogSeenLog.Add(seenLog);
 
+        if (!await TrySave(explode: true, cancellationToken: cancellationToken))
+        {
+            actorNameEntity = await _db.ActorName
+                .FirstOrDefaultAsync(
+                    x => x.ActorId == normalizedActorId && x.Name == name,
+                    cancellationToken) ?? throw new UnreachableException("Should find an actor. after conflict on actor");
+
+            _db.ActorName.Remove(seenLog.SeenBy.ActorNameEntity);
+            seenLog.SeenBy.ActorNameEntity = actorNameEntity;
+
+            await TrySave(cancellationToken: cancellationToken);
+        }
+    }
+    private async Task<bool> TrySave(bool explode = true, CancellationToken cancellationToken = default)
+    {
         var result = await _unitOfWork
             .DisableUpdatableFilter()
             .DisableVersionableFilter()
             .SaveChangesAsync(cancellationToken);
-
+        var saved = true;
         result.Switch(
             success => { },
             domainError =>
             {
-                if (!IsDuplicateSeenLogIdError(domainError)
-                    && !IsDuplicateActorNameError(domainError))
+                if (IsDuplicateActorNameError(domainError) && !explode)
+                {
+                    saved = false;
+                    return;
+                }
+                if (!IsDuplicateSeenLogIdError(domainError))
                 {
                     throw new UnreachableException("Should not get domain error when updating SeenAt.");
                 }
@@ -128,17 +149,18 @@ public sealed class DialogSeenEvent(
             concurrencyError =>
                 throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
+        return saved;
     }
 
     private static bool IsDuplicateSeenLogIdError(DomainError domainError) =>
         domainError.Errors.Any(x =>
             x.PropertyName == "DialogSeenLog"
-            && x.ErrorMessage.Contains("(Id)=", StringComparison.Ordinal)
-            && x.ErrorMessage.Contains("already exists", StringComparison.Ordinal));
+         && x.ErrorMessage.Contains("(\'Id\')=", StringComparison.Ordinal)
+         && x.ErrorMessage.Contains("already exists", StringComparison.Ordinal));
 
     private static bool IsDuplicateActorNameError(DomainError domainError) =>
         domainError.Errors.Any(x =>
             x.PropertyName == "ActorName"
-            && x.ErrorMessage.Contains("(ActorId, Name)=", StringComparison.Ordinal)
-            && x.ErrorMessage.Contains("already exists", StringComparison.Ordinal));
+         && x.ErrorMessage.Contains("(\'ActorId\', \'Name\')=", StringComparison.Ordinal)
+         && x.ErrorMessage.Contains("already exists", StringComparison.Ordinal));
 }

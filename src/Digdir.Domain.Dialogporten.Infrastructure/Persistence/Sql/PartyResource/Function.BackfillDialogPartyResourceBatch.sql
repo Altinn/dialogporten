@@ -105,6 +105,13 @@ BEGIN
                 SELECT DISTINCT p."UnprefixedResourceIdentifier"
                 FROM parsed p
             ),
+            existing_parties AS MATERIALIZED (
+                SELECT existing."Id", existing."ShortPrefix", existing."UnprefixedPartyIdentifier"
+                FROM partyresource."Party" existing
+                INNER JOIN party_candidates c
+                    ON existing."ShortPrefix" = c."ShortPrefix"
+                   AND existing."UnprefixedPartyIdentifier" = c."UnprefixedPartyIdentifier"
+            ),
             inserted_parties AS (
                 INSERT INTO partyresource."Party" ("ShortPrefix", "UnprefixedPartyIdentifier")
                 SELECT c."ShortPrefix", c."UnprefixedPartyIdentifier"
@@ -115,7 +122,21 @@ BEGIN
                 WHERE existing."Id" IS NULL
                 ORDER BY c."ShortPrefix", c."UnprefixedPartyIdentifier"
                 ON CONFLICT ("ShortPrefix", "UnprefixedPartyIdentifier") DO NOTHING
-                RETURNING 1
+                RETURNING "Id", "ShortPrefix", "UnprefixedPartyIdentifier"
+            ),
+            all_parties AS MATERIALIZED (
+                -- Data-modifying CTEs are not visible through base-table re-reads in the same WITH chain.
+                SELECT p."Id", p."ShortPrefix", p."UnprefixedPartyIdentifier"
+                FROM existing_parties p
+                UNION ALL
+                SELECT p."Id", p."ShortPrefix", p."UnprefixedPartyIdentifier"
+                FROM inserted_parties p
+            ),
+            existing_resources AS MATERIALIZED (
+                SELECT existing."Id", existing."UnprefixedResourceIdentifier"
+                FROM partyresource."Resource" existing
+                INNER JOIN resource_candidates c
+                    ON existing."UnprefixedResourceIdentifier" = c."UnprefixedResourceIdentifier"
             ),
             inserted_resources AS (
                 INSERT INTO partyresource."Resource" ("UnprefixedResourceIdentifier")
@@ -126,15 +147,22 @@ BEGIN
                 WHERE existing."Id" IS NULL
                 ORDER BY c."UnprefixedResourceIdentifier"
                 ON CONFLICT ("UnprefixedResourceIdentifier") DO NOTHING
-                RETURNING 1
+                RETURNING "Id", "UnprefixedResourceIdentifier"
+            ),
+            all_resources AS MATERIALIZED (
+                SELECT r."Id", r."UnprefixedResourceIdentifier"
+                FROM existing_resources r
+                UNION ALL
+                SELECT r."Id", r."UnprefixedResourceIdentifier"
+                FROM inserted_resources r
             ),
             pair_candidates AS MATERIALIZED (
                 SELECT DISTINCT pty."Id" AS "PartyId", res."Id" AS "ResourceId"
                 FROM parsed p
-                INNER JOIN partyresource."Party" pty
+                INNER JOIN all_parties pty
                     ON pty."ShortPrefix" = p."ShortPrefix"
                    AND pty."UnprefixedPartyIdentifier" = p."UnprefixedPartyIdentifier"
-                INNER JOIN partyresource."Resource" res
+                INNER JOIN all_resources res
                     ON res."UnprefixedResourceIdentifier" = p."UnprefixedResourceIdentifier"
             ),
             inserted_pairs AS (

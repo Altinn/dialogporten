@@ -7,9 +7,10 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.Party
 /// <summary>
 /// Invalidates per-party pruning cache on create and delete events.
 ///
-/// Note: Dialog soft-deletes do not remove rows from <c>partyresource</c> tables immediately,
-/// so this invalidation does not guarantee immediate pruning-table convergence. Convergence
-/// is expected after regular purge/hard-delete operations.
+/// Note: Dialog soft-deletes are intentionally not tracked in <c>partyresource</c> to avoid
+/// extra update-trigger load. This invalidation therefore does not guarantee immediate
+/// pruning-table convergence for soft-deletes; convergence is expected after regular
+/// purge/hard-delete operations.
 /// </summary>
 internal sealed class PartyResourceReferenceCacheInvalidator(IPartyResourceReferenceRepository repo) : INotificationHandler<DialogCreatedDomainEvent>, INotificationHandler<DialogDeletedDomainEvent>
 {

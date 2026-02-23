@@ -22,6 +22,9 @@ BEGIN
     WHERE "UnprefixedResourceIdentifier" = v_unprefixed_resource_identifier;
 
     IF v_party_id IS NOT NULL AND v_resource_id IS NOT NULL THEN
+        -- We intentionally do not track dialog soft-deletes here to avoid extra update-trigger load.
+        -- Rows are pruned on hard-delete/purge instead. Concurrent deletes can temporarily leave stale
+        -- PartyResource rows because each transaction may still observe another matching Dialog row.
         DELETE FROM partyresource."PartyResource"
         WHERE "PartyId" = v_party_id
           AND "ResourceId" = v_resource_id

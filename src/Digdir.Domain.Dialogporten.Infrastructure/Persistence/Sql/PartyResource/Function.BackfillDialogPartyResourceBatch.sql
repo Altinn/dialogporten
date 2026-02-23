@@ -22,215 +22,138 @@ DECLARE
     v_inserted_pairs integer := 0;
     v_shard_completed boolean := false;
     v_all_shards_completed boolean := false;
-    v_attempt integer := 0;
-    v_max_attempts constant integer := 5;
 BEGIN
     IF p_batch_size <= 0 THEN
         RAISE EXCEPTION 'p_batch_size must be > 0'
             USING ERRCODE = '22023';
     END IF;
 
-    LOOP
-        v_attempt := v_attempt + 1;
+    SELECT s."ShardId", s."ShardCount", s."LastDialogId"
+    INTO v_shard_id, v_shard_count, v_last_dialog_id
+    FROM partyresource."BackfillShardState" s
+    WHERE NOT s."Completed"
+    ORDER BY s."UpdatedAt", s."ShardId"
+    FOR UPDATE SKIP LOCKED
+    LIMIT 1;
 
-        BEGIN
-            v_processed_rows := 0;
-            v_inserted_parties := 0;
-            v_inserted_resources := 0;
-            v_inserted_pairs := 0;
-            v_shard_completed := false;
-            v_all_shards_completed := false;
+    IF NOT FOUND THEN
+        SELECT COALESCE(bool_and(s."Completed"), true)
+        INTO v_all_shards_completed
+        FROM partyresource."BackfillShardState" s;
 
-            SELECT s."ShardId", s."ShardCount", s."LastDialogId"
-            INTO v_shard_id, v_shard_count, v_last_dialog_id
-            FROM partyresource."BackfillShardState" s
-            WHERE NOT s."Completed"
-            ORDER BY s."UpdatedAt", s."ShardId"
-            FOR UPDATE SKIP LOCKED
-            LIMIT 1;
+        RETURN QUERY
+        SELECT
+            NULL::integer,
+            0,
+            0,
+            0,
+            0,
+            false,
+            v_all_shards_completed,
+            NULL::uuid;
+        RETURN;
+    END IF;
 
-            IF NOT FOUND THEN
-                SELECT COALESCE(bool_and(s."Completed"), true)
-                INTO v_all_shards_completed
-                FROM partyresource."BackfillShardState" s;
+    CREATE TEMP TABLE IF NOT EXISTS pg_temp.pr_backfill_batch
+    (
+        "Id" uuid NOT NULL,
+        "Party" text NOT NULL,
+        "ServiceResource" text NOT NULL
+    )
+    ON COMMIT DROP;
 
-                RETURN QUERY
-                SELECT
-                    NULL::integer,
-                    0,
-                    0,
-                    0,
-                    0,
-                    true,
-                    v_all_shards_completed,
-                    NULL::uuid;
-                RETURN;
-            END IF;
+    CREATE TEMP TABLE IF NOT EXISTS pg_temp.pr_backfill_parsed
+    (
+        "ShortPrefix" char(1) NOT NULL,
+        "UnprefixedPartyIdentifier" text NOT NULL,
+        "UnprefixedResourceIdentifier" text NOT NULL
+    )
+    ON COMMIT DROP;
 
-            WITH batch AS MATERIALIZED (
-                SELECT d."Id", d."Party", d."ServiceResource"
-                FROM public."Dialog" d
-                WHERE d."Id" > v_last_dialog_id
-                  AND MOD((HASHTEXT(d."Id"::text)::bigint & 2147483647), v_shard_count) = v_shard_id
-                ORDER BY d."Id"
-                LIMIT p_batch_size
-            ),
-            valid AS MATERIALIZED (
-                SELECT b."Id", b."Party", b."ServiceResource"
-                FROM batch b
-                WHERE b."ServiceResource" LIKE 'urn:altinn:resource:%'
-                  AND (
-                    b."Party" LIKE 'urn:altinn:organization:identifier-no:%'
-                    OR b."Party" LIKE 'urn:altinn:person:identifier-no:%'
-                    OR b."Party" LIKE 'urn:altinn:person:legacy-selfidentified:%'
-                    OR b."Party" LIKE 'urn:altinn:person:idporten-email:%'
-                    OR b."Party" LIKE 'urn:altinn:systemuser:uuid:%'
-                    OR b."Party" LIKE 'urn:altinn:feide-subject:%'
-                )
-            ),
-            parsed AS MATERIALIZED (
-                SELECT
-                    v."Id",
-                    parsed_party."ShortPrefix",
-                    parsed_party."UnprefixedPartyIdentifier",
-                    partyresource.resource_from_urn(v."ServiceResource") AS "UnprefixedResourceIdentifier"
-                FROM valid v
-                CROSS JOIN LATERAL partyresource.party_parse_urn(v."Party") parsed_party
-            ),
-            party_candidates AS MATERIALIZED (
-                SELECT DISTINCT p."ShortPrefix", p."UnprefixedPartyIdentifier"
-                FROM parsed p
-            ),
-            resource_candidates AS MATERIALIZED (
-                SELECT DISTINCT p."UnprefixedResourceIdentifier"
-                FROM parsed p
-            ),
-            existing_parties AS MATERIALIZED (
-                SELECT existing."Id", existing."ShortPrefix", existing."UnprefixedPartyIdentifier"
-                FROM partyresource."Party" existing
-                INNER JOIN party_candidates c
-                    ON existing."ShortPrefix" = c."ShortPrefix"
-                   AND existing."UnprefixedPartyIdentifier" = c."UnprefixedPartyIdentifier"
-            ),
-            inserted_parties AS (
-                INSERT INTO partyresource."Party" ("ShortPrefix", "UnprefixedPartyIdentifier")
-                SELECT c."ShortPrefix", c."UnprefixedPartyIdentifier"
-                FROM party_candidates c
-                LEFT JOIN partyresource."Party" existing
-                  ON existing."ShortPrefix" = c."ShortPrefix"
-                 AND existing."UnprefixedPartyIdentifier" = c."UnprefixedPartyIdentifier"
-                WHERE existing."Id" IS NULL
-                ORDER BY c."ShortPrefix", c."UnprefixedPartyIdentifier"
-                ON CONFLICT ("ShortPrefix", "UnprefixedPartyIdentifier") DO NOTHING
-                RETURNING "Id", "ShortPrefix", "UnprefixedPartyIdentifier"
-            ),
-            all_parties AS MATERIALIZED (
-                -- Data-modifying CTEs are not visible through base-table re-reads in the same WITH chain.
-                SELECT p."Id", p."ShortPrefix", p."UnprefixedPartyIdentifier"
-                FROM existing_parties p
-                UNION ALL
-                SELECT p."Id", p."ShortPrefix", p."UnprefixedPartyIdentifier"
-                FROM inserted_parties p
-            ),
-            existing_resources AS MATERIALIZED (
-                SELECT existing."Id", existing."UnprefixedResourceIdentifier"
-                FROM partyresource."Resource" existing
-                INNER JOIN resource_candidates c
-                    ON existing."UnprefixedResourceIdentifier" = c."UnprefixedResourceIdentifier"
-            ),
-            inserted_resources AS (
-                INSERT INTO partyresource."Resource" ("UnprefixedResourceIdentifier")
-                SELECT c."UnprefixedResourceIdentifier"
-                FROM resource_candidates c
-                LEFT JOIN partyresource."Resource" existing
-                  ON existing."UnprefixedResourceIdentifier" = c."UnprefixedResourceIdentifier"
-                WHERE existing."Id" IS NULL
-                ORDER BY c."UnprefixedResourceIdentifier"
-                ON CONFLICT ("UnprefixedResourceIdentifier") DO NOTHING
-                RETURNING "Id", "UnprefixedResourceIdentifier"
-            ),
-            all_resources AS MATERIALIZED (
-                SELECT r."Id", r."UnprefixedResourceIdentifier"
-                FROM existing_resources r
-                UNION ALL
-                SELECT r."Id", r."UnprefixedResourceIdentifier"
-                FROM inserted_resources r
-            ),
-            pair_candidates AS MATERIALIZED (
-                SELECT DISTINCT pty."Id" AS "PartyId", res."Id" AS "ResourceId"
-                FROM parsed p
-                INNER JOIN all_parties pty
-                    ON pty."ShortPrefix" = p."ShortPrefix"
-                   AND pty."UnprefixedPartyIdentifier" = p."UnprefixedPartyIdentifier"
-                INNER JOIN all_resources res
-                    ON res."UnprefixedResourceIdentifier" = p."UnprefixedResourceIdentifier"
-            ),
-            inserted_pairs AS (
-                INSERT INTO partyresource."PartyResource" ("PartyId", "ResourceId")
-                SELECT c."PartyId", c."ResourceId"
-                FROM pair_candidates c
-                LEFT JOIN partyresource."PartyResource" existing
-                  ON existing."PartyId" = c."PartyId"
-                 AND existing."ResourceId" = c."ResourceId"
-                WHERE existing."PartyId" IS NULL
-                ORDER BY c."PartyId", c."ResourceId"
-                ON CONFLICT ("PartyId", "ResourceId") DO NOTHING
-                RETURNING 1
-            ),
-            stats AS (
-                SELECT
-                    (SELECT COUNT(*)::integer FROM batch) AS "ProcessedRows",
-                    (SELECT COUNT(*)::integer FROM inserted_parties) AS "InsertedParties",
-                    (SELECT COUNT(*)::integer FROM inserted_resources) AS "InsertedResources",
-                    (SELECT COUNT(*)::integer FROM inserted_pairs) AS "InsertedPairs",
-                    (SELECT b."Id" FROM batch b ORDER BY b."Id" DESC LIMIT 1) AS "MaxDialogId"
-            )
-            SELECT
-                s."ProcessedRows",
-                s."InsertedParties",
-                s."InsertedResources",
-                s."InsertedPairs",
-                COALESCE(s."MaxDialogId", v_last_dialog_id)
-            INTO
-                v_processed_rows,
-                v_inserted_parties,
-                v_inserted_resources,
-                v_inserted_pairs,
-                v_last_dialog_id
-            FROM stats s;
+    TRUNCATE pg_temp.pr_backfill_batch;
+    TRUNCATE pg_temp.pr_backfill_parsed;
 
-            v_shard_completed := v_processed_rows = 0;
+    INSERT INTO pg_temp.pr_backfill_batch ("Id", "Party", "ServiceResource")
+    SELECT d."Id", d."Party", d."ServiceResource"
+    FROM public."Dialog" d
+    WHERE d."Id" > v_last_dialog_id
+      AND MOD((HASHTEXT(d."Id"::text)::bigint & 2147483647), v_shard_count) = v_shard_id
+    ORDER BY d."Id"
+    LIMIT p_batch_size;
+    GET DIAGNOSTICS v_processed_rows = ROW_COUNT;
 
-            UPDATE partyresource."BackfillShardState" s
-            SET
-                "LastDialogId" = v_last_dialog_id,
-                "Completed" = v_shard_completed,
-                "UpdatedAt" = now()
-            WHERE s."ShardId" = v_shard_id;
+    IF v_processed_rows > 0 THEN
+        SELECT COALESCE(
+            (
+                SELECT b."Id"
+                FROM pg_temp.pr_backfill_batch b
+                ORDER BY b."Id" DESC
+                LIMIT 1
+            ),
+            v_last_dialog_id
+        )
+        INTO v_last_dialog_id;
 
-            SELECT COALESCE(bool_and(s."Completed"), true)
-            INTO v_all_shards_completed
-            FROM partyresource."BackfillShardState" s;
+        INSERT INTO pg_temp.pr_backfill_parsed ("ShortPrefix", "UnprefixedPartyIdentifier", "UnprefixedResourceIdentifier")
+        SELECT
+            parsed_party."ShortPrefix",
+            parsed_party."UnprefixedPartyIdentifier",
+            partyresource.resource_from_urn(b."ServiceResource")
+        FROM pg_temp.pr_backfill_batch b
+        CROSS JOIN LATERAL partyresource.party_parse_urn(b."Party") parsed_party
+        WHERE b."ServiceResource" LIKE 'urn:altinn:resource:%'
+        ;
 
-            RETURN QUERY
-            SELECT
-                v_shard_id,
-                v_processed_rows,
-                v_inserted_parties,
-                v_inserted_resources,
-                v_inserted_pairs,
-                v_shard_completed,
-                v_all_shards_completed,
-                v_last_dialog_id;
-            RETURN;
-        EXCEPTION
-            WHEN deadlock_detected THEN
-                IF v_attempt >= v_max_attempts THEN
-                    RAISE;
-                END IF;
+        INSERT INTO partyresource."Party" ("ShortPrefix", "UnprefixedPartyIdentifier")
+        SELECT DISTINCT b."ShortPrefix", b."UnprefixedPartyIdentifier"
+        FROM pg_temp.pr_backfill_parsed b
+        ORDER BY b."ShortPrefix", b."UnprefixedPartyIdentifier"
+        ON CONFLICT ("ShortPrefix", "UnprefixedPartyIdentifier") DO NOTHING;
+        GET DIAGNOSTICS v_inserted_parties = ROW_COUNT;
 
-                PERFORM pg_sleep((0.02 * v_attempt) + (random() * 0.08));
-        END;
-    END LOOP;
+        INSERT INTO partyresource."Resource" ("UnprefixedResourceIdentifier")
+        SELECT DISTINCT b."UnprefixedResourceIdentifier"
+        FROM pg_temp.pr_backfill_parsed b
+        ORDER BY b."UnprefixedResourceIdentifier"
+        ON CONFLICT ("UnprefixedResourceIdentifier") DO NOTHING;
+        GET DIAGNOSTICS v_inserted_resources = ROW_COUNT;
+
+        -- Join against base tables in a separate statement to avoid same-snapshot CTE visibility pitfalls.
+        INSERT INTO partyresource."PartyResource" ("PartyId", "ResourceId")
+        SELECT DISTINCT p."Id", r."Id"
+        FROM pg_temp.pr_backfill_parsed b
+        INNER JOIN partyresource."Party" p
+            ON p."ShortPrefix" = b."ShortPrefix"
+           AND p."UnprefixedPartyIdentifier" = b."UnprefixedPartyIdentifier"
+        INNER JOIN partyresource."Resource" r
+            ON r."UnprefixedResourceIdentifier" = b."UnprefixedResourceIdentifier"
+        ORDER BY p."Id", r."Id"
+        ON CONFLICT ("PartyId", "ResourceId") DO NOTHING;
+        GET DIAGNOSTICS v_inserted_pairs = ROW_COUNT;
+    END IF;
+
+    v_shard_completed := v_processed_rows = 0;
+
+    UPDATE partyresource."BackfillShardState" s
+    SET
+        "LastDialogId" = v_last_dialog_id,
+        "Completed" = v_shard_completed,
+        "UpdatedAt" = now()
+    WHERE s."ShardId" = v_shard_id;
+
+    SELECT COALESCE(bool_and(s."Completed"), true)
+    INTO v_all_shards_completed
+    FROM partyresource."BackfillShardState" s;
+
+    RETURN QUERY
+    SELECT
+        v_shard_id,
+        v_processed_rows,
+        v_inserted_parties,
+        v_inserted_resources,
+        v_inserted_pairs,
+        v_shard_completed,
+        v_all_shards_completed,
+        v_last_dialog_id;
 END;
 $$;

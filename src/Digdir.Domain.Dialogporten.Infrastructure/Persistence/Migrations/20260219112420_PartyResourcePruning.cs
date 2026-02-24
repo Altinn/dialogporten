@@ -19,10 +19,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 "PartyResource/Table.Party.sql",
                 "PartyResource/Table.Resource.sql",
                 "PartyResource/Table.PartyResource.sql",
-                "PartyResource/Table.BackfillShardState.sql",
+                "PartyResource/Table.BackfillState.sql",
                 "PartyResource/Function.PartyResourceAfterInsertRow.sql",
                 "PartyResource/Function.PartyResourceAfterDeleteRow.sql",
                 "PartyResource/Function.BackfillDialogPartyResourceBatch.sql",
+                "PartyResource/Procedure.RunBackfillDialogPartyResource.sql",
                 "PartyResource/Trigger.TR_PR_AfterInsert_Row.sql",
                 "PartyResource/Trigger.TR_PR_AfterDelete.sql",
             };
@@ -40,10 +41,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 DROP TRIGGER IF EXISTS "TR_PR_AfterDelete" ON public."Dialog";
                 DROP TRIGGER IF EXISTS "TR_PR_AfterInsert_Row" ON public."Dialog";
 
+                DROP PROCEDURE IF EXISTS partyresource.run_backfill_dialog_partyresource(integer, integer, double precision);
                 DROP FUNCTION IF EXISTS partyresource.backfill_dialog_partyresource_batch(integer);
                 DROP FUNCTION IF EXISTS partyresource.party_resource_after_delete_row();
                 DROP FUNCTION IF EXISTS partyresource.party_resource_after_insert_row();
 
+                DROP TABLE IF EXISTS partyresource."BackfillPairStage";
+                DROP TABLE IF EXISTS partyresource."BackfillState";
                 DROP TABLE IF EXISTS partyresource."BackfillShardState";
                 DROP TABLE IF EXISTS partyresource."PartyResource";
                 DROP TABLE IF EXISTS partyresource."Resource";

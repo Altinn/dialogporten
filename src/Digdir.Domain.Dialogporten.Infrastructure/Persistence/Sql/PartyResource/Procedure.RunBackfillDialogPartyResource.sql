@@ -79,6 +79,8 @@ BEGIN
         COMMIT;
     END LOOP;
 
+    COMMIT;
+
     v_elapsed := clock_timestamp() - v_started_at;
 
     RAISE NOTICE

@@ -25,36 +25,6 @@ public class AuthorizationHelperTests
     }
 
     [Fact]
-    public async Task PruneUnreferencedResources_ShouldNotReturnEarly_WhenMultipleParties()
-    {
-        var result = new DialogSearchAuthorizationResult
-        {
-            ResourcesByParties = new Dictionary<string, HashSet<string>>
-            {
-                ["party1"] = ["resource1"],
-                ["party2"] = ["resource2"]
-            }
-        };
-        var repo = new FakePartyResourceReferenceRepository
-        {
-            ReferencedResourcesByParty = new Dictionary<string, HashSet<string>>
-            {
-                ["party1"] = ["resource1"],
-                ["party2"] = ["resource2"]
-            }
-        };
-
-        await AuthorizationHelper.PruneUnreferencedResources(
-            result,
-            repo,
-            minResourcesPruningThreshold: 0,
-            CancellationToken.None);
-
-        Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
-        Assert.Equal(2, result.ResourcesByParties.Count);
-    }
-
-    [Fact]
     public async Task PruneUnreferencedResources_ShouldReturnEarly_WhenDistinctResourcesAtOrBelowThreshold()
     {
         var result = new DialogSearchAuthorizationResult

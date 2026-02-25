@@ -152,7 +152,7 @@ internal static class AuthorizationHelper
     /// <summary>
     /// Prunes resolved service resources for each party by intersecting authorized resources with
     /// existing party-service references. This is an optimization step before the actual dialog search,
-    /// to avoid spending time looking for service resources not actually referenced by the give party.
+    /// to avoid spending time looking for service resources not actually referenced by any given party.
     /// </summary>
     /// <param name="result">Resolved dialog search authorization result to prune in-place.</param>
     /// <param name="partyResourceReferenceRepository">

@@ -18,15 +18,14 @@ public class AuthorizationHelperTests
         await AuthorizationHelper.PruneUnreferencedResources(
             result,
             repo,
-            maxPartiesForPruning: null,
-            resourcePruningThreshold: 0,
+            minResourcesPruningThreshold: 0,
             CancellationToken.None);
 
         Assert.Equal(0, repo.GetReferencedResourcesByPartyCallCount);
     }
 
     [Fact]
-    public async Task PruneUnreferencedResources_ShouldReturnEarly_WhenMaxPartiesExceeded()
+    public async Task PruneUnreferencedResources_ShouldNotReturnEarly_WhenMultipleParties()
     {
         var result = new DialogSearchAuthorizationResult
         {
@@ -36,16 +35,22 @@ public class AuthorizationHelperTests
                 ["party2"] = ["resource2"]
             }
         };
-        var repo = new FakePartyResourceReferenceRepository();
+        var repo = new FakePartyResourceReferenceRepository
+        {
+            ReferencedResourcesByParty = new Dictionary<string, HashSet<string>>
+            {
+                ["party1"] = ["resource1"],
+                ["party2"] = ["resource2"]
+            }
+        };
 
         await AuthorizationHelper.PruneUnreferencedResources(
             result,
             repo,
-            maxPartiesForPruning: 1,
-            resourcePruningThreshold: 0,
+            minResourcesPruningThreshold: 0,
             CancellationToken.None);
 
-        Assert.Equal(0, repo.GetReferencedResourcesByPartyCallCount);
+        Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
         Assert.Equal(2, result.ResourcesByParties.Count);
     }
 
@@ -65,8 +70,7 @@ public class AuthorizationHelperTests
         await AuthorizationHelper.PruneUnreferencedResources(
             result,
             repo,
-            maxPartiesForPruning: null,
-            resourcePruningThreshold: 2,
+            minResourcesPruningThreshold: 2,
             CancellationToken.None);
 
         Assert.Equal(0, repo.GetReferencedResourcesByPartyCallCount);
@@ -102,8 +106,7 @@ public class AuthorizationHelperTests
         await AuthorizationHelper.PruneUnreferencedResources(
             result,
             repo,
-            maxPartiesForPruning: null,
-            resourcePruningThreshold: 0,
+            minResourcesPruningThreshold: 0,
             CancellationToken.None);
 
         Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
@@ -134,8 +137,7 @@ public class AuthorizationHelperTests
         await AuthorizationHelper.PruneUnreferencedResources(
             result,
             repo,
-            maxPartiesForPruning: null,
-            resourcePruningThreshold: 0,
+            minResourcesPruningThreshold: 0,
             CancellationToken.None);
 
         Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
@@ -187,8 +189,7 @@ public class AuthorizationHelperTests
         await AuthorizationHelper.PruneUnreferencedResources(
             resolved,
             repo,
-            maxPartiesForPruning: null,
-            resourcePruningThreshold: 0,
+            minResourcesPruningThreshold: 0,
             CancellationToken.None);
 
         Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);

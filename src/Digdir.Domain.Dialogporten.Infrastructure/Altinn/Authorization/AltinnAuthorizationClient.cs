@@ -25,7 +25,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 {
     private const string AuthorizeUrl = "authorization/api/v1/authorize";
     private const string AuthorizedPartiesBaseUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties";
-    private const int ResourcePruningThreshold = 20;
 
     private readonly HttpClient _httpClient;
     private readonly IFusionCache _pdpCache;
@@ -303,14 +302,15 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             GetAllSubjectResources,
             cancellationToken);
 
-        var featureToggle = _applicationSettings.CurrentValue.FeatureToggle;
+        var applicationSettings = _applicationSettings.CurrentValue;
+        var featureToggle = applicationSettings.FeatureToggle;
         if (featureToggle.UsePartyResourcePruning)
         {
+            var partyResourcePruningLimits = applicationSettings.Limits.PartyResourcePruning;
             await AuthorizationHelper.PruneUnreferencedResources(
                 result,
                 _partyResourceReferenceRepository,
-                featureToggle.MaxPartiesForPruning,
-                ResourcePruningThreshold,
+                partyResourcePruningLimits.MinResourcesPruningThreshold,
                 cancellationToken);
         }
 

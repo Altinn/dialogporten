@@ -158,18 +158,14 @@ internal static class AuthorizationHelper
     /// <param name="partyResourceReferenceRepository">
     /// Repository used to resolve existing service resources per party.
     /// </param>
-    /// <param name="maxPartiesForPruning">
-    /// Optional upper bound for number of parties eligible for pruning.
-    /// </param>
-    /// <param name="resourcePruningThreshold">
+    /// <param name="minResourcesPruningThreshold">
     /// Minimum number of distinct service resources required before pruning is attempted.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     public static async Task PruneUnreferencedResources(
         DialogSearchAuthorizationResult result,
         IPartyResourceReferenceRepository partyResourceReferenceRepository,
-        int? maxPartiesForPruning,
-        int resourcePruningThreshold,
+        int minResourcesPruningThreshold,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -180,19 +176,13 @@ internal static class AuthorizationHelper
             return;
         }
 
-        if (maxPartiesForPruning is > 0
-            && result.ResourcesByParties.Count > maxPartiesForPruning.Value)
-        {
-            return;
-        }
-
         var distinctResources = result.ResourcesByParties
             .Values
             .SelectMany(x => x)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
-        if (distinctResources.Length <= resourcePruningThreshold)
+        if (distinctResources.Length <= minResourcesPruningThreshold)
         {
             return;
         }

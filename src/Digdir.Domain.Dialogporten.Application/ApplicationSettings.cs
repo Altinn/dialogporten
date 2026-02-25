@@ -17,7 +17,6 @@ public sealed class FeatureToggle
 {
     public bool UseBranchingLogicForDialogSearch { get; init; }
     public bool UsePartyResourcePruning { get; init; }
-    public int? MaxPartiesForPruning { get; init; }
     public bool UseAltinnAutoAuthorizedPartiesQueryParameters { get; init; }
     public bool UseCorrectPersonNameOrdering { get; init; }
     public bool UseAccessManagementForAltinnSelfIdentifiedUsers { get; init; }
@@ -54,6 +53,13 @@ public sealed class LimitsSettings
 {
     public EndUserSearchQueryLimits EndUserSearch { get; init; } = new();
     public ServiceOwnerSearchQueryLimits ServiceOwnerSearch { get; init; } = new();
+    public PartyResourcePruningLimits PartyResourcePruning { get; init; } = new();
+}
+
+public sealed class PartyResourcePruningLimits
+{
+    public int MaxPartiesCachingThreshold { get; init; } = 1500; // 0 means no limit.
+    public int MinResourcesPruningThreshold { get; init; } = 5;
 }
 
 public sealed class EndUserSearchQueryLimits
@@ -99,7 +105,8 @@ internal sealed class LimitsSettingsValidator : AbstractValidator<LimitsSettings
 {
     public LimitsSettingsValidator(
         IValidator<EndUserSearchQueryLimits> endUserSearchValidator,
-        IValidator<ServiceOwnerSearchQueryLimits> serviceOwnerSearchValidator)
+        IValidator<ServiceOwnerSearchQueryLimits> serviceOwnerSearchValidator,
+        IValidator<PartyResourcePruningLimits> partyResourcePruningValidator)
     {
         RuleFor(x => x.EndUserSearch)
             .NotEmpty()
@@ -108,6 +115,10 @@ internal sealed class LimitsSettingsValidator : AbstractValidator<LimitsSettings
         RuleFor(x => x.ServiceOwnerSearch)
             .NotEmpty()
             .SetValidator(serviceOwnerSearchValidator);
+
+        RuleFor(x => x.PartyResourcePruning)
+            .NotEmpty()
+            .SetValidator(partyResourcePruningValidator);
     }
 }
 
@@ -129,5 +140,18 @@ internal sealed class ServiceOwnerSearchQueryLimitsValidator : AbstractValidator
         RuleFor(x => x.MaxPartyFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
         RuleFor(x => x.MaxServiceResourceFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
         RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
+    }
+}
+
+internal sealed class PartyResourcePruningLimitsValidator : AbstractValidator<PartyResourcePruningLimits>
+{
+    public PartyResourcePruningLimitsValidator()
+    {
+        RuleFor(x => x.MaxPartiesCachingThreshold)
+            .GreaterThanOrEqualTo(0);
+
+        RuleFor(x => x.MinResourcesPruningThreshold)
+            .GreaterThanOrEqualTo(0)
+            .LessThanOrEqualTo(1000);
     }
 }

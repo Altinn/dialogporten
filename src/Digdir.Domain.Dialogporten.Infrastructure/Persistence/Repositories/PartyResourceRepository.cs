@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Dapper;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.Extensions.Options;
@@ -20,6 +22,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 /// </summary>
 internal sealed class PartyResourceRepository(
     NpgsqlDataSource dataSource,
+    IOptionsSnapshot<ApplicationSettings> applicationSettings,
     IFusionCacheProvider? cacheProvider = null) : IPartyResourceReferenceRepository
 {
     private const string ResourcePrefix = "urn:altinn:resource:";
@@ -28,6 +31,7 @@ internal sealed class PartyResourceRepository(
     private static readonly StringComparer Comparer = StringComparer.InvariantCultureIgnoreCase;
 
     private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
 
     private readonly IFusionCache _cache =
         cacheProvider?.GetCache(nameof(IPartyResourceReferenceRepository))
@@ -38,14 +42,14 @@ internal sealed class PartyResourceRepository(
         IReadOnlyCollection<string> resources,
         CancellationToken cancellationToken)
     {
-        var request = TryNormalizeRequest(parties, resources);
-        if (request is null)
+        if (!TryNormalizeRequest(parties, resources, out var request))
         {
             return [];
         }
 
+        var shouldPopulateCache = ShouldPopulateCache(request.Parties.Count);
         var cacheLookup = await LoadCachedResourcesByParty(request.Parties, cancellationToken);
-        await PopulateCacheMisses(cacheLookup, cancellationToken);
+        await PopulateCacheMisses(cacheLookup, shouldPopulateCache, cancellationToken);
 
         return BuildResult(
             request.Parties,
@@ -114,13 +118,14 @@ internal sealed class PartyResourceRepository(
                 Comparer);
     }
 
-    private static NormalizedRequest? TryNormalizeRequest(
+    private static bool TryNormalizeRequest(
         IReadOnlyCollection<string> parties,
-        IReadOnlyCollection<string> resources)
+        IReadOnlyCollection<string> resources, [NotNullWhen(true)] out NormalizedRequest? normalizedRequest)
     {
         if (parties.Count == 0 || resources.Count == 0)
         {
-            return null;
+            normalizedRequest = null;
+            return false;
         }
 
         var requestedParties = parties
@@ -130,14 +135,22 @@ internal sealed class PartyResourceRepository(
 
         if (requestedParties.Count == 0)
         {
-            return null;
+            normalizedRequest = null;
+            return false;
         }
 
         var requestedResources = resources
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .ToHashSet(Comparer);
 
-        return requestedResources.Count == 0 ? null : new NormalizedRequest(requestedParties, requestedResources);
+        if (requestedResources.Count == 0)
+        {
+            normalizedRequest = null;
+            return false;
+        }
+
+        normalizedRequest = new NormalizedRequest(requestedParties, requestedResources);
+        return true;
     }
 
     private async Task<CacheLookup> LoadCachedResourcesByParty(
@@ -172,6 +185,7 @@ internal sealed class PartyResourceRepository(
 
     private async Task PopulateCacheMisses(
         CacheLookup cacheLookup,
+        bool shouldPopulateCache,
         CancellationToken cancellationToken)
     {
         if (cacheLookup.CacheMisses.Count == 0)
@@ -186,11 +200,24 @@ internal sealed class PartyResourceRepository(
         {
             var resourceIds = cacheLookup.CachedResourcesByParty[party] =
                 fetchedResourcesByParty.GetValueOrDefault(party) ?? [];
-            cacheTasks.Add(
-                _cache.SetAsync(GetCacheKey(party), resourceIds.ToArray(), token: cancellationToken).AsTask());
+            if (shouldPopulateCache)
+            {
+                cacheTasks.Add(
+                    _cache.SetAsync(GetCacheKey(party), resourceIds.ToArray(), token: cancellationToken).AsTask());
+            }
         }
 
         await Task.WhenAll(cacheTasks);
+    }
+
+    private bool ShouldPopulateCache(int requestedPartiesCount)
+    {
+        var configuredThreshold = _applicationSettings.Value
+            .Limits
+            .PartyResourcePruning
+            .MaxPartiesCachingThreshold;
+
+        return configuredThreshold == 0 || requestedPartiesCount <= configuredThreshold;
     }
 
     private static Dictionary<string, HashSet<string>> BuildResult(

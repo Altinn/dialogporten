@@ -32,6 +32,8 @@ using NSubstitute;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers.PostgreSql;
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.NullObjects;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
@@ -129,6 +131,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
             .AddScoped<IOptionsSnapshot<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
             .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>())
+            .AddSingleton<IFusionCacheProvider>(_ => CreateNullFusionCacheProvider())
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
@@ -225,6 +228,17 @@ public class DialogApplication : IAsyncLifetime
             });
 
         return organizationRegistrySubstitute;
+    }
+
+    private static IFusionCacheProvider CreateNullFusionCacheProvider()
+    {
+        var cacheProviderSubstitute = Substitute.For<IFusionCacheProvider>();
+
+        cacheProviderSubstitute
+            .GetCache(Arg.Any<string>())
+            .Returns(_ => new NullFusionCache(Options.Create(new FusionCacheOptions())));
+
+        return cacheProviderSubstitute;
     }
 
     public IMapper GetMapper() => _mapper!;

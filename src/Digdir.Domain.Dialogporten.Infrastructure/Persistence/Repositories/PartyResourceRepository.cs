@@ -28,6 +28,7 @@ internal sealed class PartyResourceRepository(
     private static readonly StringComparer Comparer = StringComparer.InvariantCultureIgnoreCase;
 
     private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+
     private readonly IFusionCache _cache =
         cacheProvider?.GetCache(nameof(IPartyResourceReferenceRepository))
         ?? new NullFusionCache(Options.Create(new FusionCacheOptions()));
@@ -146,19 +147,27 @@ internal sealed class PartyResourceRepository(
         var cachedResourcesByParty = new Dictionary<string, HashSet<string>>(Comparer);
         var cacheMisses = new List<string>();
 
-        foreach (var party in requestedParties)
+        await foreach (var partyLookupAttempt in Task
+                           .WhenEach(requestedParties.Select(TryGetCache))
+                           .WithCancellation(cancellationToken))
         {
-            var cached = await _cache.GetOrDefaultAsync<string[]>(GetCacheKey(party), token: cancellationToken);
-            if (cached is null)
+            var (party, cache) = await partyLookupAttempt;
+            if (!cache.HasValue)
             {
                 cacheMisses.Add(party);
                 continue;
             }
 
-            cachedResourcesByParty[party] = cached.ToHashSet(Comparer);
+            cachedResourcesByParty[party] = cache.Value.ToHashSet(Comparer);
         }
 
         return new CacheLookup(cachedResourcesByParty, cacheMisses);
+
+        async Task<(string Key, MaybeValue<string[]> Value)> TryGetCache(string x)
+        {
+            var value = await _cache.TryGetAsync<string[]>(GetCacheKey(x), token: cancellationToken);
+            return (x, value);
+        }
     }
 
     private async Task PopulateCacheMisses(
@@ -171,13 +180,17 @@ internal sealed class PartyResourceRepository(
         }
 
         var fetchedResourcesByParty = await FetchResourcesByParty(cacheLookup.CacheMisses, cancellationToken);
+        var cacheTasks = new List<Task>();
+
         foreach (var party in cacheLookup.CacheMisses)
         {
-            var resourceIds = fetchedResourcesByParty.GetValueOrDefault(party) ?? [];
-
-            cacheLookup.CachedResourcesByParty[party] = resourceIds;
-            await _cache.SetAsync(GetCacheKey(party), resourceIds.ToArray(), token: cancellationToken);
+            var resourceIds = cacheLookup.CachedResourcesByParty[party] =
+                fetchedResourcesByParty.GetValueOrDefault(party) ?? [];
+            cacheTasks.Add(
+                _cache.SetAsync(GetCacheKey(party), resourceIds.ToArray(), token: cancellationToken).AsTask());
         }
+
+        await Task.WhenAll(cacheTasks);
     }
 
     private static Dictionary<string, HashSet<string>> BuildResult(
@@ -228,7 +241,15 @@ internal sealed class PartyResourceRepository(
     }
 
     private sealed record NormalizedRequest(List<string> Parties, HashSet<string> Resources);
-    private sealed record CacheLookup(Dictionary<string, HashSet<string>> CachedResourcesByParty, List<string> CacheMisses);
+
+    private sealed record CacheLookup(
+        Dictionary<string, HashSet<string>> CachedResourcesByParty,
+        List<string> CacheMisses);
+
     private sealed record UnprefixedParty(char ShortPrefix, string UnprefixedPartyIdentifier);
-    private sealed record SummaryRow(char ShortPrefix, string UnprefixedPartyIdentifier, string UnprefixedResourceIdentifier);
+
+    private sealed record SummaryRow(
+        char ShortPrefix,
+        string UnprefixedPartyIdentifier,
+        string UnprefixedResourceIdentifier);
 }

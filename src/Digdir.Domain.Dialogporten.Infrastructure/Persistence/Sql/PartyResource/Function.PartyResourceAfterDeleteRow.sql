@@ -5,6 +5,7 @@ AS $$
 DECLARE
     v_party_id integer;
     v_resource_id integer;
+    v_deleted_rows integer;
     v_party_prefix char(1);
     v_unprefixed_party_identifier text;
     v_unprefixed_resource_identifier text;
@@ -33,6 +34,36 @@ BEGIN
             WHERE "Party" = OLD."Party"
               AND "ServiceResource" = OLD."ServiceResource"
         );
+
+        GET DIAGNOSTICS v_deleted_rows = ROW_COUNT;
+
+        IF v_deleted_rows > 0 THEN
+            BEGIN
+                DELETE FROM partyresource."Party" p
+                WHERE p."Id" = v_party_id
+                  AND NOT EXISTS (
+                    SELECT 1
+                    FROM partyresource."PartyResource" pr
+                    WHERE pr."PartyId" = p."Id"
+                );
+            EXCEPTION
+                WHEN foreign_key_violation THEN
+                    NULL;
+            END;
+
+            BEGIN
+                DELETE FROM partyresource."Resource" r
+                WHERE r."Id" = v_resource_id
+                  AND NOT EXISTS (
+                    SELECT 1
+                    FROM partyresource."PartyResource" pr
+                    WHERE pr."ResourceId" = r."Id"
+                );
+            EXCEPTION
+                WHEN foreign_key_violation THEN
+                    NULL;
+            END;
+        END IF;
     END IF;
 
     RETURN NULL;

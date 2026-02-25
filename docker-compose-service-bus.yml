@@ -1,0 +1,41 @@
+# Note on Podman: If msql fails to start on Mac, make sure rosetta actually runs:
+# https://blog.podman.io/2025/08/podman-5-6-released-rosetta-status-update/
+
+name: "microsoft-azure-servicebus-emulator"
+services:
+  emulator:
+    container_name: "servicebus-emulator"
+    image: "mcr.microsoft.com/azure-messaging/servicebus-emulator:latest"
+    pull_policy: "always"
+    volumes:
+      - "./local-service-bus-configuration/Config.json:/ServiceBus_Emulator/ConfigFiles/Config.json"
+    ports:
+      - "5672:5672"
+      - "5300:5300"
+    environment:
+      SQL_SERVER: "mssql"
+      MSSQL_SA_PASSWORD: "password123456!"
+      ACCEPT_EULA: "Y"
+      EMULATOR_HTTP_PORT: 5300
+      SQL_WAIT_INTERVAL:
+    depends_on:
+      - "mssql"
+    networks:
+      sb-emulator:
+        aliases:
+          - "sb-emulator"
+  mssql:
+    container_name: "mssql"
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    ports:
+      - "1433:1433"
+    networks:
+      sb-emulator:
+        aliases:
+          - "mssql"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "password123456!"
+
+networks:
+  sb-emulator:

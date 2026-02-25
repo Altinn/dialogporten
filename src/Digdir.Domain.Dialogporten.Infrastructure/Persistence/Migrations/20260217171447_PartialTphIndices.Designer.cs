@@ -3,6 +3,7 @@ using System;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -12,9 +13,11 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    partial class DialogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260217171447_PartialTphIndices")]
+    partial class PartialTphIndices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,10 +264,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DialogId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_DialogEndUserContext_DialogId_IncludeId");
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("DialogId"), new[] { "Id" });
+                        .IsUnique();
 
                     b.ToTable("DialogEndUserContext");
                 });
@@ -625,16 +625,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DialogId");
+
+                    b.HasIndex("TransmissionId");
+
                     b.HasIndex("TypeId");
-
-                    b.HasIndex("TransmissionId", "TypeId")
-                        .HasDatabaseName("IX_DialogActivity_TransmissionId_TypeId")
-                        .HasAnnotation("Dialogporten:ReplacesIndex", "IX_DialogActivity_TransmissionId");
-
-                    b.HasIndex("DialogId", "CreatedAt", "Id")
-                        .IsDescending(false, true, true)
-                        .HasDatabaseName("IX_DialogActivity_DialogId_CreatedAt_Id")
-                        .HasAnnotation("Dialogporten:ReplacesIndex", "IX_DialogActivity_DialogId");
 
                     b.ToTable("DialogActivity");
                 });
@@ -992,16 +987,36 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ContentUpdatedAt");
+
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("Deleted");
+
+                    b.HasIndex("DueAt");
+
+                    b.HasIndex("ExtendedStatus");
+
+                    b.HasIndex("ExternalReference");
 
                     b.HasIndex("Id")
                         .HasDatabaseName("IX_Dialog_Id_Covering");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Id"), new[] { "ServiceResource", "Deleted", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt", "ContentUpdatedAt" });
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Id"), new[] { "ServiceResource", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt", "ContentUpdatedAt" });
+
+                    b.HasIndex("IsApiOnly");
+
+                    b.HasIndex("Org");
+
+                    b.HasIndex("Party");
+
+                    b.HasIndex("Process");
 
                     b.HasIndex("ServiceResource");
 
                     b.HasIndex("StatusId");
+
+                    b.HasIndex("UpdatedAt");
 
                     b.HasIndex("VisibleFrom");
 
@@ -1020,8 +1035,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Party", "ContentUpdatedAt", "Id")
                         .IsDescending(false, true, true)
-                        .HasDatabaseName("IX_Dialog_Party_ContentUpdatedAt_Id_Covering")
-                        .HasFilter("\"Deleted\" = false");
+                        .HasDatabaseName("IX_Dialog_Party_ContentUpdatedAt_Id_Covering");
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ContentUpdatedAt", "Id"), new[] { "ServiceResource", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt" });
 
@@ -1049,11 +1063,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("Org", "ServiceResource", "ContentUpdatedAt", "Id")
                         .IsDescending(false, false, true, true);
 
-                    b.HasIndex("ServiceResource", "Party", "ContentUpdatedAt", "Id")
-                        .IsDescending(false, false, true, true)
-                        .HasDatabaseName("IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted")
-                        .HasFilter("\"Deleted\" = false");
-
                     b.ToTable("Dialog", (string)null);
                 });
 
@@ -1080,6 +1089,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DialogId");
+
+                    b.HasIndex("Value");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Value"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Value"), new[] { "gin_trgm_ops" });
 
                     b.ToTable("DialogSearchTag");
                 });
@@ -1524,6 +1538,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("LocalizationSetId", "LanguageCode");
 
+                    b.HasIndex("Value");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Value"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Value"), new[] { "gin_trgm_ops" });
+
                     b.ToTable("Localization");
                 });
 
@@ -1634,6 +1653,10 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("DialogId");
+
+                    b.HasIndex("SearchVector");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SearchVector"), "GIN");
 
                     b.HasIndex("Party", "SearchVector");
 

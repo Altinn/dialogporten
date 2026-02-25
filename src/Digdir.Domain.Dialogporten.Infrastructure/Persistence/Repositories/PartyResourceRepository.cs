@@ -23,7 +23,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 internal sealed class PartyResourceRepository(
     NpgsqlDataSource dataSource,
     IOptionsSnapshot<ApplicationSettings> applicationSettings,
-    IFusionCacheProvider? cacheProvider = null) : IPartyResourceReferenceRepository
+    IFusionCacheProvider cacheProvider) : IPartyResourceReferenceRepository
 {
     private const string ResourcePrefix = "urn:altinn:resource:";
     private const string CacheKeyPrefix = "ps:";
@@ -32,10 +32,7 @@ internal sealed class PartyResourceRepository(
 
     private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
     private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
-
-    private readonly IFusionCache _cache =
-        cacheProvider?.GetCache(nameof(IPartyResourceReferenceRepository))
-        ?? new NullFusionCache(Options.Create(new FusionCacheOptions()));
+    private readonly IFusionCache _cache = cacheProvider.GetCache(nameof(IPartyResourceReferenceRepository)) ?? throw new ArgumentNullException(nameof(cacheProvider));
 
     public async Task<Dictionary<string, HashSet<string>>> GetReferencedResourcesByParty(
         IReadOnlyCollection<string> parties,

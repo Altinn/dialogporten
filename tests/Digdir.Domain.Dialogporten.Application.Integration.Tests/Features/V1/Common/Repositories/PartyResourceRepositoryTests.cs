@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 

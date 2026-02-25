@@ -66,7 +66,7 @@ public sealed class DialogSeenEvent(
             .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId.ExternalId)
             .MaxBy(x => x.CreatedAt);
 
-        if (lastSeen is not null && lastSeen.CreatedAt >= dialog.UpdatedAt)
+        if (lastSeen is not null && lastSeen.Id != dialogSeenDomainEvent.LastSeenId)
         {
             return;
         }
@@ -81,7 +81,7 @@ public sealed class DialogSeenEvent(
         // If multiple seen events are produced without dialog changes in between,
         // they represent the same logical "seen" and should not create duplicates.
         var id = dialogSeenDomainEvent.DialogId
-            .CreateDeterministicSubUuidV7($"{userId.ExternalId}{(lastSeen is not null ? lastSeen.Id.ToString() : "")}");
+            .CreateDeterministicSubUuidV7($"{userId.ExternalId}{(dialogSeenDomainEvent.LastSeenId is not null ? dialogSeenDomainEvent.LastSeenId.ToString() : "")}");
 
         var dialogSeenLogSeenByActor = new DialogSeenLogSeenByActor
         {
@@ -95,7 +95,8 @@ public sealed class DialogSeenEvent(
             Id = id,
             EndUserTypeId = userId.Type,
             IsViaServiceOwner = userId.Type == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
-            SeenBy = dialogSeenLogSeenByActor
+            SeenBy = dialogSeenLogSeenByActor,
+            CreatedAt = dialogSeenDomainEvent.OccurredAt
         };
 
         var performedBy = LabelAssignmentLogActorFactory.Create(
@@ -112,34 +113,18 @@ public sealed class DialogSeenEvent(
         dialog.SeenLog.Add(seenLog);
         _db.DialogSeenLog.Add(seenLog);
 
-        if (!await TrySave(explode: true, cancellationToken: cancellationToken))
-        {
-            actorNameEntity = await _db.ActorName
-                .FirstOrDefaultAsync(
-                    x => x.ActorId == normalizedActorId && x.Name == name,
-                    cancellationToken) ?? throw new UnreachableException("Should find an actor. after conflict on actor");
-
-            _db.ActorName.Remove(seenLog.SeenBy.ActorNameEntity);
-            seenLog.SeenBy.ActorNameEntity = actorNameEntity;
-
-            await TrySave(cancellationToken: cancellationToken);
-        }
-    }
-    private async Task<bool> TrySave(bool explode = true, CancellationToken cancellationToken = default)
-    {
         var result = await _unitOfWork
             .DisableUpdatableFilter()
             .DisableVersionableFilter()
             .SaveChangesAsync(cancellationToken);
-        var saved = true;
+
         result.Switch(
             success => { },
             domainError =>
             {
-                if (IsDuplicateActorNameError(domainError) && !explode)
+                if (IsDuplicateActorNameError(domainError))
                 {
-                    saved = false;
-                    return;
+                    throw new InvalidOperationException(domainError.Errors.First().ErrorMessage);
                 }
                 if (!IsDuplicateSeenLogIdError(domainError))
                 {
@@ -149,7 +134,6 @@ public sealed class DialogSeenEvent(
             concurrencyError =>
                 throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
-        return saved;
     }
 
     private static bool IsDuplicateSeenLogIdError(DomainError domainError) =>

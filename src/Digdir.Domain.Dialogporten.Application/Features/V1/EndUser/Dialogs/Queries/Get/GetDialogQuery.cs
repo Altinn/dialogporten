@@ -171,7 +171,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         if (lastSeen is null || lastSeen.CreatedAt <= dialog.UpdatedAt)
         {
-            dialog.UpdateSeenAt(externalId, userId.Type);
+            dialog.UpdateSeenAt(externalId, userId.Type, lastSeen?.Id);
         }
 
 

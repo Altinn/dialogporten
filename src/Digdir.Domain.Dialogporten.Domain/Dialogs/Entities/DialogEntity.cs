@@ -164,9 +164,11 @@ public sealed class DialogEntity :
     public void OnRestore(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogRestoredDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId)
+    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, Guid? lastSeenId)
     {
-        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, endUserId, userTypeId));
+        var id = Id
+            .CreateDeterministicSubUuidV7($"{userId.ExternalId}{(dialogSeenDomainEvent.LastSeenId is not null ? dialogSeenDomainEvent.LastSeenId.ToString() : "")}");
+        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, endUserId, userTypeId, lastSeenId));
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];

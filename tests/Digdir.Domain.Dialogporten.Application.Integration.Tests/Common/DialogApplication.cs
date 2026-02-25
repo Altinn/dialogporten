@@ -244,15 +244,27 @@ public class DialogApplication : IAsyncLifetime
         return await mediator.Send(request, cancellationToken);
     }
 
-    public async Task PublishEvents()
+    public async Task PublishEvents(bool reAddFailedEvents = true)
     {
-        await Task.WhenAll(GetPublishedEvents().Select<object, Task>(async value =>
+        List<object> failedEvents = [];
+        await Task.WhenAll(GetPublishedEvents().ToList().Select<object, Task>(async value =>
         {
             using var scope = _rootProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
-            await mediator.Publish(value);
+            try
+            {
+                await mediator.Publish(value);
+            }
+            catch (Exception)
+            {
+                if (reAddFailedEvents)
+                {
+                    failedEvents.Add(value);
+                }
+            }
         }));
         _publishedEvents.Clear();
+        _publishedEvents.AddRange(failedEvents);
     }
 
     public async ValueTask ResetState()

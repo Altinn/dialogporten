@@ -124,7 +124,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.Id = dialogId;
             })
             .GetEndUserDialog() // Default integration test user
-            .GetEndUserDialog()
             .ConsumeEvents()
             .GetEndUserDialog()
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
@@ -143,13 +142,59 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     }
 
     [Fact]
+    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs() => FlowBuilder.For(Application)
+        .CreateSimpleDialog()
+        .ConsumeEvents() // Consume Created event
+        .GetEndUserDialog()
+        .GetEndUserDialog()
+        .ConsumeEvents() // 1/2 Seen event should fail and get readded to queue
+        .Select((x, ctx) =>
+        {
+            ctx.Application.GetPublishedEvents().Count.Should().Be(1);
+            return x;
+        })
+        .ConsumeEvents() // Consume Seen event should not create Seenlog
+        .GetEndUserSeenLogs()
+        .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
+        {
+            x.Count.Should().Be(1);
+            ctx.Application.GetPublishedEvents().Count.Should().Be(0);
+        });
+
+    [Fact]
+    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs2() => FlowBuilder.For(Application)
+        .CreateSimpleDialog()
+        .ConsumeEvents() // Consume Created event
+        .GetEndUserDialog() // SeenLog er den første
+        .GetEndUserDialog() // SeenLog tror den er første burde ikke være her
+        .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
+        .GetEndUserDialog() // SeenLog tror den er første burde være andre
+        .ConsumeEvents()
+        .Select((x, ctx) =>
+        {
+            ctx.Application.GetPublishedEvents().Count.Should().Be(2);
+            return x;
+        })
+        .ConsumeEvents() // Consume Seen event should not create Seenlog
+        .GetEndUserSeenLogs()
+        .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
+        {
+            x.Count.Should().Be(1);
+            ctx.Application.GetPublishedEvents().Count.Should().Be(0);
+        });
+
+    [Fact]
     public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastUpdate_On_Dialog_Search() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
             .ConsumeEvents()
             .AssertResult<DialogDto>()
-            .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
+            //.Assert bare en event igjen
+            .UpdateDialog(x =>
+            {
+                x.Dto.ExternalReference = "foo:bar";
+            })
             .GetEndUserDialog()
             .ConsumeEvents()
             .AssertResult<DialogDto>()

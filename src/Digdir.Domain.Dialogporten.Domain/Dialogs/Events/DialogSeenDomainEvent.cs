@@ -10,5 +10,6 @@ public sealed record DialogSeenDomainEvent(
     string? Process,
     string? PrecedingProcess,
     string UserId,
-    DialogUserType.Values UserType
+    DialogUserType.Values UserType,
+    Guid? LastSeenId
     ) : DomainEvent, IProcessEvent;

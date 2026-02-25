@@ -24,8 +24,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 "PartyResource/Function.PartyResourceAfterDeleteRow.sql",
                 "PartyResource/Function.BackfillDialogPartyResourceBatch.sql",
                 "PartyResource/Procedure.RunBackfillDialogPartyResource.sql",
-                "PartyResource/Trigger.TR_PR_AfterInsert_Row.sql",
-                "PartyResource/Trigger.TR_PR_AfterDelete.sql",
+                "PartyResource/Trigger.UpdatePartyResource_AfterInsert_Row.sql",
+                "PartyResource/Trigger.UpdatePartyResource_AfterDelete_Row.sql",
             };
 
             foreach (var sql in MigrationSqlLoader.LoadAll(scripts))
@@ -40,6 +40,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             migrationBuilder.Sql("""
                 DROP TRIGGER IF EXISTS "TR_PR_AfterDelete" ON public."Dialog";
                 DROP TRIGGER IF EXISTS "TR_PR_AfterInsert_Row" ON public."Dialog";
+                DROP TRIGGER IF EXISTS "UpdatePartyResource_AfterDelete_Row" ON public."Dialog";
+                DROP TRIGGER IF EXISTS "UpdatePartyResource_AfterInsert_Row" ON public."Dialog";
 
                 DROP PROCEDURE IF EXISTS partyresource.run_backfill_dialog_partyresource(integer, integer, double precision);
                 DROP FUNCTION IF EXISTS partyresource.backfill_dialog_partyresource_batch(integer);

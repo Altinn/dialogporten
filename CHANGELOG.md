@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.105.1](https://github.com/Altinn/dialogporten/compare/v1.105.0...v1.105.1) (2026-02-26)
+
+
+### Bug Fixes
+
+* name ordering in ordering emulation ([#3513](https://github.com/Altinn/dialogporten/issues/3513)) ([d5e2e8d](https://github.com/Altinn/dialogporten/commit/d5e2e8dc4f99afdf5f360db75fe04b93d7c2a4e8))
+* **perf:** Use partial indices for TPH tables ([#3478](https://github.com/Altinn/dialogporten/issues/3478)) ([f63c852](https://github.com/Altinn/dialogporten/commit/f63c85222d1bdd22ec715b1376cada46899fd741))
+
+
+### Miscellaneous Chores
+
+* **deps:** update mcr.microsoft.com/dotnet/sdk:10.0.103 docker digest to e362a8d ([#3510](https://github.com/Altinn/dialogporten/issues/3510)) ([39053b9](https://github.com/Altinn/dialogporten/commit/39053b96aafa516ef02e82e962bafededd0d0fed))
+* **deps:** update step-security/changed-files action to v47 ([#3509](https://github.com/Altinn/dialogporten/issues/3509)) ([1c7bd68](https://github.com/Altinn/dialogporten/commit/1c7bd68a0341a4d40426c58b6409790b6267c1ab))
+
 ## [1.105.0](https://github.com/Altinn/dialogporten/compare/v1.104.1...v1.105.0) (2026-02-25)
 
 

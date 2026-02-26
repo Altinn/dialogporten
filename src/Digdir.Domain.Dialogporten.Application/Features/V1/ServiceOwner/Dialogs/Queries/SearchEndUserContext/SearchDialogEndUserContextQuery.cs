@@ -21,7 +21,7 @@ public sealed class SearchDialogEndUserContextQuery : PaginationParameter<Search
     /// <summary>
     /// Filter by content updated after this date
     /// </summary>
-    public DateTimeOffset? CreatedAfter { get; set; }
+    public DateTimeOffset? ContentUpdatedAfter { get; set; }
 
     /// <summary>
     /// Filter by one or more system labels
@@ -69,7 +69,7 @@ internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<S
             orgName,
             request.Party.Select(x => x.ToLowerInvariant()).ToList(),
             request.Label,
-            request.CreatedAfter,
+            request.ContentUpdatedAfter,
             request.ContinuationToken,
             request.Limit!.Value,
             cancellationToken);

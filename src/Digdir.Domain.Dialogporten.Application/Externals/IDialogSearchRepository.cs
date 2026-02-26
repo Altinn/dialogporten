@@ -35,7 +35,7 @@ public interface IDialogSearchRepository
         string orgName,
         List<string> parties,
         List<SystemLabel.Values>? systemLabels,
-        DateTimeOffset? createdAfter,
+        DateTimeOffset? contentUpdatedAfter,
         IContinuationTokenSet? continuationToken,
         int limit,
         CancellationToken cancellationToken);

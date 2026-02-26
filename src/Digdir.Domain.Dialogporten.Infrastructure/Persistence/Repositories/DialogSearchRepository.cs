@@ -132,7 +132,7 @@ internal sealed class DialogSearchRepository(
         string orgName,
         List<string> parties,
         List<SystemLabel.Values>? systemLabels,
-        DateTimeOffset? createdAfter,
+        DateTimeOffset? contentUpdatedAfter,
         IContinuationTokenSet? continuationToken,
         int limit,
         CancellationToken cancellationToken)
@@ -154,8 +154,9 @@ internal sealed class DialogSearchRepository(
                      FROM "Dialog" d
                      WHERE d."Org" = {orgName}
                        AND d."Party" = ANY({parties}::text[])
+
                  """)
-            .AppendIf(createdAfter is not null, $""" AND d."ContentUpdatedAt" > {createdAfter}::timestamptz """)
+            .AppendIf(contentUpdatedAfter is not null, $""" AND d."ContentUpdatedAt" > {contentUpdatedAfter}::timestamptz """)
             .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
             .ApplyPaginationOrder(orderSet, alias: "d")
             .ApplyPaginationLimit(limit)
@@ -172,6 +173,7 @@ internal sealed class DialogSearchRepository(
                      WHERE sl_filter."DialogEndUserContextId" = c."Id"
                        AND sl_filter."SystemLabelId" = ANY({systemLabelValues}::int[])
                      LIMIT 1
+
                  ) filter_check ON TRUE
                  """)
             .Append(
@@ -181,6 +183,7 @@ internal sealed class DialogSearchRepository(
                      FROM "DialogEndUserContextSystemLabel" sl
                      WHERE sl."DialogEndUserContextId" = c."Id"
                  ) sl_agg ON TRUE
+
                 """)
             .ApplyPaginationOrder(orderSet, alias: "d");
 
@@ -190,14 +193,11 @@ internal sealed class DialogSearchRepository(
         var rawRows = await connection.QueryAsync<RawEndUserContextListItemRow>(command);
 
         var items = rawRows
-            .Select(row =>
-            {
-                return new DataDialogEndUserContextListItemDto(
-                    row.DialogId,
-                    row.EndUserContextRevision,
-                    new DateTimeOffset(row.ContentUpdatedAt),
-                    row.SystemLabels.ToList());
-            })
+            .Select(row => new DataDialogEndUserContextListItemDto(
+                row.DialogId,
+                row.EndUserContextRevision,
+                new DateTimeOffset(row.ContentUpdatedAt),
+                row.SystemLabels.ToList()))
             .ToList();
 
         var hasNextPage = items.Count > limit;

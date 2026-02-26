@@ -56,7 +56,6 @@ param redisSku = {
 param serviceBusSku = {
   name: 'Standard'
   tier: 'Standard'
-  capacity: 1
 }
 
 // Altinn Product Dialogporten: Developers Dev

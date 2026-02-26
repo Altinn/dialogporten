@@ -170,8 +170,8 @@ module serviceBus '../modules/serviceBus/main.bicep' = {
     namePrefix: namePrefix
     location: location
     sku: serviceBusSku
-    subnetId: serviceBusSku.name == 'Premium' ? vnet.outputs.serviceBusSubnetId : ''
-    vnetId: serviceBusSku.name == 'Premium' ? vnet.outputs.virtualNetworkId : ''
+    subnetId: serviceBusSku.name == 'Premium' ? vnet.outputs.serviceBusSubnetId : null
+    vnetId: serviceBusSku.name == 'Premium' ? vnet.outputs.virtualNetworkId : null
     tags: tags
   }
 }

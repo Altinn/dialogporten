@@ -10,10 +10,10 @@ param namePrefix string
 param location string
 
 @description('The ID of the subnet where the Service Bus will be deployed (Premium tier only)')
-param subnetId string = ''
+param subnetId string?
 
 @description('The ID of the virtual network for the private DNS zone (Premium tier only)')
-param vnetId string = ''
+param vnetId string?
 
 @description('Tags to apply to resources')
 param tags object
@@ -23,7 +23,7 @@ type Sku = {
   name: 'Basic' | 'Standard' | 'Premium'
   tier: 'Basic' | 'Standard' | 'Premium'
   @minValue(1)
-  capacity: int
+  capacity: int?
 }
 
 @description('The SKU of the Service Bus')
@@ -66,7 +66,7 @@ resource serviceBusPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-0
     ]
     customNetworkInterfaceName: uniqueResourceName('${namePrefix}-service-bus-pe-nic', 80)
     subnet: {
-      id: subnetId
+      id: subnetId!
     }
   }
   tags: tags
@@ -77,7 +77,7 @@ module privateDnsZone '../privateDnsZone/main.bicep' = if (isPremium) {
   params: {
     namePrefix: namePrefix
     defaultDomain: 'privatelink.servicebus.windows.net'
-    vnetId: vnetId
+    vnetId: vnetId!
     tags: tags
   }
 }

@@ -18,7 +18,7 @@ internal sealed class SearchDialogEndUserContextQueryValidator : AbstractValidat
             .IsValidPartyIdentifier();
 
         RuleFor(x => x.Party.Count)
-            .LessThanOrEqualTo(20)
+            .Equal(1)
             .When(x => x.Party is not null);
 
         RuleForEach(x => x.Label)

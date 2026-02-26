@@ -41,6 +41,36 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
             .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>((result, ctx) =>
                 result.Items.Should().BeEmpty());
 
+    [Fact]
+    public Task Search_With_Label_Filter_Returns_Full_Page() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.SystemLabel = SystemLabel.Values.Archive;
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.SystemLabel = SystemLabel.Values.Archive;
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.SystemLabel = SystemLabel.Values.Bin;
+            })
+            .SearchServiceOwnerDialogEndUserContexts(query =>
+            {
+                query.Party = [TestUsers.DefaultParty];
+                query.Label = [SystemLabel.Values.Archive];
+                query.Limit = 2;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>(result =>
+            {
+                result.Items.Should().HaveCount(2);
+                result.Items.Should().OnlyContain(x => x.SystemLabels.Contains(SystemLabel.Values.Archive));
+            });
+
 
     [Fact]
     public Task Search_Without_Party_Returns_ValidationError() =>

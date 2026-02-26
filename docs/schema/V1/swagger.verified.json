@@ -10370,7 +10370,7 @@
             "style": "form"
           },
           {
-            "description": "Only return context for dialogs with contentUpdatedAt greater than the supplied this date-time.",
+            "description": "Only return context for dialogs with contentUpdatedAt greater than the supplied date-time.",
             "in": "query",
             "name": "contentUpdatedAfter",
             "schema": {

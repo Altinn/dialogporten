@@ -28,10 +28,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public IEnumerable<string> Party { get; set; }
 
                 /// <summary>
-                /// Only return dialogs with contentUpdatedAt greater than or equal to this date-time.
+                /// Only return context for dialogs with contentUpdatedAt greater than the supplied date-time.
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? CreatedAfter { get; set; }
+        public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
 
                 /// <summary>
                 /// Filter by one or more system labels
@@ -634,7 +634,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>Gets end user context system labels for dialogs</summary>
         /// <remarks>
-        /// Performs a search for dialog end user context labels, returning a paginated list of dialogs.
+        /// Performs a search for dialog end user context labels, returning a paginated list of dialog ids and end user context revisions.
         /// 
         /// * Party is required.
         /// * System labels are matched with OR semantics.

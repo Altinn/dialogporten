@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 using Dapper;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
@@ -14,14 +13,12 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 internal sealed class DialogSearchRepository(
     DialogDbContext dbContext,
-    ILogger<DialogSearchRepository> logger,
     NpgsqlDataSource dataSource,
     ISearchStrategySelector<EndUserSearchContext> endUserSearchStrategySelector) : IDialogSearchRepository
 {
@@ -135,9 +132,9 @@ internal sealed class DialogSearchRepository(
         string orgName,
         List<string> parties,
         List<SystemLabel.Values>? systemLabels,
+        DateTimeOffset? createdAfter,
         IContinuationTokenSet? continuationToken,
         int limit,
-        DialogSearchAuthorizationResult? authorizedResources,
         CancellationToken cancellationToken)
     {
         var orderSet = OrderSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>.Default;
@@ -145,93 +142,47 @@ internal sealed class DialogSearchRepository(
             .Select(x => (int)x)
             .ToArray();
 
-        if (authorizedResources is not null && authorizedResources.HasNoAuthorizations)
-        {
-            return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
-        }
-
-        var queryBuilder = new PostgresFormattableStringBuilder();
-
-        if (authorizedResources is null)
-        {
-            queryBuilder
-                .Append(
-                    $"""
-                     SELECT d."Id" AS "DialogId"
-                          , c."Revision" AS "EndUserContextRevision"
-                          , d."ContentUpdatedAt"
-                          , ARRAY_AGG(sl."SystemLabelId" ORDER BY sl."SystemLabelId") AS "SystemLabels"
+        var queryBuilder = new PostgresFormattableStringBuilder()
+            .Append(
+                $"""
+                 SELECT d."Id" AS "DialogId"
+                      , c."Revision" AS "EndUserContextRevision"
+                      , d."ContentUpdatedAt"
+                      , COALESCE(sl_agg."SystemLabels", ARRAY[]::int[]) AS "SystemLabels"
+                 FROM (
+                     SELECT d."Id", d."ContentUpdatedAt"
                      FROM "Dialog" d
-                     INNER JOIN "DialogEndUserContext" c ON c."DialogId" = d."Id"
-                     INNER JOIN "DialogEndUserContextSystemLabel" sl ON c."Id" = sl."DialogEndUserContextId"
                      WHERE d."Org" = {orgName}
-                       AND NOT d."Deleted"
                        AND d."Party" = ANY({parties}::text[])
-                     """);
-        }
-        else
-        {
-            var partyFilterQuery = new GetDialogsQuery
-            {
-                Deleted = null,
-                Party = parties
-            };
-            var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
-                partyFilterQuery,
-                authorizedResources);
-
-            if (partiesAndServices.Count == 0)
-            {
-                return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
-            }
-
-            DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(logger, partiesAndServices);
-
-            queryBuilder
-                .Append(
-                    $"""
-                     WITH raw_permissions AS (
-                         SELECT p.party, s.service
-                         FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
-                         CROSS JOIN LATERAL unnest(x."Services") AS s(service)
-                         CROSS JOIN LATERAL unnest(x."Parties") AS p(party)
-                     ),
-                     party_permission_map AS (
-                         SELECT party
-                              , ARRAY_AGG(service) AS allowed_services
-                         FROM raw_permissions
-                         GROUP BY party
-                     )
-                     SELECT d."Id" AS "DialogId"
-                          , c."Revision" AS "EndUserContextRevision"
-                          , d."ContentUpdatedAt"
-                          , ARRAY_AGG(sl."SystemLabelId" ORDER BY sl."SystemLabelId") AS "SystemLabels"
-                     FROM party_permission_map ppm
-                     INNER JOIN "Dialog" d ON d."Party" = ppm.party AND d."ServiceResource" = ANY(ppm.allowed_services)
-                     INNER JOIN "DialogEndUserContext" c ON c."DialogId" = d."Id"
-                     INNER JOIN "DialogEndUserContextSystemLabel" sl ON c."Id" = sl."DialogEndUserContextId"
-                     WHERE d."Org" = {orgName}
-                       AND NOT d."Deleted"
-                     """);
-        }
-
-        queryBuilder
+                 """)
+            .AppendIf(createdAfter is not null, $""" AND d."ContentUpdatedAt" > {createdAfter}::timestamptz """)
+            .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
+            .ApplyPaginationOrder(orderSet, alias: "d")
+            .ApplyPaginationLimit(limit)
+            .Append(
+                """
+                    ) d
+                 INNER JOIN "DialogEndUserContext" c ON c."DialogId" = d."Id"
+                """)
             .AppendIf(systemLabelValues is not null && systemLabelValues.Length != 0,
                 $"""
-                 AND EXISTS (
+                 INNER JOIN LATERAL (
                      SELECT 1
                      FROM "DialogEndUserContextSystemLabel" sl_filter
                      WHERE sl_filter."DialogEndUserContextId" = c."Id"
                        AND sl_filter."SystemLabelId" = ANY({systemLabelValues}::int[])
-                 )
+                     LIMIT 1
+                 ) filter_check ON TRUE
                  """)
-            .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
             .Append(
                 """
-                GROUP BY d."Id", c."Revision", d."ContentUpdatedAt"
+                 LEFT JOIN LATERAL (
+                     SELECT ARRAY_AGG(sl."SystemLabelId" ORDER BY sl."SystemLabelId") AS "SystemLabels"
+                     FROM "DialogEndUserContextSystemLabel" sl
+                     WHERE sl."DialogEndUserContextId" = c."Id"
+                 ) sl_agg ON TRUE
                 """)
-            .ApplyPaginationOrder(orderSet, alias: "d")
-            .ApplyPaginationLimit(limit);
+            .ApplyPaginationOrder(orderSet, alias: "d");
 
         var (query, parameters) = queryBuilder.ToDynamicParameters();
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);

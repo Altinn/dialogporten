@@ -10370,10 +10370,11 @@
             "style": "form"
           },
           {
-            "description": "Filter by end user id",
+            "description": "Only return dialogs with contentUpdatedAt greater than or equal to this date-time.",
             "in": "query",
-            "name": "endUserId",
+            "name": "createdAfter",
             "schema": {
+              "format": "date-time",
               "nullable": true,
               "type": "string"
             }

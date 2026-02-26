@@ -28,10 +28,10 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public IEnumerable<string> Party { get; set; }
 
                 /// <summary>
-                /// Filter by end user id
+                /// Only return dialogs with contentUpdatedAt greater than or equal to this date-time.
                 /// </summary>
         [Query] 
-        public string EndUserId { get; set; }
+        public System.DateTimeOffset? CreatedAfter { get; set; }
 
                 /// <summary>
                 /// Filter by one or more system labels

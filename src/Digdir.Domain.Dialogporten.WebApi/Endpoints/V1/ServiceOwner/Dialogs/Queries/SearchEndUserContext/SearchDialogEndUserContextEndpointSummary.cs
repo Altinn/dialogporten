@@ -31,5 +31,7 @@ public sealed class SearchDialogEndUserContextEndpointSummary : Summary<SearchDi
             "Supply \"continuationToken\" for the response to get the next page of results, if hasNextPage is true");
         RequestParam(p => p.Limit,
             $"Limit the number of results per page ({PaginationConstants.MinLimit}-{PaginationConstants.MaxLimit}, default: {PaginationConstants.DefaultLimit})");
+        RequestParam(p => p.CreatedAfter,
+            "Only return dialogs with contentUpdatedAt greater than or equal to this date-time.");
     }
 }

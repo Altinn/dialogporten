@@ -1,11 +1,11 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using AwesomeAssertions;
+using GetDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
 
@@ -35,20 +35,28 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
             .ExecuteAndAssert<ValidationError>();
 
     [Fact]
-    public Task Search_With_EndUserId_And_No_Authorizations_Returns_Empty() =>
-        FlowBuilder.For(Application, services =>
+    public async Task Search_CreatedAfter_Filters_On_ContentUpdatedAt()
+    {
+        DateTimeOffset? createdAfter = null!;
+        Guid newestDialogId = Guid.Empty;
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.UpdatedAt = DateTimeOffset.UtcNow.AddDays(-2))
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .AssertResult<GetDialogDto>(x =>
             {
-                services.ConfigureAltinnAuthorization(x =>
-                    x.ConfigureGetAuthorizedResourcesForSearch(new DialogSearchAuthorizationResult()));
+                createdAfter = x.ContentUpdatedAt.AddMilliseconds(-1);
+                newestDialogId = x.Id;
             })
-            .CreateSimpleDialog((x, _) => x.Dto.Party = TestUsers.DefaultParty)
             .SearchServiceOwnerDialogEndUserContexts((query, ctx) =>
             {
                 query.Party = [ctx.GetParty()];
-                query.EndUserId = ctx.GetParty();
+                query.CreatedAfter = createdAfter;
             })
             .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>(result =>
-                result.Items.Should().BeEmpty());
+                result.Items.Should().ContainSingle(x => x.DialogId == newestDialogId));
+    }
 
     [Fact]
     public Task Search_Returns_All_System_Labels() =>

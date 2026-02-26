@@ -10349,7 +10349,7 @@
     },
     "/api/v1/serviceowner/dialogs/endusercontext": {
       "get": {
-        "description": "Performs a search for dialog end user context labels, returning a paginated list of dialogs.\n\n* Party is required.\n* System labels are matched with OR semantics.\n* See \\\u0022continuationToken\\\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
+        "description": "Performs a search for dialog end user context labels, returning a paginated list of dialog ids and end user context revisions.\n\n* Party is required.\n* System labels are matched with OR semantics.\n* See \\\u0022continuationToken\\\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
         "operationId": "V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContext",
         "parameters": [
           {
@@ -10370,9 +10370,9 @@
             "style": "form"
           },
           {
-            "description": "Only return dialogs with contentUpdatedAt greater than or equal to this date-time.",
+            "description": "Only return context for dialogs with contentUpdatedAt greater than the supplied this date-time.",
             "in": "query",
-            "name": "createdAfter",
+            "name": "contentUpdatedAfter",
             "schema": {
               "format": "date-time",
               "nullable": true,

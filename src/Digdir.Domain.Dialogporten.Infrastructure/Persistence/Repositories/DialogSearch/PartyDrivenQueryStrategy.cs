@@ -25,7 +25,7 @@ internal sealed class PartyDrivenQueryStrategy(ILogger<PartyDrivenQueryStrategy>
         var query = context.Query;
         var authorizedResources = context.AuthorizedResources;
         var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(query, authorizedResources);
-        DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices);
+        DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices, StrategyName);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
         var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, authorizedResources.DialogIds.ToArray());
         var postPermissionOrderAndLimit = BuildPostPermissionOrderAndLimit(query);

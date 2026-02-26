@@ -5,6 +5,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Parties;
 
 public sealed record FeideUserIdentifier : IPartyIdentifier
 {
+    public static char ShortPrefix => 'f';
     public static string Prefix => "urn:altinn:feide-subject";
     public static string PrefixWithSeparator => Prefix + PartyIdentifier.Separator;
     public string FullId { get; }

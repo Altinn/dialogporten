@@ -13,7 +13,7 @@ public sealed record SystemUserIdentifier : IPartyIdentifier
 
     private SystemUserIdentifier(ReadOnlySpan<char> value)
     {
-        Id = value.ToString();
+        Id = value.ToString().ToLowerInvariant();
         FullId = PrefixWithSeparator + Id;
     }
 

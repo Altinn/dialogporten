@@ -14,7 +14,7 @@ public sealed partial record IdportenEmailUserIdentifier : IPartyIdentifier
 
     private IdportenEmailUserIdentifier(ReadOnlySpan<char> value)
     {
-        Id = value.ToString();
+        Id = value.ToString().ToLowerInvariant();
         FullId = PrefixWithSeparator + Id;
     }
 

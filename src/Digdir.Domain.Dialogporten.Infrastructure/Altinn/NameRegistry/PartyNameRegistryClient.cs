@@ -109,11 +109,11 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         // the flip itself for persons. See https://github.com/Altinn/dialogporten/issues/3171
         if (!_useCorrectPersonNameOrdering && partyIdentifier is NorwegianPersonIdentifier)
         {
-            // Flip the order of the name parts: "A B C" -> "B C A" / "A B" -> "B A"
+            // Flip the order of the name parts: "A B C" -> "C A B" / "A B" -> "B A"
             var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length > 1)
             {
-                name = $"{string.Join(" ", parts[1..])} {parts[0]}";
+                name = $"{parts[^1]} {string.Join(" ", parts[..^1])}";
             }
         }
 

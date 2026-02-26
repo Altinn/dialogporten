@@ -16,5 +16,20 @@ public static class ServiceOwnerApiExtensions
 
             return createDialogResponse.Content.ToGuid();
         }
+
+        public async Task<Guid> CreateSimpleActivityAsync(
+            Guid dialogId,
+            Guid? ifMatch = null,
+            Action<V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest>? modify = null)
+        {
+            var createActivityResponse =
+                await serviceownerApi.V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(
+                    dialogId,
+                    DialogTestData.CreateSimpleActivity(modify),
+                    ifMatch,
+                    TestContext.Current.CancellationToken);
+
+            return createActivityResponse.Content.ToGuid();
+        }
     }
 }

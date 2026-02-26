@@ -47,6 +47,7 @@ public class AuthorizedPartiesRequestTests
 
         public string FullId { get; }
         public string Id { get; }
+        public static char ShortPrefix => 't';
         public static string Prefix => "urn:altinn:test";
         public static string PrefixWithSeparator => Prefix + PartyIdentifier.Separator;
 

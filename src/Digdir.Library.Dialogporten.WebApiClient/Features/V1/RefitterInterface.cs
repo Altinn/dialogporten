@@ -4432,20 +4432,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
+        /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
 
         /// <summary>
-        /// The type of transmission.
+        /// The type of activity.
         /// </summary>
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
@@ -4679,20 +4679,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
+        /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
 
         /// <summary>
-        /// The type of transmission.
+        /// The type of activity
         /// </summary>
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
@@ -5425,20 +5425,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? Id { get; set; }
 
         /// <summary>
-        /// If supplied, overrides the creating date and time for the transmission.
+        /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
-        /// Arbitrary URI/URN describing a service-specific transmission type.
+        /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
 
         /// <summary>
-        /// The type of transmission.
+        /// The type of activity.
         /// </summary>
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]

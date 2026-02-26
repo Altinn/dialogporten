@@ -256,7 +256,7 @@ public sealed class SearchTagDto
     public string Value { get; set; } = null!;
 }
 
-public class ActivityDto
+public sealed class ActivityDto
 {
     /// <summary>
     /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
@@ -266,18 +266,18 @@ public class ActivityDto
     public Guid? Id { get; set; }
 
     /// <summary>
-    /// If supplied, overrides the creating date and time for the transmission.
+    /// If supplied, overrides the creating date and time for the activity.
     /// If not supplied, the current date /time will be used.
     /// </summary>
     public DateTimeOffset? CreatedAt { get; set; }
 
     /// <summary>
-    /// Arbitrary URI/URN describing a service-specific transmission type.
+    /// Arbitrary URI/URN describing a service-specific activity type.
     /// </summary>
     public Uri? ExtendedType { get; set; }
 
     /// <summary>
-    /// The type of transmission.
+    /// The type of activity.
     /// </summary>
     public DialogActivityType.Values Type { get; set; }
 

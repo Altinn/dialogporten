@@ -5,6 +5,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Parties;
 
 public sealed record AltinnSelfIdentifiedUserIdentifier : IPartyIdentifier
 {
+    public static char ShortPrefix => 'i';
     public static string Prefix => "urn:altinn:person:legacy-selfidentified";
     public static string PrefixWithSeparator => Prefix + PartyIdentifier.Separator;
     public string FullId { get; }
@@ -12,7 +13,7 @@ public sealed record AltinnSelfIdentifiedUserIdentifier : IPartyIdentifier
 
     private AltinnSelfIdentifiedUserIdentifier(ReadOnlySpan<char> value)
     {
-        Id = value.ToString();
+        Id = value.ToString().ToLowerInvariant();
         FullId = PrefixWithSeparator + Id;
     }
 

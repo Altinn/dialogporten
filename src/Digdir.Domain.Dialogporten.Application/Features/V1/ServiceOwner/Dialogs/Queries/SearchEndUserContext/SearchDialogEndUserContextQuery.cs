@@ -67,7 +67,7 @@ internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<S
         var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
         var paginatedList = await _searchRepository.SearchDialogEndUserContextsAsServiceOwner(
             orgName,
-            request.Party,
+            request.Party.Select(x => x.ToLowerInvariant()).ToList(),
             request.Label,
             request.CreatedAfter,
             request.ContinuationToken,

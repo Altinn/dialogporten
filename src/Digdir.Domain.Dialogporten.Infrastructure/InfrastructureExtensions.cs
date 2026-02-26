@@ -1,7 +1,6 @@
 using System.Data;
 using System.Globalization;
 using Altinn.ApiClients.Maskinporten.Extensions;
-using Dapper;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -132,6 +131,7 @@ public static class InfrastructureExtensions
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
+            .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
@@ -220,6 +220,11 @@ public static class InfrastructureExtensions
         {
             IsFailSafeEnabled = false,
             Duration = TimeSpan.FromMinutes(5)
+        })
+        .ConfigureFusionCache(nameof(IPartyResourceReferenceRepository), new()
+        {
+            Duration = TimeSpan.FromMinutes(30),
+            FailSafeMaxDuration = TimeSpan.FromMinutes(60)
         });
 
         if (environment.IsEnvironment("yt01"))

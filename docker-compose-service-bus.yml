@@ -5,7 +5,7 @@ name: "microsoft-azure-servicebus-emulator"
 services:
   emulator:
     container_name: "servicebus-emulator"
-    image: "mcr.microsoft.com/azure-messaging/servicebus-emulator:latest"
+    image: "mcr.microsoft.com/azure-messaging/servicebus-emulator@sha256:a00c9626c8960f6b9be6178aa91a7ac8f1a102c0d9deda7603a1ba0ac9d9ab51"
     pull_policy: "always"
     volumes:
       - "./local-service-bus-configuration/Config.json:/ServiceBus_Emulator/ConfigFiles/Config.json"
@@ -26,7 +26,7 @@ services:
           - "sb-emulator"
   mssql:
     container_name: "mssql"
-    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    image: "mcr.microsoft.com/mssql/server@sha256:0ec7739e1c5ec2f57861facbe1f2b74f1d3e147c7c97edf91eeea920c5944d9c"
     ports:
       - "1433:1433"
     networks:

@@ -36,7 +36,7 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
             return;
         }
 
-        if (activity.Tags.ContainsUniqueConstraintError())
+        if (activity.Tags.IsHandledPostgresExceptionActivity())
         {
             activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
             return;
@@ -76,14 +76,15 @@ internal static class ActivityTagsExtensions
     private const string UniqueViolationErrorCode = "23505";
     // "23503" is the PostgreSQL error code for foreign key violation
     private const string ForeignKeyViolationErrorCode = "23503";
+    // "40001" is the PostgreSQL error code for serialization failure
+    private const string SerializationFailureErrorCode = "40001";
 
     // This mutes Slack notifications and error logging in AppInsights
-    public static bool ContainsUniqueConstraintError(this IEnumerable<KeyValuePair<string, string?>> tags) =>
-        tags.Any(t => t is { Key: Constants.OtelStatusCode, Value: Constants.Error }) &&
+    public static bool IsHandledPostgresExceptionActivity(this IEnumerable<KeyValuePair<string, string?>> tags) =>
         tags.Any(t => t is
         {
-            Key: Constants.OtelStatusDescription,
-            Value: UniqueViolationErrorCode or ForeignKeyViolationErrorCode
+            Key: Constants.DbStatusCode,
+            Value: UniqueViolationErrorCode or ForeignKeyViolationErrorCode or SerializationFailureErrorCode
         });
 
     public static bool IsSuccessfulSqlStatementActivity(this IEnumerable<KeyValuePair<string, string?>> tags) =>

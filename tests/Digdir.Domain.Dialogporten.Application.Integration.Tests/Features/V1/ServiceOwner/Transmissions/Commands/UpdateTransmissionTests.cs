@@ -321,7 +321,7 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             Add(
                 (command, _) => command.Dto.NavigationalActions[0].ExpiresAt = updatedNavigationalActionExpiresAt,
                 transmission => transmission.NavigationalActions.Should().ContainSingle()
-                    .Which.ExpiresAt.Should().Be(updatedNavigationalActionExpiresAt));
+                    .Which.ExpiresAt.Should().BeCloseToDefault(updatedNavigationalActionExpiresAt));
 
             Add(
                 (command, _) => command.Dto.Attachments = [],

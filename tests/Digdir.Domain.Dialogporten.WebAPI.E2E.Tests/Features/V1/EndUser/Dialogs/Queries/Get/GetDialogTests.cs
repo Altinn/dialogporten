@@ -67,4 +67,29 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         secondAction.Prompt.Should().NotBeEmpty();
         secondAction.HttpMethod.Should().Be(Http_HttpVerb.POST);
     }
+
+    [E2EFact]
+    public async Task Should_Have_Unauthorized_ApiActions_With_Default_Urls()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
+
+        // Act
+        var languages = new V1EndUserCommon_AcceptedLanguages();
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+
+        // Assert
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        content.ApiActions.Should().HaveCount(1);
+
+        var apiAction = content.ApiActions.Single();
+        apiAction.IsAuthorized.Should().BeFalse();
+        apiAction.Endpoints.Should().NotBeEmpty();
+
+        foreach (var endpoint in apiAction.Endpoints)
+        {
+            endpoint.Url.ToString().Should().Be("urn:dialogporten:unauthorized");
+        }
+    }
 }

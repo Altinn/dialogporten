@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
@@ -49,31 +50,9 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     }
 
     [Fact]
-    public Task Get_Dialog_Should_Include_MainContentReference() =>
+    public Task Get_Dialog_Should_Include_MainContentReference_When_Read_Access_To_Main_Resource() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) =>
-                x.Dto.Content!.MainContentReference = new ContentValueDto
-                {
-                    MediaType = MediaTypes.EmbeddableMarkdown,
-                    Value =
-                    [
-                        new LocalizationDto
-                        {
-                            LanguageCode = "nb",
-                            Value = "https://localhost/nb"
-                        },
-                        new LocalizationDto
-                        {
-                            LanguageCode = "nn",
-                            Value = "https://localhost/nn"
-                        },
-                        new LocalizationDto
-                        {
-                            LanguageCode = "en",
-                            Value = "https://localhost/en"
-                        }
-                    ]
-                })
+            .CreateSimpleDialog((x, _) => x.AddMainContentReference())
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
@@ -105,37 +84,166 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             });
 
     [Fact]
-    public Task Get_Dialog_Should_Mask_Unauthorized_MainContentReference() =>
+    public Task Get_Dialog_Should_Mask_Unauthorized_MainContentReference_When_No_Read_Access_To_Main_Resource() =>
         FlowBuilder.For(Application, ConfigureWriteOnlyAuthorization)
-            .CreateSimpleDialog((x, _) =>
-                x.Dto.Content!.MainContentReference = new ContentValueDto
-                {
-                    MediaType = MediaTypes.EmbeddableMarkdown,
-                    Value =
-                    [
-                        new LocalizationDto
-                        {
-                            LanguageCode = "nb",
-                            Value = "https://localhost/nb"
-                        },
-                        new LocalizationDto
-                        {
-                            LanguageCode = "nn",
-                            Value = "https://localhost/nn"
-                        },
-                        new LocalizationDto
-                        {
-                            LanguageCode = "en",
-                            Value = "https://localhost/en"
-                        }
-                    ]
-                })
+            .CreateSimpleDialog((x, _) => x.AddMainContentReference())
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.Content.MainContentReference!.IsAuthorized.Should().BeFalse();
                 x.Content.MainContentReference!.Value.Should().AllSatisfy(x =>
                     x.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Include_GuiAction_Url_When_Read_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.AddGuiAction(guiAction => guiAction.Url = new Uri("https://localhost")))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var guiAction = x.GuiActions.Single();
+                guiAction.IsAuthorized.Should().BeTrue();
+                guiAction.Url.Should().Be(new Uri("https://localhost"));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Include_GuiAction_Url_When_Specific_Access_To_Resource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("GuiAction1", "urn:altinn:resource:gui-action-1"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) => x.AddGuiAction(guiAction =>
+            {
+                guiAction.Action = "GuiAction1";
+                guiAction.AuthorizationAttribute = "urn:altinn:resource:gui-action-1";
+                guiAction.Url = new Uri("https://localhost");
+            }))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var guiAction = x.GuiActions.Single();
+                guiAction.IsAuthorized.Should().BeTrue();
+                guiAction.Url.Should().Be(new Uri("https://localhost"));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_GuiAction_Urls_When_No_Specific_Read_Access_But_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("read", Constants.MainResource),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddGuiAction(g =>
+                {
+                    g.Action = "GuiAction1";
+                    g.AuthorizationAttribute = "urn:altinn:resource:unauthorized";
+                });
+                x.AddGuiAction(g =>
+                {
+                    g.Priority = DialogGuiActionPriority.Values.Secondary;
+                    g.Action = "GuiAction2";
+                    g.AuthorizationAttribute = "urn:altinn:resource:unauthorized";
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.GuiActions.Count.Should().Be(2);
+                x.GuiActions.Should().AllSatisfy(guiAction =>
+                {
+                    guiAction.IsAuthorized.Should().BeFalse();
+                    guiAction.Url.Should().Be(Constants.UnauthorizedUri.ToString());
+                });
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Include_ApiAction_Url_When_Read_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction();
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var apiAction = x.ApiActions.Single();
+                apiAction.IsAuthorized.Should().BeTrue();
+                apiAction.Endpoints.Single().Url.Should().Be(new Uri("https://example.com"));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Include_ApiAction_Url_When_Specific_Access_To_Resource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("ApiAction1", "urn:altinn:resource:api-action-1"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) => x.AddApiAction(apiAction =>
+            {
+                apiAction.Action = "ApiAction1";
+                apiAction.AuthorizationAttribute = "urn:altinn:resource:api-action-1";
+            }))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var apiAction = x.ApiActions.Single();
+                apiAction.IsAuthorized.Should().BeTrue();
+                apiAction.Endpoints.Single().Url.Should().Be(new Uri("https://example.com"));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_ApiAction_Urls_When_No_Specific_Read_Access_But_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("read", Constants.MainResource),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction(g =>
+                {
+                    g.Action = "ApiAction1";
+                    g.AuthorizationAttribute = "urn:altinn:resource:unauthorized";
+                });
+                x.AddApiAction(g =>
+                {
+                    g.Action = "ApiAction2";
+                    g.AuthorizationAttribute = "urn:altinn:resource:unauthorized";
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.ApiActions.Count.Should().Be(2);
+                x.ApiActions.Should().AllSatisfy(guiAction =>
+                {
+                    guiAction.IsAuthorized.Should().BeFalse();
+                    guiAction.Endpoints.Single().Url.Should().Be(Constants.UnauthorizedUri.ToString());
+                });
             });
 
     [Fact]
@@ -148,6 +256,70 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Transmissions.Should().ContainSingle()
                     .Which.ExternalReference.Should().Be("ext"));
+
+    [Fact]
+    public Task Get_Dialog_Should_Return_Transmission_ContentReference_When_Specific_Access() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
+                        new AltinnAction(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:transmission-1";
+                    transmission.Content!.ContentReference = new ContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "https://example.com/secret1"
+                            }
+                        ]
+                    };
+                });
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:transmission-2";
+                    transmission.Content!.ContentReference = new ContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "https://example.com/secret2"
+                            }
+                        ]
+                    };
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Transmissions.Count.Should().Be(2);
+                x.Transmissions.Should().AllSatisfy(x =>
+                {
+                    x.IsAuthorized.Should().BeTrue();
+                    x.Content.ContentReference.Should().NotBeNull();
+                    x.Content.ContentReference.Value.Should().NotBeEmpty();
+                    x.Content.ContentReference.Value.Should().AllSatisfy(v =>
+                    {
+                        v.Value.Should().StartWith("https://example.com/secret");
+                    });
+                });
+            });
 
     [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>

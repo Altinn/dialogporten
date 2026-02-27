@@ -1,6 +1,7 @@
 ﻿using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -162,5 +163,157 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 result.Errors.Should().ContainSingle()
                     .Which.ErrorMessage.Should()
                     .Contain("EndUserId must be a valid end user identifier.");
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Not_Decorate_Authorization() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction();
+                x.AddGuiAction();
+                x.AddTransmission();
+                x.AddMainContentReference();
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.ApiActions.Count.Should().NotBe(0);
+                x.ApiActions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeNull());
+                x.GuiActions.Count.Should().NotBe(0);
+                x.GuiActions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeNull());
+                x.Content.Should().NotBeNull();
+                x.Content.MainContentReference.Should().NotBeNull();
+                x.Content.MainContentReference.IsAuthorized.Should().BeNull();
+                x.Transmissions.Count.Should().NotBe(0);
+                x.Transmissions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeNull());
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Decorate_Authorization_True_When_EndUserId_Is_Supplied_And_Has_Main_Content_Access() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction();
+                x.AddGuiAction();
+                x.AddTransmission();
+                x.AddMainContentReference();
+            })
+            .GetServiceOwnerDialogAsEndUser()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.ApiActions.Count.Should().NotBe(0);
+                x.ApiActions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeTrue());
+                x.GuiActions.Count.Should().NotBe(0);
+                x.GuiActions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeTrue());
+                x.Content.Should().NotBeNull();
+                x.Content.MainContentReference.Should().NotBeNull();
+                x.Content.MainContentReference.IsAuthorized.Should().BeTrue();
+                x.Transmissions.Count.Should().NotBe(0);
+                x.Transmissions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeTrue());
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Decorate_Authorization_True_When_EndUserId_Is_Supplied_And_Has_Specific_Access() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction(Constants.ReadAction),
+                        new AltinnAction("ApiAction", "urn:altinn:resource:api-action"),
+                        new AltinnAction("GuiAction", "urn:altinn:resource:gui-action"),
+                        new AltinnAction(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
+                        new AltinnAction(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction(apiAction =>
+                {
+                    apiAction.Action = "ApiAction";
+                    apiAction.AuthorizationAttribute = "urn:altinn:resource:api-action";
+                });
+                x.AddGuiAction(guiAction =>
+                {
+                    guiAction.Action = "GuiAction";
+                    guiAction.AuthorizationAttribute = "urn:altinn:resource:gui-action";
+                });
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:transmission-1";
+                });
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:transmission-2";
+                });
+                x.AddMainContentReference();
+            })
+            .GetServiceOwnerDialogAsEndUser()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.ApiActions.Count.Should().NotBe(0);
+                x.ApiActions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeTrue());
+                x.GuiActions.Count.Should().NotBe(0);
+                x.GuiActions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeTrue());
+                x.Content.Should().NotBeNull();
+                x.Content.MainContentReference.Should().NotBeNull();
+                x.Content.MainContentReference.IsAuthorized.Should().BeTrue();
+                x.Transmissions.Count.Should().NotBe(0);
+                x.Transmissions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeTrue());
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Decorate_Authorization_False_When_EndUserId_Is_Supplied_And_No_Specific_Access() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("subscribe"),
+                        new AltinnAction("ApiAction", "urn:altinn:resource:restricted"),
+                        new AltinnAction("GuiAction", "urn:altinn:resource:restricted"),
+                        new AltinnAction(Constants.TransmissionReadAction, "urn:altinn:resource:restricted"),
+                        new AltinnAction(Constants.ReadAction, "urn:altinn:resource:restricted"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction(apiAction =>
+                {
+                    apiAction.Action = "ApiAction";
+                    apiAction.AuthorizationAttribute = "urn:altinn:resource:api-action";
+                });
+                x.AddGuiAction(guiAction =>
+                {
+                    guiAction.Action = "GuiAction";
+                    guiAction.AuthorizationAttribute = "urn:altinn:resource:gui-action";
+                });
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:transmission-1";
+                });
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:transmission-2";
+                });
+                x.AddMainContentReference();
+            })
+            .GetServiceOwnerDialogAsEndUser()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.ApiActions.Count.Should().NotBe(0);
+                x.ApiActions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeFalse());
+                x.GuiActions.Count.Should().NotBe(0);
+                x.GuiActions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeFalse());
+                x.Content.Should().NotBeNull();
+                x.Content.MainContentReference.Should().NotBeNull();
+                x.Content.MainContentReference.IsAuthorized.Should().BeFalse();
+                x.Transmissions.Count.Should().NotBe(0);
+                x.Transmissions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeFalse());
             });
 }

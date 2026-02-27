@@ -35,8 +35,8 @@ public sealed class AuthorizationContentValueDto : IContentValueDto
     public string MediaType { get; set; } = MediaTypes.PlainText;
 
     /// <summary>
-    /// True if the authenticated user is authorized for this action. If not, the action will not be available
-    /// and all endpoints will be replaced with a fixed placeholder.
+    /// True if the authenticated user is authorized for this content. If not, the endpoints will 
+    /// be replaced with a fixed placeholder.
     /// </summary>
     public bool IsAuthorized { get; set; }
 }

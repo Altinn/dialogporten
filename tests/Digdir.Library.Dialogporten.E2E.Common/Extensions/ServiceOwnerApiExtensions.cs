@@ -25,10 +25,13 @@ public static class ServiceOwnerApiExtensions
                     dialog,
                     TestContext.Current.CancellationToken);
 
-            if (createDialogResponse.IsSuccessStatusCode) return createDialogResponse.Content.ToGuid();
+            if (!createDialogResponse.IsSuccessStatusCode)
+            {
+                TestContext.Current.TestOutputHelper!.WriteLine(createDialogResponse.Error.Content!);
+            }
 
-            TestContext.Current.TestOutputHelper!.WriteLine(createDialogResponse.Error.Content!);
             createDialogResponse.Error.Should().BeNull();
+
             return createDialogResponse.Content.ToGuid();
         }
 

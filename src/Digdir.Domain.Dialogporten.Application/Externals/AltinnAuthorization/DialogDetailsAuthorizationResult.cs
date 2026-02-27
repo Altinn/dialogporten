@@ -44,5 +44,5 @@ public sealed class DialogDetailsAuthorizationResult
     }
 
     private bool HasAccessToAction(string action, string authorizationAttribute) =>
-        AuthorizedAltinnActions.Find(x => x.Name == action)?.AuthorizationAttribute == authorizationAttribute;
+        AuthorizedAltinnActions.Any(x => x.Name == action && x.AuthorizationAttribute == authorizationAttribute);
 }

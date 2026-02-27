@@ -12,6 +12,27 @@ public sealed class DialogDetailsAuthorizationResult
     public bool HasAccessToMainResource() =>
         AuthorizedAltinnActions.Any(action => action.AuthorizationAttribute == Constants.MainResource);
 
+    public bool HasAccessToGuiAction(string action, string? authorizationAttribute)
+    {
+        return authorizationAttribute is null
+            ? HasAccessToMainResource()
+            : HasAccessToAction(action, authorizationAttribute);
+    }
+
+    public bool HasAccessToApiAction(string action, string? authorizationAttribute)
+    {
+        return authorizationAttribute is null
+            ? HasAccessToMainResource()
+            : HasAccessToAction(action, authorizationAttribute);
+    }
+
+    public bool HasReadAccessToMainResource() =>
+        AuthorizedAltinnActions.Any(x => x is
+        {
+            Name: Constants.ReadAction,
+            AuthorizationAttribute: Constants.MainResource
+        });
+
     public bool HasReadAccessToDialogTransmission(string? authorizationAttribute)
     {
         return authorizationAttribute is not null
@@ -21,4 +42,7 @@ public sealed class DialogDetailsAuthorizationResult
                 || AuthorizedAltinnActions.Contains(new(Constants.ReadAction, authorizationAttribute))
             ) : HasAccessToMainResource();
     }
+
+    private bool HasAccessToAction(string action, string authorizationAttribute) =>
+        AuthorizedAltinnActions.Find(x => x.Name == action)?.AuthorizationAttribute == authorizationAttribute;
 }

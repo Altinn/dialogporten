@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -129,38 +128,23 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     }
 
     private static void DecorateWithAuthorization(DialogDto dto,
-        DialogDetailsAuthorizationResult authorizationResult)
+        DialogDetailsAuthorizationResult authorization)
     {
-        foreach (var (action, resource) in authorizationResult.AuthorizedAltinnActions)
+        foreach (var a in dto.ApiActions)
         {
-            foreach (var apiAction in dto.ApiActions.Where(a => a.Action == action))
-            {
-                if ((apiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
-                {
-                    apiAction.IsAuthorized = true;
-                }
-            }
+            a.IsAuthorized = authorization.HasAccessToApiAction(a.Action, a.AuthorizationAttribute);
+        }
 
-            foreach (var guiAction in dto.GuiActions.Where(a => a.Action == action))
-            {
-                if ((guiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
-                {
-                    guiAction.IsAuthorized = true;
-                }
-            }
+        foreach (var g in dto.GuiActions)
+        {
+            g.IsAuthorized = authorization.HasAccessToGuiAction(g.Action, g.AuthorizationAttribute);
+        }
 
-            if (action == Constants.ReadAction && resource == Constants.MainResource)
-            {
-                dto.Content?.MainContentReference?.IsAuthorized = true;
-            }
+        dto.Content?.MainContentReference?.IsAuthorized = authorization.HasReadAccessToMainResource();
 
-            var authorizedTransmissions = dto.Transmissions.Where(t => authorizationResult.HasReadAccessToDialogTransmission(t.AuthorizationAttribute));
-            foreach (var transmission in authorizedTransmissions)
-            {
-                transmission.IsAuthorized = true;
-            }
+        foreach (var t in dto.Transmissions)
+        {
+            t.IsAuthorized = authorization.HasReadAccessToDialogTransmission(t.AuthorizationAttribute);
         }
     }
 }

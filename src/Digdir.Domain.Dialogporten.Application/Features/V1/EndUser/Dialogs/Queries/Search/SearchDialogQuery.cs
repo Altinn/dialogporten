@@ -157,7 +157,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
     {
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
-            request.Party ?? [],
+            request.Party?.Select(x => x.ToLowerInvariant()).ToList() ?? [],
             request.ServiceResource ?? [],
             cancellationToken: cancellationToken);
 
@@ -389,7 +389,7 @@ internal static class SearchDialogQueryExtensions
             ExternalReference = request.ExternalReference,
             ExtendedStatus = request.ExtendedStatus,
             Org = request.Org,
-            Party = request.Party,
+            Party = request.Party?.Select(x => x.ToLowerInvariant()).ToList(),
             ServiceResource = request.ServiceResource,
             Status = request.Status,
         };

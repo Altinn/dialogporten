@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.105.1](https://github.com/Altinn/dialogporten/compare/v1.105.0...v1.105.1) (2026-02-26)
+
+
+### Bug Fixes
+
+* name ordering in ordering emulation ([#3513](https://github.com/Altinn/dialogporten/issues/3513)) ([d5e2e8d](https://github.com/Altinn/dialogporten/commit/d5e2e8dc4f99afdf5f360db75fe04b93d7c2a4e8))
+* **perf:** Use partial indices for TPH tables ([#3478](https://github.com/Altinn/dialogporten/issues/3478)) ([f63c852](https://github.com/Altinn/dialogporten/commit/f63c85222d1bdd22ec715b1376cada46899fd741))
+
+
+### Miscellaneous Chores
+
+* **deps:** update mcr.microsoft.com/dotnet/sdk:10.0.103 docker digest to e362a8d ([#3510](https://github.com/Altinn/dialogporten/issues/3510)) ([39053b9](https://github.com/Altinn/dialogporten/commit/39053b96aafa516ef02e82e962bafededd0d0fed))
+* **deps:** update step-security/changed-files action to v47 ([#3509](https://github.com/Altinn/dialogporten/issues/3509)) ([1c7bd68](https://github.com/Altinn/dialogporten/commit/1c7bd68a0341a4d40426c58b6409790b6267c1ab))
+
+## [1.105.0](https://github.com/Altinn/dialogporten/compare/v1.104.1...v1.105.0) (2026-02-25)
+
+
+### Features
+
+* **api:** configurable limits, metadata endpoint ([#3455](https://github.com/Altinn/dialogporten/issues/3455)) ([4041464](https://github.com/Altinn/dialogporten/commit/4041464c6a52676299fdaafbdd6362e32809babd))
+* create activity as admin for deleted dialogs ([#3432](https://github.com/Altinn/dialogporten/issues/3432)) ([e0c2299](https://github.com/Altinn/dialogporten/commit/e0c2299c5dbec9db741e8f341de068907348e75e))
+
+
+### Bug Fixes
+
+* **dialog:** add ordering to transmissions and related entities in FullDialogAggregateDataLoader ([#3457](https://github.com/Altinn/dialogporten/issues/3457)) ([b2fb7b5](https://github.com/Altinn/dialogporten/commit/b2fb7b52b3f6edb525284f22c42c0c36b92fb155))
+* **dialogSearch:** add ordering to VDialogContent view for improved search consistency ([#3403](https://github.com/Altinn/dialogporten/issues/3403)) ([0a55114](https://github.com/Altinn/dialogporten/commit/0a55114b1bfa3f5f02f4c42e2d3848b7ed3ae606))
+* **perf:** Sql strategy selection mechanism, optimizations, reenable instance delegations checks ([#3292](https://github.com/Altinn/dialogporten/issues/3292)) ([9369850](https://github.com/Altinn/dialogporten/commit/93698502ee053452dde294d3dee5640dedcec617))
+* **test:** deterministic randomness in dialog generator ([#3490](https://github.com/Altinn/dialogporten/issues/3490)) ([8d7850e](https://github.com/Altinn/dialogporten/commit/8d7850ee82d2257f1fa30f01e601754cc167d04e))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency deterministicguids to 1.0.10 ([#3479](https://github.com/Altinn/dialogporten/issues/3479)) ([8fd68e3](https://github.com/Altinn/dialogporten/commit/8fd68e3713fbbb49f7b0f29ce7f4993616b0f795))
+* **deps:** update docker/build-push-action action to v6.19.0 ([#3480](https://github.com/Altinn/dialogporten/issues/3480)) ([3a8f8bc](https://github.com/Altinn/dialogporten/commit/3a8f8bcc71f1a454172a62dbd0a2398fe4e5e326))
+* **deps:** update docker/build-push-action action to v6.19.2 ([#3498](https://github.com/Altinn/dialogporten/issues/3498)) ([31fe078](https://github.com/Altinn/dialogporten/commit/31fe078b971b2fe1593385da800f97bd43c0e36e))
+* **deps:** update mcr.microsoft.com/dotnet/aspnet:10.0.3 docker digest to d81a600 ([#3508](https://github.com/Altinn/dialogporten/issues/3508)) ([d68cd5f](https://github.com/Altinn/dialogporten/commit/d68cd5ff16410c6519f774ad1818b2f3af982882))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.145.0 ([#3481](https://github.com/Altinn/dialogporten/issues/3481)) ([ca22d28](https://github.com/Altinn/dialogporten/commit/ca22d281f8cc5f18120f84514862de41b2a44bf1))
+* **deps:** update refit monorepo to v10 (major) ([#3501](https://github.com/Altinn/dialogporten/issues/3501)) ([bd422d8](https://github.com/Altinn/dialogporten/commit/bd422d88843496471bac96cbe76eaafc8fcab67a))
+* **infra:** Consolidating indexes with production ([#3379](https://github.com/Altinn/dialogporten/issues/3379)) ([142d81b](https://github.com/Altinn/dialogporten/commit/142d81b9672e69547ef938cfd6ee09ef23f87634))
+* **infra:** increase PostgreSQL disk to 8TB, P60 ([#3483](https://github.com/Altinn/dialogporten/issues/3483)) ([22ff499](https://github.com/Altinn/dialogporten/commit/22ff499d4781aceb0a533b647422a180e3352dcc))
+* optimize create-activity endpoint ([#3405](https://github.com/Altinn/dialogporten/issues/3405)) ([4b9520f](https://github.com/Altinn/dialogporten/commit/4b9520fa01e3e05704d4ecdab7a2a08997d1b940))
+
 ## [1.104.1](https://github.com/Altinn/dialogporten/compare/v1.104.0...v1.104.1) (2026-02-17)
 
 

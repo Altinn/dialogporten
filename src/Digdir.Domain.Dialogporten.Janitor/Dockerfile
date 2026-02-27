@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.3@sha256:13fda51806e4b84fccf84abf86b35313edf89200a17a7b01c4ea587c88a0fa20 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.3@sha256:d81a6005f3bc22fe132f6ae2f5fe8a17914381bde66fd3586580211fb1993413 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.103@sha256:0a506ab0c8aa077361af42f82569d364ab1b8741e967955d883e3f23683d473a AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.103@sha256:e362a8dbcd691522456da26a5198b8f3ca1d7641c95624fadc5e3e82678bd08a AS build
 WORKDIR /src
 
 COPY [".editorconfig", "."]

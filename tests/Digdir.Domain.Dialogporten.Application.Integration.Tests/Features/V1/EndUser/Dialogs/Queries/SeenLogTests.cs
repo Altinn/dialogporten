@@ -145,6 +145,17 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         x.SeenSinceLastContentUpdate.AssertSingleActorIdHashed();
         x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
     }
+
+    [Fact]
+    public Task CaseInsensitive_Party_Match_For_IsCurrentUser() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.Dto.Party = IdportenEmailUserIdentifier.PrefixWithSeparator + "Test@Test.no")
+            .AsIntegrationEmailUser()
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.SeenSinceLastUpdate.Should().ContainSingle()
+                    .Which.IsCurrentEndUser.Should().BeTrue());
 }
 
 internal static class SeenLogAssertionExtensions

@@ -44,8 +44,8 @@ setRepoPath() {
     depth=0
     found=0
     while [[ $repo_root != "/" && $depth -lt 5 ]]; do
-      if [[ -e "$repo_root/Digdir.Domain.Dialogporten.sln" ]]; then
-        echo "Repo root found: $repo_root/Digdir.Domain.Dialogporten.sln"
+      if [[ -e "$repo_root/Digdir.Domain.Dialogporten.slnx" ]]; then
+        echo "Repo root found: $repo_root/Digdir.Domain.Dialogporten.slnx"
         found=1
         break
       fi

@@ -177,6 +177,12 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
     }
     availabilityZone: availabilityZone
     highAvailability: highAvailability
+    maintenanceWindow: {
+      customWindow: 'Enabled'
+      dayOfWeek: 1
+      startHour: 3
+      startMinute: 0
+    }
   }
   sku: sku
   resource database 'databases' = {

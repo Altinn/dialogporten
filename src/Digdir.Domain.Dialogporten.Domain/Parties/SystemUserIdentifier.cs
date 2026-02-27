@@ -5,6 +5,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Parties;
 
 public sealed record SystemUserIdentifier : IPartyIdentifier
 {
+    public static char ShortPrefix => 's';
     public static string Prefix => "urn:altinn:systemuser:uuid";
     public static string PrefixWithSeparator => Prefix + PartyIdentifier.Separator;
     public string FullId { get; }
@@ -12,7 +13,7 @@ public sealed record SystemUserIdentifier : IPartyIdentifier
 
     private SystemUserIdentifier(ReadOnlySpan<char> value)
     {
-        Id = value.ToString();
+        Id = value.ToString().ToLowerInvariant();
         FullId = PrefixWithSeparator + Id;
     }
 

@@ -4,25 +4,20 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
-using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using FluentValidation.Results;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -48,6 +43,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
     private readonly IResourceRegistry _resourceRegistry;
+    private readonly ISystemLabelAdder _systemLabelAdder;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
     private readonly IUser _user;
@@ -62,9 +58,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IResourceRegistry resourceRegistry,
+        ISystemLabelAdder systemLabelAdder,
         IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
-        ITransmissionHierarchyValidator transmissionHierarchyValidator)
+        ITransmissionHierarchyValidator transmissionHierarchyValidator
+    )
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -72,6 +70,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+        _systemLabelAdder = systemLabelAdder ?? throw new ArgumentNullException(nameof(systemLabelAdder));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
@@ -88,6 +87,9 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             .Concat(dialog.Transmissions.SelectMany(x => x.Attachments))
             .Concat(dialog.Attachments)
             .EnsureIds();
+
+        // Make sure Party get stored lowercased in db
+        dialog.Party = dialog.Party.ToLowerInvariant();
 
         await _serviceResourceAuthorizer.SetResourceType(dialog, cancellationToken);
         var serviceResourceAuthorizationResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
@@ -155,7 +157,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
         if (dialog.Transmissions.ContainsTransmissionByEndUser())
         {
-            AddSystemLabel(dialog, SystemLabel.Values.Sent);
+            _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
 
         _db.Dialogs.Add(dialog);
@@ -218,26 +220,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return;
         }
 
-        AddSystemLabel(dialog, request.Dto.SystemLabel.Value);
-    }
-
-    private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
-    {
-        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
-        {
-            _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
-            return;
-        }
-
-        var performedBy = LabelAssignmentLogActorFactory.Create(
-            ActorType.Values.ServiceOwner,
-            actorId: $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
-            actorName: null);
-
-        dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [labelToAdd],
-            removeLabels: [],
-            performedBy);
+        _systemLabelAdder.AddSystemLabel(dialog, request.Dto.SystemLabel.Value);
     }
 
     private void CreateDialogServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)

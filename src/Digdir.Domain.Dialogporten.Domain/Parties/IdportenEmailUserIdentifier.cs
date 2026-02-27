@@ -6,6 +6,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Parties;
 
 public sealed partial record IdportenEmailUserIdentifier : IPartyIdentifier
 {
+    public static char ShortPrefix => 'e';
     public static string Prefix => "urn:altinn:person:idporten-email";
     public static string PrefixWithSeparator => Prefix + PartyIdentifier.Separator;
     public string FullId { get; }
@@ -13,7 +14,7 @@ public sealed partial record IdportenEmailUserIdentifier : IPartyIdentifier
 
     private IdportenEmailUserIdentifier(ReadOnlySpan<char> value)
     {
-        Id = value.ToString();
+        Id = value.ToString().ToLowerInvariant();
         FullId = PrefixWithSeparator + Id;
     }
 

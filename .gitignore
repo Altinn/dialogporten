@@ -410,3 +410,6 @@ CLAUDE.md
 
 # Claude Code related files (used for skills, workflows, etc. for claude agents)
 .claude
+
+# Auto Claude data directory
+.auto-claude/

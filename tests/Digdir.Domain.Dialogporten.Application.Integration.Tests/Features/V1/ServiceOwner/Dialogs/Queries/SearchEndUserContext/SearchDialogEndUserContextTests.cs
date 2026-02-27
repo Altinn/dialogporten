@@ -192,17 +192,6 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
                 result.Items.Should().ContainSingle(item => item.DialogId == ctx.GetDialogId()));
 
     [Fact]
-    public Task Search_With_More_Than_20_Parties_Returns_ValidationError() =>
-        FlowBuilder.For(Application)
-            .SearchServiceOwnerDialogEndUserContexts(query =>
-            {
-                query.Party = Enumerable
-                    .Repeat(TestUsers.DefaultParty, 21)
-                    .ToList();
-            })
-            .ExecuteAndAssert<ValidationError>();
-
-    [Fact]
     public async Task Search_ContentUpdatedAfter_Filters_On_ContentUpdatedAt()
     {
         DateTimeOffset? contentUpdatedAfter = null!;

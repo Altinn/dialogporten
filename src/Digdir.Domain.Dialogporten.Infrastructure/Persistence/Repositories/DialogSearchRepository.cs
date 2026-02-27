@@ -144,7 +144,7 @@ internal sealed class DialogSearchRepository(
 
         if (parties.Count == 0)
         {
-            throw new ArgumentException("Parties cannot be empty", nameof(parties));
+            return new PaginatedList<DataDialogEndUserContextListItemDto>([], false, null, orderSet.GetOrderString());
         }
 
         var queryBuilder = new PostgresFormattableStringBuilder();

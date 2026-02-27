@@ -23,4 +23,24 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.Id.Should().Be(dialogId);
     }
+
+    [E2EFact]
+    public async Task Should_Populate_SeenLog_After_Get()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
+
+        // Act
+        var languages = new V1EndUserCommon_AcceptedLanguages();
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+
+        // Assert
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        content.SeenSinceLastUpdate.Should().HaveCount(1);
+
+        var seenEntry = content.SeenSinceLastUpdate.Single();
+        seenEntry.SeenBy.ActorId.Should().Contain("urn:altinn:person:identifier-ephemeral");
+        seenEntry.IsCurrentEndUser.Should().BeTrue();
+    }
 }

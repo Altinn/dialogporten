@@ -1,5 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
@@ -71,11 +73,133 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
                 result.Items.Should().OnlyContain(x => x.SystemLabels.Contains(SystemLabel.Values.Archive));
             });
 
+    [Fact]
+    public async Task Search_With_Label_Filter_Paginates_Deterministically_With_ContinuationToken()
+    {
+        var baseTime = DateTimeOffset.UtcNow.AddMinutes(-10);
+        var oldestArchiveId = Guid.CreateVersion7();
+        var middleArchiveId = Guid.CreateVersion7();
+        var filteredOutId = Guid.CreateVersion7();
+        var newestArchiveId = Guid.CreateVersion7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                var ts = baseTime.AddMinutes(1);
+                x.Dto.Id = oldestArchiveId;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.SystemLabel = SystemLabel.Values.Archive;
+                x.Dto.CreatedAt = ts;
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                var ts = baseTime.AddMinutes(2);
+                x.Dto.Id = middleArchiveId;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.SystemLabel = SystemLabel.Values.Archive;
+                x.Dto.CreatedAt = ts;
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                var ts = baseTime.AddMinutes(3);
+                x.Dto.Id = filteredOutId;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.SystemLabel = SystemLabel.Values.Bin;
+                x.Dto.CreatedAt = ts;
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                var ts = baseTime.AddMinutes(4);
+                x.Dto.Id = newestArchiveId;
+                x.Dto.Party = TestUsers.DefaultParty;
+                x.Dto.SystemLabel = SystemLabel.Values.Archive;
+                x.Dto.CreatedAt = ts;
+            })
+            .ExecuteAndAssert(_ => { });
+
+        var firstPage = await FlowBuilder.For(Application)
+            .SearchServiceOwnerDialogEndUserContexts(query =>
+            {
+                query.Party = [TestUsers.DefaultParty];
+                query.Label = [SystemLabel.Values.Archive];
+                query.Limit = 1;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>();
+
+        firstPage.Items.Should().ContainSingle();
+        firstPage.Items.Single().DialogId.Should().Be(newestArchiveId);
+        firstPage.HasNextPage.Should().BeTrue();
+        firstPage.ContinuationToken.Should().NotBeNullOrWhiteSpace();
+
+        var firstToken = ContinuationTokenSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>
+            .TryParse(firstPage.ContinuationToken, out var parsedFirstToken)
+                ? parsedFirstToken
+                : throw new InvalidOperationException("Unable to parse first continuation token.");
+
+        var secondPage = await FlowBuilder.For(Application)
+            .SearchServiceOwnerDialogEndUserContexts(query =>
+            {
+                query.Party = [TestUsers.DefaultParty];
+                query.Label = [SystemLabel.Values.Archive];
+                query.Limit = 1;
+                query.ContinuationToken = firstToken;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>();
+
+        secondPage.Items.Should().ContainSingle();
+        secondPage.Items.Single().DialogId.Should().Be(middleArchiveId);
+        secondPage.Items.Select(x => x.DialogId).Should().NotIntersectWith(firstPage.Items.Select(x => x.DialogId));
+        secondPage.HasNextPage.Should().BeTrue();
+        secondPage.ContinuationToken.Should().NotBeNullOrWhiteSpace();
+
+        var secondToken = ContinuationTokenSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>
+            .TryParse(secondPage.ContinuationToken, out var parsedSecondToken)
+                ? parsedSecondToken
+                : throw new InvalidOperationException("Unable to parse second continuation token.");
+
+        var thirdPage = await FlowBuilder.For(Application)
+            .SearchServiceOwnerDialogEndUserContexts(query =>
+            {
+                query.Party = [TestUsers.DefaultParty];
+                query.Label = [SystemLabel.Values.Archive];
+                query.Limit = 1;
+                query.ContinuationToken = secondToken;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>();
+
+        thirdPage.Items.Should().ContainSingle();
+        thirdPage.Items.Single().DialogId.Should().Be(oldestArchiveId);
+        thirdPage.Items.Select(x => x.DialogId).Should().NotIntersectWith(firstPage.Items.Select(x => x.DialogId));
+        thirdPage.Items.Select(x => x.DialogId).Should().NotIntersectWith(secondPage.Items.Select(x => x.DialogId));
+        thirdPage.HasNextPage.Should().BeFalse();
+    }
 
     [Fact]
     public Task Search_Without_Party_Returns_ValidationError() =>
         FlowBuilder.For(Application)
             .SearchServiceOwnerDialogEndUserContexts(_ => { })
+            .ExecuteAndAssert<ValidationError>();
+
+    [Fact]
+    public Task Search_With_Multiple_Parties_Returns_Matching_Dialogs() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SearchServiceOwnerDialogEndUserContexts((query, ctx) =>
+            {
+                query.Party = [ctx.GetParty(), "urn:altinn:person:identifier-no:19895597581"];
+            })
+            .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>((result, ctx) =>
+                result.Items.Should().ContainSingle(item => item.DialogId == ctx.GetDialogId()));
+
+    [Fact]
+    public Task Search_With_More_Than_20_Parties_Returns_ValidationError() =>
+        FlowBuilder.For(Application)
+            .SearchServiceOwnerDialogEndUserContexts(query =>
+            {
+                query.Party = Enumerable
+                    .Repeat(TestUsers.DefaultParty, 21)
+                    .ToList();
+            })
             .ExecuteAndAssert<ValidationError>();
 
     [Fact]

@@ -142,11 +142,10 @@ internal sealed class DialogSearchRepository(
             .Select(x => (int)x)
             .ToArray();
 
-        // For performance reasons, we only support a single Party. This ensures that we hit the
-        // index on (Org, Party, ContentUpdatedAt) instead of (Org, ContentUpdatedAt) which would be the case if
-        // we allowed multiple parties with an IN clause, causing signficantly more i/o.
-        // The validator will ensure that only one is supplied.
-        var party = parties.FirstOrDefault() ?? throw new ArgumentException("Parties cannot be empty", nameof(parties));
+        if (parties.Count == 0)
+        {
+            throw new ArgumentException("Parties cannot be empty", nameof(parties));
+        }
 
         var queryBuilder = new PostgresFormattableStringBuilder();
         if (systemLabelValues is not null && systemLabelValues.Length != 0)
@@ -173,10 +172,11 @@ internal sealed class DialogSearchRepository(
                              LIMIT 1
                          ) filter_check ON TRUE
                          WHERE d."Org" = {orgName}
-                           AND d."Party" = {party}
                      """)
+                .AppendManyFilter(parties, "Party")
                 .AppendIf(contentUpdatedAfter is not null, $""" AND d."ContentUpdatedAt" > {contentUpdatedAfter}::timestamptz """)
                 .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
+                .ApplyPaginationOrder(orderSet, alias: "d")
                 .ApplyPaginationLimit(limit)
                 .Append(
                     """
@@ -202,8 +202,8 @@ internal sealed class DialogSearchRepository(
                          SELECT d."Id", d."ContentUpdatedAt"
                          FROM "Dialog" d
                          WHERE d."Org" = {orgName}
-                           AND d."Party" = {party}
                      """)
+                .AppendManyFilter(parties, "Party")
                 .AppendIf(contentUpdatedAfter is not null, $""" AND d."ContentUpdatedAt" > {contentUpdatedAfter}::timestamptz """)
                 .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
                 .ApplyPaginationOrder(orderSet, alias: "d")

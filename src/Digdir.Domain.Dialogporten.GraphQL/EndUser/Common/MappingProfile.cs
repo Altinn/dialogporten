@@ -2,6 +2,7 @@ using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Content;
 using DialogActivityDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogActivityDto;
 using DialogSeenLogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogSeenLogDto;
 
@@ -14,6 +15,8 @@ public sealed class MappingProfile : Profile
         CreateMap<LocalizationDto, Localization>();
 
         CreateMap<ContentValueDto, ContentValue>();
+
+        CreateMap<AuthorizationContentValueDto, AuthorizationContentValue>();
 
         CreateMap<DialogSeenLogDto, SeenLog>();
 

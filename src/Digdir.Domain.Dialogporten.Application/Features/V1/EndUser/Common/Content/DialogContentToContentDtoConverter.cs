@@ -19,15 +19,17 @@ public sealed class DialogContentToContentDtoConverter : ITypeConverter<List<Dia
             switch (content.TypeId)
             {
                 case DialogContentType.Values.Title:
-                case DialogContentType.Values.NonSensitiveTitle:
                     dto.Title = context.Mapper.Map<ContentValueDto>(content);
+                    return dto;
+                case DialogContentType.Values.NonSensitiveTitle:
                     return dto;
                 case DialogContentType.Values.SenderName:
                     dto.SenderName = context.Mapper.Map<ContentValueDto>(content);
                     return dto;
                 case DialogContentType.Values.Summary:
-                case DialogContentType.Values.NonSensitiveSummary:
                     dto.Summary = context.Mapper.Map<ContentValueDto>(content);
+                    return dto;
+                case DialogContentType.Values.NonSensitiveSummary:
                     return dto;
                 case DialogContentType.Values.AdditionalInfo:
                     dto.AdditionalInfo = context.Mapper.Map<ContentValueDto>(content);

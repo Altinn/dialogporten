@@ -13,7 +13,5 @@ public sealed class MappingProfile : Profile
         CreateMap<IntermediateDialogContent, DialogContent>();
         CreateMap<DialogTransmissionContent, ContentValueDto>();
         CreateMap<DialogContent, ContentValueDto>();
-        CreateMap<DialogContent, AuthorizationContentValueDto>()
-            .ForMember(x => x.IsAuthorized, opt => opt.MapFrom(x => false));
     }
 }

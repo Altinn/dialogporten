@@ -19,7 +19,7 @@ public sealed class SearchDialogEndUserContextQuery : PaginationParameter<Search
     public List<string> Party { get; set; } = [];
 
     /// <summary>
-    /// Filter by content updated after this date
+    /// Filter by content updated at or after this datetime
     /// </summary>
     public DateTimeOffset? ContentUpdatedAfter { get; set; }
 

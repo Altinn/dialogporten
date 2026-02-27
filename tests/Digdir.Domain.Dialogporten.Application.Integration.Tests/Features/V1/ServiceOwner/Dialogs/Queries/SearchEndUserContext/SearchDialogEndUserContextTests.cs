@@ -194,7 +194,7 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
     [Fact]
     public async Task Search_ContentUpdatedAfter_Filters_On_ContentUpdatedAt()
     {
-        DateTimeOffset? contentUpdatedAfter = null!;
+        DateTimeOffset? contentUpdatedAfter = null;
         var newestDialogId = Guid.Empty;
 
         await FlowBuilder.For(Application)

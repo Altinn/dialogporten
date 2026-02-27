@@ -28,7 +28,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public IEnumerable<string> Party { get; set; }
 
                 /// <summary>
-                /// Only return context for dialogs with contentUpdatedAt greater than the supplied date-time.
+                /// Only return context for dialogs with contentUpdatedAt greater than or equal to the supplied date-time.
                 /// </summary>
         [Query] 
         public System.DateTimeOffset? ContentUpdatedAfter { get; set; }

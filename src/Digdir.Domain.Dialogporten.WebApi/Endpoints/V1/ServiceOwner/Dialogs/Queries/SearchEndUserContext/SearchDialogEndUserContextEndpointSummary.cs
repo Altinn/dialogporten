@@ -32,6 +32,6 @@ public sealed class SearchDialogEndUserContextEndpointSummary : Summary<SearchDi
         RequestParam(p => p.Limit,
             $"Limit the number of results per page ({PaginationConstants.MinLimit}-{PaginationConstants.MaxLimit}, default: {PaginationConstants.DefaultLimit})");
         RequestParam(p => p.ContentUpdatedAfter,
-            "Only return context for dialogs with contentUpdatedAt greater than the supplied date-time.");
+            "Only return context for dialogs with contentUpdatedAt greater than or equal to the supplied date-time.");
     }
 }

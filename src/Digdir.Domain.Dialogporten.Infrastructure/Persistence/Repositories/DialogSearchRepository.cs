@@ -174,7 +174,7 @@ internal sealed class DialogSearchRepository(
                          WHERE d."Org" = {orgName}
                      """)
                 .AppendManyFilter(parties, "Party")
-                .AppendIf(contentUpdatedAfter is not null, $""" AND d."ContentUpdatedAt" > {contentUpdatedAfter}::timestamptz """)
+                .AppendIf(contentUpdatedAfter is not null, $""" AND {contentUpdatedAfter}::timestamptz <= d."ContentUpdatedAt" """)
                 .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
                 .ApplyPaginationOrder(orderSet, alias: "d")
                 .ApplyPaginationLimit(limit)
@@ -204,7 +204,7 @@ internal sealed class DialogSearchRepository(
                          WHERE d."Org" = {orgName}
                      """)
                 .AppendManyFilter(parties, "Party")
-                .AppendIf(contentUpdatedAfter is not null, $""" AND d."ContentUpdatedAt" > {contentUpdatedAfter}::timestamptz """)
+                .AppendIf(contentUpdatedAfter is not null, $""" AND {contentUpdatedAfter}::timestamptz <= d."ContentUpdatedAt" """)
                 .ApplyPaginationCondition(orderSet, continuationToken, alias: "d")
                 .ApplyPaginationOrder(orderSet, alias: "d")
                 .ApplyPaginationLimit(limit)
